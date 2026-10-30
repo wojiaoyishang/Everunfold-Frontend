@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { AppLink as Link, SearchForm } from "./navigation-link";
 
 import type { Site } from "@/core/content/types";
 import { publicHref, resourceUrl } from "@/core/content/urls";
@@ -106,12 +106,25 @@ export function SiteHeader({ site }: { site: Site }) {
 export function Sidebar({
   site,
   toc = [],
+  contentKey,
 }: {
   site: Site;
   toc?: TableOfContentsItem[];
+  contentKey: string;
 }) {
   const { open, setOpen, triggerRef } = useNavigation();
-  const [tab, setTab] = useState(toc.length ? "toc" : "overview");
+  const [selection, setSelection] = useState<{
+    key: string;
+    tab: "toc" | "overview";
+  } | null>(null);
+  const tab =
+    selection?.key === contentKey
+      ? selection.tab
+      : toc.length
+        ? "toc"
+        : "overview";
+  const setTab = (value: "toc" | "overview") =>
+    setSelection({ key: contentKey, tab: value });
   const sidebarRef = useRef<HTMLElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -192,7 +205,7 @@ export function Sidebar({
               </Link>
             ))}
           </nav>
-          <form action="/search" method="get" className="sidebar-search">
+          <SearchForm className="sidebar-search">
             <Icon name="search" />
             <input
               aria-label="搜索文章"
@@ -200,7 +213,7 @@ export function Sidebar({
               placeholder="搜索什么…"
               maxLength={160}
             />
-          </form>
+          </SearchForm>
         </section>
         <section className="surface sidebar-overview">
           <div className="sidebar-tabs" role="tablist" aria-label="侧栏内容">

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { pageNumber, queryContents } from "@/core/content/query";
-import { BlogShell } from "@/themes/argon/components/shell";
+import { PagePresentation } from "@/themes/argon/components/route-state";
+import { SearchForm } from "@/themes/argon/components/navigation-link";
 import { PostCard } from "@/themes/argon/components/post-card";
 import { Pagination } from "@/themes/argon/components/pagination";
 import { EmptyState } from "@/themes/argon/components/empty-state";
@@ -26,13 +27,14 @@ export default async function SearchPage({
     page: pageNumber(parameters.page),
   });
   return (
-    <BlogShell site={snapshot.site}>
+    <>
+      <PagePresentation site={snapshot.site} />
       <section className="surface search-card">
         <h1>
           <Icon name="search" />
           站内搜索
         </h1>
-        <form action="/search" method="get" className="search-form">
+        <SearchForm className="search-form">
           <input
             name="q"
             aria-label="搜索关键词"
@@ -44,7 +46,7 @@ export default async function SearchPage({
           <button className="primary-button" type="submit">
             搜索
           </button>
-        </form>
+        </SearchForm>
         <p>
           {query
             ? `“${query}” 找到 ${result.total} 篇文章`
@@ -73,6 +75,6 @@ export default async function SearchPage({
           />
         </>
       )}
-    </BlogShell>
+    </>
   );
 }

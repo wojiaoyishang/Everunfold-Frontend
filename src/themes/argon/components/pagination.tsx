@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "./navigation-link";
 
 function href(pathname: string, current: number, query?: string) {
   const parameters = new URLSearchParams();

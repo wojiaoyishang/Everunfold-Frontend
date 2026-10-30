@@ -1,10 +1,10 @@
-import Link from "next/link";
+import { AppLink as Link } from "./navigation-link";
 import type { Content, PublicSnapshot } from "@/core/content/types";
 import { displayDate } from "@/core/content/query";
 import { taxonomyHref } from "@/core/content/urls";
 import { renderContent } from "@/core/rendering/content";
 import { CommentText } from "./comment-text";
-import { BlogShell } from "./shell";
+import { PagePresentation } from "./route-state";
 import { Icon } from "./icon";
 
 function Comments({
@@ -63,7 +63,7 @@ function Comments({
                   <p className="comment-reply-to">
                     回复{" "}
                     {target ? (
-                      <a href={target}>@{comment.reply_to}</a>
+                      <Link href={target}>@{comment.reply_to}</Link>
                     ) : (
                       <span>@{comment.reply_to}</span>
                     )}
@@ -118,7 +118,12 @@ export function Article({
   const previous = position >= 0 ? articles[position + 1] : undefined;
   const next = position > 0 ? articles[position - 1] : undefined;
   return (
-    <BlogShell site={snapshot.site} toc={rendered.toc} sidebarKey={content.id}>
+    <>
+      <PagePresentation
+        site={snapshot.site}
+        toc={rendered.toc}
+        id={content.id}
+      />
       <article className="surface article-card">
         <header className="article-header">
           <div className="article-categories">
@@ -190,6 +195,6 @@ export function Article({
         </nav>
       )}
       <Comments snapshot={snapshot} content={content} page={commentsPage} />
-    </BlogShell>
+    </>
   );
 }

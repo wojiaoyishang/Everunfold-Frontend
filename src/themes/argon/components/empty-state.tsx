@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { AppLink as Link } from "./navigation-link";
 import { Icon } from "./icon";
 
 export function EmptyState({

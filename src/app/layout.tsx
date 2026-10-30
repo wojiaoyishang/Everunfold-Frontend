@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import "@/themes/argon/argon.css";
 import { readPublicSnapshot } from "@/core/content/snapshot";
+import { BlogShell } from "@/themes/argon/components/shell";
 
 export const dynamic = "force-dynamic";
 
@@ -27,15 +28,18 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const initializeTheme = `(function(){try{var t=localStorage.getItem('everunfold.theme');if(t==='dark'||t==='light'){document.documentElement.dataset.theme=t;}}catch(e){}})();`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
+  const { site } = await readPublicSnapshot();
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: initializeTheme }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <BlogShell site={site}>{children}</BlogShell>
+      </body>
     </html>
   );
 }

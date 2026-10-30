@@ -1,6 +1,6 @@
 import type { PublicSnapshot } from "@/core/content/types";
 import { queryContents, type ContentFilter } from "@/core/content/query";
-import { BlogShell } from "./shell";
+import { PagePresentation } from "./route-state";
 import { PostCard } from "./post-card";
 import { Pagination } from "./pagination";
 import { EmptyState } from "./empty-state";
@@ -25,7 +25,8 @@ export function ArticleList({
 }) {
   const result = queryContents(snapshot, filter);
   return (
-    <BlogShell site={snapshot.site}>
+    <>
+      <PagePresentation site={snapshot.site} />
       {home && snapshot.site.notice && (
         <div className="surface notice">
           <Icon name="bell" />
@@ -72,6 +73,6 @@ export function ArticleList({
         pathname={pathname}
         query={filter?.query}
       />
-    </BlogShell>
+    </>
   );
 }

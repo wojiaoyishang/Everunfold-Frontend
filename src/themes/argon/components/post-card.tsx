@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { AppLink as Link } from "./navigation-link";
 
 import type { Content } from "@/core/content/types";
 import { displayDate } from "@/core/content/query";

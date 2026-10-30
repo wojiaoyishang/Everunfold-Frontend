@@ -1,7 +1,7 @@
-import Link from "next/link";
+import { AppLink as Link } from "./navigation-link";
 import type { PublicSnapshot, Taxonomy } from "@/core/content/types";
 import { taxonomyHref } from "@/core/content/urls";
-import { BlogShell } from "./shell";
+import { PagePresentation } from "./route-state";
 import { Icon } from "./icon";
 export function TaxonomyIndex({
   snapshot,
@@ -15,7 +15,8 @@ export function TaxonomyIndex({
     .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"));
   const title = kind === "category" ? "文章分类" : "文章标签";
   return (
-    <BlogShell site={snapshot.site}>
+    <>
+      <PagePresentation site={snapshot.site} />
       <header className="surface page-heading">
         <Icon name={kind === "category" ? "folder" : "tag"} />
         <div>
@@ -41,6 +42,6 @@ export function TaxonomyIndex({
           <p>暂时还没有{kind === "category" ? "分类" : "标签"}。</p>
         )}
       </section>
-    </BlogShell>
+    </>
   );
 }

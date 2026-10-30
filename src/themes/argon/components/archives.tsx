@@ -1,7 +1,7 @@
-import Link from "next/link";
+import { AppLink as Link } from "./navigation-link";
 import type { PublicSnapshot } from "@/core/content/types";
 import { displayDate } from "@/core/content/query";
-import { BlogShell } from "./shell";
+import { PagePresentation } from "./route-state";
 import { Icon } from "./icon";
 
 export function Archives({ snapshot }: { snapshot: PublicSnapshot }) {
@@ -16,7 +16,8 @@ export function Archives({ snapshot }: { snapshot: PublicSnapshot }) {
     groups.set(month, group);
   }
   return (
-    <BlogShell site={snapshot.site}>
+    <>
+      <PagePresentation site={snapshot.site} />
       <header className="surface page-heading">
         <Icon name="archive" />
         <div>
@@ -44,6 +45,6 @@ export function Archives({ snapshot }: { snapshot: PublicSnapshot }) {
         ))}
         {!articles.length && <p>暂时还没有文章。</p>}
       </section>
-    </BlogShell>
+    </>
   );
 }
