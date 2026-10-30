@@ -6,8 +6,8 @@ import {
   useContext,
   useEffect,
   useLayoutEffect,
+  useReducer,
   useRef,
-  useState,
   useTransition,
   type MouseEvent,
   type ReactNode,
@@ -16,14 +16,12 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { Site } from "@/core/content/types";
 import type { TableOfContentsItem } from "@/core/rendering/content";
 import { clientNavigationHref } from "@/core/navigation/targets";
+import {
+  reducePagePresentation,
+  type PagePresentationData,
+} from "@/core/navigation/presentation";
 
 const noHeadings: TableOfContentsItem[] = [];
-interface Presentation {
-  route: string;
-  site: Site;
-  toc: TableOfContentsItem[];
-  id: string;
-}
 interface NavigateOptions {
   replace?: boolean;
   scroll?: boolean;
@@ -35,7 +33,7 @@ interface RouteState {
   presentationId: string;
   pending: boolean;
   navigate: (href: string, options?: NavigateOptions) => void;
-  present: (value: Presentation) => void;
+  present: (value: PagePresentationData) => () => void;
 }
 const RouteContext = createContext<RouteState | null>(null);
 
@@ -51,11 +49,15 @@ export function RouteStateProvider({
   const route = `${pathname}${parameters ? `?${parameters}` : ""}`;
   const router = useRouter();
   const [pending, startTransition] = useTransition();
-  const [presentation, setPresentation] = useState<Presentation | null>(null);
-  const present = useCallback(
-    (value: Presentation) => setPresentation(value),
-    [],
+  const [presentation, dispatchPresentation] = useReducer(
+    reducePagePresentation,
+    { site, current: null },
   );
+  const present = useCallback((value: PagePresentationData) => {
+    const token = Symbol("page-presentation");
+    dispatchPresentation({ type: "register", value, token });
+    return () => dispatchPresentation({ type: "release", token });
+  }, []);
   const navigate = useCallback(
     (href: string, options: NavigateOptions = {}) => {
       startTransition(() => {
@@ -65,12 +67,13 @@ export function RouteStateProvider({
     },
     [router],
   );
-  const current = presentation?.route === route ? presentation : null;
+  const current =
+    presentation.current?.route === route ? presentation.current : null;
   return (
     <RouteContext.Provider
       value={{
         route,
-        site: presentation?.site ?? site,
+        site: presentation.site,
         toc: current?.toc ?? noHeadings,
         presentationId: current?.id ?? route,
         pending,
@@ -102,7 +105,7 @@ export function PagePresentation({
 }) {
   const { route, present } = useRouteState();
   useLayoutEffect(() => {
-    present({ route, site, toc, id: id ?? route });
+    return present({ route, site, toc, id: id ?? route });
   }, [route, site, toc, id, present]);
   return null;
 }
