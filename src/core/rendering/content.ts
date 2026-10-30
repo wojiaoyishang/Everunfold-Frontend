@@ -130,7 +130,10 @@ export function renderContent(content: Content): {
   const seenHeadings = new Map<string, number>();
   const html = content.content
     .map((block) => {
-      const expanded = expandPresentationShortcodes(block.content);
+      const expanded = expandPresentationShortcodes(
+        block.content,
+        block.type === "markdown",
+      );
       const raw =
         block.type === "markdown" ? markdown.render(expanded) : expanded;
       // Permit the storage-only scheme in this intermediate tree, then resolve actual nodes.

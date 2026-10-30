@@ -42,10 +42,17 @@ function present(kind: string, raw: string, body: string): string {
 }
 
 /** A closed presentation-only vocabulary; no WordPress/PHP execution or data lookup. */
-export function expandPresentationShortcodes(raw: string): string {
+export function expandPresentationShortcodes(
+  raw: string,
+  markdown = false,
+): string {
   // Protected code, comments and HTML attributes are tokens too, so examples stay literal.
-  const token =
-    /(^[ \t]*(`{3,}|~{3,})[^\n]*\n[\s\S]*?^[ \t]*\2[^\n]*$)|<pre\b[^>]*>[\s\S]*?<\/pre\s*>|<code\b[^>]*>[\s\S]*?<\/code\s*>|<!--[^]*?-->|<(?:[^>"']|"[^"]*"|'[^']*')*>|(`+)[^]*?\3|\[(\/?)(collapse|fold|alert|admonition|tooltips)\b((?:[^\]"']|"[^"]*"|'[^']*')*)\]/gim;
+  const vocabulary =
+    /(^[ \t]*(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:^[ \t]*\2[^\n]*$|$(?![\s\S])))|<pre\b[^>]*>[\s\S]*?<\/pre\s*>|<code\b[^>]*>[\s\S]*?<\/code\s*>|<!--[^]*?-->|<(?:[^>"']|"[^"]*"|'[^']*')*>|(`+)[^]*?\3|\[(\/?)(collapse|fold|alert|admonition|tooltips)\b((?:[^\]"']|"[^"]*"|'[^']*')*)\]/gim;
+  const token = new RegExp(
+    (markdown ? "^(?: {4}|\\t)[^\\n]*(?:\\n|$)|" : "") + vocabulary.source,
+    vocabulary.flags,
+  );
   const stack: {
     kind: string;
     attrs: string;

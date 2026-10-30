@@ -35,6 +35,7 @@ test("shortcode expansion leaves code, HTML attributes, unknown and unclosed tag
   for (const raw of [
     '```html\n[collapse title="示例"]text[/collapse]\n```',
     "`[alert]example[/alert]`",
+    '```html\n[collapse title="未闭合代码块"]text[/collapse]',
     "<pre>[collapse]literal[/collapse]</pre>",
     "<code>[alert]literal[/alert]</code>",
     '<a title="[alert]title[/alert]">link</a>',
@@ -54,6 +55,20 @@ test("shortcode expansion leaves code, HTML attributes, unknown and unclosed tag
     }),
   );
   assert.match(result.html, /<strong>强调<\/strong>/);
+  const indented = renderContent(
+    content({
+      content: [
+        {
+          id: "code",
+          type: "markdown",
+          content:
+            "    [collapse]literal[/collapse]\n\n\t[alert]literal[/alert]",
+        },
+      ],
+    }),
+  );
+  assert.doesNotMatch(indented.html, /<details|legacy-alert/);
+  assert.match(indented.html, /\[collapse\]literal\[\/collapse\]/);
 });
 
 test("mixed HTML and Markdown are sanitized without executing legacy active content", () => {
