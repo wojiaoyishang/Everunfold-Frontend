@@ -10,7 +10,12 @@
     scale var(--motion-normal) var(--motion-ease);
 }
 .blog-shell
-  :where(button, .primary-button, .pagination a, .article-tags a):active {
+  :where(
+    button:not(.sidebar-mask),
+    .primary-button,
+    .pagination a,
+    .article-tags a
+  ):active {
   scale: 0.94;
   transition-duration: 90ms;
 }

@@ -138,6 +138,7 @@ export function installScrollBehavior(
       !event.cancelable ||
       event.ctrlKey ||
       event.metaKey ||
+      event.shiftKey ||
       Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
       !motionEnabled() ||
       nativeScrollTarget(event.target)

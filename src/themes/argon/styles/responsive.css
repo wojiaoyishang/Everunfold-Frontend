@@ -339,6 +339,10 @@ html[data-motion="reduced"] {
   .blog-shell :where(a, button):hover > .icon {
     scale: none;
   }
+  .blog-shell :where(a, button, summary, img):is(:hover, :active),
+  .floating-button[aria-label="阅读设置"]:hover > .icon {
+    transform: none;
+  }
   .post-card:hover,
   .taxonomy-index a:hover,
   .article-neighbors a:hover,
