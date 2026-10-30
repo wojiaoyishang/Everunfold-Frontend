@@ -6,16 +6,18 @@ export function TransitionPanel({
   id,
   labelledBy,
   children,
+  role = "tabpanel",
 }: {
   active: boolean;
   id: string;
   labelledBy: string;
   children: ReactNode;
+  role?: "tabpanel" | "region";
 }) {
   return (
     <div
       id={id}
-      role="tabpanel"
+      role={role}
       aria-labelledby={labelledBy}
       aria-hidden={!active}
       inert={!active}

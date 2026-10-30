@@ -147,10 +147,13 @@
   .table-of-contents {
     max-height: none;
   }
-  .article-card {
+  .article-body {
     padding: 28px;
   }
   .comments-card {
+    padding: 27px;
+  }
+  .comment-composer {
     padding: 27px;
   }
   .floating-tools {
@@ -244,11 +247,17 @@
   .page-heading h1 {
     font-size: 22px;
   }
-  .article-card {
+  .article-body {
     padding: 25px 21px;
   }
   .article-header h1 {
     font-size: 25px;
+  }
+  .article-header.has-cover {
+    min-height: 250px;
+  }
+  .article-heading {
+    padding: 30px 22px;
   }
   .article-content {
     font-size: var(--reading-font-size, 15px);
@@ -274,6 +283,50 @@
   .comments-card {
     margin-top: 18px;
     padding: 24px 20px;
+  }
+  .comment-composer {
+    padding: 24px 20px 16px;
+  }
+  .comments-header {
+    align-items: flex-start;
+  }
+  .comments-header h2,
+  .composer-heading h2 {
+    font-size: 19px;
+  }
+  .comments-write {
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+  .comments-demo-note {
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+  .composer-submit-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .composer-submit-row button {
+    justify-content: center;
+  }
+  .composer-identity,
+  .composer-extra-fields {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .composer-extra-toggle {
+    justify-content: flex-start;
+    height: 28px;
+  }
+  .composer-editor-toolbar {
+    padding-inline: 7px;
+  }
+  .composer-editor-toolbar button {
+    padding-inline: 7px;
+  }
+  .composer-editor-footer > span {
+    order: 3;
+    width: 100%;
   }
   .comment {
     gap: 11px;

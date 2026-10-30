@@ -91,7 +91,7 @@
   align-items: center;
   font-size: 14px;
 }
-.header-navigation a {
+.header-menu-link {
   display: inline-flex;
   gap: 9px;
   align-items: center;
@@ -103,7 +103,7 @@
     opacity var(--motion-fast) ease,
     transform var(--motion-fast) var(--motion-ease);
 }
-.header-navigation a::after {
+.header-menu-link::after {
   content: "";
   position: absolute;
   height: 2px;
@@ -117,11 +117,11 @@
   opacity: 0.8;
   transition: transform 240ms var(--motion-ease);
 }
-.header-navigation a:hover {
+.header-menu-link:hover {
   opacity: 1;
 }
-.header-navigation a:hover::after,
-.header-navigation a:focus-visible::after {
+.header-menu-link:hover::after,
+.header-menu-link:focus-visible::after {
   transform: scaleX(1);
 }
 .header-actions {

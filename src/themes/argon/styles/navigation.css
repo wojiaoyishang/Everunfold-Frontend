@@ -1,0 +1,129 @@
+.header-menu-item {
+  position: relative;
+}
+.header-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.header-menu-toggle {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 30px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border-radius: 4px;
+}
+.header-menu-toggle .icon {
+  width: 11px;
+  transform: rotate(90deg);
+}
+.header-menu-item[data-open="true"] .header-menu-toggle .icon {
+  transform: rotate(270deg);
+}
+.header-menu-item[data-active="true"] .header-menu-link {
+  opacity: 1;
+}
+.header-menu-item[data-active="true"] .header-menu-link::after {
+  transform: scaleX(1);
+}
+.header-submenu {
+  position: absolute;
+  top: 100%;
+  left: -18px;
+  width: 286px;
+  max-width: calc(100vw - 40px);
+  padding-top: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.98);
+  transform-origin: top left;
+  transition:
+    opacity 200ms ease,
+    transform 320ms var(--motion-ease),
+    visibility 0s 320ms;
+}
+.header-menu-item[data-open="true"] .header-submenu {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+.header-submenu-surface {
+  position: relative;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 14px 35px #170c3033;
+}
+.header-submenu-surface::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 30px;
+  width: 10px;
+  height: 10px;
+  background: var(--surface);
+  transform: rotate(45deg);
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
+}
+.header-submenu a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 10px;
+  border-radius: 6px;
+}
+.header-submenu a:hover,
+.header-submenu a:focus-visible,
+.header-submenu a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+  transform: translateX(3px);
+}
+.submenu-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 auto;
+  border-radius: 8px;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.header-submenu strong,
+.header-submenu small {
+  display: block;
+}
+.header-submenu strong {
+  font-size: 13px;
+  font-weight: 500;
+}
+.header-submenu small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.header-submenu .external-mark {
+  margin-left: auto;
+  width: 12px;
+  flex: 0 0 auto;
+}
+.sidebar-submenu > div {
+  min-height: 0;
+}
+.sidebar-submenu a {
+  padding-left: 35px;
+  padding-right: 14px;
+  gap: 9px;
+}
+.sidebar-submenu a .icon {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 auto;
+}

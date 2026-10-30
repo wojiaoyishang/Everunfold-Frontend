@@ -1,17 +1,15 @@
 "use client";
 
 import type { Site } from "@/core/content/types";
-import { usePathname } from "next/navigation";
-import { siteNavigation } from "../navigation";
 import { useScrollPosition } from "../hooks/use-scroll-position";
 import { AppLink as Link } from "./navigation-link";
 import { useNavigation } from "./navigation-state";
 import { Icon } from "./icon";
+import { HeaderNavigation } from "./header-navigation";
 
 export function SiteHeader({ site }: { site: Site }) {
   const { open, setOpen, triggerRef } = useNavigation();
   const scrolled = useScrollPosition() > 80;
-  const pathname = usePathname();
   return (
     <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
       <button
@@ -29,22 +27,7 @@ export function SiteHeader({ site }: { site: Site }) {
         <Link href="/" className="site-brand">
           <span>{site.hero_title || site.name}</span>
         </Link>
-        <nav className="header-navigation" aria-label="顶部导航">
-          {siteNavigation(site).map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={
-                pathname.replace(/\/$/, "") === item.href.replace(/\/$/, "")
-                  ? "page"
-                  : undefined
-              }
-            >
-              <Icon name={item.icon} />
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <HeaderNavigation site={site} />
         <div className="header-actions">
           <Link
             href="/search"

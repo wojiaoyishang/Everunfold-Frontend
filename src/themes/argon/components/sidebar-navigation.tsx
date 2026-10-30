@@ -3,22 +3,35 @@
 import { useId, useState } from "react";
 import { usePathname } from "next/navigation";
 import type { Site } from "@/core/content/types";
-import { siteNavigation, type NavigationItem } from "../navigation";
+import {
+  siteNavigation,
+  navigationIsActive,
+  navigationTarget,
+  type NavigationItem,
+} from "../navigation";
 import { AppLink as Link } from "./navigation-link";
 import { useNavigation } from "./navigation-state";
 import { Icon } from "./icon";
 
 function MenuItem({ item }: { item: NavigationItem }) {
-  const [expanded, setExpanded] = useState(false);
+  const [choice, setChoice] = useState<{
+    path: string;
+    expanded: boolean;
+  } | null>(null);
   const { setOpen } = useNavigation();
   const id = useId();
   const pathname = usePathname().replace(/\/$/, "");
-  const active = (href: string) => pathname === href.replace(/\/$/, "");
+  const active = (href: string) => navigationIsActive(pathname || "/", href);
+  const expanded =
+    choice?.path === pathname
+      ? choice.expanded
+      : !!item.children?.some((child) => active(child.href));
   return (
     <div className="sidebar-menu-item">
       <div className="sidebar-menu-row">
         <Link
           href={item.href}
+          {...navigationTarget(item.href)}
           aria-current={active(item.href) ? "page" : undefined}
           onClick={() => setOpen(false)}
         >
@@ -31,7 +44,13 @@ function MenuItem({ item }: { item: NavigationItem }) {
             aria-label={`${expanded ? "收起" : "展开"}${item.label}`}
             aria-expanded={expanded}
             aria-controls={id}
-            onClick={() => setExpanded(!expanded)}
+            onClick={() => setChoice({ path: pathname, expanded: !expanded })}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") {
+                event.stopPropagation();
+                setChoice({ path: pathname, expanded: false });
+              }
+            }}
           >
             <Icon name="chevron" />
           </button>
@@ -50,9 +69,11 @@ function MenuItem({ item }: { item: NavigationItem }) {
               <Link
                 key={child.href}
                 href={child.href}
+                {...navigationTarget(child.href)}
                 aria-current={active(child.href) ? "page" : undefined}
                 onClick={() => setOpen(false)}
               >
+                <Icon name={child.icon} />
                 {child.label}
               </Link>
             ))}
