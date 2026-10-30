@@ -1,11 +1,12 @@
 /* Independent sidebar panels keep navigation and reading aids reusable. */
 .site-sidebar {
-  display: grid;
-  gap: 20px;
+  position: relative;
+  align-self: stretch;
+}
+.sidebar-overview {
   position: sticky;
-  /* Keep desktop reading aids below the fixed 86px header. */
-  top: 104px;
-  align-self: start;
+  top: 90px;
+  margin-top: 12px;
 }
 .sidebar-menu-card {
   overflow: hidden;
@@ -13,7 +14,8 @@
 .sidebar-banner {
   background: linear-gradient(140deg, #9266da 0%, #673bb7 72%, #59309f);
   color: #fff;
-  padding: 24px 16px 20px;
+  padding: 23px 16px;
+  min-height: 150px;
   text-align: center;
 }
 .sidebar-banner > span {
@@ -50,6 +52,47 @@
 .sidebar-navigation a:hover {
   color: var(--accent);
   background: var(--accent-soft);
+}
+.sidebar-navigation a[aria-current="page"] {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.sidebar-menu-row {
+  display: flex;
+}
+.sidebar-menu-row > a {
+  flex: 1;
+}
+.sidebar-menu-row > button {
+  width: 36px;
+  background: transparent;
+  color: var(--muted);
+}
+.sidebar-menu-row > button .icon {
+  width: 12px;
+  transition: transform 240ms var(--motion-ease);
+}
+.sidebar-menu-row > button[aria-expanded="true"] .icon {
+  transform: rotate(90deg);
+}
+.sidebar-submenu {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 300ms var(--motion-ease),
+    opacity 240ms;
+}
+.sidebar-submenu[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.sidebar-submenu > div {
+  overflow: hidden;
+}
+.sidebar-submenu a {
+  padding-left: 54px;
+  font-size: 13px;
 }
 .sidebar-search {
   margin: 12px 16px 18px;
@@ -199,7 +242,8 @@
     background-color var(--motion-fast) ease;
 }
 .table-of-contents a:hover,
-.table-of-contents a:focus-visible {
+.table-of-contents a:focus-visible,
+.table-of-contents a[aria-current="location"] {
   border-left-color: var(--accent);
   color: var(--accent);
   background: var(--accent-soft);

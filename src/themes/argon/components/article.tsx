@@ -5,6 +5,8 @@ import { taxonomyHref } from "@/core/content/urls";
 import { renderContent } from "@/core/rendering/content";
 import { CommentText } from "./comment-text";
 import { PagePresentation } from "./route-state";
+import { PostMeta } from "./post-meta";
+import { ArticleMedia } from "./article-media";
 import { Icon } from "./icon";
 
 function Comments({
@@ -134,33 +136,14 @@ export function Article({
             ))}
           </div>
           <h1>{content.title}</h1>
-          <div className="post-meta">
-            <span>
-              <Icon name="user" />
-              {content.author}
-            </span>
-            <time dateTime={content.published_at}>
-              <Icon name="calendar" />
-              {displayDate(content.published_at)}
-            </time>
-            <span>
-              <Icon name="book" />
-              {content.word_count.toLocaleString("zh-CN")} 字
-            </span>
-            <span>
-              <Icon name="clock" />
-              {content.reading_minutes} 分钟
-            </span>
-            <a href="#comments">
-              <Icon name="comment" />
-              {content.comment_count}
-            </a>
-          </div>
+          <PostMeta content={content} article />
         </header>
-        <div
-          className="article-content"
-          dangerouslySetInnerHTML={{ __html: rendered.html }}
-        />
+        <ArticleMedia>
+          <div
+            className="article-content"
+            dangerouslySetInnerHTML={{ __html: rendered.html }}
+          />
+        </ArticleMedia>
         <footer className="article-footer">
           <div className="article-tags">
             {content.tags.map((tag) => (

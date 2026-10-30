@@ -42,15 +42,6 @@ export function ArticleList({
           </div>
         </header>
       )}
-      {home && (
-        <div className="list-heading">
-          <span>
-            <Icon name="book" />
-            最新文章
-          </span>
-          <span>{result.total} 篇故事</span>
-        </div>
-      )}
       <div className="article-list">
         {result.items.length ? (
           result.items.map((content) => (

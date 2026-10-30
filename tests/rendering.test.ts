@@ -5,6 +5,56 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { renderContent } from "../src/core/rendering/content";
 import { CommentText } from "../src/themes/argon/components/comment-text";
 import { content } from "./fixtures";
+import { expandPresentationShortcodes } from "../src/core/rendering/shortcodes";
+
+test("presentation shortcodes nest, escape attributes and sanitize their bodies", () => {
+  const result = renderContent(
+    content({
+      content: [
+        {
+          id: "legacy",
+          type: "html",
+          content:
+            '[collapse title="提示" collapsed="false" color="indigo"][alert title="<img src=x onerror=alert(1)>注意" color="orange"]<script>private-value</script><b>保留正文</b>[/alert][/collapse] [tooltips content=\'a" onclick="bad\']词[/tooltips]',
+        },
+      ],
+    }),
+  );
+  assert.match(
+    result.html,
+    /<details class="legacy-collapse tone-indigo" open/,
+  );
+  assert.match(result.html, /<summary>提示<\/summary>/);
+  assert.match(result.html, /legacy-alert tone-orange/);
+  assert.match(result.html, /<b>保留正文<\/b>/);
+  assert.doesNotMatch(result.html, /<script|private-value|onerror| onclick="/);
+  assert.match(result.html, /a&quot; onclick=&quot;bad/);
+});
+
+test("shortcode expansion leaves code, HTML attributes, unknown and unclosed tags literal", () => {
+  for (const raw of [
+    '```html\n[collapse title="示例"]text[/collapse]\n```',
+    "`[alert]example[/alert]`",
+    "<pre>[collapse]literal[/collapse]</pre>",
+    "<code>[alert]literal[/alert]</code>",
+    '<a title="[alert]title[/alert]">link</a>',
+    "[unknown]text[/unknown]",
+    "[collapse]unfinished [alert]nested[/alert]",
+  ])
+    assert.equal(expandPresentationShortcodes(raw), raw);
+  const result = renderContent(
+    content({
+      content: [
+        {
+          id: "md",
+          type: "markdown",
+          content: '[collapse title="Markdown"]\n\n**强调**\n\n[/collapse]',
+        },
+      ],
+    }),
+  );
+  assert.match(result.html, /<strong>强调<\/strong>/);
+});
 
 test("mixed HTML and Markdown are sanitized without executing legacy active content", () => {
   const result = renderContent(

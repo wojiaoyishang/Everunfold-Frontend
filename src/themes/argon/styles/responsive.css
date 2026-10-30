@@ -93,6 +93,9 @@
   .sidebar-menu-card {
     margin-bottom: 18px;
   }
+  .sidebar-overview {
+    position: static;
+  }
   .sidebar-note {
     color: var(--muted);
     padding-top: 20px;
@@ -199,6 +202,14 @@
   .post-title {
     font-size: 21px;
     margin-bottom: 12px;
+  }
+  .post-cover {
+    height: 225px;
+  }
+  .post-cover-heading {
+    bottom: 24px;
+    left: 20px;
+    right: 20px;
   }
   .post-meta {
     font-size: 11px;

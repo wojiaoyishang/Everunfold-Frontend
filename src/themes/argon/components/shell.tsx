@@ -4,7 +4,8 @@ import type { CSSProperties, ReactNode } from "react";
 import type { Site } from "@/core/content/types";
 import { resourceUrl } from "@/core/content/urls";
 
-import { SiteHeader, Sidebar } from "./sidebar";
+import { SiteHeader } from "./site-header";
+import { Sidebar } from "./sidebar";
 import { FloatingTools } from "./floating-tools";
 import { NavigationProvider } from "./navigation-state";
 import { BackgroundVideoProvider } from "./background-video";

@@ -4,6 +4,7 @@ import { DomUtils, parseDocument } from "htmlparser2";
 
 import type { Content } from "@/core/content/types";
 import { publicHref, resourceUrl } from "@/core/content/urls";
+import { expandPresentationShortcodes } from "./shortcodes";
 
 export interface TableOfContentsItem {
   id: string;
@@ -81,13 +82,27 @@ const options: sanitizeHtml.IOptions = {
     h4: ["id"],
     h5: ["id"],
     h6: ["id"],
-    details: ["open"],
+    details: ["open", "class"],
+    div: ["class"],
+    strong: ["class"],
+    span: ["class", "title", "tabindex"],
     abbr: ["title"],
     audio: ["src", "controls", "preload"],
     video: ["src", "poster", "controls", "preload"],
     source: ["src", "type"],
   },
   allowedClasses: {
+    details: [
+      "legacy-collapse",
+      /^tone-(indigo|green|red|orange|blue|black|grey)$/,
+    ],
+    div: [
+      "legacy-alert",
+      "legacy-collapse-body",
+      /^tone-(indigo|green|red|orange|blue|black|grey)$/,
+    ],
+    strong: ["legacy-alert-title"],
+    span: ["legacy-tooltip"],
     code: [/^language-[a-zA-Z0-9_-]+$/, "hljs"],
     pre: [/^language-[a-zA-Z0-9_-]+$/],
   },
@@ -115,10 +130,9 @@ export function renderContent(content: Content): {
   const seenHeadings = new Map<string, number>();
   const html = content.content
     .map((block) => {
+      const expanded = expandPresentationShortcodes(block.content);
       const raw =
-        block.type === "markdown"
-          ? markdown.render(block.content)
-          : block.content;
+        block.type === "markdown" ? markdown.render(expanded) : expanded;
       // Permit the storage-only scheme in this intermediate tree, then resolve actual nodes.
       // Code text never participates in URL replacement.
       const clean = sanitizeHtml(raw, {

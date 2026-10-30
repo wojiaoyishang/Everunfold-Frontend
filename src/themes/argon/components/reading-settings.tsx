@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "./icon";
+import { useModalDialog } from "../hooks/use-modal-dialog";
 
 const defaults = {
   size: 16.5,
@@ -45,7 +46,7 @@ function applySettings(value: Settings) {
 }
 
 export function ReadingSettings() {
-  const dialog = useRef<HTMLDialogElement>(null);
+  const { dialog, open, close } = useModalDialog();
   const [settings, setSettings] = useState(defaults);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -72,7 +73,7 @@ export function ReadingSettings() {
         className="floating-button"
         aria-label="阅读设置"
         title="阅读设置"
-        onClick={() => dialog.current?.showModal()}
+        onClick={open}
       >
         <Icon name="settings" />
       </button>
@@ -81,7 +82,7 @@ export function ReadingSettings() {
         className="reading-settings"
         aria-labelledby="reading-settings-title"
         onClick={(event) => {
-          if (event.target === event.currentTarget) dialog.current?.close();
+          if (event.target === event.currentTarget) close();
         }}
       >
         <div className="settings-content">
@@ -91,7 +92,7 @@ export function ReadingSettings() {
               type="button"
               className="icon-button"
               aria-label="关闭阅读设置"
-              onClick={() => dialog.current?.close()}
+              onClick={close}
             >
               <Icon name="close" />
             </button>

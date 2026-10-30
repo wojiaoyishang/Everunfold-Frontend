@@ -143,14 +143,6 @@
     transform: scale(1.15);
   }
 }
-@keyframes navigation-sweep {
-  from {
-    transform: translateX(-110%);
-  }
-  to {
-    transform: translateX(340%);
-  }
-}
 @keyframes reading-target {
   from {
     background-color: var(--accent-soft);
@@ -180,9 +172,7 @@
   }
   .pagination a:hover,
   .primary-button:hover,
-  .article-tags a:hover,
-  .back-to-top:hover,
-  .background-playback-toggle:hover {
+  .article-tags a:hover {
     transform: translateY(-3px);
   }
   .article-neighbors a:hover {

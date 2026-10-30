@@ -1,107 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { AppLink as Link, SearchForm } from "./navigation-link";
 
 import type { Site } from "@/core/content/types";
-import { publicHref, resourceUrl } from "@/core/content/urls";
+import { resourceUrl } from "@/core/content/urls";
 import type { TableOfContentsItem } from "@/core/rendering/content";
-import { Icon, type IconName } from "./icon";
-import { ThemeToggle } from "./controls";
+import { Icon } from "./icon";
+import { campfireIdentity } from "../navigation";
+import { SidebarNavigation } from "./sidebar-navigation";
+import { useReadingState } from "./reading-state";
 import { useNavigation } from "./navigation-state";
-
-function subscribeScroll(listener: () => void) {
-  window.addEventListener("scroll", listener, { passive: true });
-  return () => window.removeEventListener("scroll", listener);
-}
-
-const defaultNavigation: { label: string; href: string; icon: IconName }[] = [
-  { label: "首页", href: "/", icon: "home" },
-  { label: "文章归档", href: "/archives", icon: "archive" },
-  { label: "文章分类", href: "/categories", icon: "folder" },
-  { label: "标签", href: "/tags", icon: "tag" },
-];
-
-function navigation(site: Site) {
-  return site.navigation.length
-    ? site.navigation.flatMap((item) => {
-        const href = publicHref(item.href);
-        return href
-          ? [
-              {
-                ...item,
-                href,
-                icon: (Object.hasOwn(
-                  {
-                    home: 1,
-                    archive: 1,
-                    folder: 1,
-                    tag: 1,
-                    user: 1,
-                    book: 1,
-                    link: 1,
-                  },
-                  item.icon ?? "",
-                )
-                  ? item.icon
-                  : "link") as IconName,
-              },
-            ]
-          : [];
-      })
-    : defaultNavigation;
-}
-
-export function SiteHeader({ site }: { site: Site }) {
-  const { open, setOpen, triggerRef } = useNavigation();
-  const scrolled = useSyncExternalStore(
-    subscribeScroll,
-    () => window.scrollY > 80,
-    () => false,
-  );
-  return (
-    <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
-      <button
-        ref={triggerRef}
-        type="button"
-        className="mobile-sidebar-button"
-        aria-label="打开站点侧栏"
-        aria-expanded={open}
-        aria-controls="site-sidebar"
-        onClick={() => setOpen(true)}
-      >
-        <Icon name="menu" />
-      </button>
-      <div className="header-inner">
-        <Link href="/" className="site-brand">
-          <Icon name="campfire" />
-          <span>{site.hero_title || site.name}</span>
-        </Link>
-        <nav className="header-navigation" aria-label="顶部导航">
-          {navigation(site)
-            .slice(0, 5)
-            .map((item) => (
-              <Link key={`${item.href}-${item.label}`} href={item.href}>
-                {item.label}
-              </Link>
-            ))}
-        </nav>
-        <div className="header-actions">
-          <Link
-            href="/search"
-            className="icon-button"
-            aria-label="搜索文章"
-            title="搜索文章"
-          >
-            <Icon name="search" />
-          </Link>
-          <ThemeToggle />
-        </div>
-      </div>
-    </header>
-  );
-}
 
 export function Sidebar({
   site,
@@ -164,6 +74,20 @@ export function Sidebar({
     };
   }, [open, setOpen, triggerRef]);
   const avatar = resourceUrl(site.avatar_url);
+  const identity = campfireIdentity(site);
+  const { activeId } = useReadingState();
+  useEffect(() => {
+    const current = sidebarRef.current?.querySelector<HTMLElement>(
+      '.table-of-contents [aria-current="location"]',
+    );
+    const panel = current?.parentElement;
+    if (current && panel) {
+      const offset =
+        current.getBoundingClientRect().top - panel.getBoundingClientRect().top;
+      if (offset < 0 || offset > panel.clientHeight - current.clientHeight)
+        panel.scrollTop += offset - panel.clientHeight / 3;
+    }
+  }, [activeId, tab]);
   return (
     <>
       {open && (
@@ -190,21 +114,18 @@ export function Sidebar({
         </button>
         <section className="surface sidebar-menu-card">
           <div className="sidebar-banner">
-            <span>{site.hero_title || site.name}</span>
-            <small>{site.description}</small>
+            <span>
+              {identity.title}
+              {identity.alias && (
+                <>
+                  <br />
+                  {identity.alias}
+                </>
+              )}
+            </span>
+            <small>{identity.subtitle}</small>
           </div>
-          <nav className="sidebar-navigation" aria-label="侧栏导航">
-            {navigation(site).map((item) => (
-              <Link
-                key={`${item.href}-${item.label}`}
-                href={item.href}
-                onClick={() => setOpen(false)}
-              >
-                <Icon name={item.icon} />
-                <span>{item.label}</span>
-              </Link>
-            ))}
-          </nav>
+          <SidebarNavigation site={site} />
           <SearchForm className="sidebar-search">
             <Icon name="search" />
             <input
@@ -250,6 +171,7 @@ export function Sidebar({
                 <a
                   key={entry.id}
                   href={`#${entry.id}`}
+                  aria-current={activeId === entry.id ? "location" : undefined}
                   style={{
                     paddingLeft: `${Math.max(0, entry.level - 2) * 12 + 10}px`,
                   }}
@@ -297,19 +219,25 @@ export function Sidebar({
                 </Link>
               </div>
               <div className="profile-links">
-                <Link href="/archives">
-                  <Icon name="archive" />
-                  文章归档
-                </Link>
-                <Link href="/search">
-                  <Icon name="search" />
-                  站内搜索
+                {identity.social.map((item) => (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Icon name="link" />
+                    {item.label}
+                  </a>
+                ))}
+                <Link href="/links/">
+                  <Icon name="leaf" />
+                  Links
                 </Link>
               </div>
             </div>
           )}
         </section>
-        <div className="sidebar-note">每一个故事，都仍在展开。</div>
       </aside>
     </>
   );

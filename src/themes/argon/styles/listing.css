@@ -44,7 +44,7 @@
   transform: translateY(-4px);
 }
 .post-card-body {
-  padding: 29px 32px 23px;
+  padding: 26px 29px 24px;
 }
 .post-title-row {
   display: flex;
@@ -54,7 +54,7 @@
 .post-title {
   margin: 0 0 13px;
   color: var(--text-strong);
-  font-size: 23px;
+  font-size: 25px;
   font-weight: 500;
   line-height: 1.55;
   overflow-wrap: anywhere;
@@ -114,18 +114,29 @@
   justify-content: space-between;
   align-items: center;
   gap: 15px;
-  padding-top: 17px;
-  border-top: 1px solid var(--line);
+  padding-top: 5px;
 }
 .post-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 7px 12px;
+  gap: 6px;
   color: var(--muted);
   font-size: 12px;
 }
 .post-tags a:hover {
   color: var(--accent);
+}
+.post-tags > .icon {
+  margin-right: 3px;
+  width: 18px;
+  height: 24px;
+}
+.post-tags a {
+  padding: 1px 9px;
+  background: var(--accent-soft);
+  color: var(--text);
+  border-radius: 4px;
+  font-weight: 500;
 }
 .read-more {
   color: var(--accent);
@@ -141,8 +152,52 @@
 }
 .post-cover {
   display: block;
-  height: 220px;
+  height: 250px;
   overflow: hidden;
+  position: relative;
+  color: #fff;
+}
+.post-cover-image {
+  position: absolute;
+  inset: 0;
+}
+.post-cover-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #16182705 5%, #11132442 50%, #111324b3);
+  pointer-events: none;
+}
+.post-cover-heading {
+  position: absolute;
+  bottom: 32px;
+  left: 28px;
+  right: 28px;
+  text-align: center;
+  pointer-events: none;
+}
+.post-cover-heading a {
+  pointer-events: auto;
+}
+.post-cover-heading .post-title-row,
+.post-cover-heading .post-meta {
+  justify-content: center;
+}
+.post-cover-heading .post-title,
+.post-cover-heading .post-meta,
+.post-cover-heading .pinned-badge {
+  color: #fff;
+  text-shadow: 0 1px 5px #0005;
+}
+.post-cover-heading .post-title a:hover,
+.post-cover-heading .post-meta a:hover {
+  color: #ece1ff;
+}
+.post-cover-heading .post-meta {
+  opacity: 0.88;
+}
+.has-cover .post-excerpt {
+  margin-top: 4px;
 }
 .post-cover img {
   display: block;

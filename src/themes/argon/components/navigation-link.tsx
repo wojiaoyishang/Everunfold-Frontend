@@ -6,6 +6,7 @@ import type { ComponentProps, FormEvent, ReactNode } from "react";
 import { clientNavigationHref, searchHref } from "@/core/navigation/targets";
 import { useRouteState } from "./route-state";
 import { useNavigation } from "./navigation-state";
+import { navigateToAnchor } from "@/core/browser/scroll-restoration";
 
 type AppLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
   href: string;
@@ -17,6 +18,7 @@ export function AppLink({
   replace,
   scroll,
   onNavigate,
+  onClick,
   ...props
 }: AppLinkProps) {
   const { navigate } = useRouteState();
@@ -26,6 +28,29 @@ export function AppLink({
       href={href}
       replace={replace}
       scroll={scroll}
+      onClick={(event) => {
+        onClick?.(event);
+        if (
+          event.defaultPrevented ||
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey ||
+          props.download ||
+          (props.target && props.target !== "_self")
+        )
+          return;
+        const url = new URL(href, window.location.href);
+        if (
+          url.origin === window.location.origin &&
+          url.pathname === window.location.pathname &&
+          url.search === window.location.search &&
+          url.hash &&
+          navigateToAnchor(url)
+        )
+          event.preventDefault();
+      }}
       onNavigate={(event) => {
         let canceled = false;
         onNavigate?.({

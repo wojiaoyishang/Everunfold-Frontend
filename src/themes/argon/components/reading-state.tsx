@@ -27,7 +27,11 @@ export function ReadingStateProvider({ children }: { children: ReactNode }) {
         let activeId = toc[0]?.id ?? "";
         for (const heading of toc) {
           const element = document.getElementById(heading.id);
-          if (element && element.getBoundingClientRect().top <= 135)
+          if (
+            element &&
+            !element.closest("details:not([open])") &&
+            element.getBoundingClientRect().top <= 135
+          )
             activeId = heading.id;
         }
         next = {
