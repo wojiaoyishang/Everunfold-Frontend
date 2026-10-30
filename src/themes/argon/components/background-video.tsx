@@ -1,9 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 const VIDEO_SOURCE = "/reference/campfire-background.webm";
-const PREFERENCE_KEY = "everunfold.background-motion";
+// Pause belongs to this visit. An old persistent test pause must not disable new visits.
+const PREFERENCE_KEY = "everunfold.background-motion.session";
 const PREFERENCE_EVENT = "everunfold:background-motion";
 type PlaybackPreference = "auto" | "playing" | "paused";
 
@@ -19,7 +28,7 @@ function connection(): DataConnection | undefined {
 
 function readPreference(): PlaybackPreference {
   try {
-    const saved = window.localStorage.getItem(PREFERENCE_KEY);
+    const saved = window.sessionStorage.getItem(PREFERENCE_KEY);
     if (saved === "playing" || saved === "paused") return saved;
   } catch {
     // The control remains usable when browser storage is unavailable.
@@ -67,14 +76,36 @@ function subscribe(callback: () => void): () => void {
 function savePreference(preference: PlaybackPreference): void {
   memoryPreference = preference;
   try {
-    window.localStorage.setItem(PREFERENCE_KEY, preference);
+    window.sessionStorage.setItem(PREFERENCE_KEY, preference);
   } catch {
     // A memory fallback still honors the choice for the current visit.
   }
   window.dispatchEvent(new Event(PREFERENCE_EVENT));
 }
 
-export function BackgroundVideo({ poster }: { poster: string }) {
+const PlaybackContext = createContext<{
+  playing: boolean;
+  label: string;
+  description: string;
+  togglePlayback: () => void;
+} | null>(null);
+
+export function useBackgroundPlayback() {
+  const value = useContext(PlaybackContext);
+  if (!value)
+    throw new Error(
+      "Background controls require the persistent video provider",
+    );
+  return value;
+}
+
+export function BackgroundVideoProvider({
+  poster,
+  children,
+}: {
+  poster: string;
+  children: ReactNode;
+}) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const snapshot = useSyncExternalStore(
     subscribe,
@@ -155,7 +186,9 @@ export function BackgroundVideo({ poster }: { poster: string }) {
           : "播放星空动态背景";
 
   return (
-    <>
+    <PlaybackContext.Provider
+      value={{ playing, label, description, togglePlayback }}
+    >
       <div
         className={`page-background${playing ? " is-playing" : ""}`}
         aria-hidden="true"
@@ -168,7 +201,7 @@ export function BackgroundVideo({ poster }: { poster: string }) {
           autoPlay
           loop
           playsInline
-          preload="none"
+          preload="auto"
           tabIndex={-1}
           onPlaying={() => {
             setPlaying(true);
@@ -182,36 +215,7 @@ export function BackgroundVideo({ poster }: { poster: string }) {
           }}
         />
       </div>
-      <button
-        className="background-playback-toggle"
-        type="button"
-        aria-label={label}
-        aria-pressed={playing}
-        title={description}
-        onClick={togglePlayback}
-      >
-        <svg
-          viewBox="0 0 24 24"
-          width="18"
-          height="18"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-          focusable="false"
-        >
-          {playing ? (
-            <path d="M8 5v14M16 5v14" />
-          ) : (
-            <path d="m8 4 12 8-12 8V4Z" />
-          )}
-        </svg>
-        <span className="background-playback-label">
-          {playing ? "暂停背景" : "动态背景"}
-        </span>
-      </button>
-    </>
+      {children}
+    </PlaybackContext.Provider>
   );
 }

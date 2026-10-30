@@ -15,55 +15,158 @@
 .footer-separator {
   padding: 0 5px;
 }
-.back-to-top {
+.floating-tools {
   position: fixed;
-  right: 28px;
-  bottom: 28px;
-  z-index: 20;
-  background: var(--surface);
-  color: var(--accent);
-  border-radius: 50%;
-  width: 43px;
-  height: 43px;
+  right: 20px;
+  bottom: 35px;
+  z-index: 60;
+  width: 42px;
+}
+.tool-slot {
+  display: grid;
+  grid-template-rows: 1fr;
+  margin-top: 8px;
+  opacity: 1;
+  transition:
+    grid-template-rows 300ms ease,
+    margin-top 300ms ease,
+    opacity 250ms ease,
+    transform 300ms var(--motion-ease);
+}
+.tool-slot[data-visible="false"] {
+  grid-template-rows: 0fr;
+  margin-top: 0;
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+}
+.tool-slot-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+.floating-button {
   display: grid;
   place-items: center;
-  box-shadow: var(--shadow);
-  transition:
-    transform 240ms var(--motion-ease),
-    box-shadow 240ms ease,
-    background-color var(--motion-normal) ease;
-}
-.background-playback-toggle {
-  position: fixed;
-  right: 82px;
-  bottom: 28px;
-  z-index: 20;
-  min-width: 43px;
-  min-height: 43px;
-  padding: 10px 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border-radius: 4px;
   background: var(--surface);
   color: var(--accent);
-  box-shadow: var(--shadow);
-  font-size: 12px;
-  line-height: 1.4;
+  box-shadow: 0 2px 5px #20143a18;
   transition:
-    transform 240ms var(--motion-ease),
-    box-shadow 240ms ease,
-    background-color var(--motion-normal) ease;
+    background-color 200ms ease,
+    color 200ms ease;
 }
-.background-playback-toggle svg {
+.floating-button .icon {
   width: 17px;
   height: 17px;
-  flex-shrink: 0;
 }
-.background-playback-label {
-  white-space: nowrap;
+.floating-button:hover,
+.floating-button:focus-visible {
+  background: var(--accent);
+  color: white;
+  transform: none;
+}
+.reading-progress {
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  font-size: 11px;
+  color: var(--accent);
+  background: linear-gradient(var(--accent-soft), var(--accent-soft)) no-repeat
+    var(--surface);
+  transition: background-size 150ms linear;
+}
+.reading-settings {
+  position: fixed;
+  margin: auto 0 0 auto;
+  inset: auto 78px 35px auto;
+  width: min(320px, calc(100vw - 90px));
+  border: 0;
+  padding: 0;
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: 0 14px 60px #12062655;
+  max-height: calc(100dvh - 50px);
+  overscroll-behavior: contain;
+}
+.reading-settings[open] {
+  animation: settings-arrive 220ms var(--motion-ease);
+}
+.reading-settings::backdrop {
+  background: #0f092b30;
+}
+.settings-content {
+  padding: 22px;
+}
+.settings-content header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.settings-content h2 {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 500;
+}
+.settings-content fieldset {
+  border: 0;
+  padding: 0;
+  margin: 20px 0;
+}
+.settings-content legend {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.setting-options {
+  display: flex;
+  gap: 7px;
+}
+.setting-options button,
+.settings-reset {
+  padding: 6px 10px;
+  border-radius: 4px;
+  color: var(--text);
+  background: var(--accent-soft);
+  font-size: 12px;
+  transition:
+    background 180ms,
+    color 180ms;
+}
+.setting-options button[aria-pressed="true"] {
+  color: #fff;
+  background: #673bb7;
+}
+.setting-range {
+  display: block;
+  font-size: 14px;
+  margin: 20px 0;
+}
+.setting-range output {
+  float: right;
+  color: var(--muted);
+  font-size: 12px;
+}
+.setting-range input {
+  width: 100%;
+  accent-color: var(--accent);
+  margin: 12px 0 0;
+}
+.settings-reset {
+  width: 100%;
+}
+@keyframes settings-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
 .standalone-state {
   margin: 13vh auto;
@@ -90,25 +193,4 @@
 }
 .standalone-state .primary-button {
   margin-top: 16px;
-}
-.loading-state {
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 14px;
-  min-height: 60vh;
-}
-.loading-state span {
-  width: 22px;
-  height: 22px;
-  border: 2px solid #ffffff33;
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: loading-spin 0.8s linear infinite;
-}
-@keyframes loading-spin {
-  to {
-    transform: rotate(360deg);
-  }
 }

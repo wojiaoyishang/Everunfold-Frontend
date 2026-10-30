@@ -1,6 +1,15 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  play: "m8 4 12 8-12 8V4Z",
+  pause: "M8 5v14M16 5v14",
+  settings:
+    "M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8ZM12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2",
+  star: "m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9L12 3Z",
+  flask: "M9 3h6M10 3v6l-6 10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2L14 9V3M8 14h8",
+  leaf: "M20 3c-10-1-16 3-16 9a7 7 0 0 0 7 7c6 0 9-7 9-16ZM3 21l12-12",
+  chevron: "m9 5 7 7-7 7",
+  expand: "M9 3H3v6M15 3h6v6M3 15v6h6M21 15v6h-6",
   home: "M3 10.5 12 3l9 7.5M5 9v11h5v-6h4v6h5V9",
   search: "m20 20-4.5-4.5M18 10.5a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z",
   menu: "M4 6h16M4 12h16M4 18h16",

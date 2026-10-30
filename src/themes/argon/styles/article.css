@@ -24,6 +24,7 @@
   overflow-wrap: anywhere;
 }
 .article-content {
+  font-size: var(--reading-font-size, 1rem);
   line-height: 1.95;
   overflow-wrap: anywhere;
 }

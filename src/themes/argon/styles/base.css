@@ -6,7 +6,7 @@
   --text: #3d4050;
   --text-strong: #323646;
   --muted: #8a8e9d;
-  --surface: #fff;
+  --surface: #f5f1fb;
   --surface-soft: #f6f7fa;
   --line: #edf0f5;
   --shadow: 0 4px 20px rgb(25 16 64 / 8%), 0 1px 4px rgb(25 16 64 / 4%);
@@ -71,4 +71,29 @@ button {
     background-color var(--motion-normal) ease,
     color var(--motion-fast) ease,
     border-color var(--motion-normal) ease;
+}
+html[data-reading-font="serif"] .article-content {
+  font-family: Georgia, "Noto Serif SC", "Songti SC", SimSun, serif;
+}
+html[data-reading-shadow="deep"] .surface {
+  box-shadow:
+    0 7px 30px #1b0e4933,
+    0 2px 8px #1b0e491c;
+}
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 150;
+  transition: background 220ms;
+}
+html[data-reading-filter="sunset"] body::after {
+  background: #ffb55c20;
+}
+html[data-reading-filter="dim"] body::after {
+  background: #0003;
+}
+html[data-reading-filter="gray"] body::after {
+  backdrop-filter: grayscale(1);
 }

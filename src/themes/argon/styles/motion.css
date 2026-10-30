@@ -8,7 +8,7 @@
   animation: reading-arrive 320ms var(--motion-ease) backwards;
 }
 .route-transition[data-state="pending"] {
-  opacity: 0.72;
+  opacity: 0.94;
 }
 .navigation-progress {
   position: fixed;
@@ -20,19 +20,26 @@
   opacity: 0;
   transition: opacity 140ms ease;
 }
-.navigation-progress[data-active="true"] {
+.navigation-progress[data-state="loading"],
+.navigation-progress[data-state="complete"] {
   opacity: 1;
 }
 .navigation-progress > span {
   display: block;
-  width: 42%;
+  width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, #be9df3 45%, #f1e8ff);
+  background: #9c6cda;
   box-shadow: 0 0 9px rgb(190 157 243 / 45%);
-  transform: translateX(-110%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 220ms ease;
 }
-.navigation-progress[data-active="true"] > span {
-  animation: navigation-sweep 1100ms 80ms ease-in-out infinite;
+.navigation-progress[data-state="complete"] {
+  opacity: 0;
+  transition: opacity 220ms 220ms ease;
+}
+.navigation-progress[data-state="idle"] > span {
+  transition: none;
 }
 .navigation-status {
   position: absolute;
