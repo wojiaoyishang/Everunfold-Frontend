@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff2 binary
+docs/baseline/01_Design_Baseline_v2.11.md -text
+docs/baseline/02_Engineering_Plan_v0.14.md -text

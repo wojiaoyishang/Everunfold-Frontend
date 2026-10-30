@@ -1,0 +1,40 @@
+# 规划模板：逐字提取自工程规范 v0.14 的完整示例代码块。
+# 当前初始化骨架尚未完整实现该 TOML 的显式加载、Schema 校验和各项功能。
+# 文件存在不表示参数生效；勿直接用于生产，不将其作为缺省回退配置。
+# 完整来源与原始 SHA256 见 docs/baseline/README.md。
+
+# everunfold-frontend/config.example.toml
+# 仅在服务端加载；地址仅为可替换示例
+# 前端自身身份，必须与后端 frontends 的对应配置键一致
+FRONTEND_NODE_ID = "web-main"
+
+[backend]
+# Next.js 服务端访问 FastAPI 的连接地址
+# 可省略：省略时使用部署已配置的公开 BACKEND_BASE_URL
+# 显式覆盖仅作用于服务端，不替代浏览器的公开 API 地址
+base_url = "https://api.example.com"
+# 本轮建议初值：仅服务端连接超时，待压测
+connect_timeout_seconds = 2
+request_timeout_seconds = 15
+
+# FastAPI/Celery Worker -> Next.js：接收请求时允许的实际 socket 来源
+# 以下仅为本机联调；生产填写实际连接来源 IP/CIDR，不从 base_url 推导
+allowed_peer_ips = ["127.0.0.1", "::1"]
+
+# Next.js -> FastAPI：前端发送时使用
+# 与后端 frontends.web-main 下同名字段解析出的实际 Token 值一致
+nextjs_to_fastapi_token_env = "NEXTJS_TO_FASTAPI_WEB_MAIN_TOKEN"
+
+# FastAPI/Celery Worker -> Next.js：前端接收并校验
+# 与后端 frontends.web-main 下同名字段解析出的实际 Token 值一致
+fastapi_to_nextjs_token_env = "FASTAPI_TO_NEXTJS_WEB_MAIN_TOKEN"
+
+# 本地快照设置，与后端连接设置分开；仍为仅服务端配置
+# 本轮建议初值，待压测；相对目录以本项目配置根解析
+[cache]
+directory = "./var/public-snapshots"
+max_snapshot_bytes = 8388608
+max_concurrent_fetches = 4
+max_total_bytes = 2147483648
+min_free_bytes = 536870912
+rebuild_concurrency = 2

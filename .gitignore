@@ -1,0 +1,40 @@
+# Local dependencies and generated build state
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+next-env.d.ts
+
+# Local configuration and runtime state
+.env
+.env.*
+!.env.example
+config.toml
+config.*.local.toml
+var/
+logs/
+*.log
+*.pid
+.vercel/
+
+# Credentials and WordPress source data must stay outside Git
+*.pem
+*.key
+*.p12
+*.pfx
+*.sql
+*.sql.*
+*.dump
+*.bak
+wp-config.php
+wp-content/
+wordpress-backup/
+
+# Editor / operating system state
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.DS_Store
+Thumbs.db
