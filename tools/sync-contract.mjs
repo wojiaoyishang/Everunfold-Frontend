@@ -16,7 +16,10 @@ if (!sourcePath) {
   );
 }
 const absoluteSource = path.resolve(sourcePath);
-const source = await readFile(absoluteSource, "utf8");
+const source = (await readFile(absoluteSource, "utf8")).replaceAll(
+  "\r\n",
+  "\n",
+);
 const schema = JSON.parse(source);
 const backendRoot = path.dirname(path.dirname(absoluteSource));
 const relativeSource = path

@@ -444,7 +444,8 @@
           "type": "string"
         },
         "content": {
-          "type": "string"
+          "type": "string",
+          "description": "纯文本，按文本展示，不再作为 HTML 解析"
         },
         "created_at": {
           "type": "string",

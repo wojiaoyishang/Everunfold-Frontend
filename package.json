@@ -19,7 +19,8 @@
     "format:check": "prettier --check src tests tools .github next.config.ts eslint.config.mjs package.json tsconfig.json .prettierrc.json",
     "check": "npm run lint && npm run typecheck && npm run format:check && npm run test",
     "contract:sync": "node tools/sync-contract.mjs",
-    "test": "tsx --test tests/*.test.ts"
+    "test": "tsx --test tests/*.test.ts",
+    "verify:http": "node tools/verify-public-http.mjs"
   },
   "dependencies": {
     "ajv": "8.20.0",

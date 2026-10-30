@@ -7,6 +7,7 @@ import {
 } from "../src/core/content/query";
 import { publicHref, resourceUrl } from "../src/core/content/urls";
 import { parsePublicSnapshot } from "../src/core/content/validation";
+import { hasPublicRoute } from "../src/core/content/routes";
 import { content, snapshot } from "./fixtures";
 
 test("lists filter articles and paginate stable results", () => {
@@ -58,4 +59,14 @@ test("URLs reject active schemes and preserve unrelated external origins", () =>
     "https://example.com/story.html",
   );
   assert.equal(resourceUrl("/uploads/photo.jpg"), "/uploads/photo.jpg");
+});
+
+test("known routes and real content are distinguishable before streamed rendering", () => {
+  const data = snapshot();
+  assert.equal(hasPublicRoute(data, "/archives"), true);
+  assert.equal(hasPublicRoute(data, "/category/notes"), true);
+  assert.equal(hasPublicRoute(data, "/tag/code"), true);
+  assert.equal(hasPublicRoute(data, "/category/absent"), false);
+  assert.equal(hasPublicRoute(data, "/missing.html"), false);
+  assert.equal(hasPublicRoute(data, "/hello.html"), true);
 });

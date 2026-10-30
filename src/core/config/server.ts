@@ -15,7 +15,8 @@ export function projectRoot(): string {
   ];
   for (const candidate of candidates) {
     if (!candidate) continue;
-    let current = path.resolve(candidate);
+    // Runtime configuration is mounted separately; it must not be traced into build output.
+    let current = path.resolve(/* turbopackIgnore: true */ candidate);
     for (let level = 0; level < 12; level += 1) {
       try {
         const metadata = JSON.parse(
@@ -41,7 +42,9 @@ export function readConfiguration() {
   const filename = path.resolve(root, configuredFile);
   let input: unknown;
   try {
-    input = parse(fs.readFileSync(filename, "utf8"));
+    input = parse(
+      fs.readFileSync(/* turbopackIgnore: true */ filename, "utf8"),
+    );
   } catch {
     throw new ConfigurationError("前端实例配置缺失或 TOML 格式无效");
   }

@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { renderComment, renderContent } from "../src/core/rendering/content";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { renderContent } from "../src/core/rendering/content";
+import { CommentText } from "../src/themes/argon/components/comment-text";
 import { content } from "./fixtures";
 
 test("mixed HTML and Markdown are sanitized without executing legacy active content", () => {
@@ -80,11 +83,15 @@ test("missing and unsafe mapped media cannot become active URLs", () => {
   assert.match(result.html, /preload="none"/);
 });
 
-test("historical comment markup is restricted and links stay safe", () => {
-  const html = renderComment(
-    '<p>你好 <strong>朋友</strong></p><img src="bad" onerror="alert(1)"><a href="javascript:alert(1)">坏链接</a><a href="https://example.com">网站</a>',
+test("plain historical comments preserve literal tags, entities and line breaks", () => {
+  const html = renderToStaticMarkup(
+    createElement(CommentText, {
+      content: "模板<T> &amp; & 中文\n<script>示例</script>",
+    }),
   );
-  assert.match(html, /<strong>朋友<\/strong>/);
-  assert.doesNotMatch(html, /javascript|onerror|<img/);
-  assert.match(html, /nofollow noopener noreferrer/);
+  assert.match(
+    html,
+    /&lt;T&gt; &amp;amp; &amp; 中文\n&lt;script&gt;示例&lt;\/script&gt;/,
+  );
+  assert.doesNotMatch(html, /<script>|<T>/);
 });

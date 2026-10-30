@@ -192,23 +192,3 @@ export function renderContent(content: Content): {
     .join("\n");
   return { html, toc };
 }
-
-export function renderComment(value: string): string {
-  return sanitizeHtml(value, {
-    allowedTags: ["p", "br", "strong", "em", "code", "pre", "blockquote", "a"],
-    allowedAttributes: { a: ["href", "rel"] },
-    allowedSchemes: ["http", "https", "mailto"],
-    allowProtocolRelative: false,
-    transformTags: {
-      a: (_tag, attributes): sanitizeHtml.Tag => {
-        const href = publicHref(attributes.href ?? "");
-        const attribs: sanitizeHtml.Attributes = {};
-        if (href) {
-          attribs.href = href;
-          attribs.rel = "nofollow noopener noreferrer";
-        }
-        return { tagName: "a", attribs };
-      },
-    },
-  });
-}

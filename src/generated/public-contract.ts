@@ -77,6 +77,9 @@ export interface PublicComment {
   id: string;
   parent_id: string | null;
   author: string;
+  /**
+   * 纯文本，按文本展示，不再作为 HTML 解析
+   */
   content: string;
   created_at: string;
   reply_to?: string | null;

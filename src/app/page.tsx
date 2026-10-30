@@ -1,12 +1,26 @@
-export default function HomePage() {
+import { readPublicSnapshot } from "@/core/content/snapshot";
+import { pageNumber } from "@/core/content/query";
+import { ArticleList } from "@/themes/argon/components/article-list";
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const parameters = await searchParams;
+  const snapshot = await readPublicSnapshot();
+  const query =
+    typeof parameters.q === "string"
+      ? parameters.q
+      : typeof parameters.s === "string"
+        ? parameters.s
+        : undefined;
   return (
-    <main>
-      <p className="eyebrow">EVERUNFOLD</p>
-      <h1>故事仍在展开。</h1>
-      <p>博客重构已开始，前端项目已完成初始化。</p>
-      <p className="note">
-        这里是开发占位页。文章、管理后台和公开内容缓存将在后续阶段逐步实现。
-      </p>
-    </main>
+    <ArticleList
+      snapshot={snapshot}
+      home={!query}
+      title={query ? `搜索：${query}` : undefined}
+      filter={{ page: pageNumber(parameters.page), query }}
+    />
   );
 }
