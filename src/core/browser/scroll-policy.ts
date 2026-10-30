@@ -6,9 +6,16 @@ export function wheelDistance(
   return delta * (mode === 1 ? 32 : mode === 2 ? viewport : 1);
 }
 
-/** Leave small/high-resolution touchpad deltas native; enhance coarse wheel steps. */
-export function isSteppedWheel(delta: number, mode: number): boolean {
-  return mode !== 0 || (Number.isInteger(delta) && Math.abs(delta) >= 50);
+/** Time-based damping also accepts fractional/high-DPI wheel input. */
+export function dampedPosition(
+  position: number,
+  target: number,
+  milliseconds: number,
+): number {
+  return (
+    position +
+    (target - position) * (1 - Math.exp(-Math.max(0, milliseconds) / 145))
+  );
 }
 
 export function easeOutExpo(progress: number): number {

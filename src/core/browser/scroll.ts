@@ -1,4 +1,5 @@
-import { easeOutExpo, isSteppedWheel, wheelDistance } from "./scroll-policy";
+import { dampedPosition, easeOutExpo, wheelDistance } from "./scroll-policy";
+import { motionEnabled, subscribeMotion } from "./motion";
 
 let cancelAnimation: (() => void) | undefined;
 let wheelTarget: number | undefined;
@@ -17,10 +18,7 @@ export function scrollToPosition(top: number, duration = 650): Promise<void> {
     document.documentElement.scrollHeight - window.innerHeight,
   );
   const target = Math.max(0, Math.min(top, limit));
-  if (
-    Math.abs(target - start) < 1 ||
-    window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  ) {
+  if (Math.abs(target - start) < 1 || !motionEnabled()) {
     window.scrollTo({ top: target, behavior: "instant" });
     return Promise.resolve();
   }
@@ -76,7 +74,7 @@ function nativeScrollTarget(target: EventTarget | null): boolean {
   if (!(target instanceof Element)) return true;
   if (
     target.closest(
-      "input, textarea, select, [contenteditable='true'], dialog, [data-native-scroll], pre",
+      "input, textarea, select, [contenteditable='true'], dialog, [popover], [data-native-scroll], pre",
     )
   )
     return true;
@@ -98,8 +96,42 @@ function nativeScrollTarget(target: EventTarget | null): boolean {
 export function installScrollBehavior(
   navigateAnchor: (url: URL) => boolean,
 ): () => void {
-  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const pointer = window.matchMedia("(any-pointer: fine)");
+  let wheelActive = false;
+  function beginWheel() {
+    stopScrolling();
+    wheelActive = true;
+    let position = window.scrollY;
+    let previousTime = performance.now();
+    let frame = 0;
+    wheelTarget = position;
+    const finish = () => {
+      cancelAnimationFrame(frame);
+      wheelActive = false;
+      wheelTarget = undefined;
+      cancelAnimation = undefined;
+      delete document.documentElement.dataset.scrollAnimating;
+    };
+    cancelAnimation = finish;
+    document.documentElement.dataset.scrollAnimating = "wheel";
+    const tick = (now: number) => {
+      const limit = Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight,
+      );
+      const target = Math.max(0, Math.min(wheelTarget ?? position, limit));
+      position = dampedPosition(
+        position,
+        target,
+        Math.min(64, now - previousTime),
+      );
+      previousTime = now;
+      const done = Math.abs(position - target) < 0.5;
+      window.scrollTo({ top: done ? target : position, behavior: "instant" });
+      if (done) finish();
+      else frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+  }
   function onWheel(event: WheelEvent) {
     if (
       event.defaultPrevented ||
@@ -107,10 +139,8 @@ export function installScrollBehavior(
       event.ctrlKey ||
       event.metaKey ||
       Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
-      reduce.matches ||
-      !pointer.matches ||
-      nativeScrollTarget(event.target) ||
-      !isSteppedWheel(event.deltaY, event.deltaMode)
+      !motionEnabled() ||
+      nativeScrollTarget(event.target)
     ) {
       stopScrolling();
       return;
@@ -123,16 +153,18 @@ export function installScrollBehavior(
       ),
     );
     if (!delta) return;
+    if (!wheelActive) beginWheel();
     const previous = wheelTarget ?? window.scrollY;
     const sameDirection =
       Math.sign(previous - window.scrollY) === Math.sign(delta);
     const target = (sameDirection ? previous : window.scrollY) + delta;
     event.preventDefault();
-    void scrollToPosition(target, 420);
     wheelTarget = Math.max(
       0,
+      window.scrollY - Math.max(window.innerHeight * 2, 1000),
       Math.min(
         target,
+        window.scrollY + Math.max(window.innerHeight * 2, 1000),
         document.documentElement.scrollHeight - window.innerHeight,
       ),
     );
@@ -173,7 +205,7 @@ export function installScrollBehavior(
   window.addEventListener("keydown", stopScrolling);
   window.addEventListener("popstate", stopScrolling);
   document.addEventListener("click", onAnchor);
-  reduce.addEventListener("change", stopScrolling);
+  const unsubscribeMotion = subscribeMotion(stopScrolling);
   return () => {
     stopScrolling();
     window.removeEventListener("wheel", onWheel);
@@ -182,6 +214,6 @@ export function installScrollBehavior(
     window.removeEventListener("keydown", stopScrolling);
     window.removeEventListener("popstate", stopScrolling);
     document.removeEventListener("click", onAnchor);
-    reduce.removeEventListener("change", stopScrolling);
+    unsubscribeMotion();
   };
 }

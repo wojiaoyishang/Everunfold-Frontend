@@ -3,18 +3,15 @@
 import { useEffect, useRef, type MouseEvent, type ReactNode } from "react";
 import { clientNavigationHref } from "@/core/navigation/targets";
 import { useRouteState } from "./route-state";
+import { useMotion } from "../hooks/use-motion";
 
 export function RouteContent({ children }: { children: ReactNode }) {
   const { route, pending, navigate } = useRouteState();
+  const { enabled } = useMotion();
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const element = container.current;
-    if (
-      !element ||
-      !("IntersectionObserver" in window) ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    )
-      return;
+    if (!element || !("IntersectionObserver" in window) || !enabled) return;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries)
@@ -42,7 +39,7 @@ export function RouteContent({ children }: { children: ReactNode }) {
           delete item.dataset.revealState;
       });
     };
-  }, [route, children]);
+  }, [route, children, enabled]);
   function onClick(event: MouseEvent<HTMLDivElement>) {
     if (event.defaultPrevented || !(event.target instanceof Element)) return;
     const anchor = event.target.closest<HTMLAnchorElement>(

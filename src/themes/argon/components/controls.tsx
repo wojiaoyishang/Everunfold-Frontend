@@ -22,7 +22,7 @@ export function ThemeToggle({
   }
   return (
     <button
-      className={className}
+      className={`${className} theme-toggle`}
       type="button"
       onClick={toggleTheme}
       aria-label="切换深浅色外观"

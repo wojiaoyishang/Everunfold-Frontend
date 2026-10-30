@@ -91,13 +91,34 @@
   background: var(--surface);
   box-shadow: 0 14px 60px #12062655;
   max-height: calc(100dvh - 50px);
+  overflow-y: auto;
   overscroll-behavior: contain;
+  opacity: 0;
+  transform: translateX(18px) translateY(8px) scale(0.96);
+  transform-origin: right bottom;
+  transition:
+    opacity 240ms ease,
+    transform 360ms var(--motion-ease),
+    display 360ms allow-discrete,
+    overlay 360ms allow-discrete;
 }
-.reading-settings[open] {
-  animation: settings-arrive 220ms var(--motion-ease);
+.reading-settings:popover-open {
+  opacity: 1;
+  transform: none;
 }
 .reading-settings::backdrop {
-  background: #0f092b30;
+  background: transparent;
+}
+@starting-style {
+  .reading-settings:popover-open {
+    opacity: 0;
+    transform: translateX(18px) translateY(8px) scale(0.96);
+  }
+}
+.setting-hint {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 9px 0 0;
 }
 .settings-content {
   padding: 22px;
@@ -157,16 +178,6 @@
 }
 .settings-reset {
   width: 100%;
-}
-@keyframes settings-arrive {
-  from {
-    opacity: 0;
-    transform: translateX(12px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
 .standalone-state {
   margin: 13vh auto;

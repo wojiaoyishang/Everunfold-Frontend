@@ -12,6 +12,7 @@ import { campfireIdentity } from "../navigation";
 import { SidebarNavigation } from "./sidebar-navigation";
 import { useReadingState } from "./reading-state";
 import { useNavigation } from "./navigation-state";
+import { TransitionPanel } from "./transition-panel";
 
 export function Sidebar({
   site,
@@ -50,8 +51,13 @@ export function Sidebar({
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
       if (event.key !== "Tab") return;
-      const focusable = sidebarRef.current?.querySelectorAll<HTMLElement>(
-        "a[href], button, input",
+      const focusable = Array.from(
+        sidebarRef.current?.querySelectorAll<HTMLElement>(
+          "a[href], button, input",
+        ) ?? [],
+      ).filter(
+        (element) =>
+          !element.closest("[inert]") && element.offsetParent !== null,
       );
       if (!focusable?.length) return;
       const first = focusable[0];
@@ -90,14 +96,16 @@ export function Sidebar({
   }, [activeId, tab]);
   return (
     <>
-      {open && (
-        <button
-          type="button"
-          className="sidebar-mask"
-          aria-label="关闭站点侧栏"
-          onClick={() => setOpen(false)}
-        />
-      )}
+      <button
+        type="button"
+        className="sidebar-mask"
+        data-open={open}
+        inert={!open}
+        aria-hidden={!open}
+        tabIndex={-1}
+        aria-label="关闭站点侧栏"
+        onClick={() => setOpen(false)}
+      />
       <aside
         ref={sidebarRef}
         id="site-sidebar"
@@ -159,35 +167,37 @@ export function Sidebar({
               站点概览
             </button>
           </div>
-          {tab === "toc" && toc.length > 0 ? (
-            <nav
+          {toc.length > 0 && (
+            <TransitionPanel
+              active={tab === "toc"}
               id="toc-panel"
-              role="tabpanel"
-              aria-labelledby="toc-tab"
-              className="table-of-contents"
-              aria-label="文章目录"
+              labelledBy="toc-tab"
             >
-              {toc.map((entry) => (
-                <a
-                  key={entry.id}
-                  href={`#${entry.id}`}
-                  aria-current={activeId === entry.id ? "location" : undefined}
-                  style={{
-                    paddingLeft: `${Math.max(0, entry.level - 2) * 12 + 10}px`,
-                  }}
-                  onClick={() => setOpen(false)}
-                >
-                  {entry.text}
-                </a>
-              ))}
-            </nav>
-          ) : (
-            <div
-              id="overview-panel"
-              role="tabpanel"
-              aria-labelledby="overview-tab"
-              className="profile"
-            >
+              <nav className="table-of-contents" aria-label="文章目录">
+                {toc.map((entry) => (
+                  <a
+                    key={entry.id}
+                    href={`#${entry.id}`}
+                    aria-current={
+                      activeId === entry.id ? "location" : undefined
+                    }
+                    style={{
+                      paddingLeft: `${Math.max(0, entry.level - 2) * 12 + 10}px`,
+                    }}
+                    onClick={() => setOpen(false)}
+                  >
+                    {entry.text}
+                  </a>
+                ))}
+              </nav>
+            </TransitionPanel>
+          )}
+          <TransitionPanel
+            active={tab === "overview"}
+            id="overview-panel"
+            labelledBy="overview-tab"
+          >
+            <div className="profile">
               {avatar ? (
                 <Image
                   src={avatar}
@@ -236,7 +246,7 @@ export function Sidebar({
                 </Link>
               </div>
             </div>
-          )}
+          </TransitionPanel>
         </section>
       </aside>
     </>

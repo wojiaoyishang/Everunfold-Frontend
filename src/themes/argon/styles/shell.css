@@ -147,21 +147,32 @@
 .icon-button:hover {
   background: rgb(255 255 255 / 13%);
 }
-.theme-sun {
-  display: none;
+.theme-toggle .icon {
+  grid-area: 1 / 1;
+  transition:
+    opacity 240ms ease,
+    transform 440ms var(--motion-ease);
+}
+.theme-toggle .theme-sun {
+  opacity: 0;
+  transform: rotate(-100deg) scale(0.5);
 }
 html[data-theme="dark"] .theme-sun {
-  display: block;
+  opacity: 1;
+  transform: none;
 }
 html[data-theme="dark"] .theme-moon {
-  display: none;
+  opacity: 0;
+  transform: rotate(100deg) scale(0.5);
 }
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"]) .theme-sun {
-    display: block;
+    opacity: 1;
+    transform: none;
   }
   html:not([data-theme="light"]) .theme-moon {
-    display: none;
+    opacity: 0;
+    transform: rotate(100deg) scale(0.5);
   }
 }
 .hero {

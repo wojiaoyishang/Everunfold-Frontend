@@ -86,10 +86,38 @@
   margin: 0;
   overflow: auto;
   overscroll-behavior: contain;
+  opacity: 0;
+  transform: translateY(16px) scale(0.97);
+  transition:
+    opacity 240ms ease,
+    transform 360ms var(--motion-ease),
+    display 360ms allow-discrete,
+    overlay 360ms allow-discrete;
+}
+.image-viewer[open] {
+  opacity: 1;
+  transform: none;
 }
 .image-viewer::backdrop {
   background: #0c0919eb;
   backdrop-filter: blur(8px);
+  opacity: 0;
+  transition:
+    opacity 300ms ease,
+    display 360ms allow-discrete,
+    overlay 360ms allow-discrete;
+}
+.image-viewer[open]::backdrop {
+  opacity: 1;
+}
+@starting-style {
+  .image-viewer[open] {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+  .image-viewer[open]::backdrop {
+    opacity: 0;
+  }
 }
 .image-viewer figure {
   margin: 0 auto;

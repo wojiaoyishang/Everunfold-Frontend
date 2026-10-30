@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Icon } from "./icon";
-import { useModalDialog } from "../hooks/use-modal-dialog";
+import { useMotion } from "../hooks/use-motion";
 
 const defaults = {
   size: 16.5,
@@ -46,7 +46,8 @@ function applySettings(value: Settings) {
 }
 
 export function ReadingSettings() {
-  const { dialog, open, close } = useModalDialog();
+  const panelId = useId();
+  const motion = useMotion();
   const [settings, setSettings] = useState(defaults);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -73,17 +74,17 @@ export function ReadingSettings() {
         className="floating-button"
         aria-label="阅读设置"
         title="阅读设置"
-        onClick={open}
+        popoverTarget={panelId}
+        aria-haspopup="dialog"
       >
         <Icon name="settings" />
       </button>
-      <dialog
-        ref={dialog}
+      <div
+        id={panelId}
+        popover="auto"
+        role="dialog"
         className="reading-settings"
         aria-labelledby="reading-settings-title"
-        onClick={(event) => {
-          if (event.target === event.currentTarget) close();
-        }}
       >
         <div className="settings-content">
           <header>
@@ -92,11 +93,34 @@ export function ReadingSettings() {
               type="button"
               className="icon-button"
               aria-label="关闭阅读设置"
-              onClick={close}
+              popoverTarget={panelId}
+              popoverTargetAction="hide"
             >
               <Icon name="close" />
             </button>
           </header>
+          <fieldset>
+            <legend>全站动效</legend>
+            <div className="setting-options">
+              {(
+                [
+                  ["full", "完整动效"],
+                  ["system", "跟随系统"],
+                  ["reduced", "减少动态"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  type="button"
+                  key={value}
+                  aria-pressed={motion.preference === value}
+                  onClick={() => motion.setPreference(value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            <p className="setting-hint">控制背景播放、滚动惯性和界面动画</p>
+          </fieldset>
           <fieldset>
             <legend>字体</legend>
             <div className="setting-options">
@@ -183,12 +207,15 @@ export function ReadingSettings() {
           <button
             type="button"
             className="settings-reset"
-            onClick={() => update(defaults)}
+            onClick={() => {
+              update(defaults);
+              motion.setPreference("full");
+            }}
           >
             恢复默认
           </button>
         </div>
-      </dialog>
+      </div>
     </>
   );
 }

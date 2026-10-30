@@ -2,18 +2,30 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   easeOutExpo,
-  isSteppedWheel,
+  dampedPosition,
   wheelDistance,
 } from "../src/core/browser/scroll-policy";
 
-test("wheel units preserve direction and high-resolution touchpad input stays native", () => {
+test("wheel units preserve direction and fractional high-DPI deltas", () => {
   assert.equal(wheelDistance(-3, 1, 800), -96);
   assert.equal(wheelDistance(1, 2, 800), 800);
   assert.equal(wheelDistance(4.25, 0, 800), 4.25);
-  assert.equal(isSteppedWheel(4.25, 0), false);
-  assert.equal(isSteppedWheel(-12, 0), false);
-  assert.equal(isSteppedWheel(100, 0), true);
-  assert.equal(isSteppedWheel(-3, 1), true);
+  assert.equal(wheelDistance(53.333333, 0, 800), 53.333333);
+});
+
+test("wheel momentum continues after input and is independent of display refresh rate", () => {
+  function travel(step: number, time: number) {
+    let position = 0;
+    for (let elapsed = 0; elapsed < time; elapsed += step)
+      position = dampedPosition(position, 600, Math.min(step, time - elapsed));
+    return position;
+  }
+  assert.ok(travel(16, 100) < 400);
+  assert.ok(travel(16, 500) > travel(16, 100));
+  assert.ok(travel(16, 1100) > 599);
+  assert.ok(Math.abs(travel(8, 500) - travel(16, 500)) < 0.01);
+  assert.ok(dampedPosition(600, 300, 16) < 600);
+  assert.ok(dampedPosition(600, 300, 16) > 300);
 });
 
 test("scroll easing reaches its target without overshooting or reversing", () => {

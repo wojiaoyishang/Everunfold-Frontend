@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import { useModalDialog } from "../hooks/use-modal-dialog";
 import { Icon } from "./icon";
+import { useDetailsMotion } from "../hooks/use-details-motion";
 
 interface Gallery {
   index: number;
@@ -12,6 +13,7 @@ interface Gallery {
 
 export function ArticleMedia({ children }: { children: ReactNode }) {
   const container = useRef<HTMLDivElement>(null);
+  useDetailsMotion(container, children);
   const { dialog, open: openModal, close } = useModalDialog();
   const [gallery, setGallery] = useState<Gallery | null>(null);
   useEffect(() => {

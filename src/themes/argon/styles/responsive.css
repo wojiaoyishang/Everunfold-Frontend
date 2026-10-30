@@ -84,11 +84,13 @@
     visibility: hidden;
     transition:
       transform 300ms var(--motion-ease),
-      background-color var(--motion-normal) ease;
+      background-color var(--motion-normal) ease,
+      visibility 0s 300ms;
   }
   .site-sidebar.is-open {
     transform: translateX(0);
     visibility: visible;
+    transition-delay: 0s;
   }
   .sidebar-menu-card {
     margin-bottom: 18px;
@@ -114,7 +116,16 @@
     z-index: 80;
     background: rgb(10 8 25 / 55%);
     backdrop-filter: blur(3px);
-    animation: mask-arrive 180ms ease-out;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity 300ms ease,
+      visibility 0s 300ms;
+  }
+  .sidebar-mask[data-open="true"] {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
   }
   .mobile-sidebar-button {
     display: grid;
@@ -145,14 +156,6 @@
   .floating-tools {
     right: 14px;
     bottom: max(18px, env(safe-area-inset-bottom));
-  }
-}
-@keyframes mask-arrive {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
   }
 }
 @media (max-width: 520px) {
@@ -324,12 +327,17 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+html[data-motion="reduced"] {
   /* JavaScript may already have marked offscreen cards; never leave them hidden. */
   [data-reveal-state],
   .route-transition[data-state="pending"] {
     opacity: 1;
     translate: none;
+    filter: none;
+  }
+  .blog-shell :where(a, button, summary, img):is(:hover, :active),
+  .blog-shell :where(a, button):hover > .icon {
+    scale: none;
   }
   .post-card:hover,
   .taxonomy-index a:hover,

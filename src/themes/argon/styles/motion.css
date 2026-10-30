@@ -1,14 +1,92 @@
+/* Shared interaction language; component-specific transitions remain in their own files. */
+.blog-shell :where(a, button, summary, input, select, textarea) {
+  transition:
+    color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    box-shadow var(--motion-normal) ease,
+    opacity var(--motion-fast) ease,
+    transform var(--motion-normal) var(--motion-ease),
+    scale var(--motion-normal) var(--motion-ease);
+}
+.blog-shell
+  :where(button, .primary-button, .pagination a, .article-tags a):active {
+  scale: 0.94;
+  transition-duration: 90ms;
+}
+.blog-shell :where(a, button) > .icon {
+  transition:
+    transform var(--motion-normal) var(--motion-ease),
+    scale var(--motion-normal) var(--motion-ease),
+    opacity var(--motion-fast) ease;
+}
+.sidebar-search,
+.search-form input {
+  transition:
+    box-shadow var(--motion-normal) ease,
+    background-color var(--motion-normal) ease;
+}
+.sidebar-search:focus-within,
+.search-form input:focus {
+  box-shadow:
+    0 0 0 3px var(--accent-soft),
+    0 4px 16px #673bb71a;
+  background-color: var(--surface);
+}
+.transition-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    grid-template-rows 380ms var(--motion-ease),
+    opacity 240ms ease,
+    translate 380ms var(--motion-ease);
+}
+.transition-panel[data-active="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  translate: 0 0;
+}
+.transition-panel-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+.article-content summary {
+  list-style: none;
+}
+.article-content summary::-webkit-details-marker {
+  display: none;
+}
+.article-content summary::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin: 0 12px 2px 1px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 320ms var(--motion-ease);
+}
+.article-content details[open]:not([data-expanded="false"]) > summary::before {
+  transform: rotate(45deg);
+}
+
 /* The public shell stays mounted; only this reading region enters on navigation. */
 .route-transition {
   min-width: 0;
   opacity: 1;
-  transition: opacity 160ms ease;
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease;
 }
 .route-transition[data-state="entering"] {
-  animation: reading-arrive 320ms var(--motion-ease) backwards;
+  animation: reading-arrive 460ms var(--motion-ease) backwards;
 }
 .route-transition[data-state="pending"] {
-  opacity: 0.94;
+  opacity: 0.82;
+  filter: saturate(0.8);
 }
 .navigation-progress {
   position: fixed;
@@ -105,7 +183,7 @@
 @keyframes reading-arrive {
   from {
     opacity: 0;
-    transform: translate3d(0, 12px, 0);
+    transform: translate3d(0, 18px, 0);
   }
   to {
     opacity: 1;
@@ -153,6 +231,35 @@
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .floating-button:hover > .icon,
+  .icon-button:hover > .icon {
+    scale: 1.16;
+  }
+  .floating-button:hover {
+    box-shadow: 0 5px 15px #38205033;
+  }
+  .floating-button[aria-label="阅读设置"]:hover > .icon {
+    transform: rotate(35deg);
+  }
+  .setting-options button:hover,
+  .settings-reset:hover,
+  .sidebar-tabs button:hover {
+    box-shadow: 0 4px 12px #673bb726;
+    transform: translateY(-2px);
+  }
+  .post-tags a:hover,
+  .profile-links a:hover,
+  .site-stats a:hover {
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .article-content summary:hover {
+    background-color: var(--accent-soft);
+  }
+  .archive-month li a:hover {
+    color: var(--accent);
+    transform: translateX(4px);
+  }
   .header-navigation a:hover {
     transform: translateY(-1px);
   }
