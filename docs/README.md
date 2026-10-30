@@ -12,6 +12,7 @@
 6. [公开阅读决定](decisions/0002-public-reading.md)：当前交付、数据链路与尚未实现边界。
 7. [持久前台决定](decisions/0003-persistent-ui-motion.md) 与 [前台组件架构](architecture/frontend-ui.md)：公共壳、导航、视频及有序样式职责。
 8. [原站复刻决定](decisions/0004-reference-fidelity.md)：连续阅读、共享滚动/工具列、安全展示短代码。
+9. [整站动效决定](decisions/0005-site-motion-policy.md)：本站完整动效默认值、连续滚轮、非模态设置与双向过渡，更新 ADR 0004 的相关细节。
 
 ## 目录职责
 
@@ -35,7 +36,8 @@
 - [公开阅读验证](handoff/public-reading-verification.md)：当前阶段实际检查与已知限制；初始化记录保留为历史。
 - [前台交互动效验证](handoff/frontend-motion-verification.md)：上一阶段浏览器、视频、软导航和窄屏交互证据。
 - [原站前台复刻审阅](handoff/original-site-ui-audit.md)：实施前的用户反馈与原站对照；保留为历史依据。
-- [原站复刻验证](handoff/frontend-fidelity-verification.md)：当前实现、慢加载中间态、目录/图片/手机交互及剩余限制。
+- [原站复刻验证](handoff/frontend-fidelity-verification.md)：上一轮版式、慢加载中间态、目录/图片/手机交互的历史证据。
+- [整站动效验证](handoff/frontend-global-motion-verification.md)：最新实际 Edge 根因、完整动效、设置滚动条、滚轮尾程和双向交互验证。
 
 ## 两仓库分工
 

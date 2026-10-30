@@ -12,7 +12,7 @@ src/core/
   config/                       仅服务端实例配置
   rendering/                    Server 侧正文安全渲染和媒体解析
     shortcodes.ts               展示语法白名单，不执行旧插件
-  browser/                      有限滚动、输入策略、页面/锚点历史位置
+  browser/                      动效纯策略/订阅、阻尼滚动、页面/锚点历史位置
   navigation/
     targets.ts                  纯 URL / 手势 / 资源导航策略
     presentation.ts             纯目录注册/释放状态约束
@@ -26,15 +26,16 @@ src/themes/argon/
     navigation-progress.tsx     延迟显示、推进、完成与淡出
     floating-tools.tsx          纵向工具列与回顶出入，不各自固定定位
     reading-state.tsx           阅读进度、活动目录、评论状态
-    article-media.tsx           已安全渲染正文的图片交互
-    reading-settings.tsx       原生阅读设置弹窗
+    article-media.tsx           已安全渲染正文的图片和折叠交互
+    reading-settings.tsx        不锁页面滚动的原生 popover、统一动效选项
+    transition-panel.tsx        保留内容的双向高度切换与 inactive/inert
     site-header / sidebar*     共享导航数据与独立区域展示
     navigation-link.tsx         Next Link/Form 的统一交互适配
     navigation-state.tsx        手机侧栏展开、关闭及焦点共享
     article*.tsx / post-card    Server 正文与可复用内容展示
     pagination / archives ...   主题业务展示组件
   navigation.ts                 主题导航/原站品牌映射，不改公开业务 DTO
-  hooks/                        滚动订阅、原生 dialog 滚动锁等实际复用能力
+  hooks/                        动效订阅、details 高度、滚动订阅、图片 dialog 锁
   styles/                       九个职责样式文件，保持原级联顺序
 ```
 
@@ -55,13 +56,13 @@ src/themes/argon/
 
 ## 动效与资源策略
 
-背景使用原 WebM/VP9、5 秒循环、3200×2400、25fps、无音轨。组件默认静音循环、行内播放；读到客户端偏好后才设置源地址。自动播放拒绝/资源失败时保留静态 poster，用户可手动重试。减少动态效果、省流量默认静态，隐藏标签暂停；暂停保留当前帧，偏好存本标签 sessionStorage，不再永久影响新访问。
+背景使用原 WebM/VP9、5 秒循环、3200×2400、25fps、无音轨。组件默认静音循环、行内播放；可见且策略允许时才设置源地址。播放拒绝/资源失败时保留静态图，用户可重试。隐藏标签暂停；手动暂停仅在当前持久 Provider 挂载期间保留，跨页保持当前帧、刷新重新播放；不读旧 sessionStorage 暂停键。
 
-正文过渡约 320ms，保留旧内容直至下一页就绪；顶端进度和读屏状态反馈 pending。卡片有限错落入场，屏幕外项目按 IntersectionObserver 进入显示；hero 只在公共壳首次进入时播放。hover/focus、主题、目录、手机侧栏保持共同节奏，不添加常驻每帧 JavaScript 或通用动画总线。
+正文过渡约 460ms，保留旧内容直至下一页就绪；顶端进度和读屏状态反馈 pending。卡片有限错落入场，屏幕外项目按 IntersectionObserver 进入显示；hero 只在公共壳首次进入时播放。hover/press/focus、主题图标、目录/概览高度、手机侧栏/遮罩具有来回过渡。阅读设置与图片查看采用 display/overlay 离散过渡延后移出顶层；details 只在交互时使用 Web Animations 测量自然高度。不添加常驻动画总线。
 
-系统减少动态效果时关闭非必要动画并确保内容可见；回顶不强制平滑。桌面侧栏菜单随页面滚动，概览/目录区 sticky 顶距 90px；手机侧栏 top=0，内部面板取消 sticky。
+统一策略见 ADR 0005：默认完整动效、可选跟随系统/减少动态，CSS 与 JS 共用 html data-motion 和 motion.ts 订阅；系统 reduce=true 不能覆盖用户选择的完整模式。SSR 首屏脚本避免闪错偏好，关闭动效仍确保内容可见。桌面侧栏菜单随页面滚动，概览/目录区 sticky 顶距 90px；手机侧栏 top=0，内部面板取消 sticky。
 
-滚动核心只在用户输入/定位时安排有限 rAF。滚轮跳过输入框、嵌套滚动区、弹窗与小幅触控板输入；不创建第二套页面滚动容器。历史位置有界存于内存并用 history.state 独立键定位，保留 Next 自有字段；完整页面重载不承诺跨会话保存阅读位置。
+滚动核心只在用户输入/定位时安排有限 rAF。纵向 wheel 支持小数与像素/行/页单位，采用时间相关指数阻尼并累积有界目标，跳过输入框、嵌套滚动区、弹层、代码区、缩放和横向手势。触屏保持原生；不创建第二套页面滚动容器。阅读设置不锁 body；图片 dialog 仍锁背景，根 scrollbar-gutter 稳定横向位置。历史位置有界存于内存并用 history.state 独立键定位，保留 Next 自有字段；完整页面重载不承诺跨会话保存阅读位置。
 
 短代码仅展示转换，转换产物仍走 HTML allowlist 和真实媒体节点映射；不要添加执行脚本、任意类名/样式、查询 WordPress 数据的能力。图片查看保留链接图片的原链接语义，非链接图片才加键盘可访问的查看行为。
 
