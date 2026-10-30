@@ -33,6 +33,7 @@
 - [初始化验证](handoff/bootstrap-verification.md)：本步实际执行的检查、结果与限制。
 - [公开阅读验证](handoff/public-reading-verification.md)：当前阶段实际检查与已知限制；初始化记录保留为历史。
 - [前台交互动效验证](handoff/frontend-motion-verification.md)：最新浏览器、视频、软导航和窄屏交互证据。
+- [原站前台复刻审阅](handoff/original-site-ui-audit.md)：后续用户反馈、真实原站对照与待实现改进；已有检查不代表复刻验收通过。
 
 ## 两仓库分工
 
