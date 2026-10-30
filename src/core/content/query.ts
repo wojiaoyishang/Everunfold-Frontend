@@ -1,4 +1,4 @@
-import type { Content, PublicSnapshot } from "./types";
+import type { Content, PublicSnapshot, Taxonomy } from "./types";
 import { normalizePath } from "./urls";
 
 export interface ContentFilter {
@@ -55,6 +55,27 @@ export function resolveContent(
   const requested = normalizePath(requestedPath);
   return snapshot.contents.find(
     (item) => normalizePath(item.path) === requested,
+  );
+}
+
+/** Accept a framework route segment in either encoded or decoded form, once. */
+export function resolveTaxonomy(
+  snapshot: PublicSnapshot,
+  kind: Taxonomy["kind"],
+  requestedSlug: string,
+): Taxonomy | undefined {
+  const exact = snapshot.taxonomies.find(
+    (term) => term.kind === kind && term.slug === requestedSlug,
+  );
+  if (exact) return exact;
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(requestedSlug);
+  } catch {
+    return undefined;
+  }
+  return snapshot.taxonomies.find(
+    (term) => term.kind === kind && term.slug === decoded,
   );
 }
 

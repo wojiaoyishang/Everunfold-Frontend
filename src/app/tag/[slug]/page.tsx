@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { readPublicSnapshot } from "@/core/content/snapshot";
-import { pageNumber } from "@/core/content/query";
+import { pageNumber, resolveTaxonomy } from "@/core/content/query";
+import { taxonomyHref } from "@/core/content/urls";
 import { ArticleList } from "@/themes/argon/components/article-list";
 export default async function TagPage({
   params,
@@ -14,9 +15,7 @@ export default async function TagPage({
     params,
     searchParams,
   ]);
-  const tag = snapshot.taxonomies.find(
-    (term) => term.kind === "tag" && term.slug === slug,
-  );
+  const tag = resolveTaxonomy(snapshot, "tag", slug);
   if (!tag) notFound();
   return (
     <ArticleList
@@ -24,8 +23,8 @@ export default async function TagPage({
       title={`# ${tag.name}`}
       subtitle={`标签 · ${tag.count} 篇文章`}
       icon="tag"
-      filter={{ tag: slug, page: pageNumber(parameters.page) }}
-      pathname={`/tag/${encodeURIComponent(slug)}`}
+      filter={{ tag: tag.slug, page: pageNumber(parameters.page) }}
+      pathname={taxonomyHref(tag)}
     />
   );
 }

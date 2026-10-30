@@ -66,6 +66,12 @@ for (const kind of ["category", "tag"]) {
     (item) => item.kind === kind && item.count > 0,
   );
   if (term) await htmlAt(`/${kind}/${encodeURIComponent(term.slug)}`);
+  const unicodeTerm = snapshot.taxonomies.find(
+    (item) =>
+      item.kind === kind && item.count > 0 && /[^\x00-\x7F]/.test(item.slug),
+  );
+  if (unicodeTerm && unicodeTerm.id !== term?.id)
+    await htmlAt(`/${kind}/${encodeURIComponent(unicodeTerm.slug)}`);
 }
 const detail = await htmlAt(firstArticle.path);
 assert.equal(DomUtils.getElementsByTagName("h1", detail.document).length, 1);
@@ -76,13 +82,40 @@ const commented = snapshot.contents.find(
 );
 if (commented) {
   const { document } = await htmlAt(commented.path);
-  const comments = DomUtils.findAll(
-    (node) => (node.attribs.class ?? "").split(" ").includes("comment"),
-    document.children,
-  );
-  assert.equal(
-    comments.length,
-    Math.min(20, snapshot.comments[commented.id].length),
+  const withClass = (name, root) =>
+    DomUtils.findAll(
+      (node) => (node.attribs.class ?? "").split(" ").includes(name),
+      root.children,
+    );
+  const historicalIds = (root) =>
+    withClass("comment", root)
+      .filter((node) => withClass("origin-history", node).length > 0)
+      .map((node) => node.attribs.id);
+  const seen = historicalIds(document);
+  const pagination = withClass("comment-pagination", document)[0];
+  const pages = pagination
+    ? Number(
+        DomUtils.textContent(pagination).match(
+          /第\s*\d+\s*\/\s*(\d+)\s*页/,
+        )?.[1],
+      )
+    : 1;
+  assert.ok(Number.isInteger(pages) && pages >= 1);
+  for (let page = 2; page <= pages; page++) {
+    const destination = new URL(commented.path, origin);
+    destination.searchParams.set("comments_page", String(page));
+    seen.push(
+      ...historicalIds(
+        (await htmlAt(destination.pathname + destination.search)).document,
+      ),
+    );
+  }
+  // Demo rows must neither inflate the real count nor hide imported comments.
+  assert.deepEqual(
+    seen.sort(),
+    snapshot.comments[commented.id]
+      .map((comment) => `comment-${comment.id}`)
+      .sort(),
   );
 }
 await htmlAt("/this-path-was-not-published", 404);

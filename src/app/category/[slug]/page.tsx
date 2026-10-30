@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { readPublicSnapshot } from "@/core/content/snapshot";
-import { pageNumber } from "@/core/content/query";
+import { pageNumber, resolveTaxonomy } from "@/core/content/query";
+import { taxonomyHref } from "@/core/content/urls";
 import { ArticleList } from "@/themes/argon/components/article-list";
 export default async function CategoryPage({
   params,
@@ -14,9 +15,7 @@ export default async function CategoryPage({
     params,
     searchParams,
   ]);
-  const category = snapshot.taxonomies.find(
-    (term) => term.kind === "category" && term.slug === slug,
-  );
+  const category = resolveTaxonomy(snapshot, "category", slug);
   if (!category) notFound();
   return (
     <ArticleList
@@ -24,8 +23,8 @@ export default async function CategoryPage({
       title={category.name}
       subtitle={`分类 · ${category.count} 篇文章`}
       icon="folder"
-      filter={{ category: slug, page: pageNumber(parameters.page) }}
-      pathname={`/category/${encodeURIComponent(slug)}`}
+      filter={{ category: category.slug, page: pageNumber(parameters.page) }}
+      pathname={taxonomyHref(category)}
     />
   );
 }

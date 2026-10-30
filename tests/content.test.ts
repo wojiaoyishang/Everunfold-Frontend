@@ -4,6 +4,7 @@ import {
   pageNumber,
   queryContents,
   resolveContent,
+  resolveTaxonomy,
 } from "../src/core/content/query";
 import { publicHref, resourceUrl } from "../src/core/content/urls";
 import { parsePublicSnapshot } from "../src/core/content/validation";
@@ -69,4 +70,32 @@ test("known routes and real content are distinguishable before streamed renderin
   assert.equal(hasPublicRoute(data, "/category/absent"), false);
   assert.equal(hasPublicRoute(data, "/missing.html"), false);
   assert.equal(hasPublicRoute(data, "/hello.html"), true);
+});
+
+test("Unicode taxonomy routes resolve encoded parameters without changing canonical slugs", () => {
+  const data = snapshot();
+  data.taxonomies.push({
+    id: "zh",
+    slug: "大学",
+    name: "大学",
+    kind: "tag",
+    count: 1,
+  });
+  for (const slug of ["大学", encodeURIComponent("大学")]) {
+    assert.equal(resolveTaxonomy(data, "tag", slug)?.id, "zh");
+    assert.equal(resolveTaxonomy(data, "category", slug), undefined);
+  }
+  assert.equal(resolveTaxonomy(data, "tag", "%ZZ"), undefined);
+  assert.equal(
+    resolveTaxonomy(
+      data,
+      "tag",
+      encodeURIComponent(encodeURIComponent("大学")),
+    ),
+    undefined,
+  );
+  assert.equal(
+    hasPublicRoute(data, `/tag/${encodeURIComponent("大学")}`),
+    true,
+  );
 });
