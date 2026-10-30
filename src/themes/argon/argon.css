@@ -6,6 +6,7 @@
 @import "./styles/listing.css";
 @import "./styles/article.css";
 @import "./styles/comments.css";
+@import "./styles/comment-composer.css";
 @import "./styles/reader.css";
 @import "./styles/controls.css";
 @import "./styles/motion.css";

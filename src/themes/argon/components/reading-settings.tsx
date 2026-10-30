@@ -3,6 +3,7 @@
 import { useEffect, useId, useState } from "react";
 import { Icon } from "./icon";
 import { useMotion } from "../hooks/use-motion";
+import { useBackgroundPlayback } from "./background-video";
 
 const defaults = {
   size: 16.5,
@@ -48,6 +49,7 @@ function applySettings(value: Settings) {
 export function ReadingSettings() {
   const panelId = useId();
   const motion = useMotion();
+  const playback = useBackgroundPlayback();
   const [settings, setSettings] = useState(defaults);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -119,8 +121,35 @@ export function ReadingSettings() {
                 </button>
               ))}
             </div>
-            <p className="setting-hint">控制背景播放、滚动惯性和界面动画</p>
+            <p className="setting-hint">
+              控制滚动惯性和界面动画，背景可单独设置
+            </p>
           </fieldset>
+          <div className="setting-playback">
+            <div>
+              <span id={`${panelId}-background`}>动态背景</span>
+              <p className="setting-hint">{playback.description}</p>
+            </div>
+            <button
+              type="button"
+              className="setting-switch"
+              role="switch"
+              aria-labelledby={`${panelId}-background`}
+              aria-checked={playback.enabled}
+              onClick={() => playback.setEnabled(!playback.enabled)}
+            >
+              <span />
+            </button>
+          </div>
+          {playback.needsRetry && (
+            <button
+              type="button"
+              className="settings-reset"
+              onClick={() => playback.setEnabled(true)}
+            >
+              重试背景播放
+            </button>
+          )}
           <fieldset>
             <legend>字体</legend>
             <div className="setting-options">
@@ -210,10 +239,12 @@ export function ReadingSettings() {
             onClick={() => {
               update(defaults);
               motion.setPreference("full");
+              playback.reset();
             }}
           >
             恢复默认
           </button>
+          <p className="settings-persistence">偏好自动保存在当前浏览器</p>
         </div>
       </div>
     </>

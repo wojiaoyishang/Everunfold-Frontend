@@ -33,11 +33,32 @@
   gap: 25px;
 }
 .post-card {
+  position: relative;
   overflow: hidden;
   transition:
     box-shadow 0.25s,
     transform 0.3s var(--motion-ease),
     background-color var(--motion-normal) ease;
+}
+.post-card-open {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+}
+.post-card-open:focus-visible {
+  outline-offset: -3px;
+}
+/* Taxonomies/comments remain separate destinations above the card-wide native link. */
+.post-card :is(.post-meta a, .post-tags a) {
+  position: relative;
+  z-index: 2;
+}
+.post-card:hover .post-title {
+  color: var(--accent);
+}
+.post-card.has-cover:hover .post-title {
+  color: #fff;
 }
 .post-card:hover {
   box-shadow: 0 8px 27px rgb(21 12 49 / 15%);
@@ -58,6 +79,7 @@
   font-weight: 500;
   line-height: 1.55;
   overflow-wrap: anywhere;
+  transition: color 200ms ease;
 }
 .post-title a {
   transition: color 0.2s;
@@ -194,6 +216,8 @@
   color: #ece1ff;
 }
 .post-cover-heading .post-meta {
+  position: relative;
+  z-index: 2;
   opacity: 0.88;
 }
 .has-cover .post-excerpt {
@@ -206,7 +230,7 @@
   object-fit: cover;
   transition: transform 0.5s;
 }
-.post-cover:hover img {
+.post-card:hover .post-cover img {
   transform: scale(1.025);
 }
 .page-heading {

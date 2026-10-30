@@ -17,25 +17,23 @@ export function PostCard({ content }: { content: Content }) {
             <span>置顶</span>
           </span>
         )}
-        <h2 className="post-title">
-          <Link href={content.path}>{content.title}</Link>
-        </h2>
+        <h2 className="post-title">{content.title}</h2>
       </div>
       <PostMeta content={content} />
     </>
   );
   return (
     <article className={`surface post-card ${cover ? "has-cover" : ""}`}>
+      <Link
+        href={content.path}
+        className="post-card-open"
+        aria-label={content.title}
+      />
       {cover && (
         <header className="post-cover">
-          <Link
-            href={content.path}
-            className="post-cover-image"
-            tabIndex={-1}
-            aria-hidden="true"
-          >
+          <div className="post-cover-image" aria-hidden="true">
             <Image src={cover} alt="" width={900} height={360} unoptimized />
-          </Link>
+          </div>
           <div className="post-cover-heading">{heading}</div>
         </header>
       )}
@@ -51,10 +49,10 @@ export function PostCard({ content }: { content: Content }) {
               </Link>
             ))}
           </div>
-          <Link href={content.path} className="read-more">
+          <span className="read-more" aria-hidden="true">
             阅读全文
             <Icon name="arrow" />
-          </Link>
+          </span>
         </div>
       </div>
     </article>

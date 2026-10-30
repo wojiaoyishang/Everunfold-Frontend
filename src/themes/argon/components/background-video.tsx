@@ -10,6 +10,12 @@ import {
   type ReactNode,
 } from "react";
 import { useMotion } from "../hooks/use-motion";
+import { resolvePlayback } from "@/core/browser/playback-policy";
+import {
+  readPlaybackPreference,
+  setPlaybackPreference,
+  subscribePlaybackPreference,
+} from "@/core/browser/playback-preference";
 
 const VIDEO_SOURCE = "/reference/campfire-background.webm";
 function subscribeVisibility(listener: () => void) {
@@ -18,9 +24,11 @@ function subscribeVisibility(listener: () => void) {
 }
 const PlaybackContext = createContext<{
   playing: boolean;
-  label: string;
+  enabled: boolean;
   description: string;
-  togglePlayback: () => void;
+  needsRetry: boolean;
+  setEnabled: (enabled: boolean) => void;
+  reset: () => void;
 } | null>(null);
 
 export function useBackgroundPlayback() {
@@ -46,20 +54,17 @@ export function BackgroundVideoProvider({
     () => !document.hidden,
     () => false,
   );
-  // A pause lasts for the current mounted visit, including soft navigation. Reload starts playing.
-  const [pausedByUser, setPausedByUser] = useState(false);
-  const [manualEnvironment, setManualEnvironment] = useState<string | null>(
-    null,
+  const preference = useSyncExternalStore(
+    subscribePlaybackPreference,
+    readPlaybackPreference,
+    () => "auto" as const,
   );
   const [playing, setPlaying] = useState(false);
   const [hasFrame, setHasFrame] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [failed, setFailed] = useState(false);
-  const environment = `${motion.preference}:${motion.enabled}`;
-  const shouldPlay =
-    visible &&
-    !pausedByUser &&
-    (motion.enabled || manualEnvironment === environment);
+  const enabled = resolvePlayback(preference, motion.enabled);
+  const shouldPlay = visible && enabled;
 
   useEffect(() => {
     const video = videoRef.current;
@@ -94,18 +99,15 @@ export function BackgroundVideoProvider({
     return () => window.removeEventListener("pointerdown", retry);
   }, [blocked, shouldPlay]);
 
-  function togglePlayback() {
+  function setEnabled(value: boolean) {
     const video = videoRef.current;
-    if (playing) {
-      setPausedByUser(true);
-      setManualEnvironment(null);
+    setPlaybackPreference(value ? "play" : "pause");
+    if (!value) {
       video?.pause();
       return;
     }
-    setPausedByUser(false);
     setBlocked(false);
     setFailed(false);
-    setManualEnvironment(environment);
     if (!video) return;
     video.muted = true;
     if (!video.getAttribute("src")) video.src = VIDEO_SOURCE;
@@ -113,23 +115,25 @@ export function BackgroundVideoProvider({
     void video.play().catch(() => setBlocked(true));
   }
 
-  const label = playing
-    ? "暂停动态背景"
-    : failed
-      ? "重试动态背景"
-      : "播放动态背景";
   const description = playing
-    ? "暂停星空背景，保留当前画面"
+    ? "星空正在播放，离开标签时自动暂停"
     : failed
       ? "视频暂时不可用，点击重试"
       : blocked
-        ? "浏览器暂未允许自动播放，点击播放背景"
-        : !motion.enabled
-          ? "当前为减少动态模式，也可单独播放背景"
-          : "播放星空动态背景";
+        ? "浏览器暂未允许播放，点击重试"
+        : !enabled
+          ? "已使用静态背景，可随时开启"
+          : "进入页面时自动播放星空背景";
   return (
     <PlaybackContext.Provider
-      value={{ playing, label, description, togglePlayback }}
+      value={{
+        playing,
+        enabled,
+        description,
+        needsRetry: enabled && (blocked || failed),
+        setEnabled,
+        reset: () => setPlaybackPreference("auto"),
+      }}
     >
       <div
         className={`page-background${playing ? " is-playing" : ""}`}

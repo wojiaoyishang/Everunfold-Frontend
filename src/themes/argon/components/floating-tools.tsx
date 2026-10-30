@@ -8,7 +8,6 @@ import {
 } from "@/core/browser/scroll";
 import { navigateToAnchor } from "@/core/browser/scroll-restoration";
 import { useScrollPosition } from "../hooks/use-scroll-position";
-import { useBackgroundPlayback } from "./background-video";
 import { useReadingState } from "./reading-state";
 import { ThemeToggle } from "./controls";
 import { ReadingSettings } from "./reading-settings";
@@ -35,7 +34,6 @@ function ToolSlot({
 
 export function FloatingTools() {
   const scroll = useScrollPosition();
-  const playback = useBackgroundPlayback();
   const reading = useReadingState();
   useEffect(() => installScrollBehavior(navigateToAnchor), []);
   return (
@@ -69,18 +67,6 @@ export function FloatingTools() {
           onClick={() => scrollToAnchor("#comments")}
         >
           <Icon name="comment" />
-        </button>
-      </ToolSlot>
-      <ToolSlot>
-        <button
-          className="floating-button background-playback-toggle"
-          type="button"
-          aria-label={playback.label}
-          aria-pressed={playback.playing}
-          title={playback.description}
-          onClick={playback.togglePlayback}
-        >
-          <Icon name={playback.playing ? "pause" : "play"} />
         </button>
       </ToolSlot>
       <ToolSlot>
