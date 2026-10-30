@@ -1,0 +1,211 @@
+/* The public shell stays mounted; only this reading region enters on navigation. */
+.route-transition {
+  min-width: 0;
+  opacity: 1;
+  transition: opacity 160ms ease;
+}
+.route-transition[data-state="entering"] {
+  animation: reading-arrive 320ms var(--motion-ease) backwards;
+}
+.route-transition[data-state="pending"] {
+  opacity: 0.72;
+}
+.navigation-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 150;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+.navigation-progress[data-active="true"] {
+  opacity: 1;
+}
+.navigation-progress > span {
+  display: block;
+  width: 42%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, #be9df3 45%, #f1e8ff);
+  box-shadow: 0 0 9px rgb(190 157 243 / 45%);
+  transform: translateX(-110%);
+}
+.navigation-progress[data-active="true"] > span {
+  animation: navigation-sweep 1100ms 80ms ease-in-out infinite;
+}
+.navigation-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Finite CSS entry remains usable without JavaScript. Scroll reveal is opt-in. */
+.article-list > .post-card:not([data-reveal-state]) {
+  animation: card-arrive 460ms var(--card-delay, 0ms) var(--motion-ease)
+    backwards;
+}
+.article-list > .post-card:nth-child(2) {
+  --card-delay: 40ms;
+}
+.article-list > .post-card:nth-child(3) {
+  --card-delay: 80ms;
+}
+.article-list > .post-card:nth-child(4) {
+  --card-delay: 120ms;
+}
+.article-list > .post-card:nth-child(5) {
+  --card-delay: 160ms;
+}
+.article-list > .post-card:nth-child(6) {
+  --card-delay: 200ms;
+}
+.article-list > .post-card:nth-child(n + 7) {
+  --card-delay: 240ms;
+}
+[data-reveal-state] {
+  transition:
+    opacity 420ms ease,
+    translate 460ms var(--motion-ease),
+    transform 300ms var(--motion-ease),
+    box-shadow 250ms ease,
+    background-color var(--motion-normal) ease;
+}
+[data-reveal-state="pending"] {
+  opacity: 0;
+  translate: 0 18px;
+}
+[data-reveal-state="visible"],
+[data-reveal-state="pending"]:focus-within {
+  opacity: 1;
+  translate: 0 0;
+}
+.archive-month li:focus-within::before {
+  background: var(--accent);
+  transform: scale(1.35);
+}
+.comment:target,
+.article-content :is(h1, h2, h3, h4, h5, h6):target {
+  animation: reading-target 1600ms ease-out;
+}
+
+@keyframes reading-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes card-arrive {
+  from {
+    opacity: 0.45;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes hero-arrive {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes campfire-glimmer {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+@keyframes navigation-sweep {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(340%);
+  }
+}
+@keyframes reading-target {
+  from {
+    background-color: var(--accent-soft);
+  }
+  to {
+    background-color: transparent;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .header-navigation a:hover {
+    transform: translateY(-1px);
+  }
+  .site-brand:hover > .icon {
+    animation: campfire-greeting 540ms var(--motion-ease);
+  }
+  .sidebar-navigation a:hover .icon {
+    transform: translateX(3px);
+  }
+  .profile-avatar:hover {
+    transform: translateY(-2px) rotate(-3deg);
+    box-shadow: 0 6px 19px rgb(103 59 183 / 23%);
+  }
+  .post-card:hover .read-more .icon,
+  .read-more:focus-visible .icon {
+    transform: translateX(4px);
+  }
+  .pagination a:hover,
+  .primary-button:hover,
+  .article-tags a:hover,
+  .back-to-top:hover,
+  .background-playback-toggle:hover {
+    transform: translateY(-3px);
+  }
+  .article-neighbors a:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgb(21 12 49 / 15%);
+  }
+  .article-content img:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 22px rgb(21 12 49 / 14%);
+  }
+  .archive-month li:hover::before {
+    background: var(--accent);
+    transform: scale(1.35);
+  }
+}
+@keyframes campfire-greeting {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  35% {
+    transform: rotate(-9deg);
+  }
+  70% {
+    transform: rotate(7deg);
+  }
+}
+@media (hover: none) {
+  .post-card:hover,
+  .taxonomy-index a:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,114 @@
+.site-footer {
+  text-align: center;
+  color: rgb(255 255 255 / 70%);
+  padding: 55px 25px 30px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+.site-footer p {
+  margin: 3px 0;
+}
+.site-footer p:last-child {
+  color: rgb(255 255 255 / 48%);
+  font-size: 11px;
+}
+.footer-separator {
+  padding: 0 5px;
+}
+.back-to-top {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  z-index: 20;
+  background: var(--surface);
+  color: var(--accent);
+  border-radius: 50%;
+  width: 43px;
+  height: 43px;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow);
+  transition:
+    transform 240ms var(--motion-ease),
+    box-shadow 240ms ease,
+    background-color var(--motion-normal) ease;
+}
+.background-playback-toggle {
+  position: fixed;
+  right: 82px;
+  bottom: 28px;
+  z-index: 20;
+  min-width: 43px;
+  min-height: 43px;
+  padding: 10px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: var(--shadow);
+  font-size: 12px;
+  line-height: 1.4;
+  transition:
+    transform 240ms var(--motion-ease),
+    box-shadow 240ms ease,
+    background-color var(--motion-normal) ease;
+}
+.background-playback-toggle svg {
+  width: 17px;
+  height: 17px;
+  flex-shrink: 0;
+}
+.background-playback-label {
+  white-space: nowrap;
+}
+.standalone-state {
+  margin: 13vh auto;
+  max-width: 660px;
+  padding: 45px;
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+.state-code {
+  color: var(--accent);
+  font-size: 38px;
+  margin: 0;
+  letter-spacing: 0.05em;
+}
+.standalone-state h1 {
+  color: var(--text-strong);
+  font-size: 28px;
+  font-weight: 500;
+}
+.standalone-state > p:not(.state-code) {
+  color: var(--muted);
+}
+.standalone-state .primary-button {
+  margin-top: 16px;
+}
+.loading-state {
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  min-height: 60vh;
+}
+.loading-state span {
+  width: 22px;
+  height: 22px;
+  border: 2px solid #ffffff33;
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: loading-spin 0.8s linear infinite;
+}
+@keyframes loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

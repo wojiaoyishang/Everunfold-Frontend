@@ -1,0 +1,211 @@
+/* Independent sidebar panels keep navigation and reading aids reusable. */
+.site-sidebar {
+  display: grid;
+  gap: 20px;
+  position: sticky;
+  /* Keep desktop reading aids below the fixed 86px header. */
+  top: 104px;
+  align-self: start;
+}
+.sidebar-menu-card {
+  overflow: hidden;
+}
+.sidebar-banner {
+  background: linear-gradient(140deg, #9266da 0%, #673bb7 72%, #59309f);
+  color: #fff;
+  padding: 24px 16px 20px;
+  text-align: center;
+}
+.sidebar-banner > span {
+  display: block;
+  font-size: 20px;
+  line-height: 1.6;
+}
+.sidebar-banner small {
+  display: block;
+  opacity: 0.8;
+  margin-top: 9px;
+  font-size: 13px;
+}
+.sidebar-navigation {
+  padding: 12px 0 4px;
+}
+.sidebar-navigation a {
+  display: flex;
+  align-items: center;
+  padding: 6px 24px;
+  min-height: 37px;
+  gap: 12px;
+  font-size: 14px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.sidebar-navigation a .icon {
+  transition: transform 240ms var(--motion-ease);
+}
+.sidebar-navigation a .icon {
+  color: var(--accent);
+}
+.sidebar-navigation a:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.sidebar-search {
+  margin: 12px 16px 18px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-radius: 5px;
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+.sidebar-search > .icon {
+  margin-left: 12px;
+  width: 15px;
+  height: 15px;
+}
+.sidebar-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  padding: 9px 10px;
+  background: transparent;
+  color: var(--text);
+  outline-offset: 1px;
+  font-size: 13px;
+}
+.sidebar-tabs {
+  display: flex;
+  gap: 6px;
+  padding: 16px 16px 0;
+}
+.sidebar-tabs button {
+  flex: 1;
+  padding: 7px 5px;
+  border-radius: 5px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: 13px;
+  white-space: nowrap;
+  transition:
+    background-color 220ms ease,
+    color var(--motion-fast) ease,
+    box-shadow 220ms ease;
+}
+.sidebar-tabs button[aria-selected="true"] {
+  color: #fff;
+  background: #673bb7;
+  box-shadow: 0 3px 9px rgb(103 59 183 / 20%);
+}
+.profile {
+  padding: 24px 18px 22px;
+  text-align: center;
+}
+.profile-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 3px 10px rgb(60 43 105 / 12%);
+  transition:
+    transform 420ms var(--motion-ease),
+    box-shadow 300ms ease;
+}
+.avatar-placeholder {
+  width: 92px;
+  height: 92px;
+  margin: auto;
+  background: var(--accent-soft);
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  font-size: 35px;
+}
+.profile h2 {
+  color: var(--text-strong);
+  font-size: 18px;
+  font-weight: 500;
+  margin: 12px 0 5px;
+}
+.profile > p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.site-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 25px 0 18px;
+}
+.site-stats a + a {
+  border-left: 1px solid var(--line);
+}
+.site-stats strong {
+  display: block;
+  color: var(--text-strong);
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.site-stats span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+.site-stats a:hover strong {
+  color: var(--accent);
+}
+.profile-links {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 13px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.profile-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.profile-links a:hover {
+  color: var(--accent);
+}
+.sidebar-note {
+  color: rgb(255 255 255 / 62%);
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.table-of-contents {
+  padding: 18px 14px 22px;
+  max-height: 65vh;
+  overflow-y: auto;
+  font-size: 13px;
+}
+.table-of-contents a {
+  display: block;
+  border-left: 2px solid var(--line);
+  margin-bottom: 5px;
+  line-height: 1.7;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  color: var(--muted);
+  border-radius: 0 4px 4px 0;
+  transition:
+    color var(--motion-fast) ease,
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease;
+}
+.table-of-contents a:hover,
+.table-of-contents a:focus-visible {
+  border-left-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.mobile-sidebar-button,
+.sidebar-close,
+.sidebar-mask {
+  display: none;
+}
