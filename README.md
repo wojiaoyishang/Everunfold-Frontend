@@ -3,6 +3,8 @@
 Everunfold 博客重构的独立前端仓库，使用 Next.js App Router、React 和 TypeScript。
 当前已实现公开阅读第一版：星空背景、紫色 Argon 风格两栏，首页、文章/普通页面、归档、分类、标签、搜索、分页、目录和只读评论。界面复用主题组件与后端生成类型，内容来自本地导出的真实公开快照。
 
+现已接入原 WebM 动态星空：公共背景、顶栏和侧栏常驻，站内导航/搜索只切主体，带进度与入场反馈。视频可暂停，按系统动态/省流量偏好回退静态。组件/八层样式目录见 [前台架构](docs/architecture/frontend-ui.md)，实际验证见 [交互动效记录](docs/handoff/frontend-motion-verification.md)。
+
 先阅读 [文档入口](docs/README.md) 和 [当前交接状态](docs/handoff/STATUS.md)，再继续开发。
 历史设计与当前实现状态分别记录，原始基线文档中的示例不代表功能已经实现。
 
@@ -41,7 +43,8 @@ npm.cmd run build
 npm.cmd run start
 ```
 
-`npm.cmd run check` 合并执行 lint、类型和格式检查；构建独立运行。
+`npm.cmd run check` 合并执行 lint、类型、格式检查与单元测试；构建独立运行。
+用户正在运行 next dev 时，用 `npm.cmd run verify:production` 在独立临时副本验证默认生产构建，保留热更新且不覆盖当前 `.next`；停止开发服务后才直接使用普通 build。
 `npm.cmd run format` 格式化代码和工具配置，不修改保存的设计基线。
 测试覆盖配置、快照路径约束、安全 HTML/媒体渲染、查询与评论纯文本等基础行为；后续功能按对应验收用例扩展。
 CI 使用相同的检查与构建命令。
@@ -71,7 +74,7 @@ CI 使用相同的检查与构建命令。
 - 前端只消费后端版本化契约，不能手工建立另一套业务字段定义。内部凭据、`backend` 对象及私网地址不能注入浏览器。
 - 实际 `config.toml`、环境文件、运行缓存、原始 WordPress 数据和密钥均不提交。
 - 文章媒体 `public/uploads/wordpress/` 与 `var/public-snapshots/` 是本地生成数据，不提交；`public/reference/` 保存必要主题资产与来源说明。
-- 本轮浏览器工具因无法可靠识别当前 URL 停止操作；只做了源码/资源核对和真实 HTTP 检查，没有宣称浏览器视觉验收完成。
+- 前台动效阶段已在内置浏览器完成视频、软导航、目录、主题、手机侧栏/Esc 与截图检查；所有真机和系统设置仍需逐步覆盖。旧阶段访问失败记录保留为历史。
 
 依赖选择参考 [Next.js 官方安装文档](https://nextjs.org/docs/app/getting-started/installation) 与 [支持策略](https://nextjs.org/support-policy)。
 本次选用 Next.js 16.4.3（16.x Active LTS）和 React 19.3.1；TypeScript 使用 5.9.3，便于与当前 Next.js/ESLint 工具链共同验证。

@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-本目录是跨上下文、跨开发者的长期交接入口。当前阶段为公开阅读第一版，完整博客/CMS 尚未全部实现。
+本目录是跨上下文、跨开发者的长期交接入口。当前阶段为公开阅读与前台交互动效，完整博客/CMS 尚未全部实现。
 
 ## 先从这里读
 
@@ -10,6 +10,7 @@
 4. [基线来源及校验](baseline/README.md)：原始附件、权威顺序和双仓库同步规则。
 5. [初始化决定](decisions/0001-bootstrap.md)：本步工程选型及其适用范围。
 6. [公开阅读决定](decisions/0002-public-reading.md)：当前交付、数据链路与尚未实现边界。
+7. [持久前台决定](decisions/0003-persistent-ui-motion.md) 与 [前台组件架构](architecture/frontend-ui.md)：公共壳、导航、视频及有序样式职责。
 
 ## 目录职责
 
@@ -27,9 +28,11 @@
 
 - [开发环境](development/environment.md)：本机工具、安装方式和项目运行说明。
 - [公开阅读运行指南](development/public-reading.md)：8001/3000 启动命令、数据刷新与手工验收。
+- [动效开发与验证](development/frontend-motion.md)：保留热更新时的独立生产构建、交互检查和资源规则。
 - [WordPress 只读清点](migration/wordpress-inventory.md)：源备份范围与迁移前置事实；不是导入结果。
 - [初始化验证](handoff/bootstrap-verification.md)：本步实际执行的检查、结果与限制。
 - [公开阅读验证](handoff/public-reading-verification.md)：当前阶段实际检查与已知限制；初始化记录保留为历史。
+- [前台交互动效验证](handoff/frontend-motion-verification.md)：最新浏览器、视频、软导航和窄屏交互证据。
 
 ## 两仓库分工
 
