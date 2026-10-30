@@ -39,7 +39,9 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 - 本目录 `README.md` 与两份原始附件。
 - `docs/architecture/constraints.md`。
 - `docs/development/protocol.md`。
+- `docs/development/environment.md` 与 `docs/development/public-reading.md`。
 - `docs/decisions/0001-bootstrap.md`（后续跨仓库 ADR 同样同步）。
+- 本次 `docs/migration/wordpress-inventory.md` 去敏盘点。
 
 修改公共规范时在当前交付同步另一仓库，检查文件 SHA256 相同，并在两仓库状态中记录同步结果。若另一仓库暂时不可访问，明确记为待同步及目标版本，不能声称已一致。两个仓库分别提交，不要求提交哈希相同。
 

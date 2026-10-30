@@ -1,46 +1,45 @@
 # 前端交接状态
 
-更新：2026-10-30（Asia/Shanghai）。阶段：**第 0 步，基线对齐与项目初始化**。本仓库可独立安装、检查和构建；当前首页是开发占位页。
+更新：2026-10-30（Asia/Shanghai）。阶段：**公开阅读前台第一版**。Next.js 16.4.3，公开数据契约 0.1.0。
 
 ## 恢复上下文
 
-1. 读本页、[文档索引](../README.md)、[开发协议](../development/protocol.md) 和 [约束](../architecture/constraints.md)。
-2. 查看 `git status`、当前分支/提交与 `origin`；保留已有修改。远程同步情况用实际 Git/GitHub 状态核对，不依赖聊天。
-3. 原始附件在 `docs/baseline/`，哈希与维护规则在该目录 README；历史聊天只作辅助。确认需求、工程提案和实际代码分别判断。
-4. 查看 [本轮验证记录](bootstrap-verification.md) 以及根 README 的复现命令。
+先读本页、[文档索引](../README.md)、[开发协议](../development/protocol.md)、[公开阅读运行指南](../development/public-reading.md) 与 [当前验证](public-reading-verification.md)。原始附件在 docs/baseline/；当前采用 ADR 0002，ADR 0001 保留历史初始化记录。
 
-## 已完成
+开始前检查分支和 git status，保留协作者修改。最新用户约定：代理阶段性本地提交，**用户自行 push**。本地前端 **3000**，后端 **8001**；不占用其他项目的 8000。
 
-- 对齐设计 v2.11 与工程 v0.14，建立逐字节原件副本、来源/哈希、提案与已确认边界说明。
-- 建立 `AGENTS.md`、开发协议、ADR 0001、文档分目录和双仓库公共资料同步规则。
-- Next.js App Router + React + TypeScript 严格模式、普通 CSS、中文占位首页；标注 `noindex`，不是最终博客主题。
-- npm 精确依赖与独立 `package-lock.json`、Node/npm 兼容范围、ESLint/Prettier/类型检查、构建和 CI。
-- 预留 `src/core`、`src/themes`、`src/custom_pages`、`src/plugins`、`src/generated` 及部署/测试目录，未用假服务实现填充目录。
-- `config.example.toml` 从原文提取，通信设置只放仅服务端 `[backend]`，但**当前没有 TOML 加载器**，复制模板不会连接后端。
-- 真实配置、密钥、`node_modules`、构建状态、运行缓存和源 SQL 均忽略提交；本轮备份盘点见 [迁移清点](../migration/wordpress-inventory.md)。
+## 已实现
 
-应用版本 `0.1.0` 是骨架包版本，不是后端契约版本。初始化选择 Next.js `16.4.3`、React `19.3.1`、TypeScript `5.9.3`，本机 Node `22.15.1` / npm `10.9.2`；精确依赖与传递依赖以锁文件为准。
+- 真实旧站公开设置的 Argon 风格：星空背景、透明横幅、紫色 #673bb7、两栏与 8px 浅色卡片；深浅色切换、窄屏共享导航状态和目录/概览。
+- 首页/分页、搜索与旧 s 参数兼容、归档、分类/标签索引和列表、原正式 URL 的文章/普通页面、文章目录及历史评论只读展示。
+- 薄路由 src/app，基础能力 src/core，主题 src/themes/argon；卡片、分页、导航、空/错误/加载状态可复用。
+- 从后端提交 2e08df2 中的权威 Schema 生成 TypeScript；来源提交、规范 LF SHA256 与 Schema 副本记录在 src/generated/，生成类型不手改。
+- 严格仅服务端 TOML 配置；前端 config.toml 已填写、忽略提交。BACKEND_BASE_URL=http://127.0.0.1:8001，节点 web-main，内部 backend 对象不进入客户端。
+- 本地完整公开快照 JSON Schema/路径/身份校验；页面动态 SSR、无时间 TTL、不每次访问回源，显式原子替换后立即生效。
+- Node Proxy 区分缺失/坏快照 503 与确认不存在 404；跳过默认尾斜线跳转，原普通页面 /gzrj/ 直接 200。ready 单独报告 public_read=true、cache_receiver=false。
+- Markdown/HTML allowlist 安全过滤、真实节点 site://media 映射；代码区不改写、危险 URL 拒绝。评论按纯 React 文本显示，不再次当 HTML 解码。
+- 真实数据 78 文章、9 普通页、11 评论、78 标签、7 分类；current.json generation=3，约 1.1 MB；312 项媒体约 55.3 MB 在忽略目录。必要背景/头像与去敏来源记录在 public/reference/。
 
-## 未实现与限制
+## 已验证
 
-- 后端客户端/运行时公开配置、开发代理、认证/用户状态、主题注册、Markdown/HTML 渲染、安全过滤、编辑器/协同尚未实现。
-- 尚无公开磁盘快照、cache handler、内部接收端、真实 socket 来源校验、回源/撤回、镜像或 Cloudflare 插件。
-- `src/generated` 没有业务类型：后端尚未发布版本化业务契约，禁止先手写另一套接口。
-- 当前无需后端即可构建占位页；不代表全站已实现或生产可用。完整主题设计还需审阅线上视觉，当前主题线索来自本地 Argon 源码。
-- ESLint 9 工具兼容限制、实际检查结果和未执行项见根 README / 验证记录；不使用未经验证的 peer override 强行升级工具。
-- 没有更改线上站点、导入 WordPress、部署生产服务或执行完整 P0 验收。
+lint、类型、格式、11 项测试与生产构建通过。root 在实际 3000 端口执行 14 项页面 HTTP 检查、ready 与背景检查全部通过；后端 8001 停止后首页和公开读取 ready 仍通过。独立快照副本的替换即时生效、缺失/损坏 503、恢复 200 已验证。详情见当前验证文档。
 
-## 建议下一步
+本轮临时服务已经停止，用户按运行指南自行启动。没有推送或部署。
 
-1. 与后端同步第一个版本化业务/内部契约；从后端指定 tag/commit 或发布产物生成 TypeScript 客户端，记录版本/哈希与兼容范围。
-2. 按 ADR 交付仅服务端配置加载器、显式公开字段及统一 URL 客户端：生产浏览器直接访问配置的 `BACKEND_BASE_URL + /v1/*`，不泄露内部 `[backend]`。若做开发代理，只剥离一次 `/api`，不代理内部接口。
-3. 阅读 Argon 公开主题与线上参考，形成主题/页面规范；可信主题与业务客户端分离，再逐步实现内容渲染、管理界面与组件注册。
-4. 等内部协议落地后再实现公开快照存储、版本/撤回和 socket 来源适配，并按原文执行故障验证；无 TTL 不等于永远不更新，已知撤回绝不回退旧正文。
+## 未实现与验收限制
 
-UI 框架、编辑器/Python Yjs 组合、语言清单、完整 Schema 等仍待对应设计阶段决定；不重新开启已确认架构的产品选择题。
+- 登录/用户状态、后台写入、评论提交、协同编辑、源码编辑器、可信插件 SDK；没有假提交成功按钮。
+- 浏览器业务 API 客户端和开发代理、内部 HTTP 接收端/真实 socket IP 校验、完整缓存通知/撤回/恢复、镜像与 CDN。
+- 当前只支持受控导出的公开数据，不代表完整访问策略、生产搜索或实时发布同步已实现。
+- 部分旧短代码按字面安全降级，独立应用链接保留原站；完整 WordPress 格式/插件迁移尚未完成。
+- 线上站点遇到 Cloudflare challenge；本机浏览器工具因无法可靠识别当前 URL 停止，未绕过。**没有完成浏览器截图级视觉或真实移动/键盘交互验收**，用户需按手工清单检查外观。
+- ESLint 9 受当前 Next 配套插件 peer 范围限制，工具维护状态及来源见根 README；未来升级另行验证。
 
-## Git 与跨仓库
+## 下一步与维护
 
-目标分支 `main`；目标 [Everunfold-Frontend](https://github.com/wojiaoyishang/Everunfold-Frontend)，本机 `origin` 使用同仓库 SSH 地址。后端位置 `E:\Programming\Python\Everunfold-Backend`，目标 [Everunfold-Backend](https://github.com/wojiaoyishang/Everunfold-Backend)。
+1. 用户先检查桌面/窄屏、深浅色、目录/导航与卡片外观；用实际截图和反馈修正差异。
+2. 在后端身份/修订/写协议明确后逐步接管理与编辑功能，不能把后端私有设置送进公共 SSR。
+3. 内部 ICP 与可靠任务落地后，再替换手工快照更新方式并验收撤回/乱序/磁盘故障；当前 cache_receiver 明确 false。
+4. 新依赖、类型契约与设计变化同步记录来源、检查和状态；不因 AI 上下文压缩重建另一套接口。
 
-公共协议/原件按 `docs/baseline/README.md` 同步；环境和本次迁移盘点目前也相同。后端发布契约，前端只消费明确版本。后续每次有意义交付更新本页、实际检查记录和相关 ADR，不能只在聊天中保留进展。
+后端项目位于 E:\Programming\Python\Everunfold-Backend，模型、迁移和契约以后端为唯一权威。公共规范、基线、环境、运行指南、迁移盘点与跨仓库 ADR 保持一致，仓库专属状态和验证分别维护。

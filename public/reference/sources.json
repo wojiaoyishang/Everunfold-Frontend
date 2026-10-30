@@ -1,0 +1,26 @@
+{
+  "purpose": "Existing blog visual reference assets",
+  "assets": [
+    {
+      "file": "campfire-background.webp",
+      "source": "https://lovepikachu.top/wp-content/uploads/2024/11/04f54fe00c879791833b92f487ba9d2f.jpg.webp",
+      "sha256": "dd7da073bb2ac0de90e3cbfee2b18f287bbd3a95d94284d6654c0c06e01e7fb1",
+      "bytes": 64310,
+      "note": "Copied byte-for-byte from the provided WordPress backup."
+    },
+    {
+      "file": "yishang-avatar.jpg",
+      "source": "https://vip.123pan.cn/1812010814/20219207",
+      "sha256": "8457d1849bb60adc7911d5d84a15cf357adef44990ccb03ef9994e68e4b39904",
+      "bytes": 299284,
+      "note": "Downloaded from the existing public theme reference; signed query intentionally omitted."
+    },
+    {
+      "file": "../favicon.ico",
+      "source": "https://lovepikachu.top/favicon.ico",
+      "sha256": "d757b88f4a6d7d612d4c8191f9f7024820370b2e3affab4b9ffb100e5cd7e4ad",
+      "bytes": 32038,
+      "note": "Copied byte-for-byte from the provided WordPress backup."
+    }
+  ]
+}

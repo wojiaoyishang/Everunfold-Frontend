@@ -30,6 +30,7 @@ logs/
 wp-config.php
 wp-content/
 wordpress-backup/
+public/uploads/wordpress/
 
 # Editor / operating system state
 .idea/

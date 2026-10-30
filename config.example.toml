@@ -1,18 +1,18 @@
-# 规划模板：逐字提取自工程规范 v0.14 的完整示例代码块。
-# 当前初始化骨架尚未完整实现该 TOML 的显式加载、Schema 校验和各项功能。
-# 文件存在不表示参数生效；勿直接用于生产，不将其作为缺省回退配置。
-# 完整来源与原始 SHA256 见 docs/baseline/README.md。
+# 服务端实例配置示例；显式加载器读取 config.toml 或 CONFIG_FILE，拒绝未知字段。
+# 本文件不作为自动回退；原始规划示例保留在 docs/baseline/。
+# 当前支持公开快照读取，尚未运行内部回调、回源或完整缓存管理；预留限额不等于已启用。
 
 # everunfold-frontend/config.example.toml
 # 仅在服务端加载；地址仅为可替换示例
 # 前端自身身份，必须与后端 frontends 的对应配置键一致
+BACKEND_BASE_URL = "http://127.0.0.1:8001"
 FRONTEND_NODE_ID = "web-main"
 
 [backend]
 # Next.js 服务端访问 FastAPI 的连接地址
 # 可省略：省略时使用部署已配置的公开 BACKEND_BASE_URL
 # 显式覆盖仅作用于服务端，不替代浏览器的公开 API 地址
-base_url = "https://api.example.com"
+# base_url = "http://127.0.0.1:8001"
 # 本轮建议初值：仅服务端连接超时，待压测
 connect_timeout_seconds = 2
 request_timeout_seconds = 15
