@@ -90,7 +90,7 @@ export function RouteStateProvider({
         if (
           options.scroll !== false &&
           !destination.hash &&
-          window.scrollY > 100
+          window.scrollY > 0
         ) {
           const readingTop =
             (document.getElementById("main-content")?.getBoundingClientRect()
