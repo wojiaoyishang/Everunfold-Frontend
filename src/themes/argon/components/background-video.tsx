@@ -120,6 +120,7 @@ export function BackgroundVideoProvider({
     null,
   );
   const [playing, setPlaying] = useState(false);
+  const [hasFrame, setHasFrame] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [failed, setFailed] = useState(false);
   const shouldPlay =
@@ -195,7 +196,7 @@ export function BackgroundVideoProvider({
       >
         <video
           ref={videoRef}
-          className={`background-video${playing ? " is-playing" : ""}`}
+          className={`background-video${hasFrame && !failed ? " is-visible" : ""}`}
           poster={poster}
           muted
           autoPlay
@@ -204,6 +205,7 @@ export function BackgroundVideoProvider({
           preload="auto"
           tabIndex={-1}
           onPlaying={() => {
+            setHasFrame(true);
             setPlaying(true);
             setBlocked(false);
             setFailed(false);

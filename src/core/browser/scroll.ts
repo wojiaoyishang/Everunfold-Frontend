@@ -60,6 +60,13 @@ export function scrollToAnchor(hash: string): boolean {
   }
   const target = document.getElementById(id);
   if (!target) return false;
+  for (
+    let parent = target.parentElement;
+    parent;
+    parent = parent.parentElement
+  ) {
+    if (parent instanceof HTMLDetailsElement) parent.open = true;
+  }
   const top = target.getBoundingClientRect().top + window.scrollY - 100;
   void scrollToPosition(top, 650);
   return true;

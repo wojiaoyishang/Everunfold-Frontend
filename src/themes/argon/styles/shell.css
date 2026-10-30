@@ -19,8 +19,7 @@
   opacity: 0;
   transition: opacity 800ms ease;
 }
-.page-background.is-playing .background-video,
-.background-video.is-playing {
+.background-video.is-visible {
   opacity: 1;
 }
 .page-background::after {

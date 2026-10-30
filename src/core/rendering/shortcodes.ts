@@ -76,10 +76,22 @@ export function expandPresentationShortcodes(raw: string): string {
 }
 
 export function presentationExcerpt(text: string): string {
-  return text
+  const clean = text
     .replace(
       /\[\/?(?:collapse|fold|alert|admonition|tooltips)\b[^\]]*(?:\]|$)/gi,
       "",
     )
     .trim();
+  const start = clean.lastIndexOf("[");
+  const tail = clean
+    .slice(start + 1)
+    .replace(/^\//, "")
+    .toLowerCase();
+  return start >= 0 &&
+    tail.length >= 3 &&
+    ["collapse", "fold", "alert", "admonition", "tooltips"].some((name) =>
+      name.startsWith(tail),
+    )
+    ? clean.slice(0, start).trimEnd()
+    : clean;
 }

@@ -98,7 +98,9 @@ export function RouteStateProvider({
             window.scrollY -
             95;
           await scrollToPosition(
-            Math.max(0, Math.min(window.scrollY, readingTop)),
+            destination.pathname === "/" && !destination.search
+              ? 0
+              : Math.max(0, Math.min(window.scrollY, readingTop)),
             420,
           );
         }
