@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读、按页面注册的动态请求、演示身份/浏览量，以及真实匿名历史评论点赞和阅读反馈；完整博客/CMS 尚未全部实现。
+本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读、按页面注册的动态请求、演示身份/浏览量、真实匿名历史评论点赞和阅读反馈，以及正式管理员登录和简要空后台；完整博客/CMS 尚未全部实现。
 
 ## 先从这里读
 
@@ -26,6 +26,7 @@
 20. [阅读反馈与评论点赞](decisions/0015-reader-feedback-and-comment-likes.md)：404/同步失败、页面请求圆周进度、真实匿名点赞确认，不扩展账户权限。
 21. [悬浮层与主题错误页](decisions/0016-anchored-popovers-and-failure-pages.md)：水合/定位就绪门控、共享 404/503/错误边界、离线翻牌小游戏与构建产物。
 22. [媒体上传与存储设计](architecture/media-storage.md) 与 [ADR 0017](decisions/0017-media-storage-and-upload-lifecycle.md)：后端媒体库、Base URL/Uploads Path、文件布局、上传确认及 CDN 扩展；本轮仅设计，尚未实现。
+23. [真实登录与后台入口](decisions/0018-authentication-and-admin-entry.md)：PostgreSQL 用户/可撤销 Session、HttpOnly Cookie、CSRF/精确 Origin、管理员校验与 `init.database.py`。
 
 ## 目录职责
 
@@ -34,6 +35,8 @@
 最新补充：[阅读反馈与评论点赞验收](handoff/reader-feedback-verification.md)，包括真实后端确认、离线反馈与未完成的视觉核验边界。
 
 最新界面检查：[悬浮层与错误页验收](handoff/failure-pages-verification.md)，包含最终生产构建、离线有/无缓存、错误边界、配对游戏及窄框检查；不会替代上一阶段尚未执行的其他验收。
+
+最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。两份记录分别说明真实 PostgreSQL/多进程边界和浏览器跨源登录、路由隔离、错误恢复及响应式表现。
 
 | 目录 | 内容与维护时机 |
 | --- | --- |
@@ -54,6 +57,8 @@
 - [WordPress 只读清点](migration/wordpress-inventory.md)：源备份范围与迁移前置事实；不是导入结果。
 - [初始化验证](handoff/bootstrap-verification.md)：本步实际执行的检查、结果与限制。
 - [公开阅读验证](handoff/public-reading-verification.md)：当前阶段实际检查与已知限制；初始化记录保留为历史。
+- [认证后端验证](handoff/authentication-verification.md)：契约、初始化、Session/CSRF/Origin、管理员校验、真实多进程与实际未执行项。
+- [登录与空后台验证](handoff/authentication-frontend-verification.md)：生成客户端、跨源登录/退出、返回地址限制、错误恢复、减少动态、主题和窄屏检查。
 - [前台交互动效验证](handoff/frontend-motion-verification.md)：上一阶段浏览器、视频、软导航和窄屏交互证据。
 - [原站前台复刻审阅](handoff/original-site-ui-audit.md)：实施前的用户反馈与原站对照；保留为历史依据。
 - [原站复刻验证](handoff/frontend-fidelity-verification.md)：上一轮版式、慢加载中间态、目录/图片/手机交互的历史证据。

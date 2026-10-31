@@ -17,10 +17,11 @@
 ```powershell
 Set-Location -LiteralPath 'E:\Programming\Python\Everunfold-Backend'
 uv sync --locked
+uv run --locked python init.database.py --config config.toml
 uv run --locked python -m uvicorn app.entrypoints.api:app --host 127.0.0.1 --port 8001 --reload --no-proxy-headers
 ```
 
-在 IDE 选 `.venv\Scripts\python.exe`，无需全局安装应用包、改 `PYTHONPATH` 或开启管理员权限。`uv run` 不依赖手动激活环境。活性检查 `/health/live` 不检查数据库；`/health/ready` 检查数据库、Redis 及迁移版本。Worker、Scheduler 尚未实现。`--no-proxy-headers` 是本地启动选择，不能视为已实现内部入口的完整 IP 校验。后端端口按用户指定固定为本地示例 `8001`，避免其他项目使用的 `8000`。
+在 IDE 选 `.venv\Scripts\python.exe`，无需全局安装应用包、改 `PYTHONPATH` 或开启管理员权限。`uv run` 不依赖手动激活环境。初始化命令只在目标库不存在时尝试创建，随后显式迁移并创建缺失的默认管理员；重复执行不重置已有账号或内容。非回环部署必须配置 HTTPS，并在首次初始化时通过 `EVERUNFOLD_ADMIN_PASSWORD` 覆盖本地默认密码。活性检查 `/health/live` 不检查数据库；`/health/ready` 检查数据库、Redis 及迁移版本。Worker、Scheduler 尚未实现。`--no-proxy-headers` 是本地启动选择，不能视为已实现内部入口或生产反向代理的完整 IP 校验。后端端口按用户指定固定为本地示例 `8001`，避免其他项目使用的 `8000`。
 
 验证：`uv lock --check`、`uv run --locked ruff check .`、`uv run --locked ruff format --check .`、`uv run --locked mypy`、`uv run --locked pytest`。新增依赖通过 `uv add` / `uv add --dev` 精确指定并提交 `pyproject.toml`、`uv.lock`，升级需复核兼容性；CI 使用锁文件同步。
 

@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-1，2026-10-30。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经实现。
+版本：bootstrap-2，2026-10-31。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经实现。
 
 ## 已确认的范围
 
@@ -41,6 +41,8 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 
 浏览器默认由 FastAPI 管理 HttpOnly Cookie Session；CORS 精确来源、Cookie Domain 与 CSRF 分开设计。API Key 不突破所属用户当前权限。请求身份、语言和数据库 Session 按请求/任务隔离，不共用可变全局上下文。
 
+2026-10-31 已实现基础浏览器认证：[ADR 0018](../decisions/0018-authentication-and-admin-entry.md) 与 [验收记录](../handoff/authentication-verification.md)。用户和可撤销 Session 存 PostgreSQL，密码使用 Argon2id，数据库不保存原始 token；登录/退出要求预会话绑定的 CSRF token 与精确 Origin，后台入口每次按数据库当前角色复核管理员。`/v1/auth/*` 与 `/v1/admin/*` 响应禁止共享缓存。注册、改密、找回密码、2FA、用户管理和细粒度资源权限仍未实现。
+
 内部接口要求真实 socket 来源 IP 允许列表 AND 接收 Token，随后检查最小权限。转发头不是原始来源事实；空允许列表、未知 peer 不放行。不能假定 Next.js App Router 暴露 socket；实现须选择可验证的适配层或受控入口并阻断旁路。内部路径仍需公网隔离。Token 不进入浏览器、URL、公开配置、日志或数据库任务参数。
 
 ## 内容、URL、协同与媒体
@@ -67,7 +69,7 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 以下来自工程文档的补充章节，需在对应实现 ADR/契约和测试中落实，不能写成已完成：
 
 - 显式配置优先级、未知字段拒绝、环境覆盖表与单活 Token 协调轮换；原始示例不作生产回退。
-- Session 绑定 CSRF、WS Origin/首帧校验、请求幂等、期待版本冲突、分页结构与建议初值。
+- HTTP Session 已绑定 CSRF 并要求精确 Origin；WS Origin/首帧校验、请求幂等、期待版本冲突、分页结构与其余建议初值仍待对应功能实现。
 - 由既有 Scheduler 兼任独立 Outbox relay 循环；仅认领/投递，不发业务 HTTP/邮件，不加载 `tasks.py`。
 - 连续持久水位、审核冻结截点、安全检查点压缩、回执保留、跨 Worker 主动补齐和有界队列。
 - 上传 staging/ready/failed、文件与数据库可见性；缓存磁盘预算、dirty/clean 恢复和显式重建。
@@ -76,6 +78,6 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 
 ## 待定与后续验收
 
-待定：完整 DDL/主键/枚举、错误码及 API/WS/ICP Schema、Session 存储/超时/2FA、Cookie 生产范围、语言与 slug/保留路由、编辑器与 Python Yjs 互操作、搜索中文策略、审计留存、精确资源配额和协同压缩周期。无需重新开启已经确认的架构选择。
+待定：完整业务 DDL/主键/枚举、扩展错误码及 API/WS/ICP Schema、改密/找回/2FA、生产 Cookie 域名选择、语言与 slug/保留路由、编辑器与 Python Yjs 互操作、搜索中文策略、审计留存、精确资源配额和协同压缩周期。基础 Session 已选择 PostgreSQL 并以配置控制有效期；无需重新开启已经确认的架构选择。
 
 对应功能交付前执行原文 P0 与真实多进程验证；各阶段实际覆盖范围见交接状态，不能将构建成功、占位接口成功或配置文件存在视为完成上述验收。

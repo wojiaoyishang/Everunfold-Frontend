@@ -1,5 +1,15 @@
 # 前端交接状态
 
+## 最新交付：真实登录与简要空后台（2026-10-31）
+
+- 功能提交 `0ab5aee`：公开博客迁入 `(blog)`，新增互不依赖公开快照的 `(management)` `/login`、`/admin`；管理入口不挂载公共 `BlogShell`，不进入公开软导航/预取，并返回 private/no-store/noindex。
+- 接入后端 `ce825d0` 发布的 `auth-v0.1` 生成类型、Schema、来源哈希与客户端。登录完成真实 Session/CSRF、提交中、错误/重试、密码显隐、管理员校验、退出和返回站点；`next` 仅允许 `/admin`。后台只展示真实管理员显示名/用户名/角色，不提供假统计或未实现业务入口。
+- `npm run check` 的 79 项测试、ESLint、Next typegen/TypeScript、Prettier 与错误页产物检查通过。`npm run verify:reader` 的独立生产构建、真实/离线快照和管理入口隔离通过；`npm run verify:http` 的 26 个公开路由检查通过。
+- 真实跨源登录使用本机 FastAPI 与 Edge 157 无头 CDP 完成：错误密码、正确登录、CSRF 轮换、恶意 `next`、退出、API 阻断/重试、密码显隐、减少动态、深/浅主题及 1440/390/320px 布局均实测。原生可见浏览器自动化因工具无法可靠确认当前 URL 被安全终止，不写成已通过。
+- 详细证据、截图入口和限制见 [登录与空后台验收](authentication-frontend-verification.md)；后端记录见 [认证后端验收](authentication-verification.md)，决定见 [ADR 0018](../decisions/0018-authentication-and-admin-entry.md)。未执行 Safari/Firefox、真实移动硬件、生产 HTTPS/Secure Cookie 域名矩阵与强制颜色实操。
+- 当前没有持续 Session 心跳；服务端撤销在刷新、窗口重新聚焦或受保护操作时被发现。注册、改密/找回、2FA、用户管理及文章/媒体后台仍未实现。公共入口索引本轮按前端事实更新；后端仓库需在后续跨仓交付同步最终索引，当前不声称两仓公共文档逐字节一致。
+- 正常前端 3000 保留，后端 8001 未由本轮启停。仅本地提交，**未 push**。
+
 ## 最新设计：后端媒体库与 CDN 切换衔接
 
 - 用户要求先制定后端媒体规则、不修改代码。已同步 [media-storage-1](../architecture/media-storage.md) 与 [ADR 0017](../decisions/0017-media-storage-and-upload-lifecycle.md)：后端负责业务资源上传、文件与数据库登记，Base URL/Uploads Path 可配置，未来接 CDN/上传 provider；具体字段、布局和接口仍是未实现的工程建议。

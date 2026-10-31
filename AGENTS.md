@@ -57,3 +57,13 @@
 - 每次有意义的交付更新 `docs/handoff/STATUS.md`：完成项、文件/版本、检查结果、限制、下一步与未决事项。不能只写在聊天里。
 - 新的实现决定写 ADR；功能设计和操作文档分别放 `docs/architecture/`、`docs/development/` 等子目录，并维护索引。
 - 公共规范和原始基线在两仓库同步，按 `docs/baseline/README.md` 规则记录版本及哈希；仓库状态和运行说明可各自维护。
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
