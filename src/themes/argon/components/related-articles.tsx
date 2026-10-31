@@ -3,6 +3,7 @@ import { relatedArticles } from "@/core/content/related";
 import { AppLink } from "./navigation-link";
 import { Icon } from "./icon";
 import { StoryCover } from "./story-cover";
+import { HorizontalRail } from "./ui/horizontal-rail";
 export function RelatedArticles({
   snapshot,
   content,
@@ -21,7 +22,7 @@ export function RelatedArticles({
         <Icon name="book" />
         推荐文章
       </h2>
-      <ul className="related-track">
+      <HorizontalRail className="related-track" aria-label="推荐文章列表">
         {items.map((entry) => (
           <li key={entry.id}>
             <AppLink href={entry.path} className="related-card">
@@ -31,7 +32,7 @@ export function RelatedArticles({
             </AppLink>
           </li>
         ))}
-      </ul>
+      </HorizontalRail>
     </section>
   );
 }

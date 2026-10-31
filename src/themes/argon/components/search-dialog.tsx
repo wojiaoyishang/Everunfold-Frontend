@@ -1,6 +1,13 @@
 "use client";
+import {
+  Button,
+  TextField,
+  Dialog,
+} from "@/themes/argon/components/ui/primitives";
+
 import { useId } from "react";
 import { useModalDialog } from "../hooks/use-modal-dialog";
+import { SearchContentType } from "./search-content-type";
 import { SearchForm } from "./navigation-link";
 import { Icon } from "./icon";
 export function SearchDialog() {
@@ -8,7 +15,7 @@ export function SearchDialog() {
   const id = useId();
   return (
     <>
-      <button
+      <Button
         className="icon-button"
         type="button"
         aria-label="站内搜索"
@@ -17,8 +24,8 @@ export function SearchDialog() {
         onClick={open}
       >
         <Icon name="search" />
-      </button>
-      <dialog
+      </Button>
+      <Dialog
         ref={dialog}
         className="search-dialog"
         aria-labelledby={`${id}-title`}
@@ -40,15 +47,15 @@ export function SearchDialog() {
             <span className="search-eyebrow">AROUND THE CAMPFIRE</span>
             <h2 id={`${id}-title`}>寻找一段故事</h2>
           </div>
-          <button className="icon-button" aria-label="关闭搜索" onClick={close}>
+          <Button className="icon-button" aria-label="关闭搜索" onClick={close}>
             <Icon name="close" />
-          </button>
+          </Button>
         </header>
         <SearchForm className="search-dialog-form" onSearch={close}>
           <label>
-            <span className="navigation-status">搜索关键词</span>
+            <span className="sr-only">搜索关键词</span>
             <Icon name="search" />
-            <input
+            <TextField
               name="q"
               autoFocus
               placeholder="文章、说说，或者记忆中的几个字…"
@@ -56,19 +63,14 @@ export function SearchDialog() {
             />
           </label>
           <div>
-            <select name="type" aria-label="搜索内容类型">
-              <option value="all">全部内容</option>
-              <option value="article">文章</option>
-              <option value="shuoshuo">说说</option>
-              <option value="page">页面</option>
-            </select>
-            <button className="primary-button" type="submit">
+            <SearchContentType />
+            <Button className="primary-button" type="submit">
               开始寻找 <Icon name="arrow" />
-            </button>
+            </Button>
           </div>
         </SearchForm>
         <p>按 Enter 搜索 · Esc 回到阅读</p>
-      </dialog>
+      </Dialog>
     </>
   );
 }

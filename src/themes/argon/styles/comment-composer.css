@@ -172,11 +172,6 @@
   gap: 5px;
   white-space: nowrap;
 }
-.composer-editor-footer input {
-  appearance: auto;
-  accent-color: var(--accent);
-  margin: 0;
-}
 .composer-editor-footer output {
   margin-left: auto;
 }

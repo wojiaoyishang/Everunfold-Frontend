@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
+
 import Image from "next/image";
 import { useState } from "react";
 import { stickerGroups } from "@/core/rendering/stickers";
@@ -53,29 +55,29 @@ export function EmotionPicker({
     <div className="emotion-picker">
       <div className="emotion-tabs" role="group" aria-label="表情分组">
         {[...textGroups, ...stickerGroups].map((item) => (
-          <button
+          <Button
             type="button"
             key={item.id}
             aria-pressed={group === item.id}
             onClick={() => setGroup(item.id)}
           >
             {item.label}
-          </button>
+          </Button>
         ))}
       </div>
       <div className="emotion-grid" data-kind={stickers ? "sticker" : group}>
         {text?.items.map((item) => (
-          <button
+          <Button
             type="button"
             key={item}
             aria-label={`插入 ${item}`}
             onClick={() => onInsert(item, false)}
           >
             {item}
-          </button>
+          </Button>
         ))}
         {stickers?.items.map((item) => (
-          <button
+          <Button
             type="button"
             key={item.src}
             title={item.label}
@@ -89,7 +91,7 @@ export function EmotionPicker({
               height={64}
               unoptimized
             />
-          </button>
+          </Button>
         ))}
       </div>
       {group === "flower" && (

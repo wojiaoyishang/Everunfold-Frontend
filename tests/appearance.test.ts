@@ -39,11 +39,9 @@ test("appearance validates stored values and restores explicit system mode over 
   }
 });
 test("custom accent extremes remain readable in both themes", () => {
-  function luminance(hex: string) {
-    const values = hex
-      .slice(1)
-      .match(/../g)!
-      .map((pair) => parseInt(pair, 16) / 255)
+  function luminance(rgb: number[]) {
+    const values = rgb
+      .map((n) => n / 255)
       .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4));
     return values[0] * 0.2126 + values[1] * 0.7152 + values[2] * 0.0722;
   }
@@ -54,13 +52,39 @@ test("custom accent extremes remain readable in both themes", () => {
       "#ffff00",
       "#673bb7",
       "#00ffff",
+      "#2466bd",
+      "#237768",
+      "#bb4371",
+      "#aa5925",
     ]) {
-      const foreground = luminance(readableAccent(input, dark));
-      const background = luminance(dark ? "#242132" : "#f5f1fb");
-      assert.ok(
-        (Math.max(foreground, background) + 0.05) /
-          (Math.min(foreground, background) + 0.05) >=
-          4.5,
+      const color = readableAccent(input, dark)
+        .slice(1)
+        .match(/../g)!
+        .map((value) => parseInt(value, 16));
+      const foreground = luminance(color);
+      const mix = (base: number[], ratio: number) =>
+        base.map((value, index) => value * (1 - ratio) + color[index] * ratio);
+      const surface = mix(
+        dark ? [29, 32, 40] : [252, 252, 253],
+        dark ? 0.08 : 0.04,
       );
+      const soft = mix(
+        dark ? [34, 37, 46] : [248, 249, 252],
+        dark ? 0.12 : 0.02,
+      );
+      for (const backdrop of [
+        dark ? [36, 33, 50] : [245, 241, 251],
+        surface,
+        soft,
+        mix(surface, 0.09),
+      ]) {
+        const background = luminance(backdrop);
+        assert.ok(
+          (Math.max(foreground, background) + 0.05) /
+            (Math.min(foreground, background) + 0.05) >=
+            4.5,
+          `${input} on ${backdrop} (${dark ? "dark" : "light"})`,
+        );
+      }
     }
 });

@@ -152,14 +152,6 @@
   font: inherit;
   font-size: 13px;
 }
-.search-form select {
-  min-width: 105px;
-  background: var(--surface-soft);
-  color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  padding: 8px;
-}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -182,7 +174,7 @@
   .search-form {
     flex-wrap: wrap;
   }
-  .search-form input {
+  .search-form > .ui-input {
     flex-basis: 100%;
   }
 }

@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
 
 import { Icon } from "./icon";
 import { setAppearance } from "@/core/browser/appearance";
@@ -17,7 +18,7 @@ export function ThemeToggle({
     setAppearance({ mode: next });
   }
   return (
-    <button
+    <Button
       className={`${className} theme-toggle`}
       type="button"
       onClick={toggleTheme}
@@ -26,6 +27,6 @@ export function ThemeToggle({
     >
       <Icon name="sun" className="theme-sun" />
       <Icon name="moon" className="theme-moon" />
-    </button>
+    </Button>
   );
 }

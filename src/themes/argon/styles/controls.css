@@ -64,7 +64,7 @@
 }
 .floating-button:hover,
 .floating-button:focus-visible {
-  background: var(--accent);
+  background: var(--brand-accent);
   color: white;
   transform: none;
 }
@@ -159,7 +159,7 @@
 }
 .setting-options button[aria-pressed="true"] {
   color: #fff;
-  background: #673bb7;
+  background: var(--brand-accent);
 }
 .setting-range {
   display: block;
@@ -171,7 +171,7 @@
   color: var(--muted);
   font-size: 12px;
 }
-.setting-range input {
+.setting-range .ui-range {
   width: 100%;
   accent-color: var(--accent);
   margin: 12px 0 0;
@@ -187,29 +187,6 @@
   padding-block: 16px;
   border-block: 1px solid var(--line);
   font-size: 14px;
-}
-.setting-switch {
-  flex: 0 0 auto;
-  width: 38px;
-  height: 22px;
-  padding: 3px;
-  border-radius: 20px;
-  background: var(--line);
-}
-.setting-switch > span {
-  display: block;
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 4px #0002;
-  transition: transform 260ms var(--motion-ease);
-}
-.setting-switch[aria-checked="true"] {
-  background: var(--accent);
-}
-.setting-switch[aria-checked="true"] > span {
-  transform: translateX(16px);
 }
 .settings-persistence {
   text-align: center;

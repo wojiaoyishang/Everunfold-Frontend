@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
 
 import type { Site } from "@/core/content/types";
 import { useScrollPosition } from "../hooks/use-scroll-position";
@@ -14,7 +15,7 @@ export function SiteHeader({ site }: { site: Site }) {
   const scrolled = useScrollPosition() > 80;
   return (
     <header className={`site-header ${scrolled ? "is-scrolled" : ""}`}>
-      <button
+      <Button
         ref={triggerRef}
         type="button"
         className="mobile-sidebar-button"
@@ -24,7 +25,7 @@ export function SiteHeader({ site }: { site: Site }) {
         onClick={() => setOpen(true)}
       >
         <Icon name="menu" />
-      </button>
+      </Button>
       <div className="header-inner">
         <Link href="/" className="site-brand">
           <span>{site.hero_title || site.name}</span>

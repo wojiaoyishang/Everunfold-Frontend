@@ -1,6 +1,8 @@
+import { Button, TextField } from "@/themes/argon/components/ui/primitives";
 import type { PublicSnapshot } from "@/core/content/types";
 import { queryFeed, type FeedType } from "@/core/content/presentation";
 import { PagePresentation } from "./route-state";
+import { SearchContentType } from "./search-content-type";
 import { SearchForm } from "./navigation-link";
 import { ContentCard } from "./feed";
 import { Pagination } from "./pagination";
@@ -28,7 +30,7 @@ export function SearchResults({
           站内搜索
         </h1>
         <SearchForm className="search-form">
-          <input
+          <TextField
             name="q"
             aria-label="搜索关键词"
             placeholder="寻找文章、说说或页面…"
@@ -36,15 +38,10 @@ export function SearchResults({
             maxLength={160}
             autoFocus
           />
-          <select name="type" aria-label="搜索内容类型" defaultValue={type}>
-            <option value="all">全部内容</option>
-            <option value="article">文章</option>
-            <option value="shuoshuo">说说</option>
-            <option value="page">页面</option>
-          </select>
-          <button className="primary-button" type="submit">
+          <SearchContentType key={type} defaultValue={type} />
+          <Button className="primary-button" type="submit">
             搜索
-          </button>
+          </Button>
         </SearchForm>
         <p>
           {query

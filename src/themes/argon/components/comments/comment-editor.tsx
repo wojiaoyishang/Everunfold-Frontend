@@ -1,4 +1,7 @@
 "use client";
+import { Button, TextArea } from "@/themes/argon/components/ui/primitives";
+import { Checkbox } from "@/themes/argon/components/ui/checkbox";
+
 import { useRef, useState } from "react";
 import { Icon } from "../icon";
 import { TransitionPanel } from "../transition-panel";
@@ -64,7 +67,7 @@ export function CommentEditor({
             role="tablist"
             aria-label="留言编辑方式"
           >
-            <button
+            <Button
               id={`${prefix}-write-tab`}
               type="button"
               role="tab"
@@ -74,8 +77,8 @@ export function CommentEditor({
             >
               <Icon name="edit" />
               编辑
-            </button>
-            <button
+            </Button>
+            <Button
               id={`${prefix}-preview-tab`}
               type="button"
               role="tab"
@@ -88,11 +91,11 @@ export function CommentEditor({
             >
               <Icon name="eye" />
               预览
-            </button>
+            </Button>
           </div>
           {!preview && (
             <div className="composer-format-tools">
-              <button
+              <Button
                 type="button"
                 aria-label="插入粗体"
                 title="粗体"
@@ -102,8 +105,8 @@ export function CommentEditor({
                 }}
               >
                 <b>B</b>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 aria-label="插入行内代码"
                 title="行内代码"
@@ -113,8 +116,8 @@ export function CommentEditor({
                 }}
               >
                 <span aria-hidden="true">&lt;/&gt;</span>
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 aria-label="插入链接"
                 title="链接"
@@ -124,8 +127,8 @@ export function CommentEditor({
                 }}
               >
                 <Icon name="link" />
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 aria-label="插入列表"
                 title="列表"
@@ -135,8 +138,8 @@ export function CommentEditor({
                 }}
               >
                 ≡
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 aria-label="插入多行代码"
                 title="多行代码"
@@ -144,8 +147,8 @@ export function CommentEditor({
                   update({ formatted: true });
                   insert("\n```\n", "\n```\n", "code");
                 }}
-              >{`{ }`}</button>
-              <button
+              >{`{ }`}</Button>
+              <Button
                 id={`${prefix}-emoji-toggle`}
                 type="button"
                 aria-label="插入表情"
@@ -154,7 +157,7 @@ export function CommentEditor({
                 onClick={() => setEmoji(!emoji)}
               >
                 <Icon name="smile" />
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -176,7 +179,7 @@ export function CommentEditor({
           labelledBy={`${prefix}-write-tab`}
           active={!preview}
         >
-          <textarea
+          <TextArea
             ref={editor}
             name="body"
             aria-label="留言内容"
@@ -206,8 +209,7 @@ export function CommentEditor({
         </TransitionPanel>
         <div className="composer-editor-footer">
           <label>
-            <input
-              type="checkbox"
+            <Checkbox
               checked={draft.formatted}
               onChange={(event) => update({ formatted: event.target.checked })}
             />

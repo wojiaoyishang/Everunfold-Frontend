@@ -10,7 +10,10 @@ export function stopScrolling(): void {
   wheelTarget = undefined;
 }
 
-export function scrollToPosition(top: number, duration = 650): Promise<void> {
+export function scrollToPosition(
+  top: number,
+  duration = 650,
+): Promise<boolean> {
   stopScrolling();
   const start = window.scrollY;
   const limit = Math.max(
@@ -20,15 +23,15 @@ export function scrollToPosition(top: number, duration = 650): Promise<void> {
   const target = Math.max(0, Math.min(top, limit));
   if (Math.abs(target - start) < 1 || !motionEnabled()) {
     window.scrollTo({ top: target, behavior: "instant" });
-    return Promise.resolve();
+    return Promise.resolve(true);
   }
   return new Promise((resolve) => {
     const began = performance.now();
     let frame = 0;
-    const finish = () => {
+    const finish = (arrived = false) => {
       cancelAnimationFrame(frame);
       delete document.documentElement.dataset.scrollAnimating;
-      resolve();
+      resolve(arrived);
     };
     cancelAnimation = finish;
     document.documentElement.dataset.scrollAnimating = "true";
@@ -42,14 +45,14 @@ export function scrollToPosition(top: number, duration = 650): Promise<void> {
       else {
         cancelAnimation = undefined;
         wheelTarget = undefined;
-        finish();
+        finish(true);
       }
     };
     frame = requestAnimationFrame(tick);
   });
 }
 
-export function scrollToAnchor(hash: string): boolean {
+export function scrollToAnchor(hash: string, onArrive?: () => void): boolean {
   let id: string;
   try {
     id = decodeURIComponent(hash.slice(1));
@@ -66,7 +69,9 @@ export function scrollToAnchor(hash: string): boolean {
     if (parent instanceof HTMLDetailsElement) parent.open = true;
   }
   const top = target.getBoundingClientRect().top + window.scrollY - 100;
-  void scrollToPosition(top, 650);
+  void scrollToPosition(top, 650).then((arrived) => {
+    if (arrived && target.isConnected) onArrive?.();
+  });
   return true;
 }
 

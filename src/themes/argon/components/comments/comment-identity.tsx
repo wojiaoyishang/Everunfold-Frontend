@@ -1,3 +1,4 @@
+import { Button, TextField } from "@/themes/argon/components/ui/primitives";
 import { Icon } from "../icon";
 import { TransitionPanel } from "../transition-panel";
 import type { CommentDraft, DraftErrors } from "./model";
@@ -24,7 +25,7 @@ export function CommentIdentity({
       <div className="composer-identity">
         <label htmlFor={`${prefix}-author`}>
           昵称 <span aria-hidden="true">*</span>
-          <input
+          <TextField
             id={`${prefix}-author`}
             name="author"
             required
@@ -48,7 +49,7 @@ export function CommentIdentity({
             </span>
           )}
         </label>
-        <button
+        <Button
           id={`${prefix}-extra-toggle`}
           className="composer-extra-toggle"
           type="button"
@@ -58,7 +59,7 @@ export function CommentIdentity({
         >
           邮箱与网站（选填）
           <Icon name="chevron" />
-        </button>
+        </Button>
       </div>
       <TransitionPanel
         id={`${prefix}-extra-panel`}
@@ -69,7 +70,7 @@ export function CommentIdentity({
         <div className="composer-extra-fields">
           <label htmlFor={`${prefix}-email`}>
             邮箱（不会公开）
-            <input
+            <TextField
               id={`${prefix}-email`}
               name="email"
               type="email"
@@ -95,7 +96,7 @@ export function CommentIdentity({
           </label>
           <label htmlFor={`${prefix}-website`}>
             个人网站
-            <input
+            <TextField
               id={`${prefix}-website`}
               name="website"
               type="url"

@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
 
 import {
   useEffect,
@@ -115,7 +116,7 @@ export function HeaderNavigation({ site }: { site: Site }) {
                 {item.label}
               </Link>
               {item.children && (
-                <button
+                <Button
                   type="button"
                   className="header-menu-toggle"
                   aria-label={`${expanded ? "收起" : "展开"}${item.label}子菜单`}
@@ -127,7 +128,7 @@ export function HeaderNavigation({ site }: { site: Site }) {
                   }}
                 >
                   <Icon name="chevron" />
-                </button>
+                </Button>
               )}
             </div>
             {item.children && (

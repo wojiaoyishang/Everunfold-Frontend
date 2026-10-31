@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
+
 import { useEffect } from "react";
 import {
   preferredHomeHref,
@@ -25,14 +27,14 @@ export function HomeFeedSettings({
             ["shuoshuo", "仅说说"],
           ] as const
         ).map(([type, label]) => (
-          <button
+          <Button
             key={type}
             type="button"
             aria-pressed={value === type}
             onClick={() => onChange(type)}
           >
             {label}
-          </button>
+          </Button>
         ))}
       </div>
       <p className="setting-hint">记住首页浏览偏好，不影响搜索和说说归档</p>

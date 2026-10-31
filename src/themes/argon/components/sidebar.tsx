@@ -1,4 +1,9 @@
 "use client";
+import {
+  Button,
+  TextField,
+  TextLink,
+} from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -96,7 +101,7 @@ export function Sidebar({
   }, [activeId, tab]);
   return (
     <>
-      <button
+      <Button
         type="button"
         className="sidebar-mask"
         data-open={open}
@@ -112,14 +117,14 @@ export function Sidebar({
         className={`site-sidebar ${open ? "is-open" : ""}`}
         aria-label="站点导航和概览"
       >
-        <button
+        <Button
           ref={closeRef}
           className="sidebar-close icon-button"
           aria-label="关闭侧栏"
           onClick={() => setOpen(false)}
         >
           <Icon name="close" />
-        </button>
+        </Button>
         <section className="surface sidebar-menu-card">
           <div className="sidebar-banner">
             <span>
@@ -136,7 +141,7 @@ export function Sidebar({
           <SidebarNavigation site={site} />
           <SearchForm className="sidebar-search">
             <Icon name="search" />
-            <input
+            <TextField
               aria-label="搜索文章"
               name="q"
               placeholder="搜索什么…"
@@ -148,7 +153,7 @@ export function Sidebar({
           {toc.length > 0 && (
             <div className="sidebar-tabs" role="tablist" aria-label="侧栏内容">
               {toc.length > 0 && (
-                <button
+                <Button
                   id="toc-tab"
                   role="tab"
                   aria-controls="toc-panel"
@@ -156,9 +161,9 @@ export function Sidebar({
                   onClick={() => setTab("toc")}
                 >
                   文章目录
-                </button>
+                </Button>
               )}
-              <button
+              <Button
                 id="overview-tab"
                 role="tab"
                 aria-controls="overview-panel"
@@ -166,7 +171,7 @@ export function Sidebar({
                 onClick={() => setTab("overview")}
               >
                 站点概览
-              </button>
+              </Button>
             </div>
           )}
           {toc.length > 0 && (
@@ -177,7 +182,7 @@ export function Sidebar({
             >
               <nav className="table-of-contents" aria-label="文章目录">
                 {toc.map((entry) => (
-                  <a
+                  <TextLink
                     key={entry.id}
                     href={`#${entry.id}`}
                     aria-current={
@@ -189,7 +194,7 @@ export function Sidebar({
                     onClick={() => setOpen(false)}
                   >
                     {entry.text}
-                  </a>
+                  </TextLink>
                 ))}
               </nav>
             </TransitionPanel>
@@ -233,7 +238,7 @@ export function Sidebar({
               </div>
               <div className="profile-links">
                 {identity.social.map((item) => (
-                  <a
+                  <TextLink
                     key={item.href}
                     href={item.href}
                     target="_blank"
@@ -241,7 +246,7 @@ export function Sidebar({
                   >
                     <Icon name="link" />
                     {item.label}
-                  </a>
+                  </TextLink>
                 ))}
                 <Link href="/links/">
                   <Icon name="leaf" />

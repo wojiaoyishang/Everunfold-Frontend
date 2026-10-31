@@ -1,4 +1,5 @@
 "use client";
+import { TextLink } from "@/themes/argon/components/ui/primitives";
 
 import type { CSSProperties, ReactNode } from "react";
 import type { Site } from "@/core/content/types";
@@ -47,9 +48,9 @@ function ShellFrame({ children }: { children: ReactNode }) {
     >
       <BackgroundVideoProvider poster={background}>
         <HomeFeedPreference />
-        <a className="skip-link" href="#main-content">
+        <TextLink className="skip-link" href="#main-content">
           跳到正文
-        </a>
+        </TextLink>
         <SiteHeader site={site} />
         <section className="hero" aria-label="站点横幅">
           <div className="hero-copy">

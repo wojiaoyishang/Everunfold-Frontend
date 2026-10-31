@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
+
 import { useEffect, useState } from "react";
 import { Icon } from "./icon";
 
@@ -17,7 +19,7 @@ export function ReactionButton({
     return () => cancelAnimationFrame(frame);
   }, [id]);
   return (
-    <button
+    <Button
       className="reaction-button"
       aria-pressed={liked}
       title="本次浏览的互动预览，不会提交到网站"
@@ -31,6 +33,6 @@ export function ReactionButton({
       <Icon name="heart" />
       {count + Number(liked) || "喜欢"}
       <span className="sr-only">（互动预览）</span>
-    </button>
+    </Button>
   );
 }

@@ -1,4 +1,6 @@
 "use client";
+import { Button, Dialog } from "@/themes/argon/components/ui/primitives";
+
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useModalDialog } from "../../hooks/use-modal-dialog";
@@ -56,7 +58,7 @@ export function ImageViewer({
     close();
   }
   return (
-    <dialog
+    <Dialog
       ref={dialog}
       className="image-viewer enhanced-viewer"
       aria-label="图片查看器"
@@ -81,24 +83,24 @@ export function ImageViewer({
         <span>
           {index + 1} / {items.length}
         </span>
-        <button
+        <Button
           aria-label="缩小图片"
           disabled={zoom <= 1}
           onClick={() => setZoom(Math.max(1, zoom - 0.5))}
         >
-          −
-        </button>
-        <button aria-label="还原图片比例" onClick={() => setZoom(1)}>
+          <Icon name="minus" />
+        </Button>
+        <Button aria-label="还原图片比例" onClick={() => setZoom(1)}>
           {Math.round(zoom * 100)}%
-        </button>
-        <button
+        </Button>
+        <Button
           aria-label="放大图片"
           disabled={zoom >= 4}
           onClick={() => setZoom(Math.min(4, zoom + 0.5))}
         >
-          ＋
-        </button>
-        <button
+          <Icon name="plus" />
+        </Button>
+        <Button
           aria-label="切换全屏"
           onClick={async () => {
             try {
@@ -110,15 +112,15 @@ export function ImageViewer({
           }}
         >
           <Icon name="expand" />
-        </button>
+        </Button>
         {items.length > 1 && (
-          <button aria-pressed={thumbs} onClick={() => setThumbs(!thumbs)}>
+          <Button aria-pressed={thumbs} onClick={() => setThumbs(!thumbs)}>
             缩略图
-          </button>
+          </Button>
         )}
-        <button aria-label="关闭图片" onClick={dismiss}>
+        <Button aria-label="关闭图片" onClick={dismiss}>
           <Icon name="close" />
-        </button>
+        </Button>
       </div>
       <div
         ref={stage}
@@ -167,7 +169,7 @@ export function ImageViewer({
         {failed ? (
           <div className="viewer-error" role="alert">
             <p>这张图片暂时没有加载出来。</p>
-            <button
+            <Button
               onClick={() => {
                 setFailed(false);
                 setLoading(true);
@@ -175,7 +177,7 @@ export function ImageViewer({
               }}
             >
               重新加载
-            </button>
+            </Button>
           </div>
         ) : (
           <div
@@ -200,33 +202,33 @@ export function ImageViewer({
         )}
       </div>
       <div className="viewer-bottom">
-        <button
+        <Button
           disabled={items.length < 2}
           aria-label="上一张图片"
           onClick={() => select(index - 1)}
         >
           <Icon name="arrow-left" />
-        </button>
+        </Button>
         <p>{selected.caption}</p>
-        <button
+        <Button
           disabled={items.length < 2}
           aria-label="下一张图片"
           onClick={() => select(index + 1)}
         >
           <Icon name="arrow" />
-        </button>
+        </Button>
       </div>
       {thumbs && (
         <div className="viewer-thumbnails">
           {items.map((item, i) => (
-            <button
+            <Button
               key={`${i}-${item.src}`}
               aria-label={`查看第 ${i + 1} 张图片`}
               aria-pressed={i === index}
               onClick={() => select(i)}
             >
               <Image src={item.src} alt="" width={70} height={52} unoptimized />
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -235,6 +237,6 @@ export function ImageViewer({
           {notice}
         </p>
       )}
-    </dialog>
+    </Dialog>
   );
 }

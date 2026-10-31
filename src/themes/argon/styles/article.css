@@ -182,7 +182,7 @@
 .article-content a,
 .comment-copy a {
   color: var(--accent);
-  border-bottom: 1px solid rgb(146 102 218 / 30%);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   transition:
     color var(--motion-fast) ease,
     border-color var(--motion-fast) ease;
@@ -208,7 +208,7 @@
 .comment-copy code {
   font-family: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
   background: var(--surface-soft);
-  color: #a35b9a;
+  color: var(--accent);
   border-radius: 4px;
   padding: 0.15em 0.35em;
   font-size: 0.86em;

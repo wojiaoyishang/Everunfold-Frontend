@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useDetailsMotion } from "../hooks/use-details-motion";
 import { useCodeTools } from "../hooks/use-code-tools";
@@ -127,7 +129,7 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
           {failed.map((index) => (
             <p key={index}>
               第 {index + 1} 张图片暂时无法加载。{" "}
-              <button
+              <Button
                 onClick={() => {
                   const image = imageElements.current[index];
                   if (image) {
@@ -139,7 +141,7 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
                 }}
               >
                 重试
-              </button>
+              </Button>
             </p>
           ))}
         </div>

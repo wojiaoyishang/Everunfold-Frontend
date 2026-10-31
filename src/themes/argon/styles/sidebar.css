@@ -144,8 +144,8 @@
 }
 .sidebar-tabs button[aria-selected="true"] {
   color: #fff;
-  background: #673bb7;
-  box-shadow: 0 3px 9px rgb(103 59 183 / 20%);
+  background: var(--brand-accent);
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--brand-accent) 20%, transparent);
 }
 .profile {
   padding: 24px 18px 22px;

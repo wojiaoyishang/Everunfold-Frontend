@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, type ReactNode } from "react";
 import {
@@ -48,7 +49,7 @@ export function FloatingTools() {
         </div>
       </ToolSlot>
       <ToolSlot visible={scroll >= 400}>
-        <button
+        <Button
           className="floating-button back-to-top"
           type="button"
           aria-label="返回顶部"
@@ -56,10 +57,10 @@ export function FloatingTools() {
           onClick={() => void scrollToPosition(0, 800)}
         >
           <Icon name="up" />
-        </button>
+        </Button>
       </ToolSlot>
       <ToolSlot visible={reading.comments}>
-        <button
+        <Button
           className="floating-button"
           type="button"
           aria-label="前往评论"
@@ -67,7 +68,7 @@ export function FloatingTools() {
           onClick={() => scrollToAnchor("#comments")}
         >
           <Icon name="comment" />
-        </button>
+        </Button>
       </ToolSlot>
       <ToolSlot>
         <ThemeToggle className="floating-button" />

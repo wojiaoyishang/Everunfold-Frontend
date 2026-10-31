@@ -1,4 +1,5 @@
 "use client";
+import { Button, Form } from "@/themes/argon/components/ui/primitives";
 
 import {
   useEffect,
@@ -128,17 +129,17 @@ export function CommentComposer({
             </strong>
             <p>{reply?.body.slice(0, 90)}</p>
           </div>
-          <button
+          <Button
             type="button"
             className="icon-button"
             aria-label="取消回复"
             onClick={onCancelReply}
           >
             <Icon name="close" />
-          </button>
+          </Button>
         </div>
       </TransitionPanel>
-      <form ref={form} onSubmit={submit} noValidate>
+      <Form ref={form} onSubmit={submit} noValidate>
         <CommentEditor
           key={editorRevision}
           prefix={prefix}
@@ -161,10 +162,10 @@ export function CommentComposer({
             <span className="preview-badge">互动演示</span>
             留言只显示在本页，不会发布；刷新后清除。
           </p>
-          <button className="primary-button" type="submit" disabled={!hydrated}>
+          <Button className="primary-button" type="submit" disabled={!hydrated}>
             <Icon name="send" />
             添加到本页
-          </button>
+          </Button>
         </div>
         <p className="composer-status" role="status">
           {notice}
@@ -172,7 +173,7 @@ export function CommentComposer({
         <noscript>
           请启用 JavaScript 后体验评论交互；历史留言仍可阅读。
         </noscript>
-      </form>
+      </Form>
     </section>
   );
 }

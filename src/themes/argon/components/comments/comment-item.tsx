@@ -1,3 +1,4 @@
+import { Button, TextLink } from "@/themes/argon/components/ui/primitives";
 import type { MouseEvent } from "react";
 import { RelativeTime } from "../relative-time";
 import { CollapsibleContent } from "../collapsible-content";
@@ -60,14 +61,14 @@ export function CommentItem({
       <div className="comment-main">
         <div className="comment-heading">
           {entry.website ? (
-            <a
+            <TextLink
               href={entry.website}
               target="_blank"
               rel="nofollow noopener noreferrer"
             >
               <strong>{entry.author}</strong>
               <Icon name="external" />
-            </a>
+            </TextLink>
           ) : (
             <strong>{entry.author}</strong>
           )}
@@ -91,12 +92,12 @@ export function CommentItem({
             <Icon name="reply" />
             回复{" "}
             {parentPage ? (
-              <a
+              <TextLink
                 href={`${path}?comments_page=${parentPage}#comment-${encodeURIComponent(entry.parentId!)}`}
                 onClick={locate}
               >
                 @{parent?.author ?? entry.replyTo}
-              </a>
+              </TextLink>
             ) : (
               <span>@{entry.replyTo}</span>
             )}
@@ -109,15 +110,15 @@ export function CommentItem({
           />
         </CollapsibleContent>
         <div className="comment-actions">
-          <button
+          <Button
             type="button"
             onClick={onReply}
             aria-label={`回复 ${entry.author}`}
           >
             <Icon name="reply" />
             回复
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             className="comment-like"
             aria-pressed={liked}
@@ -127,7 +128,7 @@ export function CommentItem({
           >
             <Icon name="heart" />
             {liked ? "已赞同" : "赞同"}
-          </button>
+          </Button>
         </div>
       </div>
     </li>

@@ -4,9 +4,15 @@ html[data-custom-accent="true"] {
   --brand-accent: var(--custom-accent-light);
   --accent-light: color-mix(in srgb, var(--accent), white 25%);
   --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--surface));
+  --surface: color-mix(in srgb, var(--brand-accent) 4%, #fcfcfd);
+  --surface-soft: color-mix(in srgb, var(--brand-accent) 2%, #f8f9fc);
+  --line: color-mix(in srgb, var(--brand-accent) 9%, #eef0f4);
 }
 html[data-theme="dark"][data-custom-accent="true"] {
   --accent: var(--custom-accent-dark);
+  --surface: color-mix(in srgb, var(--accent) 8%, #1d2028);
+  --surface-soft: color-mix(in srgb, var(--accent) 12%, #22252e);
+  --line: color-mix(in srgb, var(--accent) 20%, #292c34);
 }
 html[data-theme="dark"][data-amoled="true"] {
   --surface: #08080b;
@@ -16,6 +22,9 @@ html[data-theme="dark"][data-amoled="true"] {
 @media (prefers-color-scheme: dark) {
   html:not([data-theme="light"])[data-custom-accent="true"] {
     --accent: var(--custom-accent-dark);
+    --surface: color-mix(in srgb, var(--accent) 8%, #1d2028);
+    --surface-soft: color-mix(in srgb, var(--accent) 12%, #22252e);
+    --line: color-mix(in srgb, var(--accent) 20%, #292c34);
   }
   html:not([data-theme="light"])[data-amoled="true"] {
     --surface: #08080b;
@@ -33,9 +42,10 @@ html[data-theme="dark"][data-amoled="true"] {
 .accent-options {
   display: flex;
   gap: 9px;
+  flex-wrap: wrap;
   align-items: center;
 }
-.accent-options button {
+.accent-options > button {
   border-radius: 50%;
   color: #fff;
   cursor: pointer;
@@ -45,27 +55,6 @@ html[data-theme="dark"][data-amoled="true"] {
   outline: 2px solid transparent;
   outline-offset: 3px;
 }
-.accent-options button[aria-pressed="true"] {
+.accent-options > button[aria-pressed="true"] {
   outline-color: var(--accent);
-}
-.accent-options label {
-  position: relative;
-  font-size: 10px;
-  color: var(--muted);
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  width: 28px;
-  height: 28px;
-}
-.accent-options input {
-  opacity: 0;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-}
-.accent-options label:focus-within {
-  outline: 2px solid var(--accent);
 }

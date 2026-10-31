@@ -40,11 +40,11 @@ button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 summary:focus-visible {
-  outline: 3px solid #b59ae8;
+  outline: 3px solid var(--accent-light);
   outline-offset: 4px;
 }
 ::selection {
-  background: #9d73df66;
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
 }
 html[data-motion="reduced"] {
   scroll-behavior: auto;

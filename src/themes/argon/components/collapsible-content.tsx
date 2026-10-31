@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
+
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Icon } from "./icon";
 
@@ -41,7 +43,7 @@ export function CollapsibleContent({
         <style>{".foldable-window{max-height:none!important}"}</style>
       </noscript>
       {long && (
-        <button
+        <Button
           className="fold-toggle"
           aria-controls={id}
           aria-expanded={expanded}
@@ -49,7 +51,7 @@ export function CollapsibleContent({
         >
           {expanded ? "收起长内容" : "展开全文"}
           <Icon name={expanded ? "up" : "down"} />
-        </button>
+        </Button>
       )}
     </div>
   );

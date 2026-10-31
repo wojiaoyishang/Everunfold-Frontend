@@ -1,6 +1,9 @@
 "use client";
+import { Button, Popover } from "@/themes/argon/components/ui/primitives";
+import { RangeField } from "@/themes/argon/components/ui/range-field";
 
 import { useEffect, useId, useState } from "react";
+import { Switch } from "./ui/switch";
 import { Icon } from "./icon";
 import { useMotion } from "../hooks/use-motion";
 import { useBackgroundPlayback } from "./background-video";
@@ -77,7 +80,7 @@ export function ReadingSettings() {
   }
   return (
     <>
-      <button
+      <Button
         type="button"
         className="floating-button"
         aria-label="阅读设置"
@@ -86,8 +89,8 @@ export function ReadingSettings() {
         aria-haspopup="dialog"
       >
         <Icon name="settings" />
-      </button>
-      <div
+      </Button>
+      <Popover
         id={panelId}
         popover="auto"
         role="dialog"
@@ -97,7 +100,7 @@ export function ReadingSettings() {
         <div className="settings-content">
           <header>
             <h2 id="reading-settings-title">阅读设置</h2>
-            <button
+            <Button
               type="button"
               className="icon-button"
               aria-label="关闭阅读设置"
@@ -105,7 +108,7 @@ export function ReadingSettings() {
               popoverTargetAction="hide"
             >
               <Icon name="close" />
-            </button>
+            </Button>
           </header>
           <AppearanceSettings />
           <HomeFeedSettings
@@ -122,14 +125,14 @@ export function ReadingSettings() {
                   ["reduced", "减少动态"],
                 ] as const
               ).map(([value, label]) => (
-                <button
+                <Button
                   type="button"
                   key={value}
                   aria-pressed={motion.preference === value}
                   onClick={() => motion.setPreference(value)}
                 >
                   {label}
-                </button>
+                </Button>
               ))}
             </div>
             <p className="setting-hint">
@@ -141,50 +144,44 @@ export function ReadingSettings() {
               <span id={`${panelId}-background`}>动态背景</span>
               <p className="setting-hint">{playback.description}</p>
             </div>
-            <button
-              type="button"
-              className="setting-switch"
-              role="switch"
+            <Switch
               aria-labelledby={`${panelId}-background`}
-              aria-checked={playback.enabled}
-              onClick={() => playback.setEnabled(!playback.enabled)}
-            >
-              <span />
-            </button>
+              checked={playback.enabled}
+              onCheckedChange={playback.setEnabled}
+            />
           </div>
           {playback.needsRetry && (
-            <button
+            <Button
               type="button"
               className="settings-reset"
               onClick={() => playback.setEnabled(true)}
             >
               重试背景播放
-            </button>
+            </Button>
           )}
           <fieldset>
             <legend>字体</legend>
             <div className="setting-options">
-              <button
+              <Button
                 type="button"
                 aria-pressed={!settings.serif}
                 onClick={() => update({ serif: false })}
               >
                 Sans Serif
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 aria-pressed={settings.serif}
                 onClick={() => update({ serif: true })}
               >
                 Serif
-              </button>
+              </Button>
             </div>
           </fieldset>
           <label className="setting-range">
             字号 <output>{settings.size} px</output>
-            <input
+            <RangeField
               aria-label="正文字号"
-              type="range"
               min="14"
               max="22"
               step="0.5"
@@ -195,20 +192,20 @@ export function ReadingSettings() {
           <fieldset>
             <legend>阴影</legend>
             <div className="setting-options">
-              <button
+              <Button
                 type="button"
                 aria-pressed={!settings.shadow}
                 onClick={() => update({ shadow: false })}
               >
                 浅阴影
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 aria-pressed={settings.shadow}
                 onClick={() => update({ shadow: true })}
               >
                 深阴影
-              </button>
+              </Button>
             </div>
           </fieldset>
           <fieldset>
@@ -220,22 +217,21 @@ export function ReadingSettings() {
                 ["dim", "暗化"],
                 ["gray", "灰度"],
               ].map(([value, label]) => (
-                <button
+                <Button
                   type="button"
                   key={value}
                   aria-pressed={settings.filter === value}
                   onClick={() => update({ filter: value })}
                 >
                   {label}
-                </button>
+                </Button>
               ))}
             </div>
           </fieldset>
           <label className="setting-range">
             圆角 <output>{settings.radius} px</output>
-            <input
+            <RangeField
               aria-label="卡片圆角"
-              type="range"
               min="0"
               max="20"
               value={settings.radius}
@@ -244,7 +240,7 @@ export function ReadingSettings() {
               }
             />
           </label>
-          <button
+          <Button
             type="button"
             className="settings-reset"
             onClick={() => {
@@ -256,10 +252,10 @@ export function ReadingSettings() {
             }}
           >
             恢复默认
-          </button>
+          </Button>
           <p className="settings-persistence">偏好自动保存在当前浏览器</p>
         </div>
-      </div>
+      </Popover>
     </>
   );
 }

@@ -214,7 +214,7 @@
 }
 .post-cover-heading .post-title a:hover,
 .post-cover-heading .post-meta a:hover {
-  color: #ece1ff;
+  color: color-mix(in srgb, var(--accent-light) 25%, white);
 }
 .post-cover-heading .post-meta {
   position: relative;
@@ -286,7 +286,7 @@
 }
 .pagination a.current,
 .pagination a:hover {
-  background: #673bb7;
+  background: var(--brand-accent);
   color: #fff;
 }
 .pagination-ellipsis {
@@ -314,17 +314,17 @@
   border: 0;
   border-radius: 5px;
   padding: 10px 22px;
-  background: #673bb7;
+  background: var(--brand-accent);
   color: #fff;
   font-size: 14px;
-  box-shadow: 0 3px 7px rgb(103 59 183 / 18%);
+  box-shadow: 0 3px 7px color-mix(in srgb, var(--brand-accent) 18%, transparent);
   transition:
     transform 240ms var(--motion-ease),
     background-color var(--motion-fast) ease,
     box-shadow 240ms ease;
 }
 .primary-button:hover {
-  background: #7548c5;
+  background: color-mix(in srgb, var(--brand-accent) 90%, #000);
 }
 .empty-state .primary-button {
   margin-top: 12px;
@@ -348,7 +348,7 @@
   display: flex;
   gap: 12px;
 }
-.search-form input {
+.search-form > .ui-input {
   min-width: 0;
   flex: 1;
   border: 1px solid var(--line);

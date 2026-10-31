@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
 
 import { useId, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -39,7 +40,7 @@ function MenuItem({ item }: { item: NavigationItem }) {
           <span>{item.label}</span>
         </Link>
         {item.children && (
-          <button
+          <Button
             type="button"
             aria-label={`${expanded ? "收起" : "展开"}${item.label}`}
             aria-expanded={expanded}
@@ -53,7 +54,7 @@ function MenuItem({ item }: { item: NavigationItem }) {
             }}
           >
             <Icon name="chevron" />
-          </button>
+          </Button>
         )}
       </div>
       {item.children && (

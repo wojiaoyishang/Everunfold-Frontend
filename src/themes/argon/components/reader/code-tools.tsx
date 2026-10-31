@@ -1,4 +1,6 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
+
 import { useState } from "react";
 
 export function CodeTools({
@@ -18,13 +20,13 @@ export function CodeTools({
   const [error, setError] = useState(false);
   return (
     <div className="code-tools">
-      <button type="button" aria-pressed={wrapped} onClick={onWrap}>
+      <Button type="button" aria-pressed={wrapped} onClick={onWrap}>
         折行
-      </button>
-      <button type="button" aria-pressed={expanded} onClick={onExpand}>
+      </Button>
+      <Button type="button" aria-pressed={expanded} onClick={onExpand}>
         {expanded ? "退出展开" : "展开代码"}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         onClick={async () => {
           try {
@@ -37,7 +39,7 @@ export function CodeTools({
         }}
       >
         {copied ? "已复制" : "复制代码"}
-      </button>
+      </Button>
       <span role="status">
         {error
           ? "复制未获允许，请选中代码手动复制。"

@@ -133,8 +133,8 @@
   flex-shrink: 0;
 }
 .viewer-thumbnails button[aria-pressed="true"] {
-  border-color: #c6a4ff;
-  background: #673bb755;
+  border-color: var(--accent-light);
+  background: color-mix(in srgb, var(--brand-accent) 33%, transparent);
 }
 .viewer-thumbnails img {
   width: 70px;

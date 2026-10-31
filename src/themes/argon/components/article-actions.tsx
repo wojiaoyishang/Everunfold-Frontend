@@ -1,4 +1,9 @@
 "use client";
+import {
+  Button,
+  TextField,
+  Popover,
+} from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useId, useState } from "react";
 import { AppLink as Link } from "./navigation-link";
@@ -45,20 +50,20 @@ export function ArticleActions({
             写下感想
           </Link>
         )}
-        <button
+        <Button
           type="button"
           popoverTarget={panel}
           onClick={() => setLink(new URL(path, window.location.origin).href)}
         >
           <Icon name="send" />
           分享
-        </button>
-        <button type="button" onClick={copyLink}>
+        </Button>
+        <Button type="button" onClick={copyLink}>
           <Icon name={state === "copied" ? "check" : "copy"} />
           {state === "copied" ? "链接已复制" : "复制链接"}
-        </button>
+        </Button>
       </div>
-      <div
+      <Popover
         id={panel}
         popover="auto"
         className="share-panel"
@@ -67,7 +72,7 @@ export function ArticleActions({
       >
         <header>
           <strong>分享这段故事</strong>
-          <button
+          <Button
             type="button"
             className="icon-button"
             aria-label="关闭分享"
@@ -75,12 +80,12 @@ export function ArticleActions({
             popoverTargetAction="hide"
           >
             <Icon name="close" />
-          </button>
+          </Button>
         </header>
         <p>{title || "一则随记"}</p>
         <label>
           分享链接
-          <input
+          <TextField
             readOnly
             aria-label="分享链接"
             value={link}
@@ -88,11 +93,11 @@ export function ArticleActions({
           />
         </label>
         <div>
-          <button type="button" onClick={copyLink}>
+          <Button type="button" onClick={copyLink}>
             <Icon name="copy" />
             {state === "copied" ? "已复制" : "复制链接"}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={async () => {
               if (!navigator.share) {
@@ -111,7 +116,7 @@ export function ArticleActions({
           >
             <Icon name="external" />
             系统分享
-          </button>
+          </Button>
         </div>
         <small role="status">
           {state === "manual"
@@ -120,14 +125,14 @@ export function ArticleActions({
               ? "链接已复制，可以粘贴给朋友。"
               : "不支持系统分享时，会为你复制链接。"}
         </small>
-      </div>
+      </Popover>
       <span className="navigation-status" role="status">
         {state === "copied" ? "文章链接已复制" : ""}
       </span>
       {state === "manual" && (
         <label className="copy-link-fallback">
           选中链接后复制
-          <input
+          <TextField
             aria-label="文章链接"
             readOnly
             value={link}

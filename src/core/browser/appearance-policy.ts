@@ -37,16 +37,40 @@ export function readableAccent(color: string, dark: boolean): string {
       .map((n) => (n <= 0.04045 ? n / 12.92 : ((n + 0.055) / 1.055) ** 2.4))
       .reduce((sum, n, i) => sum + n * [0.2126, 0.7152, 0.0722][i], 0);
   const background = luminance(dark ? [36, 33, 50] : [245, 241, 251]);
+  const mix = (foreground: number[], base: number[], amount: number) =>
+    base.map(
+      (channel, index) => channel * (1 - amount) + foreground[index] * amount,
+    );
   let result = rgb;
   for (let step = 0; step <= 20; step++) {
     result = rgb.map((value) =>
       Math.round(value + (((dark ? 255 : 0) - value) * step) / 20),
     );
     const foreground = luminance(result);
+    // These surfaces follow the same palette mixes as appearance.css, including selected controls.
+    const surface = mix(
+      result,
+      dark ? [29, 32, 40] : [252, 252, 253],
+      dark ? 0.08 : 0.04,
+    );
+    const soft = mix(
+      result,
+      dark ? [34, 37, 46] : [248, 249, 252],
+      dark ? 0.12 : 0.02,
+    );
+    const backgrounds = [
+      background,
+      luminance(surface),
+      luminance(soft),
+      luminance(mix(result, surface, 0.09)),
+    ];
     if (
-      (Math.max(background, foreground) + 0.05) /
-        (Math.min(background, foreground) + 0.05) >=
-      4.5
+      backgrounds.every(
+        (value) =>
+          (Math.max(value, foreground) + 0.05) /
+            (Math.min(value, foreground) + 0.05) >=
+          4.5,
+      )
     )
       break;
   }

@@ -1,4 +1,9 @@
 "use client";
+import { Button } from "@/themes/argon/components/ui/primitives";
+import { Checkbox } from "@/themes/argon/components/ui/checkbox";
+
+import { ColorPicker } from "./ui/color-picker";
+import { Icon } from "./icon";
 import { setAppearance } from "@/core/browser/appearance";
 import { useAppearance } from "../hooks/use-appearance";
 const colors = [
@@ -22,20 +27,19 @@ export function AppearanceSettings() {
               ["dark", "深色"],
             ] as const
           ).map(([mode, label]) => (
-            <button
+            <Button
               type="button"
               key={mode}
               aria-pressed={value.mode === mode}
               onClick={() => setAppearance({ mode })}
             >
               {label}
-            </button>
+            </Button>
           ))}
         </div>
       </fieldset>
       <label className="appearance-check">
-        <input
-          type="checkbox"
+        <Checkbox
           checked={value.amoled}
           onChange={(event) => setAppearance({ amoled: event.target.checked })}
         />
@@ -45,7 +49,7 @@ export function AppearanceSettings() {
         <legend>主题色</legend>
         <div className="accent-options">
           {colors.map(([accent, label]) => (
-            <button
+            <Button
               type="button"
               key={accent}
               aria-label={label}
@@ -54,20 +58,13 @@ export function AppearanceSettings() {
               style={{ backgroundColor: accent }}
               onClick={() => setAppearance({ accent })}
             >
-              {value.accent === accent ? "✓" : ""}
-            </button>
+              {value.accent === accent && <Icon name="check" />}
+            </Button>
           ))}
-          <label title="自定义主题色">
-            <input
-              type="color"
-              value={value.accent}
-              aria-label="自定义主题色"
-              onChange={(event) =>
-                setAppearance({ accent: event.target.value })
-              }
-            />
-            <span>自选</span>
-          </label>
+          <ColorPicker
+            value={value.accent}
+            onChange={(accent) => setAppearance({ accent })}
+          />
         </div>
         <p className="setting-hint">文字颜色会适配深浅背景，保持清晰</p>
       </fieldset>

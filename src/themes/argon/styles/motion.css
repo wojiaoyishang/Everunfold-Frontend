@@ -26,16 +26,16 @@
     opacity var(--motion-fast) ease;
 }
 .sidebar-search,
-.search-form input {
+.search-form > .ui-input {
   transition:
     box-shadow var(--motion-normal) ease,
     background-color var(--motion-normal) ease;
 }
 .sidebar-search:focus-within,
-.search-form input:focus {
+.search-form > .ui-input:focus {
   box-shadow:
     0 0 0 3px var(--accent-soft),
-    0 4px 16px #673bb71a;
+    0 4px 16px color-mix(in srgb, var(--brand-accent) 10%, transparent);
   background-color: var(--surface);
 }
 .transition-panel {
@@ -138,7 +138,6 @@
   background: var(--accent);
   transform: scale(1.35);
 }
-.comment:target,
 .article-content :is(h1, h2, h3, h4, h5, h6):target {
   animation: reading-target 1600ms ease-out;
 }
@@ -207,7 +206,8 @@
   .setting-options button:hover,
   .settings-reset:hover,
   .sidebar-tabs button:hover {
-    box-shadow: 0 4px 12px #673bb726;
+    box-shadow: 0 4px 12px
+      color-mix(in srgb, var(--brand-accent) 15%, transparent);
     transform: translateY(-2px);
   }
   .post-tags a:hover,
@@ -234,7 +234,8 @@
   }
   .profile-avatar:hover {
     transform: translateY(-2px) rotate(-3deg);
-    box-shadow: 0 6px 19px rgb(103 59 183 / 23%);
+    box-shadow: 0 6px 19px
+      color-mix(in srgb, var(--brand-accent) 23%, transparent);
   }
   .post-card:hover .read-more .icon,
   .read-more:focus-visible .icon {

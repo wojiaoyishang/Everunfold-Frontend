@@ -1,9 +1,10 @@
 "use client";
+import { Button, TextLink } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PublicComment } from "@/core/content/types";
 import { publicHref } from "@/core/content/urls";
-import { scrollToAnchor } from "@/core/browser/scroll";
+import { useCommentLocation } from "./use-comment-location";
 import { Icon } from "../icon";
 import { CommentComposer } from "./comment-composer";
 import { CommentItem } from "./comment-item";
@@ -50,20 +51,7 @@ export function CommentSection({
   );
   const { entries: paged, page, pages } = commentPage(entries, requestedPage);
   const shown = continuous ? entries.slice(0, page * COMMENT_PAGE_SIZE) : paged;
-  useEffect(() => {
-    if (!target) return;
-    const frame = requestAnimationFrame(() => {
-      const element = document.getElementById(target.id);
-      if (!element) return;
-      scrollToAnchor(`#${encodeURIComponent(target.id)}`);
-      const focus =
-        target.id === "comment-composer"
-          ? element.querySelector("textarea")
-          : element;
-      focus?.focus({ preventScroll: true });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [target, page]);
+  useCommentLocation(target, page);
   useEffect(() => {
     if (initialAnchor.current) return;
     let hash: string;
@@ -131,7 +119,7 @@ export function CommentSection({
               {local.length ? ` · ${local.length} 条本页留言` : ""}
             </p>
           </div>
-          <a
+          <TextLink
             href="#comment-composer"
             className="comments-write"
             onClick={(event) => {
@@ -149,14 +137,14 @@ export function CommentSection({
           >
             <Icon name="edit" />
             写留言
-          </a>
+          </TextLink>
         </header>
         <div className="comments-demo-note">
           <span>
             <span className="preview-badge">效果预览</span>
             历史留言保留原文，示例人物与对话均为虚构。
           </span>
-          <button
+          <Button
             type="button"
             aria-pressed={examples}
             onClick={() => {
@@ -165,10 +153,10 @@ export function CommentSection({
             }}
           >
             {examples ? "隐藏示例" : "显示示例"}
-          </button>
+          </Button>
         </div>
         <div className="comment-view-options" aria-label="留言浏览方式">
-          <button
+          <Button
             type="button"
             aria-pressed={!continuous}
             onClick={() => {
@@ -178,8 +166,8 @@ export function CommentSection({
             }}
           >
             分页阅读
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             aria-pressed={continuous}
             onClick={() => {
@@ -189,7 +177,7 @@ export function CommentSection({
             }}
           >
             连续阅读
-          </button>
+          </Button>
         </div>
         <ol className="comment-list">
           {shown.map((entry, index) => (
@@ -226,7 +214,7 @@ export function CommentSection({
           </div>
         )}
         {continuous && page < pages && (
-          <button
+          <Button
             className="comment-load-more"
             type="button"
             onClick={() => {
@@ -235,11 +223,11 @@ export function CommentSection({
             }}
           >
             再看看更多留言 · {entries.length - shown.length} 条
-          </button>
+          </Button>
         )}
         {!continuous && pages > 1 && (
           <nav className="comment-pagination" aria-label="评论分页">
-            <button
+            <Button
               type="button"
               disabled={page <= 1}
               onClick={() => {
@@ -248,11 +236,11 @@ export function CommentSection({
               }}
             >
               上一页
-            </button>
+            </Button>
             <span>
               第 {page} / {pages} 页
             </span>
-            <button
+            <Button
               type="button"
               disabled={page >= pages}
               onClick={() => {
@@ -261,7 +249,7 @@ export function CommentSection({
               }}
             >
               下一页
-            </button>
+            </Button>
           </nav>
         )}
       </section>
