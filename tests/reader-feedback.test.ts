@@ -14,7 +14,7 @@ import {
 } from "../src/core/reader/state";
 import { NavigationTransaction } from "../src/core/navigation/transaction";
 import { NavigationLoadError } from "../src/core/navigation/document";
-import { failureDocument } from "../src/core/navigation/failure-page";
+import { failureDocument } from "../src/themes/argon/failure/document";
 import { CommentItem } from "../src/themes/argon/components/comments/comment-item";
 import type { CommentEntry } from "../src/themes/argon/components/comments/model";
 

@@ -9,6 +9,10 @@
   },
   "packageManager": "npm@10.9.2",
   "scripts": {
+    "failure:generate": "tsx tools/generate-failure-pages.mts",
+    "failure:check": "tsx tools/generate-failure-pages.mts --check",
+    "predev": "npm run failure:generate",
+    "prebuild": "npm run failure:generate",
     "dev": "next dev --hostname 127.0.0.1",
     "build": "next build",
     "verify:production": "node tools/verify-production.mjs",
@@ -19,7 +23,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write src tests tools .github next.config.ts eslint.config.mjs package.json tsconfig.json .prettierrc.json",
     "format:check": "prettier --check src tests tools .github next.config.ts eslint.config.mjs package.json tsconfig.json .prettierrc.json",
-    "check": "npm run lint && npm run typecheck && npm run format:check && npm run test",
+    "check": "npm run failure:check && npm run lint && npm run typecheck && npm run format:check && npm run test",
     "contract:sync": "node tools/sync-contract.mjs",
     "test": "tsx --test tests/*.test.ts",
     "verify:http": "node tools/verify-public-http.mjs"

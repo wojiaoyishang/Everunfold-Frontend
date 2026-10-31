@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { hasPublicRoute } from "@/core/content/routes";
-import { failureDocument } from "@/core/navigation/failure-page";
+import { failureDocument } from "@/themes/argon/failure/document";
 export async function proxy(request: NextRequest) {
   try {
     const snapshot = await readPublicSnapshot();
