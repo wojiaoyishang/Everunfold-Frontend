@@ -11,6 +11,7 @@
 - 管理页和认证响应使用 `private, no-store` 与 `noindex, nofollow`。身份、CSRF 和 Cookie 不写入 `localStorage`、URL 或公开快照；退出必须等待有效的匿名 Session 响应。
 - 登录页和管理员身份确认抽取为共享 `ManagementEntry` 卡片，等待、失败、重试和退出状态不改变页面宽度或撑满视口。
 - 管理员校验通过后进入主题化后台：顶部站点栏、左侧管理导航、右侧仪表盘工作区及其分栏只参考 WordPress 的排版信息组织，不复制其配色、品牌、字体或控件外观。当前唯一导航是仪表盘，工作区内容为空。
+- 认证入口背景复用高密度星空图，并叠加原创 SVG 山脊、松林、帐篷、营地、柴火、三层火焰和烟雾。整个背景场景统一施加柔焦，卡片本身不模糊；背景包含可运行的星层漂移、亮星闪烁、间歇流星、火星、火焰和萤火动画。
 
 ## 已执行检查
 
@@ -32,7 +33,8 @@
 - “减少动态”下登录卡片动画为 `none`，控件过渡为 `0s`；深色主题、桌面 1440x1000、390x844 和 320x740 均无横向溢出，固定格式控件没有改变布局。
 - 后续排版修订使用正式开发库中的 `admin` 管理员验证：阻断认证 API 时，`/admin` 在登录卡片内显示失败和重试，不再出现整页空白大面板；恢复后登录进入 `/admin`，顶部栏为 1428px、左侧导航 184px、右侧工作区有 3 个真实空状态分区。
 - 390px 和 320px 下后台导航转为横向排列，工作区单列展示，文档宽度均等于视口且无横向溢出；深色主题沿用 Everunfold 主题变量。退出后回到 `/login`，管理员工作区消失。
-- 登录与后台截图保存在忽略目录 `var/qa/`：早期登录/后台截图，以及本次 `admin-gate-card.png`、`admin-wordpress-layout-desktop.png`、`admin-wordpress-layout-mobile.png`、`admin-wordpress-layout-320.png`、`admin-wordpress-layout-dark.png`。
+- 星空营地背景实测确认：背景资源加载成功，完整动态下星层、21 个亮星、2 条流星、7 个萤火和三层火焰均运行；整个场景的 CSS filter 为 `blur(2.6px)`，登录卡片 filter 为 `none`。390px 无横向溢出，深色主题正常；减少动态时星层、亮星、火焰动画均为 `none`，流星保持隐藏。
+- 登录与后台截图保存在忽略目录 `var/qa/`：早期截图，以及本次 `admin-gate-card.png`、`admin-wordpress-layout-desktop.png`、`admin-wordpress-layout-mobile.png`、`admin-wordpress-layout-320.png`、`admin-wordpress-layout-dark.png`、`login-starry-campfire-desktop.png`、`login-starry-campfire-mobile.png`、`login-starry-campfire-dark.png`。
 
 ## 未执行与限制
 

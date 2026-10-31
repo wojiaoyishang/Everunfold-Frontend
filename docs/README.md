@@ -36,7 +36,7 @@
 
 最新界面检查：[悬浮层与错误页验收](handoff/failure-pages-verification.md)，包含最终生产构建、离线有/无缓存、错误边界、配对游戏及窄框检查；不会替代上一阶段尚未执行的其他验收。
 
-最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。认证等待态复用登录卡片；管理员验证后进入参考后台信息组织但沿用 Everunfold 主题的顶部栏、左侧导航和仪表盘工作区。
+最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。认证等待态复用登录卡片，背景为整体柔焦的星空营地；管理员验证后进入参考后台信息组织但沿用 Everunfold 主题的顶部栏、左侧导航和仪表盘工作区。
 
 | 目录 | 内容与维护时机 |
 | --- | --- |

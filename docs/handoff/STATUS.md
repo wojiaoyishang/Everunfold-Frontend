@@ -4,11 +4,13 @@
 
 - 功能提交 `0ab5aee`：公开博客迁入 `(blog)`，新增互不依赖公开快照的 `(management)` `/login`、`/admin`；管理入口不挂载公共 `BlogShell`，不进入公开软导航/预取，并返回 private/no-store/noindex。
 - 排版修订 `01be282`：身份确认等待/失败态统一放入登录卡片；管理员验证后使用 Everunfold 主题化顶部栏、左侧导航和右侧仪表盘工作区，只参考 WordPress 的排版结构，不复制其视觉皮肤。现有后台仍只展示真实管理员、空工作区和退出。
+- 背景修订 `1ee8aad`：认证入口加入星空营地场景，复用高密度星空图并叠加原创 SVG 山脊、松林、帐篷、篝火、烟雾和萤火。整个背景统一柔焦，卡片保持清晰；星层漂移、亮星闪烁、流星和火焰动画均受“减少动态”偏好控制。
 - 接入后端 `ce825d0` 发布的 `auth-v0.1` 生成类型、Schema、来源哈希与客户端。登录完成真实 Session/CSRF、提交中、错误/重试、密码显隐、管理员校验、退出和返回站点；`next` 仅允许 `/admin`。后台只展示真实管理员显示名/用户名/角色，不提供假统计或未实现业务入口。
 - `npm run check` 的 79 项测试、ESLint、Next typegen/TypeScript、Prettier 与错误页产物检查通过。`npm run verify:reader` 的独立生产构建、真实/离线快照和管理入口隔离通过；`npm run verify:http` 的 26 个公开路由检查通过。
 - 真实跨源登录使用本机 FastAPI 与 Edge 157 无头 CDP 完成：错误密码、正确登录、CSRF 轮换、恶意 `next`、退出、API 阻断/重试、密码显隐、减少动态、深/浅主题及 1440/390/320px 布局均实测。原生可见浏览器自动化因工具无法可靠确认当前 URL 被安全终止，不写成已通过。
 - 浏览器验收同时发现并修复 Next.js 16 根文档缺少 `data-scroll-behavior="smooth"` 的兼容提示；该修复单独提交，路由切换仍由框架临时关闭平滑滚动。
 - 最新排版复查确认：API 阻断时在登录卡片内重试；管理员识别后顶部栏、侧栏和工作区无溢出，320px 下侧栏转为横向导航，深色主题正常。截图在忽略目录 `var/qa/admin-*.png`。
+- 星空背景复查确认桌面、390px 和深色主题可用，背景与卡片 filter 分责正确；减少动态时全部背景/篝火动画停止。截图在 `var/qa/login-starry-campfire-*.png`。
 - 详细证据、截图入口和限制见 [登录与空后台验收](authentication-frontend-verification.md)；后端记录见 [认证后端验收](authentication-verification.md)，决定见 [ADR 0018](../decisions/0018-authentication-and-admin-entry.md)。未执行 Safari/Firefox、真实移动硬件、生产 HTTPS/Secure Cookie 域名矩阵与强制颜色实操。
 - 当前没有持续 Session 心跳；服务端撤销在刷新、窗口重新聚焦或受保护操作时被发现。注册、改密/找回、2FA、用户管理及文章/媒体后台仍未实现。公共入口索引、ADR、认证验收与基线同步说明已同步后端；`AGENTS.md` 的 Next.js 自动生成区块作为前端工具专属例外。
 - 正常前端 3000 与后端 8001 保留。仅本地提交，**未 push**。
