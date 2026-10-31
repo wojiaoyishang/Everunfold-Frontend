@@ -61,7 +61,7 @@
     box-shadow 220ms ease;
 }
 .site-header.is-scrolled {
-  background-color: color-mix(in srgb, var(--brand-accent) 86%, transparent);
+  background-color: var(--header-fill);
   backdrop-filter: blur(16px);
   box-shadow: 0 1px 9px rgb(19 8 42 / 10%);
 }
@@ -71,7 +71,7 @@
   max-width: 1200px;
   padding: 15px 18px;
   margin: auto;
-  min-height: 71px;
+  min-height: var(--header-height);
   display: flex;
   align-items: center;
   gap: 34px;

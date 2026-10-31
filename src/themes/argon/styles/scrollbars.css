@@ -1,16 +1,20 @@
 /* Native scrolling stays in charge; theme tokens cover page and nested scrollers. */
 :root {
-  --scrollbar-track: color-mix(in srgb, var(--surface) 96%, var(--accent));
   --scrollbar-thumb: color-mix(in srgb, var(--accent) 72%, var(--surface));
+  --gutter-header-fill: transparent;
+}
+html:has(.site-header.is-scrolled) {
+  --gutter-header-fill: var(--header-fill);
 }
 @media (forced-colors: none) {
   * {
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-thumb) transparent;
   }
-  html {
+  html,
+  body {
     scrollbar-width: auto;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    scrollbar-color: var(--scrollbar-thumb) transparent;
   }
   @supports selector(::-webkit-scrollbar) {
     /* Non-auto standard properties would override the rounded native thumb. */
@@ -18,7 +22,8 @@
       scrollbar-width: auto;
       scrollbar-color: auto;
     }
-    html {
+    html,
+    body {
       scrollbar-width: auto;
       scrollbar-color: auto;
     }
@@ -26,7 +31,8 @@
       width: 10px;
       height: 10px;
     }
-    html::-webkit-scrollbar {
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar {
       width: 12px;
       height: 12px;
     }
@@ -34,8 +40,14 @@
       background: transparent;
       border-radius: 999px;
     }
-    html::-webkit-scrollbar-track {
-      background: var(--scrollbar-track);
+    html::-webkit-scrollbar-track,
+    body::-webkit-scrollbar-track {
+      /* Viewport scrollbars may originate from body; paint their header segment too. */
+      background: linear-gradient(
+        to bottom,
+        var(--gutter-header-fill) 0 var(--header-height),
+        transparent var(--header-height)
+      );
       border-radius: 0;
     }
     ::-webkit-scrollbar-thumb {

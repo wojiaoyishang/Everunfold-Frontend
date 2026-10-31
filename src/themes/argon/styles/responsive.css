@@ -24,9 +24,11 @@
   }
 }
 @media (max-width: 900px) {
+  :root {
+    --header-height: 80px;
+  }
   .header-inner {
     padding: 20px 20px 20px 65px;
-    min-height: 80px;
     gap: 10px;
   }
   .site-brand {
