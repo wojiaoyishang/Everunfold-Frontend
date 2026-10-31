@@ -5,6 +5,8 @@ import { pageNumber, resolveContent } from "@/core/content/query";
 import { Article } from "@/themes/argon/components/article";
 import { resolvePresentation } from "@/core/content/presentation";
 import { ShuoshuoDetail } from "@/themes/argon/components/shuoshuo";
+import { contentMetadata } from "@/core/content/metadata";
+import { readConfiguration } from "@/core/config/server";
 type Parameters = {
   params: Promise<{ contentPath: string[] }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -15,15 +17,13 @@ export async function generateMetadata({
   const snapshot = await readPublicSnapshot();
   const { contentPath } = await params;
   const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
-  if (presented?.content.type === "shuoshuo")
-    return {
-      title: presented.content.title || "一则随记",
-      description: presented.content.excerpt,
-      robots: { index: !presented.example },
-    };
-  const content = resolveContent(snapshot, `/${contentPath.join("/")}`);
-  return content
-    ? { title: content.title, description: content.excerpt }
+  return presented
+    ? contentMetadata(
+        presented.content,
+        snapshot.site.name,
+        readConfiguration().publicSiteUrl,
+        presented.example,
+      )
     : { title: "没有找到这个故事", robots: { index: false } };
 }
 export default async function ContentPage({

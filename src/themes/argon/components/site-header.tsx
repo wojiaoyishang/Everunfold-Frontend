@@ -6,6 +6,7 @@ import { AppLink as Link } from "./navigation-link";
 import { useNavigation } from "./navigation-state";
 import { Icon } from "./icon";
 import { HeaderNavigation } from "./header-navigation";
+import { SearchDialog } from "./search-dialog";
 
 export function SiteHeader({ site }: { site: Site }) {
   const { open, setOpen, triggerRef } = useNavigation();
@@ -29,14 +30,7 @@ export function SiteHeader({ site }: { site: Site }) {
         </Link>
         <HeaderNavigation site={site} />
         <div className="header-actions">
-          <Link
-            href="/search"
-            className="icon-button"
-            aria-label="搜索文章"
-            title="搜索文章"
-          >
-            <Icon name="search" />
-          </Link>
+          <SearchDialog />
         </div>
       </div>
     </header>

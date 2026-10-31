@@ -8,6 +8,7 @@ export class ConfigurationError extends Error {
 }
 
 export interface FrontendConfiguration {
+  publicSiteUrl: string | undefined;
   backendBaseUrl: string;
   frontendNodeId: string;
   backend: {
@@ -123,7 +124,13 @@ export function parseConfiguration(
   const root = object(input, "根配置");
   knownKeys(
     root,
-    ["BACKEND_BASE_URL", "FRONTEND_NODE_ID", "backend", "cache"],
+    [
+      "BACKEND_BASE_URL",
+      "FRONTEND_NODE_ID",
+      "PUBLIC_SITE_URL",
+      "backend",
+      "cache",
+    ],
     "根配置",
   );
   const backend = object(root.backend ?? {}, "backend");
@@ -163,7 +170,13 @@ export function parseConfiguration(
   if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(nodeId)) {
     throw new ConfigurationError("FRONTEND_NODE_ID 格式不正确");
   }
+  const siteValue = environment.PUBLIC_SITE_URL ?? root.PUBLIC_SITE_URL;
+  const publicSiteUrl =
+    siteValue === undefined ? undefined : baseUrl(siteValue, "PUBLIC_SITE_URL");
+  if (publicSiteUrl && new URL(publicSiteUrl).pathname !== "/")
+    throw new ConfigurationError("PUBLIC_SITE_URL 必须为前台公开站点根地址");
   return {
+    publicSiteUrl,
     backendBaseUrl: publicUrl,
     frontendNodeId: nodeId,
     backend: {

@@ -2,6 +2,10 @@
 
 2026-10-30。后端端口按用户要求为 **8001**，前端为 **3000**；两个进程分别启动，不占用其他项目的 8000。
 
+2026-10-31 补充：说说/阅读工具的最新验证见 [交付记录](../handoff/frontend-reader-verification.md)，本页旧浏览器观察只作历史。前端运行实例可保持热更新，使用 `npm run verify:production` 在独立副本构建，避免覆盖它的 .next。前端可在 config.toml 根级或环境变量设置 `PUBLIC_SITE_URL` 为实际前台公开根地址，输出文章 canonical / Open Graph；省略时不推测正式地址，拒绝凭据/路径/查询。该字段不是 FastAPI 地址，本机已填用户原站 https://lovepikachu.top，实际文件仍忽略提交。
+
+草案类型生成命令：`npm run contract:sync -- 'E:\Programming\Python\Everunfold-Backend\contracts\presentation-v0.2.schema.json'`。该草案不替换当前公开 API/快照；此阶段不要为查看说说示例重新运行导入器。
+
 ## 当前本机准备情况
 
 - PostgreSQL 18 与 Redis 已连通，专用 `everunfold_dev` / `everunfold_test` 已建立并显式迁移；真实配置已写入两个项目各自被忽略的 `config.toml`。

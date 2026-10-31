@@ -14,7 +14,8 @@
 8. [原站复刻决定](decisions/0004-reference-fidelity.md)：连续阅读、共享滚动/工具列、安全展示短代码。
 9. [整站动效决定](decisions/0005-site-motion-policy.md)：本站完整动效默认值、连续滚轮、非模态设置与双向过渡，更新 ADR 0004 的相关细节。
 10. [前台功能决定](decisions/0006-public-ui-completion.md)：二级导航、文章头图、评论预览、整卡点击和保存背景偏好。
-11. [内容类型衔接](architecture/content-types.md)：已确认文章/说说呈现不同、后续统一 type；尚未实施契约升级。
+11. [内容类型衔接](architecture/content-types.md)：0.2 展示草案与前台原型已实现，在线 0.1 类型迁移/整体导入后置。
+12. [说说与阅读工具决定](decisions/0007-shuoshuo-and-reader-features.md)：后端草案、前端适配、共享评论/图片/正文工具与偏好边界。
 
 ## 目录职责
 
@@ -42,6 +43,7 @@
 - [整站动效验证](handoff/frontend-global-motion-verification.md)：上一轮实际 Edge 根因、完整动效、设置滚动条、滚轮尾程和双向交互验证。
 - [前台功能验证](handoff/frontend-interaction-verification.md)：本轮菜单、卡片、文章、评论、阅读偏好、桌面/窄屏与构建检查。
 - [前台差异盘点（2026-10-31）](handoff/frontend-gap-audit-2026-10-31.md)：说说及 Argon 通用功能，含评论、图片、正文工具、访问状态与分享预览；区分已启用/可选/已有。自定义页面另排，先完善前端，再整体导入。
+- [说说与通用阅读验证](handoff/frontend-reader-verification.md)：本轮实际源码/HTTP/构建结果、手工验证入口、浏览器验证中止及未接后端范围。
 
 ## 两仓库分工
 

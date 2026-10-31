@@ -1,5 +1,6 @@
 /* Preserve component, motion and responsive cascade order. */
 @import "./styles/base.css";
+@import "./styles/appearance.css";
 @import "./styles/shell.css";
 @import "./styles/sidebar.css";
 @import "./styles/navigation.css";
@@ -10,6 +11,7 @@
 @import "./styles/comment-composer.css";
 @import "./styles/reader.css";
 @import "./styles/reader-tools.css";
+@import "./styles/discovery.css";
 @import "./styles/controls.css";
 @import "./styles/motion.css";
 @import "./styles/responsive.css";

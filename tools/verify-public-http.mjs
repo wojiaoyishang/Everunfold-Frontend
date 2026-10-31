@@ -28,26 +28,50 @@ async function htmlAt(route, expectedStatus = 200) {
   return { html, document: parseDocument(html), response };
 }
 
-function articles(document) {
+function articles(document, mixed = false) {
   return DomUtils.findAll(
     (node) =>
       node.name === "article" &&
-      (node.attribs.class ?? "").split(" ").includes("post-card"),
+      (node.attribs.class ?? "")
+        .split(" ")
+        .some(
+          (name) => name === "post-card" || (mixed && name === "shuoshuo-card"),
+        ),
     document.children,
   );
 }
 
 const home = await htmlAt("/");
-assert.equal(
-  articles(home.document).length,
-  Math.min(10, snapshot.site.stats.articles),
-);
+assert.equal(articles(home.document, true).length, 10);
 assert.ok(
   DomUtils.textContent(home.document).includes(snapshot.site.hero_title),
 );
 if (snapshot.site.stats.articles > 10)
   assert.ok(articles((await htmlAt("/?page=2")).document).length > 0);
 await htmlAt("/archives");
+await htmlAt("/article/");
+const moments = await htmlAt("/ss");
+assert.equal(articles(moments.document, true).length, 4);
+assert.equal(articles(moments.document).length, 0);
+const sample = await htmlAt("/shuoshuo/preview-long-walk");
+assert.match(sample.html, /reader-reference/);
+assert.match(sample.html, /name="robots" content="noindex"/);
+const closed = await htmlAt("/shuoshuo/preview-quiet");
+assert.ok(DomUtils.textContent(closed.document).includes("评论已关闭"));
+assert.equal(
+  DomUtils.getElementById("comment-composer", closed.document.children),
+  null,
+);
+const shuoshuoSearch = await htmlAt(
+  "/search?q=" + encodeURIComponent("皮卡丘") + "&type=shuoshuo",
+);
+assert.equal(articles(shuoshuoSearch.document, true).length, 1);
+assert.equal(articles(shuoshuoSearch.document).length, 0);
+const noResult = await htmlAt(
+  "/search?q=this-keyword-has-no-match&type=shuoshuo",
+);
+assert.ok(DomUtils.textContent(noResult.document).includes("没有找到相关内容"));
+await htmlAt("/shuoshuo/unknown-example", 404);
 await htmlAt("/categories");
 await htmlAt("/tags");
 const firstArticle = snapshot.contents.find((item) => item.kind === "article");
@@ -75,6 +99,8 @@ for (const kind of ["category", "tag"]) {
 }
 const detail = await htmlAt(firstArticle.path);
 assert.equal(DomUtils.getElementsByTagName("h1", detail.document).length, 1);
+assert.match(detail.html, /property="og:title"/);
+assert.match(detail.html, /property="og:type" content="article"/);
 const ordinaryPage = snapshot.contents.find((item) => item.kind === "page");
 if (ordinaryPage) await htmlAt(ordinaryPage.path);
 const commented = snapshot.contents.find(
@@ -132,6 +158,14 @@ const background = await fetch(
 );
 assert.equal(background.status, 200);
 assert.ok(background.headers.get("content-type")?.startsWith("image/"));
+for (const sticker of ["dinosaur/1", "dinosaur/16", "flower/1", "flower/14"]) {
+  const response = await fetch(
+    new URL(`/reference/stickers/${sticker}.jpg`, origin),
+    { method: "HEAD" },
+  );
+  assert.equal(response.status, 200);
+  assert.ok(response.headers.get("content-type")?.startsWith("image/"));
+}
 console.log(
   JSON.stringify(
     { passed: true, checks: results, capabilities: "public-read-only" },

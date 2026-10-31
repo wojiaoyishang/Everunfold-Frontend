@@ -94,9 +94,15 @@ export function queryFeed(
     );
   const pageSize = Math.max(
     1,
-    Math.min(100, Math.floor(options.pageSize ?? 10)),
+    Math.min(
+      100,
+      Math.floor(Number.isFinite(options.pageSize) ? options.pageSize! : 10),
+    ),
   );
-  const page = Math.max(1, Math.floor(options.page ?? 1));
+  const page = Math.max(
+    1,
+    Math.floor(Number.isSafeInteger(options.page) ? options.page! : 1),
+  );
   return {
     items: items.slice((page - 1) * pageSize, page * pageSize),
     page,

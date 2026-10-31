@@ -20,6 +20,26 @@ test("configuration uses an explicit public address while internal overrides sta
   assert.equal(config.backend.baseUrl, "http://backend.internal:8000");
 });
 test("unknown fields, empty overrides, bad addresses and CIDRs fail clearly", () => {
+  assert.equal(parseConfiguration(base).publicSiteUrl, undefined);
+  assert.equal(
+    parseConfiguration({
+      ...base,
+      PUBLIC_SITE_URL: "https://blog.example.com/",
+    }).publicSiteUrl,
+    "https://blog.example.com",
+  );
+  assert.throws(() =>
+    parseConfiguration({
+      ...base,
+      PUBLIC_SITE_URL: "https://example.com/subpath",
+    }),
+  );
+  assert.throws(() =>
+    parseConfiguration({
+      ...base,
+      PUBLIC_SITE_URL: "https://secret:password@example.com",
+    }),
+  );
   assert.throws(() => parseConfiguration({ ...base, typo: true }));
   assert.throws(() => parseConfiguration(base, { BACKEND_BASE_URL: "" }));
   assert.throws(() =>

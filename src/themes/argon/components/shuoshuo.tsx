@@ -93,7 +93,11 @@ export function ShuoshuoDetail({
       )}
       <ShuoshuoCard entry={entry} detail />
       <div className="surface shuoshuo-share">
-        <ArticleActions path={entry.content.path} />
+        <ArticleActions
+          path={entry.content.path}
+          title={entry.content.title}
+          commentsOpen={entry.content.comments_open}
+        />
       </div>
       {entry.content.comments_open ? (
         <CommentSection

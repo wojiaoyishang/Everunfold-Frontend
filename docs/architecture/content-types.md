@@ -1,6 +1,12 @@
 # 内容类型：文章、说说与页面的后续统一
 
-记录：2026-10-30。**已确认需求，尚未实施类型升级或说说迁移。** 依据为用户本轮明确补充；不要因上下文压缩遗漏，也不要把下面的建议字段当成已经发布的契约。
+更新：2026-10-31。**展示草案和前台原型已实现；在线 API/数据库/快照的类型升级与说说导入未执行。** 依据为用户确认先补前台，接口先大致约定，整体导入后置。
+
+## 本轮已实现
+
+后端提交 `29f198a` 发布 `contracts/presentation-v0.2.schema.json`（0.2.0-preview.1），源模型为 `app/modules/content/presentation_schema.py`。前端通过 contract:sync 生成 `presentation-contract.ts`、Schema 副本与来源 SHA256；旧 0.1 kind 在唯一适配层转为展示 type。首页混排、/ss 说说列表、轻量详情、搜索类型、长文折叠和共享阅读能力已实现。四条虚构说说不写入数据库/快照、不计入真实统计；评论/喜欢仅演示。详见 ADR 0007 和 frontend-reader-verification.md。
+
+草案字段 type=article/shuoshuo/page，含 comments_open、reaction_count、access、opens_at；只允许说说无标题。受限投影禁止正文、摘要、媒体映射，定时状态必须给开放时间。这不是密码验证/开放倒计时/评论审核 API 已接通的证明，前台当前只消费公开记录。
 
 ## 已确认需求
 
@@ -10,11 +16,11 @@
 
 ## 现状与原站依据
 
-当前后端 app/modules/content/schemas.py 的 ContentKind 只有 article/page；公开契约 0.1.0 与生成的前端类型使用 kind。数据库、查询、导出与前端列表以此工作；本轮没有改字段、迁移数据库或重新导入。
+在线后端 app/modules/content/schemas.py 的 ContentKind 仍只有 article/page；公开契约 0.1.0 使用 kind。数据库、查询、导出仍以此工作，本轮没有迁移数据库或重新导入。0.2 展示草案与在线 API 必须分别理解。
 
 原 Argon 的 functions.php 用 register_post_type('shuoshuo') 注册独立类型，首页配置可查询 post + shuoshuo。template-parts/content-shuoshuo.php 和 content-shuoshuo-preview.php 展示可选标题、正文、日期/时间和互动摘要；文章则使用封面、标题、摘要及阅读全文。它们说明类型和展示应分开建模，不代表新系统必须复制其全部行为。
 
-## 后续建议（待契约设计时确定细节）
+## 展示语义（草案已实现，生产迁移待定）
 
 | 语义 | 建议稳定值 | 首页展示建议 |
 | --- | --- | --- |

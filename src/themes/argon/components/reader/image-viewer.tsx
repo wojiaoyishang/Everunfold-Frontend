@@ -32,6 +32,10 @@ export function ImageViewer({
     left: number;
     top: number;
   } | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
   const selected = items[index];
   useEffect(() => {
     open();
@@ -56,7 +60,12 @@ export function ImageViewer({
       ref={dialog}
       className="image-viewer enhanced-viewer"
       aria-label="图片查看器"
-      onClose={onDismiss}
+      onClose={() => {
+        closeTimer.current = setTimeout(
+          onDismiss,
+          document.documentElement.dataset.motion === "reduced" ? 0 : 360,
+        );
+      }}
       onClick={(event) => {
         if (event.target === event.currentTarget) dismiss();
       }}

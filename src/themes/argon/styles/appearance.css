@@ -1,0 +1,69 @@
+html[data-custom-accent="true"] {
+  --accent: var(--custom-accent-light);
+  --accent-light: color-mix(in srgb, var(--accent), white 25%);
+  --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--surface));
+}
+html[data-theme="dark"][data-custom-accent="true"] {
+  --accent: var(--custom-accent-dark);
+}
+html[data-theme="dark"][data-amoled="true"] {
+  --surface: #08080b;
+  --surface-soft: #141419;
+  --line: #25252b;
+}
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme="light"])[data-custom-accent="true"] {
+    --accent: var(--custom-accent-dark);
+  }
+  html:not([data-theme="light"])[data-amoled="true"] {
+    --surface: #08080b;
+    --surface-soft: #141419;
+    --line: #25252b;
+  }
+}
+.appearance-check {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  align-items: center;
+  padding-bottom: 8px;
+}
+.accent-options {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+}
+.accent-options button {
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  width: 26px;
+  height: 26px;
+  line-height: 1;
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+}
+.accent-options button[aria-pressed="true"] {
+  outline-color: var(--accent);
+}
+.accent-options label {
+  position: relative;
+  font-size: 10px;
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+}
+.accent-options input {
+  opacity: 0;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.accent-options label:focus-within {
+  outline: 2px solid var(--accent);
+}

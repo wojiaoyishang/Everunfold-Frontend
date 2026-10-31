@@ -6,6 +6,7 @@ import "@/themes/argon/argon.css";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { BlogShell } from "@/themes/argon/components/shell";
 import { initializeMotion } from "@/core/browser/motion-policy";
+import { initializeAppearance } from "@/core/browser/appearance-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -27,8 +28,6 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-const initializeTheme = `(function(){try{var t=localStorage.getItem('everunfold.theme');if(t==='dark'||t==='light'){document.documentElement.dataset.theme=t;}}catch(e){}})();`;
-
 export default async function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
@@ -36,7 +35,7 @@ export default async function RootLayout({
   return (
     <html lang="zh-CN" data-motion="full" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: initializeTheme }} />
+        <script dangerouslySetInnerHTML={{ __html: initializeAppearance }} />
         <script dangerouslySetInnerHTML={{ __html: initializeMotion }} />
       </head>
       <body>

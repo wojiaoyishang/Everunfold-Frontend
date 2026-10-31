@@ -4,6 +4,9 @@ import { useEffect, useId, useState } from "react";
 import { Icon } from "./icon";
 import { useMotion } from "../hooks/use-motion";
 import { useBackgroundPlayback } from "./background-video";
+import { AppearanceSettings } from "./appearance-settings";
+import { setAppearance } from "@/core/browser/appearance";
+import { defaultAppearance } from "@/core/browser/appearance-policy";
 
 const defaults = {
   size: 16.5,
@@ -101,6 +104,7 @@ export function ReadingSettings() {
               <Icon name="close" />
             </button>
           </header>
+          <AppearanceSettings />
           <fieldset>
             <legend>全站动效</legend>
             <div className="setting-options">
@@ -240,6 +244,7 @@ export function ReadingSettings() {
               update(defaults);
               motion.setPreference("full");
               playback.reset();
+              setAppearance(defaultAppearance);
             }}
           >
             恢复默认

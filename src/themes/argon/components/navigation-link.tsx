@@ -73,9 +73,11 @@ export function AppLink({
 export function SearchForm({
   children,
   className,
+  onSearch,
 }: {
   children: ReactNode;
   className?: string;
+  onSearch?: () => void;
 }) {
   const { navigate } = useRouteState();
   const { setOpen } = useNavigation();
@@ -86,6 +88,7 @@ export function SearchForm({
     if (typeof value !== "string") return;
     event.preventDefault();
     setOpen(false);
+    onSearch?.();
     const url = new URL(searchHref(value), window.location.origin);
     const type = values.get("type");
     if (type === "article" || type === "shuoshuo" || type === "page")

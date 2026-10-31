@@ -7,6 +7,8 @@
 # 前端自身身份，必须与后端 frontends 的对应配置键一致
 BACKEND_BASE_URL = "http://127.0.0.1:8001"
 FRONTEND_NODE_ID = "web-main"
+# 可选：前台正式公开根地址，用于文章 canonical / Open Graph；不从请求 Host 或 API 地址推导。
+# PUBLIC_SITE_URL = "https://blog.example.com"
 
 [backend]
 # Next.js 服务端访问 FastAPI 的连接地址

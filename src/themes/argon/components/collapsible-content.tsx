@@ -31,15 +31,14 @@ export function CollapsibleContent({
         }}
         style={{
           maxHeight:
-            height === null
-              ? undefined
-              : long && !expanded
-                ? limit
-                : height + 2,
+            height === null ? limit : long && !expanded ? limit : height + 2,
         }}
       >
         <div ref={inner}>{children}</div>
       </div>
+      <noscript>
+        <style>{".foldable-window{max-height:none!important}"}</style>
+      </noscript>
       {long && (
         <button
           className="fold-toggle"

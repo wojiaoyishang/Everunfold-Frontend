@@ -1,6 +1,7 @@
 "use client";
 
 import { Icon } from "./icon";
+import { setAppearance } from "@/core/browser/appearance";
 
 export function ThemeToggle({
   className = "icon-button",
@@ -13,12 +14,7 @@ export function ThemeToggle({
       ? current === "dark"
       : window.matchMedia("(prefers-color-scheme: dark)").matches;
     const next = isDark ? "light" : "dark";
-    document.documentElement.dataset.theme = next;
-    try {
-      window.localStorage.setItem("everunfold.theme", next);
-    } catch {
-      /* Preferences are optional. */
-    }
+    setAppearance({ mode: next });
   }
   return (
     <button

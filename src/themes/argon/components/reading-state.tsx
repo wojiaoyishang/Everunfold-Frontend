@@ -9,7 +9,13 @@ import {
 } from "react";
 import { useRouteState } from "./route-state";
 
-const empty = { progress: 0, activeId: "", article: false, comments: false };
+const empty = {
+  progress: 0,
+  activeId: "",
+  article: false,
+  comments: false,
+  showProgress: false,
+};
 const ReadingContext = createContext(empty);
 
 export function ReadingStateProvider({ children }: { children: ReactNode }) {
@@ -19,7 +25,9 @@ export function ReadingStateProvider({ children }: { children: ReactNode }) {
     let frame = 0;
     function update() {
       frame = 0;
-      const article = document.querySelector<HTMLElement>(".article-content");
+      const article = document.querySelector<HTMLElement>(
+        ".article-card .article-content, .shuoshuo-detail .article-content",
+      );
       let next = empty;
       if (article) {
         const bounds = article.getBoundingClientRect();
@@ -36,6 +44,10 @@ export function ReadingStateProvider({ children }: { children: ReactNode }) {
         }
         next = {
           article: true,
+          showProgress:
+            bounds.height > window.innerHeight - 100 &&
+            bounds.top <= 100 &&
+            bounds.bottom > window.innerHeight,
           comments: !!document.getElementById("comments"),
           activeId,
           progress: Math.round(
@@ -47,7 +59,8 @@ export function ReadingStateProvider({ children }: { children: ReactNode }) {
         previous.progress === next.progress &&
         previous.activeId === next.activeId &&
         previous.article === next.article &&
-        previous.comments === next.comments
+        previous.comments === next.comments &&
+        previous.showProgress === next.showProgress
           ? previous
           : next,
       );
@@ -59,7 +72,9 @@ export function ReadingStateProvider({ children }: { children: ReactNode }) {
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
     const observer = new ResizeObserver(schedule);
-    const article = document.querySelector(".article-content");
+    const article = document.querySelector(
+      ".article-card .article-content, .shuoshuo-detail .article-content",
+    );
     if (article) observer.observe(article);
     return () => {
       cancelAnimationFrame(frame);

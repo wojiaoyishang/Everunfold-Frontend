@@ -1,6 +1,6 @@
 # 前台组件、导航与动效边界
 
-更新：2026-10-31。适用于当前 Next.js App Router 前台；后端公开契约与读取数据保持不变。
+更新：2026-10-31。适用于当前 Next.js App Router 前台；在线 0.1 API/快照保持不变，展示原型另消费后端 0.2.0-preview.1 草案。验证边界见 [说说与阅读工具交付记录](../handoff/frontend-reader-verification.md)。
 
 ## 目录与职责
 
@@ -8,9 +8,9 @@
 src/app/                         薄路由、元信息、错误状态；无替换正文的根 loading
   layout.tsx                    唯一公共 BlogShell 入口
 src/core/
-  content/                      后端生成类型、快照校验和纯查询
+  content/                      后端生成类型、快照校验、展示适配/样例、查询/推荐/元信息
   config/                       仅服务端实例配置
-  rendering/                    Server 侧正文安全渲染和媒体解析
+  rendering/                    Server 正文渲染、客户端评论的安全 Markdown 元素树
     shortcodes.ts               展示语法白名单，不执行旧插件
   browser/                      动效纯策略/订阅、阻尼滚动、页面/锚点历史位置
   navigation/
@@ -27,6 +27,11 @@ src/themes/argon/
     floating-tools.tsx          纵向工具列与回顶出入，不各自固定定位
     reading-state.tsx           阅读进度、活动目录、评论状态
     article-media.tsx           已安全渲染正文的图片和折叠交互
+    reader/                     图片查看器与代码工具；由文章、说说和评论共用
+    shuoshuo.tsx                轻量说说卡片/详情；不使用整卡遮盖链接
+    collapsible-content.tsx     共用长说说/长评论的测量、渐隐和展开
+    search-dialog.tsx           常驻壳搜索弹层，复用 SearchForm
+    appearance-settings.tsx     主题色、系统/手动外观、纯黑模式
     reading-settings.tsx        不锁页面滚动的原生 popover、统一动效选项
     transition-panel.tsx        保留内容的双向高度切换与 inactive/inert
     site-header / sidebar*     共享导航数据与独立区域展示
@@ -41,7 +46,7 @@ src/themes/argon/
   styles/                       十二个职责样式文件，保持原级联顺序
 ```
 
-`styles/` 按顺序分为 base（变量/基础）、shell、sidebar、navigation、listing、article、comments、comment-composer、reader、controls、motion、responsive。响应式与减少动态效果覆盖保持最后；不得按文件名随意重排导入来改变级联。新动效先复用 tokens 和现有类，不复制一套页面样式。
+`styles/` 按职责分为 base/appearance、shell/sidebar/navigation、listing/shuoshuo、article/comments/comment-composer、reader/reader-tools/discovery、controls/motion/responsive。响应式与减少动态效果覆盖保持最后；不得按文件名随意重排导入来改变级联。新动效先复用 tokens 和现有类，不复制一套页面样式。
 
 ## 公共壳只挂载一次
 
@@ -54,7 +59,7 @@ src/themes/argon/
 - AppLink 保留 Next 预取和浏览器默认手势，并共享 React transition；SearchForm 保留 GET 可分享地址和无 JS 时的原生能力。
 - 历史正文由 Server 安全渲染，限定在正文容器的事件委托接管真实同源页面链接；外链、资源、下载、新标签和修饰键不接管。同页 hash 使用共享平滑定位并保留独立历史条目，目标在折叠块内时先展开。
 - 页目录/最新站点数据由 PagePresentation 在提交后桥接。每次注册拥有独立 token，卸载只释放自己的注册；旧页迟到 cleanup 不能清掉新目录，同一路由进入错误边界也不能残留旧目录。
-- Client 组件只获得公开 Site、目录和已渲染 children，不把完整快照、HTML 解析器、数据库配置或服务密钥引入客户端。
+- Client 组件只获得公开 Site、目录和已渲染 children，不把完整快照、服务端 HTML 清洗器、数据库配置或服务密钥引入客户端。评论的 Markdown 解析器用于编辑预览，通过封闭的 React 元素集合输出，拒绝 HTML 执行。
 
 ## 动效与资源策略
 
@@ -66,14 +71,18 @@ src/themes/argon/
 
 滚动核心只在用户输入/定位时安排有限 rAF。纵向 wheel 支持小数与像素/行/页单位，采用时间相关指数阻尼并累积有界目标，跳过输入框、嵌套滚动区、弹层、代码区、缩放和横向手势。触屏保持原生；不创建第二套页面滚动容器。阅读设置不锁 body；图片 dialog 仍锁背景，根 scrollbar-gutter 稳定横向位置。历史位置有界存于内存并用 history.state 独立键定位，保留 Next 自有字段；完整页面重载不承诺跨会话保存阅读位置。
 
-短代码仅展示转换，转换产物仍走 HTML allowlist 和真实媒体节点映射；不要添加执行脚本、任意类名/样式、查询 WordPress 数据的能力。图片查看保留链接图片的原链接语义，非链接图片才加键盘可访问的查看行为。
+短代码仅展示转换，转换产物仍走 HTML allowlist 和真实媒体节点映射；不要添加执行脚本、任意类名/样式、查询 WordPress 数据的能力。ref 转为跨块顺序编号及文末往返链接，代码/注释/属性中的例子仍保留字面量。图片仅增强无链接图片及明确指向图片文件的链接，其他链接图片保留导航语义；贴纸不打开大图。
 
 ## 后续维护
 
-ArticleHeader 在服务端分有图/无图展示，ArticleActions 仅负责客户端留言定位和复制链接。PostCard 的覆盖链接是原生 AppLink，元信息和标签链接保持独立层级，不嵌套 anchor；点击摘要/留白也能软导航。
+ArticleHeader 在服务端分有图/无图展示，ArticleActions 负责留言定位、分享弹层、复制反馈与浏览器原生分享；关闭评论时不输出写留言入口。PostCard 的覆盖链接是原生 AppLink，元信息和标签链接保持独立层级，不嵌套 anchor；说说正文保留独立图片、链接及操作。相关文章按公开标签/分类匹配，再按时间和稳定 ID 排序。
 
 评论的历史条目由后端生成 PublicComment 适配为界面模型，示例和临时行只存在主题内。CommentSection 编排全局排序/分页/回复/本页赞同，CommentItem 展示一级缩进，CommentComposer 协调验证和提交演示，CommentEditor/CommentIdentity 分别维护编辑与访客字段。CommentBody 仅用 React 输出有限格式；历史正文始终纯文本。样例不进入 DTO、快照或后端写 API，刷新/离开页面丢弃；正式评论接入时替换编排与接口，不把演示成功提示当作发布成功。
 
-文章/说说的顶层 type 待后端版本化升级，见 [内容类型衔接](content-types.md)，不要为了先做一个卡片而手改生成类型或猜测已有 kind。
+文章/说说顶层 type 的展示草案来自后端，见 [内容类型衔接](content-types.md)。legacy kind 只在 core/content/presentation.ts 适配，样例集中在 examples.ts；不修改在线 0.1 快照和生成文件。正式迁移仍待后端版本化发布。
+
+外观偏好由 core/browser/appearance-policy、appearance 和 use-appearance 统一校验、订阅和应用；ThemeToggle 与设置共用。主题色自动派生适合深浅背景的文字色，模式与纯黑偏好跨刷新保存，保留旧 everunfold.theme 选择。右侧设置仍用非模态 popover；搜索使用原生 dialog，复用稳定滚动条与焦点处理。阅读进度仅在确需滚动的文章/说说详情正文内显示，列表和评论区域隐藏。
+
+公开分享地址由仅服务端 PUBLIC_SITE_URL 显式提供，不从 API 地址/请求 Host 推断。文章 metadata 输出公开标题、摘要、图片、时间和 canonical；示例 noindex 且没有正式 canonical，受限投影不输出正文摘要/图片。当前复制/系统分享使用浏览器实际访问地址，便于本机预览；发布后自然使用真实站点地址。
 
 UI 交互用原有组件和纯策略扩展；新页面的内容与安全渲染继续在 Server 侧。先运行 npm run check，再按手工步骤验证客户端交互；保留热更新时使用独立生产构建命令，不直接覆盖正在运行的 .next。

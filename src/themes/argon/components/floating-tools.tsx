@@ -38,7 +38,7 @@ export function FloatingTools() {
   useEffect(() => installScrollBehavior(navigateToAnchor), []);
   return (
     <div className="floating-tools" role="group" aria-label="阅读工具">
-      <ToolSlot visible={reading.article && scroll > 100}>
+      <ToolSlot visible={reading.showProgress}>
         <div
           className="reading-progress"
           aria-label={`阅读进度 ${reading.progress}%`}

@@ -9,6 +9,7 @@ import { ArticleHeader } from "./article-header";
 import { ArticleActions } from "./article-actions";
 import { ArticleMedia } from "./article-media";
 import { Icon } from "./icon";
+import { RelatedArticles } from "./related-articles";
 
 export function Article({
   snapshot,
@@ -58,7 +59,7 @@ export function Article({
               </time>
             </p>
           </footer>
-          <ArticleActions path={content.path} />
+          <ArticleActions path={content.path} title={content.title} />
         </div>
       </article>
       {(previous || next) && (
@@ -76,6 +77,9 @@ export function Article({
             </Link>
           )}
         </nav>
+      )}
+      {content.kind === "article" && (
+        <RelatedArticles snapshot={snapshot} content={content} />
       )}
       <CommentSection
         key={content.id}
