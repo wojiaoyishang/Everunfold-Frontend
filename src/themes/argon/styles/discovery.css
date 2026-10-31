@@ -256,8 +256,6 @@
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
   scroll-padding-inline: 3px;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--muted) 40%, transparent) transparent;
   list-style: none;
   margin: 0 -3px;
   padding: 5px 3px 16px;

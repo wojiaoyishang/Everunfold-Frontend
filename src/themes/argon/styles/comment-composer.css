@@ -63,12 +63,25 @@
     border-color 220ms,
     box-shadow 220ms;
 }
-.composer-editor:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+.composer-editor:has(textarea:focus) {
+  border-color: color-mix(in srgb, var(--accent) 65%, var(--line));
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+.comment-composer :where(button, input):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+/* Keep toolbar/picker focus inside clipped, animated panels. */
+.composer-editor button:focus-visible {
+  outline-offset: -3px;
+}
+.comment-composer button:focus:not(:focus-visible) {
+  outline: none;
 }
 .composer-editor-toolbar {
   display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
   align-items: center;
   justify-content: space-between;
   padding: 7px 11px;
@@ -78,6 +91,13 @@
 .composer-format-tools {
   display: flex;
   gap: 4px;
+}
+.composer-tabs {
+  flex-shrink: 0;
+}
+.composer-format-tools {
+  flex-wrap: wrap;
+  margin-left: auto;
 }
 .composer-editor-toolbar button {
   display: inline-flex;
@@ -95,6 +115,7 @@
   height: 15px;
 }
 .composer-editor-toolbar button:hover,
+.composer-format-tools button[aria-expanded="true"],
 .composer-tabs [aria-selected="true"] {
   background: var(--surface);
   color: var(--accent);
@@ -134,28 +155,6 @@
 .preview-empty {
   color: var(--muted);
   font-size: 13px;
-}
-.composer-emotions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--line);
-}
-.composer-emotions button {
-  min-width: 35px;
-  padding: 6px 9px;
-  border-radius: 5px;
-  font-size: 17px;
-  color: var(--text);
-  background: var(--surface);
-}
-.composer-emotions button:nth-last-child(-n + 2) {
-  font-size: 12px;
-}
-.composer-emotions button:hover {
-  transform: translateY(-3px);
-  background: var(--accent-soft);
 }
 .composer-editor-footer {
   display: flex;
@@ -258,4 +257,8 @@
 }
 .comment-composer [aria-invalid="true"] {
   border-color: #c24e69;
+}
+.composer-editor:has(textarea[aria-invalid="true"]) {
+  border-color: #c24e69;
+  box-shadow: none;
 }

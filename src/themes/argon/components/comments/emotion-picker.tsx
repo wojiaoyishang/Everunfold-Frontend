@@ -63,7 +63,7 @@ export function EmotionPicker({
           </button>
         ))}
       </div>
-      <div className={`emotion-grid ${stickers ? "sticker-grid" : ""}`}>
+      <div className="emotion-grid" data-kind={stickers ? "sticker" : group}>
         {text?.items.map((item) => (
           <button
             type="button"

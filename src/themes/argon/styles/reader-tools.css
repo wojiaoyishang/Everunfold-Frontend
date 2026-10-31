@@ -220,54 +220,6 @@
 .enhanced-code[data-expanded="true"] {
   max-height: none;
 }
-.emotion-tabs {
-  display: flex;
-  gap: 5px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-.emotion-tabs button {
-  border-radius: 5px;
-  padding: 6px 12px;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font: inherit;
-  font-size: 12px;
-}
-.emotion-tabs button[aria-pressed="true"] {
-  background: var(--accent-soft);
-  color: var(--accent);
-}
-.emotion-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-  max-height: 240px;
-  gap: 5px;
-  overflow: auto;
-}
-.emotion-grid button {
-  background: var(--surface-soft);
-  border-radius: 6px;
-  min-height: 45px;
-  cursor: pointer;
-  color: var(--text);
-  font-size: 16px;
-  overflow: hidden;
-}
-.emotion-grid button:hover {
-  background: var(--accent-soft);
-}
-.sticker-grid img {
-  width: 100%;
-  height: auto;
-  display: block;
-  border-radius: 4px;
-}
-.emotion-picker > small {
-  color: var(--muted);
-  font-size: 10px;
-}
 .comment-formatted .comment-sticker {
   display: inline-block;
   width: 85px;
@@ -341,8 +293,5 @@
     padding: 4px 7px;
     min-width: 32px;
     font-size: 12px;
-  }
-  .emotion-grid {
-    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
   }
 }

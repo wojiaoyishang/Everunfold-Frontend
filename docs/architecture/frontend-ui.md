@@ -86,6 +86,8 @@ ArticleHeader 在服务端分有图/无图展示，ArticleActions 负责留言�
 
 评论的历史条目由后端生成 PublicComment 适配为界面模型，示例和临时行只存在主题内。CommentSection 编排全局排序/分页/回复/本页赞同，CommentItem 展示一级缩进，CommentComposer 协调验证和提交演示，CommentEditor/CommentIdentity 分别维护编辑与访客字段。CommentBody 仅用 React 输出有限格式；历史正文始终纯文本。样例不进入 DTO、快照或后端写 API，刷新/离开页面丢弃；正式评论接入时替换编排与接口，不把演示成功提示当作发布成功。
 
+评论展示细节见 [ADR 0011](../decisions/0011-comment-focus-and-scrollbars.md)：EmotionPicker 通过 data-kind 区分 Emoji/完整颜文字/贴纸布局，样式集中在 emotion-picker.css。分组选择与键盘焦点分开，内描边不被 TransitionPanel 裁切；编辑器外框仅跟随正文输入焦点。全站原生滚动条在 scrollbars.css 消费主题变量，保留标准属性回退、系统强制颜色和根稳定 gutter，不改滚动控制逻辑。
+
 文章/说说顶层 type 的展示草案来自后端，见 [内容类型衔接](content-types.md)。legacy kind 只在 core/content/presentation.ts 适配，样例集中在 examples.ts；不修改在线 0.1 快照和生成文件。正式迁移仍待后端版本化发布。
 
 外观偏好由 core/browser/appearance-policy、appearance 和 use-appearance 统一校验、订阅和应用；ThemeToggle 与设置共用。主题色自动派生适合深浅背景的文字色，模式与纯黑偏好跨刷新保存，保留旧 everunfold.theme 选择。右侧设置仍用非模态 popover；搜索使用原生 dialog，复用稳定滚动条与焦点处理。阅读进度仅在确需滚动的文章/说说详情正文内显示，列表和评论区域隐藏。
