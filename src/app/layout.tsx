@@ -14,7 +14,12 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   return (
-    <html lang="zh-CN" data-motion="full" suppressHydrationWarning>
+    <html
+      lang="zh-CN"
+      data-motion="full"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: initializeAppearance }} />
         <script dangerouslySetInnerHTML={{ __html: initializeMotion }} />
