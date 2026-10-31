@@ -41,7 +41,10 @@ export function PostMeta({
         <Icon name="clock" />
         {content.reading_minutes} 分钟
       </span>
-      <Link href={article ? "#comments" : `${content.path}#comments`}>
+      <Link
+        href={article ? "#comments" : `${content.path}#comments`}
+        expectedContent={!article}
+      >
         <Icon name="comment" />
         {content.comment_count}
       </Link>

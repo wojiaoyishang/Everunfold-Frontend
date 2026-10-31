@@ -9,6 +9,7 @@ import { Icon } from "../icon";
 import { CommentComposer } from "./comment-composer";
 import { CommentItem } from "./comment-item";
 import { exampleComments } from "./examples";
+import { useCommentLikes } from "./use-comment-likes";
 import {
   COMMENT_PAGE_SIZE,
   commentPage,
@@ -30,7 +31,6 @@ export function CommentSection({
 }) {
   const [local, setLocal] = useState<CommentEntry[]>([]);
   const [examples, setExamples] = useState(true);
-  const [likes, setLikes] = useState<Set<string>>(() => new Set());
   const [reply, setReply] = useState<{
     entry: CommentEntry | null;
     active: boolean;
@@ -51,6 +51,11 @@ export function CommentSection({
   );
   const { entries: paged, page, pages } = commentPage(entries, requestedPage);
   const shown = continuous ? entries.slice(0, page * COMMENT_PAGE_SIZE) : paged;
+  const likes = useCommentLikes(
+    shown
+      .filter((entry) => entry.origin === "history")
+      .map((entry) => entry.id),
+  );
   useCommentLocation(target, page);
   useEffect(() => {
     if (initialAnchor.current) return;
@@ -189,15 +194,12 @@ export function CommentSection({
               floor={
                 (continuous ? 0 : (page - 1) * COMMENT_PAGE_SIZE) + index + 1
               }
-              liked={likes.has(entry.id)}
-              onLike={() =>
-                setLikes((current) => {
-                  const next = new Set(current);
-                  if (next.has(entry.id)) next.delete(entry.id);
-                  else next.add(entry.id);
-                  return next;
-                })
-              }
+              liked={likes.get(entry.id)?.liked ?? false}
+              likeCount={likes.get(entry.id)?.count}
+              liking={likes.pending.has(entry.id)}
+              onLike={() => {
+                void likes.toggle(entry.id);
+              }}
               onReply={() => {
                 setReply({ entry, active: true });
                 setTarget({ id: "comment-composer" });

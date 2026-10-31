@@ -15,6 +15,7 @@ import { RouteContent } from "./route-content";
 import { RouteStateProvider, useRouteState } from "./route-state";
 import { HomeFeedPreference } from "./home-feed-settings";
 import { ReaderDataProvider } from "./reader-data";
+import { FeedbackProvider } from "./ui/feedback";
 
 export function BlogShell({
   site,
@@ -30,7 +31,9 @@ export function BlogShell({
       <RouteStateProvider site={site}>
         <ReadingStateProvider>
           <ReaderDataProvider baseUrl={backendBaseUrl}>
-            <ShellFrame>{children}</ShellFrame>
+            <FeedbackProvider>
+              <ShellFrame>{children}</ShellFrame>
+            </FeedbackProvider>
           </ReaderDataProvider>
         </ReadingStateProvider>
       </RouteStateProvider>

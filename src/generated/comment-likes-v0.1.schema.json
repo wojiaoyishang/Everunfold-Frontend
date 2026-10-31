@@ -1,0 +1,179 @@
+{
+  "$defs": {
+    "CommentLikeInput": {
+      "additionalProperties": false,
+      "properties": {
+        "liked": {
+          "title": "Liked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "liked"
+      ],
+      "title": "CommentLikeInput",
+      "type": "object"
+    },
+    "CommentLikeState": {
+      "additionalProperties": false,
+      "properties": {
+        "comment_id": {
+          "format": "uuid",
+          "title": "Comment Id",
+          "type": "string"
+        },
+        "liked": {
+          "title": "Liked",
+          "type": "boolean"
+        },
+        "count": {
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "comment_id",
+        "liked",
+        "count"
+      ],
+      "title": "CommentLikeState",
+      "type": "object"
+    },
+    "CommentLikes": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/CommentLikeState"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "CommentLikes",
+      "type": "object"
+    },
+    "CommentLikesQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ids"
+      ],
+      "title": "CommentLikesQuery",
+      "type": "object"
+    },
+    "PublicResponse_CommentLikeState_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/CommentLikeState"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[CommentLikeState]",
+      "type": "object"
+    },
+    "PublicResponse_CommentLikes_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/CommentLikes"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[CommentLikes]",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "$ref": "#/$defs/CommentLikesQuery"
+    },
+    "mutation": {
+      "$ref": "#/$defs/CommentLikeInput"
+    },
+    "states": {
+      "$ref": "#/$defs/PublicResponse_CommentLikes_"
+    },
+    "state": {
+      "$ref": "#/$defs/PublicResponse_CommentLikeState_"
+    }
+  },
+  "required": [
+    "query",
+    "mutation",
+    "states",
+    "state"
+  ],
+  "title": "CommentLikesContract",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-everunfold-contract-version": "0.1.0",
+  "x-everunfold-visitor-header": "X-Everunfold-Visitor",
+  "x-everunfold-operations": [
+    {
+      "name": "readCommentLikes",
+      "path": "/v1/comments/likes",
+      "method": "GET",
+      "input": "query",
+      "response": "states"
+    },
+    {
+      "name": "setCommentLike",
+      "path": "/v1/comments/{comment_id}/like",
+      "method": "PUT",
+      "input": "mutation",
+      "response": "state"
+    }
+  ]
+}

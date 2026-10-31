@@ -43,7 +43,7 @@ export function ArticleActions({
           ? "读到这里，想听听你的声音。"
           : "把这一刻，分享给在意的人。"}
       </span>
-      <div>
+      <div className="article-action-buttons">
         {commentsOpen && (
           <Link href="#comment-composer">
             <Icon name="comment" />
@@ -126,7 +126,7 @@ export function ArticleActions({
               : "不支持系统分享时，会为你复制链接。"}
         </small>
       </Popover>
-      <span className="navigation-status" role="status">
+      <span className="sr-only" role="status">
         {state === "copied" ? "文章链接已复制" : ""}
       </span>
       {state === "manual" && (

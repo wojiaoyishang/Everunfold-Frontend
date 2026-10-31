@@ -24,7 +24,7 @@ export async function generateMetadata({
         readConfiguration().publicSiteUrl,
         presented.example,
       )
-    : { title: "没有找到这个故事", robots: { index: false } };
+    : { title: "404 页面未找到", robots: { index: false } };
 }
 export default async function ContentPage({
   params,

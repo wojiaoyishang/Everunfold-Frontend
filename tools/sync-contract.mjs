@@ -25,16 +25,22 @@ const presentation =
   path.basename(absoluteSource) === "presentation-v0.2.schema.json";
 const reader =
   path.basename(absoluteSource) === "reader-preview-v0.1.schema.json";
-const rootName = reader
-  ? "ReaderPreviewContract"
-  : presentation
-    ? "ContentPresentation"
-    : "PublicSnapshot";
-const outputName = reader
-  ? "reader-preview-contract"
-  : presentation
-    ? "presentation-contract"
-    : "public-contract";
+const likes =
+  path.basename(absoluteSource) === "comment-likes-v0.1.schema.json";
+const rootName = likes
+  ? "CommentLikesContract"
+  : reader
+    ? "ReaderPreviewContract"
+    : presentation
+      ? "ContentPresentation"
+      : "PublicSnapshot";
+const outputName = likes
+  ? "comment-likes-contract"
+  : reader
+    ? "reader-preview-contract"
+    : presentation
+      ? "presentation-contract"
+      : "public-contract";
 const backendRoot = path.dirname(path.dirname(absoluteSource));
 const relativeSource = path
   .relative(backendRoot, absoluteSource)
@@ -64,7 +70,7 @@ const types = await compile(schema, rootName, {
   bannerComment:
     "/* Generated from the backend public contract. Do not edit by hand. */",
   additionalProperties: false,
-  ignoreMinAndMaxItems: reader,
+  ignoreMinAndMaxItems: reader || likes,
   style: { singleQuote: false, semi: true, printWidth: 100 },
 });
 await writeFile(path.join(output, `${outputName}.ts`), types);
@@ -72,11 +78,13 @@ await writeFile(path.join(output, path.basename(absoluteSource)), source);
 await writeFile(
   path.join(
     output,
-    reader
-      ? "reader-preview-source.json"
-      : presentation
-        ? "presentation-source.json"
-        : "contract-source.json",
+    likes
+      ? "comment-likes-source.json"
+      : reader
+        ? "reader-preview-source.json"
+        : presentation
+          ? "presentation-source.json"
+          : "contract-source.json",
   ),
   `${JSON.stringify(
     {
@@ -125,6 +133,44 @@ import { requestJSON, type RequestOptions } from "@/core/http/request";
 const ajv = new Ajv({ strict: true });
 addFormats(ajv);
 ajv.addSchema(Object.fromEntries(Object.entries(schema).filter(([key]) => !key.startsWith("x-"))), "reader-preview");
+${functions}\n`,
+  );
+}
+if (likes) {
+  const operations = schema["x-everunfold-operations"];
+  if (
+    !Array.isArray(operations) ||
+    operations.some(
+      (op) =>
+        !/^(readCommentLikes|setCommentLike)$/.test(op.name) ||
+        !/^\/v1\/comments\/(likes|\{comment_id\}\/like)$/.test(op.path) ||
+        !["GET", "PUT"].includes(op.method) ||
+        !schema.properties[op.input] ||
+        !schema.properties[op.response],
+    ) ||
+    schema["x-everunfold-visitor-header"] !== "X-Everunfold-Visitor"
+  )
+    throw new Error("Invalid comment operation metadata");
+  const functions = operations
+    .map(
+      (op) => `
+const ${op.name}Validator = ajv.compile<CommentLikesContract[${JSON.stringify(op.response)}]>({ $ref: ${JSON.stringify(`comment-likes#/properties/${op.response}`)} });
+export function ${op.name}(baseUrl: string, ${op.method === "PUT" ? "commentId: string, " : ""}input: CommentLikesContract[${JSON.stringify(op.input)}], visitor: string, options: RequestOptions = {}) {
+  return ${op.method === "PUT" ? "mutateJSON" : "requestJSON"}(baseUrl, ${op.method === "PUT" ? `${JSON.stringify(op.path)}.replace("{comment_id}", encodeURIComponent(commentId))` : JSON.stringify(op.path)}, input, ${op.name}Validator, { ...options, headers: { ...options.headers, "X-Everunfold-Visitor": visitor } });
+}`,
+    )
+    .join("\n");
+  await writeFile(
+    path.join(output, "comment-likes-client.ts"),
+    `/* Generated from backend operation metadata. Do not edit by hand. */
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
+import schema from "./comment-likes-v0.1.schema.json";
+import type { CommentLikesContract } from "./comment-likes-contract";
+import { requestJSON, mutateJSON, type RequestOptions } from "@/core/http/request";
+const ajv = new Ajv({ strict: true });
+addFormats(ajv);
+ajv.addSchema(Object.fromEntries(Object.entries(schema).filter(([key]) => !key.startsWith("x-"))), "comment-likes");
 ${functions}\n`,
   );
 }

@@ -20,7 +20,8 @@
     padding: 25px;
   }
   .post-meta {
-    gap: 5px 12px;
+    --post-meta-gap: 12px;
+    gap: 5px var(--post-meta-gap);
   }
 }
 @media (max-width: 900px) {
@@ -221,7 +222,8 @@
   }
   .post-meta {
     font-size: 11px;
-    gap: 5px 10px;
+    --post-meta-gap: 10px;
+    gap: 5px var(--post-meta-gap);
   }
   .post-excerpt {
     font-size: 14px;

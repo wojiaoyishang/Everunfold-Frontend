@@ -1,0 +1,66 @@
+.ui-feedback-region {
+  position: fixed;
+  z-index: 1200;
+  inset: auto 20px 24px auto;
+  width: min(420px, calc(100vw - 40px));
+  pointer-events: none;
+}
+.ui-feedback {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 1.6;
+  pointer-events: auto;
+  opacity: 0;
+  translate: 0 8px;
+  transition:
+    opacity 200ms ease,
+    translate 200ms var(--motion-ease);
+}
+.ui-feedback[data-visible="true"] {
+  opacity: 1;
+  translate: 0 0;
+}
+.ui-feedback[data-tone="error"] {
+  border-inline-start-color: var(--color-danger, #b93648);
+}
+.ui-feedback > .icon {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.ui-feedback[data-tone="error"] > .icon {
+  color: var(--color-danger, #b93648);
+}
+.ui-feedback > span {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.ui-feedback .icon-button {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+@starting-style {
+  .ui-feedback[data-visible="true"] {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+.ui-spinner {
+  animation: ui-loading-orbit 900ms linear infinite;
+}
+html[data-motion="reduced"] .ui-spinner {
+  animation: none;
+}
+html[data-motion="reduced"] .ui-feedback {
+  transition: none;
+}

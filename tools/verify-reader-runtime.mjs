@@ -115,7 +115,7 @@ export async function verifyReaderRuntime({
           "app = create_app(settings)",
           "@app.middleware('http')",
           "async def preview_delay(request, call_next):",
-          `    if request.url.path.startswith('/v1/reader-preview/'): await asyncio.sleep(${delay})`,
+          `    if request.url.path.startswith(('/v1/reader-preview/', '/v1/comments')): await asyncio.sleep(${delay})`,
           "    return await call_next(request)",
           "uvicorn.run(app, host='127.0.0.1', port=8991, log_level='warning', access_log=False)",
         ].join("\n"),
@@ -142,7 +142,8 @@ export async function verifyReaderRuntime({
       );
     } else {
       assert.match(html, /noindex/);
-      assert.match(html, /公开内容暂时无法读取/);
+      assert.match(html, /页面加载失败/);
+      assert.match(html, /后端同步失败/);
       assert.equal(response.headers.get("cache-control"), "no-store");
       assert.equal(response.headers.get("retry-after"), "60");
       assert.doesNotMatch(html, /data-page-ready="true"/);
@@ -253,7 +254,7 @@ export async function verifyReaderRuntime({
         if (line.trim() === "slow") {
           await online(4);
           console.log(
-            "Reader GET requests now take 4 seconds in the test backend only.",
+            "Reader and comment requests now take 4 seconds in the test backend only.",
           );
         }
       }

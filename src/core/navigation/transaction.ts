@@ -9,6 +9,7 @@ export interface NavigationIntent {
   origin: string;
   replace?: boolean;
   scroll?: boolean;
+  expectedContent?: boolean;
 }
 export interface NavigationFeedback {
   id: number;
@@ -109,6 +110,13 @@ export class NavigationTransaction {
   fail(failure: NavigationFailure) {
     const task = this.active;
     if (!task) return;
+    // An index-backed article link failing preparation indicates a node/index mismatch.
+    // Keep the original page; never resurrect withdrawn content from a client cache.
+    if (
+      task.intent.expectedContent &&
+      ["not-found", "unavailable", "render"].includes(failure)
+    )
+      failure = "sync";
     this.active = null;
     this.clearTimers();
     task.abort.abort();

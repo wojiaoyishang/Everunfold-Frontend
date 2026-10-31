@@ -1,18 +1,29 @@
 .dynamic-metric {
-  display: inline-flex;
-  inline-size: 7em;
+  display: inline-grid;
+  grid-template-columns: 0fr;
+  min-width: 0;
   min-block-size: 1.4em;
-  flex: 0 0 7em;
   font-variant-numeric: tabular-nums;
-  visibility: hidden;
+  transition:
+    grid-template-columns 280ms var(--motion-ease),
+    margin-inline-start 280ms var(--motion-ease);
+}
+.post-meta > .dynamic-metric[data-ready="false"] {
+  margin-inline-start: calc(-1 * var(--post-meta-gap));
+}
+.dynamic-metric-sizer {
+  overflow: hidden;
+  min-width: 0;
 }
 .dynamic-metric[data-ready="true"] {
-  visibility: visible;
+  grid-template-columns: 1fr;
+  margin-inline-start: 0;
 }
 .dynamic-metric-value {
   display: inline-flex;
   align-items: center;
   gap: 0.35em;
+  white-space: nowrap;
   animation: reader-metric-appear 200ms ease both;
 }
 .dynamic-metric-value small {
@@ -147,4 +158,7 @@
 }
 html[data-motion="reduced"] .dynamic-metric-value {
   animation: none;
+}
+html[data-motion="reduced"] .dynamic-metric {
+  transition: none;
 }

@@ -198,7 +198,7 @@
 }
 .ui-loading-ring-line {
   stroke-linecap: round;
-  stroke-dasharray: 30 83.1;
+  stroke-dasharray: 26.5 73.5;
   transform-origin: center;
 }
 .ui-loading-ring[data-active="true"] .ui-loading-ring-line {
@@ -213,6 +213,11 @@ html[data-motion="reduced"]
   .ui-loading-ring[data-active="true"]
   .ui-loading-ring-line {
   animation: none;
+}
+.ui-loading-ring[data-determinate="true"] .ui-loading-ring-line {
+  animation: none;
+  transform: rotate(-90deg);
+  transition: stroke-dashoffset 220ms ease;
 }
 .ui-anchored-panel {
   position: fixed;

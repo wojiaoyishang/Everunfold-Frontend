@@ -12,6 +12,8 @@ export function CommentItem({
   path,
   floor,
   liked,
+  liking = false,
+  likeCount,
   onLike,
   onReply,
   onLocate,
@@ -21,6 +23,8 @@ export function CommentItem({
   path: string;
   floor: number;
   liked: boolean;
+  liking?: boolean;
+  likeCount?: number;
   onLike: () => void;
   onReply: () => void;
   onLocate: (id: string) => void;
@@ -122,12 +126,23 @@ export function CommentItem({
             type="button"
             className="comment-like"
             aria-pressed={liked}
+            aria-busy={liking}
+            disabled={liking || entry.origin !== "history"}
             onClick={onLike}
             aria-label={`${liked ? "取消赞同" : "赞同"} ${entry.author} 的留言`}
-            title="本页互动演示"
+            title={
+              entry.origin === "history"
+                ? undefined
+                : "示例和仅本页留言暂不支持点赞"
+            }
           >
-            <Icon name="heart" />
-            {liked ? "已赞同" : "赞同"}
+            <span className={liking ? "ui-spinner" : undefined}>
+              <Icon name={liking ? "refresh" : "heart"} />
+            </span>
+            {liking ? "提交中" : liked ? "已赞同" : "赞同"}
+            {likeCount !== undefined && likeCount > 0 && (
+              <span>{likeCount}</span>
+            )}
           </Button>
         </div>
       </div>

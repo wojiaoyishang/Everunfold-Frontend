@@ -26,6 +26,7 @@ export function PostCard({ content }: { content: ReadableContent }) {
     <article className={`surface post-card ${cover ? "has-cover" : ""}`}>
       <Link
         href={content.path}
+        expectedContent
         className="post-card-open"
         aria-label={content.title}
       />

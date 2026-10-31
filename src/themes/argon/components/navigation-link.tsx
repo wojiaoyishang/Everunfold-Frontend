@@ -10,6 +10,7 @@ import { navigateToAnchor } from "@/core/browser/scroll-restoration";
 
 type AppLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
   href: string;
+  expectedContent?: boolean;
 };
 
 /** Keep Next's prefetching and browser gestures, sharing only the pending transition. */
@@ -19,6 +20,7 @@ export function AppLink({
   scroll,
   onNavigate,
   onClick,
+  expectedContent,
   ...props
 }: AppLinkProps) {
   const { navigate } = useRouteState();
@@ -63,7 +65,7 @@ export function AppLink({
         const destination = clientNavigationHref(window.location.href, href);
         if (!destination) return;
         event.preventDefault();
-        navigate(destination, { replace, scroll });
+        navigate(destination, { replace, scroll, expectedContent });
       }}
     />
   );

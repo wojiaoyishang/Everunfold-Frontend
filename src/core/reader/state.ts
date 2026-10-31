@@ -37,6 +37,21 @@ export function readerPhase(snapshot: ReaderSnapshot) {
       : "unavailable";
   return states.every((value) => value.status === "ready") ? "ready" : "idle";
 }
+
+/** Settled page capabilities, including failures; never an estimate of bytes transferred. */
+export function readerProgress(snapshot: ReaderSnapshot) {
+  const states = Object.values(snapshot.requests);
+  const settled = states.filter(
+    (state) => state.status === "ready" || state.status === "error",
+  ).length;
+  const failed = states.filter((state) => state.status === "error").length;
+  return {
+    total: states.length,
+    settled,
+    failed,
+    fraction: states.length ? settled / states.length : 0,
+  };
+}
 export function failureReason(error: unknown) {
   if (!(error instanceof RequestError)) return "暂时无法更新";
   if (error.kind === "timeout") return "请求超时";

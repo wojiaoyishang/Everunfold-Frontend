@@ -1,0 +1,7 @@
+{
+  "schema_version": "0.1.0",
+  "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+  "source_path": "contracts/comment-likes-v0.1.schema.json",
+  "source_commit": "75471b1b659455dbbfe4344fdedde258b57c35ee",
+  "sha256": "0e86b2f72e2acb788f6b4faa71b49ac63c52802c05958a69054665137887d018"
+}

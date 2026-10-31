@@ -1,5 +1,5 @@
 export type NavigationFailure =
-  "timeout" | "network" | "not-found" | "unavailable" | "render";
+  "timeout" | "network" | "not-found" | "unavailable" | "render" | "sync";
 
 export class NavigationLoadError extends Error {
   constructor(readonly reason: NavigationFailure) {

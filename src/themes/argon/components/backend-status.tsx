@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import { readerPhase } from "@/core/reader/state";
+import { readerPhase, readerProgress } from "@/core/reader/state";
 import { useReaderData, DynamicStatusExtensions } from "./reader-data";
 import { Button, Popover } from "./ui/primitives";
 import { LoadingRing } from "./ui/loading-ring";
@@ -25,6 +25,10 @@ export function BackendStatus() {
   const phase = readerPhase(snapshot);
   const presentation = phases[phase];
   const loading = phase === "updating";
+  const progress = readerProgress(snapshot);
+  const progressText = progress.total
+    ? `已检查 ${progress.settled}/${progress.total} 项${progress.failed ? `，${progress.failed} 项失败` : ""}`
+    : "";
   return (
     <>
       <Button
@@ -32,14 +36,15 @@ export function BackendStatus() {
         className="icon-button backend-status"
         data-status={phase}
         aria-label={`动态数据状态：${presentation.text}`}
-        title={presentation.text}
+        title={[presentation.text, progressText].filter(Boolean).join(" · ")}
         aria-expanded={open}
         aria-controls={id}
         aria-haspopup="dialog"
         popoverTarget={id}
       >
         <Icon name={presentation.icon} />
-        <LoadingRing active={loading} />
+        <LoadingRing active={loading} progress={progress.fraction} />
+        <span className="sr-only">{progressText}</span>
       </Button>
       <Popover
         ref={panel}
@@ -57,6 +62,7 @@ export function BackendStatus() {
           <div>
             <strong id={`${id}-title`}>动态数据状态</strong>
             <p role="status">{presentation.text}</p>
+            {progress.total > 0 && <p>{progressText}</p>}
           </div>
         </div>
         {["partial", "unavailable", "offline"].includes(phase) && (

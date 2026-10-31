@@ -25,7 +25,7 @@ export function RelatedArticles({
       <HorizontalRail className="related-track" aria-label="推荐文章列表">
         {items.map((entry) => (
           <li key={entry.id}>
-            <AppLink href={entry.path} className="related-card">
+            <AppLink href={entry.path} expectedContent className="related-card">
               <StoryCover src={entry.cover_url} sizes="220px" />
               <h3>{entry.title}</h3>
               <Icon name="chevron" className="related-arrow" />

@@ -37,7 +37,9 @@ export function Archives({ snapshot }: { snapshot: PublicSnapshot }) {
                   <time dateTime={article.published_at}>
                     {displayDate(article.published_at).slice(5)}
                   </time>
-                  <Link href={article.path}>{article.title}</Link>
+                  <Link href={article.path} expectedContent>
+                    {article.title}
+                  </Link>
                 </li>
               ))}
             </ol>

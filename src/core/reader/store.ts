@@ -53,7 +53,7 @@ export class ReaderStore {
   private client: ReaderClient;
 
   constructor(
-    private baseUrl: string,
+    readonly baseUrl: string,
     private options: ReaderStoreOptions = {},
   ) {
     this.client = options.client ?? {

@@ -135,15 +135,15 @@ export function useReaderData() {
 
 /** Use a stable loader (module function or useCallback); the page owns its namespaced key. */
 export function usePageRequest<T>(
-  key: string,
+  key: string | null,
   load: (options: RequestOptions) => Promise<T>,
 ) {
   const { store, route, snapshot } = useReaderData();
   useEffect(
-    () => store.registerTask(route, key, load),
+    () => (key ? store.registerTask(route, key, load) : undefined),
     [store, route, key, load],
   );
-  return snapshot.requests[key] as LoadState<T> | undefined;
+  return (key ? snapshot.requests[key] : undefined) as LoadState<T> | undefined;
 }
 
 export function ViewMetric({ contentId }: { contentId: string }) {
@@ -182,13 +182,15 @@ export function ViewMetric({ contentId }: { contentId: string }) {
       aria-label={value === null ? undefined : `演示浏览量：${value}`}
       title={value === null ? undefined : "演示浏览量，不代表历史访问统计"}
     >
-      {value !== null && (
-        <span className="dynamic-metric-value">
-          <Icon name="eye" />
-          <span>{value.toLocaleString("zh-CN")}</span>
-          <small>演示</small>
-        </span>
-      )}
+      <span className="dynamic-metric-sizer">
+        {value !== null && (
+          <span className="dynamic-metric-value">
+            <Icon name="eye" />
+            <span>{value.toLocaleString("zh-CN")}</span>
+            <small>演示</small>
+          </span>
+        )}
+      </span>
     </span>
   );
 }

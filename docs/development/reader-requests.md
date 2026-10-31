@@ -1,6 +1,6 @@
 # 动态请求开发与联调
 
-版本：reader-requests-1，2026-10-31。已实现范围见 [ADR 0014](../decisions/0014-page-registered-reader-requests.md)；验证证据见 [验收记录](../handoff/reader-requests-verification.md)。
+版本：reader-requests-2，2026-10-31。初版见 [ADR 0014](../decisions/0014-page-registered-reader-requests.md)；阅读反馈与匿名点赞见 [ADR 0015](../decisions/0015-reader-feedback-and-comment-likes.md)、[本轮验收](../handoff/reader-feedback-verification.md)。
 
 ## 组件如何接入
 
@@ -64,4 +64,14 @@ node tools/verify-production.mjs --reader --interactive
 
 ## 尚未交付
 
-真实 Session/权限/CSRF、持久浏览记账和历史统计导入、评论异步核对/发布、真实点赞、可靠快照同步/撤回通知、生产容量和全部缓存 P0。演示接口明确默认关闭；上线正式能力时应使用正式契约及认证策略，不把演示响应改名当作生产事实。
+真实 Session/权限/CSRF、持久浏览记账和历史统计导入、评论正文异步核对/发布、说说点赞、可靠快照同步/撤回通知、生产容量和全部缓存 P0。演示身份/浏览量默认关闭，不把演示响应改名当作生产事实。
+
+## 阅读反馈与历史评论点赞
+
+- 当前页圆周进度使用 `readerProgress(snapshot)`，只统计登记能力的结束数量；失败结束仍显示失败，不因达到 100% 宣称同步成功。不同端点的页面请求自动加入统计，换页释放。
+- 浏览量未成功时横向占位为零，出现后通过网格与间距过渡移动同行元信息；窄屏间距共用变量。减少动态停止装饰过渡。
+- 已有索引中的正文链接通过 `AppLink expectedContent` 标记，准备/提交阶段的 404、503 或缺少页面就绪标记转为同步失败横幅，保留原页。直接访问未知 URL 仍为真实 404；没有合法快照为真实 503。不要为绕过失败恢复旧正文。
+- 前端点赞从后端 `75471b1` 的 `comment-likes-v0.1.schema.json` 生成；独立于 preview 开关。部署显式执行 `uv run alembic -c migrations/alembic.ini upgrade head`，再更新 API 和前端。开发库与隔离测试库已显式迁移，应用启动不做迁移。
+- `useCommentLikes` 只为可见历史留言注册读取，连续阅读按最多 50 条拆批。浏览器随机匿名标识按后端隔离，只用于偏好去重；更换浏览器不保持同一身份。PUT 等真实确认，不自动重试；迟到初始读取不覆盖新确认，离开页取消订阅与写入回调。
+- 示例/仅本页留言没有真实后端 ID，点赞禁用并说明原因。请求中爱心换为加载图标；成功/失败使用 `FeedbackProvider/useFeedback` 主题全局反馈，不占用正文布局。正文评论发布仍是原本明确标注的本页预览。
+- 隔离联调的 `slow` 命令同时延迟演示读取和评论请求 4 秒，便于查看进度及点赞加载状态；`offline/online/quit` 仍只控制测试进程。

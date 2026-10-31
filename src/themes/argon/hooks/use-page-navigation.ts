@@ -23,6 +23,7 @@ import {
 export interface NavigateOptions {
   replace?: boolean;
   scroll?: boolean;
+  expectedContent?: boolean;
 }
 
 export function usePageNavigation(route: string) {

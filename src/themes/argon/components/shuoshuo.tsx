@@ -49,7 +49,9 @@ export function ShuoshuoCard({
           <h1>{content.title}</h1>
         ) : (
           <h2>
-            <Link href={content.path}>{content.title}</Link>
+            <Link href={content.path} expectedContent>
+              {content.title}
+            </Link>
           </h2>
         ))}
       {detail ? (
@@ -61,7 +63,10 @@ export function ShuoshuoCard({
         <ReactionButton id={content.id} count={content.reaction_count} />
         {!example && <ViewMetric contentId={content.id} />}
         {content.comments_open ? (
-          <Link href={detail ? "#comments" : `${content.path}#comments`}>
+          <Link
+            href={detail ? "#comments" : `${content.path}#comments`}
+            expectedContent={!detail}
+          >
             <Icon name="comment" />
             {content.comment_count || "聊两句"}
           </Link>
@@ -72,6 +77,7 @@ export function ShuoshuoCard({
           <Link
             className="shuoshuo-open"
             href={content.path}
+            expectedContent
             aria-label={`打开说说：${content.title || "无标题随记"}`}
           >
             <Icon name="arrow" />

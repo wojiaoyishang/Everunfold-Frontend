@@ -101,9 +101,10 @@
   width: 12px;
 }
 .post-meta {
+  --post-meta-gap: 18px;
   display: flex;
   flex-wrap: wrap;
-  gap: 7px 18px;
+  gap: 7px var(--post-meta-gap);
   color: var(--muted);
   font-size: 12px;
   line-height: 1.7;

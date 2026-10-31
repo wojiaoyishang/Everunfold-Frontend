@@ -26,6 +26,7 @@ function NeighborCard({
   return (
     <AppLink
       href={content.path}
+      expectedContent
       className={className}
       aria-label={`${label}：${content.title}`}
     >

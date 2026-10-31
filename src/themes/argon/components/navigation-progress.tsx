@@ -10,6 +10,7 @@ const failureText: Record<NavigationFailure, string> = {
   "not-found": "没有找到这页，原页面已保留",
   unavailable: "页面暂不可用，原页面已保留",
   render: "内容未准备好，原页面已保留",
+  sync: "后端同步失败，文章暂时无法打开，原页面已保留",
 };
 
 export function NavigationProgress() {

@@ -1,4 +1,4 @@
-/** Browser GET transport; credentials and response caching are explicit per capability. */
+/** Browser JSON transport; credentials, caching and desired-state writes stay explicit. */
 export type RequestFailure =
   "cancelled" | "timeout" | "network" | "http" | "invalid";
 export class RequestError extends Error {
@@ -14,6 +14,7 @@ export interface RequestOptions {
   signal?: AbortSignal;
   timeoutMs?: number;
   fetcher?: typeof fetch;
+  headers?: Readonly<Record<string, string>>;
 }
 
 export async function requestJSON<T>(
@@ -21,7 +22,29 @@ export async function requestJSON<T>(
   path: string,
   query: object,
   validate: (input: unknown) => input is T,
-  { signal, timeoutMs = 8000, fetcher = fetch }: RequestOptions = {},
+  options: RequestOptions = {},
+): Promise<T> {
+  return sendJSON(baseUrl, path, query, validate, options);
+}
+
+/** Explicit desired-state writes have no automatic retry, unlike page-owned reads. */
+export async function mutateJSON<T>(
+  baseUrl: string,
+  path: string,
+  body: object,
+  validate: (input: unknown) => input is T,
+  options: RequestOptions = {},
+): Promise<T> {
+  return sendJSON(baseUrl, path, {}, validate, options, body);
+}
+
+async function sendJSON<T>(
+  baseUrl: string,
+  path: string,
+  query: object,
+  validate: (input: unknown) => input is T,
+  { signal, timeoutMs = 8000, fetcher = fetch, headers = {} }: RequestOptions,
+  body?: object,
 ): Promise<T> {
   const url = new URL(path, `${baseUrl}/`);
   for (const [key, input] of Object.entries(query)) {
@@ -53,30 +76,37 @@ export async function requestJSON<T>(
       (async () => {
         if (controller.signal.aborted) throw new RequestError("cancelled");
         const response = await fetcher(url, {
-          method: "GET",
+          method: body === undefined ? "GET" : "PUT",
           credentials: "omit",
           cache: "no-store",
-          headers: { Accept: "application/json" },
+          headers: {
+            ...headers,
+            Accept: "application/json",
+            ...(body === undefined
+              ? {}
+              : { "Content-Type": "application/json" }),
+          },
+          body: body === undefined ? undefined : JSON.stringify(body),
           signal: controller.signal,
         });
         if (!response.ok) throw new RequestError("http", response.status);
-        let body: unknown;
+        let result: unknown;
         try {
-          body = await response.json();
+          result = await response.json();
         } catch {
           throw new RequestError("invalid");
         }
         if (
-          !body ||
-          typeof body !== "object" ||
-          !("success" in body) ||
-          body.success !== true ||
-          !("code" in body) ||
-          body.code !== response.status ||
-          !validate(body)
+          !result ||
+          typeof result !== "object" ||
+          !("success" in result) ||
+          result.success !== true ||
+          !("code" in result) ||
+          result.code !== response.status ||
+          !validate(result)
         )
           throw new RequestError("invalid");
-        return body;
+        return result;
       })(),
     ]);
   } catch (error) {

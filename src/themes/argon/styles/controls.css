@@ -198,14 +198,14 @@
   margin: 13vh auto;
   max-width: 660px;
   padding: 45px;
-  border-radius: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
   background: var(--surface);
-  box-shadow: var(--shadow);
-  text-align: center;
+  text-align: start;
 }
 .state-code {
-  color: var(--accent);
-  font-size: 38px;
+  color: var(--text-strong);
+  font-size: 64px;
   margin: 0;
   letter-spacing: 0.05em;
 }

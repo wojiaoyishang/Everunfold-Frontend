@@ -1,5 +1,7 @@
 # 公开首屏与浏览器动态数据设计
 
+最新实现补充：[ADR 0015](../decisions/0015-reader-feedback-and-comment-likes.md) 已增加真实匿名历史评论点赞、无空位的浏览量和按登记能力计算的圆周进度。下文关于“点赞为演示”的现状描述保留为初版历史；当前说说点赞和本页评论发布仍是原型。真实认证、浏览计数及可靠快照同步仍后置。
+
 版本：public-dynamic-2，2026-10-31。状态：**请求基线与演示能力已实现；正式业务能力分阶段继续**。跨仓库同步；原设计见 [ADR 0013](../decisions/0013-public-dynamic-data.md)，本轮实现边界见 [ADR 0014](../decisions/0014-page-registered-reader-requests.md) 和 [验收记录](../handoff/reader-requests-verification.md)。本文是职责与交互规范，不是第二份 API Schema。
 
 ## 需求、建议与现状
