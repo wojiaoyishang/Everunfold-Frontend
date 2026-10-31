@@ -36,7 +36,7 @@
 
 最新界面检查：[悬浮层与错误页验收](handoff/failure-pages-verification.md)，包含最终生产构建、离线有/无缓存、错误边界、配对游戏及窄框检查；不会替代上一阶段尚未执行的其他验收。
 
-最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。两份记录分别说明真实 PostgreSQL/多进程边界和浏览器跨源登录、路由隔离、错误恢复及响应式表现。
+最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。认证等待态复用登录卡片；管理员验证后进入参考后台信息组织但沿用 Everunfold 主题的顶部栏、左侧导航和仪表盘工作区。
 
 | 目录 | 内容与维护时机 |
 | --- | --- |
@@ -58,7 +58,7 @@
 - [初始化验证](handoff/bootstrap-verification.md)：本步实际执行的检查、结果与限制。
 - [公开阅读验证](handoff/public-reading-verification.md)：当前阶段实际检查与已知限制；初始化记录保留为历史。
 - [认证后端验证](handoff/authentication-verification.md)：契约、初始化、Session/CSRF/Origin、管理员校验、真实多进程与实际未执行项。
-- [登录与空后台验证](handoff/authentication-frontend-verification.md)：生成客户端、跨源登录/退出、返回地址限制、错误恢复、减少动态、主题和窄屏检查。
+- [登录与空后台验证](handoff/authentication-frontend-verification.md)：生成客户端、跨源登录/退出、返回地址限制、共享入口卡片、主题化后台排版、错误恢复和响应式检查。
 - [前台交互动效验证](handoff/frontend-motion-verification.md)：上一阶段浏览器、视频、软导航和窄屏交互证据。
 - [原站前台复刻审阅](handoff/original-site-ui-audit.md)：实施前的用户反馈与原站对照；保留为历史依据。
 - [原站复刻验证](handoff/frontend-fidelity-verification.md)：上一轮版式、慢加载中间态、目录/图片/手机交互的历史证据。
