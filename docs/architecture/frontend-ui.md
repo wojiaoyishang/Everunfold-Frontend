@@ -109,3 +109,11 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 评论定位由 useCommentLocation 在分页提交后安排。scrollToPosition 返回是否真正到达；scrollToAnchor 的可选到达回调只对仍连接的目标调用。只有正常完成才聚焦并设置临时定位标记，2 秒后清理；连续点击/卸载清理前次标记，中断不触发误强调。CSS 只强调头像光晕与作者名字，不使用整行底色、竖线或卡片选中框；减少动态仅保留静态头像/名字提示。
 
 颜色变量统一覆盖选中/主按钮、分页、标签、焦点、正文链接、图片工具及卡片/表单底色，自选色下深浅表面同步染色；错误语义、头像识别色及媒体独立。原生滚动条轨道在顶部导航高度内共用 --header-fill，顶端保持透明；不改变 stable gutter 或弹层锁定时的内容宽度。
+
+## 悬浮层与错误页（2026-10-31）
+
+详见 [ADR 0016](../decisions/0016-anchored-popovers-and-failure-pages.md)。共享 anchored popover 的触发按钮在水合前禁用；每次打开重新测量，`data-positioned` 写入之前不显示，避免原生弹出先于 React 定位。仍支持打开期间观察尺寸与滚动，关闭动画不丢坐标。
+
+`themes/argon/failure/` 统一状态展示、样式和四组翻牌配对；`FailureView` 用于 Next 的局部/根错误边界，`document` 用于 Proxy 独立 404/503。前者消费同一组件/游戏，后者消费 `tools/generate-failure-pages.mts` 构建时生成的 `src/generated/failure-pages.json`，不能在 Proxy 运行时导入 React 服务端渲染器。此 JSON 是展示产物，不是业务契约。修改主题源码后运行 `npm run failure:generate`；启动开发/生产构建自动生成，`npm run check` 与独立构建拒绝过期产物。
+
+独立 404/503 的核心说明与样式不依赖脚本、快照或远程资产；游戏只在本地内存运行。Next 意外渲染错误依赖框架客户端错误边界接管，不声称具有同等的无脚本可用性。原有导航准备/超时/旧页保留及撤回内容禁回退规则不变。
