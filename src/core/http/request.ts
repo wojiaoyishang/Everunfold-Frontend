@@ -6,7 +6,7 @@ export class RequestError extends Error {
     public readonly kind: RequestFailure,
     public readonly status?: number,
   ) {
-    super(`Reader request ${kind}`);
+    super(`API request ${kind}`);
     this.name = "RequestError";
   }
 }
@@ -15,6 +15,7 @@ export interface RequestOptions {
   timeoutMs?: number;
   fetcher?: typeof fetch;
   headers?: Readonly<Record<string, string>>;
+  credentials?: "omit" | "include";
 }
 
 export async function requestJSON<T>(
@@ -35,7 +36,18 @@ export async function mutateJSON<T>(
   validate: (input: unknown) => input is T,
   options: RequestOptions = {},
 ): Promise<T> {
-  return sendJSON(baseUrl, path, {}, validate, options, body);
+  return sendJSON(baseUrl, path, {}, validate, options, body, "PUT");
+}
+
+/** Credentialed auth operations opt in explicitly; POST is never automatically retried. */
+export async function postJSON<T>(
+  baseUrl: string,
+  path: string,
+  body: object | undefined,
+  validate: (input: unknown) => input is T,
+  options: RequestOptions = {},
+): Promise<T> {
+  return sendJSON(baseUrl, path, {}, validate, options, body, "POST");
 }
 
 async function sendJSON<T>(
@@ -43,8 +55,15 @@ async function sendJSON<T>(
   path: string,
   query: object,
   validate: (input: unknown) => input is T,
-  { signal, timeoutMs = 8000, fetcher = fetch, headers = {} }: RequestOptions,
+  {
+    signal,
+    timeoutMs = 8000,
+    fetcher = fetch,
+    headers = {},
+    credentials = "omit",
+  }: RequestOptions,
   body?: object,
+  method: "GET" | "PUT" | "POST" = "GET",
 ): Promise<T> {
   const url = new URL(path, `${baseUrl}/`);
   for (const [key, input] of Object.entries(query)) {
@@ -76,8 +95,8 @@ async function sendJSON<T>(
       (async () => {
         if (controller.signal.aborted) throw new RequestError("cancelled");
         const response = await fetcher(url, {
-          method: body === undefined ? "GET" : "PUT",
-          credentials: "omit",
+          method,
+          credentials,
           cache: "no-store",
           headers: {
             ...headers,

@@ -26,6 +26,17 @@ function visibleText(html) {
   return result;
 }
 
+function classCount(html, name) {
+  let count = 0;
+  const parser = new Parser({
+    onopentag(_tag, attributes) {
+      if (attributes.class?.split(/\s+/).includes(name)) count++;
+    },
+  });
+  parser.end(html);
+  return count;
+}
+
 export async function verifyReaderRuntime({
   workspace,
   projectRoot,
@@ -134,6 +145,11 @@ export async function verifyReaderRuntime({
       /postgresql\+asyncpg:|allowed_peer_ips|FASTAPI_TO_NEXTJS|NEXTJS_TO_FASTAPI/,
     );
     if (expected === 200) {
+      assert.equal(
+        classCount(html, "blog-shell"),
+        1,
+        "Public layout must be mounted exactly once",
+      );
       assert.match(html, /data-page-ready="true"/);
       assert.match(html, /backend-status/);
       assert.match(html, /data-ready="false"/);
@@ -218,12 +234,36 @@ export async function verifyReaderRuntime({
     await htmlAt(warm, "/?type=article", 200);
     await htmlAt(cold, content.path, 503);
     await htmlAt(cold, "/", 503);
+    for (const route of ["/login", "/admin"]) {
+      const response = await fetch(`${cold}${route}`);
+      assert.equal(
+        response.status,
+        200,
+        `Management entry ${route} must not depend on a public snapshot or API availability`,
+      );
+      assert.match(response.headers.get("cache-control") ?? "", /private/);
+      assert.match(response.headers.get("cache-control") ?? "", /no-store/);
+      assert.match(response.headers.get("x-robots-tag") ?? "", /noindex/);
+      const html = await response.text();
+      assert.equal(classCount(html, "blog-shell"), 0);
+      assert.equal(classCount(html, "management-root"), 1);
+      assert.equal(
+        classCount(html, "admin-workspace"),
+        0,
+        "An unverified identity must never expose the workspace in SSR",
+      );
+      assert.doesNotMatch(
+        html,
+        /csrf_token|password_hash|session_hash|postgresql\+asyncpg:|FASTAPI_TO_NEXTJS|NEXTJS_TO_FASTAPI/,
+      );
+      assert.match(visibleText(html), /正在确认登录状态/);
+    }
     assert.deepEqual(
       await readFile(path.join(originalCache, "current.json")),
       original,
     );
     console.log(
-      "PASS: real backend stopped; warm snapshot article/home/comments/SEO stay readable (200), empty snapshot article/home return 503 no-store/noindex; original cache unchanged.",
+      "PASS: real backend stopped; warm snapshot article/home/comments/SEO stay readable (200) with exactly one blog shell, empty snapshot article/home return 503 no-store/noindex; login/admin remain 200 private no-store/noindex with no public shell or private SSR data; original cache unchanged.",
     );
     if (interactive) {
       await online();

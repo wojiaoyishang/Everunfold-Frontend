@@ -3,7 +3,14 @@ import type { NextRequest } from "next/server";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { hasPublicRoute } from "@/core/content/routes";
 import { failureDocument } from "@/themes/argon/failure/document";
+import { isManagementRoute } from "@/core/auth/routes";
 export async function proxy(request: NextRequest) {
+  if (isManagementRoute(request.nextUrl.pathname)) {
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "private, no-store");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return response;
+  }
   try {
     const snapshot = await readPublicSnapshot();
     if (!hasPublicRoute(snapshot, request.nextUrl.pathname)) {

@@ -47,7 +47,7 @@ export function clientNavigationHref(
   if (next.pathname === current.pathname && next.search === current.search)
     return null;
   if (
-    /^\/(?:_next|uploads|media|reference|health|api)(?:\/|$)/.test(
+    /^\/(?:_next|uploads|media|reference|health|api|login|admin)(?:\/|$)/.test(
       next.pathname,
     ) ||
     assetPath.test(next.pathname)

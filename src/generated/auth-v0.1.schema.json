@@ -1,0 +1,213 @@
+{
+  "$defs": {
+    "AuthSessionState": {
+      "additionalProperties": false,
+      "properties": {
+        "authenticated": {
+          "title": "Authenticated",
+          "type": "boolean"
+        },
+        "user": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AuthUser"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "csrf_token": {
+          "title": "Csrf Token",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "authenticated",
+        "user",
+        "csrf_token",
+        "expires_at"
+      ],
+      "title": "AuthSessionState",
+      "type": "object"
+    },
+    "AuthUser": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "username": {
+          "title": "Username",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "admin",
+            "user"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "username",
+        "display_name",
+        "role"
+      ],
+      "title": "AuthUser",
+      "type": "object"
+    },
+    "ErrorResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "const": false,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "default": null,
+          "title": "Data"
+        }
+      },
+      "required": [
+        "success",
+        "code",
+        "msg"
+      ],
+      "title": "ErrorResponse",
+      "type": "object"
+    },
+    "LoginInput": {
+      "additionalProperties": false,
+      "properties": {
+        "username": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Username",
+          "type": "string"
+        },
+        "password": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "username",
+        "password"
+      ],
+      "title": "LoginInput",
+      "type": "object"
+    },
+    "PublicResponse_AuthSessionState_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/AuthSessionState"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[AuthSessionState]",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "login": {
+      "$ref": "#/$defs/LoginInput"
+    },
+    "session": {
+      "$ref": "#/$defs/PublicResponse_AuthSessionState_"
+    },
+    "error": {
+      "$ref": "#/$defs/ErrorResponse"
+    }
+  },
+  "required": [
+    "login",
+    "session",
+    "error"
+  ],
+  "title": "AuthContract",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-everunfold-contract-version": "0.1.0",
+  "x-everunfold-csrf-header": "X-CSRF-Token",
+  "x-everunfold-credentials": "include",
+  "x-everunfold-operations": [
+    {
+      "name": "readAuthSession",
+      "path": "/v1/auth/session",
+      "method": "GET",
+      "response": "session"
+    },
+    {
+      "name": "login",
+      "path": "/v1/auth/login",
+      "method": "POST",
+      "input": "login",
+      "response": "session",
+      "csrf": true
+    },
+    {
+      "name": "logout",
+      "path": "/v1/auth/logout",
+      "method": "POST",
+      "response": "session",
+      "csrf": true
+    },
+    {
+      "name": "readAdminSession",
+      "path": "/v1/admin/session",
+      "method": "GET",
+      "response": "session"
+    }
+  ],
+  "x-everunfold-errors": {
+    "unauthenticated": 40101,
+    "invalid_credentials": 40110,
+    "admin_required": 40301,
+    "csrf_rejected": 40310,
+    "rate_limited": 42901
+  }
+}

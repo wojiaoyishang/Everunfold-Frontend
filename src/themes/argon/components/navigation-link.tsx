@@ -7,6 +7,7 @@ import { clientNavigationHref, searchHref } from "@/core/navigation/targets";
 import { useRouteState } from "./route-state";
 import { useNavigation } from "./navigation-state";
 import { navigateToAnchor } from "@/core/browser/scroll-restoration";
+import { isManagementLink } from "@/core/auth/routes";
 
 type AppLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
   href: string;
@@ -27,6 +28,7 @@ export function AppLink({
   return (
     <Link
       {...props}
+      prefetch={isManagementLink(href) ? false : props.prefetch}
       href={href}
       replace={replace}
       scroll={scroll}

@@ -27,20 +27,25 @@ const reader =
   path.basename(absoluteSource) === "reader-preview-v0.1.schema.json";
 const likes =
   path.basename(absoluteSource) === "comment-likes-v0.1.schema.json";
-const rootName = likes
-  ? "CommentLikesContract"
-  : reader
-    ? "ReaderPreviewContract"
-    : presentation
-      ? "ContentPresentation"
-      : "PublicSnapshot";
-const outputName = likes
-  ? "comment-likes-contract"
-  : reader
-    ? "reader-preview-contract"
-    : presentation
-      ? "presentation-contract"
-      : "public-contract";
+const auth = path.basename(absoluteSource) === "auth-v0.1.schema.json";
+const rootName = auth
+  ? "AuthContract"
+  : likes
+    ? "CommentLikesContract"
+    : reader
+      ? "ReaderPreviewContract"
+      : presentation
+        ? "ContentPresentation"
+        : "PublicSnapshot";
+const outputName = auth
+  ? "auth-contract"
+  : likes
+    ? "comment-likes-contract"
+    : reader
+      ? "reader-preview-contract"
+      : presentation
+        ? "presentation-contract"
+        : "public-contract";
 const backendRoot = path.dirname(path.dirname(absoluteSource));
 const relativeSource = path
   .relative(backendRoot, absoluteSource)
@@ -78,13 +83,15 @@ await writeFile(path.join(output, path.basename(absoluteSource)), source);
 await writeFile(
   path.join(
     output,
-    likes
-      ? "comment-likes-source.json"
-      : reader
-        ? "reader-preview-source.json"
-        : presentation
-          ? "presentation-source.json"
-          : "contract-source.json",
+    auth
+      ? "auth-source.json"
+      : likes
+        ? "comment-likes-source.json"
+        : reader
+          ? "reader-preview-source.json"
+          : presentation
+            ? "presentation-source.json"
+            : "contract-source.json",
   ),
   `${JSON.stringify(
     {
@@ -174,4 +181,46 @@ ajv.addSchema(Object.fromEntries(Object.entries(schema).filter(([key]) => !key.s
 ${functions}\n`,
   );
 }
-console.log(`Generated public contract from backend ${commit.slice(0, 7)}`);
+if (auth) {
+  const operations = schema["x-everunfold-operations"];
+  if (
+    !Array.isArray(operations) ||
+    operations.some(
+      (op) =>
+        !/^(readAuthSession|login|logout|readAdminSession)$/.test(op.name) ||
+        !/^\/v1\/(auth\/(session|login|logout)|admin\/session)$/.test(
+          op.path,
+        ) ||
+        !["GET", "POST"].includes(op.method) ||
+        (op.input && !schema.properties[op.input]) ||
+        !schema.properties[op.response] ||
+        (op.method === "POST" && op.csrf !== true),
+    ) ||
+    schema["x-everunfold-csrf-header"] !== "X-CSRF-Token" ||
+    schema["x-everunfold-credentials"] !== "include"
+  )
+    throw new Error("Invalid auth operation metadata");
+  const functions = operations
+    .map(
+      (op) => `
+const ${op.name}Validator = ajv.compile<AuthContract[${JSON.stringify(op.response)}]>({ $ref: ${JSON.stringify(`auth#/properties/${op.response}`)} });
+export function ${op.name}(baseUrl: string, ${op.input ? `input: AuthContract[${JSON.stringify(op.input)}], ` : ""}${op.csrf ? "csrfToken: string, " : ""}options: RequestOptions = {}) {
+  return ${op.method === "POST" ? "postJSON" : "requestJSON"}(baseUrl, ${JSON.stringify(op.path)}, ${op.input ? "input" : op.method === "POST" ? "undefined" : "{}"}, ${op.name}Validator, { ...options, credentials: "include"${op.csrf ? ', headers: { ...options.headers, "X-CSRF-Token": csrfToken }' : ""} });
+}`,
+    )
+    .join("\n");
+  await writeFile(
+    path.join(output, "auth-client.ts"),
+    `/* Generated from backend operation metadata. Do not edit by hand. */
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
+import schema from "./auth-v0.1.schema.json";
+import type { AuthContract } from "./auth-contract";
+import { requestJSON, postJSON, type RequestOptions } from "@/core/http/request";
+const ajv = new Ajv({ strict: true });
+addFormats(ajv);
+ajv.addSchema(Object.fromEntries(Object.entries(schema).filter(([key]) => !key.startsWith("x-"))), "auth");
+${functions}\n`,
+  );
+}
+console.log(`Generated contract from backend ${commit.slice(0, 7)}`);
