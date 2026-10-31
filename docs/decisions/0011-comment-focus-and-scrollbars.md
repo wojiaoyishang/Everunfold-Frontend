@@ -15,3 +15,5 @@
 标准滚动条非 auto 值会覆盖 WebKit 伪元素，故两条样式路径互斥，参考 [MDN 的覆盖说明](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar)。未引入依赖。浏览器样式实现及系统覆盖滚动条行为仍可能不同，不能由单个引擎的检查推断全部平台已验收。
 
 实际检查、截图位置与复查步骤见 [评论与滚动条验证](../handoff/frontend-comment-scroll-verification.md)。本轮仅修改主题展示；真实评论发布、审核及完整导入仍待后续。
+
+后续修订：导航右侧轨道衔接、统一控件与评论到达后的高亮见 [ADR 0012](0012-shared-controls-and-theme-consistency.md)；本记录保留上一轮实现依据。

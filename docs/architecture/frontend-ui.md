@@ -99,3 +99,13 @@ ArticleNeighbors 的顺序来自 core/content/related.ts，固定两格并使用
 公开分享地址由仅服务端 PUBLIC_SITE_URL 显式提供，不从 API 地址/请求 Host 推断。文章 metadata 输出公开标题、摘要、图片、时间和 canonical；示例 noindex 且没有正式 canonical，受限投影不输出正文摘要/图片。当前复制/系统分享使用浏览器实际访问地址，便于本机预览；发布后自然使用真实站点地址。
 
 UI 交互用原有组件和纯策略扩展；新页面的内容与安全渲染继续在 Server 侧。先运行 npm run check，再按手工步骤验证客户端交互；保留热更新时使用独立生产构建命令，不直接覆盖正在运行的 .next。
+
+## 统一控件与交互细节（2026-10-31）
+
+开发约定与边界见 [ADR 0012](../decisions/0012-shared-controls-and-theme-consistency.md)。`components/ui/` 封装所有基础交互控件，`ui-controls.css` 负责其默认样式；页面组合组件，仅维护业务事件和布局。Select 的选项/定位纯策略便于测试；useAnchoredPopover 只在打开时观察尺寸/滚动，使用 top layer 避免被搜索 dialog 或设置面板裁切。SearchContentType 让两处搜索使用同一组选项及 GET 语义。不得在新页面直接引入原生选择框或颜色对话框。
+
+HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，复用纵向滚动的时间阻尼/单位换算。监听只消费还能横移的纵向滚轮，边界留 1px 容差兼容缩放取整；到边缘、无溢出、Shift、缩放及横向输入保留页面/浏览器行为，不另造滚动条。关闭动效立即更新，触摸保持原生，卸载释放资源。
+
+评论定位由 useCommentLocation 在分页提交后安排。scrollToPosition 返回是否真正到达；scrollToAnchor 的可选到达回调只对仍连接的目标调用。只有正常完成才聚焦并设置临时定位标记，2 秒后清理；连续点击/卸载清理前次标记，中断不触发误强调。CSS 只强调头像光晕与作者名字，不使用整行底色、竖线或卡片选中框；减少动态仅保留静态头像/名字提示。
+
+颜色变量统一覆盖选中/主按钮、分页、标签、焦点、正文链接、图片工具及卡片/表单底色，自选色下深浅表面同步染色；错误语义、头像识别色及媒体独立。原生滚动条轨道在顶部导航高度内共用 --header-fill，顶端保持透明；不改变 stable gutter 或弹层锁定时的内容宽度。
