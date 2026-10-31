@@ -84,12 +84,12 @@ test("historical text stays plain while preview formatting never executes HTML",
   assert.ok(plain.includes("&amp;lt;b&amp;gt;"));
   const formatted = renderToStaticMarkup(
     createElement(CommentBody, {
-      body: `${raw}\n> 引用\n\`<script>bad()</script>\`\n**\n\``,
+      body: `${raw}\n\n> 引用\n\n\`<script>bad()</script>\`\n\n**\n\n\``,
       formatted: true,
     }),
   );
   assert.ok(formatted.includes("<strong>原文</strong>"));
-  assert.ok(formatted.includes("<blockquote>引用</blockquote>"));
+  assert.match(formatted, /<blockquote>\s*<p>引用<\/p>\s*<\/blockquote>/);
   assert.ok(formatted.includes("<p>**</p>"));
   assert.doesNotMatch(formatted, /<img|<script|onerror="/);
 });

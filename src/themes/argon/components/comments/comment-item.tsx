@@ -1,5 +1,6 @@
 import type { MouseEvent } from "react";
-import { displayDate } from "@/core/content/query";
+import { RelativeTime } from "../relative-time";
+import { CollapsibleContent } from "../collapsible-content";
 import { Icon } from "../icon";
 import { CommentBody } from "./comment-body";
 import { avatarTone, commentPageFor, type CommentEntry } from "./model";
@@ -82,9 +83,9 @@ export function CommentItem({
           </span>
           <span className="comment-floor">#{floor}</span>
         </div>
-        <time className="comment-time" dateTime={entry.createdAt}>
-          {displayDate(entry.createdAt, true)}
-        </time>
+        <span className="comment-time">
+          <RelativeTime value={entry.createdAt} />
+        </span>
         {(entry.replyTo || parent) && (
           <p className="comment-reply-to">
             <Icon name="reply" />
@@ -101,10 +102,12 @@ export function CommentItem({
             )}
           </p>
         )}
-        <CommentBody
-          body={entry.body}
-          formatted={entry.format === "formatted"}
-        />
+        <CollapsibleContent limit={360}>
+          <CommentBody
+            body={entry.body}
+            formatted={entry.format === "formatted"}
+          />
+        </CollapsibleContent>
         <div className="comment-actions">
           <button
             type="button"

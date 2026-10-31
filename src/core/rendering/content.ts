@@ -69,7 +69,7 @@ const options: sanitizeHtml.IOptions = {
     "source",
   ],
   allowedAttributes: {
-    a: ["href", "title", "target", "rel"],
+    a: ["href", "title", "target", "rel", "id", "class", "aria-label"],
     img: ["src", "alt", "title", "width", "height", "loading", "decoding"],
     code: ["class"],
     pre: ["class"],
@@ -92,6 +92,7 @@ const options: sanitizeHtml.IOptions = {
     source: ["src", "type"],
   },
   allowedClasses: {
+    a: ["reader-reference"],
     details: [
       "legacy-collapse",
       /^tone-(indigo|green|red|orange|blue|black|grey)$/,
@@ -102,7 +103,7 @@ const options: sanitizeHtml.IOptions = {
       /^tone-(indigo|green|red|orange|blue|black|grey)$/,
     ],
     strong: ["legacy-alert-title"],
-    span: ["legacy-tooltip"],
+    span: ["legacy-tooltip", "legacy-reference"],
     code: [/^language-[a-zA-Z0-9_-]+$/, "hljs"],
     pre: [/^language-[a-zA-Z0-9_-]+$/],
   },
@@ -130,6 +131,8 @@ export function renderContent(
 } {
   const toc: TableOfContentsItem[] = [];
   const seenHeadings = new Map<string, number>();
+  const references: string[] = [];
+  const prefix = `reference-${encodeURIComponent(content.id).replace(/%/g, "_")}`;
   const html = content.content
     .map((block) => {
       const expanded = expandPresentationShortcodes(
@@ -148,6 +151,25 @@ export function renderContent(
       function visit(nodes: ParsedNode[]): void {
         for (const node of nodes) {
           if ("attribs" in node) {
+            // Only generated references may create anchors outside the heading namespace.
+            if (node.name === "a") delete node.attribs.id;
+            if (
+              node.name === "span" &&
+              node.attribs.class === "legacy-reference"
+            ) {
+              references.push(node.attribs.title ?? "");
+              const number = references.length;
+              node.name = "a";
+              node.attribs = {
+                class: "reader-reference",
+                id: `${prefix}-source-${number}`,
+                href: `#${prefix}-note-${number}`,
+                title: references[number - 1],
+                "aria-label": `参考资料 ${number}：${references[number - 1]}`,
+              };
+              node.children = parseDocument(`[${number}]`)
+                .children as typeof node.children;
+            }
             if (["img", "audio", "video", "source"].includes(node.name)) {
               const source = mappedUrl(
                 node.attribs.src ?? "",
@@ -209,5 +231,14 @@ export function renderContent(
       return sanitizeHtml(DomUtils.getOuterHTML(document), options);
     })
     .join("\n");
-  return { html, toc };
+  const escape = (value: string) =>
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  const notes = references.length
+    ? `<div class="reader-references"><strong>参考资料</strong><ol>${references.map((text, index) => `<li id="${prefix}-note-${index + 1}">${escape(text)} <a href="#${prefix}-source-${index + 1}" aria-label="返回引用 ${index + 1}">↩</a></li>`).join("")}</ol></div>`
+    : "";
+  return { html: html + notes, toc };
 }

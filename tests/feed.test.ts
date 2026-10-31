@@ -33,7 +33,7 @@ test("mixed feed retains article identity, excludes pages by default and marks e
     queryFeed(source, { type: "shuoshuo", pageSize: 1, page: 2 }).items.length,
     1,
   );
-  assert.equal(queryFeed(source, { type: "shuoshuo", query: "热茶" }).total, 1);
+  assert.equal(queryFeed(source, { type: "shuoshuo", query: "皮卡丘" }).total, 1);
   assert.equal(
     queryFeed(source, { type: "page", includePages: true }).total,
     1,

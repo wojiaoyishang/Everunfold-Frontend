@@ -23,6 +23,8 @@ function attributes(raw: string): Record<string, string> {
 function present(kind: string, raw: string, body: string): string {
   const attrs = attributes(raw);
   const title = escapeAttribute(attrs.title ?? "");
+  if (kind === "ref")
+    return `<span class="legacy-reference" title="${escapeAttribute(body.slice(0, 2000))}">[参考]</span>`;
   const color = [
     "indigo",
     "green",
@@ -48,7 +50,7 @@ export function expandPresentationShortcodes(
 ): string {
   // Protected code, comments and HTML attributes are tokens too, so examples stay literal.
   const vocabulary =
-    /(^[ \t]*(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:^[ \t]*\2[^\n]*$|$(?![\s\S])))|<pre\b[^>]*>[\s\S]*?<\/pre\s*>|<code\b[^>]*>[\s\S]*?<\/code\s*>|<!--[^]*?-->|<(?:[^>"']|"[^"]*"|'[^']*')*>|(`+)[^]*?\3|\[(\/?)(collapse|fold|alert|admonition|tooltips)\b((?:[^\]"']|"[^"]*"|'[^']*')*)\]/gim;
+    /(^[ \t]*(`{3,}|~{3,})[^\n]*\n[\s\S]*?(?:^[ \t]*\2[^\n]*$|$(?![\s\S])))|<pre\b[^>]*>[\s\S]*?<\/pre\s*>|<code\b[^>]*>[\s\S]*?<\/code\s*>|<!--[^]*?-->|<(?:[^>"']|"[^"]*"|'[^']*')*>|(`+)[^]*?\3|\[(\/?)(collapse|fold|alert|admonition|tooltips|ref)\b((?:[^\]"']|"[^"]*"|'[^']*')*)\]/gim;
   const token = new RegExp(
     (markdown ? "^(?: {4}|\\t)[^\\n]*(?:\\n|$)|" : "") + vocabulary.source,
     vocabulary.flags,

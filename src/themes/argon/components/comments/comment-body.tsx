@@ -1,20 +1,7 @@
-import { Fragment, type ReactNode } from "react";
 import { CommentText } from "../comment-text";
-
-function inline(text: string): ReactNode[] {
-  // Only trusted React elements are created. HTML and unsupported Markdown remain text.
-  return text
-    .split(/(`[^`\n]+`|\*\*[^*\n]+\*\*)/g)
-    .map((part, index) =>
-      index % 2 === 1 && part.startsWith("`") ? (
-        <code key={index}>{part.slice(1, -1)}</code>
-      ) : index % 2 === 1 && part.startsWith("**") ? (
-        <strong key={index}>{part.slice(2, -2)}</strong>
-      ) : (
-        <Fragment key={index}>{part}</Fragment>
-      ),
-    );
-}
+import { commentMarkdown } from "@/core/rendering/comment-markdown";
+import { ArticleMedia } from "../article-media";
+import { CodeBlock } from "../reader/code-tools";
 
 export function CommentBody({
   body,
@@ -25,16 +12,12 @@ export function CommentBody({
 }) {
   if (!formatted) return <CommentText content={body} />;
   return (
-    <div className="comment-copy comment-formatted">
-      {body
-        .split(/\r?\n/)
-        .map((line, index) =>
-          line.startsWith("> ") ? (
-            <blockquote key={index}>{inline(line.slice(2))}</blockquote>
-          ) : (
-            <p key={index}>{line ? inline(line) : <br />}</p>
-          ),
-        )}
-    </div>
+    <ArticleMedia>
+      <div className="comment-copy comment-formatted">
+        {commentMarkdown(body, (code, language) => (
+          <CodeBlock code={code} language={language} />
+        ))}
+      </div>
+    </ArticleMedia>
   );
 }

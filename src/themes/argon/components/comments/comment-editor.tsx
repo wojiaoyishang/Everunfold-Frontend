@@ -3,22 +3,13 @@ import { useRef, useState } from "react";
 import { Icon } from "../icon";
 import { TransitionPanel } from "../transition-panel";
 import { CommentBody } from "./comment-body";
+import { EmotionPicker } from "./emotion-picker";
 import {
   COMMENT_MAX_LENGTH,
   insertCommentText,
   type CommentDraft,
   type DraftErrors,
 } from "./model";
-const emotions = [
-  "✨",
-  "☕",
-  "🌙",
-  "💛",
-  "🌱",
-  "🔥",
-  "(๑•̀ㅂ•́)و✧",
-  "|´・ω・)ノ",
-];
 export function CommentEditor({
   prefix,
   draft,
@@ -124,6 +115,37 @@ export function CommentEditor({
                 <span aria-hidden="true">&lt;/&gt;</span>
               </button>
               <button
+                type="button"
+                aria-label="插入链接"
+                title="链接"
+                onClick={() => {
+                  update({ formatted: true });
+                  insert("[", "](https://example.com)", "链接文字");
+                }}
+              >
+                <Icon name="link" />
+              </button>
+              <button
+                type="button"
+                aria-label="插入列表"
+                title="列表"
+                onClick={() => {
+                  update({ formatted: true });
+                  insert("\n- ", "\n", "列表项目");
+                }}
+              >
+                ≡
+              </button>
+              <button
+                type="button"
+                aria-label="插入多行代码"
+                title="多行代码"
+                onClick={() => {
+                  update({ formatted: true });
+                  insert("\n```\n", "\n```\n", "code");
+                }}
+              >{`{ }`}</button>
+              <button
                 id={`${prefix}-emoji-toggle`}
                 type="button"
                 aria-label="插入表情"
@@ -142,18 +164,12 @@ export function CommentEditor({
           active={emoji && !preview}
           role="region"
         >
-          <div className="composer-emotions">
-            {emotions.map((value) => (
-              <button
-                key={value}
-                type="button"
-                aria-label={`插入 ${value}`}
-                onClick={() => insert(value)}
-              >
-                {value}
-              </button>
-            ))}
-          </div>
+          <EmotionPicker
+            onInsert={(value, formatted) => {
+              if (formatted) update({ formatted: true });
+              insert(value);
+            }}
+          />
         </TransitionPanel>
         <TransitionPanel
           id={`${prefix}-write-panel`}
@@ -198,7 +214,7 @@ export function CommentEditor({
             文字格式
           </label>
           <span id={`${prefix}-format-help`}>
-            支持 **粗体**、`代码`、&gt; 引用
+            支持 Markdown 链接、列表、代码、引用和图片
           </span>
           <output aria-label="留言字数">
             {draft.body.length} / {COMMENT_MAX_LENGTH}

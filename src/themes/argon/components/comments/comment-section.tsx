@@ -35,6 +35,7 @@ export function CommentSection({
     active: boolean;
   }>({ entry: null, active: false });
   const [requestedPage, setRequestedPage] = useState(initialPage);
+  const [continuous, setContinuous] = useState(false);
   const [target, setTarget] = useState<{ id: string } | null>(null);
   const [notice, setNotice] = useState("");
   const initialAnchor = useRef(false);
@@ -47,7 +48,8 @@ export function CommentSection({
       ]),
     [comments, examples, local],
   );
-  const { entries: shown, page, pages } = commentPage(entries, requestedPage);
+  const { entries: paged, page, pages } = commentPage(entries, requestedPage);
+  const shown = continuous ? entries.slice(0, page * COMMENT_PAGE_SIZE) : paged;
   useEffect(() => {
     if (!target) return;
     const frame = requestAnimationFrame(() => {
@@ -165,14 +167,40 @@ export function CommentSection({
             {examples ? "隐藏示例" : "显示示例"}
           </button>
         </div>
-        <ol className="comment-list" key={page}>
+        <div className="comment-view-options" aria-label="留言浏览方式">
+          <button
+            type="button"
+            aria-pressed={!continuous}
+            onClick={() => {
+              setContinuous(false);
+              setRequestedPage(1);
+              setTarget(null);
+            }}
+          >
+            分页阅读
+          </button>
+          <button
+            type="button"
+            aria-pressed={continuous}
+            onClick={() => {
+              setContinuous(true);
+              setRequestedPage(1);
+              setTarget(null);
+            }}
+          >
+            连续阅读
+          </button>
+        </div>
+        <ol className="comment-list">
           {shown.map((entry, index) => (
             <CommentItem
               key={entry.id}
               entry={entry}
               entries={entries}
               path={path}
-              floor={(page - 1) * COMMENT_PAGE_SIZE + index + 1}
+              floor={
+                (continuous ? 0 : (page - 1) * COMMENT_PAGE_SIZE) + index + 1
+              }
               liked={likes.has(entry.id)}
               onLike={() =>
                 setLikes((current) => {
@@ -197,7 +225,19 @@ export function CommentSection({
             <p>这里还很安静，等你来添一束光。</p>
           </div>
         )}
-        {pages > 1 && (
+        {continuous && page < pages && (
+          <button
+            className="comment-load-more"
+            type="button"
+            onClick={() => {
+              setRequestedPage(page + 1);
+              setTarget(null);
+            }}
+          >
+            再看看更多留言 · {entries.length - shown.length} 条
+          </button>
+        )}
+        {!continuous && pages > 1 && (
           <nav className="comment-pagination" aria-label="评论分页">
             <button
               type="button"

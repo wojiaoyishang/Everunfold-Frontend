@@ -1,0 +1,100 @@
+"use client";
+import Image from "next/image";
+import { useState } from "react";
+import { stickerGroups } from "@/core/rendering/stickers";
+
+const textGroups = [
+  {
+    id: "emoji",
+    label: "Emoji",
+    items: [
+      "✨",
+      "☕",
+      "🌙",
+      "💛",
+      "🌱",
+      "🔥",
+      "😊",
+      "🥹",
+      "😂",
+      "🐾",
+      "🌈",
+      "🍃",
+      "👍",
+      "🎉",
+      "💭",
+      "🥰",
+    ],
+  },
+  {
+    id: "faces",
+    label: "颜文字",
+    items: [
+      "(๑•̀ㅂ•́)و✧",
+      "|´・ω・)ノ",
+      "ヾ(≧∇≦*)ゝ",
+      "(☆ω☆)",
+      "(/ω＼)",
+      "٩(ˊᗜˋ*)و",
+      "(ノ°ο°)ノ",
+      "(ฅ´ω`ฅ)",
+    ],
+  },
+];
+export function EmotionPicker({
+  onInsert,
+}: {
+  onInsert: (text: string, formatted: boolean) => void;
+}) {
+  const [group, setGroup] = useState("emoji");
+  const text = textGroups.find((item) => item.id === group);
+  const stickers = stickerGroups.find((item) => item.id === group);
+  return (
+    <div className="emotion-picker">
+      <div className="emotion-tabs" role="group" aria-label="表情分组">
+        {[...textGroups, ...stickerGroups].map((item) => (
+          <button
+            type="button"
+            key={item.id}
+            aria-pressed={group === item.id}
+            onClick={() => setGroup(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <div className={`emotion-grid ${stickers ? "sticker-grid" : ""}`}>
+        {text?.items.map((item) => (
+          <button
+            type="button"
+            key={item}
+            aria-label={`插入 ${item}`}
+            onClick={() => onInsert(item, false)}
+          >
+            {item}
+          </button>
+        ))}
+        {stickers?.items.map((item) => (
+          <button
+            type="button"
+            key={item.src}
+            title={item.label}
+            aria-label={`插入 ${item.label}`}
+            onClick={() => onInsert(`![${item.label}](${item.src})`, true)}
+          >
+            <Image
+              src={item.src}
+              alt={item.label}
+              width={64}
+              height={64}
+              unoptimized
+            />
+          </button>
+        ))}
+      </div>
+      {group === "flower" && (
+        <small>花！· 原主题贴纸，来源 k4yt3x/flowerhd</small>
+      )}
+    </div>
+  );
+}

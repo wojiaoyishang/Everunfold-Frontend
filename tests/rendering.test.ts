@@ -7,6 +7,34 @@ import { CommentText } from "../src/themes/argon/components/comment-text";
 import { content } from "./fixtures";
 import { expandPresentationShortcodes } from "../src/core/rendering/shortcodes";
 
+test("references number across blocks with safe return anchors and preserve code examples", () => {
+  const result = renderContent(
+    content({
+      content: [
+        {
+          id: "first",
+          type: "markdown",
+          content:
+            "文字[ref]资料 <img src=x onerror=bad>[/ref]\n\n`[ref]literal[/ref]`",
+        },
+        {
+          id: "second",
+          type: "html",
+          content:
+            '<p>另一处[ref]第二条[/ref]</p><a id="comments" href="#x">普通链接</a>',
+        },
+      ],
+    }),
+  );
+  assert.match(result.html, />\[1\]<\/a>/);
+  assert.match(result.html, />\[2\]<\/a>/);
+  assert.match(result.html, /source-2/);
+  assert.match(result.html, /note-2/);
+  assert.match(result.html, /<code>\[ref\]literal\[\/ref\]<\/code>/);
+  assert.doesNotMatch(result.html, /onerror|id="comments"/);
+  assert.deepEqual(result.toc, []);
+});
+
 test("presentation shortcodes nest, escape attributes and sanitize their bodies", () => {
   const result = renderContent(
     content({
