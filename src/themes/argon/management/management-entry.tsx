@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Icon } from "../components/icon";
 import { TextLink } from "../components/ui/primitives";
+import { ManagementScene } from "./management-scene";
 
 type ManagementEntryProps = {
   intro: {
@@ -24,6 +25,7 @@ export function ManagementEntry({
 }: ManagementEntryProps) {
   return (
     <main className="login-stage">
+      <ManagementScene />
       <div className="login-card">
         <section
           className="login-introduction"

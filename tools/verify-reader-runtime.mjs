@@ -253,6 +253,11 @@ export async function verifyReaderRuntime({
         "Authentication gates must use the shared compact entry card",
       );
       assert.equal(
+        classCount(html, "management-scene"),
+        1,
+        "Authentication gates must render their static night backdrop",
+      );
+      assert.equal(
         classCount(html, "admin-workspace"),
         0,
         "An unverified identity must never expose the workspace in SSR",
