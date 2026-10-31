@@ -32,6 +32,7 @@ src/themes/argon/
     collapsible-content.tsx     共用长说说/长评论的测量、渐隐和展开
     search-dialog.tsx           常驻壳搜索弹层，复用 SearchForm
     appearance-settings.tsx     主题色、系统/手动外观、纯黑模式
+    home-feed-settings.tsx      首页筛选偏好及水合后恢复；公开 URL 优先
     reading-settings.tsx        不锁页面滚动的原生 popover、统一动效选项
     transition-panel.tsx        保留内容的双向高度切换与 inactive/inert
     site-header / sidebar*     共享导航数据与独立区域展示
@@ -39,6 +40,8 @@ src/themes/argon/
     navigation-link.tsx         Next Link/Form 的统一交互适配
     navigation-state.tsx        手机侧栏展开、关闭及焦点共享
     article*.tsx / post-card    Server 正文与可复用内容展示
+    story-cover.tsx             上下篇/推荐共用装饰封面和无图回退
+    related-articles.tsx        公开相关性排序、横向图片推荐
     comments/                   评论列表/条目/表单/编辑器/访客字段/纯策略/样例
     pagination / archives ...   主题业务展示组件
   navigation.ts                 主题导航/原站品牌映射，不改公开业务 DTO
@@ -82,6 +85,10 @@ ArticleHeader 在服务端分有图/无图展示，ArticleActions 负责留言�
 文章/说说顶层 type 的展示草案来自后端，见 [内容类型衔接](content-types.md)。legacy kind 只在 core/content/presentation.ts 适配，样例集中在 examples.ts；不修改在线 0.1 快照和生成文件。正式迁移仍待后端版本化发布。
 
 外观偏好由 core/browser/appearance-policy、appearance 和 use-appearance 统一校验、订阅和应用；ThemeToggle 与设置共用。主题色自动派生适合深浅背景的文字色，模式与纯黑偏好跨刷新保存，保留旧 everunfold.theme 选择。右侧设置仍用非模态 popover；搜索使用原生 dialog，复用稳定滚动条与焦点处理。阅读进度仅在确需滚动的文章/说说详情正文内显示，列表和评论区域隐藏。
+
+补充：品牌填充使用 --brand-accent，与深色模式的浅色文字强调色区分；顶栏、侧栏标题/底色和进度条同步变色。首页筛选的纯 URL 策略和存储在 core/browser/home-feed-*，use-home-feed 为主题桥接；RouteState 在普通首页导航前应用偏好。公共 SSR 只按显式参数渲染，直接访问的本机偏好在水合后恢复。详细缓存责任见 [主题配置与缓存边界](theme-configuration.md)，本轮没有实现后台配置同步。
+
+ArticleNeighbors 的顺序来自 core/content/related.ts，固定两格并使用非链接边界占位；与 RelatedArticles 共用 StoryCover。横向推荐最多六条，原生滚动、焦点和缩略图投影均在 discovery.css；容器限制最小宽度，避免图片/长文本撑宽文档。列表/正文后续区/评论使用 --content-gap 保持间距一致。
 
 公开分享地址由仅服务端 PUBLIC_SITE_URL 显式提供，不从 API 地址/请求 Host 推断。文章 metadata 输出公开标题、摘要、图片、时间和 canonical；示例 noindex 且没有正式 canonical，受限投影不输出正文摘要/图片。当前复制/系统分享使用浏览器实际访问地址，便于本机预览；发布后自然使用真实站点地址。
 
