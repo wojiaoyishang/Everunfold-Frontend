@@ -2,6 +2,8 @@ import { NavigationLoadError, type NavigationFailure } from "./document";
 
 export const SLOW_NAVIGATION_MS = 5_000;
 export const NAVIGATION_TIMEOUT_MS = 20_000;
+export const NAVIGATION_FAILURE_EMPHASIS_MS = 900;
+export const NAVIGATION_FAILURE_HOLD_MS = 5_000;
 export interface NavigationIntent {
   href: string;
   origin: string;
@@ -13,6 +15,7 @@ export interface NavigationFeedback {
   phase: "idle" | "loading" | "slow" | "complete" | "failed";
   intent?: NavigationIntent;
   failure?: NavigationFailure;
+  attention?: boolean;
 }
 interface NavigationPorts {
   prepare: (intent: NavigationIntent, signal: AbortSignal) => Promise<void>;
@@ -115,7 +118,19 @@ export class NavigationTransaction {
       phase: "failed",
       intent: task.intent,
       failure,
+      attention: true,
     });
+    // Separate the brief warning cue from the readable hold; stale timers cannot hide a new visit.
+    this.timers.push(
+      setTimeout(() => {
+        if (this.state.id === task.id && this.state.phase === "failed")
+          this.publish({ ...this.state, attention: false });
+      }, NAVIGATION_FAILURE_EMPHASIS_MS),
+      setTimeout(() => {
+        if (this.state.id === task.id && this.state.phase === "failed")
+          this.publish({ id: task.id, phase: "idle" });
+      }, NAVIGATION_FAILURE_EMPHASIS_MS + NAVIGATION_FAILURE_HOLD_MS),
+    );
   }
   /** Popstate already supersedes Next's navigation; it must never trigger an extra history write. */
   cancel(rollback = true) {

@@ -109,17 +109,9 @@ export function usePageNavigation(route: string) {
     },
     [transaction],
   );
-  const cancel = useCallback(() => transaction.cancel(), [transaction]);
-  const retry = useCallback(() => {
-    const intent = transaction.getSnapshot().intent;
-    if (intent)
-      navigate(intent.href, { replace: intent.replace, scroll: intent.scroll });
-  }, [navigate, transaction]);
   return {
     feedback,
     navigate,
-    cancel,
-    retry,
     pending: feedback.phase === "loading" || feedback.phase === "slow",
   };
 }

@@ -3,7 +3,6 @@ import type { CSSProperties } from "react";
 const paths = {
   external:
     "M14 3h7v7M21 3l-11 11M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5",
-  retry: "M20 7v5h-5M4 17v-5h5M5 8a8 8 0 0 1 13-3l2 3M4 16l2 3a8 8 0 0 0 13-3",
   copy: "M8 8h13v13H8V8ZM16 8V3H3v13h5",
   check: "m5 12 4 4L19 6",
   heart:

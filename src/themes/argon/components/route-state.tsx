@@ -29,8 +29,6 @@ interface RouteState {
   presentationId: string;
   pending: boolean;
   feedback: NavigationFeedback;
-  cancel: () => void;
-  retry: () => void;
   navigate: (href: string, options?: NavigateOptions) => void;
   present: (value: PagePresentationData) => () => void;
 }
@@ -46,8 +44,7 @@ export function RouteStateProvider({
   const pathname = usePathname();
   const parameters = useSearchParams().toString();
   const route = `${pathname}${parameters ? `?${parameters}` : ""}`;
-  const { pending, feedback, cancel, retry, navigate } =
-    usePageNavigation(route);
+  const { pending, feedback, navigate } = usePageNavigation(route);
   const [presentation, dispatchPresentation] = useReducer(
     reducePagePresentation,
     { site, current: null },
@@ -68,8 +65,6 @@ export function RouteStateProvider({
         presentationId: current?.id ?? route,
         pending,
         feedback,
-        cancel,
-        retry,
         navigate,
         present,
       }}

@@ -4,6 +4,8 @@ import {
   NavigationTransaction,
   SLOW_NAVIGATION_MS,
   NAVIGATION_TIMEOUT_MS,
+  NAVIGATION_FAILURE_EMPHASIS_MS,
+  NAVIGATION_FAILURE_HOLD_MS,
   type NavigationIntent,
 } from "../src/core/navigation/transaction";
 import {
@@ -107,12 +109,49 @@ test("five seconds expands feedback; timeout aborts and rejects even a late succ
   assert.equal(transaction.getSnapshot().phase, "slow");
   context.mock.timers.tick(NAVIGATION_TIMEOUT_MS - SLOW_NAVIGATION_MS);
   assert.equal(transaction.getSnapshot().failure, "timeout");
+  assert.equal(transaction.getSnapshot().attention, true);
   assert.equal(signal.aborted, true);
   result.resolve();
   await flush();
   assert.equal(commits, 0);
   assert.equal(transaction.getSnapshot().phase, "failed");
-  transaction.cancel();
+  context.mock.timers.tick(NAVIGATION_FAILURE_EMPHASIS_MS - 1);
+  assert.equal(transaction.getSnapshot().attention, true);
+  context.mock.timers.tick(1);
+  assert.equal(transaction.getSnapshot().attention, false);
+  context.mock.timers.tick(NAVIGATION_FAILURE_HOLD_MS - 1);
+  assert.equal(transaction.getSnapshot().phase, "failed");
+  context.mock.timers.tick(1);
+  assert.equal(transaction.getSnapshot().phase, "idle");
+  assert.equal(transaction.getSnapshot().intent, undefined);
+});
+
+test("old failure dismissal cannot hide a newer navigation, including another failure", async (context) => {
+  context.mock.timers.enable({ apis: ["setTimeout"] });
+  const transaction = new NavigationTransaction({
+    prepare: async () => {
+      throw new NavigationLoadError("unavailable");
+    },
+    commit: () => assert.fail("failed content cannot commit"),
+    abandon: () => assert.fail("preparation cannot touch history"),
+  });
+  transaction.start(intent);
+  await flush();
+  context.mock.timers.tick(NAVIGATION_FAILURE_EMPHASIS_MS);
+  context.mock.timers.tick(NAVIGATION_FAILURE_HOLD_MS - 100);
+  const next = { ...intent, href: "/newer.html" };
+  transaction.start(next);
+  assert.equal(transaction.getSnapshot().phase, "loading");
+  await flush();
+  context.mock.timers.tick(100);
+  assert.equal(transaction.getSnapshot().phase, "failed");
+  assert.equal(transaction.getSnapshot().attention, true);
+  assert.equal(transaction.getSnapshot().intent?.href, next.href);
+  transaction.cancel(false);
+  context.mock.timers.tick(
+    NAVIGATION_FAILURE_EMPHASIS_MS + NAVIGATION_FAILURE_HOLD_MS,
+  );
+  assert.equal(transaction.getSnapshot().phase, "idle");
 });
 
 test("only the most recent choice commits; repeated clicks do not extend the deadline", async (context) => {

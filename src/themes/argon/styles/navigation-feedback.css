@@ -14,6 +14,7 @@
   transition:
     height 400ms var(--motion-ease),
     background-color 300ms,
+    color 220ms,
     box-shadow 300ms,
     opacity 220ms;
 }
@@ -22,16 +23,22 @@
   opacity: 1;
 }
 .navigation-progress[data-expanded="true"] {
-  height: 58px;
+  height: 48px;
   background-color: color-mix(in srgb, var(--surface) 97%, transparent);
   backdrop-filter: blur(12px);
   box-shadow:
     0 4px 16px #1210210d,
     inset 0 -1px 0 color-mix(in srgb, var(--accent) 10%, transparent);
-  pointer-events: auto;
 }
-.navigation-progress[data-state="failed"] {
-  height: 94px;
+.navigation-progress[data-attention="true"] {
+  color: #fff;
+  background-color: #b93648;
+}
+.navigation-progress[data-attention="true"] .navigation-face {
+  color: inherit;
+}
+.navigation-progress[data-attention="true"] .navigation-message-copy {
+  animation: navigation-nudge 460ms ease-out;
 }
 .navigation-line {
   position: absolute;
@@ -51,10 +58,149 @@
 }
 .navigation-progress[data-state="complete"] {
   opacity: 0;
-  transition-delay: 0ms, 0ms, 0ms, 200ms;
+  transition-delay: 0ms, 0ms, 0ms, 0ms, 200ms;
 }
 .navigation-progress[data-state="idle"] .navigation-line {
   transition: none;
+}
+.navigation-countdown {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  border-right: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  opacity: 0;
+  transition: opacity 300ms;
+}
+.navigation-progress[data-state="failed"][data-attention="false"]
+  .navigation-countdown {
+  opacity: 1;
+  animation: navigation-countdown var(--navigation-hold-duration) linear
+    forwards;
+}
+/* This bar conveys remaining time, even when decorative motion is reduced. */
+html[data-motion="reduced"]
+  .navigation-progress[data-state="failed"][data-attention="false"]
+  .navigation-countdown {
+  animation: navigation-countdown var(--navigation-hold-duration) linear
+    forwards !important;
+}
+@keyframes navigation-countdown {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+.navigation-countdown-trail {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms;
+}
+.navigation-progress[data-state="failed"][data-attention="false"]
+  .navigation-countdown-trail {
+  opacity: 1;
+  animation: navigation-countdown-travel var(--navigation-hold-duration) linear
+    forwards;
+}
+.navigation-countdown-trail::before,
+.navigation-countdown-trail::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+.navigation-countdown-trail::before {
+  inset-block: 12%;
+  right: -1px;
+  width: 2px;
+  background: linear-gradient(transparent, var(--accent-light), transparent);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--accent-light) 60%, transparent);
+}
+.navigation-countdown-trail::after {
+  inset-block: 0;
+  right: -16px;
+  width: 32px;
+  background: radial-gradient(
+    ellipse,
+    color-mix(in srgb, var(--accent-light) 24%, transparent),
+    transparent 70%
+  );
+}
+.navigation-countdown-bubble {
+  --bubble-drift: -7px;
+  position: absolute;
+  right: 2px;
+  bottom: 3px;
+  width: 6px;
+  height: 6px;
+  border: 1px solid color-mix(in srgb, var(--accent-light) 85%, transparent);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 30% 25%,
+    #fff9,
+    color-mix(in srgb, var(--accent-light) 25%, transparent) 65%
+  );
+  box-shadow: 0 0 6px color-mix(in srgb, var(--accent-light) 40%, transparent);
+  opacity: 0;
+}
+.navigation-progress[data-state="failed"][data-attention="false"]
+  .navigation-countdown-bubble {
+  animation: navigation-bubble-rise 1400ms ease-out var(--bubble-delay, 0ms)
+    infinite;
+}
+.navigation-countdown-bubble:nth-child(2) {
+  --bubble-drift: 8px;
+  right: -4px;
+  width: 4px;
+  height: 4px;
+  --bubble-delay: -350ms;
+}
+.navigation-countdown-bubble:nth-child(3) {
+  --bubble-drift: 5px;
+  right: 7px;
+  bottom: 6px;
+  width: 8px;
+  height: 8px;
+  --bubble-delay: -700ms;
+}
+.navigation-countdown-bubble:nth-child(4) {
+  --bubble-drift: -5px;
+  right: -6px;
+  bottom: 8px;
+  width: 3px;
+  height: 3px;
+  --bubble-delay: -1050ms;
+}
+@keyframes navigation-countdown-travel {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+@keyframes navigation-bubble-rise {
+  0% {
+    opacity: 0;
+    transform: translate(0, 4px) scale(0.55);
+  }
+  20% {
+    opacity: 0.75;
+  }
+  65% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--bubble-drift), -34px) scale(1.15);
+  }
+}
+html[data-motion="reduced"] .navigation-countdown-trail {
+  display: none;
 }
 .navigation-message {
   position: relative;
@@ -62,12 +208,10 @@
   max-width: 1200px;
   margin-inline: auto;
   height: 100%;
-  padding: 10px 48px;
+  padding: 8px 12px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 9px;
   opacity: 0;
   transform: translateY(-6px);
   transition:
@@ -86,64 +230,35 @@
   text-align: center;
   font-size: 13px;
   line-height: 1.5;
+  white-space: nowrap;
 }
 .navigation-face {
   color: var(--accent);
   font-size: 20px;
   line-height: 1.2;
   white-space: nowrap;
+  transition: color 220ms;
 }
 .navigation-progress[data-state="slow"] .navigation-face {
   animation: navigation-breathe 1800ms ease-in-out infinite;
 }
-.navigation-message-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.navigation-message-actions button,
-.navigation-dismiss {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-  padding: 5px 10px;
-  color: var(--accent);
-  background: var(--accent-soft);
-  border-radius: 8px;
-  font-size: 12px;
-  line-height: 1.6;
-  transition:
-    background-color 180ms,
-    color 180ms,
-    transform 180ms;
-}
-.navigation-message-actions button + button {
-  color: var(--text);
-  background: transparent;
-}
-.navigation-dismiss {
-  position: absolute;
-  top: 13px;
-  right: 9px;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  color: var(--muted);
-  background: transparent;
-  border-radius: 50%;
-  font-size: 15px;
-}
-.navigation-message button:hover {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 15%, var(--surface));
-}
-.navigation-message button:active {
-  transform: scale(0.95);
-}
-.navigation-message button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+@keyframes navigation-nudge {
+  0%,
+  100% {
+    translate: 0;
+  }
+  20% {
+    translate: -4px;
+  }
+  40% {
+    translate: 4px;
+  }
+  60% {
+    translate: -2px;
+  }
+  80% {
+    translate: 2px;
+  }
 }
 @keyframes navigation-breathe {
   0%,
@@ -156,16 +271,16 @@
 }
 @media (max-width: 600px) {
   .navigation-progress[data-expanded="true"] {
-    height: 76px;
-  }
-  .navigation-progress[data-state="failed"] {
-    height: 110px;
+    height: 44px;
   }
   .navigation-message {
-    padding-inline: 40px;
+    padding-inline: 10px;
   }
   .navigation-message-copy {
-    flex-direction: column;
-    gap: 4px;
+    font-size: 12px;
+    gap: 8px;
+  }
+  .navigation-face {
+    font-size: 16px;
   }
 }

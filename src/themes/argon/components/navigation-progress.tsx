@@ -1,19 +1,19 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 import type { NavigationFailure } from "@/core/navigation/document";
+import { NAVIGATION_FAILURE_HOLD_MS } from "@/core/navigation/transaction";
 import { useRouteState } from "./route-state";
-import { Icon } from "./icon";
 
 const failureText: Record<NavigationFailure, string> = {
-  timeout: "加载超时，这次没能取回内容。",
-  network: "连接中断，暂时没能打开这页。",
-  "not-found": "没有找到这页，内容可能已移走。",
-  unavailable: "加载失败，这页暂时无法读取。",
-  render: "加载失败，内容还没有准备好。",
+  timeout: "加载超时，原页面已保留",
+  network: "连接中断，原页面已保留",
+  "not-found": "没有找到这页，原页面已保留",
+  unavailable: "页面暂不可用，原页面已保留",
+  render: "内容未准备好，原页面已保留",
 };
 
 export function NavigationProgress() {
-  const { feedback, cancel, retry, pending } = useRouteState();
+  const { feedback, pending } = useRouteState();
   const bar = useRef<HTMLSpanElement>(null);
   const progress = useRef({ id: 0, value: 0 });
   const expanded = feedback.phase === "slow" || feedback.phase === "failed";
@@ -48,8 +48,20 @@ export function NavigationProgress() {
       className="navigation-progress"
       data-state={feedback.phase}
       data-expanded={expanded}
+      data-attention={failed && feedback.attention === true}
+      style={
+        {
+          "--navigation-hold-duration": `${NAVIGATION_FAILURE_HOLD_MS}ms`,
+        } as CSSProperties
+      }
     >
       <span ref={bar} className="navigation-line" aria-hidden="true" />
+      <span className="navigation-countdown" aria-hidden="true" />
+      <span className="navigation-countdown-trail" aria-hidden="true">
+        {[0, 1, 2, 3].map((bubble) => (
+          <span className="navigation-countdown-bubble" key={bubble} />
+        ))}
+      </span>
       <div
         className="navigation-message"
         inert={!expanded}
@@ -62,29 +74,9 @@ export function NavigationProgress() {
           <span>
             {failed
               ? failureText[feedback.failure ?? "network"]
-              : "正在努力加载，再等我一下…"}
+              : "正在努力加载，再等一下…"}
           </span>
         </div>
-        {failed && (
-          <div className="navigation-message-actions">
-            <button type="button" onClick={retry}>
-              <Icon name="retry" />
-              再试一次
-            </button>
-            <button type="button" onClick={cancel}>
-              继续阅读
-            </button>
-          </div>
-        )}
-        <button
-          type="button"
-          className="navigation-dismiss"
-          onClick={cancel}
-          aria-label={failed ? "关闭加载提示" : "取消加载"}
-          title={failed ? "关闭提示，继续阅读" : "取消加载"}
-        >
-          <Icon name="close" />
-        </button>
       </div>
       <span
         className="sr-only"
@@ -92,7 +84,7 @@ export function NavigationProgress() {
         aria-live={failed ? "assertive" : "polite"}
       >
         {failed
-          ? `${failureText[feedback.failure ?? "network"]} 当前页面已保留，可以重试或继续阅读。`
+          ? `${failureText[feedback.failure ?? "network"]}。提示将自动收起，可再次点击原链接。`
           : pending
             ? feedback.phase === "slow"
               ? "正在努力加载，当前页面可以继续阅读。"
