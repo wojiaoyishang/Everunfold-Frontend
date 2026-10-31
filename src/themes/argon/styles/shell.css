@@ -66,6 +66,8 @@
   box-shadow: 0 1px 9px rgb(19 8 42 / 10%);
 }
 .header-inner {
+  position: relative;
+  z-index: 1;
   max-width: 1200px;
   padding: 15px 18px;
   margin: auto;

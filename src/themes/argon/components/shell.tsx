@@ -10,7 +10,6 @@ import { FloatingTools } from "./floating-tools";
 import { NavigationProvider } from "./navigation-state";
 import { BackgroundVideoProvider } from "./background-video";
 import { ReadingStateProvider } from "./reading-state";
-import { NavigationProgress } from "./navigation-progress";
 import { RouteContent } from "./route-content";
 import { RouteStateProvider, useRouteState } from "./route-state";
 import { HomeFeedPreference } from "./home-feed-settings";
@@ -51,7 +50,6 @@ function ShellFrame({ children }: { children: ReactNode }) {
         <a className="skip-link" href="#main-content">
           跳到正文
         </a>
-        <NavigationProgress />
         <SiteHeader site={site} />
         <section className="hero" aria-label="站点横幅">
           <div className="hero-copy">

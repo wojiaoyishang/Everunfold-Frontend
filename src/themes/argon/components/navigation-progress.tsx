@@ -62,25 +62,29 @@ export function NavigationProgress() {
           <span>
             {failed
               ? failureText[feedback.failure ?? "network"]
-              : "正在努力加载，请再等一下…"}
+              : "正在努力加载，再等我一下…"}
           </span>
         </div>
-        <div className="navigation-message-actions">
-          {failed && (
+        {failed && (
+          <div className="navigation-message-actions">
             <button type="button" onClick={retry}>
               <Icon name="retry" />
-              重试
+              再试一次
             </button>
-          )}
-          <button
-            type="button"
-            onClick={cancel}
-            aria-label={failed ? "关闭加载提示" : "取消加载"}
-          >
-            <Icon name="close" />
-            {failed ? "继续阅读" : "取消"}
-          </button>
-        </div>
+            <button type="button" onClick={cancel}>
+              继续阅读
+            </button>
+          </div>
+        )}
+        <button
+          type="button"
+          className="navigation-dismiss"
+          onClick={cancel}
+          aria-label={failed ? "关闭加载提示" : "取消加载"}
+          title={failed ? "关闭提示，继续阅读" : "取消加载"}
+        >
+          <Icon name="close" />
+        </button>
       </div>
       <span
         className="sr-only"

@@ -7,6 +7,7 @@ import { useNavigation } from "./navigation-state";
 import { Icon } from "./icon";
 import { HeaderNavigation } from "./header-navigation";
 import { SearchDialog } from "./search-dialog";
+import { NavigationProgress } from "./navigation-progress";
 
 export function SiteHeader({ site }: { site: Site }) {
   const { open, setOpen, triggerRef } = useNavigation();
@@ -33,6 +34,7 @@ export function SiteHeader({ site }: { site: Site }) {
           <SearchDialog />
         </div>
       </div>
+      <NavigationProgress />
     </header>
   );
 }
