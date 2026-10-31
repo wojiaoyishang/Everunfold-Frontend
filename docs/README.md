@@ -41,7 +41,7 @@
 - [原站复刻验证](handoff/frontend-fidelity-verification.md)：上一轮版式、慢加载中间态、目录/图片/手机交互的历史证据。
 - [整站动效验证](handoff/frontend-global-motion-verification.md)：上一轮实际 Edge 根因、完整动效、设置滚动条、滚轮尾程和双向交互验证。
 - [前台功能验证](handoff/frontend-interaction-verification.md)：本轮菜单、卡片、文章、评论、阅读偏好、桌面/窄屏与构建检查。
-- [前台差异盘点（2026-10-31）](handoff/frontend-gap-audit-2026-10-31.md)：说说、特殊页面、搜索及原主题差异；检查结果和建议，尚未实施。最新顺序为先完善前端，再整体导入。
+- [前台差异盘点（2026-10-31）](handoff/frontend-gap-audit-2026-10-31.md)：说说及 Argon 通用功能，含评论、图片、正文工具、访问状态与分享预览；区分已启用/可选/已有。自定义页面另排，先完善前端，再整体导入。
 
 ## 两仓库分工
 
