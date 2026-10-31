@@ -14,6 +14,7 @@ export function enhanceFailure(
   const start = panel.querySelector<HTMLButtonElement>("[data-restart]")!;
   const message = panel.querySelector<HTMLElement>("[data-game-message]")!;
   const score = panel.querySelector<HTMLElement>("[data-game-score]")!;
+  const fireworks = panel.querySelector<HTMLElement>(".ui-fireworks")!;
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   const labels = ["星星", "月亮", "叶子", "爱心"];
@@ -34,6 +35,7 @@ export function enhanceFailure(
     });
     score.textContent = `${state.matched.length / 2} / 4 组 · ${state.moves} 次尝试`;
     panel.dataset.complete = String(state.complete);
+    fireworks.dataset.active = String(state.complete);
     message.textContent = state.complete
       ? `全部配对成功，用了 ${state.moves} 次尝试。`
       : state.pending
@@ -84,5 +86,6 @@ export function enhanceFailure(
     controller.abort();
     clearTimeout(timer);
     delete panel.dataset.gameReady;
+    fireworks.dataset.active = "false";
   };
 }

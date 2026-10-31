@@ -4,6 +4,7 @@ import {
 } from "@/core/navigation/failure-page";
 import { Icon, type IconName } from "../components/icon";
 import { Button, TextLink } from "../components/ui/primitives";
+import { CelebrationFireworks } from "../components/ui/celebration-fireworks";
 
 const faces: IconName[] = ["star", "moon", "leaf", "heart"];
 
@@ -28,7 +29,6 @@ export function FailureSurface({
             <Icon name="leaf" />
             <span>Everunfold</span>
           </TextLink>
-          <span>页面访问提示</span>
         </header>
         <div className="failure-layout">
           <div className="failure-copy">
@@ -73,6 +73,7 @@ export function FailureSurface({
               <span data-game-score>尚未开始</span>
             </div>
             <div className="failure-cards">
+              <CelebrationFireworks />
               {Array.from({ length: 8 }, (_, index) => (
                 <Button
                   key={index}
@@ -118,7 +119,6 @@ export function FailureSurface({
         </div>
         <footer className="failure-footer">
           <span>Everunfold</span>
-          <span>小游戏在本地运行，无需联网</span>
         </footer>
       </div>
     </section>

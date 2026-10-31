@@ -54,7 +54,7 @@ html[data-failure-document] body { margin: 0; }
 .failure-game-heading h2 { font-size: 19px; font-weight: 600; margin: 0; line-height: 1.5; color: var(--failure-text); }
 .failure-game-heading p { margin: 3px 0 0; font-size: 12px; color: var(--failure-muted); }
 .failure-game-meta { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 5px; margin: 26px 0 12px; color: var(--failure-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-.failure-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.failure-cards { position: relative; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; --celebration-color: var(--failure-accent); }
 .failure-surface .failure-card { position: relative; aspect-ratio: 4 / 5; width: 100%; min-height: 0; padding: 0; border: 0; border-radius: 10px; background: transparent; perspective: 600px; box-shadow: none; }
 .failure-card-back, .failure-card-front { display: grid; place-items: center; position: absolute; inset: 0; border-radius: inherit; backface-visibility: hidden; transition: transform 420ms cubic-bezier(.22, 1, .36, 1), background-color 220ms, box-shadow 220ms; }
 .failure-card-back { color: color-mix(in srgb, var(--failure-accent) 58%, var(--failure-panel)); border: 1px solid var(--failure-line); background: repeating-linear-gradient(135deg, transparent 0 8px, color-mix(in srgb, var(--failure-accent) 3%, transparent) 8px 9px), color-mix(in srgb, var(--failure-accent) 7%, var(--failure-panel)); }
