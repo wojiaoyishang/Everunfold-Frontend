@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-本目录是跨上下文、跨开发者的长期交接入口。当前阶段为公开阅读与前台交互动效，完整博客/CMS 尚未全部实现。
+本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读与前台交互，本轮进行动态数据规范设计（未实施）；完整博客/CMS 尚未全部实现。
 
 ## 先从这里读
 
@@ -21,10 +21,11 @@
 15. [自动反馈与倒计时](decisions/0010-navigation-feedback-countdown.md)：无按钮的单行横幅、哭哭失败表情、10 秒整幅倒计时和气泡装饰，更新 ADR 0009 的展示部分。
 16. [评论焦点与主题滚动条](decisions/0011-comment-focus-and-scrollbars.md)：完整颜文字排版、轻量选中/键盘焦点、全站原生滚动条共用主题色。
 17. [统一控件与配色](decisions/0012-shared-controls-and-theme-consistency.md)：强制共享控件、完整配色联动、滚轮横向推荐、导航轨道衔接与评论到达反馈。
+18. [公开首屏与动态数据设计](architecture/public-dynamic-data.md) 与 [ADR 0013](decisions/0013-public-dynamic-data.md)：SEO/独立阅读、指标渐进显示、评论快照更新、动态数据状态图标、请求与缓存边界；明确未实现和建议参数。
 
 ## 目录职责
 
-最新验证入口：[共享控件与定位反馈验证](handoff/frontend-shared-controls-verification.md)。
+本轮设计入口：[动态数据盘点与交接](handoff/public-dynamic-data-audit.md)。最近一次功能验证：[共享控件与定位反馈验证](handoff/frontend-shared-controls-verification.md)，并非本轮重跑。
 
 | 目录 | 内容与维护时机 |
 | --- | --- |
