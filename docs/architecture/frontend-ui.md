@@ -1,6 +1,6 @@
 # 前台组件、导航与动效边界
 
-更新：2026-10-31。适用于当前 Next.js App Router 前台；在线 0.1 API/快照保持不变，展示原型另消费后端 0.2.0-preview.1 草案。验证边界见 [说说与阅读工具交付记录](../handoff/frontend-reader-verification.md)。
+更新：2026-10-31。适用于当前 Next.js App Router 前台；在线 0.1 API/快照保持不变，展示原型另消费后端 0.2.0-preview.1 草案。最新导航检查见 [导航验证](../handoff/frontend-navigation-verification.md)，其余阅读能力见 [说说与阅读工具记录](../handoff/frontend-reader-verification.md)。
 
 ## 目录与职责
 
@@ -16,14 +16,15 @@ src/core/
   navigation/
     targets.ts                  纯 URL / 手势 / 资源导航策略
     presentation.ts             纯目录注册/释放状态约束
+    document.ts / transaction.ts 完整公开文档准备、取消/超时/竞争请求状态
 src/themes/argon/
   argon.css                     仅有序导入，不堆积整站样式
   components/
     shell.tsx                   常驻背景、顶栏、侧栏、主内容容器和页脚
     background-video.tsx        常驻播放 Provider，阅读设置控制已保存的播放偏好
-    route-state.tsx             导航 transition、页元信息桥接、滚动交接
+    route-state.tsx             共享导航上下文与页元信息桥接
     route-content.tsx           主内容入场、滚动 reveal、正文链接增强
-    navigation-progress.tsx     延迟显示、推进、完成与淡出
+    navigation-progress.tsx     导航下缘进度、慢加载横幅和失败操作
     floating-tools.tsx          纵向工具列与回顶出入，不各自固定定位
     reading-state.tsx           阅读进度、活动目录、评论状态
     article-media.tsx           已安全渲染正文的图片和折叠交互
@@ -46,10 +47,11 @@ src/themes/argon/
     pagination / archives ...   主题业务展示组件
   navigation.ts                 主题导航/原站品牌映射，不改公开业务 DTO
   hooks/                        动效订阅、details 高度、滚动订阅、图片 dialog 锁
-  styles/                       十二个职责样式文件，保持原级联顺序
+    use-page-navigation.ts      Next 适配、准备后切换、提交后定位及历史交接
+  styles/                       按职责拆分的样式文件，保持原级联顺序
 ```
 
-`styles/` 按职责分为 base/appearance、shell/sidebar/navigation、listing/shuoshuo、article/comments/comment-composer、reader/reader-tools/discovery、controls/motion/responsive。响应式与减少动态效果覆盖保持最后；不得按文件名随意重排导入来改变级联。新动效先复用 tokens 和现有类，不复制一套页面样式。
+`styles/` 按职责分为 base/appearance、shell/sidebar/navigation、listing/shuoshuo、article/comments/comment-composer、reader/reader-tools/discovery、controls/motion/navigation-feedback/responsive。响应式与减少动态效果覆盖保持最后；不得按文件名随意重排导入来改变级联。新动效先复用 tokens 和现有类，不复制一套页面样式。
 
 ## 公共壳只挂载一次
 
@@ -60,6 +62,7 @@ src/themes/argon/
 ## 客户端导航与目录
 
 - AppLink 保留 Next 预取和浏览器默认手势，并共享 React transition；SearchForm 保留 GET 可分享地址和无 JS 时的原生能力。
+- 普通站内导航先用可取消请求完整准备目标公开文档，再交给 Next；新 DOM 提交后才定位正文，不再滚动旧页。5 秒慢加载、20 秒超时、取消/重试/竞争请求由统一事务管理；状态反馈接在 SiteHeader 下缘，菜单不被覆盖。额外 HTML 请求和 Next 传输回退的边界见 [ADR 0009](../decisions/0009-navigation-readiness-and-feedback.md)。
 - 历史正文由 Server 安全渲染，限定在正文容器的事件委托接管真实同源页面链接；外链、资源、下载、新标签和修饰键不接管。同页 hash 使用共享平滑定位并保留独立历史条目，目标在折叠块内时先展开。
 - 页目录/最新站点数据由 PagePresentation 在提交后桥接。每次注册拥有独立 token，卸载只释放自己的注册；旧页迟到 cleanup 不能清掉新目录，同一路由进入错误边界也不能残留旧目录。
 - Client 组件只获得公开 Site、目录和已渲染 children，不把完整快照、服务端 HTML 清洗器、数据库配置或服务密钥引入客户端。评论的 Markdown 解析器用于编辑预览，通过封闭的 React 元素集合输出，拒绝 HTML 执行。

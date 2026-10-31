@@ -17,6 +17,7 @@
 11. [内容类型衔接](architecture/content-types.md)：0.2 展示草案与前台原型已实现，在线 0.1 类型迁移/整体导入后置。
 12. [说说与阅读工具决定](decisions/0007-shuoshuo-and-reader-features.md)：后端草案、前端适配、共享评论/图片/正文工具与偏好边界。
 13. [主题优化决定](decisions/0008-theme-polish-and-configuration.md) 与 [主题配置/缓存边界](architecture/theme-configuration.md)：首页偏好、紧凑卡片、横向推荐、品牌色联动；明确后台配置尚未实现。
+14. [导航就绪与反馈决定](decisions/0009-navigation-readiness-and-feedback.md)：完整页面准备、切换后定位、5 秒导航延伸横幅、20 秒超时和竞争请求处理。
 
 ## 目录职责
 
@@ -46,6 +47,7 @@
 - [前台差异盘点（2026-10-31）](handoff/frontend-gap-audit-2026-10-31.md)：说说及 Argon 通用功能，含评论、图片、正文工具、访问状态与分享预览；区分已启用/可选/已有。自定义页面另排，先完善前端，再整体导入。
 - [说说与通用阅读验证](handoff/frontend-reader-verification.md)：本轮实际源码/HTTP/构建结果、手工验证入口、浏览器验证中止及未接后端范围。
 - [主题优化验证](handoff/frontend-theme-polish-verification.md)：最新截图反馈、主题色联动、内置浏览器桌面/窄屏、检查结果与复查入口。
+- [导航慢网复查](development/navigation-network-preview.md) 与 [导航交付验证](handoff/frontend-navigation-verification.md)：临时本地故障代理、就绪与失败反馈、位置恢复和实际验证边界。
 
 ## 两仓库分工
 
