@@ -27,5 +27,11 @@ export default defineConfig([
       ],
     },
   },
-  globalIgnores([".next/**", "out/**", "coverage/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    "out/**",
+    "coverage/**",
+    "var/**",
+    "next-env.d.ts",
+  ]),
 ]);

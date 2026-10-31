@@ -248,6 +248,11 @@ export async function verifyReaderRuntime({
       assert.equal(classCount(html, "blog-shell"), 0);
       assert.equal(classCount(html, "management-root"), 1);
       assert.equal(
+        classCount(html, "login-card"),
+        1,
+        "Authentication gates must use the shared compact entry card",
+      );
+      assert.equal(
         classCount(html, "admin-workspace"),
         0,
         "An unverified identity must never expose the workspace in SSR",
