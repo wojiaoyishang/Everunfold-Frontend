@@ -3,6 +3,7 @@ import { displayDate } from "@/core/content/query";
 import { taxonomyHref } from "@/core/content/urls";
 import { AppLink as Link } from "./navigation-link";
 import { Icon } from "./icon";
+import { ViewMetric } from "./reader-data";
 
 export function PostMeta({
   content,
@@ -44,6 +45,7 @@ export function PostMeta({
         <Icon name="comment" />
         {content.comment_count}
       </Link>
+      <ViewMetric contentId={content.id} />
     </div>
   );
 }

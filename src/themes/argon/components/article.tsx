@@ -11,6 +11,7 @@ import { ArticleMedia } from "./article-media";
 import { Icon } from "./icon";
 import { RelatedArticles } from "./related-articles";
 import { ArticleNeighbors } from "./article-neighbors";
+import { ReaderPreviewRegistration } from "./reader-preview";
 
 export function Article({
   snapshot,
@@ -29,6 +30,7 @@ export function Article({
         toc={rendered.toc}
         id={content.id}
       />
+      {content.kind === "article" && <ReaderPreviewRegistration />}
       <article className="surface article-card">
         <ArticleHeader content={content} />
         <div className="article-body">

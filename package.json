@@ -12,6 +12,7 @@
     "dev": "next dev --hostname 127.0.0.1",
     "build": "next build",
     "verify:production": "node tools/verify-production.mjs",
+    "verify:reader": "node tools/verify-production.mjs --reader",
     "start": "next start --hostname 127.0.0.1",
     "lint": "eslint . --max-warnings=0",
     "lint:fix": "eslint . --fix --max-warnings=0",

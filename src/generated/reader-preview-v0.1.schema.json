@@ -1,0 +1,222 @@
+{
+  "$defs": {
+    "PublicResponse_ReaderIdentity_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/ReaderIdentity"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[ReaderIdentity]",
+      "type": "object"
+    },
+    "PublicResponse_ReaderMetrics_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/ReaderMetrics"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[ReaderMetrics]",
+      "type": "object"
+    },
+    "ReaderIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "const": "demo",
+          "title": "Mode",
+          "type": "string"
+        },
+        "persona": {
+          "enum": [
+            "guest",
+            "member"
+          ],
+          "title": "Persona",
+          "type": "string"
+        },
+        "display_name": {
+          "title": "Display Name",
+          "type": "string"
+        },
+        "sampled_at": {
+          "format": "date-time",
+          "title": "Sampled At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mode",
+        "persona",
+        "display_name",
+        "sampled_at"
+      ],
+      "title": "ReaderIdentity",
+      "type": "object"
+    },
+    "ReaderIdentityQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "persona": {
+          "default": "guest",
+          "enum": [
+            "guest",
+            "member"
+          ],
+          "title": "Persona",
+          "type": "string"
+        }
+      },
+      "title": "ReaderIdentityQuery",
+      "type": "object"
+    },
+    "ReaderMetric": {
+      "additionalProperties": false,
+      "properties": {
+        "content_id": {
+          "format": "uuid",
+          "title": "Content Id",
+          "type": "string"
+        },
+        "views": {
+          "maximum": 996,
+          "minimum": 0,
+          "title": "Views",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "content_id",
+        "views"
+      ],
+      "title": "ReaderMetric",
+      "type": "object"
+    },
+    "ReaderMetrics": {
+      "additionalProperties": false,
+      "properties": {
+        "mode": {
+          "const": "demo",
+          "title": "Mode",
+          "type": "string"
+        },
+        "sampled_at": {
+          "format": "date-time",
+          "title": "Sampled At",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ReaderMetric"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "mode",
+        "sampled_at",
+        "items"
+      ],
+      "title": "ReaderMetrics",
+      "type": "object"
+    },
+    "ReaderMetricsQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "maxItems": 20,
+          "minItems": 1,
+          "title": "Ids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ids"
+      ],
+      "title": "ReaderMetricsQuery",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "identity_query": {
+      "$ref": "#/$defs/ReaderIdentityQuery"
+    },
+    "metrics_query": {
+      "$ref": "#/$defs/ReaderMetricsQuery"
+    },
+    "identity": {
+      "$ref": "#/$defs/PublicResponse_ReaderIdentity_"
+    },
+    "metrics": {
+      "$ref": "#/$defs/PublicResponse_ReaderMetrics_"
+    }
+  },
+  "required": [
+    "identity_query",
+    "metrics_query",
+    "identity",
+    "metrics"
+  ],
+  "title": "ReaderPreviewContract",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-everunfold-contract-version": "0.1.0-preview.1",
+  "description": "Opt-in synthetic data only. No authentication, authorization or writes.",
+  "x-everunfold-operations": [
+    {
+      "name": "readPreviewIdentity",
+      "path": "/v1/reader-preview/identity",
+      "query": "identity_query",
+      "response": "identity"
+    },
+    {
+      "name": "readPreviewMetrics",
+      "path": "/v1/reader-preview/metrics",
+      "query": "metrics_query",
+      "response": "metrics"
+    }
+  ]
+}

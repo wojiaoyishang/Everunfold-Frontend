@@ -179,6 +179,41 @@
 .ui-select-trigger[aria-expanded="true"] > .icon {
   transform: rotate(-90deg);
 }
+.ui-loading-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+.ui-loading-ring[data-active="true"] {
+  opacity: 1;
+}
+.ui-loading-ring-track {
+  opacity: 0.14;
+}
+.ui-loading-ring-line {
+  stroke-linecap: round;
+  stroke-dasharray: 30 83.1;
+  transform-origin: center;
+}
+.ui-loading-ring[data-active="true"] .ui-loading-ring-line {
+  animation: ui-loading-orbit 1.25s linear infinite;
+}
+@keyframes ui-loading-orbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+html[data-motion="reduced"]
+  .ui-loading-ring[data-active="true"]
+  .ui-loading-ring-line {
+  animation: none;
+}
 .ui-anchored-panel {
   position: fixed;
   inset: auto;

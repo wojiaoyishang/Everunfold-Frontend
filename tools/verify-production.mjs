@@ -57,6 +57,14 @@ try {
     child.once("exit", (status) => resolve(status ?? 1));
   });
   process.exitCode = Number(code);
+  if (code === 0 && process.argv.includes("--reader")) {
+    const { verifyReaderRuntime } = await import("./verify-reader-runtime.mjs");
+    await verifyReaderRuntime({
+      workspace,
+      projectRoot,
+      interactive: process.argv.includes("--interactive"),
+    });
+  }
 } finally {
   // Only a verified tool-created tree is removed. All dependencies above are
   // copied with symlinks dereferenced; the running project's files stay intact.

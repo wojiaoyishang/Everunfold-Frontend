@@ -14,19 +14,24 @@ import { ReadingStateProvider } from "./reading-state";
 import { RouteContent } from "./route-content";
 import { RouteStateProvider, useRouteState } from "./route-state";
 import { HomeFeedPreference } from "./home-feed-settings";
+import { ReaderDataProvider } from "./reader-data";
 
 export function BlogShell({
   site,
+  backendBaseUrl,
   children,
 }: {
   site: Site;
+  backendBaseUrl: string;
   children: ReactNode;
 }) {
   return (
     <NavigationProvider>
       <RouteStateProvider site={site}>
         <ReadingStateProvider>
-          <ShellFrame>{children}</ShellFrame>
+          <ReaderDataProvider baseUrl={backendBaseUrl}>
+            <ShellFrame>{children}</ShellFrame>
+          </ReaderDataProvider>
         </ReadingStateProvider>
       </RouteStateProvider>
     </NavigationProvider>

@@ -9,6 +9,7 @@ import { Icon } from "./icon";
 import { HeaderNavigation } from "./header-navigation";
 import { SearchDialog } from "./search-dialog";
 import { NavigationProgress } from "./navigation-progress";
+import { BackendStatus } from "./backend-status";
 
 export function SiteHeader({ site }: { site: Site }) {
   const { open, setOpen, triggerRef } = useNavigation();
@@ -32,6 +33,7 @@ export function SiteHeader({ site }: { site: Site }) {
         </Link>
         <HeaderNavigation site={site} />
         <div className="header-actions">
+          <BackendStatus />
           <SearchDialog />
         </div>
       </div>

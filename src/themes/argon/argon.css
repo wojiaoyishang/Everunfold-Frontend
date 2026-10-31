@@ -16,6 +16,7 @@
 @import "./styles/discovery.css";
 @import "./styles/controls.css";
 @import "./styles/ui-controls.css";
+@import "./styles/dynamic-data.css";
 @import "./styles/motion.css";
 @import "./styles/navigation-feedback.css";
 @import "./styles/responsive.css";

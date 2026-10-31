@@ -7,6 +7,7 @@ import { readPublicSnapshot } from "@/core/content/snapshot";
 import { BlogShell } from "@/themes/argon/components/shell";
 import { initializeMotion } from "@/core/browser/motion-policy";
 import { initializeAppearance } from "@/core/browser/appearance-policy";
+import { readConfiguration } from "@/core/config/server";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export default async function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
   const { site } = await readPublicSnapshot();
+  const { backendBaseUrl } = readConfiguration();
   return (
     <html lang="zh-CN" data-motion="full" suppressHydrationWarning>
       <head>
@@ -39,7 +41,9 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: initializeMotion }} />
       </head>
       <body>
-        <BlogShell site={site}>{children}</BlogShell>
+        <BlogShell site={site} backendBaseUrl={backendBaseUrl}>
+          {children}
+        </BlogShell>
       </body>
     </html>
   );

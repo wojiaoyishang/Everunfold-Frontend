@@ -1,0 +1,7 @@
+{
+  "schema_version": "0.1.0-preview.1",
+  "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+  "source_path": "contracts/reader-preview-v0.1.schema.json",
+  "source_commit": "38ff7226fcdb373d436d191718c8585811ac00c8",
+  "sha256": "9324386a70b1d3f1b657939864683926ce9dc692061499d696506bb6aaf37e7c"
+}

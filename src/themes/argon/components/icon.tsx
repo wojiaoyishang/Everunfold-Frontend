@@ -1,6 +1,13 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  cloud: "M6 18a4 4 0 0 1-1-7.9 7 7 0 0 1 13.5-1.8A5 5 0 0 1 18 18H6Z",
+  "cloud-check":
+    "M7 18H6a4 4 0 0 1-1-7.9 7 7 0 0 1 13.5-1.8A5 5 0 0 1 20 17M10 17l3 3 7-7",
+  "cloud-off":
+    "M3 3l18 18M7 18H6a4 4 0 0 1-1-7.9M9 5a7 7 0 0 1 9.5 3.3A5 5 0 0 1 21 16M11 18h4",
+  refresh:
+    "M20 7v5h-5M4 17v-5h5M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1",
   external:
     "M14 3h7v7M21 3l-11 11M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5",
   copy: "M8 8h13v13H8V8ZM16 8V3H3v13h5",

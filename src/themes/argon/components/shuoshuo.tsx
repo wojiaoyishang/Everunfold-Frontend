@@ -10,6 +10,7 @@ import { Icon } from "./icon";
 import { PagePresentation } from "./route-state";
 import { CommentSection } from "./comments/comment-section";
 import { ArticleActions } from "./article-actions";
+import { ViewMetric } from "./reader-data";
 
 export function ShuoshuoCard({
   entry,
@@ -58,6 +59,7 @@ export function ShuoshuoCard({
       )}
       <footer className="shuoshuo-actions">
         <ReactionButton id={content.id} count={content.reaction_count} />
+        {!example && <ViewMetric contentId={content.id} />}
         {content.comments_open ? (
           <Link href={detail ? "#comments" : `${content.path}#comments`}>
             <Icon name="comment" />

@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读与前台交互，本轮进行动态数据规范设计（未实施）；完整博客/CMS 尚未全部实现。
+本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读与前台交互，本轮完成按页面注册的动态请求基线与演示能力；完整博客/CMS 尚未全部实现。
 
 ## 先从这里读
 
@@ -21,11 +21,12 @@
 15. [自动反馈与倒计时](decisions/0010-navigation-feedback-countdown.md)：无按钮的单行横幅、哭哭失败表情、10 秒整幅倒计时和气泡装饰，更新 ADR 0009 的展示部分。
 16. [评论焦点与主题滚动条](decisions/0011-comment-focus-and-scrollbars.md)：完整颜文字排版、轻量选中/键盘焦点、全站原生滚动条共用主题色。
 17. [统一控件与配色](decisions/0012-shared-controls-and-theme-consistency.md)：强制共享控件、完整配色联动、滚轮横向推荐、导航轨道衔接与评论到达反馈。
-18. [公开首屏与动态数据设计](architecture/public-dynamic-data.md) 与 [ADR 0013](decisions/0013-public-dynamic-data.md)：SEO/独立阅读、指标渐进显示、评论快照更新、动态数据状态图标、请求与缓存边界；明确未实现和建议参数。
+18. [公开首屏与动态数据设计](architecture/public-dynamic-data.md) 与 [ADR 0013](decisions/0013-public-dynamic-data.md)：SEO/独立阅读、指标渐进显示、评论快照更新、请求与缓存边界；区分设计与已实现子集。
+19. [按页面注册的请求基线](decisions/0014-page-registered-reader-requests.md)：通用状态面板与页面插槽、生成客户端、取消/去重/重试、假身份/浏览量、真实离线有/无缓存验证；不是生产认证或持久计数。
 
 ## 目录职责
 
-本轮设计入口：[动态数据盘点与交接](handoff/public-dynamic-data-audit.md)。最近一次功能验证：[共享控件与定位反馈验证](handoff/frontend-shared-controls-verification.md)，并非本轮重跑。
+本轮接入入口：[动态请求开发指南](development/reader-requests.md) 与 [验收记录](handoff/reader-requests-verification.md)。原始设计依据保留在 [动态数据盘点](handoff/public-dynamic-data-audit.md)。
 
 | 目录 | 内容与维护时机 |
 | --- | --- |
@@ -41,6 +42,7 @@
 
 - [开发环境](development/environment.md)：本机工具、安装方式和项目运行说明。
 - [公开阅读运行指南](development/public-reading.md)：8001/3000 启动命令、数据刷新与手工验收。
+- [动态请求开发与联调](development/reader-requests.md)：页面请求/面板注册、演示开关、契约生成、独立生产与断线测试。
 - [动效开发与验证](development/frontend-motion.md)：保留热更新时的独立生产构建、交互检查和资源规则。
 - [WordPress 只读清点](migration/wordpress-inventory.md)：源备份范围与迁移前置事实；不是导入结果。
 - [初始化验证](handoff/bootstrap-verification.md)：本步实际执行的检查、结果与限制。

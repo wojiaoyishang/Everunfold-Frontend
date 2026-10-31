@@ -23,6 +23,18 @@ const source = (await readFile(absoluteSource, "utf8")).replaceAll(
 const schema = JSON.parse(source);
 const presentation =
   path.basename(absoluteSource) === "presentation-v0.2.schema.json";
+const reader =
+  path.basename(absoluteSource) === "reader-preview-v0.1.schema.json";
+const rootName = reader
+  ? "ReaderPreviewContract"
+  : presentation
+    ? "ContentPresentation"
+    : "PublicSnapshot";
+const outputName = reader
+  ? "reader-preview-contract"
+  : presentation
+    ? "presentation-contract"
+    : "public-contract";
 const backendRoot = path.dirname(path.dirname(absoluteSource));
 const relativeSource = path
   .relative(backendRoot, absoluteSource)
@@ -48,28 +60,23 @@ const commit = execFileSync("git", ["rev-parse", "HEAD"], {
 }).trim();
 const output = path.join(projectRoot, "src/generated");
 await mkdir(output, { recursive: true });
-const types = await compile(
-  schema,
-  presentation ? "ContentPresentation" : "PublicSnapshot",
-  {
-    bannerComment:
-      "/* Generated from the backend public contract. Do not edit by hand. */",
-    additionalProperties: false,
-    style: { singleQuote: false, semi: true, printWidth: 100 },
-  },
-);
-await writeFile(
-  path.join(
-    output,
-    presentation ? "presentation-contract.ts" : "public-contract.ts",
-  ),
-  types,
-);
+const types = await compile(schema, rootName, {
+  bannerComment:
+    "/* Generated from the backend public contract. Do not edit by hand. */",
+  additionalProperties: false,
+  ignoreMinAndMaxItems: reader,
+  style: { singleQuote: false, semi: true, printWidth: 100 },
+});
+await writeFile(path.join(output, `${outputName}.ts`), types);
 await writeFile(path.join(output, path.basename(absoluteSource)), source);
 await writeFile(
   path.join(
     output,
-    presentation ? "presentation-source.json" : "contract-source.json",
+    reader
+      ? "reader-preview-source.json"
+      : presentation
+        ? "presentation-source.json"
+        : "contract-source.json",
   ),
   `${JSON.stringify(
     {
@@ -83,4 +90,42 @@ await writeFile(
     2,
   )}\n`,
 );
+if (reader) {
+  const operations = schema["x-everunfold-operations"];
+  if (
+    !Array.isArray(operations) ||
+    operations.some(
+      (op) =>
+        !/^readPreview[A-Za-z]+$/.test(op.name) ||
+        !/^\/v1\/reader-preview\/[a-z]+$/.test(op.path) ||
+        !schema.properties[op.query] ||
+        !schema.properties[op.response],
+    )
+  )
+    throw new Error("Invalid reader operation metadata");
+  const functions = operations
+    .map(
+      (op) => `
+const ${op.name}Validator = ajv.compile<ReaderPreviewContract[${JSON.stringify(op.response)}]>({
+  $ref: ${JSON.stringify(`reader-preview#/properties/${op.response}`)},
+});
+export function ${op.name}(baseUrl: string, query: ReaderPreviewContract[${JSON.stringify(op.query)}], options: RequestOptions = {}) {
+  return requestJSON(baseUrl, ${JSON.stringify(op.path)}, query, ${op.name}Validator, options);
+}`,
+    )
+    .join("\n");
+  await writeFile(
+    path.join(output, "reader-preview-client.ts"),
+    `/* Generated from backend operation metadata. Do not edit by hand. */
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
+import schema from "./reader-preview-v0.1.schema.json";
+import type { ReaderPreviewContract } from "./reader-preview-contract";
+import { requestJSON, type RequestOptions } from "@/core/http/request";
+const ajv = new Ajv({ strict: true });
+addFormats(ajv);
+ajv.addSchema(Object.fromEntries(Object.entries(schema).filter(([key]) => !key.startsWith("x-"))), "reader-preview");
+${functions}\n`,
+  );
+}
 console.log(`Generated public contract from backend ${commit.slice(0, 7)}`);
