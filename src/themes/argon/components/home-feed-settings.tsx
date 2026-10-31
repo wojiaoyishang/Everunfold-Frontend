@@ -46,8 +46,10 @@ export function HomeFeedPreference() {
   const { route, navigate, pending } = useRouteState();
   useEffect(() => {
     if (pending) return;
-    const destination = preferredHomeHref(route, window.location.href, saved);
-    if (destination !== route)
+    const { pathname, search, hash, href } = window.location;
+    const current = `${pathname}${search}${hash}`;
+    const destination = preferredHomeHref(current, href, saved);
+    if (destination !== current)
       navigate(destination, { replace: true, scroll: false });
   }, [route, navigate, pending, saved]);
   return null;

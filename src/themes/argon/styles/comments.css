@@ -1,5 +1,5 @@
 .comments-card {
-  margin-top: 25px;
+  margin-top: var(--content-gap);
   padding: 30px 38px;
 }
 .comments-header h2 {

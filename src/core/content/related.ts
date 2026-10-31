@@ -1,4 +1,24 @@
 import type { Content, PublicSnapshot } from "./types";
+
+/** Chronological neighbors, independent of pinned status and the current feed filter. */
+export function articleNeighbors(snapshot: PublicSnapshot, current: Content) {
+  const articles = snapshot.contents
+    .filter((entry) => entry.kind === "article")
+    .sort(
+      (a, b) =>
+        Date.parse(b.published_at) - Date.parse(a.published_at) ||
+        a.id.localeCompare(b.id),
+    );
+  const position =
+    current.kind === "article"
+      ? articles.findIndex((entry) => entry.id === current.id)
+      : -1;
+  return {
+    previous: position >= 0 ? articles[position + 1] : undefined,
+    next: position > 0 ? articles[position - 1] : undefined,
+  };
+}
+
 /** Related public articles only; visitors and private state never enter this ranking. */
 export function relatedArticles(
   snapshot: PublicSnapshot,

@@ -1,5 +1,7 @@
 html[data-custom-accent="true"] {
   --accent: var(--custom-accent-light);
+  /* Brand fills carry white text, so they keep the darker, contrast-safe tone. */
+  --brand-accent: var(--custom-accent-light);
   --accent-light: color-mix(in srgb, var(--accent), white 25%);
   --accent-soft: color-mix(in srgb, var(--accent) 9%, var(--surface));
 }

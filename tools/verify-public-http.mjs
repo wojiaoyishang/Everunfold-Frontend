@@ -41,8 +41,27 @@ function articles(document, mixed = false) {
   );
 }
 
+const withClass = (name, root) =>
+  DomUtils.findAll(
+    (node) => (node.attribs.class ?? "").split(" ").includes(name),
+    root.children,
+  );
+
 const home = await htmlAt("/");
 assert.equal(articles(home.document, true).length, 10);
+assert.equal(withClass("feed-tabs", home.document).length, 0);
+assert.equal(
+  DomUtils.getElementById("overview-tab", home.document.children),
+  null,
+);
+assert.ok(DomUtils.textContent(home.document).includes("首页内容"));
+assert.ok(!DomUtils.textContent(home.document).includes("说说暂为示例内容"));
+const onlyArticles = await htmlAt("/?type=article");
+assert.equal(articles(onlyArticles.document).length, 10);
+assert.equal(withClass("shuoshuo-card", onlyArticles.document).length, 0);
+const onlyMoments = await htmlAt("/?type=shuoshuo");
+assert.equal(articles(onlyMoments.document).length, 0);
+assert.equal(withClass("shuoshuo-card", onlyMoments.document).length, 4);
 assert.ok(
   DomUtils.textContent(home.document).includes(snapshot.site.hero_title),
 );
@@ -101,18 +120,37 @@ const detail = await htmlAt(firstArticle.path);
 assert.equal(DomUtils.getElementsByTagName("h1", detail.document).length, 1);
 assert.match(detail.html, /property="og:title"/);
 assert.match(detail.html, /property="og:type" content="article"/);
+const chronological = snapshot.contents
+  .filter((item) => item.kind === "article")
+  .sort(
+    (a, b) =>
+      Date.parse(b.published_at) - Date.parse(a.published_at) ||
+      a.id.localeCompare(b.id),
+  );
+for (const item of [chronological[0], chronological.at(-1)]) {
+  const { document } =
+    item.id === firstArticle.id ? detail : await htmlAt(item.path);
+  assert.equal(withClass("neighbor-card", document).length, 2);
+  assert.equal(
+    withClass("neighbor-empty", document).length,
+    chronological.length === 1 ? 2 : 1,
+  );
+  assert.equal(withClass("neighbor-empty", document)[0].name, "div");
+  assert.equal(
+    withClass("related-card", document).length,
+    Math.min(6, chronological.length - 1),
+  );
+}
 const ordinaryPage = snapshot.contents.find((item) => item.kind === "page");
-if (ordinaryPage) await htmlAt(ordinaryPage.path);
+if (ordinaryPage) {
+  const { document } = await htmlAt(ordinaryPage.path);
+  assert.equal(withClass("article-neighbors", document).length, 0);
+}
 const commented = snapshot.contents.find(
   (item) => snapshot.comments[item.id]?.length,
 );
 if (commented) {
   const { document } = await htmlAt(commented.path);
-  const withClass = (name, root) =>
-    DomUtils.findAll(
-      (node) => (node.attribs.class ?? "").split(" ").includes(name),
-      root.children,
-    );
   const historicalIds = (root) =>
     withClass("comment", root)
       .filter((node) => withClass("origin-history", node).length > 0)

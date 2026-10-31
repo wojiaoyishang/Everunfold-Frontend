@@ -11,8 +11,14 @@
 .sidebar-menu-card {
   overflow: hidden;
 }
+.sidebar-menu-card,
+.sidebar-overview {
+  background-color: color-mix(in srgb, var(--brand-accent) 4%, var(--surface));
+}
 .sidebar-banner {
-  background: linear-gradient(140deg, #9266da 0%, #673bb7 72%, #59309f);
+  background-color: var(--brand-accent);
+  background-image: linear-gradient(140deg, transparent, #0002);
+  transition: background-color var(--motion-normal) ease;
   color: #fff;
   padding: 23px 16px;
   min-height: 150px;

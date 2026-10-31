@@ -275,13 +275,11 @@
   }
   .article-neighbors {
     gap: 12px;
-    margin-top: 18px;
   }
-  .article-neighbors a {
-    padding: 17px;
+  .neighbor-card {
+    padding: 14px;
   }
   .comments-card {
-    margin-top: 18px;
     padding: 24px 20px;
   }
   .comment-composer {

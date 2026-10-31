@@ -238,7 +238,7 @@ export function renderContent(
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;");
   const notes = references.length
-    ? `<div class="reader-references"><strong>参考资料</strong><ol>${references.map((text, index) => `<li id="${prefix}-note-${index + 1}">${escape(text)} <a href="#${prefix}-source-${index + 1}" aria-label="返回引用 ${index + 1}">↩</a></li>`).join("")}</ol></div>`
+    ? `<div class="reader-references"><strong>参考资料</strong><ol>${references.map((text, index) => `<li id="${prefix}-note-${index + 1}">${escape(text)} <a href="#${prefix}-source-${index + 1}" aria-label="返回引用 ${index + 1}">返回</a></li>`).join("")}</ol></div>`
     : "";
   return { html: html + notes, toc };
 }

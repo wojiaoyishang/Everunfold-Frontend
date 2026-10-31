@@ -10,6 +10,7 @@ import { ArticleActions } from "./article-actions";
 import { ArticleMedia } from "./article-media";
 import { Icon } from "./icon";
 import { RelatedArticles } from "./related-articles";
+import { ArticleNeighbors } from "./article-neighbors";
 
 export function Article({
   snapshot,
@@ -21,12 +22,6 @@ export function Article({
   commentsPage?: number;
 }) {
   const rendered = renderContent(content);
-  const articles = snapshot.contents
-    .filter((entry) => entry.kind === "article")
-    .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
-  const position = articles.findIndex((entry) => entry.id === content.id);
-  const previous = position >= 0 ? articles[position + 1] : undefined;
-  const next = position > 0 ? articles[position - 1] : undefined;
   return (
     <>
       <PagePresentation
@@ -62,24 +57,11 @@ export function Article({
           <ArticleActions path={content.path} title={content.title} />
         </div>
       </article>
-      {(previous || next) && (
-        <nav className="article-neighbors" aria-label="相邻文章">
-          {previous && (
-            <Link href={previous.path} className="surface">
-              <small>上一篇</small>
-              <span>{previous.title}</span>
-            </Link>
-          )}
-          {next && (
-            <Link href={next.path} className="surface">
-              <small>下一篇</small>
-              <span>{next.title}</span>
-            </Link>
-          )}
-        </nav>
-      )}
       {content.kind === "article" && (
-        <RelatedArticles snapshot={snapshot} content={content} />
+        <div className="article-followup">
+          <ArticleNeighbors snapshot={snapshot} content={content} />
+          <RelatedArticles snapshot={snapshot} content={content} />
+        </div>
       )}
       <CommentSection
         key={content.id}

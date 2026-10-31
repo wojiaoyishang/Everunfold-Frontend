@@ -1,4 +1,5 @@
 import { AppLink as Link } from "./navigation-link";
+import { Icon } from "./icon";
 
 function href(
   pathname: string,
@@ -35,7 +36,7 @@ export function Pagination({
     <nav className="pagination" aria-label="文章分页">
       {page > 1 && (
         <Link href={href(pathname, page - 1, query, type)} aria-label="上一页">
-          ‹
+          <Icon name="chevron-left" />
         </Link>
       )}
       {visible.map((number, index) => (
@@ -54,7 +55,7 @@ export function Pagination({
       ))}
       {page < pages && (
         <Link href={href(pathname, page + 1, query, type)} aria-label="下一页">
-          ›
+          <Icon name="chevron" />
         </Link>
       )}
     </nav>

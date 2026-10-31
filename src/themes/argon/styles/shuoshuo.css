@@ -142,7 +142,10 @@
   border: 0;
   background: none;
   color: var(--accent);
-  display: block;
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 5px;
   margin: 8px auto 0;
   padding: 6px 20px;
   cursor: pointer;

@@ -1,9 +1,42 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { relatedArticles } from "../src/core/content/related";
+import { articleNeighbors, relatedArticles } from "../src/core/content/related";
 import { contentMetadata } from "../src/core/content/metadata";
 import { presentLegacyContent } from "../src/core/content/presentation";
 import { content, snapshot } from "./fixtures";
+test("article neighbors preserve both boundary slots and ignore pages and pinned order", () => {
+  const source = snapshot();
+  source.contents[0].pinned = true;
+  const before = JSON.stringify(source);
+  assert.deepEqual(articleNeighbors(source, source.contents[0]), {
+    previous: undefined,
+    next: source.contents[1],
+  });
+  assert.deepEqual(articleNeighbors(source, source.contents[1]), {
+    previous: source.contents[0],
+    next: undefined,
+  });
+  for (const item of [source.contents[2], content({ id: "missing" })]) {
+    assert.deepEqual(articleNeighbors(source, item), {
+      previous: undefined,
+      next: undefined,
+    });
+  }
+  assert.equal(JSON.stringify(source), before);
+  source.contents = [source.contents[0]];
+  assert.deepEqual(articleNeighbors(source, source.contents[0]), {
+    previous: undefined,
+    next: undefined,
+  });
+});
+test("equal publication dates keep chronological navigation deterministic", () => {
+  const source = snapshot();
+  source.contents[1].published_at = source.contents[0].published_at;
+  const current = source.contents[0];
+  const expected = articleNeighbors(source, current);
+  source.contents.reverse();
+  assert.deepEqual(articleNeighbors(source, current), expected);
+});
 test("related reading is deterministic, excludes pages and the current article, and does not mutate source", () => {
   const source = snapshot();
   source.contents.push(

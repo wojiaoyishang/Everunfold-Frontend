@@ -205,7 +205,7 @@ export function ImageViewer({
           aria-label="上一张图片"
           onClick={() => select(index - 1)}
         >
-          ←
+          <Icon name="arrow-left" />
         </button>
         <p>{selected.caption}</p>
         <button
@@ -213,7 +213,7 @@ export function ImageViewer({
           aria-label="下一张图片"
           onClick={() => select(index + 1)}
         >
-          →
+          <Icon name="arrow" />
         </button>
       </div>
       {thumbs && (

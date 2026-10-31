@@ -48,19 +48,20 @@
   top: 12px;
 }
 
-/* The original Argon page uses a full transparent banner over its star field. */
+/* A light brand tint preserves the star field; the scrolled header becomes solid enough to read. */
 .site-header {
   position: fixed;
   top: 0;
   width: 100%;
   color: #fff;
   z-index: 30;
+  background-color: color-mix(in srgb, var(--brand-accent) 12%, transparent);
   transition:
     background-color 220ms ease,
     box-shadow 220ms ease;
 }
 .site-header.is-scrolled {
-  background: rgb(94 48 163 / 79%);
+  background-color: color-mix(in srgb, var(--brand-accent) 86%, transparent);
   backdrop-filter: blur(16px);
   box-shadow: 0 1px 9px rgb(19 8 42 / 10%);
 }

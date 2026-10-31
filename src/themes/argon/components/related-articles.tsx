@@ -1,9 +1,8 @@
-import Image from "next/image";
 import type { Content, PublicSnapshot } from "@/core/content/types";
 import { relatedArticles } from "@/core/content/related";
-import { displayDate } from "@/core/content/query";
 import { AppLink } from "./navigation-link";
 import { Icon } from "./icon";
+import { StoryCover } from "./story-cover";
 export function RelatedArticles({
   snapshot,
   content,
@@ -11,7 +10,7 @@ export function RelatedArticles({
   snapshot: PublicSnapshot;
   content: Content;
 }) {
-  const items = relatedArticles(snapshot, content);
+  const items = relatedArticles(snapshot, content, 6);
   if (!items.length) return null;
   return (
     <section
@@ -19,34 +18,20 @@ export function RelatedArticles({
       aria-labelledby="related-title"
     >
       <h2 id="related-title">
-        <Icon name="leaf" />
-        也许，你还想看看
+        <Icon name="book" />
+        推荐文章
       </h2>
-      <div>
+      <ul className="related-track">
         {items.map((entry) => (
-          <AppLink key={entry.id} href={entry.path} className="related-card">
-            <div className="related-cover">
-              {entry.cover_url ? (
-                <Image
-                  src={entry.cover_url}
-                  alt=""
-                  width={360}
-                  height={180}
-                  unoptimized
-                />
-              ) : (
-                <Icon name="campfire" />
-              )}
-            </div>
-            <div>
-              <time dateTime={entry.published_at}>
-                {displayDate(entry.published_at)}
-              </time>
+          <li key={entry.id}>
+            <AppLink href={entry.path} className="related-card">
+              <StoryCover src={entry.cover_url} sizes="220px" />
               <h3>{entry.title}</h3>
-            </div>
-          </AppLink>
+              <Icon name="chevron" className="related-arrow" />
+            </AppLink>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }

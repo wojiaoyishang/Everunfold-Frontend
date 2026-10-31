@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { Icon } from "./icon";
 
 /** Shared measured disclosure for long moments and comments; media can resize it. */
 export function CollapsibleContent({
@@ -46,7 +47,8 @@ export function CollapsibleContent({
           aria-expanded={expanded}
           onClick={() => setExpanded(!expanded)}
         >
-          {expanded ? "收起长内容 ↑" : "展开全文 ↓"}
+          {expanded ? "收起长内容" : "展开全文"}
+          <Icon name={expanded ? "up" : "down"} />
         </button>
       )}
     </div>

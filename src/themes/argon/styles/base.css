@@ -3,6 +3,7 @@
   --accent: #673bb7;
   --accent-light: #9c76df;
   --accent-soft: #f0eaf9;
+  --brand-accent: #673bb7;
   --text: #3d4050;
   --text-strong: #323646;
   --muted: #8a8e9d;
@@ -11,6 +12,7 @@
   --line: #edf0f5;
   --shadow: 0 4px 20px rgb(25 16 64 / 8%), 0 1px 4px rgb(25 16 64 / 4%);
   --radius: 8px;
+  --content-gap: clamp(18px, 2vw, 24px);
   --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --motion-fast: 180ms;
   --motion-normal: 320ms;
