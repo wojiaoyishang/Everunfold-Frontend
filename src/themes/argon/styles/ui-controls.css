@@ -246,6 +246,10 @@ html[data-motion="reduced"]
   opacity: 1;
   transform: none;
 }
+.ui-anchored-panel:not([data-positioned="true"]) {
+  visibility: hidden;
+  pointer-events: none;
+}
 .ui-select-options:popover-open {
   display: flex;
   flex-direction: column;

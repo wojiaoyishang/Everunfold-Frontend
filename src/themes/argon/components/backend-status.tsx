@@ -19,8 +19,15 @@ const phases = {
 
 export function BackendStatus() {
   const id = useId();
-  const { trigger, panel, open, onToggle, onPanelKeyDown } =
-    useAnchoredPopover(312);
+  const {
+    trigger,
+    panel,
+    open,
+    ready,
+    onBeforeToggle,
+    onToggle,
+    onPanelKeyDown,
+  } = useAnchoredPopover(312);
   const { store, snapshot } = useReaderData();
   const phase = readerPhase(snapshot);
   const presentation = phases[phase];
@@ -41,6 +48,7 @@ export function BackendStatus() {
         aria-controls={id}
         aria-haspopup="dialog"
         popoverTarget={id}
+        disabled={!ready}
       >
         <Icon name={presentation.icon} />
         <LoadingRing active={loading} progress={progress.fraction} />
@@ -53,6 +61,7 @@ export function BackendStatus() {
         aria-labelledby={`${id}-title`}
         className="backend-status-panel ui-anchored-panel"
         onToggle={onToggle}
+        onBeforeToggle={onBeforeToggle}
         onKeyDown={onPanelKeyDown}
       >
         <div className="backend-status-heading">

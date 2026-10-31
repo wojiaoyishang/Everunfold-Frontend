@@ -12,8 +12,16 @@ export function ColorPicker({
   onChange: (value: string) => void;
 }) {
   const id = useId();
-  const { trigger, panel, open, onToggle, close, onPanelKeyDown } =
-    useAnchoredPopover(264);
+  const {
+    trigger,
+    panel,
+    open,
+    ready,
+    onBeforeToggle,
+    onToggle,
+    close,
+    onPanelKeyDown,
+  } = useAnchoredPopover(264);
   const [draft, setDraft] = useState<string | null>(null);
   const channels = [1, 3, 5].map((start) =>
     parseInt(value.slice(start, start + 2), 16),
@@ -30,6 +38,7 @@ export function ColorPicker({
         aria-controls={id}
         aria-haspopup="dialog"
         popoverTarget={id}
+        disabled={!ready}
         onClick={() => setDraft(null)}
       >
         <span style={{ backgroundColor: value }} aria-hidden="true" />
@@ -39,6 +48,7 @@ export function ColorPicker({
         ref={panel}
         id={id}
         onToggle={onToggle}
+        onBeforeToggle={onBeforeToggle}
         onKeyDown={onPanelKeyDown}
         className="ui-color-panel ui-anchored-panel"
         role="dialog"

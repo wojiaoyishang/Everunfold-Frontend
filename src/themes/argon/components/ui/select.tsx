@@ -4,7 +4,6 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  useSyncExternalStore,
   type KeyboardEvent,
 } from "react";
 import { Icon } from "../icon";
@@ -12,7 +11,6 @@ import { Button, Popover } from "./primitives";
 import { matchOption, moveOption, type SelectOption } from "./select-model";
 import { useAnchoredPopover } from "./use-anchored-popover";
 
-const noSubscription = () => () => {};
 export function Select({
   name,
   label,
@@ -31,19 +29,21 @@ export function Select({
   disabled?: boolean;
 }) {
   const id = useId();
-  const { trigger, panel, open, onToggle, onPanelKeyDown } =
-    useAnchoredPopover();
+  const {
+    trigger,
+    panel,
+    open,
+    ready: hydrated,
+    onBeforeToggle,
+    onToggle,
+    onPanelKeyDown,
+  } = useAnchoredPopover();
   const [local, setLocal] = useState(
     defaultValue ?? options.find((item) => !item.disabled)?.value ?? "",
   );
   const selected = value ?? local;
   const [active, setActive] = useState(-1);
   const typeahead = useRef({ text: "", at: 0 });
-  const hydrated = useSyncExternalStore(
-    noSubscription,
-    () => true,
-    () => false,
-  );
   const selectedIndex = options.findIndex((item) => item.value === selected);
   useLayoutEffect(() => {
     if (!open || active < 0 || !panel.current) return;
@@ -153,6 +153,7 @@ export function Select({
         id={`${id}-options`}
         ref={panel}
         onToggle={onToggle}
+        onBeforeToggle={onBeforeToggle}
         onKeyDown={onPanelKeyDown}
         className="ui-select-options ui-anchored-panel"
         role="listbox"
