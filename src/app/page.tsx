@@ -1,26 +1,36 @@
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { pageNumber } from "@/core/content/query";
-import { ArticleList } from "@/themes/argon/components/article-list";
-
+import { feedType } from "@/core/content/presentation";
+import { Feed } from "@/themes/argon/components/feed";
+import { SearchResults } from "@/themes/argon/components/search-results";
 export default async function HomePage({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const parameters = await searchParams;
-  const snapshot = await readPublicSnapshot();
+  const [snapshot, params] = await Promise.all([
+    readPublicSnapshot(),
+    searchParams,
+  ]);
   const query =
-    typeof parameters.q === "string"
-      ? parameters.q
-      : typeof parameters.s === "string"
-        ? parameters.s
-        : undefined;
-  return (
-    <ArticleList
+    typeof params.q === "string"
+      ? params.q
+      : typeof params.s === "string"
+        ? params.s
+        : "";
+  const type = feedType(params.type);
+  return query ? (
+    <SearchResults
       snapshot={snapshot}
-      home={!query}
-      title={query ? `搜索：${query}` : undefined}
-      filter={{ page: pageNumber(parameters.page), query }}
+      query={query}
+      type={type}
+      page={pageNumber(params.page)}
+    />
+  ) : (
+    <Feed
+      snapshot={snapshot}
+      page={pageNumber(params.page)}
+      type={type === "page" ? "all" : type}
     />
   );
 }

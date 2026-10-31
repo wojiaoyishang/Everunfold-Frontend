@@ -1,8 +1,14 @@
 import { AppLink as Link } from "./navigation-link";
 
-function href(pathname: string, current: number, query?: string) {
+function href(
+  pathname: string,
+  current: number,
+  query?: string,
+  type?: string,
+) {
   const parameters = new URLSearchParams();
   if (query) parameters.set("q", query);
+  if (type && type !== "all") parameters.set("type", type);
   if (current > 1) parameters.set("page", String(current));
   const search = parameters.toString();
   return `${pathname}${search ? `?${search}` : ""}`;
@@ -13,11 +19,13 @@ export function Pagination({
   pages,
   pathname,
   query,
+  type,
 }: {
   page: number;
   pages: number;
   pathname: string;
   query?: string;
+  type?: string;
 }) {
   if (pages <= 1 && page === 1) return null;
   const visible = [...new Set([1, page - 1, page, page + 1, pages])]
@@ -26,7 +34,7 @@ export function Pagination({
   return (
     <nav className="pagination" aria-label="文章分页">
       {page > 1 && (
-        <Link href={href(pathname, page - 1, query)} aria-label="上一页">
+        <Link href={href(pathname, page - 1, query, type)} aria-label="上一页">
           ‹
         </Link>
       )}
@@ -36,7 +44,7 @@ export function Pagination({
             <span className="pagination-ellipsis">…</span>
           )}
           <Link
-            href={href(pathname, number, query)}
+            href={href(pathname, number, query, type)}
             className={number === page ? "current" : undefined}
             aria-current={number === page ? "page" : undefined}
           >
@@ -45,7 +53,7 @@ export function Pagination({
         </span>
       ))}
       {page < pages && (
-        <Link href={href(pathname, page + 1, query)} aria-label="下一页">
+        <Link href={href(pathname, page + 1, query, type)} aria-label="下一页">
           ›
         </Link>
       )}

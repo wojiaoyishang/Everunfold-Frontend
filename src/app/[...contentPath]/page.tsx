@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { pageNumber, resolveContent } from "@/core/content/query";
 import { Article } from "@/themes/argon/components/article";
+import { resolvePresentation } from "@/core/content/presentation";
+import { ShuoshuoDetail } from "@/themes/argon/components/shuoshuo";
 type Parameters = {
   params: Promise<{ contentPath: string[] }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -12,6 +14,13 @@ export async function generateMetadata({
 }: Parameters): Promise<Metadata> {
   const snapshot = await readPublicSnapshot();
   const { contentPath } = await params;
+  const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
+  if (presented?.content.type === "shuoshuo")
+    return {
+      title: presented.content.title || "一则随记",
+      description: presented.content.excerpt,
+      robots: { index: !presented.example },
+    };
   const content = resolveContent(snapshot, `/${contentPath.join("/")}`);
   return content
     ? { title: content.title, description: content.excerpt }
@@ -26,6 +35,9 @@ export default async function ContentPage({
     params,
     searchParams,
   ]);
+  const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
+  if (presented?.content.type === "shuoshuo")
+    return <ShuoshuoDetail snapshot={snapshot} entry={presented} />;
   const content = resolveContent(snapshot, `/${contentPath.join("/")}`);
   if (!content) notFound();
   return (

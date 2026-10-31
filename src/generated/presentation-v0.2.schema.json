@@ -1,0 +1,256 @@
+{
+  "$defs": {
+    "ContentBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "markdown",
+            "html"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "content": {
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "content"
+      ],
+      "title": "ContentBlock",
+      "type": "object"
+    },
+    "MediaURL": {
+      "additionalProperties": false,
+      "properties": {
+        "original": {
+          "title": "Original",
+          "type": "string"
+        },
+        "webp": {
+          "default": "",
+          "title": "Webp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "original"
+      ],
+      "title": "MediaURL",
+      "type": "object"
+    },
+    "TaxonomyDTO": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "slug": {
+          "title": "Slug",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "category",
+            "tag"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "count": {
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "name",
+        "kind",
+        "count"
+      ],
+      "title": "TaxonomyDTO",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "minLength": 1,
+      "title": "Id",
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "article",
+        "shuoshuo",
+        "page"
+      ],
+      "title": "Type",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "path": {
+      "pattern": "^/",
+      "title": "Path",
+      "type": "string"
+    },
+    "excerpt": {
+      "title": "Excerpt",
+      "type": "string"
+    },
+    "language": {
+      "title": "Language",
+      "type": "string"
+    },
+    "published_at": {
+      "format": "date-time",
+      "title": "Published At",
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "title": "Updated At",
+      "type": "string"
+    },
+    "author": {
+      "title": "Author",
+      "type": "string"
+    },
+    "cover_url": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Cover Url"
+    },
+    "reading_minutes": {
+      "minimum": 0,
+      "title": "Reading Minutes",
+      "type": "integer"
+    },
+    "word_count": {
+      "minimum": 0,
+      "title": "Word Count",
+      "type": "integer"
+    },
+    "categories": {
+      "items": {
+        "$ref": "#/$defs/TaxonomyDTO"
+      },
+      "title": "Categories",
+      "type": "array"
+    },
+    "tags": {
+      "items": {
+        "$ref": "#/$defs/TaxonomyDTO"
+      },
+      "title": "Tags",
+      "type": "array"
+    },
+    "comment_count": {
+      "minimum": 0,
+      "title": "Comment Count",
+      "type": "integer"
+    },
+    "pinned": {
+      "title": "Pinned",
+      "type": "boolean"
+    },
+    "content": {
+      "items": {
+        "$ref": "#/$defs/ContentBlock"
+      },
+      "title": "Content",
+      "type": "array"
+    },
+    "media_urls": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MediaURL"
+      },
+      "title": "Media Urls",
+      "type": "object"
+    },
+    "comments_open": {
+      "title": "Comments Open",
+      "type": "boolean"
+    },
+    "reaction_count": {
+      "minimum": 0,
+      "title": "Reaction Count",
+      "type": "integer"
+    },
+    "access": {
+      "enum": [
+        "public",
+        "password",
+        "scheduled"
+      ],
+      "title": "Access",
+      "type": "string"
+    },
+    "opens_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Opens At"
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "title",
+    "path",
+    "excerpt",
+    "language",
+    "published_at",
+    "updated_at",
+    "author",
+    "cover_url",
+    "reading_minutes",
+    "word_count",
+    "categories",
+    "tags",
+    "comment_count",
+    "pinned",
+    "content",
+    "media_urls",
+    "comments_open",
+    "reaction_count",
+    "access",
+    "opens_at"
+  ],
+  "title": "ContentPresentation",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-everunfold-contract-version": "0.2.0-preview.1",
+  "description": "Draft presentation contract. No HTTP endpoint or database migration is installed. Locked records omit body, excerpt and media. Viewer-specific state is separate."
+}

@@ -81,11 +81,16 @@ export function SearchForm({
   const { setOpen } = useNavigation();
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     if (event.defaultPrevented) return;
-    const value = new FormData(event.currentTarget).get("q");
+    const values = new FormData(event.currentTarget);
+    const value = values.get("q");
     if (typeof value !== "string") return;
     event.preventDefault();
     setOpen(false);
-    navigate(searchHref(value));
+    const url = new URL(searchHref(value), window.location.origin);
+    const type = values.get("type");
+    if (type === "article" || type === "shuoshuo" || type === "page")
+      url.searchParams.set("type", type);
+    navigate(`${url.pathname}${url.search}`);
   }
   return (
     <Form action="/search" className={className} onSubmit={onSubmit}>

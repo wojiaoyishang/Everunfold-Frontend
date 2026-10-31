@@ -21,6 +21,12 @@ const known: Partial<Record<string, Omit<NavigationItem, "href">>> = {
     icon: "archive",
     children: [
       {
+        label: "说说",
+        href: "/ss",
+        icon: "leaf",
+        description: "收集日常的片刻与心情",
+      },
+      {
         label: "按时间浏览",
         href: "/archives",
         icon: "calendar",

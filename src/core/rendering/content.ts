@@ -122,7 +122,9 @@ function mappedUrl(value: string, media: Content["media_urls"]): string | null {
   return resourceUrl(value);
 }
 
-export function renderContent(content: Content): {
+export function renderContent(
+  content: Pick<Content, "id" | "content" | "media_urls">,
+): {
   html: string;
   toc: TableOfContentsItem[];
 } {

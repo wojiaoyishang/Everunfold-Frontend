@@ -1,12 +1,12 @@
 import Image from "next/image";
 import { AppLink as Link } from "./navigation-link";
-import type { Content } from "@/core/content/types";
+import type { ReadableContent } from "@/core/content/types";
 import { resourceUrl, taxonomyHref } from "@/core/content/urls";
 import { Icon } from "./icon";
 import { PostMeta } from "./post-meta";
 import { presentationExcerpt } from "@/core/rendering/shortcodes";
 
-export function PostCard({ content }: { content: Content }) {
+export function PostCard({ content }: { content: ReadableContent }) {
   const cover = resourceUrl(content.cover_url);
   const heading = (
     <>

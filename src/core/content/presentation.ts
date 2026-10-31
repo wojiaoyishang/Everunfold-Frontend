@@ -1,0 +1,106 @@
+import type { ContentPresentation } from "@/generated/presentation-contract";
+import type { Content, PublicSnapshot } from "./types";
+import { exampleMoments } from "./examples";
+import { normalizePath } from "./urls";
+
+export type { ContentPresentation };
+export type ContentType = ContentPresentation["type"];
+export type FeedType = ContentType | "all";
+/** Origin is UI state, deliberately outside the business DTO. */
+export interface FeedEntry {
+  content: ContentPresentation;
+  example: boolean;
+}
+
+export function presentLegacyContent({
+  kind,
+  ...content
+}: Content): ContentPresentation {
+  return {
+    ...content,
+    type: kind,
+    comments_open: true,
+    reaction_count: 0,
+    access: "public",
+    opens_at: null,
+  };
+}
+
+export function publicFeed(snapshot: PublicSnapshot): FeedEntry[] {
+  const published = snapshot.contents.map((content) => ({
+    content: presentLegacyContent(content),
+    example: false,
+  }));
+  const paths = new Set(
+    published.map(({ content }) => normalizePath(content.path)),
+  );
+  return [
+    ...published,
+    ...exampleMoments
+      .filter((item) => !paths.has(normalizePath(item.path)))
+      .map((content) => ({ content, example: true })),
+  ];
+}
+
+export function resolvePresentation(snapshot: PublicSnapshot, path: string) {
+  return publicFeed(snapshot).find(
+    ({ content }) => normalizePath(content.path) === normalizePath(path),
+  );
+}
+
+export function feedType(value: unknown): FeedType {
+  return value === "article" || value === "shuoshuo" || value === "page"
+    ? value
+    : "all";
+}
+
+export function queryFeed(
+  snapshot: PublicSnapshot,
+  options: {
+    query?: string;
+    type?: FeedType;
+    page?: number;
+    pageSize?: number;
+    includePages?: boolean;
+  } = {},
+) {
+  const query = options.query?.trim().slice(0, 160).toLocaleLowerCase();
+  const items = publicFeed(snapshot)
+    .filter(({ content }) => {
+      if (
+        options.type &&
+        options.type !== "all" &&
+        content.type !== options.type
+      )
+        return false;
+      if (!options.includePages && content.type === "page") return false;
+      const text = [
+        content.title,
+        content.excerpt,
+        ...content.content.map((block) => block.content),
+        ...content.tags.map((tag) => tag.name),
+        ...content.categories.map((category) => category.name),
+      ]
+        .join(" ")
+        .toLocaleLowerCase();
+      return !query || text.includes(query);
+    })
+    .sort(
+      (a, b) =>
+        Number(b.content.pinned) - Number(a.content.pinned) ||
+        Date.parse(b.content.published_at) -
+          Date.parse(a.content.published_at) ||
+        a.content.id.localeCompare(b.content.id),
+    );
+  const pageSize = Math.max(
+    1,
+    Math.min(100, Math.floor(options.pageSize ?? 10)),
+  );
+  const page = Math.max(1, Math.floor(options.page ?? 1));
+  return {
+    items: items.slice((page - 1) * pageSize, page * pageSize),
+    page,
+    pages: Math.max(1, Math.ceil(items.length / pageSize)),
+    total: items.length,
+  };
+}

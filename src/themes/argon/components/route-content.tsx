@@ -24,7 +24,9 @@ export function RouteContent({ children }: { children: ReactNode }) {
     );
     const waiting: HTMLElement[] = [];
     element
-      .querySelectorAll<HTMLElement>(".post-card, .archive-month")
+      .querySelectorAll<HTMLElement>(
+        ".post-card, .shuoshuo-card, .archive-month",
+      )
       .forEach((item) => {
         if (item.getBoundingClientRect().top > window.innerHeight + 24) {
           item.dataset.revealState = "pending";

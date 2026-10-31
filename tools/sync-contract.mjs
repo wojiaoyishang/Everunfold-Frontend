@@ -21,6 +21,8 @@ const source = (await readFile(absoluteSource, "utf8")).replaceAll(
   "\n",
 );
 const schema = JSON.parse(source);
+const presentation =
+  path.basename(absoluteSource) === "presentation-v0.2.schema.json";
 const backendRoot = path.dirname(path.dirname(absoluteSource));
 const relativeSource = path
   .relative(backendRoot, absoluteSource)
@@ -46,19 +48,32 @@ const commit = execFileSync("git", ["rev-parse", "HEAD"], {
 }).trim();
 const output = path.join(projectRoot, "src/generated");
 await mkdir(output, { recursive: true });
-const types = await compile(schema, "PublicSnapshot", {
-  bannerComment:
-    "/* Generated from the backend public contract. Do not edit by hand. */",
-  additionalProperties: false,
-  style: { singleQuote: false, semi: true, printWidth: 100 },
-});
-await writeFile(path.join(output, "public-contract.ts"), types);
-await writeFile(path.join(output, "public-v0.1.schema.json"), source);
+const types = await compile(
+  schema,
+  presentation ? "ContentPresentation" : "PublicSnapshot",
+  {
+    bannerComment:
+      "/* Generated from the backend public contract. Do not edit by hand. */",
+    additionalProperties: false,
+    style: { singleQuote: false, semi: true, printWidth: 100 },
+  },
+);
 await writeFile(
-  path.join(output, "contract-source.json"),
+  path.join(
+    output,
+    presentation ? "presentation-contract.ts" : "public-contract.ts",
+  ),
+  types,
+);
+await writeFile(path.join(output, path.basename(absoluteSource)), source);
+await writeFile(
+  path.join(
+    output,
+    presentation ? "presentation-source.json" : "contract-source.json",
+  ),
   `${JSON.stringify(
     {
-      schema_version: "0.1.0",
+      schema_version: schema["x-everunfold-contract-version"] ?? "0.1.0",
       source_repository: "https://github.com/wojiaoyishang/Everunfold-Backend",
       source_path: relativeSource,
       source_commit: commit,

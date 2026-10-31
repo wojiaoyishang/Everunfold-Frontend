@@ -1,0 +1,88 @@
+import type { PublicSnapshot } from "@/core/content/types";
+import {
+  queryFeed,
+  type FeedEntry,
+  type FeedType,
+} from "@/core/content/presentation";
+import { PostCard } from "./post-card";
+import { ShuoshuoCard } from "./shuoshuo";
+import { PagePresentation } from "./route-state";
+import { Pagination } from "./pagination";
+import { EmptyState } from "./empty-state";
+import { Icon } from "./icon";
+import { AppLink as Link } from "./navigation-link";
+
+export function ContentCard({ entry }: { entry: FeedEntry }) {
+  return entry.content.type === "shuoshuo" ? (
+    <ShuoshuoCard entry={entry} />
+  ) : (
+    <PostCard content={entry.content} />
+  );
+}
+
+export function Feed({
+  snapshot,
+  page = 1,
+  type = "all",
+  pathname = "/",
+}: {
+  snapshot: PublicSnapshot;
+  page?: number;
+  type?: FeedType;
+  pathname?: string;
+}) {
+  const result = queryFeed(snapshot, { page, type });
+  return (
+    <>
+      <PagePresentation site={snapshot.site} />
+      {snapshot.site.notice && (
+        <div className="surface notice">
+          <Icon name="bell" />
+          <p>{snapshot.site.notice}</p>
+        </div>
+      )}
+      {type === "shuoshuo" && (
+        <header className="surface page-heading">
+          <Icon name="leaf" />
+          <div>
+            <h1>说说</h1>
+            <p>把日常的光，收进简短的句子里。</p>
+          </div>
+        </header>
+      )}
+      <nav className="feed-tabs" aria-label="内容类型">
+        <Link href="/" aria-current={type === "all" ? "page" : undefined}>
+          全部动态
+        </Link>
+        <Link
+          href="/?type=article"
+          aria-current={type === "article" ? "page" : undefined}
+        >
+          文章
+        </Link>
+        <Link
+          href="/ss"
+          aria-current={type === "shuoshuo" ? "page" : undefined}
+        >
+          说说
+        </Link>
+        <span>说说暂为示例内容</span>
+      </nav>
+      <div className="article-list">
+        {result.items.length ? (
+          result.items.map((entry) => (
+            <ContentCard key={entry.content.id} entry={entry} />
+          ))
+        ) : (
+          <EmptyState title="这里还很安静" />
+        )}
+      </div>
+      <Pagination
+        page={result.page}
+        pages={result.pages}
+        pathname={pathname}
+        type={type}
+      />
+    </>
+  );
+}

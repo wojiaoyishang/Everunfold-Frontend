@@ -1,4 +1,4 @@
-import type { Content } from "@/core/content/types";
+import type { ReadableContent } from "@/core/content/types";
 import { displayDate } from "@/core/content/query";
 import { taxonomyHref } from "@/core/content/urls";
 import { AppLink as Link } from "./navigation-link";
@@ -8,7 +8,7 @@ export function PostMeta({
   content,
   article = false,
 }: {
-  content: Content;
+  content: ReadableContent;
   article?: boolean;
 }) {
   return (
