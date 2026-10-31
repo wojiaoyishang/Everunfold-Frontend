@@ -21,6 +21,8 @@ import {
 } from "@/core/browser/scroll-restoration";
 import type { Site } from "@/core/content/types";
 import type { TableOfContentsItem } from "@/core/rendering/content";
+import { preferredHomeHref } from "@/core/browser/home-feed-policy";
+import { readHomeFeedPreference } from "@/core/browser/home-feed-preference";
 import {
   reducePagePresentation,
   type PagePresentationData,
@@ -79,7 +81,12 @@ export function RouteStateProvider({
     return () => dispatchPresentation({ type: "release", token });
   }, []);
   const navigate = useCallback(
-    (href: string, options: NavigateOptions = {}) => {
+    (requestedHref: string, options: NavigateOptions = {}) => {
+      const href = preferredHomeHref(
+        requestedHref,
+        window.location.href,
+        readHomeFeedPreference(),
+      );
       const destination = new URL(href, window.location.href);
       if (destination.href === window.location.href) return;
       const id = ++request.current;

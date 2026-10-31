@@ -7,6 +7,8 @@ import { useBackgroundPlayback } from "./background-video";
 import { AppearanceSettings } from "./appearance-settings";
 import { setAppearance } from "@/core/browser/appearance";
 import { defaultAppearance } from "@/core/browser/appearance-policy";
+import { HomeFeedSettings } from "./home-feed-settings";
+import { useHomeFeed } from "../hooks/use-home-feed";
 
 const defaults = {
   size: 16.5,
@@ -53,6 +55,7 @@ export function ReadingSettings() {
   const panelId = useId();
   const motion = useMotion();
   const playback = useBackgroundPlayback();
+  const homeFeed = useHomeFeed();
   const [settings, setSettings] = useState(defaults);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -105,6 +108,10 @@ export function ReadingSettings() {
             </button>
           </header>
           <AppearanceSettings />
+          <HomeFeedSettings
+            value={homeFeed.value}
+            onChange={homeFeed.setValue}
+          />
           <fieldset>
             <legend>全站动效</legend>
             <div className="setting-options">
@@ -245,6 +252,7 @@ export function ReadingSettings() {
               motion.setPreference("full");
               playback.reset();
               setAppearance(defaultAppearance);
+              homeFeed.setValue("all");
             }}
           >
             恢复默认

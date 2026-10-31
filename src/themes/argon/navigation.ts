@@ -101,12 +101,13 @@ export function siteNavigation(site: Site): NavigationItem[] {
     const reference = known[href.replace(/\/$/, "") || "/"];
     return [
       {
-        label: item.label,
         href,
         icon: href.includes("lab.lovepikachu.top")
           ? ("flask" as const)
           : ("link" as const),
         ...reference,
+        // Public labels are authoritative; legacy hints only supply missing presentation.
+        label: item.label,
       },
     ];
   });

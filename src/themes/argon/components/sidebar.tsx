@@ -145,28 +145,30 @@ export function Sidebar({
           </SearchForm>
         </section>
         <section className="surface sidebar-overview">
-          <div className="sidebar-tabs" role="tablist" aria-label="侧栏内容">
-            {toc.length > 0 && (
+          {toc.length > 0 && (
+            <div className="sidebar-tabs" role="tablist" aria-label="侧栏内容">
+              {toc.length > 0 && (
+                <button
+                  id="toc-tab"
+                  role="tab"
+                  aria-controls="toc-panel"
+                  aria-selected={tab === "toc"}
+                  onClick={() => setTab("toc")}
+                >
+                  文章目录
+                </button>
+              )}
               <button
-                id="toc-tab"
+                id="overview-tab"
                 role="tab"
-                aria-controls="toc-panel"
-                aria-selected={tab === "toc"}
-                onClick={() => setTab("toc")}
+                aria-controls="overview-panel"
+                aria-selected={tab === "overview"}
+                onClick={() => setTab("overview")}
               >
-                文章目录
+                站点概览
               </button>
-            )}
-            <button
-              id="overview-tab"
-              role="tab"
-              aria-controls="overview-panel"
-              aria-selected={tab === "overview"}
-              onClick={() => setTab("overview")}
-            >
-              站点概览
-            </button>
-          </div>
+            </div>
+          )}
           {toc.length > 0 && (
             <TransitionPanel
               active={tab === "toc"}
@@ -193,9 +195,10 @@ export function Sidebar({
             </TransitionPanel>
           )}
           <TransitionPanel
-            active={tab === "overview"}
+            active={!toc.length || tab === "overview"}
             id="overview-panel"
-            labelledBy="overview-tab"
+            labelledBy={toc.length ? "overview-tab" : "profile-title"}
+            role={toc.length ? "tabpanel" : "region"}
           >
             <div className="profile">
               {avatar ? (
@@ -212,7 +215,7 @@ export function Sidebar({
                   <Icon name="campfire" />
                 </div>
               )}
-              <h2>{site.author}</h2>
+              <h2 id="profile-title">{site.author}</h2>
               <p>{site.description}</p>
               <div className="site-stats">
                 <Link href="/archives">

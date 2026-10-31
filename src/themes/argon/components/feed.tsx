@@ -10,7 +10,6 @@ import { PagePresentation } from "./route-state";
 import { Pagination } from "./pagination";
 import { EmptyState } from "./empty-state";
 import { Icon } from "./icon";
-import { AppLink as Link } from "./navigation-link";
 
 export function ContentCard({ entry }: { entry: FeedEntry }) {
   return entry.content.type === "shuoshuo" ? (
@@ -50,24 +49,6 @@ export function Feed({
           </div>
         </header>
       )}
-      <nav className="feed-tabs" aria-label="内容类型">
-        <Link href="/" aria-current={type === "all" ? "page" : undefined}>
-          全部动态
-        </Link>
-        <Link
-          href="/?type=article"
-          aria-current={type === "article" ? "page" : undefined}
-        >
-          文章
-        </Link>
-        <Link
-          href="/ss"
-          aria-current={type === "shuoshuo" ? "page" : undefined}
-        >
-          说说
-        </Link>
-        <span>说说暂为示例内容</span>
-      </nav>
       <div className="article-list">
         {result.items.length ? (
           result.items.map((entry) => (

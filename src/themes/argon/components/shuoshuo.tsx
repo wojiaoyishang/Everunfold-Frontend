@@ -51,7 +51,11 @@ export function ShuoshuoCard({
             <Link href={content.path}>{content.title}</Link>
           </h2>
         ))}
-      {detail ? body : <CollapsibleContent>{body}</CollapsibleContent>}
+      {detail ? (
+        body
+      ) : (
+        <CollapsibleContent limit={240}>{body}</CollapsibleContent>
+      )}
       <footer className="shuoshuo-actions">
         <ReactionButton id={content.id} count={content.reaction_count} />
         {content.comments_open ? (

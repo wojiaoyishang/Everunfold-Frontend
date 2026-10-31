@@ -13,6 +13,7 @@ import { ReadingStateProvider } from "./reading-state";
 import { NavigationProgress } from "./navigation-progress";
 import { RouteContent } from "./route-content";
 import { RouteStateProvider, useRouteState } from "./route-state";
+import { HomeFeedPreference } from "./home-feed-settings";
 
 export function BlogShell({
   site,
@@ -46,6 +47,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
       }
     >
       <BackgroundVideoProvider poster={background}>
+        <HomeFeedPreference />
         <a className="skip-link" href="#main-content">
           跳到正文
         </a>

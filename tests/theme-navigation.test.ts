@@ -16,6 +16,8 @@ test("header and sidebar receive the same safe nested reference navigation", () 
   ];
   const items = siteNavigation(site);
   assert.equal(items.length, 2);
+  assert.equal(items[0].label, "归档");
+  assert.equal(items[1].label, "实验");
   assert.ok(items[0].children?.some((child) => child.href === "/gzrj/"));
   assert.equal(items[1].children?.length, 2);
   assert.equal(navigationTarget(items[1].children![0].href).target, "_blank");

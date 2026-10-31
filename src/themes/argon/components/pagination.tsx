@@ -8,7 +8,7 @@ function href(
 ) {
   const parameters = new URLSearchParams();
   if (query) parameters.set("q", query);
-  if (type && type !== "all") parameters.set("type", type);
+  if (type) parameters.set("type", type);
   if (current > 1) parameters.set("page", String(current));
   const search = parameters.toString();
   return `${pathname}${search ? `?${search}` : ""}`;
