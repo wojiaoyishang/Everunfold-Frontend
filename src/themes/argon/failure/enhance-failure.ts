@@ -16,6 +16,32 @@ export function enhanceFailure(
   const score = panel.querySelector<HTMLElement>("[data-game-score]")!;
   const fireworks = panel.querySelector<HTMLElement>(".ui-fireworks")!;
   const controller = new AbortController();
+  const surface = root.matches(".failure-surface")
+    ? root
+    : root.querySelector<HTMLElement>(".failure-surface")!;
+  let entryTimer: ReturnType<typeof setTimeout> | undefined;
+  const finishEntrance = () => {
+    surface.dataset.entered = "true";
+    clearTimeout(entryTimer);
+  };
+  // Focus makes all controls immediately readable and must not replay the entrance on blur.
+  root.addEventListener("focusin", finishEntrance, {
+    signal: controller.signal,
+  });
+  root.addEventListener(
+    "animationend",
+    (event) => {
+      if (
+        event.target === cards.at(-1) &&
+        (event as AnimationEvent).animationName === "failure-card-enter"
+      )
+        finishEntrance();
+    },
+    { signal: controller.signal },
+  );
+  if (document.documentElement.dataset.motion !== "full") finishEntrance();
+  // Covers a late hydration or an animation canceled by a preference change.
+  else entryTimer = setTimeout(finishEntrance, 1300);
   let timer: ReturnType<typeof setTimeout> | undefined;
   const labels = ["星星", "月亮", "叶子", "爱心"];
   function render() {
@@ -84,6 +110,7 @@ export function enhanceFailure(
   );
   return () => {
     controller.abort();
+    clearTimeout(entryTimer);
     clearTimeout(timer);
     delete panel.dataset.gameReady;
     fireworks.dataset.active = "false";

@@ -1,3 +1,5 @@
+import { failureEntranceStyles } from "./entrance-styles";
+
 /** Shared, scoped CSS is inlined so HTTP fallback pages never depend on a CSS chunk. */
 export const failureStyles = `
 html[data-failure-document] body { margin: 0; }
@@ -24,10 +26,6 @@ html[data-failure-document] body { margin: 0; }
   mask-image: linear-gradient(#000a, #0002);
 }
 .failure-wrap { width: min(1040px, 100%); margin: auto; }
-.failure-topbar, .failure-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; color: #c9c7dc; }
-.failure-topbar { margin-bottom: 40px; font-size: 12px; letter-spacing: .04em; }
-.failure-surface .failure-brand { display: inline-flex; align-items: center; gap: 11px; font-size: 18px; font-weight: 600; color: #f5f2ff; text-decoration: none; }
-.failure-brand > .icon { width: 30px; height: 30px; padding: 5px; background: #ffffff12; border: 1px solid #ffffff24; border-radius: 10px; }
 .failure-layout { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 6vw, 72px); padding: clamp(26px, 4vw, 48px); border-radius: 22px; border: 1px solid #ffffff24; background: var(--failure-panel); box-shadow: 0 24px 90px #08071e38, 0 4px 20px #08071e20; }
 .failure-copy { min-width: 0; align-self: center; }
 .failure-art { height: 190px; width: 260px; max-width: 100%; position: relative; display: grid; place-items: center; color: var(--failure-accent); margin-bottom: 20px; }
@@ -74,9 +72,8 @@ html[data-failure-document] body { margin: 0; }
 .failure-surface .failure-start { width: 100%; }
 .failure-game:not([data-game-ready]) .failure-start { display: none; }
 .failure-game-note { font-size: 12px; color: var(--failure-muted); }
-.failure-footer { margin-top: 24px; font-size: 11px; color: #a6a4bc; }
 .failure-surface[data-embedded="true"] { min-height: auto; padding: 0; background: transparent; }
-.failure-surface[data-embedded="true"]::before, .failure-surface[data-embedded="true"] .failure-topbar { display: none; }
+.failure-surface[data-embedded="true"]::before { display: none; }
 .failure-surface[data-embedded="true"] .failure-layout { gap: 28px; padding: 28px; }
 html[data-theme="dark"] .failure-surface { --failure-accent: var(--accent, var(--custom-accent-dark, #b895f2)); --failure-panel: var(--surface, color-mix(in srgb, var(--failure-accent) 8%, #1d2028)); --failure-soft: var(--surface-soft, color-mix(in srgb, var(--failure-accent) 12%, #22252e)); --failure-text: var(--text, #e4dfef); --failure-muted: #b0aabc; }
 html[data-theme="dark"][data-amoled="true"] .failure-surface { --failure-panel: #08080b; --failure-soft: #141419; }
@@ -86,8 +83,6 @@ html[data-theme="dark"][data-amoled="true"] .failure-surface { --failure-panel: 
 }
 @media (max-width: 700px) {
   .failure-surface { padding: 22px 16px; }
-  .failure-topbar { margin-bottom: 24px; }
-  .failure-topbar > span { display: none; }
   .failure-layout, .failure-surface[data-embedded="true"] .failure-layout { grid-template-columns: 1fr; gap: 28px; padding: 24px; border-radius: 16px; }
   .failure-art { height: 136px; width: 218px; margin: 0 auto 20px; }
   .failure-copy { text-align: center; }
@@ -96,7 +91,6 @@ html[data-theme="dark"][data-amoled="true"] .failure-surface { --failure-panel: 
   .failure-actions { margin-top: 21px; justify-content: center; }
   .failure-game { border-left: 0; border-top: 1px solid var(--failure-line); padding: 24px 0 0; }
   .failure-cards { gap: 8px; }
-  .failure-footer { font-size: 10px; gap: 8px; }
 }
 html[data-motion="reduced"] .failure-surface *, html[data-motion="reduced"] .failure-surface *::after { transition: none !important; }
 @media (prefers-reduced-motion: reduce) {
@@ -106,4 +100,5 @@ html[data-motion="reduced"] .failure-surface *, html[data-motion="reduced"] .fai
   .failure-code { color: CanvasText; background: none; }
   .failure-surface .failure-card-back, .failure-surface .failure-card-front { border: 1px solid ButtonText; }
 }
+${failureEntranceStyles}
 `;

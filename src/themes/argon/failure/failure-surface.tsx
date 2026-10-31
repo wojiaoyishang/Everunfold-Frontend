@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import {
   failurePage,
   type FailureStatus,
@@ -24,12 +25,6 @@ export function FailureSurface({
       aria-label={page.title}
     >
       <div className="failure-wrap">
-        <header className="failure-topbar">
-          <TextLink href="/" className="failure-brand">
-            <Icon name="leaf" />
-            <span>Everunfold</span>
-          </TextLink>
-        </header>
         <div className="failure-layout">
           <div className="failure-copy">
             <div className="failure-art" aria-hidden="true">
@@ -79,6 +74,13 @@ export function FailureSurface({
                   key={index}
                   className="failure-card"
                   data-card={index}
+                  style={
+                    {
+                      "--entry-order": index,
+                      "--entry-x": `${((index % 4) - 1.5) * 7}px`,
+                      "--entry-turn": `${index % 2 ? 3 : -3}deg`,
+                    } as CSSProperties
+                  }
                   disabled
                   aria-label={`第 ${index + 1} 张，未翻开`}
                 >
@@ -117,9 +119,6 @@ export function FailureSurface({
             </noscript>
           </section>
         </div>
-        <footer className="failure-footer">
-          <span>Everunfold</span>
-        </footer>
       </div>
     </section>
   );
