@@ -63,7 +63,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
         </section>
         <div className="blog-container">
           <Sidebar site={site} toc={toc} contentKey={presentationId} />
-          <main id="main-content" className="main-column">
+          <main id="main-content" className="main-column" tabIndex={-1}>
             <RouteContent>{children}</RouteContent>
           </main>
         </div>

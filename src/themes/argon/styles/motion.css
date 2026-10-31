@@ -93,48 +93,6 @@
   opacity: 0.82;
   filter: saturate(0.8);
 }
-.navigation-progress {
-  position: fixed;
-  inset: 0 0 auto;
-  z-index: 150;
-  height: 3px;
-  overflow: hidden;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 140ms ease;
-}
-.navigation-progress[data-state="loading"],
-.navigation-progress[data-state="complete"] {
-  opacity: 1;
-}
-.navigation-progress > span {
-  display: block;
-  width: 100%;
-  height: 100%;
-  background: var(--accent-light);
-  box-shadow: 0 0 9px color-mix(in srgb, var(--accent-light) 45%, transparent);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 220ms ease;
-}
-.navigation-progress[data-state="complete"] {
-  opacity: 0;
-  transition: opacity 220ms 220ms ease;
-}
-.navigation-progress[data-state="idle"] > span {
-  transition: none;
-}
-.navigation-status {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-  border: 0;
-}
 
 /* Finite CSS entry remains usable without JavaScript. Scroll reveal is opt-in. */
 .article-list > .post-card:not([data-reveal-state]) {

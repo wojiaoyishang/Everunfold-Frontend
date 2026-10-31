@@ -23,11 +23,9 @@
 .header-menu-item[data-open="true"] .header-menu-toggle .icon {
   transform: rotate(270deg);
 }
-.header-menu-item[data-active="true"] .header-menu-link {
-  opacity: 1;
-}
-.header-menu-item[data-active="true"] .header-menu-link::after {
-  transform: scaleX(1);
+.header-menu-link:focus-visible {
+  outline: none;
+  /* Keyboard focus uses the animated underline instead of a persistent box. */
 }
 .header-submenu {
   position: absolute;
@@ -80,8 +78,7 @@
   border-radius: 6px;
 }
 .header-submenu a:hover,
-.header-submenu a:focus-visible,
-.header-submenu a[aria-current="page"] {
+.header-submenu a:focus-visible {
   color: var(--accent);
   background: var(--accent-soft);
   transform: translateX(3px);

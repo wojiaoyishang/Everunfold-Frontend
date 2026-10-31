@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+} from "react";
 import { usePathname } from "next/navigation";
 import type { Site } from "@/core/content/types";
 import {
@@ -21,9 +28,10 @@ export function HeaderNavigation({ site }: { site: Site }) {
   function cancelLeave() {
     if (leaveTimer.current) clearTimeout(leaveTimer.current);
   }
-  function close() {
+  function close(event?: MouseEvent<HTMLAnchorElement>) {
     cancelLeave();
     setOpened(null);
+    if (event && event.detail > 0) event.currentTarget.blur();
   }
   useEffect(() => {
     const onPointerDown = (event: PointerEvent) => {
@@ -78,12 +86,6 @@ export function HeaderNavigation({ site }: { site: Site }) {
             key={item.href}
             className="header-menu-item"
             data-open={expanded}
-            data-active={
-              active ||
-              item.children?.some((child) =>
-                navigationIsActive(pathname, child.href),
-              )
-            }
             onPointerEnter={(event) => {
               if (event.pointerType !== "mouse") return;
               cancelLeave();

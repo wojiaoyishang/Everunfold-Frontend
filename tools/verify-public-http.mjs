@@ -19,6 +19,12 @@ async function htmlAt(route, expectedStatus = 200) {
   const response = await fetch(new URL(route, origin), { redirect: "manual" });
   assert.equal(response.status, expectedStatus, `${route} HTTP status`);
   const html = await response.text();
+  if (expectedStatus === 200)
+    assert.match(
+      html,
+      /<span\b[^>]*data-page-ready="true"[^>]*>/,
+      `${route} prepared page marker`,
+    );
   assert.doesNotMatch(
     html,
     /FASTAPI_TO_NEXTJS|NEXTJS_TO_FASTAPI|allowed_peer_ips|postgresql\+asyncpg:/,

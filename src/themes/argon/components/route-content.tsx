@@ -68,6 +68,7 @@ export function RouteContent({ children }: { children: ReactNode }) {
       key={route}
       className="route-transition"
       data-state={pending ? "pending" : "entering"}
+      aria-busy={pending}
       onClick={onClick}
     >
       {children}

@@ -48,14 +48,14 @@
   top: 12px;
 }
 
-/* A light brand tint preserves the star field; the scrolled header becomes solid enough to read. */
+/* The banner is fully transparent at the top; only a scrolled header gets a brand fill. */
 .site-header {
   position: fixed;
   top: 0;
   width: 100%;
   color: #fff;
   z-index: 30;
-  background-color: color-mix(in srgb, var(--brand-accent) 12%, transparent);
+  background-color: transparent;
   transition:
     background-color 220ms ease,
     box-shadow 220ms ease;

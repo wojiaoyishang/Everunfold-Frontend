@@ -1,70 +1,100 @@
 "use client";
-
 import { useEffect, useRef } from "react";
+import type { NavigationFailure } from "@/core/navigation/document";
 import { useRouteState } from "./route-state";
+import { Icon } from "./icon";
+
+const failureText: Record<NavigationFailure, string> = {
+  timeout: "加载超时，这次没能取回内容。",
+  network: "连接中断，暂时没能打开这页。",
+  "not-found": "没有找到这页，内容可能已移走。",
+  unavailable: "加载失败，这页暂时无法读取。",
+  render: "加载失败，内容还没有准备好。",
+};
 
 export function NavigationProgress() {
-  const { pending } = useRouteState();
-  const container = useRef<HTMLDivElement>(null);
+  const { feedback, cancel, retry, pending } = useRouteState();
   const bar = useRef<HTMLSpanElement>(null);
-  const progress = useRef(0);
+  const progress = useRef({ id: 0, value: 0 });
+  const expanded = feedback.phase === "slow" || feedback.phase === "failed";
+  const failed = feedback.phase === "failed";
   useEffect(() => {
-    const element = container.current;
     const line = bar.current;
-    if (!element || !line) return;
-    let interval = 0;
-    let reset = 0;
+    if (!line) return;
+    if (progress.current.id !== feedback.id)
+      progress.current = { id: feedback.id, value: 0.08 };
     const write = (value: number) => {
-      progress.current = value;
+      progress.current.value = value;
       line.style.transform = `scaleX(${value})`;
     };
-    const delay = window.setTimeout(
-      () => {
-        if (pending) {
-          element.dataset.state = "loading";
+    if (pending) {
+      write(Math.max(0.08, progress.current.value));
+      const timer = setInterval(
+        () =>
           write(
-            progress.current >= 1 ? 0.08 : Math.max(0.08, progress.current),
-          );
-          interval = window.setInterval(
-            () =>
-              write(
-                Math.min(
-                  0.92,
-                  progress.current + (0.94 - progress.current) * 0.12,
-                ),
-              ),
-            220,
-          );
-        } else if (element.dataset.state === "loading") {
-          write(1);
-          element.dataset.state = "complete";
-          reset = window.setTimeout(() => {
-            element.dataset.state = "idle";
-            write(0);
-          }, 460);
-        }
-      },
-      pending ? 80 : 0,
-    );
-    return () => {
-      clearTimeout(delay);
-      clearTimeout(reset);
-      clearInterval(interval);
-    };
-  }, [pending]);
+            Math.min(
+              0.92,
+              progress.current.value + (0.94 - progress.current.value) * 0.1,
+            ),
+          ),
+        220,
+      );
+      return () => clearInterval(timer);
+    }
+    write(feedback.phase === "complete" ? 1 : 0);
+  }, [feedback.id, feedback.phase, pending]);
   return (
-    <>
+    <div
+      className="navigation-progress"
+      data-state={feedback.phase}
+      data-expanded={expanded}
+    >
+      <span ref={bar} className="navigation-line" aria-hidden="true" />
       <div
-        ref={container}
-        className="navigation-progress"
-        data-state="idle"
-        aria-hidden="true"
+        className="navigation-message"
+        inert={!expanded}
+        aria-hidden={!expanded}
       >
-        <span ref={bar} />
+        <div className="navigation-message-copy">
+          <span className="navigation-face" aria-hidden="true">
+            {failed ? "(｡•́︿•̀｡)" : "(ง •̀_•́)ง"}
+          </span>
+          <span>
+            {failed
+              ? failureText[feedback.failure ?? "network"]
+              : "正在努力加载，请再等一下…"}
+          </span>
+        </div>
+        <div className="navigation-message-actions">
+          {failed && (
+            <button type="button" onClick={retry}>
+              <Icon name="retry" />
+              重试
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={cancel}
+            aria-label={failed ? "关闭加载提示" : "取消加载"}
+          >
+            <Icon name="close" />
+            {failed ? "继续阅读" : "取消"}
+          </button>
+        </div>
       </div>
-      <div className="navigation-status" role="status" aria-live="polite">
-        {pending ? "正在加载下一页…" : ""}
-      </div>
-    </>
+      <span
+        className="sr-only"
+        role={failed ? "alert" : "status"}
+        aria-live={failed ? "assertive" : "polite"}
+      >
+        {failed
+          ? `${failureText[feedback.failure ?? "network"]} 当前页面已保留，可以重试或继续阅读。`
+          : pending
+            ? feedback.phase === "slow"
+              ? "正在努力加载，当前页面可以继续阅读。"
+              : "正在加载下一页…"
+            : ""}
+      </span>
+    </div>
   );
 }

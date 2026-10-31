@@ -42,13 +42,14 @@ export function navigateToAnchor(url: URL): boolean {
   return true;
 }
 
-export function commitScrollPosition(): void {
+export function commitScrollPosition(top?: number): void {
   if (restore && restore.route === route()) {
     const position = positions.get(restore.key);
     if (position !== undefined)
       window.scrollTo({ top: position, behavior: "instant" });
     restore = null;
   } else {
+    if (top !== undefined) window.scrollTo({ top, behavior: "instant" });
     positions.set(stamp(), window.scrollY);
     if (window.location.hash) scrollToAnchor(window.location.hash);
   }

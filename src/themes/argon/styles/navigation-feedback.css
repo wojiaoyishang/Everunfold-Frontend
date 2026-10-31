@@ -1,0 +1,120 @@
+.navigation-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 150;
+  height: 3px;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  color: #fff;
+  background-color: transparent;
+  transition:
+    height 400ms var(--motion-ease),
+    background-color 300ms,
+    opacity 220ms;
+}
+.navigation-progress[data-state="loading"],
+.navigation-progress[data-expanded="true"] {
+  opacity: 1;
+}
+.navigation-progress[data-expanded="true"] {
+  height: 70px;
+  background-color: color-mix(in srgb, var(--brand-accent) 92%, #151123);
+  box-shadow: 0 4px 18px #12102124;
+  pointer-events: auto;
+}
+.navigation-line {
+  position: absolute;
+  inset: 0;
+  background: var(--accent-light);
+  box-shadow: 0 0 9px color-mix(in srgb, var(--accent-light) 45%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition:
+    transform 220ms ease,
+    opacity 300ms;
+}
+.navigation-progress[data-expanded="true"] .navigation-line {
+  opacity: 0.15;
+}
+.navigation-progress[data-state="complete"] {
+  opacity: 0;
+  transition:
+    height 300ms var(--motion-ease),
+    opacity 220ms 200ms;
+}
+.navigation-progress[data-state="idle"] .navigation-line {
+  transition: none;
+}
+.navigation-message {
+  position: relative;
+  max-width: 1200px;
+  height: 70px;
+  margin: auto;
+  padding: 10px 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 240ms 80ms,
+    transform 340ms var(--motion-ease);
+}
+.navigation-progress[data-expanded="true"] .navigation-message {
+  opacity: 1;
+  transform: none;
+}
+.navigation-message-copy {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  text-align: center;
+  font-size: 13px;
+}
+.navigation-face {
+  font-size: 20px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.navigation-message-actions {
+  position: absolute;
+  right: 18px;
+  display: flex;
+  gap: 10px;
+}
+.navigation-message-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  color: inherit;
+  background: #ffffff14;
+  border: 1px solid #ffffff40;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.navigation-message-actions button:hover {
+  background: #ffffff2b;
+}
+.navigation-message-actions button:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .navigation-progress[data-expanded="true"],
+  .navigation-message {
+    height: 110px;
+  }
+  .navigation-message {
+    flex-direction: column;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .navigation-message-actions {
+    position: static;
+  }
+  .navigation-message-actions button {
+    padding: 4px 9px;
+  }
+}
