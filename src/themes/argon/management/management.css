@@ -94,27 +94,28 @@ html[data-theme="dark"] .management-root {
 .management-scene {
   position: absolute;
   z-index: 0;
-  inset: -2%;
+  inset: 0;
   overflow: hidden;
-  filter: blur(2.6px) saturate(0.92) brightness(0.82);
   pointer-events: none;
+}
+.management-scene-track {
+  position: absolute;
+  inset: -2%;
+  filter: blur(0.6px) saturate(0.94) brightness(0.94);
   transform: scale(1.018);
 }
 .management-star-sky,
 .management-scene-wash,
-.management-landscape {
+.management-motion-layer {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
 }
 .management-star-sky {
-  inset: -2%;
-  background:
-    url("/reference/campfire-background.webp") center / cover no-repeat,
-    #070b1c;
-  opacity: 0.96;
-  transform: scale(1.045);
+  object-fit: cover;
+  object-position: 50% 50%;
+  opacity: 0.98;
 }
 .management-scene-wash {
   z-index: 1;
@@ -136,8 +137,9 @@ html[data-theme="dark"] .management-root {
       rgba(3, 5, 10, 0.48)
     );
 }
-.management-landscape {
+.management-motion-layer {
   z-index: 2;
+  filter: blur(0.8px);
 }
 .management-shooting-star {
   opacity: 0;
@@ -660,7 +662,7 @@ html[data-motion="full"] .management-session-icon[data-loading="true"] > .icon,
 html[data-motion="full"] .management-spinning {
   animation: management-spin 1.2s linear infinite;
 }
-html[data-motion="full"] .management-star-sky {
+html[data-motion="full"] .management-scene-track {
   animation: management-celestial-drift 34s ease-in-out infinite alternate;
 }
 html[data-motion="full"] .management-star {

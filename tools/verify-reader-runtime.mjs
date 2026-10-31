@@ -257,6 +257,11 @@ export async function verifyReaderRuntime({
         1,
         "Authentication gates must render their static night backdrop",
       );
+      assert.match(
+        html,
+        /\/reference\/everunfold-night-camp\.webp/,
+        "Authentication gates must use the supplied night-camp background",
+      );
       assert.equal(
         classCount(html, "admin-workspace"),
         0,

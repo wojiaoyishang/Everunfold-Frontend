@@ -9,6 +9,18 @@
       "note": "Copied byte-for-byte from the provided WordPress backup."
     },
     {
+      "file": "everunfold-night-camp.webp",
+      "source": "User-supplied deterministic Canvas scene everunfold-night-camp.html; source HTML is not committed.",
+      "sha256": "adc1e8bdc5eddb7c60a143491ec14395a12a7dbc837c98be3301c8e71e628288",
+      "bytes": 67952,
+      "media": {
+        "container": "webp",
+        "width": 2560,
+        "height": 1600
+      },
+      "note": "Exported from the supplied deterministic Canvas scene and used as the management-entry background; no external image requests."
+    },
+    {
       "file": "yishang-avatar.jpg",
       "source": "https://vip.123pan.cn/1812010814/20219207",
       "sha256": "8457d1849bb60adc7911d5d84a15cf357adef44990ccb03ef9994e68e4b39904",
