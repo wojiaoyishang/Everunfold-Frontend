@@ -69,7 +69,7 @@ export function NavigationProgress() {
       >
         <div className="navigation-message-copy">
           <span className="navigation-face" aria-hidden="true">
-            {failed ? "(｡•́︿•̀｡)" : "(ง •̀_•́)ง"}
+            {failed ? "(╥﹏╥)" : "(ง •̀_•́)ง"}
           </span>
           <span>
             {failed

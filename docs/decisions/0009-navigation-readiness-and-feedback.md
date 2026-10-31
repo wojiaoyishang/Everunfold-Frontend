@@ -2,7 +2,7 @@
 
 日期：2026-10-31。状态：已实现，检查与限制见 [本轮验证](../handoff/frontend-navigation-verification.md)。
 
-后续替代：[ADR 0010](0010-navigation-feedback-countdown.md) 将横幅改成无按钮的单行自动提示，失败强调后用整条横幅倒计时 5 秒并收起。以下按钮/高度说明保留为历史，页面准备与传输边界仍有效。
+后续替代：[ADR 0010](0010-navigation-feedback-countdown.md) 将横幅改成无按钮的单行自动提示，失败强调后用整条横幅倒计时 10 秒并收起。以下按钮/高度说明保留为历史，页面准备与传输边界仍有效。
 
 ## 来源与替代关系
 

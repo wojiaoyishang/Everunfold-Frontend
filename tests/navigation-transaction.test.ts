@@ -119,7 +119,9 @@ test("five seconds expands feedback; timeout aborts and rejects even a late succ
   assert.equal(transaction.getSnapshot().attention, true);
   context.mock.timers.tick(1);
   assert.equal(transaction.getSnapshot().attention, false);
-  context.mock.timers.tick(NAVIGATION_FAILURE_HOLD_MS - 1);
+  context.mock.timers.tick(5_000);
+  assert.equal(transaction.getSnapshot().phase, "failed");
+  context.mock.timers.tick(NAVIGATION_FAILURE_HOLD_MS - 5_000 - 1);
   assert.equal(transaction.getSnapshot().phase, "failed");
   context.mock.timers.tick(1);
   assert.equal(transaction.getSnapshot().phase, "idle");
