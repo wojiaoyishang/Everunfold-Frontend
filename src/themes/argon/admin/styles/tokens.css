@@ -115,10 +115,17 @@ html:has([data-admin-mode="dark"]),
   outline: 2px solid var(--admin-accent);
   outline-offset: 3px;
 }
+.admin-root[data-admin-motion="reduced"] *,
+.admin-root[data-admin-motion="reduced"] *::before,
+.admin-root[data-admin-motion="reduced"] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
 @media (prefers-reduced-motion: reduce) {
-  .admin-root *,
-  .admin-root *::before,
-  .admin-root *::after {
+  .admin-root:not([data-admin-motion="full"]) *,
+  .admin-root:not([data-admin-motion="full"]) *::before,
+  .admin-root:not([data-admin-motion="full"]) *::after {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;

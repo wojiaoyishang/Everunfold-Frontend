@@ -1,0 +1,248 @@
+/* Admin motions stay small; full/system/reduced is independent of the blog. */
+.admin-root {
+  --admin-motion-fast: 150ms;
+  --admin-motion-layout: 240ms;
+  --admin-motion-enter: 300ms;
+  --admin-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+.admin-sidebar {
+  transition:
+    width var(--admin-motion-layout) var(--admin-motion-ease),
+    background-color 180ms ease,
+    border-color 180ms ease;
+}
+.admin-main-column {
+  transition: margin-left var(--admin-motion-layout) var(--admin-motion-ease);
+}
+.admin-brand > span:last-child,
+.admin-sidebar .admin-nav-text,
+.admin-sidebar .admin-nav-label,
+.admin-sidebar .admin-sidebar-note {
+  opacity: 1;
+  transition:
+    opacity var(--admin-motion-fast) ease,
+    visibility var(--admin-motion-fast);
+}
+.admin-brand > span:last-child,
+.admin-nav-text {
+  overflow: hidden;
+  white-space: nowrap;
+}
+.admin-shell[data-collapsed="true"]
+  .admin-sidebar
+  :is(
+    .admin-brand > span:last-child,
+    .admin-nav-text,
+    .admin-nav-label,
+    .admin-sidebar-note
+  ) {
+  opacity: 0;
+  visibility: hidden;
+}
+.admin-brand {
+  padding-inline: 7px;
+}
+.admin-nav-indicator {
+  transition:
+    transform var(--admin-motion-layout) var(--admin-motion-ease),
+    opacity var(--admin-motion-fast) ease,
+    background-color var(--admin-motion-fast) ease;
+}
+.admin-header,
+.admin-root {
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+.admin-breadcrumb-current {
+  animation: admin-breadcrumb-enter 200ms var(--admin-motion-ease) both;
+}
+/* Only the keyed page's top-level sections enter; fields and nested controls never replay. */
+.admin-page > * {
+  animation: admin-section-enter var(--admin-motion-enter)
+    var(--admin-motion-ease) both;
+}
+.admin-page > :nth-child(2) {
+  animation-delay: 35ms;
+}
+.admin-page > :nth-child(3) {
+  animation-delay: 65ms;
+}
+.admin-page > :nth-child(n + 4) {
+  animation-delay: 95ms;
+}
+.admin-root :is(.admin-icon-button, .admin-button) {
+  transition:
+    color var(--admin-motion-fast),
+    background-color var(--admin-motion-fast),
+    border-color var(--admin-motion-fast),
+    transform var(--admin-motion-fast);
+}
+.admin-root :is(.admin-icon-button, .admin-button):active:not(:disabled) {
+  transform: scale(0.96);
+}
+.admin-shortcut {
+  position: relative;
+  transition:
+    border-color 180ms,
+    background-color 180ms,
+    box-shadow 180ms,
+    transform 180ms var(--admin-motion-ease);
+}
+.admin-shortcut > .icon {
+  transition: transform 180ms var(--admin-motion-ease);
+}
+@media (hover: hover) {
+  .admin-shortcut:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 16px color-mix(in srgb, var(--admin-text) 6%, transparent);
+  }
+  .admin-shortcut:hover > .icon {
+    transform: translateX(3px);
+  }
+}
+.admin-shortcut:active {
+  transform: translateY(0);
+}
+.admin-root .ui-route-pending {
+  position: absolute;
+  right: 12px;
+  top: calc(50% - 6px);
+}
+.admin-shortcut .ui-route-pending {
+  right: 24px;
+}
+.admin-shortcut:has(.ui-route-pending[data-pending="true"]) > .icon {
+  opacity: 0;
+}
+.admin-shell[data-collapsed="true"] .admin-sidebar .ui-route-pending {
+  right: 2px;
+  top: 3px;
+}
+.admin-navigation-progress {
+  position: absolute;
+  inset: auto 0 -1px;
+  height: 2px;
+  overflow: hidden;
+  pointer-events: none;
+}
+.admin-navigation-progress::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 32%;
+  background: var(--admin-accent);
+  opacity: 0;
+}
+/* Actual Next navigation state, delayed only visually to avoid a flash on fast routes. */
+.admin-shell:has(.ui-route-pending[data-pending="true"])
+  .admin-navigation-progress::after {
+  animation: admin-navigation-progress 1.25s ease-in-out 120ms infinite;
+}
+/* Native close/Escape/focus restoration remain immediate; the browser handles visual exit. */
+@supports (transition-behavior: allow-discrete) {
+  .admin-mobile-drawer {
+    opacity: 0;
+    transform: translateX(-24px);
+    transition:
+      opacity 180ms ease,
+      transform 220ms var(--admin-motion-ease),
+      display 220ms allow-discrete,
+      overlay 220ms allow-discrete;
+  }
+  .admin-mobile-drawer[open] {
+    opacity: 1;
+    transform: none;
+    animation: none;
+  }
+  .admin-mobile-drawer::backdrop {
+    background-color: transparent;
+    transition:
+      background-color 180ms ease,
+      display 220ms allow-discrete,
+      overlay 220ms allow-discrete;
+  }
+  .admin-mobile-drawer[open]::backdrop {
+    background-color: #10172255;
+  }
+  @starting-style {
+    .admin-mobile-drawer[open] {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+    .admin-mobile-drawer[open]::backdrop {
+      background-color: transparent;
+    }
+  }
+}
+@keyframes admin-section-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes admin-breadcrumb-enter {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes admin-navigation-progress {
+  0% {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  15%,
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(320%);
+  }
+}
+.admin-root[data-admin-motion="full"]
+  .ui-route-pending[data-pending="true"]
+  .ui-route-pending-ring {
+  opacity: 0;
+  animation:
+    ui-route-pending-enter 120ms ease 120ms forwards,
+    ui-route-pending-spin 700ms linear 120ms infinite;
+}
+.admin-root[data-admin-motion="reduced"] .admin-mobile-drawer::backdrop {
+  transition: none;
+}
+.admin-root[data-admin-motion="reduced"]
+  .ui-route-pending[data-pending="true"]
+  .ui-route-pending-ring {
+  opacity: 0.8;
+}
+.admin-shell[data-admin-motion="reduced"]:has(
+    .ui-route-pending[data-pending="true"]
+  )
+  .admin-navigation-progress::after {
+  animation: none !important;
+  opacity: 0.7;
+  width: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-root:not([data-admin-motion="full"]) .admin-mobile-drawer::backdrop {
+    transition: none;
+  }
+  .admin-shell:not([data-admin-motion="full"]):has(
+      .ui-route-pending[data-pending="true"]
+    )
+    .admin-navigation-progress::after {
+    animation: none !important;
+    opacity: 0.7;
+    width: 100%;
+  }
+}

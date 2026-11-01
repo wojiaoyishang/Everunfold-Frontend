@@ -87,6 +87,22 @@ export function AdminAppearance({
             ]}
           />
         </div>
+        <div className="admin-preference-field">
+          <span>界面动效</span>
+          <Select
+            name="admin-motion"
+            label="后台界面动效"
+            value={preferences.motion}
+            onValueChange={(value) =>
+              onChange({ motion: value as AdminPreferences["motion"] })
+            }
+            options={[
+              { value: "full", label: "轻量动效" },
+              { value: "system", label: "跟随系统" },
+              { value: "reduced", label: "减少动态" },
+            ]}
+          />
+        </div>
         <p>仅调整后台，在此浏览器中记住。</p>
       </Popover>
     </>

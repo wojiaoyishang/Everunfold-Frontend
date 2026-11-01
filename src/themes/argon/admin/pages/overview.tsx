@@ -17,7 +17,7 @@ export function AdminOverview() {
         <p>文章、说说和媒体将从这里统一整理。</p>
       </section>
       <div className="admin-shortcuts">
-        <RouteLink href="/admin/content" className="admin-shortcut">
+        <RouteLink href="/admin/content" showPending className="admin-shortcut">
           <span className="admin-shortcut-icon">
             <Icon name="copy" />
           </span>
@@ -27,7 +27,7 @@ export function AdminOverview() {
           </div>
           <Icon name="arrow" />
         </RouteLink>
-        <RouteLink href="/admin/media" className="admin-shortcut">
+        <RouteLink href="/admin/media" showPending className="admin-shortcut">
           <span className="admin-shortcut-icon">
             <Icon name="image" />
           </span>

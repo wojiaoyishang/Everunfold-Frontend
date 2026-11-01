@@ -1,11 +1,13 @@
 export interface AdminPreferences {
   mode: "system" | "light" | "dark";
   density: "comfortable" | "compact";
+  motion: "full" | "system" | "reduced";
   sidebarCollapsed: boolean;
 }
 export const defaultAdminPreferences: AdminPreferences = {
   mode: "system",
   density: "comfortable",
+  motion: "full",
   sidebarCollapsed: false,
 };
 /** Only appearance is persisted. Session, permissions and content never enter this store. */
@@ -17,6 +19,8 @@ export function adminPreferences(input: unknown): AdminPreferences {
   return {
     mode: raw.mode === "dark" || raw.mode === "light" ? raw.mode : "system",
     density: raw.density === "compact" ? "compact" : "comfortable",
+    motion:
+      raw.motion === "system" || raw.motion === "reduced" ? raw.motion : "full",
     sidebarCollapsed: raw.sidebarCollapsed === true,
   };
 }

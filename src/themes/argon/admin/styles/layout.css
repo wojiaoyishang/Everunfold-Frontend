@@ -38,17 +38,40 @@
   font-size: 19px;
 }
 .admin-navigation {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  gap: 24px;
+}
+.admin-nav-group {
+  min-width: 0;
+}
+.admin-nav-items {
+  position: relative;
+  display: grid;
   gap: 5px;
 }
+.admin-nav-indicator {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 42px;
+  border-radius: 6px;
+  background: var(--admin-accent-soft);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(calc(var(--admin-active-index) * 47px));
+}
+.admin-nav-items[data-active="true"] .admin-nav-indicator {
+  opacity: 1;
+}
 .admin-nav-label {
+  display: block;
   padding: 0 12px 10px;
   color: var(--admin-muted);
   font-size: 12px;
   white-space: nowrap;
 }
 .admin-nav-link {
+  position: relative;
+  height: 42px;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -62,6 +85,8 @@
   white-space: nowrap;
 }
 .admin-nav-link .icon {
+  width: 18px;
+  flex: 0 0 18px;
   font-size: 17px;
 }
 .admin-nav-link:hover {
@@ -70,7 +95,6 @@
 }
 .admin-nav-link[aria-current="page"] {
   color: var(--admin-accent);
-  background: var(--admin-accent-soft);
   font-weight: 550;
 }
 .admin-sidebar-bottom {
@@ -90,23 +114,6 @@
 .admin-sidebar-note small {
   font-size: 11px;
   opacity: 0.8;
-}
-.admin-shell[data-collapsed="true"]
-  .admin-sidebar
-  :is(
-    .admin-brand > span:last-child,
-    .admin-nav-link > span,
-    .admin-nav-label,
-    .admin-sidebar-note
-  ) {
-  display: none;
-}
-.admin-shell[data-collapsed="true"] .admin-brand {
-  padding-inline: 7px;
-}
-.admin-shell[data-collapsed="true"] .admin-sidebar .admin-nav-link {
-  justify-content: center;
-  padding-inline: 0;
 }
 .admin-main-column {
   min-width: 0;
@@ -194,7 +201,6 @@
 .admin-page {
   max-width: 1320px;
   margin-inline: auto;
-  animation: admin-enter 180ms ease-out;
 }
 .admin-page-heading {
   display: flex;
@@ -261,16 +267,6 @@
 }
 .admin-skip-link:focus {
   transform: none;
-}
-@keyframes admin-enter {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
 }
 @keyframes admin-drawer-enter {
   from {

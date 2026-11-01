@@ -111,8 +111,10 @@
 }
 .admin-preference-field {
   display: grid;
-  gap: 7px;
-  margin-top: 15px;
+  grid-template-columns: 64px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
   font-size: 13px;
 }
 .admin-collection-toolbar {

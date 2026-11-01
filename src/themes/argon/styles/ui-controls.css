@@ -471,3 +471,48 @@ html[data-motion="reduced"]
 .ui-switch[aria-checked="true"] > span {
   transform: translateX(16px);
 }
+
+/* Optional framework-route feedback; no timers and no forced navigation delay. */
+.ui-route-pending {
+  display: inline-flex;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+}
+.ui-route-pending-ring {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  opacity: 0;
+}
+.ui-route-pending[data-pending="true"] .ui-route-pending-ring {
+  animation:
+    ui-route-pending-enter 120ms ease 120ms forwards,
+    ui-route-pending-spin 700ms linear 120ms infinite;
+}
+.ui-route-pending-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@keyframes ui-route-pending-enter {
+  to {
+    opacity: 0.8;
+  }
+}
+@keyframes ui-route-pending-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-route-pending[data-pending="true"] .ui-route-pending-ring {
+    animation: none;
+    opacity: 0.8;
+  }
+}

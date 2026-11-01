@@ -38,6 +38,7 @@ test("corrupt or outdated admin appearance cannot import permissions or public r
   const fallback = {
     mode: "system",
     density: "comfortable",
+    motion: "full",
     sidebarCollapsed: false,
   };
   for (const value of [
@@ -61,7 +62,12 @@ test("corrupt or outdated admin appearance cannot import permissions or public r
         fontSize: 30,
       }),
     ),
-    { mode: "dark", density: "compact", sidebarCollapsed: true },
+    {
+      mode: "dark",
+      density: "compact",
+      motion: "full",
+      sidebarCollapsed: true,
+    },
   );
 });
 
@@ -74,4 +80,17 @@ test("admin preferences are isolated by site and account with a separate version
   );
   assert.notEqual(key, adminPreferencesKey("https://api.example", "account:2"));
   assert.ok(key.startsWith("everunfold.admin.appearance.v1:"));
+});
+
+test("admin motion preference persists independently and migrates older appearance values", () => {
+  for (const motion of ["full", "system", "reduced"])
+    assert.equal(
+      parseAdminPreferences(JSON.stringify({ motion })).motion,
+      motion,
+    );
+  assert.equal(
+    parseAdminPreferences('{"mode":"dark","motion":"invalid"}').motion,
+    "full",
+  );
+  assert.equal(parseAdminPreferences('{"mode":"dark"}').motion, "full");
 });

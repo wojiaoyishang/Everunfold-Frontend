@@ -33,6 +33,7 @@ export function AdminShell({
       data-surface="admin"
       data-admin-mode={preferences.mode}
       data-density={preferences.density}
+      data-admin-motion={preferences.motion}
       data-collapsed={preferences.sidebarCollapsed}
     >
       <RouteLink href="#admin-main" className="admin-skip-link">
@@ -78,7 +79,9 @@ export function AdminShell({
             <AdminMobileNavigation pathname={pathname} />
             <span className="admin-breadcrumb-root">工作空间</span>
             <Icon name="chevron" />
-            <span>{destination?.label ?? "后台"}</span>
+            <span className="admin-breadcrumb-current" key={pathname}>
+              {destination?.label ?? "后台"}
+            </span>
           </div>
           <nav className="admin-header-actions" aria-label="工作空间操作">
             <RouteLink href="/" className="admin-site-link" title="访问站点">
@@ -105,6 +108,7 @@ export function AdminShell({
               <Icon name="logout" />
             </Button>
           </nav>
+          <span className="admin-navigation-progress" aria-hidden="true" />
         </header>
         <main id="admin-main" tabIndex={-1} className="admin-main">
           <div className="admin-page" key={pathname}>

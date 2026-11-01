@@ -58,6 +58,8 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 
 - 后台第一期落地同步 admin-ui-2、ADR 0021 实施记录、前台架构、架构约束、索引、`docs/development/admin-workspace.md` 与 `docs/handoff/admin-workspace-verification.md`。原始基线、auth-v0.1、development-5 与调研原稿不变；不把准备页当作内容/媒体管理已完成。
 
+- 后台导航/动效修订同步 admin-navigation-1、admin-ui-3、admin-workspace-2、ADR 0022、索引与验收记录。可信前端注册和独立动效已实现；后端挂钩仍为设计，不新增业务契约、依赖或修改原始基线。
+
 修改公共规范时在当前交付同步另一仓库，检查文件 SHA256 相同，并在两仓库状态中记录同步结果。若另一仓库暂时不可访问，明确记为待同步及目标版本，不能声称已一致。两个仓库分别提交，不要求提交哈希相同。
 
 `everunfold-frontend/AGENTS.md` 中由 Next.js 开发服务器自动维护的 `<!-- BEGIN:nextjs-agent-rules -->` 区块是该仓库工具专属内容，不复制到后端。根 `AGENTS.md` 的其余共享内容仍须保持一致；比较时先移除该区块。

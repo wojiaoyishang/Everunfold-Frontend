@@ -134,3 +134,5 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 用户允许后台采用简洁专业、独立于博客前台的视觉；[后台设计规范](admin-ui.md) 和 [ADR 0021](../decisions/0021-admin-theme-and-workspace.md) 定义主题内 public/auth/admin 分区。用户批准样例后已完成主题内 auth/admin 拆分，后台三个入口为 `/admin`、`/admin/content`、`/admin/media`。
 
 `core/admin` 负责认证协调、导航登记和外观偏好；路由适配器组合主题壳，展示留在 `themes/argon/admin/{layout,components,pages,styles}`。`RouteLink` 封装 Next.js 私有代码路由导航，弹层/表单控件复用 UI 封装。`shared.css` 留基础层，博客样式只在 blog 布局导入；根配色/滤镜/字号/动效规则显式排除 admin，后台 token 与偏好独立。内容和媒体只有准备页，下一步按后端契约逐项接业务，详见 [运行指南](../development/admin-workspace.md) 与 [验证](../handoff/admin-workspace-verification.md)。
+
+后台补充见 [ADR 0022](../decisions/0022-admin-navigation-and-motion.md) 与 [导航注册](admin-navigation.md)：`core/admin/registry` 确定性组装可信模块元信息，主题复用同一目录生成桌面/移动菜单；实际 Next 页面适配器仍显式提供。`RouteLink` 可显示真实 pending，后台分段入场/侧栏/选中项/抽屉动效独立保存在 `admin/styles/motion.css`。后台外观新增轻量/系统/减少动态偏好，默认轻量，不继承 public 的 `data-motion`。后端挂钩仅设计，尚无远程菜单接口或插件加载器。

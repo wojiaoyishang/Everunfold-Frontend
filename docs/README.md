@@ -30,7 +30,9 @@
 24. [通用账号与自适应登录](decisions/0019-shared-login-and-responsive-entry.md)：通用账号文案、后台单独鉴权、简洁表单与等比营地背景；回跳规则随后由 ADR 0020 更新。
 25. [登录过渡与会话校验](decisions/0020-login-handoff-and-session-check.md)：成功动画完成后导航、管理员缺省回后台、并发校验合并与有界失败反馈。
 
-26. [后台样式调研](design/admin-reference-research.md)、[后台界面与主题架构](architecture/admin-ui.md) 与 [ADR 0021](decisions/0021-admin-theme-and-workspace.md)：简洁工作台、前台/登录/后台展示隔离、共享控件、缓存与目录拆分；当前为设计提案，尚未改后台运行页面。
+26. [后台样式调研](design/admin-reference-research.md)、[后台界面与主题架构](architecture/admin-ui.md) 与 [ADR 0021](decisions/0021-admin-theme-and-workspace.md)：简洁工作台、前台/登录/后台展示隔离、共享控件、缓存与目录拆分；第一期后台壳和准备页已实现，内容/媒体业务尚未接入。
+
+27. [后台导航注册](architecture/admin-navigation.md) 与 [ADR 0022](decisions/0022-admin-navigation-and-motion.md)：可信模块菜单组装、系统/扩展职责、后台独立动效偏好；后端挂钩仍为设计。
 
 ## 目录职责
 
