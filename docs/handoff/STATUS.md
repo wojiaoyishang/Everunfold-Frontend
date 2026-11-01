@@ -1,5 +1,15 @@
 # 前端交接状态
 
+## 最新设计交付：后台视觉与主题分区（2026-11-01）
+
+- 用户明确后台简洁专业、视觉不必贴合博客前台，展示仍归前端主题管理。[官方参考调研](../design/admin-reference-research.md)（admin-research-1）、[后台设计规范](../architecture/admin-ui.md)（admin-ui-1）与 [ADR 0021](../decisions/0021-admin-theme-and-workspace.md) 已落档；具体配色、尺寸和目录为提案，尚未改 `/admin` 运行界面。
+- 建议浅色侧栏内容工作台，文章/说说共用列表、媒体网格/详情；主题按 public/auth/admin 展示分区，后台独立 token/偏好，控件继续复用，权限/请求在 core/后端。明确 CSS import 移位不能替代选择器、Portal 与浏览器副作用隔离。
+- 实查根布局仍全局加载 argon.css/公开外观脚本，`(management)` 共用登录与后台样式；现有 `management/admin-page.tsx` 尚未拆壳。本轮没有迁移目录、改 UI/认证/业务 API、依赖或数据库。
+- 开发协议升级 development-5、约束摘要 bootstrap-3，AGENTS 追加后台规则；九份公共 Markdown、设计截图同步后端并逐字节验证，AGENTS 公共部分一致，原始 v2.11/v0.14 SHA256 不变，修改文档的本地链接与 `git diff --check` 通过。
+- 会话设计预览在 1024px 与 320px 内置浏览器检查：内容/媒体切换、类型筛选、搜索零结果、文件详情、手机两列媒体及正文溢出检查通过，未记录脚本错误。它使用样例数据、未接 API；截图留档 `docs/design/admin-workspace-preview.jpg`，本机补充证据在 `var/qa/admin-design/`（不入库）。深色预览、正式抽屉与所有未来业务交互未执行验收。
+- 本轮仅文档/设计，无运行代码变更，不重跑登录、生产构建、后端多进程或公开离线矩阵，不将历史 88 项测试当作本轮结果。3000/8001 未重启；临时预览不改变现有用户会话。
+- 下一步先实现 AdminShell 与样式隔离，保留真实会话校验/退出，再以真实内容列表建立共享页面模式，之后对接媒体库。注册/个人中心、编辑发布与其余后台业务仍后续实施。本轮仅本地提交，不 push。
+
 ## 最新交付：登录成功过渡与后台会话校验（2026-11-01）
 
 - [ADR 0020](../decisions/0020-login-handoff-and-session-check.md) 按最新要求覆盖 ADR 0019 的缺省回跳：没有返回地址时管理员进入 `/admin`，普通账号回 `/`；显式安全首页/后台目标仍优先，回跳不授予权限。

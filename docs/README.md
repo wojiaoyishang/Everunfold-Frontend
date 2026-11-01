@@ -30,6 +30,8 @@
 24. [通用账号与自适应登录](decisions/0019-shared-login-and-responsive-entry.md)：通用账号文案、后台单独鉴权、简洁表单与等比营地背景；回跳规则随后由 ADR 0020 更新。
 25. [登录过渡与会话校验](decisions/0020-login-handoff-and-session-check.md)：成功动画完成后导航、管理员缺省回后台、并发校验合并与有界失败反馈。
 
+26. [后台样式调研](design/admin-reference-research.md)、[后台界面与主题架构](architecture/admin-ui.md) 与 [ADR 0021](decisions/0021-admin-theme-and-workspace.md)：简洁工作台、前台/登录/后台展示隔离、共享控件、缓存与目录拆分；当前为设计提案，尚未改后台运行页面。
+
 ## 目录职责
 
 本轮接入入口：[动态请求开发指南](development/reader-requests.md) 与 [验收记录](handoff/reader-requests-verification.md)。原始设计依据保留在 [动态数据盘点](handoff/public-dynamic-data-audit.md)。
@@ -38,12 +40,13 @@
 
 最新界面检查：[悬浮层与错误页验收](handoff/failure-pages-verification.md)，包含最终生产构建、离线有/无缓存、错误边界、配对游戏及窄框检查；不会替代上一阶段尚未执行的其他验收。
 
-最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。登录现为通用账号入口，未指定返回地址时管理员回后台、普通账号回前台，成功反馈完成后再切换；认证等待态复用宽松的响应式卡片，背景为等比自适应的柔焦星空营地；管理员验证后进入参考后台信息组织但沿用 Everunfold 主题的顶部栏、左侧导航和仪表盘工作区。
+最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。登录现为通用账号入口，未指定返回地址时管理员回后台、普通账号回前台，成功反馈完成后再切换；认证等待态复用宽松的响应式卡片，背景为等比自适应的柔焦星空营地；管理员验证后进入目前的主题空后台。2026-11-01 新设计允许后台视觉独立、仍归前端主题管理，具体方案见 ADR 0021，尚未迁移运行界面。
 
 | 目录 | 内容与维护时机 |
 | --- | --- |
 | `baseline/` | 两份原始附件的逐字节副本、来源和 SHA256；保留历史依据，不直接改写原件 |
 | `architecture/` | 已落实的架构边界、模块与数据设计；明确区分已实现和计划 |
+| `design/` | 官方参考调研与视觉方向；区分外部观察、建议和已验收界面 |
 | `development/` | 开发协议、本地运行和检查方法；随工具或流程变化更新 |
 | `decisions/` | 编号 ADR，记录决定、原因、后果和替代关系 |
 | `handoff/` | 当前状态、验证记录和下一步；每次有意义交付更新 |
