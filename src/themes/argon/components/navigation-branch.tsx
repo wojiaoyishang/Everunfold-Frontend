@@ -17,7 +17,7 @@ function hasActive(item: NavigationItem, path: string): boolean {
     !!item.children?.some((child) => hasActive(child, path))
   );
 }
-/** One recursive disclosure renderer shared by the header, sidebar and mobile drawer. */
+/** Recursive disclosure content for the header dropdown only. */
 export function NavigationBranch({
   item,
   depth = 0,

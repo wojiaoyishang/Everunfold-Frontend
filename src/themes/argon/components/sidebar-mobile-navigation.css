@@ -1,0 +1,93 @@
+.sidebar-navigation-mobile {
+  display: none;
+}
+@media (max-width: 900px) {
+  .sidebar-navigation-desktop {
+    display: none;
+  }
+  .sidebar-navigation-mobile {
+    display: block;
+  }
+  .mobile-menu-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px 40px;
+    align-items: stretch;
+    transition: background 180ms;
+  }
+  .mobile-menu-row[data-active="true"] {
+    background: var(--accent-soft);
+  }
+  #site-sidebar .mobile-menu-row > .mobile-menu-disclosure,
+  #site-sidebar .mobile-menu-row > .mobile-menu-link {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr) 14px;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    min-height: 48px;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+    padding: 12px 20px 12px calc(20px + var(--menu-depth) * 12px);
+    background: transparent;
+    color: var(--text);
+    text-align: left;
+    font-size: 14px;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+  #site-sidebar .mobile-menu-row > .mobile-menu-disclosure {
+    padding-right: 20px;
+  }
+  .mobile-menu-disclosure > span {
+    padding-right: 40px;
+  }
+  .mobile-menu-row > a > span,
+  .mobile-menu-disclosure > span {
+    overflow-wrap: anywhere;
+  }
+  .mobile-menu-row .icon {
+    color: var(--accent);
+    width: 18px;
+    height: 18px;
+  }
+  #site-sidebar .mobile-menu-parent-link {
+    grid-column: 2;
+    grid-row: 1;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    min-height: 48px;
+    width: 40px;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    color: var(--muted);
+    background: transparent;
+  }
+  .mobile-menu-parent-link .icon {
+    width: 15px;
+    height: 15px;
+  }
+  .mobile-menu-disclosure .mobile-menu-chevron {
+    width: 12px;
+    height: 12px;
+    color: var(--muted);
+    transition: transform 260ms var(--motion-ease);
+  }
+  .mobile-menu-disclosure[aria-expanded="true"] .mobile-menu-chevron {
+    transform: rotate(90deg);
+  }
+  #site-sidebar .mobile-menu-row > :active {
+    background: var(--accent-soft);
+  }
+  #site-sidebar .mobile-menu-row > [aria-current="page"] {
+    color: var(--accent);
+  }
+  .mobile-menu-branch > .transition-panel {
+    translate: none;
+  }
+}

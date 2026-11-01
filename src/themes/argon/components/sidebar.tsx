@@ -131,8 +131,8 @@ export function Sidebar({
               {identity.title}
               {identity.alias && (
                 <>
-                  <br />
-                  {identity.alias}
+                  <br className="sidebar-title-break" />
+                  <span className="sidebar-title-alias">{identity.alias}</span>
                 </>
               )}
             </span>
