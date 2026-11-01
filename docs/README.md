@@ -34,6 +34,8 @@
 
 27. [后台导航注册](architecture/admin-navigation.md) 与 [ADR 0022](decisions/0022-admin-navigation-and-motion.md)：可信模块菜单组装、系统/扩展职责、后台独立动效偏好；后端挂钩仍为设计。
 
+28. [设置项盘点](design/settings-reference-inventory.md)、[站点/主题/系统设置设计](architecture/settings-design.md)、[前端扩展提案](architecture/frontend-extensions.md) 与 [ADR 0023](decisions/0023-settings-and-extension-boundaries.md)：Argon/WP 可配置项分类、SEO、配置存放与缓存分层、编辑器/页面/存储注册边界；仅调研提案，系统设置存放方案待商定。
+
 ## 目录职责
 
 本轮接入入口：[动态请求开发指南](development/reader-requests.md) 与 [验收记录](handoff/reader-requests-verification.md)。原始设计依据保留在 [动态数据盘点](handoff/public-dynamic-data-audit.md)。
