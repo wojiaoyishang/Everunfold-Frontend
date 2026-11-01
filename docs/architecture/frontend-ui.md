@@ -123,7 +123,7 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 
 [ADR 0019](../decisions/0019-shared-login-and-responsive-entry.md) 将 `/login` 明确为通用账号入口；[ADR 0020](../decisions/0020-login-handoff-and-session-check.md) 随后更新缺省目的地：管理员为 `/admin`，普通账号为 `/`，明确安全返回地址优先，服务端权限检查不变。认证页仍独立于公开博客壳和快照。
 
-`ManagementEntry` 组合简洁头部、单列表单和 `SessionFeedback`；共享 `ui/FormField` 只负责标签、图标和错误外观，字段及按钮继续使用既有封装。样式由 `management.css`（共用/后台）、`scene.css`（背景）、`entry.css`（登录/身份确认卡片）分责，统一在路由组布局导入。
+`ManagementEntry` 组合简洁头部、单列表单和 `SessionFeedback`；共享 `ui/FormField` 只负责标签、图标和错误外观，字段及按钮继续使用既有封装。登录展示已迁至 `themes/argon/auth`，样式由 `auth.css`（登录基础）、`scene.css`（背景）、`entry.css`（登录/身份确认卡片）分责，只在 login 布局导入。
 
 背景定位平面保持 8:5 原比例并铺满视口，窄竖屏调整营地重心，内层单独执行漂移。布局定位和动画不得共用 transform；图片与火光叠层不得分别裁切缩放。入口卡片桌面最大 440px，仅保留必要内容并留足表单内间距；手机保持正常字号/控件尺寸；减少动态关闭入场与环境动画。
 
@@ -131,6 +131,6 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 
 ## 后台展示分区设计（2026-11-01）
 
-用户允许后台采用简洁专业、独立于博客前台的视觉；[后台设计规范](admin-ui.md) 和 [ADR 0021](../decisions/0021-admin-theme-and-workspace.md) 定义主题内 public/auth/admin 分区。当前 `management` 代码与全局主题导入仍保持原状，本轮只完成设计。
+用户允许后台采用简洁专业、独立于博客前台的视觉；[后台设计规范](admin-ui.md) 和 [ADR 0021](../decisions/0021-admin-theme-and-workspace.md) 定义主题内 public/auth/admin 分区。用户批准样例后已完成主题内 auth/admin 拆分，后台三个入口为 `/admin`、`/admin/content`、`/admin/media`。
 
-下一步从后台壳和样式隔离开始，按需将登录展示归入 auth、后台归入 admin，共享控件仍复用；会话、请求、权限和私有缓存不得由主题控制。后台的主题变量、个人偏好及 Portal 浮层要与公开阅读隔离；不能只移动 CSS import 而不处理全局选择器/浏览器副作用。
+`core/admin` 负责认证协调、导航登记和外观偏好；路由适配器组合主题壳，展示留在 `themes/argon/admin/{layout,components,pages,styles}`。`RouteLink` 封装 Next.js 私有代码路由导航，弹层/表单控件复用 UI 封装。`shared.css` 留基础层，博客样式只在 blog 布局导入；根配色/滤镜/字号/动效规则显式排除 admin，后台 token 与偏好独立。内容和媒体只有准备页，下一步按后端契约逐项接业务，详见 [运行指南](../development/admin-workspace.md) 与 [验证](../handoff/admin-workspace-verification.md)。

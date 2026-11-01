@@ -1,4 +1,4 @@
-html[data-custom-accent="true"] {
+html:not(:has([data-surface="admin"]))[data-custom-accent="true"] {
   --accent: var(--custom-accent-light);
   /* Brand fills carry white text, so they keep the darker, contrast-safe tone. */
   --brand-accent: var(--custom-accent-light);
@@ -8,25 +8,31 @@ html[data-custom-accent="true"] {
   --surface-soft: color-mix(in srgb, var(--brand-accent) 2%, #f8f9fc);
   --line: color-mix(in srgb, var(--brand-accent) 9%, #eef0f4);
 }
-html[data-theme="dark"][data-custom-accent="true"] {
+html:not(
+    :has([data-surface="admin"])
+  )[data-theme="dark"][data-custom-accent="true"] {
   --accent: var(--custom-accent-dark);
   --surface: color-mix(in srgb, var(--accent) 8%, #1d2028);
   --surface-soft: color-mix(in srgb, var(--accent) 12%, #22252e);
   --line: color-mix(in srgb, var(--accent) 20%, #292c34);
 }
-html[data-theme="dark"][data-amoled="true"] {
+html:not(:has([data-surface="admin"]))[data-theme="dark"][data-amoled="true"] {
   --surface: #08080b;
   --surface-soft: #141419;
   --line: #25252b;
 }
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"])[data-custom-accent="true"] {
+  html:not(:has([data-surface="admin"])):not(
+      [data-theme="light"]
+    )[data-custom-accent="true"] {
     --accent: var(--custom-accent-dark);
     --surface: color-mix(in srgb, var(--accent) 8%, #1d2028);
     --surface-soft: color-mix(in srgb, var(--accent) 12%, #22252e);
     --line: color-mix(in srgb, var(--accent) 20%, #292c34);
   }
-  html:not([data-theme="light"])[data-amoled="true"] {
+  html:not(:has([data-surface="admin"])):not(
+      [data-theme="light"]
+    )[data-amoled="true"] {
     --surface: #08080b;
     --surface-soft: #141419;
     --line: #25252b;

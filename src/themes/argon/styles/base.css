@@ -1,4 +1,4 @@
-:root {
+html:not(:has([data-surface="admin"])) {
   color-scheme: light;
   --accent: #673bb7;
   --accent-light: #9c76df;
@@ -27,7 +27,7 @@
   background: #14152d;
 }
 
-html[data-theme="dark"] {
+html:not(:has([data-surface="admin"]))[data-theme="dark"] {
   color-scheme: dark;
   --accent: #b895f2;
   --accent-light: #c9aff5;
@@ -42,7 +42,7 @@ html[data-theme="dark"] {
 }
 
 @media (prefers-color-scheme: dark) {
-  html:not([data-theme="light"]) {
+  html:not(:has([data-surface="admin"])):not([data-theme="light"]) {
     color-scheme: dark;
     --accent: #b895f2;
     --accent-light: #c9aff5;
@@ -76,15 +76,16 @@ button {
     color var(--motion-fast) ease,
     border-color var(--motion-normal) ease;
 }
-html[data-reading-font="serif"] .article-content {
+html:not(:has([data-surface="admin"]))[data-reading-font="serif"]
+  .article-content {
   font-family: Georgia, "Noto Serif SC", "Songti SC", SimSun, serif;
 }
-html[data-reading-shadow="deep"] .surface {
+html:not(:has([data-surface="admin"]))[data-reading-shadow="deep"] .surface {
   box-shadow:
     0 7px 30px #1b0e4933,
     0 2px 8px #1b0e491c;
 }
-body::after {
+body:not(:has([data-surface="admin"]))::after {
   content: "";
   position: fixed;
   inset: 0;
@@ -92,12 +93,15 @@ body::after {
   z-index: 150;
   transition: background 220ms;
 }
-html[data-reading-filter="sunset"] body::after {
+html:not(:has([data-surface="admin"]))[data-reading-filter="sunset"]
+  body:not(:has([data-surface="admin"]))::after {
   background: #ffb55c20;
 }
-html[data-reading-filter="dim"] body::after {
+html:not(:has([data-surface="admin"]))[data-reading-filter="dim"]
+  body:not(:has([data-surface="admin"]))::after {
   background: #0003;
 }
-html[data-reading-filter="gray"] body::after {
+html:not(:has([data-surface="admin"]))[data-reading-filter="gray"]
+  body:not(:has([data-surface="admin"]))::after {
   backdrop-filter: grayscale(1);
 }

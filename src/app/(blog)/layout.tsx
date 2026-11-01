@@ -1,3 +1,4 @@
+import "@/themes/argon/argon.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { readPublicSnapshot } from "@/core/content/snapshot";

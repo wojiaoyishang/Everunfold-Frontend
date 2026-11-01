@@ -1,6 +1,11 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  grid: "M3 3h7v7H3V3ZM14 3h7v7h-7V3ZM3 14h7v7H3v-7ZM14 14h7v7h-7v-7Z",
+  image: "M4 4h16v16H4V4ZM4 16l5-5 5 5 3-3 3 3M15 8h.01",
+  upload: "M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5",
+  sidebar: "M3 4h18v16H3V4ZM9 4v16",
+
   lock: "M6 10h12v11H6V10ZM8 10V6a4 4 0 0 1 8 0v4M12 14v3",
   logout: "M9 3H4v18h5M10 12h11m-4-4 4 4-4 4",
   "eye-off":

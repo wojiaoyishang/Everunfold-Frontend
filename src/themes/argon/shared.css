@@ -1,0 +1,5 @@
+/* Shared control foundation. Public root rules explicitly exclude the admin surface. */
+@import "./styles/base.css";
+@import "./styles/appearance.css";
+@import "./styles/scrollbars.css";
+@import "./styles/ui-controls.css";

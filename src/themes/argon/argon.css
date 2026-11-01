@@ -1,7 +1,4 @@
 /* Preserve component, motion and responsive cascade order. */
-@import "./styles/base.css";
-@import "./styles/appearance.css";
-@import "./styles/scrollbars.css";
 @import "./styles/shell.css";
 @import "./styles/sidebar.css";
 @import "./styles/navigation.css";
@@ -15,7 +12,6 @@
 @import "./styles/reader-tools.css";
 @import "./styles/discovery.css";
 @import "./styles/controls.css";
-@import "./styles/ui-controls.css";
 @import "./styles/feedback.css";
 @import "./styles/dynamic-data.css";
 @import "./styles/motion.css";

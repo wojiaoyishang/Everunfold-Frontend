@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 
 import "./globals.css";
-import "@/themes/argon/argon.css";
+import "@/themes/argon/shared.css";
 import { initializeMotion } from "@/core/browser/motion-policy";
 import { initializeAppearance } from "@/core/browser/appearance-policy";
 

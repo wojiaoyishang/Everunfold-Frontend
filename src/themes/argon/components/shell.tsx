@@ -48,6 +48,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
   return (
     <div
       className="blog-shell"
+      data-surface="public"
       style={
         {
           "--site-background": `url(${JSON.stringify(background)})`,

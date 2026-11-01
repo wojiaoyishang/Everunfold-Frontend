@@ -1,0 +1,136 @@
+/* Scoped to an actual admin surface; importing this stylesheet never restyles the blog. */
+html:has([data-surface="admin"]),
+.admin-root {
+  color-scheme: light;
+  --admin-canvas: #ffffff;
+  --admin-sidebar: #f7f8fa;
+  --admin-subtle: #f4f5f7;
+  --admin-border: #e8eaee;
+  --admin-text: #242a35;
+  --admin-muted: #697280;
+  --admin-accent: #415fb7;
+  --admin-accent-soft: #edf1fc;
+  --admin-on-accent: #ffffff;
+  --admin-positive: #28775a;
+  --admin-positive-soft: #edf6f1;
+  --admin-shadow: 0 10px 32px #17223812, 0 2px 8px #17223808;
+  --accent: var(--admin-accent);
+  --brand-accent: var(--admin-accent);
+  --accent-light: color-mix(in srgb, var(--admin-accent), white 28%);
+  --accent-soft: var(--admin-accent-soft);
+  --text: var(--admin-text);
+  --text-strong: var(--admin-text);
+  --muted: var(--admin-muted);
+  --surface: var(--admin-canvas);
+  --surface-soft: var(--admin-subtle);
+  --line: var(--admin-border);
+  --radius: 8px;
+  --shadow: var(--admin-shadow);
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-fast: 160ms;
+  --motion-normal: 200ms;
+  --scrollbar-thumb: color-mix(in srgb, var(--admin-muted) 48%, transparent);
+  --scrollbar-thumb-hover: var(--admin-muted);
+  --gutter-header-fill: transparent;
+  --header-height: 56px;
+  color: var(--admin-text);
+  background: var(--admin-canvas);
+  font:
+    400 14px/1.55 -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    "PingFang SC",
+    "Microsoft YaHei",
+    sans-serif;
+}
+html:has([data-surface="admin"]) {
+  font-size: 14px !important;
+  scroll-behavior: auto;
+  scroll-padding-top: 72px;
+}
+html:has([data-admin-mode="dark"]),
+.admin-root[data-admin-mode="dark"] {
+  color-scheme: dark;
+  --admin-canvas: #191c22;
+  --admin-sidebar: #15181e;
+  --admin-subtle: #22262e;
+  --admin-border: #303640;
+  --admin-text: #e5e9ef;
+  --admin-muted: #a0a9b7;
+  --admin-accent: #a4baff;
+  --admin-accent-soft: #29354e;
+  --admin-on-accent: #182033;
+  --admin-positive: #8bceb1;
+  --admin-positive-soft: #22382e;
+  --admin-shadow: 0 10px 32px #0004;
+}
+@media (prefers-color-scheme: dark) {
+  html:has([data-admin-mode="system"]),
+  .admin-root[data-admin-mode="system"] {
+    color-scheme: dark;
+    --admin-canvas: #191c22;
+    --admin-sidebar: #15181e;
+    --admin-subtle: #22262e;
+    --admin-border: #303640;
+    --admin-text: #e5e9ef;
+    --admin-muted: #a0a9b7;
+    --admin-accent: #a4baff;
+    --admin-accent-soft: #29354e;
+    --admin-on-accent: #182033;
+    --admin-positive: #8bceb1;
+    --admin-positive-soft: #22382e;
+    --admin-shadow: 0 10px 32px #0004;
+  }
+}
+.admin-root {
+  --admin-space: 28px;
+  --admin-row: 58px;
+  --sidebar-width: 224px;
+  min-height: 100dvh;
+}
+.admin-root[data-density="compact"] {
+  --admin-space: 20px;
+  --admin-row: 48px;
+}
+.admin-root :is(h1, h2, h3, p) {
+  margin: 0;
+}
+.admin-root :is(button, input, a) {
+  -webkit-tap-highlight-color: transparent;
+}
+.admin-root .ui-anchored-panel {
+  box-shadow: var(--admin-shadow);
+  border-color: var(--admin-border);
+  border-radius: 8px;
+}
+.admin-root .ui-select-trigger {
+  min-height: 38px;
+  background: var(--admin-canvas);
+  font-size: 14px;
+}
+.admin-root .ui-select-options > button {
+  font-size: 14px;
+}
+.admin-root :is(.ui-button, .ui-link):focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-root *,
+  .admin-root *::before,
+  .admin-root *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@media (forced-colors: active) {
+  .admin-root {
+    --admin-border: CanvasText;
+    --admin-muted: CanvasText;
+    --admin-accent: LinkText;
+  }
+  .admin-root .admin-nav-link[aria-current="page"] {
+    outline: 1px solid Highlight;
+  }
+}

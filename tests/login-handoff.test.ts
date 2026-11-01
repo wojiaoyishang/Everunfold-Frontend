@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { startLoginHandoff } from "../src/themes/argon/management/login-handoff";
+import { startLoginHandoff } from "../src/themes/argon/auth/login-handoff";
 
 const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 function surface() {

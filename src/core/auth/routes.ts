@@ -1,6 +1,8 @@
+import { adminDestination } from "../admin/navigation";
+
 /** Explicit code routes are reachable without a public-content snapshot. */
 export function isManagementRoute(pathname: string): boolean {
-  return /^\/(?:login|admin)\/?$/.test(pathname);
+  return /^\/login\/?$/.test(pathname) || !!adminDestination(pathname);
 }
 
 export function isManagementLink(href: string): boolean {
@@ -13,7 +15,7 @@ export function isManagementLink(href: string): boolean {
   }
 }
 
-/** Keep the shared login entry on the two currently supported return destinations. */
+/** Allow only registered return destinations; this never grants access to them. */
 export function loginReturnPath(input: string | undefined): string | undefined {
   // Preserve absence until the backend has confirmed the account's role.
   if (input === undefined || input === "") return undefined;
@@ -27,7 +29,7 @@ export function loginReturnPath(input: string | undefined): string | undefined {
     const url = new URL(input, "https://management.invalid");
     if (
       url.origin !== "https://management.invalid" ||
-      !["/", "/admin"].includes(url.pathname)
+      (url.pathname !== "/" && !adminDestination(url.pathname))
     )
       return "/";
     return `${url.pathname}${url.search}${url.hash}`;

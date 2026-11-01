@@ -9,7 +9,10 @@ import { createSessionCheck, type SessionView } from "./session-check";
 export function useSession(baseUrl: string, admin = false) {
   const [state, setState] = useState<SessionView>({ phase: "checking" });
   const current = useRef<ReturnType<typeof createSessionCheck> | null>(null);
-  const check = useCallback(() => current.current?.check(), []);
+  const check = useCallback(
+    (background = false) => current.current?.check(background),
+    [],
+  );
 
   useEffect(() => {
     const reader = createSessionCheck(

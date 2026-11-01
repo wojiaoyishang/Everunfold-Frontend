@@ -84,6 +84,10 @@ try {
     child.once("exit", (status) => resolve(status ?? 1));
   });
   process.exitCode = Number(code);
+  if (code === 0 && process.argv.includes("--admin")) {
+    const { verifyAdminRuntime } = await import("./verify-admin-runtime.mjs");
+    await verifyAdminRuntime({ workspace });
+  }
   if (code === 0 && process.argv.includes("--reader")) {
     const { verifyReaderRuntime } = await import("./verify-reader-runtime.mjs");
     await verifyReaderRuntime({

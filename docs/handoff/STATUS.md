@@ -1,5 +1,15 @@
 # 前端交接状态
 
+## 最新交付：独立后台工作空间第一期（2026-11-01）
+
+- 用户批准样例后已实现：浅灰侧栏、紧凑顶栏、工作台/内容/媒体三入口；224/72px 侧栏、手机抽屉、独立深浅/系统模式与舒适/紧凑间距。当前账户来自真实后端。内容/媒体工具栏禁用并明确准备状态，没有虚构业务数据。
+- 主题从 management 拆为 `themes/argon/auth` 与 `themes/argon/admin/{layout,components,pages,styles}`。`core/admin` 负责导航、认证协调和个人偏好，路由 workspace 组合展示；共享控件继续封装，新增 RouteLink。一个 admin layout 保持壳，复用原 useSession 和 8 秒截止；新增安全子页回跳。
+- `shared.css` 留基础样式，公开组件 CSS 在 blog 布局导入；公开根级字体/色板/滤镜/动效显式排除 admin。后台个人偏好按后端地址/账号版本化保存，不含身份或内容；弹层继承所属区域 token。
+- 最终 `npm run check` 通过，**91 项测试通过**；`npm run verify:admin` 隔离生产构建及实际 HTTP 验证通过：后端 503 + 无公开快照下，登录/三个后台页仍返回匿名私有壳，private/no-store/noindex，SSR 不含当前账户且未请求公开快照。
+- 实际内置浏览器验证登录返回子页、刷新、导航、退出后直达保护、偏好保存、前后台样式隔离、1280/1024/390/320px 与抽屉 Esc/焦点。未观察到浏览器错误；侧栏开关和小屏样式问题已修正。详细检查、途中失败修复及未执行矩阵见 [后台验证](admin-workspace-verification.md)。
+- 文档版本 admin-ui-2、admin-workspace-1；[运行/维护指南](../development/admin-workspace.md)、ADR 0021 和实际桌面截图同步后端。原始 v2.11/v0.14、auth-v0.1、development-5 与依赖不变。3000/8001 未重启，测试会话已退出，用户 Edge 会话未改。
+- 下一步先由后端发布内容列表/编辑契约，再接真实内容和媒体流程。未实现 CRUD、筛选/分页数据、上传、用户管理或完整主题注册系统；本轮不改后端业务，不把 UI 完成当持久事务/权限验收。仅本地提交，用户自行 push。
+
 ## 最新设计交付：后台视觉与主题分区（2026-11-01）
 
 - 用户明确后台简洁专业、视觉不必贴合博客前台，展示仍归前端主题管理。[官方参考调研](../design/admin-reference-research.md)（admin-research-1）、[后台设计规范](../architecture/admin-ui.md)（admin-ui-1）与 [ADR 0021](../decisions/0021-admin-theme-and-workspace.md) 已落档；具体配色、尺寸和目录为提案，尚未改 `/admin` 运行界面。

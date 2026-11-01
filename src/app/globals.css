@@ -46,12 +46,12 @@ summary:focus-visible {
 ::selection {
   background: color-mix(in srgb, var(--accent) 26%, transparent);
 }
-html[data-motion="reduced"] {
+html[data-motion="reduced"]:not(:has([data-surface="admin"])) {
   scroll-behavior: auto;
 }
-html[data-motion="reduced"] *,
-html[data-motion="reduced"] *::before,
-html[data-motion="reduced"] *::after {
+html[data-motion="reduced"]:not(:has([data-surface="admin"])) *,
+html[data-motion="reduced"]:not(:has([data-surface="admin"])) *::before,
+html[data-motion="reduced"]:not(:has([data-surface="admin"])) *::after {
   transition: none !important;
   animation: none !important;
 }
