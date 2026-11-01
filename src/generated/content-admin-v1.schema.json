@@ -1,0 +1,659 @@
+{
+  "$defs": {
+    "ContentTypeCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ContentTypeDefinition"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "ContentTypeCatalog",
+      "type": "object"
+    },
+    "ContentTypeDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "owner": {
+          "title": "Owner",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "icon": {
+          "title": "Icon",
+          "type": "string"
+        },
+        "order": {
+          "title": "Order",
+          "type": "integer"
+        },
+        "title_required": {
+          "title": "Title Required",
+          "type": "boolean"
+        },
+        "supports_excerpt": {
+          "title": "Supports Excerpt",
+          "type": "boolean"
+        },
+        "editor": {
+          "title": "Editor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "owner",
+        "label",
+        "description",
+        "icon",
+        "order",
+        "title_required",
+        "supports_excerpt",
+        "editor"
+      ],
+      "title": "ContentTypeDefinition",
+      "type": "object"
+    },
+    "DraftBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "const": "markdown",
+          "default": "markdown",
+          "title": "Type",
+          "type": "string"
+        },
+        "content": {
+          "maxLength": 100000,
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "content"
+      ],
+      "title": "DraftBlock",
+      "type": "object"
+    },
+    "DraftCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/DraftSummary"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "total",
+        "page",
+        "page_size"
+      ],
+      "title": "DraftCatalog",
+      "type": "object"
+    },
+    "DraftCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "type_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Type Id",
+          "type": "string"
+        },
+        "fields": {
+          "$ref": "#/$defs/DraftFields"
+        }
+      },
+      "required": [
+        "operation_id",
+        "type_id",
+        "fields"
+      ],
+      "title": "DraftCreate",
+      "type": "object"
+    },
+    "DraftDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type_id": {
+          "title": "Type Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "preview": {
+          "title": "Preview",
+          "type": "string"
+        },
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "trash"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "is_demo": {
+          "title": "Is Demo",
+          "type": "boolean"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "body": {
+          "items": {
+            "$ref": "#/$defs/DraftBlock"
+          },
+          "title": "Body",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "type_id",
+        "title",
+        "excerpt",
+        "preview",
+        "author",
+        "revision",
+        "status",
+        "is_demo",
+        "created_at",
+        "updated_at",
+        "body"
+      ],
+      "title": "DraftDetail",
+      "type": "object"
+    },
+    "DraftFields": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Title",
+          "type": "string"
+        },
+        "excerpt": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "body": {
+          "items": {
+            "$ref": "#/$defs/DraftBlock"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "title": "Body",
+          "type": "array"
+        }
+      },
+      "required": [
+        "body"
+      ],
+      "title": "DraftFields",
+      "type": "object"
+    },
+    "DraftLookup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DraftLookup",
+      "type": "object"
+    },
+    "DraftMutation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "operation_id",
+        "expected_revision"
+      ],
+      "title": "DraftMutation",
+      "type": "object"
+    },
+    "DraftQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "type_id": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Type Id",
+          "type": "string"
+        },
+        "search": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Search",
+          "type": "string"
+        },
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "trash"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 15,
+          "maximum": 50,
+          "minimum": 1,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type_id"
+      ],
+      "title": "DraftQuery",
+      "type": "object"
+    },
+    "DraftSave": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "fields": {
+          "$ref": "#/$defs/DraftFields"
+        }
+      },
+      "required": [
+        "id",
+        "operation_id",
+        "expected_revision",
+        "fields"
+      ],
+      "title": "DraftSave",
+      "type": "object"
+    },
+    "DraftSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type_id": {
+          "title": "Type Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "preview": {
+          "title": "Preview",
+          "type": "string"
+        },
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "trash"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "is_demo": {
+          "title": "Is Demo",
+          "type": "boolean"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type_id",
+        "title",
+        "excerpt",
+        "preview",
+        "author",
+        "revision",
+        "status",
+        "is_demo",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "DraftSummary",
+      "type": "object"
+    },
+    "PublicResponse_ContentTypeCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/ContentTypeCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[ContentTypeCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_DraftCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/DraftCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[DraftCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_DraftDetail_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/DraftDetail"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[DraftDetail]",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "$ref": "#/$defs/DraftQuery"
+    },
+    "lookup": {
+      "$ref": "#/$defs/DraftLookup"
+    },
+    "create": {
+      "$ref": "#/$defs/DraftCreate"
+    },
+    "save": {
+      "$ref": "#/$defs/DraftSave"
+    },
+    "mutation": {
+      "$ref": "#/$defs/DraftMutation"
+    },
+    "catalog": {
+      "$ref": "#/$defs/PublicResponse_DraftCatalog_"
+    },
+    "detail": {
+      "$ref": "#/$defs/PublicResponse_DraftDetail_"
+    },
+    "types": {
+      "$ref": "#/$defs/PublicResponse_ContentTypeCatalog_"
+    }
+  },
+  "required": [
+    "query",
+    "lookup",
+    "create",
+    "save",
+    "mutation",
+    "catalog",
+    "detail",
+    "types"
+  ],
+  "title": "ContentAdminContract",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-everunfold-contract-version": "1.0.0",
+  "x-everunfold-content-types": [
+    {
+      "id": "article",
+      "owner": "content",
+      "label": "文章",
+      "description": "整理想法，写成一篇文章。",
+      "icon": "book",
+      "order": 10,
+      "title_required": true,
+      "supports_excerpt": true,
+      "editor": "core.markdown"
+    },
+    {
+      "id": "shuoshuo",
+      "owner": "content",
+      "label": "说说",
+      "description": "记录此刻，分享日常片段。",
+      "icon": "leaf",
+      "order": 20,
+      "title_required": false,
+      "supports_excerpt": false,
+      "editor": "core.markdown"
+    }
+  ],
+  "x-everunfold-operations": [
+    {
+      "name": "readContentTypes",
+      "path": "/v1/admin/content/types",
+      "method": "GET",
+      "response": "types"
+    },
+    {
+      "name": "queryDrafts",
+      "path": "/v1/admin/content/query",
+      "method": "POST",
+      "input": "query",
+      "response": "catalog"
+    },
+    {
+      "name": "readDraft",
+      "path": "/v1/admin/content/detail",
+      "method": "POST",
+      "input": "lookup",
+      "response": "detail"
+    },
+    {
+      "name": "createDraft",
+      "path": "/v1/admin/content/create",
+      "method": "POST",
+      "input": "create",
+      "response": "detail"
+    },
+    {
+      "name": "saveDraft",
+      "path": "/v1/admin/content/save",
+      "method": "POST",
+      "input": "save",
+      "response": "detail"
+    },
+    {
+      "name": "trashDraft",
+      "path": "/v1/admin/content/trash",
+      "method": "POST",
+      "input": "mutation",
+      "response": "detail"
+    },
+    {
+      "name": "restoreDraft",
+      "path": "/v1/admin/content/restore",
+      "method": "POST",
+      "input": "mutation",
+      "response": "detail"
+    }
+  ]
+}

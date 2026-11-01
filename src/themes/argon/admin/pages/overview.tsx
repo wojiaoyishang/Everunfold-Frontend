@@ -14,7 +14,7 @@ export function AdminOverview() {
       <section className="admin-overview-intro">
         <span className="admin-eyebrow">你的工作空间</span>
         <h2>内容与资源，各有其位。</h2>
-        <p>文章、说说和媒体将从这里统一整理。</p>
+        <p>开始一篇文章，记录一则说说，整理创作素材。</p>
       </section>
       <div className="admin-shortcuts">
         <RouteLink href="/admin/content" showPending className="admin-shortcut">
@@ -71,18 +71,18 @@ export function AdminOverview() {
               <span className="admin-badge admin-badge-success">已启用</span>
             </li>
             <li>
-              <span>内容编辑</span>
-              <span className="admin-badge">准备中</span>
+              <span>草稿编辑</span>
+              <span className="admin-badge admin-badge-success">已启用</span>
             </li>
             <li>
               <span>媒体上传</span>
-              <span className="admin-badge">准备中</span>
+              <span className="admin-badge admin-badge-success">已启用</span>
             </li>
           </ul>
         </section>
       </div>
       <p className="admin-page-note">
-        内容编辑与媒体上传尚未开放，现有博客可以正常浏览。
+        新内容先保存到草稿，方便随时回来继续创作。
       </p>
     </>
   );

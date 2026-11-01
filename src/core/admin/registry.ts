@@ -1,5 +1,7 @@
 /** Trusted, build-time page metadata. A registry entry never grants permission. */
 export type AdminPageIcon =
+  | "book"
+  | "leaf"
   | "overview"
   | "content"
   | "media"

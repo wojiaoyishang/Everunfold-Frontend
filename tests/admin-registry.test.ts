@@ -47,13 +47,7 @@ test("admin modules compose deterministic groups and entries independently of re
   );
   assert.deepEqual(
     first.navigation[0].items.map((p) => p.id),
-    [
-      "core.overview",
-      "core.content",
-      "example.quick",
-      "core.media",
-      "core.icons",
-    ],
+    ["core.overview", "example.quick", "core.media", "core.icons"],
   );
   assert.equal(first.resolve("/admin/example/detail/")?.id, "example.detail");
   assert.equal(first.page("example.detail")?.menu, null);

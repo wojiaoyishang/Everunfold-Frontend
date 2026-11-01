@@ -1,0 +1,24 @@
+[
+  {
+    "id": "article",
+    "owner": "content",
+    "label": "文章",
+    "description": "整理想法，写成一篇文章。",
+    "icon": "book",
+    "order": 10,
+    "title_required": true,
+    "supports_excerpt": true,
+    "editor": "core.markdown"
+  },
+  {
+    "id": "shuoshuo",
+    "owner": "content",
+    "label": "说说",
+    "description": "记录此刻，分享日常片段。",
+    "icon": "leaf",
+    "order": 20,
+    "title_required": false,
+    "supports_excerpt": false,
+    "editor": "core.markdown"
+  }
+]

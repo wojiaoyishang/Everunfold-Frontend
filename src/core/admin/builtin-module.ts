@@ -54,7 +54,7 @@ export const builtinAdminModule = {
       label: "内容",
       description: "管理文章与说说",
       icon: "content",
-      menu: { group: "core.workspace", order: 20 },
+      menu: null,
     },
     {
       id: "core.media",

@@ -1,8 +1,12 @@
 import { builtinAdminModule } from "./builtin-module";
 import { createAdminRegistry } from "./registry";
+import { contentAdminModule } from "@/core/content-management/registry";
 
 /** Explicit trusted imports only. Backend responses must never mutate this catalog. */
-export const adminRegistry = createAdminRegistry([builtinAdminModule]);
+export const adminRegistry = createAdminRegistry([
+  builtinAdminModule,
+  contentAdminModule,
+]);
 export const adminNavigationGroups = adminRegistry.navigation;
 export const adminNavigation = Object.freeze(
   adminNavigationGroups.flatMap((group) => group.items),

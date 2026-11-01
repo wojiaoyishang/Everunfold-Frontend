@@ -178,3 +178,19 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/decisions/0028-shared-confirmation-dialog.md` | `8b0b5af8aa13dd4d085ea34669a99482fd1d3a9753f8e6e64a43391c0eff7ca0` |
 | `docs/decisions/0029-interaction-motion-lifecycle.md` | `da9f36e3be0c92eebe9ee87da9b2b444ebd8c3911833d92730ffe4cce8f847cb` |
 | `docs/design/media-confirm-motion.png` | `9949b61bd9f580dd76cf76e9475a648435f132338f47d5e6205aa98e3749f928` |
+
+## content-management-1 同步摘要（2026-11-01）
+
+本轮 ADR 0030、content-types-3、content-management-1 落地注册式文章/说说私有草稿 CRUD。新契约 content-admin 1.0.0 固定后端 2799197，数据库显式升级 0009_content_drafts；公开内容和 settings 1.6.0 不变。正式发布/撤回及可靠内容分发未交付。原始 v2.11/v0.14 字节保持不变，历史摘要保留。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `1b07c53c13e27c89a646ba157ebf58034108324b142478eac69f1e41d5d763a4` |
+| `docs/architecture/content-types.md` | `778c2b194f80c51be69b0fba089cb12fef62dd12b7cfe0a48affd3df765fe171` |
+| `docs/architecture/constraints.md` | `748f00fb7fe6d475c5e90f26a356a1649df3a808dad6d1474d0c58c033ab96d8` |
+| `docs/decisions/0030-registered-content-drafts.md` | `2cac70f45899013aa521bdb917975f25a247f79fc6b977f8213f4dd7681fbdea` |
+| `docs/development/content-management.md` | `265be9587afff837973cfa7d4457699cc3fcc712ba715ca3a4bb1ac58b0c85e5` |
+| `docs/handoff/content-management-verification.md` | `82a75c6ecfe0be1405e481dff62aacedbdd63a19c9a91dd8362cb4a2d1c1c1ed` |
+| `docs/design/content-draft-preview.png` | `0d26dbf91e78e349e2782cea960dea61ff12feeed4a16dc77b2fa131935207d5` |
+| `docs/design/content-draft-mobile.png` | `52478a83c57dcd7d9b2fd6d654dd17c1115da14371da212968598b5728a627ba` |
+| `docs/design/content-draft-list.png` | `04fc300c35966ae678689b628146b1b90fac0b45e2718a180467c034e74da231` |
