@@ -141,6 +141,7 @@ export function useAssetLibrary<T, P>(
     error: uploadError || queryError,
     canRetry: uploadRetryable || (!uploadError && Boolean(queryError)),
     lastUploaded,
+    refresh: () => setRefresh((v) => v + 1),
     upload,
     retry: () =>
       pending.current ? send(pending.current) : setRefresh((v) => v + 1),

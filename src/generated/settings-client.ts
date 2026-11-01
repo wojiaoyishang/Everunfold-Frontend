@@ -19,6 +19,66 @@ ajv.addSchema(
   "settings",
 );
 
+const readMediaValidator = ajv.compile<SettingsContract["media_details"]>({
+  $ref: "settings#/properties/media_details",
+});
+export function readMedia(
+  baseUrl: string,
+  input: SettingsContract["media_lookup"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/media/detail",
+    input,
+    readMediaValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const updateMediaValidator = ajv.compile<SettingsContract["media_details"]>({
+  $ref: "settings#/properties/media_details",
+});
+export function updateMedia(
+  baseUrl: string,
+  input: SettingsContract["media_update"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/media/update",
+    input,
+    updateMediaValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const editMediaValidator = ajv.compile<SettingsContract["media_details"]>({
+  $ref: "settings#/properties/media_details",
+});
+export function editMedia(
+  baseUrl: string,
+  input: SettingsContract["media_edit"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(baseUrl, "/v1/admin/media/edit", input, editMediaValidator, {
+    ...options,
+    credentials: "include",
+    headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+  });
+}
+
 const queryMediaValidator = ajv.compile<SettingsContract["media_catalog"]>({
   $ref: "settings#/properties/media_catalog",
 });

@@ -112,3 +112,19 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/design/sidebar-drawer-mobile.png` | `050425101f5f588f0fea472e9fd73b6d84ed4744ba0492fd7c171f0cd6cd7754` |
 | `docs/design/sidebar-drawer-mobile-expanded.png` | `4f44f1a67f79a1f34fb3323c9255f1ba55d7a8136b144216dc7ac58fb92a308d` |
 | `docs/design/announcement-settings.png` | `a4f3d1b9cef3d05d98ea8cf2162a47a0fa33b899fb986237940d4cb4bcd4e4cd` |
+
+## media-editor-runtime-1 同步摘要（2026-11-01）
+
+本轮 ADR 0026、media-library-runtime-2、media-storage-4、settings-runtime-4 为已实现更新；settings 1.4.0 生成固定后端 ac25b25。历史摘要保留，原始设计/工程附件及 development-5 不变。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `23c34ef8d50a782072082fb47a23e5b3badd5fffed2af46e89cf9da1a5e1c453` |
+| `docs/architecture/media-storage.md` | `736865009e0036a7622181b3044e64513d666af7565974e21804c4db5600757a` |
+| `docs/development/settings.md` | `5f6fb0b836e31b3c130b1bbea51c0a0276b467e4e66de4fb7bdcb7b88f01e79d` |
+| `docs/development/media-library.md` | `5de66b016ec652dd4ab41566926d849ca685f8217fd04b18829652212cee1a65` |
+| `docs/decisions/0026-media-details-and-image-editing.md` | `b9612a8444f20f857e97a8197d668572a65c2194640aee22e5df4b13b51c2083` |
+| `docs/handoff/media-editor-verification.md` | `44c5b45902b38880d50ae4f469e6a2b7b27427a6e091dbcdea3d3e900e8bcad5` |
+| `docs/design/media-details-desktop.png` | `6c7b6bc90d45366eb9d54dc67c88a0131a12e6c9d52a614981be7681f87685e2` |
+| `docs/design/media-editor-desktop.png` | `e87852a07766a4c4a54093aac2e12aa696fd41859c7e79da54f8776b8f8518f9` |
+| `docs/design/media-details-mobile.png` | `2f13a98b1b83fd2f4327468e375cfbdd35d7ccc44f0c43dac52380c4f304bc6d` |

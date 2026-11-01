@@ -1,6 +1,13 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  crop: "M6 3v15h15M3 6h15v15M18 6l3-3",
+  rotate: "M3 10a9 9 0 1 1 3 9M3 4v6h6",
+  "flip-horizontal": "M12 3v18M3 6l6 6-6 6V6ZM21 6l-6 6 6 6V6Z",
+  "flip-vertical": "M3 12h18M6 3l6 6 6-6H6ZM6 21l6-6 6 6H6Z",
+  undo: "M3 10h11a6 6 0 0 1 0 12M8 5l-5 5 5 5",
+  redo: "M21 10H10a6 6 0 0 0 0 12M16 5l5 5-5 5",
+  list: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
   grid: "M3 3h7v7H3V3ZM14 3h7v7h-7V3ZM3 14h7v7H3v-7ZM14 14h7v7h-7v-7Z",
   image: "M4 4h16v16H4V4ZM4 16l5-5 5 5 3-3 3 3M15 8h.01",
   upload: "M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5",

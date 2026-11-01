@@ -1,6 +1,6 @@
 # 媒体库、上传存储与静态分发
 
-版本：media-storage-3，2026-11-01。**状态：基础图片/视频与图标库、本地存储、Base URL 和设置字段关联已实现；变体、CDN 上传接管与回收流程仍为设计。** 用户已确认后端管理业务媒体、独立 Base URL、相对/绝对 Uploads Path 和可替换存储边界。本期实施细节以 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md) 与 [媒体指南](../development/media-library.md) 为准，下文未实现字段和接口仍须后端契约先行。
+版本：media-storage-4，2026-11-01。**状态：基础图片/视频与图标库、本地存储、附件资料/图片编辑、Base URL 和设置字段关联已实现；变体、CDN 上传接管与回收流程仍为设计。** 用户已确认后端管理业务媒体、独立 Base URL、相对/绝对 Uploads Path 和可替换存储边界。本期实施细节以 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md) 、[ADR 0026](../decisions/0026-media-details-and-image-editing.md) 与 [媒体指南](../development/media-library.md) 为准，下文未实现字段和接口仍须后端契约先行。
 
 本设计延续 [v2.11 媒体基线](../baseline/01_Design_Baseline_v2.11.md)、[v0.14 媒体一致性](../baseline/02_Engineering_Plan_v0.14.md) 和 [ADR 0017](../decisions/0017-media-storage-and-upload-lifecycle.md)：媒体 ID 稳定，原文件不可覆盖，WebP 为同一媒体的派生文件，默认公开、默认软删除。Next.js 消费媒体映射，不持有上传路径或存储凭据。
 
@@ -9,6 +9,14 @@
 试导入仍把引用文件复制到前端 `public/uploads/wordpress/`，正文使用 `site://media/{id}` 和 media_urls，头图另存 cover_url；这部分尚未整体迁移。本期新增 `app/modules/media`、media_assets 表、管理员图片/视频及图标上传/查询与后端 `/media` 分发；[media] 的 base_url/uploads_path 已生效。当前支持 icon/library 用途、本地提供器及头像/背景字段绑定；文章正文整体迁移与完整管理生命周期尚未完成。
 
 新目标把文章图片、头图、后台上传的背景/头像等业务媒体交给后端。Next.js 的代码包、CSS、字体、可信图标等构建资产仍属于前端。现有主题参考图片与试导入文件在将来的迁移核验完成之前保留，本轮不搬移或删除任何文件。
+
+## 附件详情和编辑的当前实现
+
+迁移 `0006_media_details` 已为 media_assets 增加标题、alt、caption、描述、修订号、来源 ID 和编辑配方；settings 1.4.0 提供详情/资料保存/编辑另存端点。网格/列表、标题或文件名搜索、分栏详情已实现。资料更新有并发版本保护；默认 alt 不反向重写正文中的上下文 alt。
+
+裁剪、旋转、翻转和缩小会改变图片内容，因此另存新媒体 ID/原件并保留 source_id，原文件与已有引用不变。它们与未来纯格式 WebP 派生共用原 ID 的机制分开。新资源继续使用相同存储路径约定和 ready/审计发布边界。具体顺序、校验和重试规则见 ADR 0026。
+
+当前详情不显示不存在的使用情况、视频时长或云端复制状态。下文完整模型及尚未交付的筛选、引用图、回收站、变体、远端提供器仍是设计，不因文档列出字段就视为实现。
 
 ## 配置与地址含义
 

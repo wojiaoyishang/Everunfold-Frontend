@@ -1,36 +1,70 @@
-# 基础媒体库运行指南
+# 媒体库运行指南
 
-版本：media-library-runtime-1，2026-11-01。当前实现见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)；完整生命周期规划见 [媒体存储设计](../architecture/media-storage.md)。
+版本：media-library-runtime-2，2026-11-01。基础上传见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)；附件详情与图片编辑见 [ADR 0026](../decisions/0026-media-details-and-image-editing.md)。完整生命周期规划见 [媒体存储设计](../architecture/media-storage.md)。
 
 ## 页面与表单
 
-管理员在 `/admin/media` 上传、按图片/视频过滤、名称搜索并分页浏览。头像、背景图片、背景视频旁的「媒体库」打开同一浏览组件，按目标字段过滤；图标页面仍使用独立的图标用途/大小规则。头像和背景图可以选择媒体库中已有的图标图片。
+管理员在 `/admin/media` 上传、按图片/视频过滤、按标题/文件名搜索并分页浏览。支持网格和紧凑列表；点击资源打开附件详情，可在当前查询页内切换上/下一附件。桌面分栏、手机纵向滚动，关闭和保存始终可达。窗口沿用主题动效与减少动态偏好。
 
-表单中的 42px 缩略图与地址输入框同行，单击查看大图或播放视频。选择资源只修改本地设置草稿，需要保存更改并等待节点应用；上传本身已独立完成，撤销草稿不会撤销上传。手填/清空地址会清空该字段的媒体关联。
+头像、背景图片、背景视频旁的「媒体库」仍打开同一浏览组件，按目标字段过滤，点击直接选取；图标页面仍使用独立用途/大小规则。表单 42px 缩略图与地址输入框同行，点击预览。选择只修改设置草稿，需要保存并等待节点应用；撤销草稿不会撤销已完成的上传。手填/清空地址会清空该字段媒体关联。
+
+## 附件资料
+
+详情显示原始文件名、MIME、大小、静态位图尺寸、上传时间、上传者、原文件链接/复制地址，以及以下可编辑字段：
+
+| 字段 | 规则 |
+| --- | --- |
+| 标题 | 最多 160 字；留空时列表显示原文件名；标题可搜索，不改文件名/URL |
+| 替代文本 | 图片最多 1000 字；描述图像含义，装饰图片可留空 |
+| 图片说明/说明 | 最多 2000 字；媒体库的默认 caption，视频显示「说明」 |
+| 描述 | 最多 10000 字，独立于替代文本和简短说明 |
+
+资料保存到 PostgreSQL。点击「保存资料」后等成功提示，再关闭重开可验证回读。关闭/Escape/切换资源遇到未保存修改会询问是否放弃；这不等于浏览器刷新/关闭后的草稿恢复。失败保留输入，版本冲突需先保留需合并的文字，再重新读取。资料更新不会自动改写已有文章正文或站点设置。
+
+## 图片编辑
+
+1. 打开静态 PNG/JPEG/WebP 附件，先保存未提交资料，再点击「编辑图片」。
+2. 使用旋转、水平/垂直翻转；开启裁剪后在图片上拖动新选区，或输入左侧/顶部/宽高。1:1、4:3、16:9 按钮提供居中选区，微小图片按有效像素取整。
+3. 输出宽度按比例缩小，不能放大。支持撤销、重做、重置；操作历史只在当前编辑窗口保留，最多 40 个状态。
+4. 点击「另存为新图片」。新图保留来源格式、复制四项资料，并打开新附件详情；原图和现有文章引用保持不变。若要使用新图作为头像/背景，再从设置字段中选择并保存。
+5. 未知保存结果不自动重试；保持窗口和配方，再次提交会沿用同一 edit_id。关闭窗口不代表取消已经受理的后端处理；重新进入媒体库检查结果。
+
+处理顺序是 EXIF 方向归一化 → 顺时针旋转 → 水平/垂直翻转 → 裁剪 → 等比缩小。裁剪坐标是变换后图片的像素值。新文件不复制 EXIF/GPS；原文件不可覆盖。SVG 和视频目前支持预览与资料修改，不提供图像编辑或转码。
 
 ## 当前端点与限制
 
-后端发布 `contracts/settings-v1.schema.json`，当前 1.3.0（1.2.0 引入媒体操作，1.3.0 增加公告标题）。前端固定后端提交 9803e71 生成客户端、类型及校验，不另定义业务字段。
+契约源为后端 `contracts/settings-v1.schema.json` **1.4.0**。前端生成来源固定 **ac25b25135856d33b46c74bddb9dbfc0e3393be5**，SHA256 `49cdd72353c640af8db55504503bea5d2cf62634539ee586cc56efcc5704d639`；前端不维护独立业务字段。
 
 | 方法/路径 | 已实现行为 |
 | --- | --- |
-| POST `/v1/admin/media/query` | 名称、类型、页码查询；60 项/页，只返回 ready 且未软删除的资源 |
-| POST `/v1/admin/media/upload?filename=…&upload_id=…` | 原始字节 `application/octet-stream`；查询只放文件名/重试标识，不放凭据；管理员 Session 和 CSRF 校验 |
-| GET `/media/{object_key}` | 通过数据库状态门控的公开原件，支持视频 Range/206；安全路径、MIME、nosniff 与受限 CSP |
+| POST `/v1/admin/media/query` | 标题/文件名、类型、页码查询；60 项/页，ready 且未软删除 |
+| POST `/v1/admin/media/upload?filename=…&upload_id=…` | 原始字节 application/octet-stream；查询仅文件名/重试标识，不放凭据 |
+| POST `/v1/admin/media/detail` | `{id}` 读取完整附件资料 |
+| POST `/v1/admin/media/update` | `{id, expected_revision, metadata}` 保存四项资料；并发冲突 409 |
+| POST `/v1/admin/media/edit` | `{id, edit_id, recipe}` 转换并另存新媒体；同 ID/配方可重试 |
+| GET `/media/{object_key}` | 数据库状态门控的原件，视频 Range/206；安全路径、MIME、nosniff 与受限 CSP |
 
-- 静态 JPEG/PNG/WebP：最多 20 MiB，边长最多 8192、总像素最多 40M；Pillow 真实解码并拒绝动画图。
-- SVG：最多 1 MiB，沿用安全标签/属性规则，拒绝脚本、样式、外链等主动内容；只以图片加载，不注入 DOM。
-- MP4/WebM：最多 128 MiB，检查容器结构、必要段/轨道及支持标识。没有转码或完整视频解码扫描，不能保证所有浏览器/编码都能播放；浏览器失败时保留可操作的预览状态。
-- 有界流读取后在内存校验，不是分片上传或断点续传协议。客户端上传超时 120 秒；未知结果由用户使用同一 upload_id 重试，写请求不自动重复。
+管理请求均要求管理员 Session 和 CSRF，并且 no-store。JSON 仍为 success/code/msg/data；前端按 HTTP/code 判断，不依赖本地化 msg。像素处理配方由旋转角、翻转布尔值、裁剪矩形、输出宽度组成，不接受远端源 URL。
 
-## 身份、存储与版本
+- 静态 JPEG/PNG/WebP：20 MiB、边长 8192、总像素 40M；真实解码并拒绝动画图。编辑输入和输出都校验。
+- SVG：1 MiB，拒绝脚本、样式、外链等主动内容；作为图片加载，不注入 DOM。
+- MP4/WebM：128 MiB，有界容器/必要段检查；未转码或完整解码，不能保证所有浏览器/编码都能播放。
+- 上传有界读入内存，编辑使用已有 Pillow 在线程执行；不是分片协议或异步大图任务队列。上传/图片编辑客户端超时 120 秒，没有容量或延迟承诺。
 
-`avatar_media_id`、`background_media_id`、`background_video_media_id` 保存 `media:<UUID>`。服务端检查资源存在、ready/未删除及图片/视频类型，忽略伪造的绑定 URL，按存储记录派生公开地址；手填地址仍受 HTTP(S)/站内路径校验。类型错误不会保存新设置版本。
+## 数据库、存储与版本
 
-原件遵循 `uploads/YYYY/MM/<UUID>/original.<ext>`；工作目录在同盘旁路 `.everunfold-media-work/local/staging/`，不公开。文件不可覆盖。数据库登记 staging 后发布文件，再在同一事务中提交 ready 和审计；相同操作者/upload_id/字节重试复用同一资源。详见 [图标与存储指南](menu-icons.md)。
+本机已显式迁移到 `0006_media_details`。其他环境先执行：
 
-切换 `[media].base_url` 前先完整同步原 object_key；重启后在系统设置执行「重新同步」。派生 URL 变化时生成新的公开设置修订，已确认的旧文件保持不变。地址未变的重同步仍可修复丢失的本地设置副本。公开快照无时间 TTL。
+```powershell
+uv run --locked alembic -c migrations/alembic.ini upgrade head
+```
+
+从零初始化仍用 `uv run --locked python init.database.py`。迁移给既有行增加兼容默认值，不清空媒体或账号；启动服务不会自动改表。此次迁移不支持通过 downgrade 丢弃元数据，恢复应采用数据库备份/经过审查的新迁移。
+
+原件为 `uploads/YYYY/MM/<UUID>/original.<ext>`，工作区为同盘旁路 `.everunfold-media-work/local/staging/`。数据库登记 staging 后发布不可覆盖文件，再提交 ready 和审计。编辑也沿用此流程，新增 source_id/edit_recipe；纯格式变体仍属于后续独立用例。
+
+设置中的 `avatar_media_id`、`background_media_id`、`background_video_media_id` 保存稳定 ID，服务器验证 ready/未删除和类型后派生地址。Base URL 切换前完整同步原 object_key，重启并「重新同步」；派生 URL 变化生成新的设置修订。公开快照无 TTL，元数据查询不进入公开缓存。
 
 ## 暂未交付
 
-编辑元信息、引用计数、分类/标签、删除/回收站 UI、派生缩略图、转码、断点上传、自动孤儿清理、CDN 直传和 purge 均未实现。WordPress 原资源与试导入图片没有移动或删除；文章媒体整体导入仍后续进行。`ObjectStorage` 是可替换存储边界，不等于已经完成 CDN 上传协议。
+引用计数/文章关联、分类标签、批量管理、删除/回收站 UI、派生缩略图、转码、断点上传、自动孤儿清理、CDN 直传/purge 和全文媒体迁移尚未实现。当前图片处理依赖本地可读原件；ObjectStorage 替换边界不等于远端上传/读写协议已经完成。WordPress 原资源与试导入图片没有移动或删除。

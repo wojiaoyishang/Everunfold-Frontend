@@ -36,6 +36,43 @@
       "title": "CachePolicy",
       "type": "object"
     },
+    "CropRect": {
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "maximum": 8192,
+          "minimum": 0,
+          "title": "X",
+          "type": "integer"
+        },
+        "y": {
+          "maximum": 8192,
+          "minimum": 0,
+          "title": "Y",
+          "type": "integer"
+        },
+        "width": {
+          "maximum": 8192,
+          "minimum": 1,
+          "title": "Width",
+          "type": "integer"
+        },
+        "height": {
+          "maximum": 8192,
+          "minimum": 1,
+          "title": "Height",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "title": "CropRect",
+      "type": "object"
+    },
     "DeliveryReceipt": {
       "additionalProperties": false,
       "properties": {
@@ -273,6 +310,59 @@
       "title": "IconUpload",
       "type": "object"
     },
+    "ImageRecipe": {
+      "additionalProperties": false,
+      "properties": {
+        "rotation": {
+          "default": 0,
+          "enum": [
+            0,
+            90,
+            180,
+            270
+          ],
+          "title": "Rotation",
+          "type": "integer"
+        },
+        "flip_horizontal": {
+          "default": false,
+          "title": "Flip Horizontal",
+          "type": "boolean"
+        },
+        "flip_vertical": {
+          "default": false,
+          "title": "Flip Vertical",
+          "type": "boolean"
+        },
+        "crop": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CropRect"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "output_width": {
+          "anyOf": [
+            {
+              "maximum": 8192,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Width"
+        }
+      },
+      "title": "ImageRecipe",
+      "type": "object"
+    },
     "MediaCatalog": {
       "additionalProperties": false,
       "properties": {
@@ -303,6 +393,140 @@
         "total"
       ],
       "title": "MediaCatalog",
+      "type": "object"
+    },
+    "MediaDetails": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "mime": {
+          "title": "Mime",
+          "type": "string"
+        },
+        "size": {
+          "title": "Size",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "image",
+            "video"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        },
+        "metadata": {
+          "$ref": "#/$defs/MediaMetadata"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Width"
+        },
+        "height": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Height"
+        },
+        "uploader": {
+          "title": "Uploader",
+          "type": "string"
+        },
+        "source_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Source Id"
+        },
+        "editable": {
+          "title": "Editable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "url",
+        "mime",
+        "size",
+        "created_at",
+        "kind",
+        "metadata",
+        "revision",
+        "width",
+        "height",
+        "uploader",
+        "source_id",
+        "editable"
+      ],
+      "title": "MediaDetails",
+      "type": "object"
+    },
+    "MediaEdit": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "edit_id": {
+          "pattern": "^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Edit Id",
+          "type": "string"
+        },
+        "recipe": {
+          "$ref": "#/$defs/ImageRecipe"
+        }
+      },
+      "required": [
+        "id",
+        "edit_id",
+        "recipe"
+      ],
+      "title": "MediaEdit",
       "type": "object"
     },
     "MediaItem": {
@@ -340,6 +564,11 @@
           ],
           "title": "Kind",
           "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
         }
       },
       "required": [
@@ -352,6 +581,52 @@
         "kind"
       ],
       "title": "MediaItem",
+      "type": "object"
+    },
+    "MediaLookup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "MediaLookup",
+      "type": "object"
+    },
+    "MediaMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "default": "",
+          "maxLength": 160,
+          "title": "Title",
+          "type": "string"
+        },
+        "alt_text": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Alt Text",
+          "type": "string"
+        },
+        "caption": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Caption",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 10000,
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "title": "MediaMetadata",
       "type": "object"
     },
     "MediaQuery": {
@@ -382,6 +657,31 @@
         }
       },
       "title": "MediaQuery",
+      "type": "object"
+    },
+    "MediaUpdate": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "metadata": {
+          "$ref": "#/$defs/MediaMetadata"
+        }
+      },
+      "required": [
+        "id",
+        "expected_revision",
+        "metadata"
+      ],
+      "title": "MediaUpdate",
       "type": "object"
     },
     "MediaUpload": {
@@ -579,6 +879,34 @@
         "data"
       ],
       "title": "PublicResponse[MediaCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_MediaDetails_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/MediaDetails"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[MediaDetails]",
       "type": "object"
     },
     "PublicResponse_MediaItem_": {
@@ -984,6 +1312,18 @@
   },
   "additionalProperties": false,
   "properties": {
+    "media_lookup": {
+      "$ref": "#/$defs/MediaLookup"
+    },
+    "media_update": {
+      "$ref": "#/$defs/MediaUpdate"
+    },
+    "media_edit": {
+      "$ref": "#/$defs/MediaEdit"
+    },
+    "media_details": {
+      "$ref": "#/$defs/PublicResponse_MediaDetails_"
+    },
     "media_query": {
       "$ref": "#/$defs/MediaQuery"
     },
@@ -1031,6 +1371,10 @@
     }
   },
   "required": [
+    "media_lookup",
+    "media_update",
+    "media_edit",
+    "media_details",
     "media_query",
     "media_upload",
     "media_catalog",
@@ -1050,8 +1394,29 @@
   "title": "SettingsContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.3.0",
+  "x-everunfold-contract-version": "1.4.0",
   "x-everunfold-operations": [
+    {
+      "name": "readMedia",
+      "path": "/v1/admin/media/detail",
+      "method": "POST",
+      "input": "media_lookup",
+      "response": "media_details"
+    },
+    {
+      "name": "updateMedia",
+      "path": "/v1/admin/media/update",
+      "method": "POST",
+      "input": "media_update",
+      "response": "media_details"
+    },
+    {
+      "name": "editMedia",
+      "path": "/v1/admin/media/edit",
+      "method": "POST",
+      "input": "media_edit",
+      "response": "media_details"
+    },
     {
       "name": "queryMedia",
       "path": "/v1/admin/media/query",

@@ -6,6 +6,8 @@ import { Button, TextField } from "../../components/ui/primitives";
 import { FilePicker } from "../../components/ui/file-picker";
 import { Icon } from "../../components/icon";
 import { MediaPreview } from "./media-preview";
+import { MediaDetailsDialog } from "./media-details";
+import { formatBytes } from "@/core/media/image-editor";
 export function MediaBrowser({
   kind = "all",
   value,
@@ -15,6 +17,7 @@ export function MediaBrowser({
   value?: string;
   onSelect?: (item: MediaItem) => void;
 }) {
+  const [view, setView] = useState<"grid" | "list">("grid");
   const [filter, setFilter] = useState(kind);
   const library = useMediaLibrary(filter);
   const [selected, setSelected] = useState<MediaItem | null>(null);
@@ -37,7 +40,7 @@ export function MediaBrowser({
         <TextField
           type="search"
           aria-label="搜索媒体"
-          placeholder="搜索文件名称…"
+          placeholder="搜索标题或文件名…"
           value={library.query}
           onChange={(e) => library.setQuery(e.target.value)}
         />
@@ -99,12 +102,38 @@ export function MediaBrowser({
             )}
         </div>
       )}
-      <div className="admin-media-grid" aria-busy={library.loading}>
+      <div className="admin-media-library-summary">
+        <span>
+          {library.loading ? "正在读取…" : `共 ${library.total} 个文件`}
+        </span>
+        <div aria-label="媒体展示方式">
+          <Button
+            className="admin-icon-button"
+            aria-label="网格视图"
+            aria-pressed={view === "grid"}
+            onClick={() => setView("grid")}
+          >
+            <Icon name="grid" />
+          </Button>
+          <Button
+            className="admin-icon-button"
+            aria-label="列表视图"
+            aria-pressed={view === "list"}
+            onClick={() => setView("list")}
+          >
+            <Icon name="list" />
+          </Button>
+        </div>
+      </div>
+      <div
+        className={`admin-media-grid${view === "list" ? " admin-media-list" : ""}`}
+        aria-busy={library.loading}
+      >
         {items.map((item) => (
           <Button
             key={item.id}
             className="admin-media-tile"
-            aria-label={`选择媒体 ${item.label}`}
+            aria-label={`${onSelect ? "选择媒体" : "查看附件"} ${item.title || item.label}`}
             aria-pressed={(value ?? selected?.id) === item.id}
             onClick={() => pick(item)}
           >
@@ -114,12 +143,15 @@ export function MediaBrowser({
               kind={item.kind}
               label={item.label}
             />
-            <span className="admin-media-tile-title">{item.label}</span>
+            <span
+              className="admin-media-tile-title"
+              title={item.title || item.label}
+            >
+              {item.title || item.label}
+            </span>
             <span className="admin-media-tile-meta">
               {item.kind === "image" ? "图片" : "视频"} ·{" "}
-              {item.size < 1048576
-                ? `${Math.ceil(item.size / 1024)} KB`
-                : `${(item.size / 1048576).toFixed(1)} MB`}
+              {formatBytes(item.size)}
             </span>
             {(value ?? selected?.id) === item.id && (
               <Icon name="check" className="admin-media-selected" />
@@ -156,23 +188,24 @@ export function MediaBrowser({
         </div>
       )}
       {selected && !onSelect && (
-        <div className="admin-media-selection">
-          <MediaPreview
-            key={selected.url}
-            url={selected.url}
-            kind={selected.kind}
-            label={selected.label}
-            playable
-          />
-          <div>
-            <strong>{selected.label}</strong>
-            <TextField
-              aria-label="所选媒体地址"
-              readOnly
-              value={selected.url}
-            />
-          </div>
-        </div>
+        <MediaDetailsDialog
+          key={selected.id}
+          item={selected}
+          previous={
+            items[items.findIndex((item) => item.id === selected.id) - 1]
+          }
+          next={
+            items.findIndex((item) => item.id === selected.id) >= 0
+              ? items[items.findIndex((item) => item.id === selected.id) + 1]
+              : undefined
+          }
+          onClose={() => setSelected(null)}
+          onNavigate={setSelected}
+          onChanged={(item, created) => {
+            if (created) setSelected(item);
+            library.refresh();
+          }}
+        />
       )}
       <p className="admin-library-caption">
         图片最大 20 MB（SVG 1 MB）· MP4 / WebM 视频最大 128 MB

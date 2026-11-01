@@ -8,8 +8,12 @@ export function Modal({
   title,
   onClose,
   children,
+  className = "",
+  closeLabel = "关闭选择器",
 }: {
   title: string;
+  className?: string;
+  closeLabel?: string;
   onClose: () => void;
   children: ReactNode;
 }) {
@@ -28,9 +32,12 @@ export function Modal({
   return createPortal(
     <Dialog
       ref={ref}
-      className="admin-library-modal admin-surface"
+      className={`admin-library-modal admin-surface ${className}`}
       aria-labelledby={titleId}
-      onCancel={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           const rect = event.currentTarget.getBoundingClientRect();
@@ -48,7 +55,7 @@ export function Modal({
         <h2 id={titleId}>{title}</h2>
         <Button
           className="admin-icon-button"
-          aria-label="关闭选择器"
+          aria-label={closeLabel}
           onClick={onClose}
         >
           <Icon name="close" />
