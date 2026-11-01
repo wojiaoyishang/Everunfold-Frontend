@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { Icon } from "../components/icon";
 import { TextLink } from "../components/ui/primitives";
 import { ManagementScene } from "./management-scene";
@@ -10,14 +10,19 @@ type ManagementEntryProps = {
     description: string;
   };
   children: ReactNode;
+  cardRef?: Ref<HTMLDivElement>;
 };
 
 /** A quiet, shared entry for account login and pre-authentication checks. */
-export function ManagementEntry({ panel, children }: ManagementEntryProps) {
+export function ManagementEntry({
+  panel,
+  children,
+  cardRef,
+}: ManagementEntryProps) {
   return (
     <main className="login-stage">
       <ManagementScene />
-      <div className="login-card">
+      <div className="login-card" ref={cardRef}>
         <header className="login-entry-header">
           <span className="management-brand">
             <Icon name="leaf" />

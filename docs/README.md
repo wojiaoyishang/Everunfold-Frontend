@@ -27,7 +27,8 @@
 21. [悬浮层与主题错误页](decisions/0016-anchored-popovers-and-failure-pages.md)：水合/定位就绪门控、共享 404/503/错误边界、离线翻牌小游戏与构建产物。
 22. [媒体上传与存储设计](architecture/media-storage.md) 与 [ADR 0017](decisions/0017-media-storage-and-upload-lifecycle.md)：后端媒体库、Base URL/Uploads Path、文件布局、上传确认及 CDN 扩展；本轮仅设计，尚未实现。
 23. [真实登录与后台入口](decisions/0018-authentication-and-admin-entry.md)：PostgreSQL 用户/可撤销 Session、HttpOnly Cookie、CSRF/精确 Origin、管理员校验与 `init.database.py`。
-24. [通用账号与自适应登录](decisions/0019-shared-login-and-responsive-entry.md)：默认返回前台、后台单独鉴权、宽松表单与等比营地背景；覆盖 ADR 0018 初版的登录展示/回跳规则。
+24. [通用账号与自适应登录](decisions/0019-shared-login-and-responsive-entry.md)：通用账号文案、后台单独鉴权、简洁表单与等比营地背景；回跳规则随后由 ADR 0020 更新。
+25. [登录过渡与会话校验](decisions/0020-login-handoff-and-session-check.md)：成功动画完成后导航、管理员缺省回后台、并发校验合并与有界失败反馈。
 
 ## 目录职责
 
@@ -37,7 +38,7 @@
 
 最新界面检查：[悬浮层与错误页验收](handoff/failure-pages-verification.md)，包含最终生产构建、离线有/无缓存、错误边界、配对游戏及窄框检查；不会替代上一阶段尚未执行的其他验收。
 
-最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。登录现为通用账号入口，默认返回前台；认证等待态复用宽松的响应式卡片，背景为等比自适应的柔焦星空营地；管理员验证后进入参考后台信息组织但沿用 Everunfold 主题的顶部栏、左侧导航和仪表盘工作区。
+最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。登录现为通用账号入口，未指定返回地址时管理员回后台、普通账号回前台，成功反馈完成后再切换；认证等待态复用宽松的响应式卡片，背景为等比自适应的柔焦星空营地；管理员验证后进入参考后台信息组织但沿用 Everunfold 主题的顶部栏、左侧导航和仪表盘工作区。
 
 | 目录 | 内容与维护时机 |
 | --- | --- |

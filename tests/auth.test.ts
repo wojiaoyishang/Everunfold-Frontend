@@ -52,7 +52,6 @@ test("management destinations bypass the public navigation pipeline and restrict
   assert.equal(isManagementRoute("/admin/not-implemented"), false);
   assert.equal(loginReturnPath("/admin?tab=home"), "/admin?tab=home");
   for (const input of [
-    undefined,
     "https://evil.example/",
     "//evil.example/",
     "/\\evil.example/",
@@ -66,8 +65,12 @@ test("management destinations bypass the public navigation pipeline and restrict
   }
 });
 
-test("general account login returns readers home and preserves an explicit admin entry", () => {
-  assert.equal(loginReturnPath(undefined), "/");
+test("login defaults by confirmed role and preserves explicit safe return destinations", () => {
+  assert.equal(loginReturnPath(undefined), undefined);
+  assert.equal(loginReturnPath(""), undefined);
+  assert.equal(loginDestination(undefined, true), "/admin");
+  assert.equal(loginDestination(undefined, false), "/");
+  assert.equal(loginDestination("", true), "/admin");
   assert.equal(
     loginReturnPath("/?type=article#main-content"),
     "/?type=article#main-content",

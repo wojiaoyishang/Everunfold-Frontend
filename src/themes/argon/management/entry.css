@@ -207,6 +207,53 @@
   border-radius: 8px;
   font-size: 13px;
 }
+/* Authentication success has its own completion sequence before route replacement. */
+.login-success {
+  display: flex;
+  min-height: 304px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+.login-success-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 8px;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--accent) 4%, transparent);
+}
+.login-success-icon .icon {
+  width: 28px;
+  height: 28px;
+}
+.login-success h2 {
+  font-size: 20px;
+  font-weight: 550;
+}
+.login-success p {
+  color: var(--entry-secondary);
+  font-size: 13px;
+  line-height: 1.8;
+}
+html[data-motion="full"] .login-success-icon path {
+  stroke-dasharray: 24;
+  animation: login-checkmark 420ms 100ms ease both;
+}
+@keyframes login-checkmark {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
 html[data-motion="full"] .login-card {
   animation: management-enter 500ms var(--motion-ease) both;
 }

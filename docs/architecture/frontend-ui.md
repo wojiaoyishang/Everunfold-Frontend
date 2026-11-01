@@ -120,8 +120,10 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 
 ## 通用账号入口（2026-11-01）
 
-[ADR 0019](../decisions/0019-shared-login-and-responsive-entry.md) 将 `/login` 明确为通用账号入口，缺省返回前台；管理员从明确后台入口进入时保留 `/admin`，服务端权限检查不变。认证页仍独立于公开博客壳和快照。
+[ADR 0019](../decisions/0019-shared-login-and-responsive-entry.md) 将 `/login` 明确为通用账号入口；[ADR 0020](../decisions/0020-login-handoff-and-session-check.md) 随后更新缺省目的地：管理员为 `/admin`，普通账号为 `/`，明确安全返回地址优先，服务端权限检查不变。认证页仍独立于公开博客壳和快照。
 
 `ManagementEntry` 组合简洁头部、单列表单和 `SessionFeedback`；共享 `ui/FormField` 只负责标签、图标和错误外观，字段及按钮继续使用既有封装。样式由 `management.css`（共用/后台）、`scene.css`（背景）、`entry.css`（登录/身份确认卡片）分责，统一在路由组布局导入。
 
 背景定位平面保持 8:5 原比例并铺满视口，窄竖屏调整营地重心，内层单独执行漂移。布局定位和动画不得共用 transform；图片与火光叠层不得分别裁切缩放。入口卡片桌面最大 440px，仅保留必要内容并留足表单内间距；手机保持正常字号/控件尺寸；减少动态关闭入场与环境动画。
+
+`LoginSuccess` 与 `login-handoff` 分离展示和动画生命周期，先显示勾选成功再轻微收起卡片，最后导航；目标预取不触发提前切换，减少动态保持短暂静态反馈。`core/auth/session-check` 合并挂载/焦点/恢复期间的同一次读取，后台复核不拆掉已显示工作区，但失败立即退出已确认状态；请求截止时间不能被焦点事件重置，旧回调与卸载后的请求不能覆盖新会话。

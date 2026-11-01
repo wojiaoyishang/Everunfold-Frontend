@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { loginDestination } from "@/core/auth/routes";
 import { useSession } from "@/core/auth/use-session";
 import { authFailureMessage, checkedSession } from "@/core/auth/session";
@@ -13,15 +12,16 @@ import { FormField } from "../components/ui/form-field";
 import { PasswordField } from "../components/ui/password-field";
 import { ManagementEntry } from "./management-entry";
 import { SessionFeedback } from "./session-feedback";
+import { LoginSuccess } from "./login-success";
 
 export function LoginPage({
   baseUrl,
   returnTo,
 }: {
   baseUrl: string;
-  returnTo: string;
+  returnTo: string | undefined;
 }) {
-  const router = useRouter();
+  const card = useRef<HTMLDivElement>(null);
   const { state, check, accept, fail } = useSession(baseUrl);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -38,9 +38,6 @@ export function LoginPage({
     returnTo,
     state.phase === "ready" && state.session.user?.role === "admin",
   );
-  useEffect(() => {
-    if (entering) router.replace(destination);
-  }, [entering, destination, router]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -78,12 +75,19 @@ export function LoginPage({
 
   return (
     <ManagementEntry
+      cardRef={card}
       panel={{
         title: "登录你的账号",
         description: "输入账号信息，继续访问。",
       }}
     >
-      {state.phase !== "ready" || entering ? (
+      {entering ? (
+        <LoginSuccess
+          key={destination}
+          destination={destination}
+          cardRef={card}
+        />
+      ) : state.phase !== "ready" ? (
         <SessionFeedback
           error={state.phase === "failed" ? state.error : undefined}
           failureMessage={message}
@@ -91,7 +95,6 @@ export function LoginPage({
             setMessage("");
             void check();
           }}
-          checkingText={entering ? "登录成功，正在进入" : undefined}
         />
       ) : (
         <Form className="login-form" onSubmit={submit} aria-busy={busy}>

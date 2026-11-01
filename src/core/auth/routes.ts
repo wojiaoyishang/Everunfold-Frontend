@@ -14,9 +14,10 @@ export function isManagementLink(href: string): boolean {
 }
 
 /** Keep the shared login entry on the two currently supported return destinations. */
-export function loginReturnPath(input: string | undefined): string {
+export function loginReturnPath(input: string | undefined): string | undefined {
+  // Preserve absence until the backend has confirmed the account's role.
+  if (input === undefined || input === "") return undefined;
   if (
-    !input ||
     !input.startsWith("/") ||
     input.startsWith("//") ||
     /[\u0000-\u001f\u007f\\]/.test(input)
@@ -36,7 +37,11 @@ export function loginReturnPath(input: string | undefined): string {
 }
 
 /** A login page is shared by readers and administrators; this never grants permission. */
-export function loginDestination(returnTo: string, isAdmin: boolean): string {
+export function loginDestination(
+  returnTo: string | undefined,
+  isAdmin: boolean,
+): string {
   const target = loginReturnPath(returnTo);
+  if (target === undefined) return isAdmin ? "/admin" : "/";
   return target.startsWith("/admin") && !isAdmin ? "/" : target;
 }
