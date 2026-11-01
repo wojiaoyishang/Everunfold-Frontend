@@ -7,10 +7,12 @@ export function FilePicker({
   onFile,
   disabled,
   label = "上传图标",
+  accept = ".svg,.png,.webp,image/svg+xml,image/png,image/webp",
 }: {
   onFile: (file: File) => void;
   disabled?: boolean;
   label?: string;
+  accept?: string;
 }) {
   const input = useRef<HTMLInputElement>(null);
   return (
@@ -19,7 +21,7 @@ export function FilePicker({
         ref={input}
         type="file"
         hidden
-        accept=".svg,.png,.webp,image/svg+xml,image/png,image/webp"
+        accept={accept}
         disabled={disabled}
         onChange={(event) => {
           const file = event.currentTarget.files?.[0];

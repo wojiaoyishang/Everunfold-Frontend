@@ -1,43 +1,13 @@
-import { Icon } from "../../components/icon";
-import { Button } from "../../components/ui/primitives";
 import { AdminPageHeading } from "../components/page-heading";
-import { CollectionToolbar } from "../components/collection-toolbar";
-import { PreparationState } from "../components/preparation-state";
+import { MediaBrowser } from "../media/media-browser";
 export function AdminMedia() {
   return (
-    <>
+    <div className="admin-settings-page admin-library-page">
       <AdminPageHeading
         title="媒体库"
-        description="集中存放和整理图片、视频与文件。"
-        action={
-          <Button
-            className="admin-button admin-button-primary"
-            disabled
-            title="媒体上传正在准备中"
-          >
-            <Icon name="upload" />
-            上传文件
-          </Button>
-        }
+        description="集中保存图片与视频，在站点设置和主题中复用。"
       />
-      <CollectionToolbar
-        filters={["全部", "图片", "视频", "文件"]}
-        searchLabel="搜索文件名称"
-      />
-      <section
-        className="admin-collection admin-media-collection"
-        aria-label="媒体列表"
-      >
-        <PreparationState icon="image" title="媒体库正在准备中">
-          上传、查找与引用文件将在这里完成。
-          <br />
-          现有文章资源不受影响。
-        </PreparationState>
-        <footer>
-          <span>暂未开放媒体上传</span>
-          <span className="admin-badge">准备中</span>
-        </footer>
-      </section>
-    </>
+      <MediaBrowser />
+    </div>
   );
 }

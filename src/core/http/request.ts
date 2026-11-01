@@ -61,6 +61,27 @@ export async function patchJSON<T>(
   return sendJSON(baseUrl, path, {}, validate, options, body, "PATCH");
 }
 
+/** Binary media uploads reuse the same timeout, cancellation and response checks. */
+export async function postBinary<T>(
+  baseUrl: string,
+  path: string,
+  query: object,
+  file: Blob,
+  validate: (input: unknown) => input is T,
+  options: RequestOptions = {},
+): Promise<T> {
+  return sendJSON(
+    baseUrl,
+    path,
+    query,
+    validate,
+    options,
+    undefined,
+    "POST",
+    file,
+  );
+}
+
 async function sendJSON<T>(
   baseUrl: string,
   path: string,
@@ -75,6 +96,7 @@ async function sendJSON<T>(
   }: RequestOptions,
   body?: object,
   method: "GET" | "PUT" | "POST" | "PATCH" = "GET",
+  binary?: Blob,
 ): Promise<T> {
   const url = new URL(path, `${baseUrl}/`);
   for (const [key, input] of Object.entries(query)) {
@@ -112,11 +134,14 @@ async function sendJSON<T>(
           headers: {
             ...headers,
             Accept: "application/json",
-            ...(body === undefined
-              ? {}
-              : { "Content-Type": "application/json" }),
+            ...(binary
+              ? { "Content-Type": "application/octet-stream" }
+              : body === undefined
+                ? {}
+                : { "Content-Type": "application/json" }),
           },
-          body: body === undefined ? undefined : JSON.stringify(body),
+          body:
+            binary ?? (body === undefined ? undefined : JSON.stringify(body)),
           signal: controller.signal,
         });
         if (!response.ok) throw new RequestError("http", response.status);

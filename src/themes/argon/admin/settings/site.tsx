@@ -6,6 +6,7 @@ import {
   SettingsText,
   SettingsToggle,
 } from "./shared";
+import { SettingsMediaField } from "./media-field";
 import { MenuEditor } from "./menu-editor";
 export function SiteSettingsPage() {
   const { draft, setDraft } = useSettingsEditor();
@@ -45,11 +46,15 @@ export function SiteSettingsPage() {
               maxLength={300}
               onChange={(description) => update({ description })}
             />
-            <SettingsText
+            <SettingsMediaField
               label="头像地址"
-              hint="填写已可访问的图片地址。媒体上传将在媒体库接入后提供。"
+              hint="选择媒体库中的图片，或填写可访问的地址。"
+              kind="image"
               value={site.avatar_url ?? ""}
-              onChange={(avatar_url) => update({ avatar_url })}
+              mediaId={site.avatar_media_id}
+              onChange={(avatar_url, avatar_media_id) =>
+                update({ avatar_url, avatar_media_id })
+              }
             />
             <SettingsText
               label="站点公告"

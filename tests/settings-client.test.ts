@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   readSettings,
+  uploadMedia,
+  queryMedia,
   saveSettings,
   saveCachePolicy,
   retrySettingsSync,
@@ -116,4 +118,85 @@ test("an explicit empty published menu never falls back to theme reference entri
     ["归档"],
   );
   assert.equal(siteNavigation(site)[0].children?.length ?? 0, 0);
+});
+
+test("media uploads send original bytes and safely encoded metadata with private CSRF transport", async () => {
+  const id = "00000000-0000-0000-0000-000000000001";
+  const file = new Blob([new Uint8Array([0, 10, 255, 128])]);
+  const item = {
+    id: `media:${id}`,
+    label: "背景 + 图.png",
+    url: "http://api.example.test/media/original.png",
+    mime: "image/png",
+    size: 4,
+    created_at: "2026-11-01T00:00:00Z",
+    kind: "image",
+  };
+  await uploadMedia(
+    "http://api.example.test",
+    { filename: item.label, upload_id: id },
+    file,
+    "secret-csrf",
+    {
+      fetcher: async (url, options) => {
+        const target = new URL(String(url));
+        assert.equal(target.pathname, "/v1/admin/media/upload");
+        assert.equal(target.searchParams.get("filename"), item.label);
+        assert.equal(target.searchParams.get("upload_id"), id);
+        assert.equal(target.href.includes("secret-csrf"), false);
+        assert.equal(options?.method, "POST");
+        assert.equal(options?.body, file);
+        assert.equal(options?.credentials, "include");
+        assert.equal(options?.cache, "no-store");
+        assert.equal(
+          new Headers(options?.headers).get("Content-Type"),
+          "application/octet-stream",
+        );
+        assert.equal(
+          new Headers(options?.headers).get("X-CSRF-Token"),
+          "secret-csrf",
+        );
+        return ok(item);
+      },
+    },
+  );
+  await queryMedia(
+    "http://api.example.test",
+    { kind: "video", query: "night", page: 2 },
+    "csrf",
+    {
+      fetcher: async (_url, options) => {
+        assert.deepEqual(JSON.parse(String(options?.body)), {
+          kind: "video",
+          query: "night",
+          page: 2,
+        });
+        return ok({ items: [], page: 2, total: 0, page_size: 60 });
+      },
+    },
+  );
+});
+
+test("an uncertain binary upload surfaces one failure without automatic duplicate submission", async () => {
+  let attempts = 0;
+  await assert.rejects(
+    uploadMedia(
+      "http://api.example.test",
+      {
+        filename: "clip.mp4",
+        upload_id: "00000000-0000-0000-0000-000000000001",
+      },
+      new Blob(["clip"]),
+      "csrf",
+      {
+        fetcher: async () => {
+          attempts++;
+          throw new TypeError("connection lost after send");
+        },
+      },
+    ),
+    (error: unknown) =>
+      error instanceof RequestError && error.kind === "network",
+  );
+  assert.equal(attempts, 1);
 });

@@ -6,6 +6,7 @@ import {
   SettingsText,
   SettingsToggle,
 } from "./shared";
+import { SettingsMediaField } from "./media-field";
 import { Select } from "../../components/ui/select";
 import { ColorPicker } from "../../components/ui/color-picker";
 import { Button } from "../../components/ui/primitives";
@@ -110,18 +111,24 @@ export function ThemeSettingsPage() {
             title="背景"
             description="图片作为静态背景，也用于视频播放前的占位。"
           >
-            <SettingsText
+            <SettingsMediaField
+              kind="image"
+              mediaId={theme.background_media_id}
               label="背景图片地址"
               hint="留空时使用主题内置背景。"
               value={theme.background_url ?? ""}
-              onChange={(background_url) => update({ background_url })}
+              onChange={(background_url, background_media_id) =>
+                update({ background_url, background_media_id })
+              }
             />
-            <SettingsText
+            <SettingsMediaField
+              kind="video"
+              mediaId={theme.background_video_media_id}
               label="背景视频地址"
               hint="支持浏览器可播放的视频；留空后只显示静态背景。"
               value={theme.background_video_url ?? ""}
-              onChange={(background_video_url) =>
-                update({ background_video_url })
+              onChange={(background_video_url, background_video_media_id) =>
+                update({ background_video_url, background_video_media_id })
               }
             />
             <SettingsToggle

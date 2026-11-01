@@ -273,6 +273,139 @@
       "title": "IconUpload",
       "type": "object"
     },
+    "MediaCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/MediaItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 60,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "page",
+        "total"
+      ],
+      "title": "MediaCatalog",
+      "type": "object"
+    },
+    "MediaItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "mime": {
+          "title": "Mime",
+          "type": "string"
+        },
+        "size": {
+          "title": "Size",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "image",
+            "video"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "url",
+        "mime",
+        "size",
+        "created_at",
+        "kind"
+      ],
+      "title": "MediaItem",
+      "type": "object"
+    },
+    "MediaQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "default": "",
+          "maxLength": 160,
+          "title": "Query",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "kind": {
+          "default": "all",
+          "enum": [
+            "all",
+            "image",
+            "video"
+          ],
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "MediaQuery",
+      "type": "object"
+    },
+    "MediaUpload": {
+      "additionalProperties": false,
+      "properties": {
+        "filename": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Filename",
+          "type": "string"
+        },
+        "upload_id": {
+          "pattern": "^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Upload Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "upload_id"
+      ],
+      "title": "MediaUpload",
+      "type": "object"
+    },
     "MenuItem": {
       "additionalProperties": false,
       "properties": {
@@ -418,6 +551,62 @@
         "data"
       ],
       "title": "PublicResponse[IconCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_MediaCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/MediaCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[MediaCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_MediaItem_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/MediaItem"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[MediaItem]",
       "type": "object"
     },
     "PublicResponse_NodeList_": {
@@ -671,6 +860,12 @@
           "title": "Author",
           "type": "string"
         },
+        "avatar_media_id": {
+          "default": "",
+          "pattern": "^(?:|media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$",
+          "title": "Avatar Media Id",
+          "type": "string"
+        },
         "avatar_url": {
           "default": "",
           "maxLength": 2048,
@@ -747,6 +942,18 @@
           "title": "Hero Subtitle",
           "type": "string"
         },
+        "background_media_id": {
+          "default": "",
+          "pattern": "^(?:|media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$",
+          "title": "Background Media Id",
+          "type": "string"
+        },
+        "background_video_media_id": {
+          "default": "",
+          "pattern": "^(?:|media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$",
+          "title": "Background Video Media Id",
+          "type": "string"
+        },
         "background_url": {
           "default": "",
           "maxLength": 2048,
@@ -771,6 +978,18 @@
   },
   "additionalProperties": false,
   "properties": {
+    "media_query": {
+      "$ref": "#/$defs/MediaQuery"
+    },
+    "media_upload": {
+      "$ref": "#/$defs/MediaUpload"
+    },
+    "media_catalog": {
+      "$ref": "#/$defs/PublicResponse_MediaCatalog_"
+    },
+    "media_item": {
+      "$ref": "#/$defs/PublicResponse_MediaItem_"
+    },
     "icons": {
       "$ref": "#/$defs/PublicResponse_IconCatalog_"
     },
@@ -806,6 +1025,10 @@
     }
   },
   "required": [
+    "media_query",
+    "media_upload",
+    "media_catalog",
+    "media_item",
     "icons",
     "icon_query",
     "icon_upload",
@@ -821,8 +1044,23 @@
   "title": "SettingsContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.1.0",
+  "x-everunfold-contract-version": "1.2.0",
   "x-everunfold-operations": [
+    {
+      "name": "queryMedia",
+      "path": "/v1/admin/media/query",
+      "method": "POST",
+      "input": "media_query",
+      "response": "media_catalog"
+    },
+    {
+      "name": "uploadMedia",
+      "path": "/v1/admin/media/upload",
+      "method": "POST",
+      "input": "media_upload",
+      "encoding": "binary",
+      "response": "media_item"
+    },
     {
       "name": "queryIcons",
       "path": "/v1/admin/icons/query",

@@ -7,6 +7,7 @@ import {
   requestJSON,
   patchJSON,
   postJSON,
+  postBinary,
   type RequestOptions,
 } from "@/core/http/request";
 const ajv = new Ajv({ strict: true });
@@ -17,6 +18,52 @@ ajv.addSchema(
   ),
   "settings",
 );
+
+const queryMediaValidator = ajv.compile<SettingsContract["media_catalog"]>({
+  $ref: "settings#/properties/media_catalog",
+});
+export function queryMedia(
+  baseUrl: string,
+  input: SettingsContract["media_query"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/media/query",
+    input,
+    queryMediaValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const uploadMediaValidator = ajv.compile<SettingsContract["media_item"]>({
+  $ref: "settings#/properties/media_item",
+});
+export function uploadMedia(
+  baseUrl: string,
+  input: SettingsContract["media_upload"],
+  file: Blob,
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postBinary(
+    baseUrl,
+    "/v1/admin/media/upload",
+    input,
+    file,
+    uploadMediaValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
 
 const queryIconsValidator = ajv.compile<SettingsContract["icons"]>({
   $ref: "settings#/properties/icons",
