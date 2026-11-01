@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "@/themes/argon/management/management.css";
+import "@/themes/argon/management/scene.css";
+import "@/themes/argon/management/entry.css";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {

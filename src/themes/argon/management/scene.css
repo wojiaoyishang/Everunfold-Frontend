@@ -1,0 +1,209 @@
+/* Existing night-camp artwork and ambient motion; independent of the form. */
+.management-scene {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.management-scene-frame {
+  position: absolute;
+  /* One intrinsic-ratio plane keeps the picture and animated fire aligned.
+     Anchor at the ground so short, wide windows retain the campsite. */
+  width: max(100%, 160svh);
+  aspect-ratio: 8 / 5;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+/* Layout translation and decorative drift must never overwrite one another. */
+.management-scene-track {
+  position: absolute;
+  inset: 0;
+  filter: blur(0.6px) saturate(0.94) brightness(0.94);
+  transform: scale(1.018);
+}
+.management-star-sky,
+.management-scene-wash,
+.management-motion-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.management-star-sky {
+  object-fit: cover;
+  object-position: 50% 50%;
+  opacity: 0.98;
+}
+.management-scene-wash {
+  z-index: 1;
+  background:
+    radial-gradient(
+      circle at 21% 78%,
+      rgba(255, 155, 73, 0.13),
+      transparent 25%
+    ),
+    radial-gradient(
+      ellipse at 50% 45%,
+      rgba(4, 7, 18, 0.02),
+      rgba(4, 7, 15, 0.3) 80%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(4, 7, 18, 0.2),
+      transparent 43%,
+      rgba(3, 5, 10, 0.48)
+    );
+}
+.management-motion-layer {
+  z-index: 2;
+  filter: blur(0.8px);
+}
+.management-shooting-star {
+  opacity: 0;
+  stroke-dasharray: 20 180;
+  stroke-dashoffset: 180;
+}
+.management-firefly {
+  opacity: 0.32;
+}
+html[data-motion="full"] .management-scene-track {
+  animation: management-celestial-drift 34s ease-in-out infinite alternate;
+}
+html[data-motion="full"] .management-star {
+  animation: management-twinkle 4.8s ease-in-out infinite alternate;
+}
+html[data-motion="full"] .management-shooting-star-one {
+  animation: management-shooting-star 9.5s ease-out infinite 2.2s;
+}
+html[data-motion="full"] .management-shooting-star-two {
+  animation: management-shooting-star 13s ease-out infinite 7.4s;
+}
+html[data-motion="full"] .management-fire-glow {
+  animation: management-fire-breathe 3.4s ease-in-out infinite alternate;
+}
+html[data-motion="full"] .management-fire-flame {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: management-fire-flicker 1.9s ease-in-out infinite alternate;
+}
+html[data-motion="full"] .management-fire-flame-inner {
+  animation-delay: -0.8s;
+  animation-duration: 1.45s;
+}
+html[data-motion="full"] .management-fire-flame-tip {
+  animation-delay: -0.35s;
+  animation-duration: 1.1s;
+}
+html[data-motion="full"] .management-fire-spark {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-name: management-spark-rise;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+}
+html[data-motion="full"] .management-smoke {
+  animation: management-smoke-drift 7s ease-in-out infinite alternate;
+}
+html[data-motion="full"] .management-firefly {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: management-firefly 4.2s ease-in-out infinite;
+}
+@keyframes management-twinkle {
+  from {
+    opacity: 0.35;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes management-celestial-drift {
+  from {
+    transform: scale(1.04) translate3d(-5px, 3px, 0);
+  }
+  to {
+    transform: scale(1.065) translate3d(9px, -5px, 0);
+  }
+}
+@keyframes management-shooting-star {
+  0%,
+  67% {
+    opacity: 0;
+    stroke-dashoffset: 180;
+  }
+  71% {
+    opacity: 1;
+  }
+  79% {
+    opacity: 0.85;
+    stroke-dashoffset: -20;
+  }
+  83%,
+  100% {
+    opacity: 0;
+    stroke-dashoffset: -20;
+  }
+}
+@keyframes management-fire-breathe {
+  from {
+    opacity: 0.74;
+    transform: scale(0.96);
+    transform-origin: center;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.04);
+    transform-origin: center;
+  }
+}
+@keyframes management-fire-flicker {
+  from {
+    transform: translateX(-1px) scale(0.96, 0.98) skewX(-1deg);
+  }
+  to {
+    transform: translateX(2px) scale(1.04, 1.06) skewX(1deg);
+  }
+}
+@keyframes management-spark-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.6);
+  }
+  22% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-72px) translateX(7px) scale(1.15);
+  }
+}
+@keyframes management-smoke-drift {
+  from {
+    opacity: 0.48;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 0.82;
+    transform: translateX(12px);
+  }
+}
+@keyframes management-firefly {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: translate3d(0, 3px, 0) scale(0.8);
+  }
+  48% {
+    opacity: 0.9;
+    transform: translate3d(4px, -7px, 0) scale(1.25);
+  }
+}
+
+@media (max-aspect-ratio: 4 / 5) {
+  .management-scene-frame {
+    /* The source campsite is at x=35%; keep it in view on portrait screens. */
+    transform: translateX(-35%);
+  }
+}

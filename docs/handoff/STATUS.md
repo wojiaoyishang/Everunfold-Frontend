@@ -1,5 +1,15 @@
 # 前端交接状态
 
+## 最新交付：通用登录与自适应入口（2026-11-01）
+
+- 按用户新要求，`/login` 面向所有账号，移除管理限定文案；默认回前台，显式后台来源且真实管理员才回 `/admin`。`loginReturnPath/loginDestination` 统一收口当前 `/`、`/admin` 白名单，后端授权与 `auth-v0.1` 不变。见 [ADR 0019](../decisions/0019-shared-login-and-responsive-entry.md)。
+- 按最后反馈改为桌面最大 440px 单列卡片，移除展示区/书页装饰/重复署名；内部留足间距，移动端保持大输入框和正常字号。新增共享 `FormField`；背景、入口和后台样式拆分为 `scene.css`、`entry.css`、`management.css`。
+- 营地背景等比铺满视口，竖屏调整重心；定位层与漂移动画层分开，图片和火光不再分别裁切。保留主题色、深浅色与减少动态。
+- `npm run check` 全部通过，**80 项测试**；`npm run verify:reader` 的隔离生产构建及离线有/无缓存、认证页隔离回归通过。背景拆层与最后单列简化后补做完整检查和 `npm run verify:production`，均通过。
+- 可见 Edge 真实联调覆盖错误密码、登录默认回前台、明确后台回跳、退出、密码显隐与键盘 Tab；1440×900、390×844、320×740 和实际矮窗口目视/尺寸检查通过。普通用户回跳只有单元测试覆盖，本轮不创建真实测试用户。详见 [验证记录](authentication-frontend-verification.md)。
+- 主题偏好已恢复，测试会话退出，视口复原；截图位于忽略目录 `var/qa/login-general-*.jpg`。未跑真实移动硬件/Safari/Firefox 或生产 Cookie 环境；注册/找回/个人中心仍待后续。
+- 下一步按新的视觉反馈继续微调，账户能力按正式后端契约扩展；接手时不要沿用下方旧版本“登录仅管理员、next 仅 /admin”的展示规则。公共 ADR、索引、架构与验收同步后端；原基线和 development-4 未改。本地提交，未 push。
+
 ## 最新交付：真实登录与简要空后台（2026-10-31）
 
 - 功能提交 `0ab5aee`：公开博客迁入 `(blog)`，新增互不依赖公开快照的 `(management)` `/login`、`/admin`；管理入口不挂载公共 `BlogShell`，不进入公开软导航/预取，并返回 private/no-store/noindex。

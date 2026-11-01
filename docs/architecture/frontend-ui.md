@@ -117,3 +117,11 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 `themes/argon/failure/` 统一状态展示、样式和四组翻牌配对；`FailureView` 用于 Next 的局部/根错误边界，`document` 用于 Proxy 独立 404/503。前者消费同一组件/游戏，后者消费 `tools/generate-failure-pages.mts` 构建时生成的 `src/generated/failure-pages.json`，不能在 Proxy 运行时导入 React 服务端渲染器。此 JSON 是展示产物，不是业务契约。修改主题源码后运行 `npm run failure:generate`；启动开发/生产构建自动生成，`npm run check` 与独立构建拒绝过期产物。
 
 独立 404/503 的核心说明与样式不依赖脚本、快照或远程资产；游戏只在本地内存运行。Next 意外渲染错误依赖框架客户端错误边界接管，不声称具有同等的无脚本可用性。原有导航准备/超时/旧页保留及撤回内容禁回退规则不变。
+
+## 通用账号入口（2026-11-01）
+
+[ADR 0019](../decisions/0019-shared-login-and-responsive-entry.md) 将 `/login` 明确为通用账号入口，缺省返回前台；管理员从明确后台入口进入时保留 `/admin`，服务端权限检查不变。认证页仍独立于公开博客壳和快照。
+
+`ManagementEntry` 组合简洁头部、单列表单和 `SessionFeedback`；共享 `ui/FormField` 只负责标签、图标和错误外观，字段及按钮继续使用既有封装。样式由 `management.css`（共用/后台）、`scene.css`（背景）、`entry.css`（登录/身份确认卡片）分责，统一在路由组布局导入。
+
+背景定位平面保持 8:5 原比例并铺满视口，窄竖屏调整营地重心，内层单独执行漂移。布局定位和动画不得共用 transform；图片与火光叠层不得分别裁切缩放。入口卡片桌面最大 440px，仅保留必要内容并留足表单内间距；手机保持正常字号/控件尺寸；减少动态关闭入场与环境动画。

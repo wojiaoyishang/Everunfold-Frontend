@@ -13,24 +13,30 @@ export function isManagementLink(href: string): boolean {
   }
 }
 
-/** Only implemented management destinations may be used after a credential exchange. */
-export function adminReturnPath(input: string | undefined): string {
+/** Keep the shared login entry on the two currently supported return destinations. */
+export function loginReturnPath(input: string | undefined): string {
   if (
     !input ||
     !input.startsWith("/") ||
     input.startsWith("//") ||
     /[\u0000-\u001f\u007f\\]/.test(input)
   )
-    return "/admin";
+    return "/";
   try {
     const url = new URL(input, "https://management.invalid");
     if (
       url.origin !== "https://management.invalid" ||
-      url.pathname !== "/admin"
+      !["/", "/admin"].includes(url.pathname)
     )
-      return "/admin";
+      return "/";
     return `${url.pathname}${url.search}${url.hash}`;
   } catch {
-    return "/admin";
+    return "/";
   }
+}
+
+/** A login page is shared by readers and administrators; this never grants permission. */
+export function loginDestination(returnTo: string, isAdmin: boolean): string {
+  const target = loginReturnPath(returnTo);
+  return target.startsWith("/admin") && !isAdmin ? "/" : target;
 }

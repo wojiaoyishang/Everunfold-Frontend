@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { readConfiguration } from "@/core/config/server";
-import { adminReturnPath } from "@/core/auth/routes";
+import { loginReturnPath } from "@/core/auth/routes";
 import { LoginPage } from "@/themes/argon/management/login-page";
 
 export const metadata: Metadata = { title: "登录" };
@@ -13,7 +13,7 @@ export default async function LoginRoute({
   return (
     <LoginPage
       baseUrl={readConfiguration().backendBaseUrl}
-      returnTo={adminReturnPath(typeof next === "string" ? next : undefined)}
+      returnTo={loginReturnPath(typeof next === "string" ? next : undefined)}
     />
   );
 }

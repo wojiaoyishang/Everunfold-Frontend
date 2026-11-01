@@ -2,12 +2,14 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { loginDestination } from "@/core/auth/routes";
 import { useSession } from "@/core/auth/use-session";
 import { authFailureMessage, checkedSession } from "@/core/auth/session";
 import { RequestError } from "@/core/http/request";
-import { login, logout } from "@/generated/auth-client";
+import { login } from "@/generated/auth-client";
 import { Icon } from "../components/icon";
 import { Button, Form, TextField } from "../components/ui/primitives";
+import { FormField } from "../components/ui/form-field";
 import { PasswordField } from "../components/ui/password-field";
 import { ManagementEntry } from "./management-entry";
 import { SessionFeedback } from "./session-feedback";
@@ -31,13 +33,14 @@ export function LoginPage({
   useEffect(() => {
     if (!busy && message) passwordField.current?.focus();
   }, [busy, message]);
-  const entering =
-    state.phase === "ready" &&
-    state.session.authenticated &&
-    state.session.user?.role === "admin";
+  const entering = state.phase === "ready" && state.session.authenticated;
+  const destination = loginDestination(
+    returnTo,
+    state.phase === "ready" && state.session.user?.role === "admin",
+  );
   useEffect(() => {
-    if (entering) router.replace(returnTo);
-  }, [entering, returnTo, router]);
+    if (entering) router.replace(destination);
+  }, [entering, destination, router]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -73,38 +76,11 @@ export function LoginPage({
     }
   }
 
-  async function switchAccount() {
-    if (busy || state.phase !== "ready") return;
-    const controller = new AbortController();
-    action.current = controller;
-    setBusy(true);
-    setMessage("");
-    try {
-      const response = await logout(baseUrl, state.session.csrf_token, {
-        signal: controller.signal,
-      });
-      const session = checkedSession(response.data);
-      if (session.authenticated || session.user !== null)
-        throw new RequestError("invalid");
-      accept(session);
-    } catch (error) {
-      if (!controller.signal.aborted) fail(error);
-    } finally {
-      if (!controller.signal.aborted) setBusy(false);
-    }
-  }
-
   return (
     <ManagementEntry
-      intro={{
-        kicker: "管理入口",
-        title: "欢迎回来",
-        description: "登录 Everunfold 管理后台。",
-      }}
       panel={{
-        kicker: "管理员登录",
-        title: "登录后台",
-        description: "使用管理员账号继续。",
+        title: "登录你的账号",
+        description: "输入账号信息，继续访问。",
       }}
     >
       {state.phase !== "ready" || entering ? (
@@ -117,60 +93,56 @@ export function LoginPage({
           }}
           checkingText={entering ? "登录成功，正在进入" : undefined}
         />
-      ) : state.session.authenticated ? (
-        <div className="login-account">
-          <Icon name="user" />
-          <h3>{state.session.user?.display_name}</h3>
-          <p className="login-account-username">
-            @{state.session.user?.username}
-          </p>
-          <p>当前账号没有后台访问权限。</p>
-          <Button
-            className="management-primary"
-            disabled={busy}
-            onClick={() => void switchAccount()}
-          >
-            <span aria-live="polite">{busy ? "正在切换" : "切换账号"}</span>
-          </Button>
-        </div>
       ) : (
         <Form className="login-form" onSubmit={submit} aria-busy={busy}>
-          <label htmlFor="login-username">用户名</label>
-          <TextField
-            id="login-username"
-            name="username"
-            autoComplete="username"
-            autoCapitalize="none"
-            spellCheck={false}
-            required
-            maxLength={64}
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            disabled={busy}
-            placeholder="输入用户名"
-          />
-          <label htmlFor="login-password">密码</label>
-          <PasswordField
+          <FormField id="login-username" label="用户名" icon="user">
+            <TextField
+              id="login-username"
+              name="username"
+              autoComplete="username"
+              autoCapitalize="none"
+              spellCheck={false}
+              required
+              maxLength={64}
+              value={username}
+              onChange={(event) => setUsername(event.target.value)}
+              disabled={busy}
+              placeholder="输入用户名"
+            />
+          </FormField>
+          <FormField
             id="login-password"
-            name="password"
-            autoComplete="current-password"
-            required
-            maxLength={1024}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            disabled={busy}
-            ref={passwordField}
-            placeholder="输入密码"
-            aria-describedby={message ? "login-error" : undefined}
-            aria-invalid={Boolean(message)}
-          />
+            label="密码"
+            icon="lock"
+            invalid={Boolean(message)}
+          >
+            <PasswordField
+              id="login-password"
+              name="password"
+              autoComplete="current-password"
+              required
+              maxLength={1024}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={busy}
+              ref={passwordField}
+              placeholder="输入密码"
+              aria-describedby={message ? "login-error" : undefined}
+              aria-invalid={Boolean(message)}
+            />
+          </FormField>
           <div
             className="login-message"
             id="login-error"
             role={message ? "alert" : undefined}
             aria-live="polite"
           >
-            {message}
+            {message && (
+              <>
+                <Icon name="close" />
+                <span>{message}</span>
+              </>
+            )}
           </div>
           <Button
             type="submit"
@@ -185,12 +157,8 @@ export function LoginPage({
           </Button>
         </Form>
       )}
-      <p className="login-panel-footer">
-        <Icon name="lock" />
-        账号登录
-      </p>
       <noscript>
-        <p>请启用 JavaScript 后登录后台。</p>
+        <p>请启用 JavaScript 后登录。</p>
       </noscript>
     </ManagementEntry>
   );

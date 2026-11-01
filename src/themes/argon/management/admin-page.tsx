@@ -51,11 +51,6 @@ export function AdminPage({ baseUrl }: { baseUrl: string }) {
   if (state.phase !== "ready" || leaving) {
     return (
       <ManagementEntry
-        intro={{
-          kicker: "管理入口",
-          title: "管理后台",
-          description: "登录后继续管理 Everunfold。",
-        }}
         panel={{
           kicker: "身份确认",
           title: "管理员后台",

@@ -3,7 +3,8 @@ import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
-  adminReturnPath,
+  loginReturnPath,
+  loginDestination,
   isManagementLink,
   isManagementRoute,
 } from "../src/core/auth/routes";
@@ -49,7 +50,7 @@ test("management destinations bypass the public navigation pipeline and restrict
   assert.equal(isManagementRoute("/administer"), false);
   assert.equal(isManagementRoute("/login.html"), false);
   assert.equal(isManagementRoute("/admin/not-implemented"), false);
-  assert.equal(adminReturnPath("/admin?tab=home"), "/admin?tab=home");
+  assert.equal(loginReturnPath("/admin?tab=home"), "/admin?tab=home");
   for (const input of [
     undefined,
     "https://evil.example/",
@@ -61,8 +62,23 @@ test("management destinations bypass the public navigation pipeline and restrict
     "/admin\n",
     "/private",
   ]) {
-    assert.equal(adminReturnPath(input), "/admin");
+    assert.equal(loginReturnPath(input), "/");
   }
+});
+
+test("general account login returns readers home and preserves an explicit admin entry", () => {
+  assert.equal(loginReturnPath(undefined), "/");
+  assert.equal(
+    loginReturnPath("/?type=article#main-content"),
+    "/?type=article#main-content",
+  );
+  for (const isAdmin of [false, true]) {
+    assert.equal(loginDestination("/", isAdmin), "/");
+    assert.equal(loginDestination("https://evil.example/", isAdmin), "/");
+  }
+  assert.equal(loginDestination("/admin", false), "/");
+  assert.equal(loginDestination("/admin?tab=home", true), "/admin?tab=home");
+  assert.equal(loginReturnPath("/login"), "/");
 });
 
 test("generated session reads are credentialed, uncached, validated and do not send CSRF in a URL", async () => {

@@ -1,0 +1,314 @@
+/* Shared login/checking surface: one quiet form, with room inside the card. */
+.login-stage {
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  overflow: hidden;
+  background: #070b1c;
+}
+.login-card {
+  --entry-secondary: color-mix(in srgb, var(--text) 76%, var(--surface));
+  position: relative;
+  z-index: 2;
+  width: min(440px, 100%);
+  border: 1px solid color-mix(in srgb, var(--surface) 60%, transparent);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 18px 64px #03071152;
+}
+.login-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 36px 0;
+}
+.login-entry-header .management-brand {
+  gap: 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 550;
+}
+.login-entry-header .management-brand > .icon {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+.login-back {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 6px;
+  min-height: 36px;
+  border-radius: 5px;
+  color: var(--entry-secondary);
+  font-size: 12px;
+  transition: color 180ms ease;
+}
+.login-back:hover {
+  color: var(--accent);
+}
+.login-back .icon {
+  width: 14px;
+  height: 14px;
+}
+.login-panel {
+  min-width: 0;
+  padding: 26px 36px 36px;
+}
+.login-panel-heading {
+  margin-bottom: 28px;
+}
+.login-panel-heading .management-kicker {
+  margin-bottom: 10px;
+  font-size: 11px;
+}
+.login-panel-heading h1 {
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.login-panel-heading p {
+  margin-top: 10px;
+  color: var(--entry-secondary);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.login-panel-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 304px;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.login-form .ui-form-field {
+  --field-height: 50px;
+  --field-radius: 8px;
+}
+.login-form .ui-form-field > label {
+  font-size: 14px;
+  font-weight: 500;
+}
+.login-form .ui-input {
+  background: color-mix(in srgb, var(--surface-soft) 60%, var(--surface));
+  border-color: color-mix(in srgb, var(--text) 17%, var(--surface));
+  font-size: 16px;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+.login-form .ui-input:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--surface));
+}
+.login-form .ui-input:focus {
+  outline: 0;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.login-form .ui-input::placeholder {
+  color: var(--entry-secondary);
+  opacity: 0.78;
+}
+.login-form .ui-input[aria-invalid="true"] {
+  border-color: var(--management-error);
+}
+.login-form .ui-form-field[data-invalid="true"] .ui-field-icon {
+  color: var(--management-error);
+}
+.login-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 40px;
+  margin-block: -9px -8px;
+  color: var(--management-error);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.login-message:not(:empty) {
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--management-error) 24%, transparent);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--management-error) 6%, transparent);
+}
+.login-message .icon {
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+.management-root .login-submit {
+  width: 100%;
+  min-height: 50px;
+  justify-content: space-between;
+  padding-inline: 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 3px 9px color-mix(in srgb, var(--brand-accent) 12%, transparent);
+}
+.management-root .login-submit:disabled {
+  opacity: 0.7;
+}
+.management-session {
+  display: flex;
+  min-height: 260px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+.management-session-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid color-mix(in srgb, var(--accent) 16%, transparent);
+  border-radius: 16px;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.management-session-icon > .icon {
+  width: 24px;
+  height: 24px;
+}
+.management-session h2 {
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.management-session p {
+  max-width: 310px;
+  color: var(--entry-secondary);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.management-session-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.management-session-actions .management-primary {
+  min-height: 44px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+html[data-motion="full"] .login-card {
+  animation: management-enter 500ms var(--motion-ease) both;
+}
+html[data-motion="full"] :is(.login-panel-heading, .login-panel-content) {
+  animation: entry-assemble 550ms var(--motion-ease) both;
+}
+html[data-motion="full"] .login-panel-content {
+  animation-delay: 90ms;
+}
+html[data-motion="full"]
+  .login-submit:not(:disabled):hover
+  .icon:not(.management-spinning) {
+  transform: translateX(3px);
+}
+.login-submit .icon {
+  transition: transform 180ms ease;
+}
+/* Keyboard input can begin before the entrance has completed. */
+.login-card:focus-within,
+.login-card:focus-within :is(.login-panel-heading, .login-panel-content) {
+  animation: none !important;
+}
+@keyframes entry-assemble {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 600px) {
+  .login-stage {
+    padding: 28px 16px;
+  }
+  .login-entry-header {
+    padding: 26px 28px 0;
+  }
+  .login-panel {
+    padding: 32px 28px 34px;
+  }
+  .login-panel-heading {
+    margin-bottom: 32px;
+  }
+  .login-panel-heading h1 {
+    font-size: 28px;
+  }
+  .login-panel-content {
+    min-height: 320px;
+  }
+  .login-form {
+    gap: 24px;
+  }
+  .login-form .ui-form-field {
+    --field-height: 54px;
+  }
+  .management-root .login-submit {
+    min-height: 54px;
+  }
+}
+@media (max-width: 360px) {
+  .login-stage {
+    padding: 24px 12px;
+  }
+  .login-entry-header {
+    gap: 12px;
+    padding: 24px 22px 0;
+  }
+  .login-entry-header .management-brand {
+    gap: 7px;
+    font-size: 13px;
+  }
+  .login-back {
+    gap: 4px;
+    font-size: 11px;
+  }
+  .login-panel {
+    padding: 30px 22px;
+  }
+  .login-panel-heading h1 {
+    font-size: 26px;
+  }
+}
+html[data-motion="reduced"] .login-card *,
+html[data-motion="reduced"] .login-card {
+  animation: none;
+  transition: none;
+}
+@media (forced-colors: active) {
+  .login-card {
+    border-color: CanvasText;
+    background: Canvas;
+  }
+  .management-scene {
+    display: none;
+  }
+  .login-form .ui-input {
+    border: 1px solid ButtonText;
+  }
+  .login-form .ui-input:focus {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}

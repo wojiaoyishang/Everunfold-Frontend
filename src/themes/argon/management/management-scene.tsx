@@ -36,94 +36,96 @@ const fireflies = [
 export function ManagementScene() {
   return (
     <div className="management-scene" aria-hidden="true">
-      <div className="management-scene-track">
-        {/* The source Canvas already applies one uniform blur to the complete scene. */}
-        <Image
-          className="management-star-sky"
-          src="/reference/everunfold-night-camp.webp"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          unoptimized
-        />
-        <div className="management-scene-wash" />
-        <svg
-          className="management-motion-layer"
-          viewBox="0 0 2560 1600"
-          preserveAspectRatio="xMidYMid slice"
-          focusable="false"
-        >
-          <defs>
-            <radialGradient id="management-fire-overlay">
-              <stop offset="0" stopColor="#ffd285" stopOpacity="0.34" />
-              <stop offset="0.3" stopColor="#ff9c43" stopOpacity="0.15" />
-              <stop offset="1" stopColor="#df6a31" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-
-          <g className="management-stars">
-            {stars.map(([cx, cy, radius, delay], index) => (
-              <circle
-                className="management-star"
-                key={`${cx}-${cy}`}
-                cx={cx}
-                cy={cy}
-                r={radius}
-                fill={index % 5 === 0 ? "#ffe4b5" : "#eef5ff"}
-                style={{
-                  animationDelay: `${delay}s`,
-                  animationDuration: `${2.7 + (index % 6) * 0.48}s`,
-                }}
-              />
-            ))}
-          </g>
-
-          <path
-            className="management-shooting-star management-shooting-star-one"
-            d="M1810 328 2016 252"
-            fill="none"
-            stroke="#eff7ff"
-            strokeLinecap="round"
-            strokeWidth="2.2"
+      <div className="management-scene-frame">
+        <div className="management-scene-track">
+          {/* The source Canvas already applies one uniform blur to the complete scene. */}
+          <Image
+            className="management-star-sky"
+            src="/reference/everunfold-night-camp.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            unoptimized
           />
+          <div className="management-scene-wash" />
+          <svg
+            className="management-motion-layer"
+            viewBox="0 0 2560 1600"
+            preserveAspectRatio="xMidYMid slice"
+            focusable="false"
+          >
+            <defs>
+              <radialGradient id="management-fire-overlay">
+                <stop offset="0" stopColor="#ffd285" stopOpacity="0.34" />
+                <stop offset="0.3" stopColor="#ff9c43" stopOpacity="0.15" />
+                <stop offset="1" stopColor="#df6a31" stopOpacity="0" />
+              </radialGradient>
+            </defs>
 
-          <ellipse
-            className="management-fire-glow"
-            cx="900"
-            cy="1348"
-            rx="176"
-            ry="102"
-            fill="url(#management-fire-overlay)"
-          />
-          <g fill="#ffd78a">
-            {embers.map(([cx, cy, radius, delay, duration]) => (
-              <circle
-                className="management-fire-spark"
-                key={`${cx}-${cy}`}
-                cx={cx}
-                cy={cy}
-                r={radius}
-                style={{
-                  animationDelay: `${delay}s`,
-                  animationDuration: `${duration}s`,
-                }}
-              />
-            ))}
-          </g>
-          <g className="management-fireflies" fill="#ffd786">
-            {fireflies.map(([cx, cy, delay]) => (
-              <circle
-                className="management-firefly"
-                key={`${cx}-${cy}`}
-                cx={cx}
-                cy={cy}
-                r="2.2"
-                style={{ animationDelay: `${delay}s` }}
-              />
-            ))}
-          </g>
-        </svg>
+            <g className="management-stars">
+              {stars.map(([cx, cy, radius, delay], index) => (
+                <circle
+                  className="management-star"
+                  key={`${cx}-${cy}`}
+                  cx={cx}
+                  cy={cy}
+                  r={radius}
+                  fill={index % 5 === 0 ? "#ffe4b5" : "#eef5ff"}
+                  style={{
+                    animationDelay: `${delay}s`,
+                    animationDuration: `${2.7 + (index % 6) * 0.48}s`,
+                  }}
+                />
+              ))}
+            </g>
+
+            <path
+              className="management-shooting-star management-shooting-star-one"
+              d="M1810 328 2016 252"
+              fill="none"
+              stroke="#eff7ff"
+              strokeLinecap="round"
+              strokeWidth="2.2"
+            />
+
+            <ellipse
+              className="management-fire-glow"
+              cx="900"
+              cy="1348"
+              rx="176"
+              ry="102"
+              fill="url(#management-fire-overlay)"
+            />
+            <g fill="#ffd78a">
+              {embers.map(([cx, cy, radius, delay, duration]) => (
+                <circle
+                  className="management-fire-spark"
+                  key={`${cx}-${cy}`}
+                  cx={cx}
+                  cy={cy}
+                  r={radius}
+                  style={{
+                    animationDelay: `${delay}s`,
+                    animationDuration: `${duration}s`,
+                  }}
+                />
+              ))}
+            </g>
+            <g className="management-fireflies" fill="#ffd786">
+              {fireflies.map(([cx, cy, delay]) => (
+                <circle
+                  className="management-firefly"
+                  key={`${cx}-${cy}`}
+                  cx={cx}
+                  cy={cy}
+                  r="2.2"
+                  style={{ animationDelay: `${delay}s` }}
+                />
+              ))}
+            </g>
+          </svg>
+        </div>
       </div>
     </div>
   );
