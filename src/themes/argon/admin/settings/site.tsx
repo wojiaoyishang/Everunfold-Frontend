@@ -57,7 +57,15 @@ export function SiteSettingsPage() {
               }
             />
             <SettingsText
-              label="站点公告"
+              label="公告标题"
+              hint="可留空；未填写标题时，首页直接显示公告内容。"
+              value={site.notice_title ?? ""}
+              maxLength={120}
+              onChange={(notice_title) => update({ notice_title })}
+            />
+            <SettingsText
+              label="公告内容"
+              hint="超过一行可展开阅读；清空标题和内容后隐藏公告。"
               value={site.notice ?? ""}
               maxLength={1000}
               multiline

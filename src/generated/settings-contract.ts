@@ -53,6 +53,7 @@ export type Description = string;
 export type Author = string;
 export type AvatarMediaId = string;
 export type AvatarUrl = string;
+export type NoticeTitle = string;
 export type Notice = string;
 export type Id2 = string;
 export type Label2 = string;
@@ -220,6 +221,7 @@ export interface SitePreferences {
   author: Author;
   avatar_media_id?: AvatarMediaId;
   avatar_url?: AvatarUrl;
+  notice_title?: NoticeTitle;
   notice?: Notice;
   navigation?: Navigation;
   seo_description?: SeoDescription;

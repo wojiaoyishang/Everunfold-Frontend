@@ -4,6 +4,7 @@ import { PagePresentation } from "./route-state";
 import { PostCard } from "./post-card";
 import { Pagination } from "./pagination";
 import { EmptyState } from "./empty-state";
+import { SiteNotice } from "./site-notice";
 import { Icon, type IconName } from "./icon";
 
 export function ArticleList({
@@ -27,11 +28,11 @@ export function ArticleList({
   return (
     <>
       <PagePresentation site={snapshot.site} />
-      {home && snapshot.site.notice && (
-        <div className="surface notice">
-          <Icon name="bell" />
-          <p>{snapshot.site.notice}</p>
-        </div>
+      {home && (
+        <SiteNotice
+          title={snapshot.site.settings?.site.notice_title}
+          content={snapshot.site.notice ?? ""}
+        />
       )}
       {title && (
         <header className="surface page-heading">

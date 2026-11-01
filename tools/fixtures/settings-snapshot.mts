@@ -34,6 +34,8 @@ await store.apply({
       name: "本地设置",
       description: "离线说明",
       author: "测试作者",
+      notice_title: "离线公告标题",
+      notice: "离线公告正文，来自已经应用的本地设置。",
       navigation: [
         {
           id: "archive",

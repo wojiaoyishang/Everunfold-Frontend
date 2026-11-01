@@ -1,5 +1,6 @@
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
+import { format, resolveConfig } from "prettier";
 
 /** Emit operations from the backend contract; do not maintain parallel endpoint constants. */
 export async function generateSettingsClient(schema, output) {
@@ -30,9 +31,8 @@ export function ${op.name}(baseUrl: string, ${op.path.includes("{node_id}") ? "n
 }`;
     })
     .join("\n");
-  await writeFile(
-    path.join(output, "settings-client.ts"),
-    `/* Generated from backend operation metadata. Do not edit by hand. */
+  const target = path.join(output, "settings-client.ts");
+  const source = `/* Generated from backend operation metadata. Do not edit by hand. */
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "./settings-v1.schema.json";
@@ -42,6 +42,12 @@ const ajv = new Ajv({ strict: true });
 addFormats(ajv);
 ajv.addSchema(Object.fromEntries(Object.entries(schema).filter(([key]) => !key.startsWith("x-"))), "settings");
 ${methods}
-`,
+`;
+  await writeFile(
+    target,
+    await format(source, {
+      ...(await resolveConfig(target)),
+      filepath: target,
+    }),
   );
 }

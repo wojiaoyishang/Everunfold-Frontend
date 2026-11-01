@@ -168,6 +168,7 @@ directory = "./var/absent-admin-verification-cache"
     assert.equal(home.status, 200);
     const body = await home.text();
     assert.ok(body.includes("离线主题标题") && body.includes("同步导航"));
+    assert.ok(body.includes("离线公告标题") && body.includes("离线公告正文"));
     const article = await fetch(base + "/hello.html");
     assert.equal(article.status, 200);
     const html = await article.text();

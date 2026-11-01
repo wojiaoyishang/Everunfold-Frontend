@@ -9,6 +9,7 @@ import { ShuoshuoCard } from "./shuoshuo";
 import { PagePresentation } from "./route-state";
 import { Pagination } from "./pagination";
 import { EmptyState } from "./empty-state";
+import { SiteNotice } from "./site-notice";
 import { Icon } from "./icon";
 
 export function ContentCard({ entry }: { entry: FeedEntry }) {
@@ -34,12 +35,10 @@ export function Feed({
   return (
     <>
       <PagePresentation site={snapshot.site} />
-      {snapshot.site.notice && (
-        <div className="surface notice">
-          <Icon name="bell" />
-          <p>{snapshot.site.notice}</p>
-        </div>
-      )}
+      <SiteNotice
+        title={snapshot.site.settings?.site.notice_title}
+        content={snapshot.site.notice ?? ""}
+      />
       {type === "shuoshuo" && (
         <header className="surface page-heading">
           <Icon name="leaf" />
