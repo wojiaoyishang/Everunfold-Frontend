@@ -1,27 +1,28 @@
 # 递归菜单与图标库使用指南
 
-版本：menu-icons-runtime-2，2026-11-01。已实现范围见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)。
+版本：menu-icons-runtime-3，2026-11-01。已实现范围见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)。
 
 ## 使用
 
 - 打开 `/admin/settings` 的导航菜单：左侧选中结构项，右侧修改名称、链接、所属菜单或图标。每一层都能添加子菜单；所属菜单变更携带整个分支，同级上移/下移保留子树。移除当前分支在保存前可用「撤销修改」恢复。
 - 点击「从图标库选择」打开共享选择器；`/admin/icons` 是同一图标浏览器的完整页面。内置图标可按中文名称/标识搜索，上传图标按名称搜索和分页。菜单选择图标不会立即保存整站设置，需要再点「保存更改」。
 - 上传 SVG/PNG/WebP，最大 1 MiB，位图宽高各不超过 2048；使用静态图标。含脚本、外链、样式、嵌入页面的 SVG 会拒绝。当前不支持 GIF、ICO、动态 WebP 或从外部 URL 抓图。
+- 上传入口支持多文件队列/真实字节进度，能力不足时使用不定进度；与媒体库共用同哈希复用、稳定请求 ID、重试和取消基础设施。合格的媒体复用为图标时只增加图标资格，不重写资料。
 - 上传成功直接入媒体记录，不依赖菜单保存；关闭弹窗不会撤销已上传文件。网络结果未知时保留同一上传 ID重试，避免重复创建。后端不可用仍可浏览/选择内置图标，但保存配置和读取上传图标需要连接后端。
 
 菜单不再限制两级。为限制单次设置数据体积，全树最多 256 项；服务端请求大小和解析器仍有资源保护，不承诺无限数据量。前台三个入口共用菜单数据。桌面侧栏独立弹出；手机使用点击整行展开的递归菜单，父项小链接图标单独导航，不依赖悬停。
 
 ## API 与文件落盘
 
-契约为后端 `contracts/settings-v1.schema.json`，版本 1.3.0；前端生成来源固定后端提交 `9803e71`。所有管理端请求直达 FastAPI 并使用管理员 Session；POST 携带 CSRF Token。管理响应 `private/no-store`，使用既有 success/code/msg/data 外壳。
+契约为后端 `contracts/settings-v1.schema.json`，版本 1.6.0；前端生成来源固定后端提交 `a543d7e`。所有管理端请求直达 FastAPI 并使用管理员 Session；POST 携带 CSRF Token。管理响应 `private/no-store`，使用既有 success/code/msg/data 外壳。
 
 | 端点 | 当前行为 |
 | --- | --- |
 | POST `/v1/admin/icons/query` | `{query, page}` 搜索上传图标，固定每页 60 项，仅返回 ready/未删除记录 |
-| POST `/v1/admin/icons/upload` | `{filename, data_base64, upload_id}`；本期 1 MiB 小图标使用有界 JSON，通用图片/视频使用已发布的独立原始字节上传端点 |
+| POST `/v1/admin/icons/upload` | `{filename, data_base64, upload_id}`；兼容旧客户端保留；当前前端改用 media/upload?purpose=icon 二进制上传 |
 | GET `/media/{object_key}` | 只读公开原件；以数据库 ready/未删除状态和安全路径共同校验，返回 MIME、nosniff 和受限 CSP |
 
-后端根目录显式运行 `uv run python init.database.py --no-create-database` 应用 `0005_icon_media`，已有账号和内容保留。服务启动不自动迁移。`Pillow 13.0.0` 用于解码与尺寸/格式校验，安装以 `uv.lock` 为准。
+后端根目录显式运行 `uv run python init.database.py --no-create-database` 应用至 `0008_media_safe_delete`，已有账号和内容保留。服务启动不自动迁移。`Pillow 13.0.0` 用于解码与尺寸/格式校验，安装以 `uv.lock` 为准。
 
 ```toml
 [media]

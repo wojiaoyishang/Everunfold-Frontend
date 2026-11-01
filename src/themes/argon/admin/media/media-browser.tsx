@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMediaLibrary } from "@/core/media/media-library";
 import type { MediaItem, MediaQuery } from "@/generated/settings-contract";
 import { Button, TextField } from "../../components/ui/primitives";
+import { UploadQueueView } from "../../components/ui/upload-queue";
 import { FilePicker } from "../../components/ui/file-picker";
 import { Icon } from "../../components/icon";
 import { MediaPreview } from "./media-preview";
@@ -19,7 +20,8 @@ export function MediaBrowser({
 }) {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [filter, setFilter] = useState(kind);
-  const library = useMediaLibrary(filter);
+  const [trash, setTrash] = useState(false);
+  const library = useMediaLibrary(filter, trash);
   const [selected, setSelected] = useState<MediaItem | null>(null);
   const pick = (item: MediaItem) => {
     setSelected(item);
@@ -33,7 +35,7 @@ export function MediaBrowser({
       ? ".mp4,.webm,video/mp4,video/webm"
       : filter === "image"
         ? ".svg,.png,.jpg,.jpeg,.webp,image/svg+xml,image/png,image/jpeg,image/webp"
-        : ".svg,.png,.jpg,.jpeg,.webp,.mp4,.webm";
+        : "";
   return (
     <div className="admin-media-browser">
       <div className="admin-library-toolbar">
@@ -44,12 +46,16 @@ export function MediaBrowser({
           value={library.query}
           onChange={(e) => library.setQuery(e.target.value)}
         />
-        <FilePicker
-          accept={accept}
-          disabled={library.uploading}
-          label={library.uploading ? "正在上传…" : "上传文件"}
-          onFile={(file) => void library.upload(file)}
-        />
+        <div className="admin-upload-actions">
+          <FilePicker
+            accept={accept}
+            label="上传文件"
+            onFiles={(files) => library.upload(files)}
+          />
+          <span className="admin-upload-hint">
+            支持多选 · 单文件 128 MB 内<small>图片 20 MB · SVG 1 MB</small>
+          </span>
+        </div>
       </div>
       {kind === "all" && (
         <div className="admin-library-tabs" aria-label="媒体类型">
@@ -58,12 +64,14 @@ export function MediaBrowser({
               ["all", "全部"],
               ["image", "图片"],
               ["video", "视频"],
+              ["file", "文件"],
             ] as const
           ).map(([key, label]) => (
             <Button
               key={key}
-              aria-pressed={filter === key}
+              aria-pressed={!trash && filter === key}
               onClick={() => {
+                setTrash(false);
                 setFilter(key);
                 library.setPage(1);
               }}
@@ -71,6 +79,18 @@ export function MediaBrowser({
               {label}
             </Button>
           ))}
+          {!onSelect && (
+            <Button
+              aria-pressed={trash}
+              onClick={() => {
+                setTrash(true);
+                setFilter("all");
+                library.setPage(1);
+              }}
+            >
+              回收站
+            </Button>
+          )}
         </div>
       )}
       {library.error && (
@@ -79,7 +99,6 @@ export function MediaBrowser({
           {library.canRetry && (
             <Button
               className="admin-button"
-              disabled={library.uploading}
               onClick={() => void library.retry()}
             >
               重试
@@ -87,21 +106,14 @@ export function MediaBrowser({
           )}
         </div>
       )}
-      {library.lastUploaded && (
-        <div className="admin-library-feedback" role="status">
-          <Icon name="check" />
-          <span>已上传：{library.lastUploaded.label}</span>
-          {onSelect &&
-            (filter === "all" || library.lastUploaded.kind === filter) && (
-              <Button
-                className="admin-button"
-                onClick={() => pick(library.lastUploaded!)}
-              >
-                选择此文件
-              </Button>
-            )}
-        </div>
-      )}
+      <UploadQueueView
+        items={library.uploads}
+        onRetry={(id) => library.queue.retry(id)}
+        onCancel={(id) => library.queue.cancel(id)}
+        onClear={() => library.queue.clearFinished()}
+        onSelect={onSelect ? pick : undefined}
+      />
+
       <div className="admin-media-library-summary">
         <span>
           {library.loading ? "正在读取…" : `共 ${library.total} 个文件`}
@@ -142,6 +154,7 @@ export function MediaBrowser({
               url={item.url}
               kind={item.kind}
               label={item.label}
+              deleted={item.deleted}
             />
             <span
               className="admin-media-tile-title"
@@ -150,8 +163,16 @@ export function MediaBrowser({
               {item.title || item.label}
             </span>
             <span className="admin-media-tile-meta">
-              {item.kind === "image" ? "图片" : "视频"} ·{" "}
-              {formatBytes(item.size)}
+              {item.deleted
+                ? item.purge_pending
+                  ? "待清理"
+                  : "已删除"
+                : item.kind === "image"
+                  ? "图片"
+                  : item.kind === "video"
+                    ? "视频"
+                    : "文件"}{" "}
+              · {formatBytes(item.size)}
             </span>
             {(value ?? selected?.id) === item.id && (
               <Icon name="check" className="admin-media-selected" />
@@ -165,7 +186,9 @@ export function MediaBrowser({
             ? "正在读取媒体…"
             : library.query
               ? "没有匹配的文件"
-              : "还没有这类文件，上传后即可选择。"}
+              : trash
+                ? "回收站是空的"
+                : "还没有这类文件"}
         </p>
       )}
       {library.total > 60 && (
@@ -199,6 +222,10 @@ export function MediaBrowser({
               ? items[items.findIndex((item) => item.id === selected.id) + 1]
               : undefined
           }
+          onRemoved={() => {
+            setSelected(null);
+            library.refresh();
+          }}
           onClose={() => setSelected(null)}
           onNavigate={setSelected}
           onChanged={(item, created) => {
@@ -207,9 +234,6 @@ export function MediaBrowser({
           }}
         />
       )}
-      <p className="admin-library-caption">
-        图片最大 20 MB（SVG 1 MB）· MP4 / WebM 视频最大 128 MB
-      </p>
     </div>
   );
 }

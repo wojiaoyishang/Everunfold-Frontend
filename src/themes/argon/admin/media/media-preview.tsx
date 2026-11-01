@@ -8,9 +8,11 @@ export function MediaPreview({
   kind,
   label,
   playable = false,
+  deleted = false,
 }: {
   url: string;
-  kind: "image" | "video";
+  kind: "image" | "video" | "file";
+  deleted?: boolean;
   label: string;
   playable?: boolean;
 }) {
@@ -20,7 +22,16 @@ export function MediaPreview({
   const safe = /^https?:\/\//i.test(url) || /^\/(?!\/)/.test(url);
   return (
     <div className={`admin-media-preview admin-media-preview-${kind}`}>
-      {safe && !failed ? (
+      {deleted || kind === "file" ? (
+        <span className="admin-media-file-placeholder">
+          <Icon name={deleted ? "archive" : "book"} />
+          <span>
+            {deleted
+              ? "已放入回收站"
+              : label.split(".").pop()?.toUpperCase().slice(0, 12) || "FILE"}
+          </span>
+        </span>
+      ) : safe && !failed ? (
         kind === "image" ? (
           // eslint-disable-next-line @next/next/no-img-element -- User-selected media and remote Base URL.
           <img
@@ -50,7 +61,7 @@ export function MediaPreview({
           {safe ? "暂时无法预览" : "预览"}
         </span>
       )}
-      {kind === "video" && playable && safe && !failed && (
+      {kind === "video" && playable && safe && !failed && !deleted && (
         <Button
           className="admin-media-play"
           aria-label={playing ? "暂停视频预览" : "播放视频预览"}

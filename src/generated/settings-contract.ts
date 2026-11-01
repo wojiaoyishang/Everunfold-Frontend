@@ -1,13 +1,44 @@
 /* Generated from the backend public contract. Do not edit by hand. */
 
 export type Id = string;
-export type Id1 = string;
 export type ExpectedRevision = number;
+export type DeleteOriginal = boolean;
+export type SafeDelete = boolean;
+export type Success = boolean;
+export type Code = number;
+export type Msg = string;
+export type Id1 = string;
+export type Token = string;
+export type RecordCount = number;
+export type FileCount = number;
+export type FileRetained = boolean;
+export type DeleteOriginal1 = boolean;
+export type SafeDelete1 = boolean;
+export type ResumeOperationId = string | null;
+export type Id2 = string;
+export type ExpectedRevision1 = number;
+export type DeleteOriginal2 = boolean;
+export type SafeDelete2 = boolean;
+export type OperationId = string;
+export type ExpectedPlan = string;
+export type Success1 = boolean;
+export type Code1 = number;
+export type Msg1 = string;
+export type Id3 = string;
+export type Deleted = boolean;
+export type Purged = boolean;
+export type PurgePending = boolean;
+export type RecordsRemoved = number;
+export type FilesDeleted = number;
+export type FileRetained1 = boolean;
+export type Id4 = string;
+export type Id5 = string;
+export type ExpectedRevision2 = number;
 export type Title = string;
 export type AltText = string;
 export type Caption = string;
 export type Description = string;
-export type Id2 = string;
+export type Id6 = string;
 export type EditId = string;
 export type Rotation = 0 | 90 | 180 | 270;
 export type FlipHorizontal = boolean;
@@ -17,17 +48,20 @@ export type Y = number;
 export type Width = number;
 export type Height = number;
 export type OutputWidth = number | null;
-export type Success = boolean;
-export type Code = number;
-export type Msg = string;
-export type Id3 = string;
+export type Success2 = boolean;
+export type Code2 = number;
+export type Msg2 = string;
+export type Id7 = string;
 export type Label = string;
 export type Url = string;
 export type Mime = string;
 export type Size = number;
 export type CreatedAt = string;
-export type Kind = "image" | "video";
+export type Reused = boolean;
+export type Kind = "image" | "video" | "file";
 export type Title1 = string;
+export type Deleted1 = boolean;
+export type PurgePending1 = boolean;
 export type Revision = number;
 export type Width1 = number | null;
 export type Height1 = number | null;
@@ -36,36 +70,42 @@ export type SourceId = string | null;
 export type Editable = boolean;
 export type Query = string;
 export type Page = number;
-export type Kind1 = "all" | "image" | "video";
+export type Kind1 = "all" | "image" | "video" | "file";
+export type Trash = boolean;
+export type Purpose = "library" | "icon";
 export type Filename = string;
 export type UploadId = string;
-export type Success1 = boolean;
-export type Code1 = number;
-export type Msg1 = string;
-export type Id4 = string;
+export type Success3 = boolean;
+export type Code3 = number;
+export type Msg3 = string;
+export type Id8 = string;
 export type Label1 = string;
 export type Url1 = string;
 export type Mime1 = string;
 export type Size1 = number;
 export type CreatedAt1 = string;
-export type Kind2 = "image" | "video";
+export type Reused1 = boolean;
+export type Kind2 = "image" | "video" | "file";
 export type Title2 = string;
+export type Deleted2 = boolean;
+export type PurgePending2 = boolean;
 export type Items = MediaItem[];
 export type Page1 = number;
 export type Total = number;
 export type PageSize = number;
-export type Success2 = boolean;
-export type Code2 = number;
-export type Msg2 = string;
-export type Success3 = boolean;
-export type Code3 = number;
-export type Msg3 = string;
-export type Id5 = string;
+export type Success4 = boolean;
+export type Code4 = number;
+export type Msg4 = string;
+export type Success5 = boolean;
+export type Code5 = number;
+export type Msg5 = string;
+export type Id9 = string;
 export type Label2 = string;
 export type Url2 = string;
 export type Mime2 = string;
 export type Size2 = number;
 export type CreatedAt2 = string;
+export type Reused2 = boolean;
 export type Items1 = IconAsset[];
 export type Page2 = number;
 export type Total1 = number;
@@ -75,12 +115,12 @@ export type Page3 = number;
 export type Filename1 = string;
 export type DataBase64 = string;
 export type UploadId1 = string;
-export type Success4 = boolean;
-export type Code4 = number;
-export type Msg4 = string;
-export type Success5 = boolean;
-export type Code5 = number;
-export type Msg5 = string;
+export type Success6 = boolean;
+export type Code6 = number;
+export type Msg6 = string;
+export type Success7 = boolean;
+export type Code7 = number;
+export type Msg7 = string;
 export type SourceEpoch = string;
 export type Revision1 = number;
 export type Name = string;
@@ -90,7 +130,7 @@ export type AvatarMediaId = string;
 export type AvatarUrl = string;
 export type NoticeTitle = string;
 export type Notice = string;
-export type Id6 = string;
+export type Id10 = string;
 export type Label3 = string;
 export type Href = string;
 export type Icon = string;
@@ -116,10 +156,10 @@ export type Status = "not_configured" | "pending" | "applied" | "failed";
 export type AppliedAt = string | null;
 export type Error = string | null;
 export type Delivery = DeliveryState[];
-export type ExpectedRevision1 = number;
-export type Success6 = boolean;
-export type Code6 = number;
-export type Msg6 = string;
+export type ExpectedRevision3 = number;
+export type Success8 = boolean;
+export type Code8 = number;
+export type Msg8 = string;
 export type NodeId1 = string;
 export type SourceEpoch1 = string;
 export type Revision2 = number;
@@ -127,10 +167,10 @@ export type DynamicFreshnessSeconds = number;
 export type RequestTimeoutSeconds = number;
 export type RetryDelayMs = number;
 export type BatchDelayMs = number;
-export type ExpectedRevision2 = number;
-export type Success7 = boolean;
-export type Code7 = number;
-export type Msg7 = string;
+export type ExpectedRevision4 = number;
+export type Success9 = boolean;
+export type Code9 = number;
+export type Msg9 = string;
 export type Nodes = PolicyState[];
 export type Protocol = "settings-1";
 export type NodeId2 = string;
@@ -146,6 +186,10 @@ export type Digest = string;
 export type Durable = true;
 
 export interface SettingsContract {
+  media_removal_intent: MediaRemovalIntent;
+  media_removal_preview: PublicResponseMediaRemovalPreview;
+  media_remove: MediaRemove;
+  media_removal: PublicResponseMediaRemoval;
   media_lookup: MediaLookup;
   media_update: MediaUpdate;
   media_edit: MediaEdit;
@@ -166,12 +210,57 @@ export interface SettingsContract {
   delivery: SettingsDelivery;
   receipt: DeliveryReceipt;
 }
-export interface MediaLookup {
+export interface MediaRemovalIntent {
   id: Id;
+  expected_revision: ExpectedRevision;
+  delete_original?: DeleteOriginal;
+  safe_delete?: SafeDelete;
+}
+export interface PublicResponseMediaRemovalPreview {
+  success?: Success;
+  code?: Code;
+  msg?: Msg;
+  data: MediaRemovalPreview;
+}
+export interface MediaRemovalPreview {
+  id: Id1;
+  token: Token;
+  record_count: RecordCount;
+  file_count: FileCount;
+  file_retained: FileRetained;
+  delete_original: DeleteOriginal1;
+  safe_delete: SafeDelete1;
+  resume_operation_id?: ResumeOperationId;
+}
+export interface MediaRemove {
+  id: Id2;
+  expected_revision: ExpectedRevision1;
+  delete_original?: DeleteOriginal2;
+  safe_delete?: SafeDelete2;
+  operation_id: OperationId;
+  expected_plan: ExpectedPlan;
+}
+export interface PublicResponseMediaRemoval {
+  success?: Success1;
+  code?: Code1;
+  msg?: Msg1;
+  data: MediaRemoval;
+}
+export interface MediaRemoval {
+  id: Id3;
+  deleted: Deleted;
+  purged: Purged;
+  purge_pending: PurgePending;
+  records_removed?: RecordsRemoved;
+  files_deleted?: FilesDeleted;
+  file_retained?: FileRetained1;
+}
+export interface MediaLookup {
+  id: Id4;
 }
 export interface MediaUpdate {
-  id: Id1;
-  expected_revision: ExpectedRevision;
+  id: Id5;
+  expected_revision: ExpectedRevision2;
   metadata: MediaMetadata;
 }
 export interface MediaMetadata {
@@ -181,7 +270,7 @@ export interface MediaMetadata {
   description?: Description;
 }
 export interface MediaEdit {
-  id: Id2;
+  id: Id6;
   edit_id: EditId;
   recipe: ImageRecipe;
 }
@@ -199,20 +288,23 @@ export interface CropRect {
   height: Height;
 }
 export interface PublicResponseMediaDetails {
-  success?: Success;
-  code?: Code;
-  msg?: Msg;
+  success?: Success2;
+  code?: Code2;
+  msg?: Msg2;
   data: MediaDetails;
 }
 export interface MediaDetails {
-  id: Id3;
+  id: Id7;
   label: Label;
   url: Url;
   mime: Mime;
   size: Size;
   created_at: CreatedAt;
+  reused?: Reused;
   kind: Kind;
   title?: Title1;
+  deleted?: Deleted1;
+  purge_pending?: PurgePending1;
   metadata: MediaMetadata;
   revision: Revision;
   width: Width1;
@@ -225,15 +317,17 @@ export interface MediaQuery {
   query?: Query;
   page?: Page;
   kind?: Kind1;
+  trash?: Trash;
 }
 export interface MediaUpload {
+  purpose?: Purpose;
   filename: Filename;
   upload_id: UploadId;
 }
 export interface PublicResponseMediaCatalog {
-  success?: Success1;
-  code?: Code1;
-  msg?: Msg1;
+  success?: Success3;
+  code?: Code3;
+  msg?: Msg3;
   data: MediaCatalog;
 }
 export interface MediaCatalog {
@@ -243,25 +337,28 @@ export interface MediaCatalog {
   page_size?: PageSize;
 }
 export interface MediaItem {
-  id: Id4;
+  id: Id8;
   label: Label1;
   url: Url1;
   mime: Mime1;
   size: Size1;
   created_at: CreatedAt1;
+  reused?: Reused1;
   kind: Kind2;
   title?: Title2;
+  deleted?: Deleted2;
+  purge_pending?: PurgePending2;
 }
 export interface PublicResponseMediaItem {
-  success?: Success2;
-  code?: Code2;
-  msg?: Msg2;
+  success?: Success4;
+  code?: Code4;
+  msg?: Msg4;
   data: MediaItem;
 }
 export interface PublicResponseIconCatalog {
-  success?: Success3;
-  code?: Code3;
-  msg?: Msg3;
+  success?: Success5;
+  code?: Code5;
+  msg?: Msg5;
   data: IconCatalog;
 }
 export interface IconCatalog {
@@ -271,12 +368,13 @@ export interface IconCatalog {
   page_size?: PageSize1;
 }
 export interface IconAsset {
-  id: Id5;
+  id: Id9;
   label: Label2;
   url: Url2;
   mime: Mime2;
   size: Size2;
   created_at: CreatedAt2;
+  reused?: Reused2;
 }
 export interface IconQuery {
   query?: Query1;
@@ -288,15 +386,15 @@ export interface IconUpload {
   upload_id: UploadId1;
 }
 export interface PublicResponseIconAsset {
-  success?: Success4;
-  code?: Code4;
-  msg?: Msg4;
+  success?: Success6;
+  code?: Code6;
+  msg?: Msg6;
   data: IconAsset;
 }
 export interface PublicResponseSettingsState {
-  success?: Success5;
-  code?: Code5;
-  msg?: Msg5;
+  success?: Success7;
+  code?: Code7;
+  msg?: Msg7;
   data: SettingsState;
 }
 export interface SettingsState {
@@ -324,7 +422,7 @@ export interface SitePreferences {
   allow_indexing?: AllowIndexing;
 }
 export interface MenuItem {
-  id: Id6;
+  id: Id10;
   label: Label3;
   href: Href;
   icon?: Icon;
@@ -354,13 +452,13 @@ export interface DeliveryState {
   error: Error;
 }
 export interface SaveSettings {
-  expected_revision: ExpectedRevision1;
+  expected_revision: ExpectedRevision3;
   value: PublicSettings;
 }
 export interface PublicResponsePolicyState {
-  success?: Success6;
-  code?: Code6;
-  msg?: Msg6;
+  success?: Success8;
+  code?: Code8;
+  msg?: Msg8;
   data: PolicyState;
 }
 export interface PolicyState {
@@ -380,13 +478,13 @@ export interface CachePolicy {
   batch_delay_ms?: BatchDelayMs;
 }
 export interface SavePolicy {
-  expected_revision: ExpectedRevision2;
+  expected_revision: ExpectedRevision4;
   value: CachePolicy;
 }
 export interface PublicResponseNodeList {
-  success?: Success7;
-  code?: Code7;
-  msg?: Msg7;
+  success?: Success9;
+  code?: Code9;
+  msg?: Msg9;
   data: NodeList;
 }
 export interface NodeList {

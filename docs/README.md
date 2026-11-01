@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读、按页面注册的动态请求、演示身份/浏览量、真实匿名历史评论点赞和阅读反馈，以及真实账号登录、独立后台壳、基本站点/主题/系统设置、图标库、图片/视频媒体库、附件资料/图片编辑与内容准备页；完整博客/CMS 尚未全部实现。
+本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读、按页面注册的动态请求、演示身份/浏览量、真实匿名历史评论点赞和阅读反馈，以及真实账号登录、独立后台壳、基本站点/主题/系统设置、图标库、图片/视频/通用附件媒体库、统一多文件上传/同哈希复用/安全删除、附件资料/图片编辑与内容准备页；完整博客/CMS 尚未全部实现。
 
 ## 先从这里读
 
@@ -41,7 +41,8 @@
 30. [递归菜单与图标库](decisions/0025-recursive-menus-and-icon-library.md)、[使用指南](development/menu-icons.md) 与 [验证](handoff/menu-icons-verification.md)：树形编辑、共享图标浏览/上传、公开导航递归及资源地址版本化。
 31. [自定义代码页面与链接选择](architecture/registered-pages.md)：已确认的页面注册/公开选项边界，以及待实施内容选择接口；无在线代码编辑。
 32. [媒体详情与图片编辑](decisions/0026-media-details-and-image-editing.md)、[操作指南](development/media-library.md) 与 [实际验收](handoff/media-editor-verification.md)：元数据持久化、版本冲突保护、原件不覆盖的裁剪/旋转/翻转/缩小。
-32. [基础媒体库运行指南](development/media-library.md)：图片/视频上传选择、稳定媒体绑定、紧凑预览与当前限制。
+33. [统一上传与安全删除](decisions/0027-shared-upload-queue-and-safe-removal.md) 与 [实际验收](handoff/media-uploads-verification.md)：多文件进度/降级、内容复用、回收站、同哈希安全/整组删除与冻结范围重试。
+34. [基础媒体库运行指南](development/media-library.md)：图片/视频/通用附件、多文件上传选择、稳定媒体绑定、紧凑预览与当前限制。
 
 ## 目录职责
 

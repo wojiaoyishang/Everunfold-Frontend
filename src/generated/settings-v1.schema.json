@@ -216,6 +216,11 @@
           "format": "date-time",
           "title": "Created At",
           "type": "string"
+        },
+        "reused": {
+          "default": false,
+          "title": "Reused",
+          "type": "boolean"
         }
       },
       "required": [
@@ -423,10 +428,16 @@
           "title": "Created At",
           "type": "string"
         },
+        "reused": {
+          "default": false,
+          "title": "Reused",
+          "type": "boolean"
+        },
         "kind": {
           "enum": [
             "image",
-            "video"
+            "video",
+            "file"
           ],
           "title": "Kind",
           "type": "string"
@@ -435,6 +446,16 @@
           "default": "",
           "title": "Title",
           "type": "string"
+        },
+        "deleted": {
+          "default": false,
+          "title": "Deleted",
+          "type": "boolean"
+        },
+        "purge_pending": {
+          "default": false,
+          "title": "Purge Pending",
+          "type": "boolean"
         },
         "metadata": {
           "$ref": "#/$defs/MediaMetadata"
@@ -557,10 +578,16 @@
           "title": "Created At",
           "type": "string"
         },
+        "reused": {
+          "default": false,
+          "title": "Reused",
+          "type": "boolean"
+        },
         "kind": {
           "enum": [
             "image",
-            "video"
+            "video",
+            "file"
           ],
           "title": "Kind",
           "type": "string"
@@ -569,6 +596,16 @@
           "default": "",
           "title": "Title",
           "type": "string"
+        },
+        "deleted": {
+          "default": false,
+          "title": "Deleted",
+          "type": "boolean"
+        },
+        "purge_pending": {
+          "default": false,
+          "title": "Purge Pending",
+          "type": "boolean"
         }
       },
       "required": [
@@ -650,13 +687,193 @@
           "enum": [
             "all",
             "image",
-            "video"
+            "video",
+            "file"
           ],
           "title": "Kind",
           "type": "string"
+        },
+        "trash": {
+          "default": false,
+          "title": "Trash",
+          "type": "boolean"
         }
       },
       "title": "MediaQuery",
+      "type": "object"
+    },
+    "MediaRemoval": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "deleted": {
+          "title": "Deleted",
+          "type": "boolean"
+        },
+        "purged": {
+          "title": "Purged",
+          "type": "boolean"
+        },
+        "purge_pending": {
+          "title": "Purge Pending",
+          "type": "boolean"
+        },
+        "records_removed": {
+          "default": 0,
+          "title": "Records Removed",
+          "type": "integer"
+        },
+        "files_deleted": {
+          "default": 0,
+          "title": "Files Deleted",
+          "type": "integer"
+        },
+        "file_retained": {
+          "default": false,
+          "title": "File Retained",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "deleted",
+        "purged",
+        "purge_pending"
+      ],
+      "title": "MediaRemoval",
+      "type": "object"
+    },
+    "MediaRemovalIntent": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "delete_original": {
+          "default": false,
+          "title": "Delete Original",
+          "type": "boolean"
+        },
+        "safe_delete": {
+          "default": true,
+          "title": "Safe Delete",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "expected_revision"
+      ],
+      "title": "MediaRemovalIntent",
+      "type": "object"
+    },
+    "MediaRemovalPreview": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "token": {
+          "title": "Token",
+          "type": "string"
+        },
+        "record_count": {
+          "title": "Record Count",
+          "type": "integer"
+        },
+        "file_count": {
+          "title": "File Count",
+          "type": "integer"
+        },
+        "file_retained": {
+          "title": "File Retained",
+          "type": "boolean"
+        },
+        "delete_original": {
+          "title": "Delete Original",
+          "type": "boolean"
+        },
+        "safe_delete": {
+          "title": "Safe Delete",
+          "type": "boolean"
+        },
+        "resume_operation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resume Operation Id"
+        }
+      },
+      "required": [
+        "id",
+        "token",
+        "record_count",
+        "file_count",
+        "file_retained",
+        "delete_original",
+        "safe_delete"
+      ],
+      "title": "MediaRemovalPreview",
+      "type": "object"
+    },
+    "MediaRemove": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "delete_original": {
+          "default": false,
+          "title": "Delete Original",
+          "type": "boolean"
+        },
+        "safe_delete": {
+          "default": true,
+          "title": "Safe Delete",
+          "type": "boolean"
+        },
+        "operation_id": {
+          "pattern": "^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_plan": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Plan",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "expected_revision",
+        "operation_id",
+        "expected_plan"
+      ],
+      "title": "MediaRemove",
       "type": "object"
     },
     "MediaUpdate": {
@@ -687,6 +904,15 @@
     "MediaUpload": {
       "additionalProperties": false,
       "properties": {
+        "purpose": {
+          "default": "library",
+          "enum": [
+            "library",
+            "icon"
+          ],
+          "title": "Purpose",
+          "type": "string"
+        },
         "filename": {
           "maxLength": 160,
           "minLength": 1,
@@ -935,6 +1161,62 @@
         "data"
       ],
       "title": "PublicResponse[MediaItem]",
+      "type": "object"
+    },
+    "PublicResponse_MediaRemovalPreview_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/MediaRemovalPreview"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[MediaRemovalPreview]",
+      "type": "object"
+    },
+    "PublicResponse_MediaRemoval_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/MediaRemoval"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[MediaRemoval]",
       "type": "object"
     },
     "PublicResponse_NodeList_": {
@@ -1312,6 +1594,18 @@
   },
   "additionalProperties": false,
   "properties": {
+    "media_removal_intent": {
+      "$ref": "#/$defs/MediaRemovalIntent"
+    },
+    "media_removal_preview": {
+      "$ref": "#/$defs/PublicResponse_MediaRemovalPreview_"
+    },
+    "media_remove": {
+      "$ref": "#/$defs/MediaRemove"
+    },
+    "media_removal": {
+      "$ref": "#/$defs/PublicResponse_MediaRemoval_"
+    },
     "media_lookup": {
       "$ref": "#/$defs/MediaLookup"
     },
@@ -1371,6 +1665,10 @@
     }
   },
   "required": [
+    "media_removal_intent",
+    "media_removal_preview",
+    "media_remove",
+    "media_removal",
     "media_lookup",
     "media_update",
     "media_edit",
@@ -1394,8 +1692,29 @@
   "title": "SettingsContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.4.0",
+  "x-everunfold-contract-version": "1.6.0",
   "x-everunfold-operations": [
+    {
+      "name": "previewMediaRemoval",
+      "path": "/v1/admin/media/remove-preview",
+      "method": "POST",
+      "input": "media_removal_intent",
+      "response": "media_removal_preview"
+    },
+    {
+      "name": "removeMedia",
+      "path": "/v1/admin/media/remove",
+      "method": "POST",
+      "input": "media_remove",
+      "response": "media_removal"
+    },
+    {
+      "name": "restoreMedia",
+      "path": "/v1/admin/media/restore",
+      "method": "POST",
+      "input": "media_lookup",
+      "response": "media_removal"
+    },
     {
       "name": "readMedia",
       "path": "/v1/admin/media/detail",

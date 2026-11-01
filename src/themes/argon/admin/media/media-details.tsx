@@ -12,6 +12,7 @@ import {
 import { Modal } from "../../components/ui/modal";
 import { Icon } from "../../components/icon";
 import { MediaPreview } from "./media-preview";
+import { MediaRemovalControls } from "./media-removal";
 import { MediaImageEditor } from "./image-editor";
 export function MediaDetailsDialog({
   item,
@@ -20,16 +21,20 @@ export function MediaDetailsDialog({
   onClose,
   onNavigate,
   onChanged,
+  onRemoved,
 }: {
   item: MediaItem;
   previous?: MediaItem;
   next?: MediaItem;
   onClose: () => void;
+  onRemoved: () => void;
   onNavigate: (item: MediaItem) => void;
   onChanged: (item: MediaDetails, created: boolean) => void;
 }) {
   const attachment = useMediaAttachment(item.id);
-  const { detail, draft, loading, busy, error, notice } = attachment;
+  const { detail, draft, loading, error, notice } = attachment;
+  const [removing, setRemoving] = useState(false);
+  const busy = attachment.busy || removing;
   const [editing, setEditing] = useState(false);
   const [editDirty, setEditDirty] = useState(false);
   const [confirm, setConfirm] = useState(false);
@@ -142,6 +147,7 @@ export function MediaDetailsDialog({
                   kind={info.kind}
                   label={info.title || info.label}
                   playable
+                  deleted={info.deleted}
                 />
               </div>
               <div className="admin-media-preview-actions">
@@ -156,15 +162,17 @@ export function MediaDetailsDialog({
                     编辑图片
                   </Button>
                 )}
-                <TextLink
-                  className="admin-button"
-                  href={info.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Icon name="external" />
-                  查看原文件
-                </TextLink>
+                {!info.deleted && (
+                  <TextLink
+                    className="admin-button"
+                    href={info.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Icon name="external" />
+                    {info.kind === "file" ? "下载文件" : "查看原文件"}
+                  </TextLink>
+                )}
               </div>
               {detail?.source_id && (
                 <p className="admin-media-source">
@@ -172,18 +180,15 @@ export function MediaDetailsDialog({
                   由原图编辑生成，原文件已保留。
                 </p>
               )}
-              {detail && !detail.editable && (
-                <p className="admin-media-source">
-                  {info.kind === "video"
-                    ? "视频支持预览与资料编辑。"
-                    : "此文件支持预览与资料编辑，暂不支持像素处理。"}
-                </p>
-              )}
             </section>
             <section className="admin-media-detail-info" aria-label="附件资料">
               <div className="admin-media-file-heading">
                 <span className="admin-badge">
-                  {info.kind === "video" ? "视频" : "图片"}
+                  {info.kind === "video"
+                    ? "视频"
+                    : info.kind === "image"
+                      ? "图片"
+                      : "文件"}
                 </span>
                 <strong>{info.label}</strong>
               </div>
@@ -227,7 +232,7 @@ export function MediaDetailsDialog({
                       <TextField
                         value={draft.title ?? ""}
                         maxLength={160}
-                        disabled={busy}
+                        disabled={busy || info.deleted}
                         placeholder={info.label}
                         onChange={(event) =>
                           attachment.setDraft({
@@ -244,7 +249,7 @@ export function MediaDetailsDialog({
                           aria-label="替代文本"
                           value={draft.alt_text ?? ""}
                           maxLength={1000}
-                          disabled={busy}
+                          disabled={busy || info.deleted}
                           onChange={(event) =>
                             attachment.setDraft({
                               ...draft,
@@ -263,7 +268,7 @@ export function MediaDetailsDialog({
                         rows={2}
                         value={draft.caption ?? ""}
                         maxLength={2000}
-                        disabled={busy}
+                        disabled={busy || info.deleted}
                         onChange={(event) =>
                           attachment.setDraft({
                             ...draft,
@@ -278,7 +283,7 @@ export function MediaDetailsDialog({
                         rows={3}
                         value={draft.description ?? ""}
                         maxLength={10000}
-                        disabled={busy}
+                        disabled={busy || info.deleted}
                         onChange={(event) =>
                           attachment.setDraft({
                             ...draft,
@@ -321,24 +326,34 @@ export function MediaDetailsDialog({
             </section>
           </div>
           <div className="admin-media-dialog-footer">
-            <span role="status">
-              {busy
-                ? "正在保存…"
-                : attachment.dirty
-                  ? "有未保存的修改"
-                  : notice || "修改资料后点击保存"}
-            </span>
-            <Button
-              className="admin-button admin-button-primary"
-              disabled={busy || loading || !attachment.dirty}
-              onClick={async () => {
-                const result = await attachment.save();
-                if (result) onChanged(result, false);
-              }}
-            >
-              <Icon name="check" />
-              保存资料
-            </Button>
+            {detail && (
+              <MediaRemovalControls
+                detail={detail}
+                disabled={attachment.busy || attachment.dirty}
+                onComplete={onRemoved}
+                onBusy={setRemoving}
+              />
+            )}
+            <div className="admin-media-dialog-save">
+              <span role="status">
+                {attachment.busy
+                  ? "正在保存…"
+                  : attachment.dirty
+                    ? "有未保存的修改"
+                    : notice || (info.deleted ? "此文件已放入回收站" : "")}
+              </span>
+              <Button
+                className="admin-button admin-button-primary"
+                disabled={busy || loading || !attachment.dirty || info.deleted}
+                onClick={async () => {
+                  const result = await attachment.save();
+                  if (result) onChanged(result, false);
+                }}
+              >
+                <Icon name="check" />
+                保存资料
+              </Button>
+            </div>
           </div>
         </>
       )}

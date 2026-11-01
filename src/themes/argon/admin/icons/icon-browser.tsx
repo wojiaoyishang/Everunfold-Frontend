@@ -4,6 +4,7 @@ import { useIconLibrary } from "@/core/media/icon-library";
 import { builtinIconNames, Icon } from "../../components/icon";
 import { LibraryIcon } from "../../components/library-icon";
 import { Button, TextField } from "../../components/ui/primitives";
+import { UploadQueueView } from "../../components/ui/upload-queue";
 import { FilePicker } from "../../components/ui/file-picker";
 export interface IconChoice {
   id: string;
@@ -11,6 +12,13 @@ export interface IconChoice {
   url?: string;
 }
 const labels: Record<string, string> = {
+  crop: "裁剪",
+  rotate: "旋转",
+  "flip-horizontal": "水平翻转",
+  "flip-vertical": "垂直翻转",
+  undo: "撤销",
+  redo: "重做",
+  list: "列表",
   home: "首页",
   archive: "归档",
   leaf: "叶片",
@@ -98,14 +106,18 @@ export function IconBrowser({
           value={library.query}
           onChange={(event) => library.setQuery(event.target.value)}
         />
-        <FilePicker
-          disabled={library.uploading}
-          label={library.uploading ? "正在入库…" : "上传图标"}
-          onFile={(file) => {
-            setSource("uploaded");
-            void library.upload(file);
-          }}
-        />
+        <div className="admin-upload-actions">
+          <FilePicker
+            label="上传图标"
+            onFiles={(files) => {
+              setSource("uploaded");
+              library.upload(files);
+            }}
+          />
+          <span className="admin-upload-hint">
+            SVG / PNG / WebP<small>支持多选 · 单文件 1 MB 内</small>
+          </span>
+        </div>
       </div>
       <div className="admin-library-tabs" aria-label="图标来源">
         {(
@@ -132,7 +144,6 @@ export function IconBrowser({
           {library.canRetry && (
             <Button
               className="admin-button"
-              disabled={library.uploading}
               onClick={() => void library.retry()}
             >
               重试
@@ -140,23 +151,14 @@ export function IconBrowser({
           )}
         </div>
       )}
-      {library.lastUploaded && (
-        <div className="admin-library-feedback" role="status">
-          <LibraryIcon
-            name={library.lastUploaded.id}
-            url={library.lastUploaded.url}
-          />
-          <span>已上传：{library.lastUploaded.label}</span>
-          {onSelect && (
-            <Button
-              className="admin-button"
-              onClick={() => choose(library.lastUploaded!)}
-            >
-              使用此图标
-            </Button>
-          )}
-        </div>
-      )}
+      <UploadQueueView
+        items={library.uploads}
+        onRetry={(id) => library.queue.retry(id)}
+        onCancel={(id) => library.queue.cancel(id)}
+        onClear={() => library.queue.clearFinished()}
+        onSelect={onSelect ? choose : undefined}
+      />
+
       <div
         className="admin-icon-grid"
         aria-busy={source === "uploaded" && library.loading}
@@ -206,11 +208,6 @@ export function IconBrowser({
           </Button>
         </div>
       )}
-      <div className="admin-library-caption">
-        {selected && !onSelect
-          ? `已选择 ${selected.label} · ${selected.id}`
-          : "SVG / PNG / WebP · 最大 1 MB · 上传后可在所有菜单中复用"}
-      </div>
     </div>
   );
 }

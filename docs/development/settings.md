@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-4，2026-11-01。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-5，2026-11-01。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -30,11 +30,11 @@
 | GET/PATCH `/v1/admin/frontend-nodes/{node_id}/cache-policy` | 读取/以 expected_revision 保存该节点策略 |
 | POST `/v1/admin/frontend-nodes/{node_id}/sync` | 重发当前版本；若派生媒体 URL 变化则发布新的公共设置修订 |
 
-公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以 settings 1.4.0 生成契约为准。公共 value 包含 site/theme 与后端派生的 icon_urls；客户端映射不作为保存事实源。Node 内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
+公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以 settings 1.6.0 生成契约为准。公共 value 包含 site/theme 与后端派生的 icon_urls；客户端映射不作为保存事实源。Node 内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
 
 ## 初次启动与配置
 
-1. 后端执行 `uv sync --locked`，再显式执行 `uv run python init.database.py`。已有数据库可加 `--no-create-database`。迁移 `0004_settings` 建立节点策略、审计、投递表，`0005_icon_media` 增加媒体原件记录，`0006_media_details` 增加附件资料与编辑来源；仅为空站点插入初值，不重置现有账号/文章。API 启动不做迁移。
+1. 后端执行 `uv sync --locked`，再显式执行 `uv run python init.database.py`。已有数据库可加 `--no-create-database`。迁移 `0004_settings` 建立节点策略、审计、投递表，`0005_icon_media` 增加媒体原件记录，`0006_media_details` 增加附件资料与编辑来源，`0007_media_library` / `0008_media_safe_delete` 增加上传复用及安全删除回执；仅为空站点插入初值，不重置现有账号/文章。API 启动不做迁移。
 2. 后端 `config.toml` 的 `[frontends.web-main]` 设置 `enabled=true`、`settings_receiver_url="http://127.0.0.1:3001"`；两个方向的 token 仍只填写环境变量名称。非回环地址必须 HTTPS。
 3. 前端 `config.toml` 增加 `[settings]`：`directory="./var/settings"`、`receiver_host="127.0.0.1"`、`receiver_port=3001`、`source_epoch="实际后端 UUID"`。从已鉴权 GET 设置响应的 `data.source_epoch` 或 SQL `SELECT source_epoch FROM site_settings WHERE id=1` 获取，不从未经认证请求自动认领 epoch。
 4. 前端 `[backend]` 配置允许的真实 peer IP/CIDR、FastAPI → Next.js token 环境变量名称，与后端目标节点一致。接收器不信任 X-Forwarded-For；TLS/反代部署须重新评估真实连接来源边界。

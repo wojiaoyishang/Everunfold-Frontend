@@ -128,3 +128,25 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/design/media-details-desktop.png` | `6c7b6bc90d45366eb9d54dc67c88a0131a12e6c9d52a614981be7681f87685e2` |
 | `docs/design/media-editor-desktop.png` | `e87852a07766a4c4a54093aac2e12aa696fd41859c7e79da54f8776b8f8518f9` |
 | `docs/design/media-details-mobile.png` | `2f13a98b1b83fd2f4327468e375cfbdd35d7ccc44f0c43dac52380c4f304bc6d` |
+
+
+## media-upload-runtime-1 同步摘要（2026-11-01）
+
+本轮 ADR 0027 落地统一多文件队列、SHA-256 复用、通用附件和安全/整组删除。development-6、bootstrap-4、media-storage-5、media-library-runtime-3、menu-icons-runtime-3、settings-runtime-5；契约 settings 1.6.0 固定后端 a543d7e。历史摘要保留；原始 v2.11/v0.14 未修改。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `bced126df992a9bc4ca68d10e33f404fb40fa2743912592552ea2632bed4e05d` |
+| `docs/development/protocol.md` | `65cd858eb325bf08e03afd8ee5aedf5aa90eb3d4e41f74a9008e07eb697bb7d0` |
+| `docs/architecture/constraints.md` | `a8cbba7392a0042eb52936529515913ca07f612355b7ddb5b80889cd98a9c0f0` |
+| `docs/architecture/media-storage.md` | `0a9a7d5b6621d627e1b8d2454ab51b64019249eb7b8830dcabedcdfa1c502920` |
+| `docs/development/media-library.md` | `76c0c533c72524352a8b8708959dfc4dd33f03216a71923403688355d24df1da` |
+| `docs/development/menu-icons.md` | `1b64a7a7a7ab8445c5848c21ca0f81e87b68836f041d03d1d35c5a7ab3fc7e27` |
+| `docs/development/settings.md` | `50421b8498f4a421b5e72b6cfca1c60ac7b28be9ac15fc0396eb9c25bf346ff8` |
+| `docs/decisions/0027-shared-upload-queue-and-safe-removal.md` | `f48cf1cccca267f4f7fe1a22693c1a4d94a2e4eff595195ee96947234a663b28` |
+| `docs/handoff/media-uploads-verification.md` | `4116c6c3d5cc195a5843d7807f0baca03fcae87ceee1875bf29c4324bf6e0516` |
+| `docs/design/media-library-inline-actions.png` | `09ad27d30e17845b224bc719d4093e33561d933524c2d9218f80eeca2070cff7` |
+| `docs/design/media-library-removal-scope.png` | `f4e10bb1cfc862544945814053be3db6fd77beb0d330733946417ab62791ff9b` |
+| `docs/design/media-library-removal-mobile.png` | `1128071af55fc230101da6474e5a495cf2a846493590b09301d2fb20a6cee9c1` |
+| `docs/design/media-library-upload-queue.png` | `0bff6589b189adb5ca11313d16e6c1d3f8d21020213d59369d2bb64a2d885be7` |
+| `docs/design/icon-library-upload-queue.png` | `1f005f30462fd64ad0d96cdc2538da2cad9dcdd32c11ef600be50f3eb3fd2ef7` |

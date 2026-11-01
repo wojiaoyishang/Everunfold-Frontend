@@ -19,6 +19,72 @@ ajv.addSchema(
   "settings",
 );
 
+const previewMediaRemovalValidator = ajv.compile<
+  SettingsContract["media_removal_preview"]
+>({ $ref: "settings#/properties/media_removal_preview" });
+export function previewMediaRemoval(
+  baseUrl: string,
+  input: SettingsContract["media_removal_intent"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/media/remove-preview",
+    input,
+    previewMediaRemovalValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const removeMediaValidator = ajv.compile<SettingsContract["media_removal"]>({
+  $ref: "settings#/properties/media_removal",
+});
+export function removeMedia(
+  baseUrl: string,
+  input: SettingsContract["media_remove"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/media/remove",
+    input,
+    removeMediaValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const restoreMediaValidator = ajv.compile<SettingsContract["media_removal"]>({
+  $ref: "settings#/properties/media_removal",
+});
+export function restoreMedia(
+  baseUrl: string,
+  input: SettingsContract["media_lookup"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/media/restore",
+    input,
+    restoreMediaValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
 const readMediaValidator = ajv.compile<SettingsContract["media_details"]>({
   $ref: "settings#/properties/media_details",
 });

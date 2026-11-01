@@ -1,3 +1,4 @@
+import { uploadTransport, type UploadProgress } from "./upload-transport";
 /** Browser JSON transport; credentials, caching and desired-state writes stay explicit. */
 export type RequestFailure =
   "cancelled" | "timeout" | "network" | "http" | "invalid";
@@ -5,12 +6,14 @@ export class RequestError extends Error {
   constructor(
     public readonly kind: RequestFailure,
     public readonly status?: number,
+    public readonly code?: number,
   ) {
     super(`API request ${kind}`);
     this.name = "RequestError";
   }
 }
 export interface RequestOptions {
+  onUploadProgress?: (progress: UploadProgress) => void;
   signal?: AbortSignal;
   timeoutMs?: number;
   fetcher?: typeof fetch;
@@ -93,6 +96,7 @@ async function sendJSON<T>(
     fetcher = fetch,
     headers = {},
     credentials = "omit",
+    onUploadProgress,
   }: RequestOptions,
   body?: object,
   method: "GET" | "PUT" | "POST" | "PATCH" = "GET",
@@ -127,7 +131,11 @@ async function sendJSON<T>(
       cancelled,
       (async () => {
         if (controller.signal.aborted) throw new RequestError("cancelled");
-        const response = await fetcher(url, {
+        const transport =
+          binary && onUploadProgress
+            ? uploadTransport(onUploadProgress, fetcher)
+            : fetcher;
+        const response = await transport(url, {
           method,
           credentials,
           cache: "no-store",
@@ -144,7 +152,22 @@ async function sendJSON<T>(
             binary ?? (body === undefined ? undefined : JSON.stringify(body)),
           signal: controller.signal,
         });
-        if (!response.ok) throw new RequestError("http", response.status);
+        if (!response.ok) {
+          let code: number | undefined;
+          try {
+            const failure: unknown = await response.json();
+            if (
+              failure &&
+              typeof failure === "object" &&
+              "code" in failure &&
+              typeof failure.code === "number"
+            )
+              code = failure.code;
+          } catch {
+            /* HTTP status remains authoritative without a JSON error body. */
+          }
+          throw new RequestError("http", response.status, code);
+        }
         let result: unknown;
         try {
           result = await response.json();

@@ -81,6 +81,7 @@ export function outputSize(size: ImageSize, recipe: ImageRecipe): ImageSize {
   };
 }
 export function formatBytes(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`;
   return bytes < 1048576
     ? `${Math.max(1, Math.ceil(bytes / 1024))} KB`
     : `${(bytes / 1048576).toFixed(1)} MB`;
