@@ -152,6 +152,127 @@
       "title": "DeliveryState",
       "type": "object"
     },
+    "IconAsset": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "mime": {
+          "title": "Mime",
+          "type": "string"
+        },
+        "size": {
+          "title": "Size",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "url",
+        "mime",
+        "size",
+        "created_at"
+      ],
+      "title": "IconAsset",
+      "type": "object"
+    },
+    "IconCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/IconAsset"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 60,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "page",
+        "total"
+      ],
+      "title": "IconCatalog",
+      "type": "object"
+    },
+    "IconQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "default": "",
+          "maxLength": 160,
+          "title": "Query",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        }
+      },
+      "title": "IconQuery",
+      "type": "object"
+    },
+    "IconUpload": {
+      "additionalProperties": false,
+      "properties": {
+        "filename": {
+          "maxLength": 160,
+          "minLength": 1,
+          "title": "Filename",
+          "type": "string"
+        },
+        "data_base64": {
+          "maxLength": 1398104,
+          "minLength": 1,
+          "title": "Data Base64",
+          "type": "string"
+        },
+        "upload_id": {
+          "pattern": "^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Upload Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "data_base64",
+        "upload_id"
+      ],
+      "title": "IconUpload",
+      "type": "object"
+    },
     "MenuItem": {
       "additionalProperties": false,
       "properties": {
@@ -174,26 +295,14 @@
         },
         "icon": {
           "default": "link",
-          "enum": [
-            "home",
-            "archive",
-            "leaf",
-            "book",
-            "folder",
-            "tag",
-            "link",
-            "star",
-            "bell",
-            "flask"
-          ],
+          "pattern": "^(?:[a-z][a-z-]{0,31}|media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$",
           "title": "Icon",
           "type": "string"
         },
         "children": {
           "items": {
-            "$ref": "#/$defs/MenuLink"
+            "$ref": "#/$defs/MenuItem"
           },
-          "maxItems": 12,
           "title": "Children",
           "type": "array"
         }
@@ -204,52 +313,6 @@
         "href"
       ],
       "title": "MenuItem",
-      "type": "object"
-    },
-    "MenuLink": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
-          "title": "Id",
-          "type": "string"
-        },
-        "label": {
-          "maxLength": 60,
-          "minLength": 1,
-          "title": "Label",
-          "type": "string"
-        },
-        "href": {
-          "maxLength": 2048,
-          "minLength": 1,
-          "title": "Href",
-          "type": "string"
-        },
-        "icon": {
-          "default": "link",
-          "enum": [
-            "home",
-            "archive",
-            "leaf",
-            "book",
-            "folder",
-            "tag",
-            "link",
-            "star",
-            "bell",
-            "flask"
-          ],
-          "title": "Icon",
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "label",
-        "href"
-      ],
-      "title": "MenuLink",
       "type": "object"
     },
     "NodeList": {
@@ -299,6 +362,62 @@
         "delivery"
       ],
       "title": "PolicyState",
+      "type": "object"
+    },
+    "PublicResponse_IconAsset_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/IconAsset"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[IconAsset]",
+      "type": "object"
+    },
+    "PublicResponse_IconCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/IconCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[IconCatalog]",
       "type": "object"
     },
     "PublicResponse_NodeList_": {
@@ -393,6 +512,13 @@
         },
         "theme": {
           "$ref": "#/$defs/ThemePreferences"
+        },
+        "icon_urls": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Icon Urls",
+          "type": "object"
         }
       },
       "required": [
@@ -561,7 +687,6 @@
           "items": {
             "$ref": "#/$defs/MenuItem"
           },
-          "maxItems": 12,
           "title": "Navigation",
           "type": "array"
         },
@@ -646,6 +771,18 @@
   },
   "additionalProperties": false,
   "properties": {
+    "icons": {
+      "$ref": "#/$defs/PublicResponse_IconCatalog_"
+    },
+    "icon_query": {
+      "$ref": "#/$defs/IconQuery"
+    },
+    "icon_upload": {
+      "$ref": "#/$defs/IconUpload"
+    },
+    "icon": {
+      "$ref": "#/$defs/PublicResponse_IconAsset_"
+    },
     "settings": {
       "$ref": "#/$defs/PublicResponse_SettingsState_"
     },
@@ -669,6 +806,10 @@
     }
   },
   "required": [
+    "icons",
+    "icon_query",
+    "icon_upload",
+    "icon",
     "settings",
     "save_settings",
     "policy",
@@ -680,8 +821,22 @@
   "title": "SettingsContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.0.0",
+  "x-everunfold-contract-version": "1.1.0",
   "x-everunfold-operations": [
+    {
+      "name": "queryIcons",
+      "path": "/v1/admin/icons/query",
+      "method": "POST",
+      "input": "icon_query",
+      "response": "icons"
+    },
+    {
+      "name": "uploadIcon",
+      "path": "/v1/admin/icons/upload",
+      "method": "POST",
+      "input": "icon_upload",
+      "response": "icon"
+    },
     {
       "name": "readSettings",
       "path": "/v1/admin/settings",

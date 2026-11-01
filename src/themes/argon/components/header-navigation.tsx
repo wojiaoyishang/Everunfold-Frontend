@@ -18,6 +18,8 @@ import {
 } from "../navigation";
 import { AppLink as Link } from "./navigation-link";
 import { Icon } from "./icon";
+import { LibraryIcon } from "./library-icon";
+import { NavigationBranch } from "./navigation-branch";
 
 /** Website disclosure navigation: parent links stay links; arrows open child panels. */
 export function HeaderNavigation({ site }: { site: Site }) {
@@ -62,7 +64,7 @@ export function HeaderNavigation({ site }: { site: Site }) {
     setOpened(href);
     const links = Array.from(
       group.querySelectorAll<HTMLAnchorElement>(".header-submenu a"),
-    );
+    ).filter((link) => link.getClientRects().length > 0);
     const current = links.indexOf(document.activeElement as HTMLAnchorElement);
     const next =
       event.key === "Home"
@@ -79,18 +81,19 @@ export function HeaderNavigation({ site }: { site: Site }) {
   return (
     <nav ref={root} className="header-navigation" aria-label="顶部导航">
       {siteNavigation(site).map((item, index) => {
-        const expanded = opened === item.href;
+        const key = item.id ?? `${item.href}-${index}`;
+        const expanded = opened === key;
         const panelId = `${id}-${index}`;
         const active = navigationIsActive(pathname, item.href);
         return (
           <div
-            key={item.href}
+            key={key}
             className="header-menu-item"
             data-open={expanded}
             onPointerEnter={(event) => {
               if (event.pointerType !== "mouse") return;
               cancelLeave();
-              setOpened(item.children ? item.href : null);
+              setOpened(item.children ? key : null);
             }}
             onPointerLeave={(event) => {
               if (event.pointerType !== "mouse") return;
@@ -100,9 +103,7 @@ export function HeaderNavigation({ site }: { site: Site }) {
             onBlur={(event) => {
               if (!event.currentTarget.contains(event.relatedTarget)) close();
             }}
-            onKeyDown={
-              item.children ? (event) => onKey(event, item.href) : undefined
-            }
+            onKeyDown={item.children ? (event) => onKey(event, key) : undefined}
           >
             <div className="header-menu-trigger">
               <Link
@@ -112,7 +113,7 @@ export function HeaderNavigation({ site }: { site: Site }) {
                 {...navigationTarget(item.href)}
                 onClick={close}
               >
-                <Icon name={item.icon} />
+                <LibraryIcon name={item.icon} url={item.iconUrl} />
                 {item.label}
               </Link>
               {item.children && (
@@ -124,7 +125,7 @@ export function HeaderNavigation({ site }: { site: Site }) {
                   aria-controls={panelId}
                   onClick={() => {
                     cancelLeave();
-                    setOpened(expanded ? null : item.href);
+                    setOpened(expanded ? null : key);
                   }}
                 >
                   <Icon name="chevron" />
@@ -139,29 +140,12 @@ export function HeaderNavigation({ site }: { site: Site }) {
                 aria-hidden={!expanded}
               >
                 <div className="header-submenu-surface">
-                  {item.children.map((child) => (
-                    <Link
-                      key={child.href}
-                      href={child.href}
-                      aria-current={
-                        navigationIsActive(pathname, child.href)
-                          ? "page"
-                          : undefined
-                      }
-                      {...navigationTarget(child.href)}
-                      onClick={close}
-                    >
-                      <span className="submenu-icon">
-                        <Icon name={child.icon} />
-                      </span>
-                      <span>
-                        <strong>{child.label}</strong>
-                        <small>{child.description}</small>
-                      </span>
-                      {navigationTarget(child.href).target && (
-                        <Icon name="external" className="external-mark" />
-                      )}
-                    </Link>
+                  {item.children.map((child, childIndex) => (
+                    <NavigationBranch
+                      key={child.id ?? `${child.href}-${childIndex}`}
+                      item={child}
+                      onNavigate={() => close()}
+                    />
                   ))}
                 </div>
               </div>

@@ -1,17 +1,15 @@
 import type { Site } from "@/core/content/types";
 import { normalizePath, publicHref } from "@/core/content/urls";
-import type { IconName } from "./components/icon";
+import type { MenuItem } from "@/generated/settings-contract";
 
 export interface NavigationItem {
+  id?: string;
   label: string;
   href: string;
-  icon: IconName;
-  children?: {
-    label: string;
-    href: string;
-    icon: IconName;
-    description: string;
-  }[];
+  icon: string;
+  iconUrl?: string;
+  description?: string;
+  children?: NavigationItem[];
 }
 
 const known: Partial<Record<string, Omit<NavigationItem, "href">>> = {
@@ -89,18 +87,17 @@ export function navigationTarget(href: string) {
 
 /** Presentation overrides for the reference theme, without inventing business data. */
 export function siteNavigation(site: Site): NavigationItem[] {
-  if (site.settings)
-    return (site.settings.site.navigation ?? []).map((item) => ({
+  if (site.settings) {
+    const map = (item: MenuItem): NavigationItem => ({
+      id: item.id,
       label: item.label,
       href: item.href,
       icon: item.icon ?? "link",
-      children: item.children?.map((child) => ({
-        label: child.label,
-        href: child.href,
-        icon: child.icon ?? "link",
-        description: "",
-      })),
-    }));
+      iconUrl: site.settings?.icon_urls?.[item.icon ?? ""],
+      children: item.children?.length ? item.children.map(map) : undefined,
+    });
+    return (site.settings.site.navigation ?? []).map(map);
+  }
   const items = site.navigation.length
     ? site.navigation
     : [

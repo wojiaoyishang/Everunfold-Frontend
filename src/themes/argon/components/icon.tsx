@@ -69,6 +69,9 @@ const paths = {
 } as const;
 
 export type IconName = keyof typeof paths;
+export const builtinIconNames = Object.freeze(Object.keys(paths) as IconName[]);
+export const isBuiltinIcon = (name: string): name is IconName =>
+  Object.hasOwn(paths, name);
 
 export function Icon({
   name,

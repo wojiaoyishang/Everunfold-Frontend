@@ -18,6 +18,50 @@ ajv.addSchema(
   "settings",
 );
 
+const queryIconsValidator = ajv.compile<SettingsContract["icons"]>({
+  $ref: "settings#/properties/icons",
+});
+export function queryIcons(
+  baseUrl: string,
+  input: SettingsContract["icon_query"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/icons/query",
+    input,
+    queryIconsValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const uploadIconValidator = ajv.compile<SettingsContract["icon"]>({
+  $ref: "settings#/properties/icon",
+});
+export function uploadIcon(
+  baseUrl: string,
+  input: SettingsContract["icon_upload"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/icons/upload",
+    input,
+    uploadIconValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
 const readSettingsValidator = ajv.compile<SettingsContract["settings"]>({
   $ref: "settings#/properties/settings",
 });

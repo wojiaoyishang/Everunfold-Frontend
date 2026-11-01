@@ -9,6 +9,14 @@ export const builtinAdminModule = {
   ],
   pages: [
     {
+      id: "core.icons",
+      href: "/admin/icons",
+      label: "图标库",
+      description: "管理内置与上传的图标",
+      icon: "media",
+      menu: { group: "core.workspace", order: 35 },
+    },
+    {
       id: "core.settings.site",
       href: "/admin/settings",
       label: "站点设置",

@@ -61,10 +61,21 @@ export function SiteSettingsPage() {
           </SettingsSection>
           <SettingsSection
             title="导航菜单"
-            description="顶栏、侧栏与移动菜单使用同一份内容。支持两级导航。"
+            description="顶栏、侧栏与移动菜单使用同一份内容。每层都可添加子菜单。"
           >
             <MenuEditor
               value={site.navigation ?? []}
+              iconUrls={draft?.icon_urls}
+              onIconUrl={(id, url) =>
+                setDraft((current) =>
+                  current
+                    ? {
+                        ...current,
+                        icon_urls: { ...current.icon_urls, [id]: url },
+                      }
+                    : current,
+                )
+              }
               onChange={(navigation) => update({ navigation })}
             />
           </SettingsSection>

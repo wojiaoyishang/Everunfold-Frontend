@@ -103,6 +103,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin",
       "/admin/content",
       "/admin/media",
+      "/admin/icons",
       "/admin/settings",
       "/admin/settings/theme",
       "/admin/settings/system",

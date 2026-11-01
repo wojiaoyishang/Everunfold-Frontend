@@ -3,6 +3,27 @@
 export type Success = boolean;
 export type Code = number;
 export type Msg = string;
+export type Id = string;
+export type Label = string;
+export type Url = string;
+export type Mime = string;
+export type Size = number;
+export type CreatedAt = string;
+export type Items = IconAsset[];
+export type Page = number;
+export type Total = number;
+export type PageSize = number;
+export type Query = string;
+export type Page1 = number;
+export type Filename = string;
+export type DataBase64 = string;
+export type UploadId = string;
+export type Success1 = boolean;
+export type Code1 = number;
+export type Msg1 = string;
+export type Success2 = boolean;
+export type Code2 = number;
+export type Msg2 = string;
 export type SourceEpoch = string;
 export type Revision = number;
 export type Name = string;
@@ -10,41 +31,11 @@ export type Description = string;
 export type Author = string;
 export type AvatarUrl = string;
 export type Notice = string;
-export type Id = string;
-export type Label = string;
-export type Href = string;
-export type Icon =
-  | "home"
-  | "archive"
-  | "leaf"
-  | "book"
-  | "folder"
-  | "tag"
-  | "link"
-  | "star"
-  | "bell"
-  | "flask";
 export type Id1 = string;
 export type Label1 = string;
-export type Href1 = string;
-export type Icon1 =
-  | "home"
-  | "archive"
-  | "leaf"
-  | "book"
-  | "folder"
-  | "tag"
-  | "link"
-  | "star"
-  | "bell"
-  | "flask";
-/**
- * @maxItems 12
- */
-export type Children = MenuLink[];
-/**
- * @maxItems 12
- */
+export type Href = string;
+export type Icon = string;
+export type Children = MenuItem[];
 export type Navigation = MenuItem[];
 export type SeoDescription = string;
 export type TitleTemplate = string;
@@ -65,9 +56,9 @@ export type AppliedAt = string | null;
 export type Error = string | null;
 export type Delivery = DeliveryState[];
 export type ExpectedRevision = number;
-export type Success1 = boolean;
-export type Code1 = number;
-export type Msg1 = string;
+export type Success3 = boolean;
+export type Code3 = number;
+export type Msg3 = string;
 export type NodeId1 = string;
 export type SourceEpoch1 = string;
 export type Revision1 = number;
@@ -76,9 +67,9 @@ export type RequestTimeoutSeconds = number;
 export type RetryDelayMs = number;
 export type BatchDelayMs = number;
 export type ExpectedRevision1 = number;
-export type Success2 = boolean;
-export type Code2 = number;
-export type Msg2 = string;
+export type Success4 = boolean;
+export type Code4 = number;
+export type Msg4 = string;
 export type Nodes = PolicyState[];
 export type Protocol = "settings-1";
 export type NodeId2 = string;
@@ -94,6 +85,10 @@ export type Digest = string;
 export type Durable = true;
 
 export interface SettingsContract {
+  icons: PublicResponseIconCatalog;
+  icon_query: IconQuery;
+  icon_upload: IconUpload;
+  icon: PublicResponseIconAsset;
   settings: PublicResponseSettingsState;
   save_settings: SaveSettings;
   policy: PublicResponsePolicyState;
@@ -102,10 +97,45 @@ export interface SettingsContract {
   delivery: SettingsDelivery;
   receipt: DeliveryReceipt;
 }
-export interface PublicResponseSettingsState {
+export interface PublicResponseIconCatalog {
   success?: Success;
   code?: Code;
   msg?: Msg;
+  data: IconCatalog;
+}
+export interface IconCatalog {
+  items: Items;
+  page: Page;
+  total: Total;
+  page_size?: PageSize;
+}
+export interface IconAsset {
+  id: Id;
+  label: Label;
+  url: Url;
+  mime: Mime;
+  size: Size;
+  created_at: CreatedAt;
+}
+export interface IconQuery {
+  query?: Query;
+  page?: Page1;
+}
+export interface IconUpload {
+  filename: Filename;
+  data_base64: DataBase64;
+  upload_id: UploadId;
+}
+export interface PublicResponseIconAsset {
+  success?: Success1;
+  code?: Code1;
+  msg?: Msg1;
+  data: IconAsset;
+}
+export interface PublicResponseSettingsState {
+  success?: Success2;
+  code?: Code2;
+  msg?: Msg2;
   data: SettingsState;
 }
 export interface SettingsState {
@@ -117,6 +147,7 @@ export interface SettingsState {
 export interface PublicSettings {
   site: SitePreferences;
   theme: ThemePreferences;
+  icon_urls?: IconUrls;
 }
 export interface SitePreferences {
   name: Name;
@@ -130,17 +161,11 @@ export interface SitePreferences {
   allow_indexing?: AllowIndexing;
 }
 export interface MenuItem {
-  id: Id;
-  label: Label;
+  id: Id1;
+  label: Label1;
   href: Href;
   icon?: Icon;
   children?: Children;
-}
-export interface MenuLink {
-  id: Id1;
-  label: Label1;
-  href: Href1;
-  icon?: Icon1;
 }
 export interface ThemePreferences {
   accent?: Accent;
@@ -150,6 +175,9 @@ export interface ThemePreferences {
   background_url?: BackgroundUrl;
   background_video_url?: BackgroundVideoUrl;
   background_play?: BackgroundPlay;
+}
+export interface IconUrls {
+  [k: string]: string;
 }
 export interface DeliveryState {
   node_id: NodeId;
@@ -165,9 +193,9 @@ export interface SaveSettings {
   value: PublicSettings;
 }
 export interface PublicResponsePolicyState {
-  success?: Success1;
-  code?: Code1;
-  msg?: Msg1;
+  success?: Success3;
+  code?: Code3;
+  msg?: Msg3;
   data: PolicyState;
 }
 export interface PolicyState {
@@ -191,9 +219,9 @@ export interface SavePolicy {
   value: CachePolicy;
 }
 export interface PublicResponseNodeList {
-  success?: Success2;
-  code?: Code2;
-  msg?: Msg2;
+  success?: Success4;
+  code?: Code4;
+  msg?: Msg4;
   data: NodeList;
 }
 export interface NodeList {
