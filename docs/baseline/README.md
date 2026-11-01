@@ -212,3 +212,19 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/design/content-editor-page-desktop.png` | `2b2841178bb622c838024a01824ba72d9a4262369d36b344b7febe6c460181eb` |
 | `docs/design/content-editor-page-mobile.png` | `9273b4a6bd57a44f39c1cc81aa0563b4a918c8a4ba350393b48e47d2b8af89c9` |
 | `docs/design/content-publication-reading.png` | `460fef4352e3f9b2f4acae5867390129bef9dda440e408cfa0edf295941dec7e` |
+
+## functional-test-data-1 同步摘要（2026-11-02）
+
+用户最新要求测试阶段仅使用后台新数据，按ADR 0032撤回开发库旧公开WordPress试导入并正常同步；原行/媒体保留。同步区域改为局部样式和紧凑响应式布局，指南content-management-3。数据库0010、API契约和两份原始附件不变。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `f67e5b680a1ca9bd1a37d985d0269df9e040b021155a896284cdd68e2ade7c21` |
+| `docs/development/content-management.md` | `3b3876d73383ab280df9a847ba3fbb87d320aaccc97160b9dde0b146d7fb7a7e` |
+| `docs/development/public-reading.md` | `bfa49cb575336aba6d6c7cd9c96929f27d954999dbb4713351ca522d20729dc1` |
+| `docs/decisions/0031-content-publication-and-editor-pages.md` | `05660dc10565e3cfd9f8a3b9d98089e5c0233d01f0bd67549cdf87379b0996aa` |
+| `docs/decisions/0032-functional-test-data-and-sync-status.md` | `78f1dd37074d8ba1cb1e6823fb94f8c9f35437d75d3b46bfde9a705025eedd24` |
+| `docs/handoff/content-test-data-verification.md` | `686f66e514528cdfb3ad35b5a08ca2aa7426ca2201d8b172ed2f6c3a1975f3bb` |
+| `docs/design/content-sync-status-desktop.png` | `466e3a4a9684e817575e7da4a08da763cd614390fb95c6c910b7042210566da4` |
+| `docs/design/content-sync-status-mobile.png` | `f631906a9944827eb50862e79718e58c3fca7c8c7ba25291ba2c6fd35fd0f5a6` |
+| `docs/design/content-test-data-home.png` | `0975949893f10f8831eda097c0649d76290b312cfce7fb7a27cea5880ab033d1` |

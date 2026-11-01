@@ -2,6 +2,7 @@
 import { useContentSync } from "@/core/content-management/use-content-sync";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
+import styles from "./content-sync.module.css";
 
 export function ContentSync({
   refreshKey = 0,
@@ -30,21 +31,24 @@ export function ContentSync({
             : "正在同步到前台…";
   return (
     <section
-      className="admin-content-sync"
+      className={styles.root}
       aria-label="前台同步状态"
+      data-state={failed ? "failed" : applied ? "applied" : "idle"}
       data-pending={pending}
     >
-      <Icon
-        name={
-          applied && !sync.error
-            ? "cloud-check"
-            : failed
-              ? "cloud-off"
-              : "cloud"
-        }
-      />
-      <div role="status">
-        <strong>{label}</strong>
+      <span className={styles.indicator}>
+        <Icon
+          name={
+            applied && !sync.error
+              ? "cloud-check"
+              : failed
+                ? "cloud-off"
+                : "cloud"
+          }
+        />
+      </span>
+      <div className={styles.copy} role="status">
+        <strong className={styles.title}>{label}</strong>
         <p>
           {sync.error ||
             (applied
@@ -53,7 +57,7 @@ export function ContentSync({
         </p>
       </div>
       <Button
-        className="admin-button"
+        className={`admin-button ${styles.action}`}
         disabled={sync.busy}
         onClick={() => void sync.retry()}
       >

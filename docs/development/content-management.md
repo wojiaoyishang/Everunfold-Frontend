@@ -1,6 +1,19 @@
 # 文章与说说管理
 
-版本：content-management-2，2026-11-01。基础 CRUD 见 ADR 0030；发布、同步与独立编辑页见 [ADR 0031](../decisions/0031-content-publication-and-editor-pages.md)。
+版本：content-management-3，2026-11-02。基础 CRUD 见 ADR 0030；发布、同步与独立编辑页见 [ADR 0031](../decisions/0031-content-publication-and-editor-pages.md)。当前联调数据范围见 [ADR 0032](../decisions/0032-functional-test-data-and-sync-status.md)。
+
+## 当前功能测试数据
+
+当前阶段只展示新后台创建并发布的内容。2026-11-02 已将开发库旧博客试导入的 78 篇文章和 9 个页面撤回，前台只剩两篇后台测试文章和两则说说；后续测试围绕这些内容及新建数据验证，不再次导入或恢复旧博客内容填充页面。正文、媒体、历史评论和分类关系仍保留在库中，恢复需用户明确调整本阶段范围。
+
+后端开发工具默认预检，实际撤回显式传 `--apply`：
+
+```powershell
+uv run python -m tools.withdraw_wordpress_preview
+uv run python -m tools.withdraw_wordpress_preview --apply
+```
+
+工具只接受本机开发库或专用隔离测试库；按有效管理员记录审计。撤回、审计、完整 release 与 Outbox 同事务，失败回滚，重复执行不产生版本；不用删快照或改前端过滤器。普通「重新同步」只重发当前最高版本，不会重新引入已撤回内容。
 
 ## 使用
 

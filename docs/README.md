@@ -49,7 +49,8 @@
 
 37. [注册式内容草稿](decisions/0030-registered-content-drafts.md)、[使用与开发指南](development/content-management.md) 与 [验收记录](handoff/content-management-verification.md)：独立文章/说说入口、持久 CRUD、版本冲突、回收恢复及公开边界。
 
-36. [真实发布与独立编辑页](decisions/0031-content-publication-and-editor-pages.md)、[使用指南](development/content-management.md) 与 [验收](handoff/content-publication-verification.md)：后端真实数据、独立编辑、发布/撤回、可靠投递、离线阅读和旧版本防回退。
+38. [真实发布与独立编辑页](decisions/0031-content-publication-and-editor-pages.md)、[使用指南](development/content-management.md) 与 [验收](handoff/content-publication-verification.md)：后端真实数据、独立编辑、发布/撤回、可靠投递、离线阅读和旧版本防回退。
+39. [功能联调数据与同步区域](decisions/0032-functional-test-data-and-sync-status.md) 与 [验收](handoff/content-test-data-verification.md)：旧 WordPress 数据退出开发环境公开测试、后台测试内容独立验证、紧凑同步状态与窄屏排版。
 
 ## 目录职责
 

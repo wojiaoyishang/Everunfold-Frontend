@@ -1,0 +1,95 @@
+.root {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  margin-top: 18px;
+  padding: 16px 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: var(--admin-sidebar);
+  transition:
+    background-color var(--admin-motion-fast) ease,
+    border-color var(--admin-motion-fast) ease;
+}
+.indicator {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+  transition:
+    color var(--admin-motion-fast) ease,
+    background-color var(--admin-motion-fast) ease;
+}
+.indicator > svg {
+  width: 19px;
+  height: 19px;
+}
+.root[data-state="applied"] .indicator {
+  color: var(--admin-positive);
+  background: var(--admin-positive-soft);
+}
+.root[data-state="failed"] .indicator {
+  color: var(--admin-danger);
+  background: color-mix(in srgb, var(--admin-danger) 9%, var(--admin-canvas));
+}
+.copy {
+  min-width: 0;
+}
+.title {
+  display: block;
+  color: var(--admin-text);
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.55;
+}
+.copy p {
+  margin: 3px 0 0;
+  color: var(--admin-muted);
+  font-size: 12px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.root .action {
+  gap: 7px;
+  padding: 8px 12px;
+  background: var(--admin-canvas);
+  white-space: nowrap;
+}
+.root[data-pending="true"] .indicator > svg {
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  50% {
+    opacity: 0.45;
+    transform: translateY(-2px);
+  }
+}
+@media (max-width: 560px) {
+  .root {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px 12px;
+    padding: 14px;
+  }
+  .root .action {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
+:global(.admin-root[data-admin-motion="reduced"]) .root,
+:global(.admin-root[data-admin-motion="reduced"]) .indicator,
+:global(.admin-root[data-admin-motion="reduced"]) .indicator > svg {
+  transition: none;
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(.admin-root[data-admin-motion="system"]) .root,
+  :global(.admin-root[data-admin-motion="system"]) .indicator,
+  :global(.admin-root[data-admin-motion="system"]) .indicator > svg {
+    transition: none;
+    animation: none;
+  }
+}
