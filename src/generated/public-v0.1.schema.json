@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://everunfold.local/contracts/public-v0.1.schema.json",
   "title": "PublicSnapshot",
-  "description": "Everunfold 0.1.0 公开阅读快照；仅含已发布公开内容，不是完整 ICP 协议。",
+  "description": "公开阅读快照 0.2；支持真实文章/说说，兼容旧 0.1 已发布快照。",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -17,8 +17,10 @@
   ],
   "properties": {
     "schema_version": {
-      "const": "0.1.0",
-      "type": "string"
+      "enum": [
+        "0.1.0",
+        "0.2.0"
+      ]
     },
     "source_epoch": {
       "type": "string",
@@ -221,6 +223,7 @@
         "kind": {
           "enum": [
             "article",
+            "shuoshuo",
             "page"
           ]
         },
@@ -313,6 +316,7 @@
         "kind": {
           "enum": [
             "article",
+            "shuoshuo",
             "page"
           ]
         },
@@ -459,5 +463,6 @@
         }
       }
     }
-  }
+  },
+  "x-everunfold-contract-version": "0.2.0"
 }

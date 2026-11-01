@@ -5,6 +5,8 @@ import {
   createDraft,
   readDraft,
   saveDraft,
+  publishDraft,
+  withdrawDraft,
 } from "@/generated/content-admin-client";
 import type {
   ContentTypeDefinition,
@@ -12,6 +14,7 @@ import type {
   DraftFields,
   DraftCreate,
   DraftSave,
+  DraftMutation,
 } from "@/generated/content-admin-contract";
 import { RequestError } from "@/core/http/request";
 import {
@@ -21,6 +24,10 @@ import {
   validateDraft,
 } from "./draft-state";
 
+type Write =
+  | { action: "create"; input: DraftCreate }
+  | { action: "save" | "publish"; input: DraftSave }
+  | { action: "withdraw"; input: DraftMutation };
 export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const [detail, setDetail] = useState<DraftDetail | null>(null);
@@ -36,7 +43,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
   const [latest, setLatest] = useState<DraftDetail | null>(null);
   const [uncertain, setUncertain] = useState(false);
   const [readAttempt, setReadAttempt] = useState(0);
-  const operation = useRef<DraftCreate | DraftSave | null>(null);
+  const operation = useRef<Write | null>(null);
   const apply = (value: DraftDetail) => {
     const next = draftFields(value);
     setBaseline(JSON.stringify(next));
@@ -55,6 +62,8 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     void readDraft(baseUrl, { id }, csrfToken, { signal: abort.signal })
       .then((response) => {
         if (!abort.signal.aborted) {
+          if (response.data.type_id !== type.id)
+            throw new RequestError("invalid");
           apply(response.data);
           setError("");
         }
@@ -66,7 +75,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
         if (!abort.signal.aborted) setLoading(false);
       });
     return () => abort.abort();
-  }, [id, baseUrl, csrfToken, readAttempt]);
+  }, [id, type.id, baseUrl, csrfToken, readAttempt]);
   const dirty = JSON.stringify(fields) !== baseline;
   useEffect(() => {
     if (!dirty && !uncertain && !busy) return;
@@ -76,22 +85,35 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, uncertain, busy]);
-  const save = async () => {
+  const save = async (action: "save" | "publish" | "withdraw" = "save") => {
     if (inFlight.current || conflict) return null;
     const invalid = validateDraft(fields, type);
     if (invalid) {
       setError(invalid);
       return null;
     }
-    if (!operation.current)
-      operation.current = detail
-        ? {
-            id: detail.id,
+    if (!operation.current) {
+      if (!detail)
+        operation.current = {
+          action: "create",
+          input: {
+            type_id: type.id,
             operation_id: crypto.randomUUID(),
-            expected_revision: detail.revision,
             fields,
-          }
-        : { type_id: type.id, operation_id: crypto.randomUUID(), fields };
+          },
+        };
+      else {
+        const mutation = {
+          id: detail.id,
+          operation_id: crypto.randomUUID(),
+          expected_revision: detail.revision,
+        };
+        operation.current =
+          action === "withdraw"
+            ? { action, input: mutation }
+            : { action, input: { ...mutation, fields } };
+      }
+    }
     inFlight.current = true;
     setBusy(true);
     setError("");
@@ -99,16 +121,26 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     try {
       const request = operation.current;
       const response =
-        "id" in request
-          ? await saveDraft(baseUrl, request, csrfToken)
-          : await createDraft(baseUrl, request, csrfToken);
+        request.action === "create"
+          ? await createDraft(baseUrl, request.input, csrfToken)
+          : request.action === "withdraw"
+            ? await withdrawDraft(baseUrl, request.input, csrfToken)
+            : request.action === "publish"
+              ? await publishDraft(baseUrl, request.input, csrfToken)
+              : await saveDraft(baseUrl, request.input, csrfToken);
       if (mounted.current) {
         apply(response.data);
         setUncertain(false);
-        setNotice("草稿已保存");
+        setNotice(
+          request.action === "publish"
+            ? "内容已发布"
+            : request.action === "withdraw"
+              ? "内容已撤回"
+              : "草稿已保存",
+        );
       }
       operation.current = null;
-      return response.data;
+      return mounted.current ? response.data : null;
     } catch (reason) {
       if (mounted.current) {
         const unknown = uncertainWrite(reason);

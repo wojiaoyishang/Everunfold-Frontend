@@ -18,7 +18,7 @@ export function DraftActionDialog({
     <ConfirmDialog
       open
       title={restoring ? "恢复这份内容？" : "移至回收站？"}
-      icon={restoring ? "undo" : "archive"}
+      icon={restoring ? "undo" : "trash"}
       intent={restoring ? "default" : "danger"}
       confirmLabel={restoring ? "恢复草稿" : "移至回收站"}
       description={
@@ -29,7 +29,7 @@ export function DraftActionDialog({
           <p>
             {restoring
               ? "恢复后可以继续编辑。"
-              : "内容会保留在回收站，之后可以恢复。"}
+              : "内容会移入回收站，并从前台撤下，之后可以恢复。"}
           </p>
         </>
       }

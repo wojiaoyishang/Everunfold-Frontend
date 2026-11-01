@@ -20,6 +20,8 @@ export interface AdminPageRegistration {
   readonly label: string;
   readonly description: string;
   readonly icon: AdminPageIcon;
+  /** Explicit trusted child routes; arbitrary descendants are never accepted. */
+  readonly matchesChild?: (pathname: string) => boolean;
   /** Detail pages can be registered without appearing in the sidebar. */
   readonly menu: { readonly group: string; readonly order: number } | null;
 }
@@ -120,6 +122,7 @@ export function createAdminRegistry(
     navigation,
     page: (id: string): AdminPageRegistration | undefined => pageMap.get(id),
     resolve: (pathname: string): AdminPageRegistration | undefined =>
-      routeMap.get(pathname.replace(/\/$/, "")),
+      routeMap.get(pathname.replace(/\/$/, "")) ??
+      pages.find((page) => page.matchesChild?.(pathname.replace(/\/$/, ""))),
   });
 }

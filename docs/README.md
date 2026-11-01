@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读、按页面注册的动态请求、演示身份/浏览量、真实匿名历史评论点赞和阅读反馈，以及真实账号登录、独立后台壳、基本站点/主题/系统设置、图标库、图片/视频/通用附件媒体库、统一多文件上传/同哈希复用/安全删除、附件资料/图片编辑、注册式文章/说说草稿管理与独立页面目录；完整博客/CMS 尚未全部实现。
+本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读、按页面注册的动态请求、演示身份/浏览量、真实匿名历史评论点赞和阅读反馈，以及真实账号登录、独立后台壳、基本站点/主题/系统设置、图标库、图片/视频/通用附件媒体库、统一多文件上传/同哈希复用/安全删除、附件资料/图片编辑、注册式文章/说说管理、独立编辑页、发布/撤回及可靠内容同步与独立页面目录；完整博客/CMS 尚未全部实现。
 
 ## 先从这里读
 
@@ -14,7 +14,7 @@
 8. [原站复刻决定](decisions/0004-reference-fidelity.md)：连续阅读、共享滚动/工具列、安全展示短代码。
 9. [整站动效决定](decisions/0005-site-motion-policy.md)：本站完整动效默认值、连续滚轮、非模态设置与双向过渡，更新 ADR 0004 的相关细节。
 10. [前台功能决定](decisions/0006-public-ui-completion.md)：二级导航、文章头图、评论预览、整卡点击和保存背景偏好。
-11. [内容类型衔接](architecture/content-types.md)：前台展示适配、后台类型注册与私有草稿已实现；公开类型迁移/发布与整体导入后置。
+11. [内容类型衔接](architecture/content-types.md)：前台展示适配、后台类型注册、草稿和发布/撤回同步已实现；整体历史导入后置。
 12. [说说与阅读工具决定](decisions/0007-shuoshuo-and-reader-features.md)：后端草案、前端适配、共享评论/图片/正文工具与偏好边界。
 13. [主题优化决定](decisions/0008-theme-polish-and-configuration.md) 与 [主题配置/缓存边界](architecture/theme-configuration.md)：首页偏好、紧凑卡片、横向推荐、品牌色联动；后台首批设置现由 ADR 0024 落地。
 14. [导航就绪与反馈决定](decisions/0009-navigation-readiness-and-feedback.md)：完整页面准备、切换后定位、5 秒导航延伸横幅、20 秒超时和竞争请求处理。
@@ -49,6 +49,8 @@
 
 37. [注册式内容草稿](decisions/0030-registered-content-drafts.md)、[使用与开发指南](development/content-management.md) 与 [验收记录](handoff/content-management-verification.md)：独立文章/说说入口、持久 CRUD、版本冲突、回收恢复及公开边界。
 
+36. [真实发布与独立编辑页](decisions/0031-content-publication-and-editor-pages.md)、[使用指南](development/content-management.md) 与 [验收](handoff/content-publication-verification.md)：后端真实数据、独立编辑、发布/撤回、可靠投递、离线阅读和旧版本防回退。
+
 ## 目录职责
 
 本轮接入入口：[动态请求开发指南](development/reader-requests.md) 与 [验收记录](handoff/reader-requests-verification.md)。原始设计依据保留在 [动态数据盘点](handoff/public-dynamic-data-audit.md)。
@@ -57,7 +59,7 @@
 
 最新界面检查：[悬浮层与错误页验收](handoff/failure-pages-verification.md)，包含最终生产构建、离线有/无缓存、错误边界、配对游戏及窄框检查；不会替代上一阶段尚未执行的其他验收。
 
-最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。登录现为通用账号入口，未指定返回地址时管理员回后台、普通账号回前台，成功反馈完成后再切换；认证等待态复用宽松的响应式卡片，背景为等比自适应的柔焦星空营地；管理员验证后进入独立后台工作台。2026-11-01 用户批准样例后已按 ADR 0021 拆分 auth/admin，后台拥有独立配色与偏好；文章/说说基础草稿 CRUD 已实现，正式发布仍待后续接通；媒体库上传、资料和基本图片编辑已由 ADR 0025/0026 实施。
+最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。登录现为通用账号入口，未指定返回地址时管理员回后台、普通账号回前台，成功反馈完成后再切换；认证等待态复用宽松的响应式卡片，背景为等比自适应的柔焦星空营地；管理员验证后进入独立后台工作台。2026-11-01 用户批准样例后已按 ADR 0021 拆分 auth/admin，后台拥有独立配色与偏好；文章/说说基础 CRUD、发布/撤回与完整快照同步已由 ADR 0031 接通；媒体库上传、资料和基本图片编辑已由 ADR 0025/0026 实施。
 
 | 目录 | 内容与维护时机 |
 | --- | --- |

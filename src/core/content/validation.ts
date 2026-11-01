@@ -6,7 +6,11 @@ import { normalizePath } from "./urls";
 
 const ajv = new Ajv({ strict: true, allErrors: false });
 addFormats(ajv);
-const validate = ajv.compile<PublicSnapshot>(publicSchema);
+const validate = ajv.compile<PublicSnapshot>(
+  Object.fromEntries(
+    Object.entries(publicSchema).filter(([key]) => !key.startsWith("x-")),
+  ),
+);
 
 export function parsePublicSnapshot(input: unknown): PublicSnapshot {
   if (!validate(input)) throw new Error("Invalid public snapshot contract");

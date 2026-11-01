@@ -7,6 +7,7 @@ import { readAppliedSettings } from "@/server/settings/current";
 import { readConfiguration } from "@/core/config/server";
 import type { PublicSnapshot } from "./types";
 import { parsePublicSnapshot } from "./validation";
+import { FileContentStore } from "@/server/content/store";
 
 export class SnapshotUnavailable extends Error {
   constructor() {
@@ -20,15 +21,23 @@ export class SnapshotUnavailable extends Error {
 export const readPublicSnapshot = cache(async (): Promise<PublicSnapshot> => {
   try {
     const configuration = readConfiguration();
+    const received = await new FileContentStore(
+      configuration.cache.directory,
+      configuration.frontendNodeId,
+      configuration.settings.sourceEpoch ?? "",
+      configuration.cache.maxSnapshotBytes,
+    ).read();
     const filename = path.join(configuration.cache.directory, "current.json");
-    const file = await fs.open(filename, "r");
+    const file = received ? null : await fs.open(filename, "r");
     try {
-      const stat = await file.stat();
-      if (stat.size > configuration.cache.maxSnapshotBytes)
+      const stat = await file?.stat();
+      if (stat && stat.size > configuration.cache.maxSnapshotBytes)
         throw new SnapshotUnavailable();
-      const snapshot = parsePublicSnapshot(
-        JSON.parse(await file.readFile({ encoding: "utf8" })),
-      );
+      const snapshot =
+        received ??
+        parsePublicSnapshot(
+          JSON.parse(await file!.readFile({ encoding: "utf8" })),
+        );
       const applied = await readAppliedSettings();
       const value = applied.publicSettings;
       return {
@@ -58,7 +67,7 @@ export const readPublicSnapshot = cache(async (): Promise<PublicSnapshot> => {
         },
       };
     } finally {
-      await file.close();
+      await file?.close();
     }
   } catch {
     throw new SnapshotUnavailable();

@@ -4,6 +4,7 @@ import path from "node:path";
 import { parse } from "smol-toml";
 import { parseConfiguration } from "../../src/core/config/schema";
 import { FileSettingsStore } from "../../src/server/settings/store";
+import { FileContentStore } from "../../src/server/content/store";
 import { settingsReceiver } from "../../src/server/settings/receiver";
 if (process.env.NODE_ENV !== "test") throw new Error("Test fixture only");
 const config = parseConfiguration(
@@ -27,5 +28,11 @@ const server = settingsReceiver(
   },
   process.env.TEST_SETTINGS_TOKEN!,
   config.backend.allowedPeerIps,
+  new FileContentStore(
+    path.resolve(config.cache.directory),
+    config.frontendNodeId,
+    config.settings.sourceEpoch!,
+    config.cache.maxSnapshotBytes,
+  ),
 );
 server.listen(config.settings.receiverPort, config.settings.receiverHost);

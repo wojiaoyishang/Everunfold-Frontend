@@ -3,11 +3,13 @@ import { createServer } from "node:http";
 import { BlockList, isIP } from "node:net";
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { SettingsStore } from "./store";
+import type { ContentStore } from "../content/store";
 
 export function settingsReceiver(
   store: SettingsStore,
   token: string,
   peers: string[],
+  content?: ContentStore,
 ) {
   if (token.length < 32 || !peers.length)
     throw new Error("Settings receiver credentials are not configured");
@@ -41,10 +43,13 @@ export function settingsReceiver(
         request.resume();
         return;
       }
-      if (
-        request.method !== "POST" ||
-        request.url !== "/internal/settings/apply"
-      ) {
+      const selected =
+        request.url === "/internal/settings/apply"
+          ? store
+          : request.url === "/internal/cache/v1/apply"
+            ? content
+            : undefined;
+      if (request.method !== "POST" || !selected) {
         reply(404, { error: "unknown_operation" });
         request.resume();
         return;
@@ -61,7 +66,7 @@ export function settingsReceiver(
       try {
         for await (const chunk of request) {
           size += chunk.length;
-          if (size > 65536) {
+          if (size > (selected === content ? content.maxBytes : 65536)) {
             reply(413, { error: "too_large" });
             request.resume();
             return;
@@ -69,7 +74,9 @@ export function settingsReceiver(
           chunks.push(Buffer.from(chunk));
         }
         const bytes = Buffer.concat(chunks);
-        const applied = await store.apply(JSON.parse(bytes.toString("utf8")));
+        const applied = await selected.apply(
+          JSON.parse(bytes.toString("utf8")),
+        );
         reply(200, {
           node_id: applied.node_id,
           source_epoch: applied.source_epoch,
@@ -80,7 +87,7 @@ export function settingsReceiver(
         });
       } catch {
         if (!response.headersSent)
-          reply(409, { error: "settings_not_applied" });
+          reply(409, { error: "resource_not_applied" });
       }
     },
   );

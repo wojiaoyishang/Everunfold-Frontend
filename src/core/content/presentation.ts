@@ -1,6 +1,5 @@
 import type { ContentPresentation } from "@/generated/presentation-contract";
 import type { Content, PublicSnapshot } from "./types";
-import { exampleMoments } from "./examples";
 import { normalizePath } from "./urls";
 
 export type { ContentPresentation };
@@ -27,19 +26,10 @@ export function presentLegacyContent({
 }
 
 export function publicFeed(snapshot: PublicSnapshot): FeedEntry[] {
-  const published = snapshot.contents.map((content) => ({
+  return snapshot.contents.map((content) => ({
     content: presentLegacyContent(content),
     example: false,
   }));
-  const paths = new Set(
-    published.map(({ content }) => normalizePath(content.path)),
-  );
-  return [
-    ...published,
-    ...exampleMoments
-      .filter((item) => !paths.has(normalizePath(item.path)))
-      .map((content) => ({ content, example: true })),
-  ];
 }
 
 export function resolvePresentation(snapshot: PublicSnapshot, path: string) {

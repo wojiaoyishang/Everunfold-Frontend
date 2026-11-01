@@ -1,10 +1,10 @@
 /* Generated from the backend public contract. Do not edit by hand. */
 
 /**
- * Everunfold 0.1.0 公开阅读快照；仅含已发布公开内容，不是完整 ICP 协议。
+ * 公开阅读快照 0.2；支持真实文章/说说，兼容旧 0.1 已发布快照。
  */
 export interface PublicSnapshot {
-  schema_version: "0.1.0";
+  schema_version: "0.1.0" | "0.2.0";
   source_epoch: string;
   generation: number;
   exported_at: string;
@@ -39,7 +39,7 @@ export interface Site {
 }
 export interface ContentDetail {
   id: string;
-  kind: "article" | "page";
+  kind: "article" | "shuoshuo" | "page";
   title: string;
   path: string;
   excerpt: string;

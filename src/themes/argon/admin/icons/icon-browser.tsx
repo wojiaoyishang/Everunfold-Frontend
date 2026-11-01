@@ -21,6 +21,7 @@ const labels: Record<string, string> = {
   list: "列表",
   home: "首页",
   archive: "归档",
+  trash: "垃圾桶",
   leaf: "叶片",
   book: "书本",
   folder: "文件夹",

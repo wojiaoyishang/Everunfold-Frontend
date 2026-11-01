@@ -8,13 +8,15 @@ import {
 import type {
   ContentTypeDefinition,
   DraftCatalog,
+  DraftQuery,
 } from "@/generated/content-admin-contract";
 import { draftError } from "./draft-state";
 
 export function useDraftCatalog(type: ContentTypeDefinition) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState<"draft" | "trash">("draft");
+  const [status, setStatus] =
+    useState<NonNullable<DraftQuery["status"]>>("all");
   const [page, setPage] = useState(1);
   const [revision, setRevision] = useState(0);
   const [result, setResult] = useState<DraftCatalog | null>(null);
@@ -84,7 +86,7 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
       setSearch(value);
       reset();
     },
-    setStatus: (value: "draft" | "trash") => {
+    setStatus: (value: NonNullable<DraftQuery["status"]>) => {
       setStatus(value);
       reset();
     },

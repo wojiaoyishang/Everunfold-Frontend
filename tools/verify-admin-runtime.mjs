@@ -104,6 +104,10 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/content",
       "/admin/content/article",
       "/admin/content/shuoshuo",
+      "/admin/content/article/new",
+      "/admin/content/shuoshuo/new",
+      "/admin/content/article/00000000-0000-0000-0000-000000000001/edit",
+      "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/edit",
       "/admin/pages",
       "/admin/media",
       "/admin/icons",
@@ -181,6 +185,31 @@ directory = "./var/absent-admin-verification-cache"
       backendRequests,
       0,
       "public reading must not reach the offline backend",
+    );
+    await new Promise((resolve, reject) => {
+      const fixture = spawn(
+        process.execPath,
+        [
+          "--import",
+          "tsx",
+          "tools/fixtures/settings-snapshot.mts",
+          workspace,
+          "withdraw",
+        ],
+        { cwd: projectRoot, stdio: "inherit", windowsHide: true },
+      );
+      fixture.once("error", reject);
+      fixture.once("exit", (code) =>
+        code === 0 ? resolve() : reject(new Error("Withdrawal fixture failed")),
+      );
+    });
+    assert.equal(
+      (await fetch(base + "/hello.html")).status,
+      404,
+      "withdrawn content must not reappear from the retained legacy snapshot",
+    );
+    console.log(
+      "Managed public releases passed: offline reading 200, withdrawal 404 without restarting Next.js.",
     );
     await writeFile(
       path.join(

@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-5，2026-11-01。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-6，2026-11-01。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -60,7 +60,7 @@ settings.directory/
     .*.staging   # 未完成写入不可见
 ```
 
-原始公开内容仍在 `cache.directory/current.json`。所有路径在服务器解析，相对路径相对前端配置根；浏览器不接收实际文件路径或服务端凭据。
+内容分发现按 ADR 0031 使用 `cache.directory/managed.json` 与 `releases/{node}/{epoch}`；接收第一份受管 release 之前才兼容读取 `current.json`，之后禁止回退。设置与内容复用同一监听器/投递基础设施，但版本与文件目录独立。所有路径在服务器解析，相对路径相对前端配置根；浏览器不接收实际文件路径或服务端凭据。
 
 - 后端离线、有公开快照/设置：直接使用本地完整版本，无定时过期，正文/菜单/SEO 仍可输出；动态请求按既有渐进失败行为隐藏失败字段。
 - 无公开快照：公开页面为可恢复 503，不能拿空配置伪装正常；登录/后台壳可打开，身份校验失败会提示连接异常。

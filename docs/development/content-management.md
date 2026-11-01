@@ -1,43 +1,62 @@
 # 文章与说说管理
 
-版本：content-management-1，2026-11-01。决定见 [ADR 0030](../decisions/0030-registered-content-drafts.md)。
+版本：content-management-2，2026-11-01。基础 CRUD 见 ADR 0030；发布、同步与独立编辑页见 [ADR 0031](../decisions/0031-content-publication-and-editor-pages.md)。
 
 ## 使用
 
-登录管理员后，左侧「内容」分组分别进入 `/admin/content/article` 和 `/admin/content/shuoshuo`；原 `/admin/content` 是类型入口。文章有必填标题、可选摘要和正文；说说标题可选、以正文为主。当前正文编辑器支持 Markdown 与安全预览，保存后仍为草稿。
+管理员在 `/admin/content/article` 和 `/admin/content/shuoshuo` 分别管理两种注册类型。新建进入 `/admin/content/{type}/new`，编辑进入 `/admin/content/{type}/{id}/edit`，不再使用编辑弹窗。文章标题必填、摘要可选；说说标题可选。正文暂为 Markdown，可切换安全预览。
 
-列表可按标题/摘要/正文搜索、分页、打开编辑；删除经过共享确认窗口移入回收站，可在回收站恢复。示例标有「示例」，与普通草稿一样能编辑/回收。没有永久删除、自动发布、定时发布、细化分类标签或 SEO 设置。
+1. 新建后先「保存草稿」，获得固定编辑地址。保存草稿只保存工作版本，不会改动前台。
+2. 准备好后点击「发布」；已发布内容修改后可「保存草稿」或「更新发布」。发布使用页面当前输入，并保留稳定的块 ID。
+3. 页面下方「前台内容已同步」表示配置节点已确认完整快照落盘；它与「内容已发布」分别表示两个阶段。失败时内容仍在后端，可「重新同步」。
+4. 「查看前台」打开公开地址。已打开的旧标签页需要刷新或发起新的页面导航；当前没有向所有浏览器主动推送刷新。
+5. 「撤回」使前台在同步后返回 404。垃圾桶按钮将内容移至回收站，同时撤回已发布版本；恢复只恢复工作草稿，需要再次发布才公开。
 
-保存失败保留输入；结果不明时锁住当前输入并使用同一操作 ID 重试，避免重复创建。版本冲突时保留自己的文字，可查看最新服务器版本，再明确确认是否丢弃输入并读取最新。关闭有未保存内容会询问，刷新/关闭标签页由浏览器离开保护提示。尚无跨刷新本地草稿恢复。
+列表支持全部、草稿、已发布、回收站、搜索和分页。已发布后又保存工作稿，会标记「有未发布修改」。代码「页面」入口独立；完整页面注册、暴露选项/启停保存仍按 registered-pages.md 后续实现。
 
-「页面」是独立代码页面目录，本次只分离入口，不把它当可写文章类型。完整页面注册、暴露选项保存、启停和链接选择后续按 registered-pages.md 实现；目前不生成虚假页面或代码编辑器。
+保存失败保留输入；未知结果使用固定操作 ID 重试，版本冲突保留本地输入并允许读取最新版本。返回按钮和普通页面链接对未保存内容弹出确认，刷新/关闭标签页使用浏览器离开保护。尚无跨刷新本地草稿恢复、浏览器历史后退的全面拦截或协同编辑。
 
-## 初始化与复现
+## 本地启动
 
-后端目录执行（使用当前实际 config.toml，也可显式传 `--config`）：
+后端目录先显式初始化，服务启动不自动迁移：
 
 ```powershell
 uv sync --frozen
 uv run python init.database.py --no-create-database
-uv run python -m tools.seed_content_drafts
 uv run uvicorn app.entrypoints.api:app --host 127.0.0.1 --port 8001 --no-proxy-headers
 ```
 
-迁移 0009 增加工作草稿、完整修订、操作回执三张表，保留已有用户、公开内容与媒体。初始化不自动写入示例；seed 显式添加两篇文章和两则说说，重复执行不覆盖已改文字、不恢复被回收的示例。不要使用 WordPress 备份作为可写数据库。
+另一个终端启动本地投递辅助进程（保留前端 `npm run dev`）：
 
-前端在自身目录执行 `npm run dev`，通过已有配置直接请求 FastAPI。契约来自后端 content-admin 1.0.0，来源提交/摘要在 `src/generated/content-admin-source.json`。公开 public-v0.1 与 settings 1.6.0 不变。
+```powershell
+uv run python -m tools.run_settings_dev --frontend-root E:\Programming\Node\Everunfold-Frontend
+```
 
-## 扩展与目录
+该命令同时启动独立 Node 接收器、Celery Worker 和 Scheduler，现同时处理设置与内容；不是启动 API/Next 的替代。本机接收器端口为 3001。服务运行后，无历史 release 的节点可在内容页点击「重新同步」初始化公开版本；正常发布自动登记同步。
 
-- 后端 `app/modules/content/type_registry.py`：可信类型注册，注册缺失不清库。
-- `draft_schemas / draft_repository / draft_service / draft_router / draft_models`：私有 DTO、查询、事务、HTTP、持久层。只有模块 router_init 装配路由。
-- `tools/export_content_admin_contract.py`：从权威注册与模型生成契约、操作和类型描述。先提交契约，再在前端运行 `npm run contract:sync -- <backend>/contracts/content-admin-v1.schema.json`。
-- 前端 `core/content-management`：注册元数据、请求生命周期、冲突/未知结果处理；主题 `admin/content`：列表、编辑器注册、预览和确认；路由仅装配。
-- 新类型复用后端用例及前端列表。新编辑器在主题 `content/editor-registry.tsx` 注册可信组件，键与后端描述对应；无法匹配时关闭编辑能力，不通过字符串加载远端代码。
-- 普通 Modal 增加可选 closing/onExited，确认完毕再触发编辑窗口退场；共享 ConfirmDialog、动效/减少动态、图标与封装输入继续复用。
+实际配置复用后端 `frontends.<node>.settings_receiver_url` 和对应 Token 环境变量；前端 `FRONTEND_NODE_ID`、`settings.source_epoch`、`backend.allowed_peer_ips` 必须匹配。生产分别部署这三个进程并提供凭据，不使用本地辅助命令生成的开发凭据。不要在浏览器配置内部 Token。
 
-## 数据与下一步
+`tools.seed_content_drafts` 是可选显式示例命令，重复执行不覆盖已编辑内容，**不自动发布**。本机原有两篇文章、两则说说已用于本轮正式发布联调；不提交这些数据库数据，不重新导入 WordPress。
 
-本期工作草稿与公开发布内容分离，没有修改公开内容和快照。正式发布时要实现发布事务、访问策略、索引、可靠事件、节点应用与撤回墓碑，再让前台读取新内容；不得将草稿直接写入已有公开快照。
+## 结构与契约
 
-正文是带稳定 UUID 的有序 JSONB 块，当前编辑器只支持 Markdown。完整混合块编辑器、Y.Doc 协同和媒体插入器尚未实现；后续必须沿用本期草稿身份与事务边界。当前没有借此完成历史文章导入/正式迁移。
+- 0010 迁移增加草稿发布信息、独立内容代次和不可变 `content_releases`；原用户、媒体和公开文章保留。
+- 后端 `type_registry` / `draft_*` 提供注册与私有 CRUD；`publication.py` 负责公开投影、索引、release 与 Outbox。业务、审计、回执和可靠事件同事务提交，网络投递在事务外。
+- 公开首发地址为 `/posts/{id}.html` 或 `/shuoshuo/{id}.html`，修改标题不会改地址；暂不提供自定义 slug。
+- content-admin **1.1.0** 与 public 快照 **0.2.0** 来源提交 **a86479b**，前端生成目录记录提交与 SHA256。公开契约历史文件名仍是 `public-v0.1.schema.json`，接受旧 0.1 与新 0.2，类型新增 shuoshuo；settings 1.6.0 不变。
+- 前端 `core/content-management` 处理请求/编辑状态，`themes/argon/admin/content` 负责展示，路由仅装配；类型与页面匹配在可信注册处声明，不开放任意未知后台子路径。
+- `server/content/store.ts` 与设置存储共用不可变 JSON 写入原语。内容版本存放在 `cache.directory/releases/{node}/{epoch}/`，`managed.json` 标识受管缓存。完整数据 ACK 前写入版本意图与完整文件；最高已知版本损坏/缺失时返回 503，不回退旧正文。
+
+## 检查与边界
+
+后端测试必须先迁移专用测试库，不能用开发库运行集成测试：
+
+```powershell
+uv run python init.database.py --config config.test.local.toml --no-create-database
+$env:RUN_DATABASE_TESTS = '1'
+uv run pytest -q --tb=short
+```
+
+前端 `npm run check`、`npm run verify:admin`；生产验收在临时副本构建，保持正在运行的 `.next` 不变。验证结果见 [本轮验收](../handoff/content-publication-verification.md)。
+
+当前只发布公开文章/说说。暂未实现受限/密码内容、定时发布、完整分类标签/SEO 编辑、封面/媒体插入器、Y.Doc、混合块编辑器、历史导入和完整代码页面配置。完整快照上限 8 MiB，没有增量分片/磁盘 GC/节点心跳；目录保留旧版本供诊断，但读取只认最高已知版本。跨仓库协议的完整生产缓存体系仍未完成。

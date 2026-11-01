@@ -1,16 +1,16 @@
 # 内容类型注册与公开展示衔接
 
-更新：2026-11-01，content-types-3。**文章/说说注册与私有草稿 CRUD 已实现；公开 API/快照的类型升级、正式发布及说说导入仍未执行。** 本期见 [ADR 0030](../decisions/0030-registered-content-drafts.md) 与 [管理指南](../development/content-management.md)。
+更新：2026-11-01，content-types-4。**文章/说说注册、独立编辑页、发布/撤回及完整快照同步已实现；历史说说导入仍未执行。** 本期见 [ADR 0031](../decisions/0031-content-publication-and-editor-pages.md) 与 [管理指南](../development/content-management.md)。
 
 ## 当前后台实现
 
-文章和说说是后端可信注册的独立类型，前端从 content-admin 1.0.0 契约生成类型描述与操作，再注册编译内编辑器。各自有独立列表入口，复用草稿创建、版本校验、编辑、搜索分页、回收恢复；代码页面目录单独管理。
+文章和说说是后端可信注册的独立类型，前端从 content-admin 1.1.0 契约生成类型描述与操作，再注册编译内编辑器。各自有独立列表与编辑页，复用创建、版本校验、编辑、搜索分页、回收恢复及发布用例；代码页面目录单独管理。
 
-工作草稿、完整历史和幂等回执存 PostgreSQL 三张新表，公开 contents 和快照不受影响。保存成功只代表草稿持久化。示例由显式 seed 命令写入并带标记。后续发布需沿用稳定 ID，完成可靠分发/撤回后再接前台；本期不是 Y.Doc 协同、混合块编辑器或公开 type 迁移完成。
+工作草稿、完整历史和幂等回执在 PostgreSQL；保存草稿与发布明确分开。发布将同一稳定 ID 投影到 contents，同事务产生不可变 release 与可靠事件。公开 kind 新增 shuoshuo，唯一前端适配层转换为展示 type。四条硬编码说说已移除，前台仅使用后端公开投影；显式 seed 的内容也必须发布后才显示。未完成 Y.Doc、混合块编辑与全部展示草案字段的正式业务接入。
 
 以下保留此前前台阶段依据，涉及“本轮”均指 2026-10-31 前台阶段。
 
-## 本轮已实现
+## 历史前台阶段（2026-10-31）
 
 后端提交 `29f198a` 发布 `contracts/presentation-v0.2.schema.json`（0.2.0-preview.1），源模型为 `app/modules/content/presentation_schema.py`。前端通过 contract:sync 生成 `presentation-contract.ts`、Schema 副本与来源 SHA256；旧 0.1 kind 在唯一适配层转为展示 type。首页混排、/ss 说说列表、轻量详情、搜索类型、长文折叠和共享阅读能力已实现。四条虚构说说不写入数据库/快照、不计入真实统计；评论/喜欢仅演示。详见 ADR 0007 和 frontend-reader-verification.md。
 
@@ -24,7 +24,7 @@
 
 ## 现状与原站依据
 
-在线后端 app/modules/content/schemas.py 的 ContentKind 仍只有 article/page；公开契约 0.1.0 使用 kind。数据库、查询、导出仍以此工作，本轮没有迁移数据库或重新导入。0.2 展示草案与在线 API 必须分别理解。
+历史公开契约 0.1.0 只有 kind=article/page；本轮 public 快照 0.2.0 增加 shuoshuo，保留 kind 字段及旧 0.1 读取兼容。presentation-v0.2 是独立展示草案，不能把两个 0.2 版本视作同一份业务契约。
 
 原 Argon 的 functions.php 用 register_post_type('shuoshuo') 注册独立类型，首页配置可查询 post + shuoshuo。template-parts/content-shuoshuo.php 和 content-shuoshuo-preview.php 展示可选标题、正文、日期/时间和互动摘要；文章则使用封面、标题、摘要及阅读全文。它们说明类型和展示应分开建模，不代表新系统必须复制其全部行为。
 

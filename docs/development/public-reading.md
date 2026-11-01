@@ -6,7 +6,9 @@
 
 草案类型生成命令：`npm run contract:sync -- 'E:\Programming\Python\Everunfold-Backend\contracts\presentation-v0.2.schema.json'`。该草案不替换当前公开 API/快照；此阶段不要为查看说说示例重新运行导入器。
 
-## 当前本机准备情况
+2026-11-01 更新：后台新内容通过发布/撤回与可靠投递接入前台，详见 [内容管理](content-management.md)。本轮前端四条硬编码说说已删除，发布了两篇后台示例文章、两则示例说说用于真实联调。下列试导入数量和旧快照路径是此前记录，不能当作当前总量。
+
+## 初始本机准备情况（历史）
 
 - PostgreSQL 18 与 Redis 已连通，专用 `everunfold_dev` / `everunfold_test` 已建立并显式迁移；真实配置已写入两个项目各自被忽略的 `config.toml`。
 - 本地开发库已导入 78 篇公开文章、9 个普通页面、11 条已批准评论、78 个标签、7 个分类；4 个商城系统页及 3 条密码保护内容排除。未迁移账户或评论联系信息。
@@ -51,7 +53,9 @@ npm.cmd run dev -- --port 3000
 
 ## 更新本地公开数据
 
-原备份始终只读。完整参数与 dry-run 见后端 `tools/wordpress_import/README.md`，先提取再导入。已准备的中间产物可显式重导入并刷新前端：
+常规文章/说说更新使用后台的「发布 / 更新发布 / 撤回」，节点异常可「重新同步」。受管缓存启用后，仅导出 current.json 不会改变前台；受控导入后还需在后台内容页重新同步，生成新的不可变 release。不要删除 managed.json 来回退旧正文。
+
+以下保留显式迁移/导出工具的历史用法，原备份始终只读。完整参数与 dry-run 见后端 `tools/wordpress_import/README.md`，先提取再导入。已准备的中间产物可显式重导入并刷新前端：
 
 ```powershell
 Set-Location -LiteralPath 'E:\Programming\Python\Everunfold-Backend'

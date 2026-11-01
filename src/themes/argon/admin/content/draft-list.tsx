@@ -8,7 +8,8 @@ import { useDraftCatalog } from "@/core/content-management/use-draft-catalog";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
-import { DraftEditor } from "./draft-editor";
+import { RouteLink } from "../../components/ui/route-link";
+import { ContentSync } from "./content-sync";
 import { DraftActionDialog } from "./draft-action-dialog";
 
 const dateLabel = (value: string) =>
@@ -22,7 +23,6 @@ const dateLabel = (value: string) =>
 
 export function DraftList({ type }: { type: ContentTypeDefinition }) {
   const catalog = useDraftCatalog(type);
-  const [editor, setEditor] = useState<{ id: string | null } | null>(null);
   const [action, setAction] = useState<DraftSummary | null>(null);
   const [notice, setNotice] = useState("");
   const data = catalog.result;
@@ -33,14 +33,14 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
         title={type.label}
         description={type.description}
         action={
-          <Button
+          <RouteLink
             className="admin-button admin-button-primary"
-            disabled={!catalog.compatible}
-            onClick={() => setEditor({ id: null })}
+            href={`/admin/content/${type.id}/new`}
+            showPending
           >
             <Icon name="plus" />
             新建{type.label}
-          </Button>
+          </RouteLink>
         }
       />
       <section
@@ -49,17 +49,26 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
       >
         <div className="admin-draft-list-toolbar">
           <div className="admin-draft-tabs" aria-label="内容状态">
-            <Button
-              aria-pressed={!trash}
-              onClick={() => catalog.setStatus("draft")}
-            >
-              草稿
-            </Button>
+            {(
+              [
+                ["all", "全部"],
+                ["draft", "草稿"],
+                ["published", "已发布"],
+              ] as const
+            ).map(([value, label]) => (
+              <Button
+                key={value}
+                aria-pressed={catalog.status === value}
+                onClick={() => catalog.setStatus(value)}
+              >
+                {label}
+              </Button>
+            ))}
             <Button
               aria-pressed={trash}
               onClick={() => catalog.setStatus("trash")}
             >
-              <Icon name="archive" />
+              <Icon name="trash" />
               回收站
             </Button>
           </div>
@@ -108,7 +117,7 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
             </div>
           ) : data.items.length === 0 ? (
             <div className="admin-draft-empty">
-              <Icon name={trash ? "archive" : "edit"} />
+              <Icon name={trash ? "trash" : "edit"} />
               <h2>
                 {catalog.search
                   ? "没有找到相关内容"
@@ -132,13 +141,13 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
                 </span>
                 <div className="admin-draft-row-main">
                   <div className="admin-draft-row-title">
-                    <Button
+                    <RouteLink
                       className="admin-draft-title"
-                      disabled={trash || catalog.loading || !catalog.compatible}
-                      onClick={() => setEditor({ id: item.id })}
+                      href={`/admin/content/${type.id}/${item.id}/edit`}
+                      showPending
                     >
                       {item.title || item.preview.slice(0, 60) || "未命名说说"}
-                    </Button>
+                    </RouteLink>
                     {item.is_demo && <span className="admin-badge">示例</span>}
                   </div>
                   <p>
@@ -151,19 +160,27 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
                     <time dateTime={item.updated_at}>
                       {dateLabel(item.updated_at)}
                     </time>
-                    <span>{trash ? "已回收" : "草稿"}</span>
+                    <span>
+                      {trash
+                        ? "已回收"
+                        : item.published_revision
+                          ? item.published_revision < item.revision
+                            ? "已发布 · 有未发布修改"
+                            : "已发布"
+                          : "草稿"}
+                    </span>
                   </div>
                 </div>
                 <div className="admin-draft-row-actions">
                   {!trash && (
-                    <Button
+                    <RouteLink
                       className="admin-button"
-                      disabled={catalog.loading || !catalog.compatible}
-                      onClick={() => setEditor({ id: item.id })}
+                      href={`/admin/content/${type.id}/${item.id}/edit`}
+                      showPending
                     >
                       <Icon name="edit" />
                       编辑
-                    </Button>
+                    </RouteLink>
                   )}
                   <Button
                     className="admin-icon-button"
@@ -172,7 +189,7 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
                     aria-label={`${trash ? "恢复" : "删除"} ${item.title || "说说"}`}
                     onClick={() => setAction(item)}
                   >
-                    <Icon name={trash ? "undo" : "archive"} />
+                    <Icon name={trash ? "undo" : "trash"} />
                   </Button>
                 </div>
               </article>
@@ -181,7 +198,7 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
         </div>
         <footer className="admin-draft-list-footer">
           <span>
-            {data ? `${data.total} 份${trash ? "已回收内容" : "草稿"}` : ""}
+            {data ? `${data.total} 份${trash ? "已回收内容" : "内容"}` : ""}
           </span>
           <div>
             <Button
@@ -208,21 +225,9 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
           </div>
         </footer>
       </section>
-      <p className="admin-draft-footnote">
-        这里保存创作中的草稿。公开站点仍展示已有内容。
-      </p>
-      {editor && (
-        <DraftEditor
-          key={editor.id ?? "new"}
-          type={type}
-          id={editor.id}
-          onClose={() => {
-            setEditor(null);
-            catalog.refresh();
-          }}
-          onSaved={() => catalog.refresh()}
-        />
-      )}
+      <ContentSync
+        key={`${catalog.status}-${data?.items.map((item) => item.revision).join("-")}`}
+      />
       {action && (
         <DraftActionDialog
           key={action.id}

@@ -1,7 +1,6 @@
 import type { PublicSnapshot } from "./types";
 import { resolveContent } from "./query";
 import { normalizePath } from "./urls";
-import { examplePaths } from "./examples";
 
 export const publicCodePaths = new Set([
   "/",
@@ -19,7 +18,7 @@ export function hasPublicRoute(
   requestedPath: string,
 ): boolean {
   const path = normalizePath(requestedPath);
-  if (publicCodePaths.has(path) || examplePaths.has(path)) return true;
+  if (publicCodePaths.has(path)) return true;
   const taxonomy = /^\/(category|tag)\/([^/]+)$/.exec(
     requestedPath.replace(/\/$/, ""),
   );

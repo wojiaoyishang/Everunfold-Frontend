@@ -4,6 +4,7 @@ import path from "node:path";
 import { tmpdir } from "node:os";
 import { snapshot } from "../../tests/fixtures";
 import { FileSettingsStore } from "../../src/server/settings/store";
+import { FileContentStore } from "../../src/server/content/store";
 const root = await realpath(process.argv[2]);
 const relative = path.relative(await realpath(tmpdir()), root);
 if (
@@ -18,6 +19,21 @@ value.source_epoch = epoch;
 const cache = path.join(root, "var/absent-admin-verification-cache");
 await mkdir(cache, { recursive: true });
 await writeFile(path.join(cache, "current.json"), JSON.stringify(value));
+const contentStore = new FileContentStore(cache, "admin-verification", epoch);
+const withdrawing = process.argv[3] === "withdraw";
+value.generation = withdrawing ? 3 : 2;
+if (withdrawing) {
+  value.contents = [];
+  value.comments = {};
+}
+await contentStore.apply({
+  protocol: "content-1",
+  node_id: "admin-verification",
+  source_epoch: epoch,
+  resource: "public-content",
+  revision: value.generation,
+  value,
+});
 const store = new FileSettingsStore(
   path.join(root, "var/settings-verification"),
   "admin-verification",

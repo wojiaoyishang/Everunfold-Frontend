@@ -4,6 +4,7 @@ import { parse } from "smol-toml";
 import { parseConfiguration } from "../src/core/config/schema";
 import { FileSettingsStore } from "../src/server/settings/store";
 import { settingsReceiver } from "../src/server/settings/receiver";
+import { FileContentStore } from "../src/server/content/store";
 const root = process.env.EVERUNFOLD_PROJECT_ROOT ?? process.cwd();
 const config = parseConfiguration(
   parse(
@@ -24,9 +25,20 @@ const store = new FileSettingsStore(
   config.frontendNodeId,
   config.settings.sourceEpoch,
 );
-const server = settingsReceiver(store, token, config.backend.allowedPeerIps);
+const content = new FileContentStore(
+  path.resolve(root, config.cache.directory),
+  config.frontendNodeId,
+  config.settings.sourceEpoch,
+  config.cache.maxSnapshotBytes,
+);
+const server = settingsReceiver(
+  store,
+  token,
+  config.backend.allowedPeerIps,
+  content,
+);
 server.listen(config.settings.receiverPort, config.settings.receiverHost, () =>
-  console.log(`Settings receiver ready for ${config.frontendNodeId}`),
+  console.log(`Content/settings receiver ready for ${config.frontendNodeId}`),
 );
 for (const signal of ["SIGINT", "SIGTERM"] as const)
   process.on(signal, () => server.close(() => process.exit(0)));

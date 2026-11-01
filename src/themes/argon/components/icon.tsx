@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  trash: "M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7",
   crop: "M6 3v15h15M3 6h15v15M18 6l3-3",
   rotate: "M3 10a9 9 0 1 1 3 9M3 4v6h6",
   "flip-horizontal": "M12 3v18M3 6l6 6-6 6V6ZM21 6l-6 6 6 6V6Z",

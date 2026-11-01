@@ -14,6 +14,12 @@ export const contentAdminModule: AdminModuleRegistration = {
     ...registeredContentTypes.map((type) => ({
       id: `content.${type.id}`,
       href: `/admin/content/${type.id}`,
+      matchesChild: (pathname: string) =>
+        pathname === `/admin/content/${type.id}/new` ||
+        new RegExp(
+          `^/admin/content/${type.id}/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/edit$`,
+          "i",
+        ).test(pathname),
       label: type.label,
       description: type.description,
       icon: type.icon === "leaf" ? ("leaf" as const) : ("book" as const),

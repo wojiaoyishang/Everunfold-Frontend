@@ -194,3 +194,21 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/design/content-draft-preview.png` | `0d26dbf91e78e349e2782cea960dea61ff12feeed4a16dc77b2fa131935207d5` |
 | `docs/design/content-draft-mobile.png` | `52478a83c57dcd7d9b2fd6d654dd17c1115da14371da212968598b5728a627ba` |
 | `docs/design/content-draft-list.png` | `04fc300c35966ae678689b628146b1b90fac0b45e2718a180467c034e74da231` |
+
+## content-publication-1 同步摘要（2026-11-01）
+
+本轮 ADR 0031、content-management-2、content-types-4、settings-runtime-6、bootstrap-5 接通真实文章/说说发布同步与独立编辑页。content-admin 1.1.0 / public 0.2.0 来源提交 a86479b；显式迁移0010。settings 1.6.0 和两份原始附件保持不变，历史摘要保留。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `6f392b340260dc473318406f871a463fc145face09e84ed1e97efdaeb88e004f` |
+| `docs/architecture/constraints.md` | `9df244691eb7e6bc6d74b1125c15b27f902a1673b6a0d6c39e67eee1f00e058b` |
+| `docs/architecture/content-types.md` | `94b15465e40d4d85f6ab04e324992c7ee7c218e3d0cb85a814787c6028d33594` |
+| `docs/development/content-management.md` | `6806a3e81c373867de76aa5be2c02f772ff57987b17bdfab166bab7862bbc870` |
+| `docs/development/settings.md` | `f7e8ad684c26255a3a0e148a3cb995483385faee4315ef003b780c434655a13c` |
+| `docs/development/public-reading.md` | `345f965dbcb18b9b797c2a14dad5498fa6618f30089bed16d6174d96dc785748` |
+| `docs/decisions/0031-content-publication-and-editor-pages.md` | `4eee310ec38e4eb84d25c174af21444f072586b731cfd6a0c1fb45a73f0b5f48` |
+| `docs/handoff/content-publication-verification.md` | `4a328d1a4852b47cc1f5aa014a1a66f386a7ec3ce802d7b374b8d3e25cfdb5d0` |
+| `docs/design/content-editor-page-desktop.png` | `2b2841178bb622c838024a01824ba72d9a4262369d36b344b7febe6c460181eb` |
+| `docs/design/content-editor-page-mobile.png` | `9273b4a6bd57a44f39c1cc81aa0563b4a918c8a4ba350393b48e47d2b8af89c9` |
+| `docs/design/content-publication-reading.png` | `460fef4352e3f9b2f4acae5867390129bef9dda440e408cfa0edf295941dec7e` |

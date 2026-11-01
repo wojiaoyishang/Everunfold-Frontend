@@ -1,6 +1,6 @@
 /** Node-only storage adapter. No identity, credentials or article body belongs here. */
-import { createHash, randomUUID } from "node:crypto";
-import { open, mkdir, readFile, readdir, link, unlink } from "node:fs/promises";
+import { open, readdir } from "node:fs/promises";
+import { jsonDigest, publishImmutableJson } from "../storage/immutable-json";
 import path from "node:path";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
@@ -24,18 +24,7 @@ export interface SettingsStore {
   apply(value: unknown): Promise<SettingsDelivery>;
 }
 
-function canonical(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
-  if (value && typeof value === "object")
-    return `{${Object.entries(value)
-      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-      .map(([key, item]) => `${JSON.stringify(key)}:${canonical(item)}`)
-      .join(",")}}`;
-  return JSON.stringify(value);
-}
-export function settingsDigest(value: unknown) {
-  return createHash("sha256").update(canonical(value)).digest("hex");
-}
+export const settingsDigest = jsonDigest;
 
 /** Immutable revision files + atomic hard-link publication avoid cross-process lost updates.
  * A partial staging file is never a visible revision. Highest committed revision always wins.
@@ -93,44 +82,10 @@ export class FileSettingsStore implements SettingsStore {
   }
   async apply(input: unknown) {
     const value = this.checked(input);
-    await mkdir(this.folder(), { recursive: true });
-    const target = path.join(
-      this.folder(),
-      `${value.resource}.${value.revision}.json`,
+    await publishImmutableJson(
+      path.join(this.folder(), `${value.resource}.${value.revision}.json`),
+      value,
     );
-    const staging = path.join(this.folder(), `.staging-${randomUUID()}`);
-    const bytes = canonical(value);
-    const file = await open(staging, "wx", 0o600);
-    try {
-      await file.writeFile(bytes, "utf8");
-      await file.sync();
-    } finally {
-      await file.close();
-    }
-    try {
-      try {
-        await link(staging, target);
-      } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-        const existing = this.checked(
-          JSON.parse(await readFile(target, "utf8")),
-        );
-        if (canonical(existing) !== bytes)
-          throw new Error("Conflicting settings revision");
-      }
-      // Flush directory entries where supported. Windows NTFS uses file flush + atomic link;
-      // sudden power-loss guarantees still depend on the filesystem and device.
-      if (process.platform !== "win32") {
-        const dir = await open(this.folder(), "r");
-        try {
-          await dir.sync();
-        } finally {
-          await dir.close();
-        }
-      }
-    } finally {
-      await unlink(staging).catch(() => {});
-    }
     return value;
   }
 }

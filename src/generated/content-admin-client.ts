@@ -33,6 +33,40 @@ export function readContentTypes(
   );
 }
 
+const readContentSyncValidator = ajv.compile<
+  ContentAdminContract["sync_state"]
+>({ $ref: "content-admin#/properties/sync_state" });
+export function readContentSync(baseUrl: string, options: RequestOptions = {}) {
+  return requestJSON(
+    baseUrl,
+    "/v1/admin/content/publication",
+    {},
+    readContentSyncValidator,
+    { ...options, credentials: "include", headers: { ...options.headers } },
+  );
+}
+
+const retryContentSyncValidator = ajv.compile<
+  ContentAdminContract["sync_state"]
+>({ $ref: "content-admin#/properties/sync_state" });
+export function retryContentSync(
+  baseUrl: string,
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/sync",
+    undefined,
+    retryContentSyncValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
 const queryDraftsValidator = ajv.compile<ContentAdminContract["catalog"]>({
   $ref: "content-admin#/properties/catalog",
 });
@@ -113,6 +147,50 @@ export function saveDraft(
     "/v1/admin/content/save",
     input,
     saveDraftValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const publishDraftValidator = ajv.compile<ContentAdminContract["detail"]>({
+  $ref: "content-admin#/properties/detail",
+});
+export function publishDraft(
+  baseUrl: string,
+  input: ContentAdminContract["save"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/publish",
+    input,
+    publishDraftValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const withdrawDraftValidator = ajv.compile<ContentAdminContract["detail"]>({
+  $ref: "content-admin#/properties/detail",
+});
+export function withdrawDraft(
+  baseUrl: string,
+  input: ContentAdminContract["mutation"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/withdraw",
+    input,
+    withdrawDraftValidator,
     {
       ...options,
       credentials: "include",
