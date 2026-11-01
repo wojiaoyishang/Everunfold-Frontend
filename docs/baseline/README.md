@@ -84,3 +84,31 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/development/settings.md` | `59c0edaca523b5f35415d601605b6652a67ac409a6919a9089f66618f6584cd9` |
 | `docs/handoff/settings-verification.md` | `776e993c6ee3a2869b8a2e7444c011f1e1fad1a67ca77bba4c6ec075328b2316` |
 | `docs/design/settings-theme-desktop.png` | `1f0950483422861039e72438eeb38ac48a1a63b4b75bbd47760f8165043707f9` |
+
+## menu-media-runtime-1 同步摘要（2026-11-01）
+
+本轮递归菜单、基础图片/视频库、移动点击展开和标题/正文公告的最终决定见 ADR 0025。settings 1.3.0 生成来源固定后端 9803e71；settings-runtime-3、menu-icons-runtime-2、media-library-runtime-1、media-storage-3、settings-design-4、admin-navigation-3、frontend-extensions-3 和 registered-pages-design-1 区分已实现与设计。历史摘要保留对应旧版，以下为本轮同步后的字节摘要；原始附件和 development-5 不变。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `0907727e08eb7b31976ac4b242b234803e12799aba7817c6135e047b867bfcfa` |
+| `docs/architecture/admin-navigation.md` | `fd3608332d08b4639fb95743a5b0752716d90d4dc56feee911d35c5bf0a603cc` |
+| `docs/architecture/frontend-extensions.md` | `6dfb4f949c3c741c20e8c6ca817c04ae0b7eef6696bd32be62214a6e1dd02318` |
+| `docs/architecture/media-storage.md` | `2d47b653ee6eabadcfa943c1f584280a328c690802ba4ab410e17fbd7c3b8ac1` |
+| `docs/architecture/settings-design.md` | `006610ca9afb45649ac067fb85ae423cc8eac20e3005896b3453ffc80a44e6c1` |
+| `docs/architecture/theme-configuration.md` | `7140048f4579bfa04b913168022a6d4d6937d7bf4eb75f52957b3801bc046cb7` |
+| `docs/architecture/registered-pages.md` | `4cc3b9a82ac88f4e7493244f3f721f85fc81e3ec9c9637e5b6b15b3d5f0814be` |
+| `docs/decisions/0017-media-storage-and-upload-lifecycle.md` | `aeccb180724a67541d4d3f84f64eb8b144169d577968af23c1ee03c1c9087d50` |
+| `docs/decisions/0025-recursive-menus-and-icon-library.md` | `ea024b1f973a9b6846ff2796ae2514fddb1b5ca2976cf869b1e7720c444362ce` |
+| `docs/development/settings.md` | `bb27b8170dff9e201d9f557d70d2352aa80a0c78caef4530fe970d3355b07b23` |
+| `docs/development/menu-icons.md` | `441843f7291a8ffddd0e3e8e1276c5842153f92e4c1dfcdfcfd031ee3ac557f7` |
+| `docs/development/media-library.md` | `dac06f546972302a7d0973179f063672acf7660dc334622fdab193b2e9a65007` |
+| `docs/handoff/menu-icons-verification.md` | `43df36f03fa95d6d7b8818cf9db581483f49ebcd6edacf0727e591b48d7b381b` |
+| `docs/design/menu-editor-desktop.png` | `ba6e53e270472266b61b6b0871d45e1819ed6a036bcf3a9ce7bef2b7e5193943` |
+| `docs/design/icon-library-picker.png` | `13ae31a6c4b0ed43465a61ad7b9e27d652b2f0069c91466ccda6c119999a9e18` |
+| `docs/design/icon-library-mobile.png` | `85eeb31f3bda331b1510e6771945c61efb528ef7d9e3851d2ce8a92a0e20028e` |
+| `docs/design/media-field-compact.png` | `3ef52fc04cae02caacc54c281806fba124ba533e037da37f67dba01c0de01a73` |
+| `docs/design/sidebar-flyout-desktop.png` | `f16c66cac9a11c4c15c573f76fcc7e490b1920db2ab4161658e995b49ded4e16` |
+| `docs/design/sidebar-drawer-mobile.png` | `050425101f5f588f0fea472e9fd73b6d84ed4744ba0492fd7c171f0cd6cd7754` |
+| `docs/design/sidebar-drawer-mobile-expanded.png` | `4f44f1a67f79a1f34fb3323c9255f1ba55d7a8136b144216dc7ac58fb92a308d` |
+| `docs/design/announcement-settings.png` | `a4f3d1b9cef3d05d98ea8cf2162a47a0fa33b899fb986237940d4cb4bcd4e4cd` |

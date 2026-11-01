@@ -1,18 +1,18 @@
 # 媒体库、上传存储与静态分发
 
-版本：media-storage-1，2026-10-31。**状态：设计规范，未实现。** 用户本轮要求先制定规则、不修改代码。已经确认的是后端媒体库负责资源上传和登记、无 CDN 时由后端提供图片、配置 Base URL 与支持相对/绝对路径的 Uploads Path，以及预留 CDN 接管上传的扩展边界。以下字段名称、目录布局、数据模型与接口形状是工程建议，正式实施时由后端发布版本化契约。
+版本：media-storage-3，2026-11-01。**状态：基础图片/视频与图标库、本地存储、Base URL 和设置字段关联已实现；变体、CDN 上传接管与回收流程仍为设计。** 用户已确认后端管理业务媒体、独立 Base URL、相对/绝对 Uploads Path 和可替换存储边界。本期实施细节以 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md) 与 [媒体指南](../development/media-library.md) 为准，下文未实现字段和接口仍须后端契约先行。
 
 本设计延续 [v2.11 媒体基线](../baseline/01_Design_Baseline_v2.11.md)、[v0.14 媒体一致性](../baseline/02_Engineering_Plan_v0.14.md) 和 [ADR 0017](../decisions/0017-media-storage-and-upload-lifecycle.md)：媒体 ID 稳定，原文件不可覆盖，WebP 为同一媒体的派生文件，默认公开、默认软删除。Next.js 消费媒体映射，不持有上传路径或存储凭据。
 
 ## 当前实现与目标的差别
 
-当前试导入把引用文件复制到前端 `public/uploads/wordpress/`，正文使用 `site://media/{id}`，内容记录内保存 `media_urls`，头图另存 `cover_url`。前端已按节点/属性解析映射，但后端尚无正式媒体库、上传端点、媒体存储表、静态挂载或 `[media]` 配置加载。此处是已存在的过渡实现，不能视作本规范已生效。
+试导入仍把引用文件复制到前端 `public/uploads/wordpress/`，正文使用 `site://media/{id}` 和 media_urls，头图另存 cover_url；这部分尚未整体迁移。本期新增 `app/modules/media`、media_assets 表、管理员图片/视频及图标上传/查询与后端 `/media` 分发；[media] 的 base_url/uploads_path 已生效。当前支持 icon/library 用途、本地提供器及头像/背景字段绑定；文章正文整体迁移与完整管理生命周期尚未完成。
 
 新目标把文章图片、头图、后台上传的背景/头像等业务媒体交给后端。Next.js 的代码包、CSS、字体、可信图标等构建资产仍属于前端。现有主题参考图片与试导入文件在将来的迁移核验完成之前保留，本轮不搬移或删除任何文件。
 
 ## 配置与地址含义
 
-建议新增后端配置组，下面只是文档示例，**不要现在写入实际配置；当前加载器会拒绝未知字段**：
+后端已支持下面的配置组；可省略 base_url 使用默认推导。实际部署值不提交，修改后重启相应服务。其余尚未发布的提供器/变体配置仍为设计：
 
 ```toml
 [media]
@@ -30,7 +30,7 @@ uploads_path = "./uploads"
 
 例：配置文件位于后端根目录时，`./uploads` 对应 `E:\Programming\Python\Everunfold-Backend\uploads`；也可显式指定 `E:/EverunfoldData/uploads` 或 Linux 上的 `/srv/everunfold/uploads`。先按现有规则定位配置文件，再解析其中相对上传路径，不把 `CONFIG_FILE` 自身的项目根解析规则一起改掉。拒绝空路径、Windows 的 `E:uploads` 盘符相对形式和隐式 shell 变量展开；不使用原 WordPress 备份或前端目录作为新上传根。
 
-服务启动时校验本地目录、权限与工作区位置；各 API/Worker 必须使用同一存储配置。多进程可以共用同一磁盘，多台服务器不能把各自同名路径当成同一个存储。跨主机时须使用共享存储或明确唯一文件源站。实施时把默认数据/工作目录加入忽略规则；本轮不创建目录、不修改 `.gitignore` 或配置。
+配置加载时校验路径形式，实际上传时检查目录写入能力。各 API/Worker 必须使用同一存储配置；同一磁盘可供多进程使用，多台服务器不能把各自同名路径当成同一个存储。跨主机须使用共享存储或明确唯一源站。本期已忽略 uploads 和旁路工作目录；生产权限、共享盘和断电恢复仍须部署验收。
 
 ## uploads 的物理目录
 

@@ -1,8 +1,10 @@
 # 站点、主题与系统设置设计
 
-版本：settings-design-2，2026-11-01。状态：**首批基本设置已实施；余下栏目继续作为设计**。用户已同意 PostgreSQL/FastAPI 保存业务设置与节点期望策略，Node 接收并保留已应用副本。已实施字段、API、事务/投递及限制以 [ADR 0024](../decisions/0024-versioned-settings-delivery.md) 和 [操作指南](../development/settings.md) 为准；原调研见 [盘点](../design/settings-reference-inventory.md)。
+版本：settings-design-4，2026-11-01。状态：**首批基本设置已实施；余下栏目继续作为设计**。用户已同意 PostgreSQL/FastAPI 保存业务设置与节点期望策略，Node 接收并保留已应用副本。已实施字段、API、事务/投递及限制以 [ADR 0024](../decisions/0024-versioned-settings-delivery.md) 和 [操作指南](../development/settings.md) 为准；原调研见 [盘点](../design/settings-reference-inventory.md)。
 
 当前已实现：三个注册式后台设置页、settings-1、显式数据库迁移、带 revision 的保存、审计/可靠事件、独立 Worker/Scheduler、真实 socket 鉴权接收器、FileSettingsStore。公开快照无 TTL；四项动态请求参数可以按节点保存，框架缓存/驱动/目录远程切换未实现。
+
+实施更新（2026-11-01）：菜单升级为递归结构树，图标库和图片/视频上传选择已实现，settings 1.3.0 公共投影携带后端派生的 icon_urls 与稳定媒体绑定对应 URL；见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)。自定义代码页面选项和内容链接选择仍为 [待实施设计](registered-pages.md)。
 
 ## 调研时事实（历史，实施更新见上）
 

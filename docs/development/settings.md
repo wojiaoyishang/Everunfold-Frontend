@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-1，2026-11-01。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-3，2026-11-01。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -8,11 +8,13 @@
 
 | 页面 | 已实现 |
 | --- | --- |
-| `/admin/settings` | 站点名称、简介、作者、头像地址、公告；两级导航添加/排序/删除与图标；SEO 描述、标题模板、允许索引 |
+| `/admin/settings` | 站点名称、简介、作者、头像地址、公告；递归导航结构树/父级调整/排序/删除，复用图标库选择；SEO 描述、标题模板、允许索引 |
+| `/admin/icons` | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用 |
+| `/admin/media` | 基础图片/视频列表、上传、类型筛选、名称搜索和分页；与表单选择器共用 |
 | `/admin/settings/theme` | 默认主题色/显示模式、首页横幅文字、背景图片/视频地址、默认播放 |
 | `/admin/settings/system` | 按稳定节点 ID 保存动态请求刷新间隔、超时、重试间隔、批处理窗口；查看期望/确认版本、重新同步；部署来源脱敏展示 |
 
-头像/背景目前填写可访问地址，后续媒体库接管上传与选择。讨论/注册/邮件/媒体提供器及高级 SEO 尚未实现；正式站点地址仍由 `PUBLIC_SITE_URL` 部署配置确定。标题模板保留一个 `%s` 文章标题，可用 `%site%` 站点名；不允许索引生成页面 robots noindex，后台始终 private/no-store/noindex。
+头像/背景图片/背景视频均可从媒体库上传或选择，也可手填地址。小缩略图与输入框同行，点击查看大图/视频；选择后按稳定媒体 ID保存，服务端派生地址，手动改地址会解除关联。见 [媒体指南](media-library.md) 和 [菜单与图标指南](menu-icons.md)。公告分为可选标题和内容（原 notice 字段），保存并同步后显示在首页内容列表上方。无标题时显示内容；超过一行或标题下有正文时可点击「展开更多」原位展开，保留动画并可收起。两项都清空隐藏公告，当前不使用首次弹窗或导航栏公告入口。讨论/注册/邮件/媒体提供器及高级 SEO 尚未实现；正式站点地址仍由 `PUBLIC_SITE_URL` 部署配置确定。标题模板保留一个 `%s` 文章标题，可用 `%site%` 站点名；不允许索引生成页面 robots noindex，后台始终 private/no-store/noindex。
 
 保存时把整份站点与主题草稿作为一个版本提交。提交成功后节点状态可能仍是等待同步，收到落盘确认才显示已应用。若提示版本冲突，当前草稿仍在；先保留你的修改，再使用明确标注的「放弃本地修改并载入服务器版本」合并。写请求不自动重试，未知结果先读取核对。节点策略按节点单独保存，切换选择不会覆盖该页其它节点草稿。
 
@@ -26,13 +28,13 @@
 | PATCH `/v1/admin/settings` | `{expected_revision, value: {site, theme}}` 保存整份配置 |
 | GET `/v1/admin/frontend-nodes` | 已配置的节点、各自策略与状态 |
 | GET/PATCH `/v1/admin/frontend-nodes/{node_id}/cache-policy` | 读取/以 expected_revision 保存该节点策略 |
-| POST `/v1/admin/frontend-nodes/{node_id}/sync` | 重发当前站点和策略版本，不修改业务值 |
+| POST `/v1/admin/frontend-nodes/{node_id}/sync` | 重发当前版本；若派生媒体 URL 变化则发布新的公共设置修订 |
 
-公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以 settings-1 生成契约为准。Node 内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
+公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以 settings 1.3.0 生成契约为准。公共 value 包含 site/theme 与后端派生的 icon_urls；客户端映射不作为保存事实源。Node 内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
 
 ## 初次启动与配置
 
-1. 后端执行 `uv sync --locked`，再显式执行 `uv run python init.database.py`。已有数据库可加 `--no-create-database`。迁移 `0004_settings` 建立节点策略、审计、投递表，仅为空站点插入初值，不重置现有账号/文章。API 启动不做迁移。
+1. 后端执行 `uv sync --locked`，再显式执行 `uv run python init.database.py`。已有数据库可加 `--no-create-database`。迁移 `0004_settings` 建立节点策略、审计、投递表，`0005_icon_media` 增加图标原件记录；仅为空站点插入初值，不重置现有账号/文章。API 启动不做迁移。
 2. 后端 `config.toml` 的 `[frontends.web-main]` 设置 `enabled=true`、`settings_receiver_url="http://127.0.0.1:3001"`；两个方向的 token 仍只填写环境变量名称。非回环地址必须 HTTPS。
 3. 前端 `config.toml` 增加 `[settings]`：`directory="./var/settings"`、`receiver_host="127.0.0.1"`、`receiver_port=3001`、`source_epoch="实际后端 UUID"`。从已鉴权 GET 设置响应的 `data.source_epoch` 或 SQL `SELECT source_epoch FROM site_settings WHERE id=1` 获取，不从未经认证请求自动认领 epoch。
 4. 前端 `[backend]` 配置允许的真实 peer IP/CIDR、FastAPI → Next.js token 环境变量名称，与后端目标节点一致。接收器不信任 X-Forwarded-For；TLS/反代部署须重新评估真实连接来源边界。
