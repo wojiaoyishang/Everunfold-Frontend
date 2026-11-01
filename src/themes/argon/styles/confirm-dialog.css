@@ -23,7 +23,7 @@
   font: inherit;
   font-size: 14px;
   line-height: 1.65;
-  animation: ui-confirm-enter 200ms var(--motion-ease) both;
+  animation: ui-confirm-enter 280ms var(--motion-ease) both;
 }
 .ui-confirm-dialog[data-intent="danger"] {
   --confirm-action: var(--confirm-danger);
@@ -32,7 +32,23 @@
 .ui-confirm-dialog::backdrop {
   background: rgb(15 20 32 / 28%);
   backdrop-filter: blur(2px);
-  animation: ui-confirm-backdrop 180ms ease both;
+  animation: ui-confirm-backdrop 220ms ease both;
+}
+.ui-confirm-dialog[data-state="closing"] {
+  animation: ui-confirm-leave 190ms ease-in both;
+}
+.ui-confirm-dialog[data-state="closing"]::backdrop {
+  animation: ui-confirm-backdrop-leave 190ms ease-in both;
+}
+.ui-confirm-dialog[data-state="open"]
+  :is(.ui-confirm-heading, .ui-confirm-content, .ui-confirm-actions) {
+  animation: ui-confirm-reveal 260ms var(--motion-ease) both;
+}
+.ui-confirm-dialog[data-state="open"] .ui-confirm-content {
+  animation-delay: 35ms;
+}
+.ui-confirm-dialog[data-state="open"] .ui-confirm-actions {
+  animation-delay: 65ms;
 }
 .ui-confirm-heading {
   display: flex;
@@ -114,14 +130,20 @@
   line-height: 1.5;
   cursor: pointer;
   transition:
-    background 150ms,
-    transform 150ms;
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease,
+    opacity 160ms ease,
+    scale 160ms var(--motion-ease),
+    transform 160ms var(--motion-ease);
 }
 .ui-confirm-button.ui-button:hover:not(:disabled) {
   background: var(--surface-soft);
+  border-color: color-mix(in srgb, var(--accent) 25%, var(--line));
 }
 .ui-confirm-button.ui-button:active:not(:disabled) {
-  transform: translateY(1px);
+  scale: 0.97;
 }
 .ui-confirm-submit.ui-button {
   color: var(--confirm-on-action);
@@ -134,6 +156,14 @@
 .ui-confirm-button.ui-button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+.ui-confirm-feedback,
+.ui-confirm-label,
+.ui-confirm-error {
+  animation: ui-confirm-feedback 180ms ease-out both;
+}
+.ui-confirm-feedback {
+  display: block;
 }
 .ui-confirm-spinner {
   width: 13px;
@@ -151,6 +181,37 @@
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
+  }
+}
+@keyframes ui-confirm-leave {
+  to {
+    opacity: 0;
+    transform: translateY(5px) scale(0.98);
+  }
+}
+@keyframes ui-confirm-backdrop-leave {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes ui-confirm-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ui-confirm-feedback {
+  from {
+    opacity: 0.25;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 @keyframes ui-confirm-backdrop {
@@ -177,16 +238,22 @@
     padding-inline: 12px;
   }
 }
-@media (prefers-reduced-motion: reduce) {
-  .ui-confirm-dialog,
+/* Public and admin preferences are independent; explicit full motion wins. */
+html:not(:has([data-surface="admin"]))[data-motion="reduced"]
+  :is(.ui-confirm-dialog, .ui-confirm-dialog *),
+html:not(:has([data-surface="admin"]))[data-motion="reduced"]
   .ui-confirm-dialog::backdrop,
-  .ui-confirm-spinner {
-    animation: none;
-  }
-}
-html[data-motion="reduced"] .ui-confirm-dialog,
-html[data-motion="reduced"] .ui-confirm-dialog::backdrop,
-html[data-motion="reduced"] .ui-confirm-spinner,
 .admin-root[data-admin-motion="reduced"] .ui-confirm-dialog::backdrop {
-  animation: none;
+  animation: none !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not(:has([data-surface="admin"])):not([data-motion="full"])
+    :is(.ui-confirm-dialog, .ui-confirm-dialog *),
+  html:not(:has([data-surface="admin"])):not([data-motion="full"])
+    .ui-confirm-dialog::backdrop,
+  .admin-root:not([data-admin-motion="full"]) .ui-confirm-dialog::backdrop {
+    animation: none !important;
+    transition: none !important;
+  }
 }

@@ -1,0 +1,34 @@
+/* Baseline feedback for wrapped controls; feature-specific motion may refine it. */
+:where(.ui-button, .ui-input, .ui-textarea, .ui-link) {
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    opacity 160ms ease,
+    scale 160ms var(--motion-ease, ease-out);
+}
+:where(.ui-button:enabled):hover {
+  background-color: color-mix(in srgb, var(--accent) 7%, var(--surface-soft));
+}
+:where(.ui-button:enabled:not(.admin-button, .admin-icon-button)):active {
+  scale: 0.97;
+}
+:where(.ui-input, .ui-textarea):focus-visible {
+  border-color: color-mix(in srgb, var(--accent) 50%, var(--line));
+}
+:where(.ui-link):hover {
+  color: var(--accent);
+}
+html:not(:has([data-surface="admin"]))[data-motion="reduced"]
+  :is(.ui-button, .ui-input, .ui-textarea, .ui-link) {
+  transition: none !important;
+  scale: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not(:has([data-surface="admin"])):not([data-motion="full"])
+    :is(.ui-button, .ui-input, .ui-textarea, .ui-link) {
+    transition: none !important;
+    scale: none !important;
+  }
+}

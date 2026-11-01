@@ -126,7 +126,12 @@
   transition:
     background 180ms,
     border-color 180ms,
-    box-shadow 180ms;
+    box-shadow 180ms,
+    opacity 180ms,
+    scale 180ms var(--motion-ease);
+}
+.ui-checkbox > input:active:not(:disabled) + .ui-checkbox-mark {
+  scale: 0.9;
 }
 .ui-checkbox-mark .icon {
   width: 14px;

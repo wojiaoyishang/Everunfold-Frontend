@@ -68,7 +68,8 @@ export function MediaDetailsDialog({
           setConfirm(false);
           pending.current = null;
         }}
-        onConfirm={() => {
+        onConfirm={() => true}
+        onConfirmed={() => {
           setConfirm(false);
           setEditDirty(false);
           pending.current?.();

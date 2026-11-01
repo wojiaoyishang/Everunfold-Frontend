@@ -240,6 +240,7 @@
   font-size: 13px;
 }
 .ui-confirm-dialog .admin-media-removal-scope {
+  min-height: 72px;
   margin: 0;
   padding: 12px 14px;
   border: 1px solid var(--admin-border);

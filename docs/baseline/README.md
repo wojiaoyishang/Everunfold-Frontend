@@ -164,3 +164,17 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/decisions/0028-shared-confirmation-dialog.md` | `38a12d1d1a78ac0fd9628cb524ac1830479b74d0514708e97883e2d8803ecb1b` |
 | `docs/design/media-removal-confirm-dialog.png` | `86e85a67e44990648caf02ef2f3ecd487823127255bb75ac117f72ec763dd73b` |
 | `docs/design/media-removal-confirm-mobile.png` | `159b58000352de02b09776b265925e9f5c84ffe953c1dfb1391c1e695078f7ef` |
+
+
+## interaction-motion-1 同步摘要（2026-11-01）
+
+本轮 development-8、media-library-runtime-5 与 ADR 0029 细化全局交互动效规则和确认退场契约；ADR 0028 使用示例同步。AGENTS 公共动效规则一致，前端独有 Next.js 附加说明保留。后端代码、settings 1.6.0、0008 迁移及两份原始基线未改，历史摘要保留。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `3b324a55b9b27466aab8985929ca64a8203623b42670e8360cf0cbba390c5e22` |
+| `docs/development/protocol.md` | `b61615ab876be8450e0a99004f4b09856f2aa6456e364e4a19d0a0db97a5d054` |
+| `docs/development/media-library.md` | `9e1a369bab1cdbec1e5a871cdd29c7bd01d11661234348e1d52193f5b283b5df` |
+| `docs/decisions/0028-shared-confirmation-dialog.md` | `8b0b5af8aa13dd4d085ea34669a99482fd1d3a9753f8e6e64a43391c0eff7ca0` |
+| `docs/decisions/0029-interaction-motion-lifecycle.md` | `da9f36e3be0c92eebe9ee87da9b2b444ebd8c3911833d92730ffe4cce8f847cb` |
+| `docs/design/media-confirm-motion.png` | `9949b61bd9f580dd76cf76e9475a648435f132338f47d5e6205aa98e3749f928` |

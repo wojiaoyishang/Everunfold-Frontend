@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { useDialogDismiss } from "../../hooks/use-dialog-dismiss";
 import { useDialogSurface } from "../../hooks/use-dialog-surface";
 import { Icon, type IconName } from "../icon";
 import { Button, Dialog } from "./primitives";
@@ -26,8 +27,10 @@ export interface ConfirmDialogProps {
   error?: string;
   auxiliaryAction?: ReactNode;
   onCancel: () => void;
-  /** Caller owns success/close and business errors; rejection keeps this open. */
-  onConfirm: () => void | Promise<void>;
+  /** Return true on success; false or rejection keeps the dialog open. */
+  onConfirm: () => boolean | Promise<boolean>;
+  /** Runs after the successful exit; close or navigate here, not in onConfirm. */
+  onConfirmed: () => void;
 }
 
 const noSubscription = () => () => {};
@@ -57,6 +60,7 @@ function ConfirmDialogSurface({
   auxiliaryAction,
   onCancel,
   onConfirm,
+  onConfirmed,
 }: Omit<ConfirmDialogProps, "open">) {
   const dialog = useRef<HTMLDialogElement>(null);
   const cancel = useRef<HTMLButtonElement>(null);
@@ -66,22 +70,28 @@ function ConfirmDialogSurface({
   const titleId = useId();
   const descriptionId = useId();
   const working = busy || pending;
+  const { closing, dismiss: finishAndDismiss } = useDialogDismiss(dialog);
+  const locked = working || closing;
   useDialogSurface(dialog, cancel);
   const dismiss = () => {
-    if (!busy && !inFlight.current) onCancel();
+    if (!busy && !inFlight.current) finishAndDismiss(onCancel);
   };
   const confirm = async () => {
-    if (busy || confirmDisabled || inFlight.current) return;
+    if (busy || closing || confirmDisabled || inFlight.current) return;
     inFlight.current = true;
     setPending(true);
     setUnexpectedError("");
+    let succeeded = false;
     try {
-      await onConfirm();
+      succeeded = await onConfirm();
+      if (succeeded) finishAndDismiss(onConfirmed);
     } catch {
       setUnexpectedError("操作未完成，请稍后重试。");
     } finally {
-      inFlight.current = false;
-      setPending(false);
+      if (!succeeded) {
+        inFlight.current = false;
+        setPending(false);
+      }
     }
   };
   return createPortal(
@@ -93,6 +103,7 @@ function ConfirmDialogSurface({
       aria-describedby={description ? descriptionId : undefined}
       aria-busy={working}
       data-intent={intent}
+      data-state={closing ? "closing" : "open"}
       onCancel={(event) => {
         event.preventDefault();
         event.stopPropagation();
@@ -128,36 +139,42 @@ function ConfirmDialogSurface({
         </div>
       </div>
       {children && (
-        <fieldset className="ui-confirm-content" disabled={working}>
+        <fieldset className="ui-confirm-content" disabled={locked}>
           {children}
         </fieldset>
       )}
       {(error || unexpectedError) && (
-        <p className="ui-confirm-error" role="alert">
+        <p
+          key={error || unexpectedError}
+          className="ui-confirm-error"
+          role="alert"
+        >
           {error || unexpectedError}
         </p>
       )}
       <div className="ui-confirm-actions">
-        <fieldset className="ui-confirm-auxiliary" disabled={working}>
+        <fieldset className="ui-confirm-auxiliary" disabled={locked}>
           {auxiliaryAction}
         </fieldset>
         <Button
           ref={cancel}
           className="ui-confirm-button"
-          disabled={working}
+          disabled={locked}
           onClick={dismiss}
         >
           {cancelLabel}
         </Button>
         <Button
           className="ui-confirm-button ui-confirm-submit"
-          disabled={working || confirmDisabled}
+          disabled={locked || confirmDisabled}
           onClick={() => void confirm()}
         >
           {working && (
             <span className="ui-confirm-spinner" aria-hidden="true" />
           )}
-          {working ? busyLabel : confirmLabel}
+          <span key={working ? "busy" : "idle"} className="ui-confirm-label">
+            {working ? busyLabel : confirmLabel}
+          </span>
         </Button>
       </div>
     </Dialog>,

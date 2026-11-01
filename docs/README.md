@@ -45,6 +45,7 @@
 34. [基础媒体库运行指南](development/media-library.md)：图片/视频/通用附件、多文件上传选择、稳定媒体绑定、紧凑预览与当前限制。
 
 35. [共享确认弹窗](decisions/0028-shared-confirmation-dialog.md)：全局可复用 ConfirmDialog、媒体删除范围、未保存修改提醒及嵌套焦点隔离。
+36. [交互动效生命周期](decisions/0029-interaction-motion-lifecycle.md)：共享控件反馈、确认弹窗双向动画、退场后关闭及减少动态兼容。
 
 ## 目录职责
 

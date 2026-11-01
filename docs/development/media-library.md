@@ -1,6 +1,6 @@
 # 媒体库运行指南
 
-版本：media-library-runtime-4，2026-11-01。基础上传见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)；附件详情与图片编辑见 [ADR 0026](../decisions/0026-media-details-and-image-editing.md)。上传与删除见 [ADR 0027](../decisions/0027-shared-upload-queue-and-safe-removal.md)。完整生命周期规划见 [媒体存储设计](../architecture/media-storage.md)。
+版本：media-library-runtime-5，2026-11-01。基础上传见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)；附件详情与图片编辑见 [ADR 0026](../decisions/0026-media-details-and-image-editing.md)。上传与删除见 [ADR 0027](../decisions/0027-shared-upload-queue-and-safe-removal.md)。完整生命周期规划见 [媒体存储设计](../architecture/media-storage.md)。
 
 ## 页面与表单
 
@@ -16,7 +16,7 @@ SHA-256 相同则复用已有可用记录并提示「已复用」，保留原名
 
 ## 删除、恢复与安全选项
 
-删除与未保存修改提醒共用 [ConfirmDialog](../decisions/0028-shared-confirmation-dialog.md)。弹窗展示文件名与服务端影响范围；取消/Escape/遮罩返回详情，处理中禁止关闭和重复确认。每次重新打开恢复安全默认值。
+删除与未保存修改提醒共用 [ConfirmDialog](../decisions/0028-shared-confirmation-dialog.md)。弹窗展示文件名与服务端影响范围；取消/Escape/遮罩返回详情，处理中禁止关闭和重复确认。每次重新打开恢复安全默认值。 确认/取消均先播放退场再关闭，勾选、范围提示及动作状态使用统一动效；减少动态时立即完成。组件调用顺序见 [ADR 0029](../decisions/0029-interaction-motion-lifecycle.md)。
 
 「删除文件」与「保存资料」在详情底部同行。点击删除打开独立确认弹窗，在弹窗中选择：
 

@@ -49,6 +49,11 @@ export function MediaRemovalControls({
     if (await removal.run(action)) onComplete();
   };
   const resuming = Boolean(removal.plan?.resume_operation_id);
+  const scope = removal.checking
+    ? "正在确认删除范围…"
+    : removal.plan
+      ? scopeLabel(removal.plan)
+      : "请先确认文件的使用状态。";
   return (
     <div className="admin-media-removal">
       <div className="admin-media-removal-actions">
@@ -91,7 +96,8 @@ export function MediaRemovalControls({
         confirmDisabled={disabled || removal.checking || !removal.plan}
         error={removal.error}
         onCancel={() => setConfirm(false)}
-        onConfirm={() => apply("remove")}
+        onConfirm={() => removal.run("remove")}
+        onConfirmed={onComplete}
         auxiliaryAction={
           !removal.plan && !removal.checking ? (
             <Button
@@ -123,11 +129,9 @@ export function MediaRemovalControls({
           </label>
         </div>
         <p className="admin-media-removal-scope" role="status">
-          {removal.checking
-            ? "正在确认删除范围…"
-            : removal.plan
-              ? scopeLabel(removal.plan)
-              : "请先确认文件的使用状态。"}
+          <span key={scope} className="ui-confirm-feedback">
+            {scope}
+          </span>
         </p>
       </ConfirmDialog>
       {removal.error && !confirm && (

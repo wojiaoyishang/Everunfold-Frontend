@@ -86,6 +86,10 @@ test("confirmation waits for hydration and never runs actions during SSR", () =>
         title: "确认操作？",
         onConfirm: () => {
           actions += 1;
+          return true;
+        },
+        onConfirmed: () => {
+          actions += 1;
         },
         onCancel: () => {
           actions += 1;
