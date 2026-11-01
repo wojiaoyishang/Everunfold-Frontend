@@ -80,7 +80,7 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/architecture/settings-design.md` | `ad3658f08e8334487831c948ef34ba17d31807d8cde1c99885be22de088f507f` |
 | `docs/architecture/theme-configuration.md` | `d6c1f163043499e688bcf7eac049bbf76ba4a88a3c23081bc26e27db7f6e34e5` |
 | `docs/decisions/0023-settings-and-extension-boundaries.md` | `d09ac013190f48a0ac110dfc24990057c086ca981238ebf9085d3ecee7a86d9d` |
-| `docs/decisions/0024-versioned-settings-delivery.md` | `e72e7f3e0e029f3b2c4fc9429c5a41ef6581137e44814cbd2a960ea45ffaceb3` |
+| `docs/decisions/0024-versioned-settings-delivery.md` | `89da5115a3f2f7f54f9055fc342ed6b46ad9e2287d5a4be7746508fe387171ce` |
 | `docs/development/settings.md` | `59c0edaca523b5f35415d601605b6652a67ac409a6919a9089f66618f6584cd9` |
-| `docs/handoff/settings-verification.md` | `56907d457760fe209ddc09eefc485a2ca551c1d6f4791cc7c331aeed33888bb7` |
+| `docs/handoff/settings-verification.md` | `776e993c6ee3a2869b8a2e7444c011f1e1fad1a67ca77bba4c6ec075328b2316` |
 | `docs/design/settings-theme-desktop.png` | `1f0950483422861039e72438eeb38ac48a1a63b4b75bbd47760f8165043707f9` |

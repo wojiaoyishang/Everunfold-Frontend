@@ -4,9 +4,9 @@
 
 - 前端路由 `/admin/settings`、`/admin/settings/theme`、`/admin/settings/system`；请求/草稿在 `core/settings`，展示在 `themes/argon/admin/settings`，本地副本与接收器在 `server/settings`。生成契约固定后端 a4237da，SHA256 记录在 `src/generated/settings-source.json`。
 - 用户同意方案后，首批设置已完成：站点资料/两级菜单/基础 SEO、主题默认外观和背景、按节点的四项动态请求策略。浏览器直接向 FastAPI 保存，PostgreSQL 为事实源；部署路径、存储实现和凭据仍留服务器配置，公开快照没有 TTL。
-- 设置保存、审计与可靠事件同事务，expected_revision 防覆盖；独立 Scheduler 只投 tick，Celery Worker 领取租约并投递，专用 Node 接收器用真实 socket IP AND token 校验。完整副本原子发布、重复幂等、乱序不倒退；明确区分已保存/等待同步/已应用。重新同步可重发已确认版本修复丢失副本。
+- 设置保存、审计与可靠事件同事务，expected_revision 防覆盖；队列配置独立于业务模块，Scheduler 不导入业务/API 且只投 tick，Celery Worker 领取租约并投递，专用 Node 接收器用真实 socket IP AND token 校验。完整副本原子发布、重复幂等、乱序不倒退；明确区分已保存/等待同步/已应用。重新同步可重发已确认版本修复丢失副本。
 - 本机显式迁移至 0004_settings，既有账号和内容保留；web-main 接收器与 epoch 已绑定。当前 8001/3000 保留，额外本地设置接收器 3001、Worker、Scheduler 由 `tools.run_settings_dev` 运行。实际 config.toml、运行凭据/副本/日志全部忽略，不提交。
-- 检查：后端 Ruff/格式与 mypy 74 文件通过，真实数据库完整 67 项测试通过；前端完整检查 100 项测试通过，隔离生产构建/HTTP 通过。真实双 API 冲突、审计失败回滚、接收端离线、落盘后发送进程退出/重投、丢失副本重同步、匿名/CSRF/Origin 拒绝均验证。离线生产 Next 有快照/设置 200，无快照或最新设置损坏 503，后台壳仍可用；无业务回源，SEO 输出新配置。
+- 检查：后端 Ruff/格式与 mypy 75 文件通过，真实数据库完整 68 项测试通过；前端完整检查 100 项测试通过，隔离生产构建/HTTP 通过。真实双 API 冲突、审计失败回滚、接收端离线、落盘后发送进程退出/重投、丢失副本重同步、匿名/CSRF/Origin 拒绝均验证。离线生产 Next 有快照/设置 200，无快照或最新设置损坏 503，后台壳仍可用；无业务回源，SEO 输出新配置。
 - 浏览器验证主题保存到首页 SSR，测试文字已恢复；跨设置页草稿不丢失，手机 390/320px 无横向溢出、自定义选择器和菜单可用，临时视口已还原。父级按路径重挂载导致草稿丢失的问题已修复；不牺牲区块入场动画。WordPress 线上与备份未修改。
 - 交接：[ADR 0024](../decisions/0024-versioned-settings-delivery.md)、[设置指南](../development/settings.md)、[实际验证](settings-verification.md) 与截图；settings-design-2 更新原提案状态。11 份本轮公共文档/图片逐字节一致，摘要见 baseline/README；两份原始基线 SHA256 不变。
 - 限制：目前仅当前主题和四项动态请求策略；媒体/讨论/用户管理/高级 SEO/完整文章发布撤回/通用插件加载器仍待实现。没有远程切换缓存驱动或框架页面 TTL，没有历史文件自动回收、节点心跳/自动发现丢失，也不强制刷新已打开前台。Windows solo/NTFS 验证不能当生产多 Worker/断电/对象存储验收。

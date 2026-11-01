@@ -13,7 +13,7 @@
 
 1. API 在同一数据库会话中校验真实管理员会话与写操作 CSRF/精确 Origin，按 `expected_revision` 加行锁；过期版本返回 HTTP 409，避免后保存覆盖他人修改。
 2. 业务值、版本、审计和各目标节点的完整投递意图在同一事务提交。请求不等待外部网络，也不因节点离线丢失设置。
-3. 单独运行的 Scheduler 持 Redis 带所有权的租约，只投递 tick；Celery Worker 领取 PostgreSQL 带租约的事件。外部 HTTP 在事务外，确认时必须仍拥有该事件租约。没有 Celery Beat，Worker/Scheduler 不装配 API 模块。
+3. 单独运行的 Scheduler 持 Redis 带所有权的租约，只投递 tick；Celery Worker 领取 PostgreSQL 带租约的事件。外部 HTTP 在事务外，确认时必须仍拥有该事件租约。共享队列配置独立放在 `app/core/task_queue.py`，Scheduler 不从 Worker 导入对象，也不加载业务投递模块。没有 Celery Beat，Worker/Scheduler 不装配 API 模块。
 4. 专用 Node 接收器按真实 socket 来源 IP **AND** Bearer token 鉴权，忽略转发头，不使用 Next Route Handler 猜来源。它校验协议、固定节点 ID、部署绑定的 source_epoch、资源类型/字段与完整版本；服务端凭据不进入浏览器、数据库事件、URL 或日志。
 5. 内置 `FileSettingsStore` 先写临时文件并 flush，再通过原子硬链接发布不可变版本文件。最高完整版本是下一次读取的有效值；同版本相同内容幂等，不同内容拒绝；乱序不倒退；残留 staging 不参与读取；最新已发布文件损坏时失败关闭，不回退旧版本。
 6. 接收器完成落盘后返回绑定节点/epoch/资源/版本/请求摘要的确认，Worker 才记录已应用。后台区分数据库已保存、等待同步、已应用、待重试和未配置接收；此状态是最后一次确认，不是实时节点健康心跳。
