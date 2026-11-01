@@ -1,8 +1,9 @@
 "use client";
-import { useLayoutEffect, useId, useRef, type ReactNode } from "react";
+import { useId, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Dialog, Button } from "./primitives";
 import { Icon } from "../icon";
+import { useDialogSurface } from "../../hooks/use-dialog-surface";
 /** Native modal owns focus, Escape and focus restoration; shared by full-page pickers. */
 export function Modal({
   title,
@@ -19,16 +20,7 @@ export function Modal({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
-  useLayoutEffect(() => {
-    const dialog = ref.current;
-    const trigger = document.activeElement;
-    dialog?.showModal();
-    return () => {
-      dialog?.close();
-      if (trigger instanceof HTMLElement && trigger.isConnected)
-        trigger.focus({ preventScroll: true });
-    };
-  }, []);
+  useDialogSurface(ref);
   return createPortal(
     <Dialog
       ref={ref}
@@ -36,6 +28,7 @@ export function Modal({
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
+        event.stopPropagation();
         onClose();
       }}
       onClick={(event) => {

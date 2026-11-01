@@ -44,6 +44,8 @@
 33. [统一上传与安全删除](decisions/0027-shared-upload-queue-and-safe-removal.md) 与 [实际验收](handoff/media-uploads-verification.md)：多文件进度/降级、内容复用、回收站、同哈希安全/整组删除与冻结范围重试。
 34. [基础媒体库运行指南](development/media-library.md)：图片/视频/通用附件、多文件上传选择、稳定媒体绑定、紧凑预览与当前限制。
 
+35. [共享确认弹窗](decisions/0028-shared-confirmation-dialog.md)：全局可复用 ConfirmDialog、媒体删除范围、未保存修改提醒及嵌套焦点隔离。
+
 ## 目录职责
 
 本轮接入入口：[动态请求开发指南](development/reader-requests.md) 与 [验收记录](handoff/reader-requests-verification.md)。原始设计依据保留在 [动态数据盘点](handoff/public-dynamic-data-audit.md)。

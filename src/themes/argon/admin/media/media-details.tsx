@@ -9,6 +9,7 @@ import {
   TextField,
   TextLink,
 } from "../../components/ui/primitives";
+import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Modal } from "../../components/ui/modal";
 import { Icon } from "../../components/icon";
 import { MediaPreview } from "./media-preview";
@@ -55,31 +56,25 @@ export function MediaDetailsDialog({
       closeLabel="关闭附件详情"
       onClose={() => attempt(onClose)}
     >
-      {confirm && (
-        <div className="admin-media-confirm" role="alert">
-          <span>有尚未保存的修改，要放弃这些修改吗？</span>
-          <Button
-            className="admin-button"
-            onClick={() => {
-              setConfirm(false);
-              pending.current = null;
-            }}
-          >
-            继续编辑
-          </Button>
-          <Button
-            className="admin-button"
-            onClick={() => {
-              setConfirm(false);
-              setEditDirty(false);
-              pending.current?.();
-              pending.current = null;
-            }}
-          >
-            放弃修改
-          </Button>
-        </div>
-      )}
+      <ConfirmDialog
+        open={confirm}
+        title="放弃尚未保存的修改？"
+        description="这些修改还没有保存，离开后将不会保留。"
+        icon="undo"
+        intent="danger"
+        confirmLabel="放弃修改"
+        cancelLabel="继续编辑"
+        onCancel={() => {
+          setConfirm(false);
+          pending.current = null;
+        }}
+        onConfirm={() => {
+          setConfirm(false);
+          setEditDirty(false);
+          pending.current?.();
+          pending.current = null;
+        }}
+      />
       {error && (
         <div className="admin-media-message" role="alert">
           {error}

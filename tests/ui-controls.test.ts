@@ -3,6 +3,7 @@ import test from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { parseDocument, DomUtils } from "htmlparser2";
+import { ConfirmDialog } from "../src/themes/argon/components/ui/confirm-dialog";
 import { Select } from "../src/themes/argon/components/ui/select";
 import {
   matchOption,
@@ -73,4 +74,25 @@ test("search selection preserves the default GET value before hydration without 
   assert.equal(hidden.attribs.name, undefined);
   assert.equal(hidden.attribs.value, "article");
   assert.ok(!html.includes("<select"));
+});
+
+// Shared dialogs can be requested on the initial render without a browser DOM.
+test("confirmation waits for hydration and never runs actions during SSR", () => {
+  for (const open of [false, true]) {
+    let actions = 0;
+    const html = renderToStaticMarkup(
+      createElement(ConfirmDialog, {
+        open,
+        title: "确认操作？",
+        onConfirm: () => {
+          actions += 1;
+        },
+        onCancel: () => {
+          actions += 1;
+        },
+      }),
+    );
+    assert.equal(html, "");
+    assert.equal(actions, 0);
+  }
 });

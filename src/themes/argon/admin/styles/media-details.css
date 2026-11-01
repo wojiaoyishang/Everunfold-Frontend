@@ -233,8 +233,7 @@
   font-size: 12px;
   color: var(--admin-muted);
 }
-.admin-media-message,
-.admin-media-confirm {
+.admin-media-message {
   flex-shrink: 0;
   display: flex;
   flex-wrap: wrap;
@@ -245,9 +244,6 @@
   background: var(--admin-accent-soft);
   color: var(--admin-text);
   border-bottom: 1px solid var(--admin-border);
-}
-.admin-media-confirm > span {
-  margin-right: auto;
 }
 @media (max-width: 720px) {
   .admin-media-modal.admin-library-modal {

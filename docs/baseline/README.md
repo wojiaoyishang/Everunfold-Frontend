@@ -150,3 +150,17 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/design/media-library-removal-mobile.png` | `1128071af55fc230101da6474e5a495cf2a846493590b09301d2fb20a6cee9c1` |
 | `docs/design/media-library-upload-queue.png` | `0bff6589b189adb5ca11313d16e6c1d3f8d21020213d59369d2bb64a2d885be7` |
 | `docs/design/icon-library-upload-queue.png` | `1f005f30462fd64ad0d96cdc2538da2cad9dcdd32c11ef600be50f3eb3fd2ef7` |
+
+
+## confirmation-dialog-1 同步摘要（2026-11-01）
+
+本轮新增 ADR 0028，共享确认弹窗接入媒体删除与未保存修改提示；development-7、media-library-runtime-4。后端运行代码、settings 1.6.0 与两份原始基线不变。下列文档和截图逐字节同步；历史摘要保留。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `ebb86f9e9b090f4507d5630e0c70cd0d1d105f1cfca4a960cab0229471e2f119` |
+| `docs/development/protocol.md` | `04756803ce09321c171ac0da1988e810ffe0212ef120b4a7e2d566c4ee49d670` |
+| `docs/development/media-library.md` | `09b161ccd34eef138ef7610c4d5a2874fcab5a3e72b63dd708b35be215025425` |
+| `docs/decisions/0028-shared-confirmation-dialog.md` | `38a12d1d1a78ac0fd9628cb524ac1830479b74d0514708e97883e2d8803ecb1b` |
+| `docs/design/media-removal-confirm-dialog.png` | `86e85a67e44990648caf02ef2f3ecd487823127255bb75ac117f72ec763dd73b` |
+| `docs/design/media-removal-confirm-mobile.png` | `159b58000352de02b09776b265925e9f5c84ffe953c1dfb1391c1e695078f7ef` |

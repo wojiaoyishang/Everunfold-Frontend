@@ -1,0 +1,192 @@
+/* A shared surface inherits public/admin tokens, never business behavior. */
+.ui-confirm-dialog {
+  --confirm-danger: var(--admin-danger, var(--color-danger, #b54343));
+  --confirm-action: var(--accent);
+  --confirm-on-action: var(--admin-on-accent, #fff);
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  box-sizing: border-box;
+  width: min(460px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  max-height: calc(100dvh - 40px);
+  padding: 26px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow:
+    0 24px 80px #0003,
+    var(--shadow);
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.65;
+  animation: ui-confirm-enter 200ms var(--motion-ease) both;
+}
+.ui-confirm-dialog[data-intent="danger"] {
+  --confirm-action: var(--confirm-danger);
+  --confirm-on-action: var(--surface);
+}
+.ui-confirm-dialog::backdrop {
+  background: rgb(15 20 32 / 28%);
+  backdrop-filter: blur(2px);
+  animation: ui-confirm-backdrop 180ms ease both;
+}
+.ui-confirm-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.ui-confirm-heading > div {
+  min-width: 0;
+}
+.ui-confirm-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.ui-confirm-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--confirm-action) 10%, var(--surface));
+  color: var(--confirm-action);
+}
+.ui-confirm-icon .icon {
+  width: 21px;
+  height: 21px;
+}
+.ui-confirm-description {
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.ui-confirm-content {
+  display: grid;
+  min-width: 0;
+  margin: 22px 0 0;
+  padding: 0;
+  border: 0;
+  gap: 14px;
+}
+.ui-confirm-dialog .ui-confirm-error {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--confirm-danger) 8%, var(--surface));
+  color: var(--confirm-danger);
+  border-radius: 7px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.ui-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+}
+.ui-confirm-auxiliary {
+  min-width: 0;
+  margin: 0 auto 0 0;
+  padding: 0;
+  border: 0;
+}
+.ui-confirm-button.ui-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--text);
+  background: var(--surface);
+  font: inherit;
+  font-weight: 500;
+  line-height: 1.5;
+  cursor: pointer;
+  transition:
+    background 150ms,
+    transform 150ms;
+}
+.ui-confirm-button.ui-button:hover:not(:disabled) {
+  background: var(--surface-soft);
+}
+.ui-confirm-button.ui-button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.ui-confirm-submit.ui-button {
+  color: var(--confirm-on-action);
+  background: var(--confirm-action);
+  border-color: transparent;
+}
+.ui-confirm-submit.ui-button:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--confirm-action) 90%, var(--text));
+}
+.ui-confirm-button.ui-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.ui-confirm-spinner {
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: ui-confirm-spin 700ms linear infinite;
+}
+@keyframes ui-confirm-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes ui-confirm-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ui-confirm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 480px) {
+  .ui-confirm-dialog {
+    padding: 22px 20px;
+  }
+  .ui-confirm-actions {
+    gap: 8px;
+  }
+  .ui-confirm-button.ui-button {
+    padding-inline: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-confirm-dialog,
+  .ui-confirm-dialog::backdrop,
+  .ui-confirm-spinner {
+    animation: none;
+  }
+}
+html[data-motion="reduced"] .ui-confirm-dialog,
+html[data-motion="reduced"] .ui-confirm-dialog::backdrop,
+html[data-motion="reduced"] .ui-confirm-spinner,
+.admin-root[data-admin-motion="reduced"] .ui-confirm-dialog::backdrop {
+  animation: none;
+}

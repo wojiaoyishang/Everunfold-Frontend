@@ -1,6 +1,6 @@
 # 媒体库运行指南
 
-版本：media-library-runtime-3，2026-11-01。基础上传见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)；附件详情与图片编辑见 [ADR 0026](../decisions/0026-media-details-and-image-editing.md)。上传与删除见 [ADR 0027](../decisions/0027-shared-upload-queue-and-safe-removal.md)。完整生命周期规划见 [媒体存储设计](../architecture/media-storage.md)。
+版本：media-library-runtime-4，2026-11-01。基础上传见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)；附件详情与图片编辑见 [ADR 0026](../decisions/0026-media-details-and-image-editing.md)。上传与删除见 [ADR 0027](../decisions/0027-shared-upload-queue-and-safe-removal.md)。完整生命周期规划见 [媒体存储设计](../architecture/media-storage.md)。
 
 ## 页面与表单
 
@@ -16,7 +16,9 @@ SHA-256 相同则复用已有可用记录并提示「已复用」，保留原名
 
 ## 删除、恢复与安全选项
 
-「删除文件」与「保存资料」在详情底部同行，展开确认后选择：
+删除与未保存修改提醒共用 [ConfirmDialog](../decisions/0028-shared-confirmation-dialog.md)。弹窗展示文件名与服务端影响范围；取消/Escape/遮罩返回详情，处理中禁止关闭和重复确认。每次重新打开恢复安全默认值。
+
+「删除文件」与「保存资料」在详情底部同行。点击删除打开独立确认弹窗，在弹窗中选择：
 
 - 未勾选「删除实际文件」：当前记录移入回收站，原件保留，可以恢复。
 - 同时勾选「删除实际文件」和「安全删除」：仅永久移除当前记录。同哈希记录仍存在（含可恢复的回收站项）就保留原件；最后一条永久移除时清理全部留存原件。

@@ -6,6 +6,7 @@ import type {
 } from "@/generated/settings-contract";
 import { useMediaRemoval } from "@/core/media/media-removal";
 import { Button } from "../../components/ui/primitives";
+import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Icon } from "../../components/icon";
 
@@ -64,8 +65,13 @@ export function MediaRemovalControls({
         <Button
           className="admin-upload-text-button admin-media-remove-button"
           disabled={disabled || removal.busy}
+          aria-haspopup="dialog"
           aria-expanded={confirm}
-          onClick={() => setConfirm((value) => !value)}
+          onClick={() => {
+            setOriginal(Boolean(detail.deleted));
+            setSafe(true);
+            setConfirm(true);
+          }}
         >
           {detail.purge_pending
             ? "重试删除文件"
@@ -74,62 +80,57 @@ export function MediaRemovalControls({
               : "删除文件"}
         </Button>
       </div>
-      {confirm && (
-        <div className="admin-media-removal-confirm">
-          <strong>{resuming ? "继续完成这次删除？" : "删除文件？"}</strong>
-          <div className="admin-media-removal-options">
-            <label>
-              <Checkbox
-                checked={resuming ? removal.plan!.delete_original : original}
-                disabled={removal.busy || resuming}
-                onChange={(e) => setOriginal(e.target.checked)}
-              />
-              删除实际文件
-            </label>
-            <label>
-              <Checkbox
-                checked={resuming ? removal.plan!.safe_delete : safe}
-                disabled={removal.busy || resuming || !original}
-                onChange={(e) => setSafe(e.target.checked)}
-              />
-              安全删除
-            </label>
-          </div>
-          <p role="status">
-            {removal.checking
-              ? "正在确认删除范围…"
-              : removal.plan
-                ? scopeLabel(removal.plan)
-                : "请先确认文件的使用状态。"}
-          </p>
-          <div>
+      <ConfirmDialog
+        open={confirm}
+        title={resuming ? "继续完成这次删除？" : "删除文件？"}
+        description={detail.title || detail.label}
+        icon="archive"
+        intent="danger"
+        confirmLabel="确认删除"
+        busy={removal.busy}
+        confirmDisabled={disabled || removal.checking || !removal.plan}
+        error={removal.error}
+        onCancel={() => setConfirm(false)}
+        onConfirm={() => apply("remove")}
+        auxiliaryAction={
+          !removal.plan && !removal.checking ? (
             <Button
-              className="admin-button"
+              className="admin-upload-text-button"
               disabled={removal.busy}
-              onClick={() => setConfirm(false)}
+              onClick={() => setAttempt((value) => value + 1)}
             >
-              取消
+              重新读取
             </Button>
-            {!removal.plan && !removal.checking ? (
-              <Button
-                className="admin-button"
-                onClick={() => setAttempt((value) => value + 1)}
-              >
-                重新读取
-              </Button>
-            ) : (
-              <Button
-                className="admin-button admin-media-remove-button"
-                disabled={removal.busy || removal.checking || !removal.plan}
-                onClick={() => void apply("remove")}
-              >
-                {removal.busy ? "正在处理…" : "确认删除"}
-              </Button>
-            )}
-          </div>
+          ) : undefined
+        }
+      >
+        <div className="admin-media-removal-options">
+          <label>
+            <Checkbox
+              checked={resuming ? removal.plan!.delete_original : original}
+              disabled={removal.busy || resuming}
+              onChange={(e) => setOriginal(e.target.checked)}
+            />
+            删除实际文件
+          </label>
+          <label>
+            <Checkbox
+              checked={resuming ? removal.plan!.safe_delete : safe}
+              disabled={removal.busy || resuming || !original}
+              onChange={(e) => setSafe(e.target.checked)}
+            />
+            安全删除
+          </label>
         </div>
-      )}
-      {removal.error && (
+        <p className="admin-media-removal-scope" role="status">
+          {removal.checking
+            ? "正在确认删除范围…"
+            : removal.plan
+              ? scopeLabel(removal.plan)
+              : "请先确认文件的使用状态。"}
+        </p>
+      </ConfirmDialog>
+      {removal.error && !confirm && (
         <p className="admin-media-removal-error" role="alert">
           {removal.error}
         </p>

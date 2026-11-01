@@ -141,26 +141,6 @@
 .admin-media-remove-button.ui-button {
   color: var(--admin-danger);
 }
-.admin-media-removal-confirm {
-  display: grid;
-  gap: 12px;
-  padding: 4px 0;
-  font-size: 13px;
-}
-.admin-media-removal-confirm label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.admin-media-removal-confirm p {
-  margin: 0;
-  color: var(--admin-muted);
-}
-.admin-media-removal-confirm > div {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
 .admin-media-removal-error {
   color: var(--admin-danger);
   font-size: 12px;
@@ -202,7 +182,7 @@
   }
 }
 
-/* One action row; destructive choices expand only after the user asks to remove. */
+/* The details footer stays one row; confirmation owns its own dialog. */
 .admin-media-dialog-footer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -228,12 +208,6 @@
   font-size: 12px;
   color: var(--admin-muted);
 }
-.admin-media-removal-confirm {
-  grid-column: 1 / -1;
-  grid-row: 2;
-  border-top: 1px solid var(--admin-border);
-  padding-top: 14px;
-}
 .admin-media-removal-error {
   grid-column: 1 / -1;
   margin: 0;
@@ -251,10 +225,27 @@
   }
 }
 
-.admin-media-removal-confirm > .admin-media-removal-options {
+.admin-media-removal-options {
   justify-content: flex-start;
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.6rem 1.4rem;
+}
+
+.admin-media-removal-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.ui-confirm-dialog .admin-media-removal-scope {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-subtle);
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.8;
 }
