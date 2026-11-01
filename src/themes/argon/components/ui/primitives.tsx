@@ -19,7 +19,15 @@ export function Button({
 }
 
 type TextFieldProps = Omit<ComponentPropsWithRef<"input">, "type"> & {
-  type?: "text" | "search" | "email" | "url" | "password" | "tel" | "hidden";
+  type?:
+    | "text"
+    | "search"
+    | "email"
+    | "url"
+    | "password"
+    | "tel"
+    | "hidden"
+    | "number";
 };
 export function TextField({
   type = "text",

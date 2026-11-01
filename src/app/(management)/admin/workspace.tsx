@@ -1,7 +1,10 @@
 "use client";
 import type { ReactNode } from "react";
 import { useAdminAccess } from "@/core/admin/use-admin-access";
-import { AdminAccountContext } from "@/core/admin/account-context";
+import {
+  AdminAccountContext,
+  AdminRequestContext,
+} from "@/core/admin/account-context";
 import { adminPreferencesKey } from "@/core/admin/preferences";
 import { useAdminPreferences } from "@/core/admin/use-admin-preferences";
 import { AdminAccessState } from "@/themes/argon/admin/components/access-state";
@@ -29,6 +32,8 @@ export function AdminWorkspace({
     <ConfirmedWorkspace
       key={storageKey}
       storageKey={storageKey}
+      baseUrl={baseUrl}
+      csrfToken={access.csrfToken}
       user={access.user}
       onSignOut={access.signOut}
     >
@@ -37,27 +42,33 @@ export function AdminWorkspace({
   );
 }
 function ConfirmedWorkspace({
+  baseUrl,
+  csrfToken,
   storageKey,
   user,
   onSignOut,
   children,
 }: {
   storageKey: string;
+  baseUrl: string;
+  csrfToken: string;
   user: AuthUser;
   onSignOut: () => Promise<void>;
   children: ReactNode;
 }) {
   const { preferences, update } = useAdminPreferences(storageKey);
   return (
-    <AdminAccountContext value={user}>
-      <AdminShell
-        user={user}
-        preferences={preferences}
-        onPreferencesChange={update}
-        onSignOut={onSignOut}
-      >
-        {children}
-      </AdminShell>
-    </AdminAccountContext>
+    <AdminRequestContext value={{ baseUrl, csrfToken }}>
+      <AdminAccountContext value={user}>
+        <AdminShell
+          user={user}
+          preferences={preferences}
+          onPreferencesChange={update}
+          onSignOut={onSignOut}
+        >
+          {children}
+        </AdminShell>
+      </AdminAccountContext>
+    </AdminRequestContext>
   );
 }

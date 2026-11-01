@@ -90,3 +90,5 @@ CI 使用相同的检查与构建命令。
 [ESLint 官方已将 9.x 标为停止维护](https://eslint.org/version-support/)；此开发工具兼容限制需在插件支持新版时单独升级验证。
 
 后台界面与验证入口见 [后台工作空间](docs/development/admin-workspace.md)。运行 `npm run verify:admin` 可在独立构建中检查私有路由响应，不影响开发服务。
+
+基本站点/主题/系统设置已接入真实 FastAPI 保存与节点应用状态，操作及接收器启动见 [设置运行指南](docs/development/settings.md)，范围与离线验证见 [设置验证记录](docs/handoff/settings-verification.md)。

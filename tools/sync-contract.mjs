@@ -1,3 +1,4 @@
+import { generateSettingsClient } from "./settings-contract-client.mjs";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFile, writeFile, mkdir } from "node:fs/promises";
@@ -28,24 +29,29 @@ const reader =
 const likes =
   path.basename(absoluteSource) === "comment-likes-v0.1.schema.json";
 const auth = path.basename(absoluteSource) === "auth-v0.1.schema.json";
-const rootName = auth
-  ? "AuthContract"
-  : likes
-    ? "CommentLikesContract"
-    : reader
-      ? "ReaderPreviewContract"
-      : presentation
-        ? "ContentPresentation"
-        : "PublicSnapshot";
-const outputName = auth
-  ? "auth-contract"
-  : likes
-    ? "comment-likes-contract"
-    : reader
-      ? "reader-preview-contract"
-      : presentation
-        ? "presentation-contract"
-        : "public-contract";
+const settings = path.basename(absoluteSource) === "settings-v1.schema.json";
+const rootName = settings
+  ? "SettingsContract"
+  : auth
+    ? "AuthContract"
+    : likes
+      ? "CommentLikesContract"
+      : reader
+        ? "ReaderPreviewContract"
+        : presentation
+          ? "ContentPresentation"
+          : "PublicSnapshot";
+const outputName = settings
+  ? "settings-contract"
+  : auth
+    ? "auth-contract"
+    : likes
+      ? "comment-likes-contract"
+      : reader
+        ? "reader-preview-contract"
+        : presentation
+          ? "presentation-contract"
+          : "public-contract";
 const backendRoot = path.dirname(path.dirname(absoluteSource));
 const relativeSource = path
   .relative(backendRoot, absoluteSource)
@@ -75,7 +81,7 @@ const types = await compile(schema, rootName, {
   bannerComment:
     "/* Generated from the backend public contract. Do not edit by hand. */",
   additionalProperties: false,
-  ignoreMinAndMaxItems: reader || likes,
+  ignoreMinAndMaxItems: reader || likes || settings,
   style: { singleQuote: false, semi: true, printWidth: 100 },
 });
 await writeFile(path.join(output, `${outputName}.ts`), types);
@@ -83,15 +89,17 @@ await writeFile(path.join(output, path.basename(absoluteSource)), source);
 await writeFile(
   path.join(
     output,
-    auth
-      ? "auth-source.json"
-      : likes
-        ? "comment-likes-source.json"
-        : reader
-          ? "reader-preview-source.json"
-          : presentation
-            ? "presentation-source.json"
-            : "contract-source.json",
+    settings
+      ? "settings-source.json"
+      : auth
+        ? "auth-source.json"
+        : likes
+          ? "comment-likes-source.json"
+          : reader
+            ? "reader-preview-source.json"
+            : presentation
+              ? "presentation-source.json"
+              : "contract-source.json",
   ),
   `${JSON.stringify(
     {
@@ -224,3 +232,5 @@ ${functions}\n`,
   );
 }
 console.log(`Generated contract from backend ${commit.slice(0, 7)}`);
+
+if (settings) await generateSettingsClient(schema, output);

@@ -1,6 +1,6 @@
 # 服务端实例配置示例；显式加载器读取 config.toml 或 CONFIG_FILE，拒绝未知字段。
 # 本文件不作为自动回退；原始规划示例保留在 docs/baseline/。
-# 当前支持公开快照读取，尚未运行内部回调、回源或完整缓存管理；预留限额不等于已启用。
+# 当前支持公开快照读取和独立设置接收器；完整文章接收/回源/缓存管理仍未实现，预留限额不等于已启用。
 
 # everunfold-frontend/config.example.toml
 # 仅在服务端加载；地址仅为可替换示例
@@ -40,3 +40,11 @@ max_concurrent_fetches = 4
 max_total_bytes = 2147483648
 min_free_bytes = 536870912
 rebuild_concurrency = 2
+
+# 设置副本与接收器；部署时填写从后端已鉴权响应获取的真实 source_epoch。
+# 未绑定 epoch 时不启用接收；不能通过首个请求自动认领来源。
+[settings]
+directory = "./var/settings"
+receiver_host = "127.0.0.1"
+receiver_port = 3001
+# source_epoch = "实际后端 UUID"

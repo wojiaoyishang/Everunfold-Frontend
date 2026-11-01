@@ -1,8 +1,9 @@
 "use client";
 import { TextLink } from "@/themes/argon/components/ui/primitives";
 
-import type { CSSProperties, ReactNode } from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 import type { Site } from "@/core/content/types";
+import { setSiteAppearance } from "@/core/browser/appearance";
 import { resourceUrl } from "@/core/content/urls";
 
 import { SiteHeader } from "./site-header";
@@ -43,6 +44,12 @@ export function BlogShell({
 
 function ShellFrame({ children }: { children: ReactNode }) {
   const { site, toc, presentationId } = useRouteState();
+  useEffect(() => {
+    setSiteAppearance({
+      mode: site.settings?.theme.mode ?? "system",
+      accent: site.settings?.theme.accent ?? "#673bb7",
+    });
+  }, [site.settings?.theme.mode, site.settings?.theme.accent]);
   const background =
     resourceUrl(site.hero_url) ?? "/reference/campfire-background.webp";
   return (
@@ -55,7 +62,12 @@ function ShellFrame({ children }: { children: ReactNode }) {
         } as CSSProperties
       }
     >
-      <BackgroundVideoProvider poster={background}>
+      <BackgroundVideoProvider
+        key={site.settings?.theme.background_video_url}
+        poster={background}
+        source={site.settings?.theme.background_video_url}
+        defaultPlay={site.settings?.theme.background_play}
+      >
         <HomeFeedPreference />
         <TextLink className="skip-link" href="#main-content">
           跳到正文

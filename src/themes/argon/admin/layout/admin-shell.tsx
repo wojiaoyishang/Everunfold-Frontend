@@ -111,9 +111,7 @@ export function AdminShell({
           <span className="admin-navigation-progress" aria-hidden="true" />
         </header>
         <main id="admin-main" tabIndex={-1} className="admin-main">
-          <div className="admin-page" key={pathname}>
-            {children}
-          </div>
+          <div className="admin-page">{children}</div>
         </main>
       </div>
     </div>

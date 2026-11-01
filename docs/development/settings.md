@@ -1,0 +1,75 @@
+# 基本设置运行指南
+
+版本：settings-runtime-1，2026-11-01。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+
+## 使用入口
+
+管理员登录后在侧栏「设置」进入：
+
+| 页面 | 已实现 |
+| --- | --- |
+| `/admin/settings` | 站点名称、简介、作者、头像地址、公告；两级导航添加/排序/删除与图标；SEO 描述、标题模板、允许索引 |
+| `/admin/settings/theme` | 默认主题色/显示模式、首页横幅文字、背景图片/视频地址、默认播放 |
+| `/admin/settings/system` | 按稳定节点 ID 保存动态请求刷新间隔、超时、重试间隔、批处理窗口；查看期望/确认版本、重新同步；部署来源脱敏展示 |
+
+头像/背景目前填写可访问地址，后续媒体库接管上传与选择。讨论/注册/邮件/媒体提供器及高级 SEO 尚未实现；正式站点地址仍由 `PUBLIC_SITE_URL` 部署配置确定。标题模板保留一个 `%s` 文章标题，可用 `%site%` 站点名；不允许索引生成页面 robots noindex，后台始终 private/no-store/noindex。
+
+保存时把整份站点与主题草稿作为一个版本提交。提交成功后节点状态可能仍是等待同步，收到落盘确认才显示已应用。若提示版本冲突，当前草稿仍在；先保留你的修改，再使用明确标注的「放弃本地修改并载入服务器版本」合并。写请求不自动重试，未知结果先读取核对。节点策略按节点单独保存，切换选择不会覆盖该页其它节点草稿。
+
+## 保存与读取端点
+
+全部浏览器管理请求直达配置的 FastAPI，使用已有 HttpOnly 会话；写请求附 `X-CSRF-Token`，不在 URL 传凭据。
+
+| 方法与路径 | 作用 |
+| --- | --- |
+| GET `/v1/admin/settings` | 当前站点/主题值、source_epoch、revision、节点状态 |
+| PATCH `/v1/admin/settings` | `{expected_revision, value: {site, theme}}` 保存整份配置 |
+| GET `/v1/admin/frontend-nodes` | 已配置的节点、各自策略与状态 |
+| GET/PATCH `/v1/admin/frontend-nodes/{node_id}/cache-policy` | 读取/以 expected_revision 保存该节点策略 |
+| POST `/v1/admin/frontend-nodes/{node_id}/sync` | 重发当前站点和策略版本，不修改业务值 |
+
+公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以 settings-1 生成契约为准。Node 内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
+
+## 初次启动与配置
+
+1. 后端执行 `uv sync --locked`，再显式执行 `uv run python init.database.py`。已有数据库可加 `--no-create-database`。迁移 `0004_settings` 建立节点策略、审计、投递表，仅为空站点插入初值，不重置现有账号/文章。API 启动不做迁移。
+2. 后端 `config.toml` 的 `[frontends.web-main]` 设置 `enabled=true`、`settings_receiver_url="http://127.0.0.1:3001"`；两个方向的 token 仍只填写环境变量名称。非回环地址必须 HTTPS。
+3. 前端 `config.toml` 增加 `[settings]`：`directory="./var/settings"`、`receiver_host="127.0.0.1"`、`receiver_port=3001`、`source_epoch="实际后端 UUID"`。从已鉴权 GET 设置响应的 `data.source_epoch` 或 SQL `SELECT source_epoch FROM site_settings WHERE id=1` 获取，不从未经认证请求自动认领 epoch。
+4. 前端 `[backend]` 配置允许的真实 peer IP/CIDR、FastAPI → Next.js token 环境变量名称，与后端目标节点一致。接收器不信任 X-Forwarded-For；TLS/反代部署须重新评估真实连接来源边界。
+5. 继续正常启动 API 和 Next.js。本机开发可在后端项目额外运行：
+
+```powershell
+uv run python -m tools.run_settings_dev --frontend-root E:/Programming/Node/Everunfold-Frontend
+```
+
+此辅助程序启动三个独立子进程：Node 接收器、Celery solo Worker、自研 Scheduler。Ctrl+C 只停止它启动的子进程，不停止 3000/8001；仅适用于单个已启用节点的本机联调。它为两个发送/接收进程提供同一份随机凭据，保存在被忽略的 `var/settings-dev-secrets.json`，不输出、不提交；不是生产密钥管理器。不要重复启动第二套相同 namespace 的 Scheduler。
+
+独立部署的入口分别是：前端 `npm run settings:receiver`；后端 `uv run celery -A app.entrypoints.worker:celery_app worker` 和 `uv run python -m app.entrypoints.scheduler`。凭据由各服务的运行环境注入；进程监督、TLS、生产 Worker pool/权限和磁盘策略另行部署验证。Scheduler 不需要发送密钥，只有真正投递的 Worker 读取凭据。
+
+修改实际 TOML/环境变量后需重启相应 API/接收器/Worker/Scheduler；后台保存业务设置无需重启。完成部署后在系统页点当前节点「重新同步」，确认站点和策略均已应用。只保存数据库而未运行接收/Worker/Scheduler 时，前台会继续保留原已应用版本，不能把「已保存」当所有节点已更新。
+
+## 副本结构与恢复
+
+```text
+settings.directory/
+  <node-id>/<source-epoch>/
+    public-settings.<revision>.json
+    cache-policy.<revision>.json
+    .*.staging   # 未完成写入不可见
+```
+
+原始公开内容仍在 `cache.directory/current.json`。所有路径在服务器解析，相对路径相对前端配置根；浏览器不接收实际文件路径或服务端凭据。
+
+- 后端离线、有公开快照/设置：直接使用本地完整版本，无定时过期，正文/菜单/SEO 仍可输出；动态请求按既有渐进失败行为隐藏失败字段。
+- 无公开快照：公开页面为可恢复 503，不能拿空配置伪装正常；登录/后台壳可打开，身份校验失败会提示连接异常。
+- 最新设置文件损坏：失败关闭，禁止悄悄回退旧设置；修复文件或使用正确版本重新配置节点。对于完整丢失的副本，系统页「重新同步」可以重发当前已确认版本。没有自动损坏修复/文件巡检。
+- 网络失败：Worker 有界重试，后台可手动重新同步；未知发送结果可以幂等重发。同版本不同内容不覆盖。
+- 数据库还原：必须维护 source_epoch 变更流程，分别调整节点绑定并重新发布，不能把新库旧版本当原库更高版本接受。
+- 新菜单已设置但仍见旧页面：检查节点状态后发起一次新的页面访问。现阶段不强制刷新已打开标签，也没有跨节点框架派生缓存失效器。
+- 已有访客颜色没有随后台改变：个人阅读偏好优先，这是预期行为；用无个人偏好的浏览器验证站点默认值。
+
+## 检查命令
+
+后端执行 Ruff、mypy、pytest；真实数据库/多进程用例需 `RUN_DATABASE_TESTS=1`，并有显式 `config.test.local.toml` 指向 `everunfold_test`、PostgreSQL/Redis 和配套前端依赖。该用例创建/销毁自己命名的临时数据库，两个 API、独立 Worker/Scheduler、Node 接收器互相验证，不访问原 WordPress。
+
+前端 `npm run check` 与 `npm run verify:admin`。后者在临时复制目录构建真实生产 Next，验证匿名后台壳、后端不可用/无缓存、有完整设置副本、SEO 与损坏版本行为；不会替换运行中的 `.next`。结果见 [验证记录](../handoff/settings-verification.md)。

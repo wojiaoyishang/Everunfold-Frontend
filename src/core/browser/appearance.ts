@@ -7,14 +7,18 @@ import {
 } from "./appearance-policy";
 const changeEvent = "everunfold:appearance";
 let current = defaultAppearance;
+let siteDefaults = defaultAppearance;
 let initialized = false;
 
 function read() {
   try {
-    current = appearance(
-      JSON.parse(localStorage.getItem(APPEARANCE_KEY) ?? "null"),
-      localStorage.getItem("everunfold.theme"),
-    );
+    const stored = JSON.parse(localStorage.getItem(APPEARANCE_KEY) ?? "null");
+    const legacy = localStorage.getItem("everunfold.theme");
+    current = appearance({
+      ...siteDefaults,
+      ...(stored ?? {}),
+      ...(stored?.mode || !legacy ? {} : { mode: legacy }),
+    });
   } catch {
     /* The in-memory preference remains usable. */
   }
@@ -71,4 +75,14 @@ export function subscribeAppearance(listener: () => void) {
     window.removeEventListener(changeEvent, listener);
     window.removeEventListener("storage", storage);
   };
+}
+
+/** Defaults never overwrite a visitor's explicitly persisted choices. */
+export function setSiteAppearance(defaults: Partial<Appearance>) {
+  const next = appearance({ ...defaultAppearance, ...defaults });
+  if (JSON.stringify(next) === JSON.stringify(siteDefaults)) return;
+  siteDefaults = next;
+  current = next;
+  applyAppearance(read());
+  window.dispatchEvent(new Event(changeEvent));
 }

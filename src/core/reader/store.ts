@@ -19,6 +19,7 @@ interface ReaderClient {
 export interface ReaderStoreOptions {
   client?: ReaderClient;
   timeoutMs?: number;
+  freshnessMs?: number;
   batchDelayMs?: number;
   retryDelayMs?: number;
 }
@@ -283,7 +284,8 @@ export class ReaderStore {
     for (const id of ids) this.demandMetric(route, id);
   }
   refreshIfStale() {
-    if (Date.now() - this.lastAttempt >= 30000) this.refresh();
+    if (Date.now() - this.lastAttempt >= (this.options.freshnessMs ?? 30000))
+      this.refresh();
   }
   setOnline(online: boolean) {
     if (this.snapshot.offline === !online) return;

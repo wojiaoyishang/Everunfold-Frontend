@@ -19,6 +19,12 @@ export interface FrontendConfiguration {
     connectTimeoutSeconds: number;
     requestTimeoutSeconds: number;
   };
+  settings: {
+    directory: string;
+    sourceEpoch: string | undefined;
+    receiverHost: string;
+    receiverPort: number;
+  };
   cache: {
     directory: string;
     maxSnapshotBytes: number;
@@ -130,11 +136,40 @@ export function parseConfiguration(
       "PUBLIC_SITE_URL",
       "backend",
       "cache",
+      "settings",
     ],
     "根配置",
   );
   const backend = object(root.backend ?? {}, "backend");
   const cache = object(root.cache ?? {}, "cache");
+  const settings = object(root.settings ?? {}, "settings");
+  knownKeys(
+    settings,
+    ["directory", "source_epoch", "receiver_host", "receiver_port"],
+    "settings",
+  );
+  const sourceEpoch =
+    settings.source_epoch === undefined
+      ? undefined
+      : string(settings.source_epoch, "settings.source_epoch");
+  if (
+    sourceEpoch &&
+    !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(sourceEpoch)
+  )
+    throw new ConfigurationError("settings.source_epoch 必须为后端来源 UUID");
+  const receiverHost = string(
+    settings.receiver_host ?? "127.0.0.1",
+    "settings.receiver_host",
+  );
+  if (!isIP(receiverHost))
+    throw new ConfigurationError("settings.receiver_host 必须为监听 IP");
+  const receiverPort = number(
+    settings.receiver_port,
+    3001,
+    "settings.receiver_port",
+  );
+  if (receiverPort > 65535)
+    throw new ConfigurationError("settings.receiver_port 不合法");
   knownKeys(
     backend,
     [
@@ -176,6 +211,15 @@ export function parseConfiguration(
   if (publicSiteUrl && new URL(publicSiteUrl).pathname !== "/")
     throw new ConfigurationError("PUBLIC_SITE_URL 必须为前台公开站点根地址");
   return {
+    settings: {
+      directory: string(
+        settings.directory ?? "./var/settings",
+        "settings.directory",
+      ),
+      sourceEpoch,
+      receiverHost,
+      receiverPort,
+    },
     publicSiteUrl,
     backendBaseUrl: publicUrl,
     frontendNodeId: nodeId,

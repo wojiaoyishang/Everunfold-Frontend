@@ -59,6 +59,7 @@ export function useAdminAccess(baseUrl: string) {
     }
   }
   return {
+    csrfToken: state.phase === "ready" ? state.session.csrf_token : "",
     user: !leaving && state.phase === "ready" ? state.session.user : null,
     error:
       !signedOut && state.phase === "failed"

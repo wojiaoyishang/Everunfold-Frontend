@@ -1,0 +1,724 @@
+{
+  "$defs": {
+    "CachePolicy": {
+      "additionalProperties": false,
+      "description": "First operational policy: request lifetime, refresh freshness and batching.",
+      "properties": {
+        "dynamic_freshness_seconds": {
+          "default": 30,
+          "maximum": 3600,
+          "minimum": 5,
+          "title": "Dynamic Freshness Seconds",
+          "type": "integer"
+        },
+        "request_timeout_seconds": {
+          "default": 8,
+          "maximum": 30,
+          "minimum": 1,
+          "title": "Request Timeout Seconds",
+          "type": "integer"
+        },
+        "retry_delay_ms": {
+          "default": 1500,
+          "maximum": 5000,
+          "minimum": 100,
+          "title": "Retry Delay Ms",
+          "type": "integer"
+        },
+        "batch_delay_ms": {
+          "default": 24,
+          "maximum": 250,
+          "minimum": 0,
+          "title": "Batch Delay Ms",
+          "type": "integer"
+        }
+      },
+      "title": "CachePolicy",
+      "type": "object"
+    },
+    "DeliveryReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "title": "Node Id",
+          "type": "string"
+        },
+        "source_epoch": {
+          "title": "Source Epoch",
+          "type": "string"
+        },
+        "resource": {
+          "enum": [
+            "public-settings",
+            "cache-policy"
+          ],
+          "title": "Resource",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "digest": {
+          "title": "Digest",
+          "type": "string"
+        },
+        "durable": {
+          "const": true,
+          "title": "Durable",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "node_id",
+        "source_epoch",
+        "resource",
+        "revision",
+        "digest",
+        "durable"
+      ],
+      "title": "DeliveryReceipt",
+      "type": "object"
+    },
+    "DeliveryState": {
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "title": "Node Id",
+          "type": "string"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "desired_revision": {
+          "title": "Desired Revision",
+          "type": "integer"
+        },
+        "applied_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Applied Revision"
+        },
+        "status": {
+          "enum": [
+            "not_configured",
+            "pending",
+            "applied",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "applied_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Applied At"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error"
+        }
+      },
+      "required": [
+        "node_id",
+        "enabled",
+        "desired_revision",
+        "applied_revision",
+        "status",
+        "applied_at",
+        "error"
+      ],
+      "title": "DeliveryState",
+      "type": "object"
+    },
+    "MenuItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 60,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "href": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Href",
+          "type": "string"
+        },
+        "icon": {
+          "default": "link",
+          "enum": [
+            "home",
+            "archive",
+            "leaf",
+            "book",
+            "folder",
+            "tag",
+            "link",
+            "star",
+            "bell",
+            "flask"
+          ],
+          "title": "Icon",
+          "type": "string"
+        },
+        "children": {
+          "items": {
+            "$ref": "#/$defs/MenuLink"
+          },
+          "maxItems": 12,
+          "title": "Children",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "href"
+      ],
+      "title": "MenuItem",
+      "type": "object"
+    },
+    "MenuLink": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 60,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "href": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Href",
+          "type": "string"
+        },
+        "icon": {
+          "default": "link",
+          "enum": [
+            "home",
+            "archive",
+            "leaf",
+            "book",
+            "folder",
+            "tag",
+            "link",
+            "star",
+            "bell",
+            "flask"
+          ],
+          "title": "Icon",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "href"
+      ],
+      "title": "MenuLink",
+      "type": "object"
+    },
+    "NodeList": {
+      "additionalProperties": false,
+      "properties": {
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/PolicyState"
+          },
+          "title": "Nodes",
+          "type": "array"
+        }
+      },
+      "required": [
+        "nodes"
+      ],
+      "title": "NodeList",
+      "type": "object"
+    },
+    "PolicyState": {
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {
+          "title": "Node Id",
+          "type": "string"
+        },
+        "source_epoch": {
+          "title": "Source Epoch",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "value": {
+          "$ref": "#/$defs/CachePolicy"
+        },
+        "delivery": {
+          "$ref": "#/$defs/DeliveryState"
+        }
+      },
+      "required": [
+        "node_id",
+        "source_epoch",
+        "revision",
+        "value",
+        "delivery"
+      ],
+      "title": "PolicyState",
+      "type": "object"
+    },
+    "PublicResponse_NodeList_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/NodeList"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[NodeList]",
+      "type": "object"
+    },
+    "PublicResponse_PolicyState_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/PolicyState"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[PolicyState]",
+      "type": "object"
+    },
+    "PublicResponse_SettingsState_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/SettingsState"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[SettingsState]",
+      "type": "object"
+    },
+    "PublicSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "site": {
+          "$ref": "#/$defs/SitePreferences"
+        },
+        "theme": {
+          "$ref": "#/$defs/ThemePreferences"
+        }
+      },
+      "required": [
+        "site",
+        "theme"
+      ],
+      "title": "PublicSettings",
+      "type": "object"
+    },
+    "SavePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "value": {
+          "$ref": "#/$defs/CachePolicy"
+        }
+      },
+      "required": [
+        "expected_revision",
+        "value"
+      ],
+      "title": "SavePolicy",
+      "type": "object"
+    },
+    "SaveSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "value": {
+          "$ref": "#/$defs/PublicSettings"
+        }
+      },
+      "required": [
+        "expected_revision",
+        "value"
+      ],
+      "title": "SaveSettings",
+      "type": "object"
+    },
+    "SettingsDelivery": {
+      "additionalProperties": false,
+      "properties": {
+        "protocol": {
+          "const": "settings-1",
+          "default": "settings-1",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "node_id": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$",
+          "title": "Node Id",
+          "type": "string"
+        },
+        "source_epoch": {
+          "pattern": "^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$",
+          "title": "Source Epoch",
+          "type": "string"
+        },
+        "resource": {
+          "enum": [
+            "public-settings",
+            "cache-policy"
+          ],
+          "title": "Resource",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicSettings"
+            },
+            {
+              "$ref": "#/$defs/CachePolicy"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "node_id",
+        "source_epoch",
+        "resource",
+        "revision",
+        "value"
+      ],
+      "title": "SettingsDelivery",
+      "type": "object"
+    },
+    "SettingsState": {
+      "additionalProperties": false,
+      "properties": {
+        "source_epoch": {
+          "title": "Source Epoch",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "value": {
+          "$ref": "#/$defs/PublicSettings"
+        },
+        "delivery": {
+          "items": {
+            "$ref": "#/$defs/DeliveryState"
+          },
+          "title": "Delivery",
+          "type": "array"
+        }
+      },
+      "required": [
+        "source_epoch",
+        "revision",
+        "value",
+        "delivery"
+      ],
+      "title": "SettingsState",
+      "type": "object"
+    },
+    "SitePreferences": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "maxLength": 300,
+          "title": "Description",
+          "type": "string"
+        },
+        "author": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Author",
+          "type": "string"
+        },
+        "avatar_url": {
+          "default": "",
+          "maxLength": 2048,
+          "title": "Avatar Url",
+          "type": "string"
+        },
+        "notice": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Notice",
+          "type": "string"
+        },
+        "navigation": {
+          "items": {
+            "$ref": "#/$defs/MenuItem"
+          },
+          "maxItems": 12,
+          "title": "Navigation",
+          "type": "array"
+        },
+        "seo_description": {
+          "default": "",
+          "maxLength": 300,
+          "title": "Seo Description",
+          "type": "string"
+        },
+        "title_template": {
+          "default": "%s · %site%",
+          "maxLength": 160,
+          "title": "Title Template",
+          "type": "string"
+        },
+        "allow_indexing": {
+          "default": true,
+          "title": "Allow Indexing",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "description",
+        "author"
+      ],
+      "title": "SitePreferences",
+      "type": "object"
+    },
+    "ThemePreferences": {
+      "additionalProperties": false,
+      "properties": {
+        "accent": {
+          "default": "#673bb7",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "title": "Accent",
+          "type": "string"
+        },
+        "mode": {
+          "default": "system",
+          "enum": [
+            "system",
+            "light",
+            "dark"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "hero_title": {
+          "default": "",
+          "maxLength": 160,
+          "title": "Hero Title",
+          "type": "string"
+        },
+        "hero_subtitle": {
+          "default": "",
+          "maxLength": 300,
+          "title": "Hero Subtitle",
+          "type": "string"
+        },
+        "background_url": {
+          "default": "",
+          "maxLength": 2048,
+          "title": "Background Url",
+          "type": "string"
+        },
+        "background_video_url": {
+          "default": "/reference/campfire-background.webm",
+          "maxLength": 2048,
+          "title": "Background Video Url",
+          "type": "string"
+        },
+        "background_play": {
+          "default": true,
+          "title": "Background Play",
+          "type": "boolean"
+        }
+      },
+      "title": "ThemePreferences",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "settings": {
+      "$ref": "#/$defs/PublicResponse_SettingsState_"
+    },
+    "save_settings": {
+      "$ref": "#/$defs/SaveSettings"
+    },
+    "policy": {
+      "$ref": "#/$defs/PublicResponse_PolicyState_"
+    },
+    "save_policy": {
+      "$ref": "#/$defs/SavePolicy"
+    },
+    "nodes": {
+      "$ref": "#/$defs/PublicResponse_NodeList_"
+    },
+    "delivery": {
+      "$ref": "#/$defs/SettingsDelivery"
+    },
+    "receipt": {
+      "$ref": "#/$defs/DeliveryReceipt"
+    }
+  },
+  "required": [
+    "settings",
+    "save_settings",
+    "policy",
+    "save_policy",
+    "nodes",
+    "delivery",
+    "receipt"
+  ],
+  "title": "SettingsContract",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-everunfold-contract-version": "1.0.0",
+  "x-everunfold-operations": [
+    {
+      "name": "readSettings",
+      "path": "/v1/admin/settings",
+      "method": "GET",
+      "response": "settings"
+    },
+    {
+      "name": "saveSettings",
+      "path": "/v1/admin/settings",
+      "method": "PATCH",
+      "input": "save_settings",
+      "response": "settings"
+    },
+    {
+      "name": "readFrontendNodes",
+      "path": "/v1/admin/frontend-nodes",
+      "method": "GET",
+      "response": "nodes"
+    },
+    {
+      "name": "readCachePolicy",
+      "path": "/v1/admin/frontend-nodes/{node_id}/cache-policy",
+      "method": "GET",
+      "response": "policy"
+    },
+    {
+      "name": "saveCachePolicy",
+      "path": "/v1/admin/frontend-nodes/{node_id}/cache-policy",
+      "method": "PATCH",
+      "input": "save_policy",
+      "response": "policy"
+    },
+    {
+      "name": "retrySettingsSync",
+      "path": "/v1/admin/frontend-nodes/{node_id}/sync",
+      "method": "POST",
+      "response": "nodes"
+    }
+  ]
+}

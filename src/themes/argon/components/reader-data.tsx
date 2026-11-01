@@ -40,8 +40,24 @@ export function ReaderDataProvider({
   baseUrl: string;
   children: ReactNode;
 }) {
-  const store = useMemo(() => new ReaderStore(baseUrl), [baseUrl]);
-  const { route } = useRouteState();
+  const { route, site } = useRouteState();
+  const policy = site.cachePolicy;
+  const store = useMemo(
+    () =>
+      new ReaderStore(baseUrl, {
+        timeoutMs: (policy?.request_timeout_seconds ?? 8) * 1000,
+        freshnessMs: (policy?.dynamic_freshness_seconds ?? 30) * 1000,
+        retryDelayMs: policy?.retry_delay_ms ?? 1500,
+        batchDelayMs: policy?.batch_delay_ms ?? 24,
+      }),
+    [
+      baseUrl,
+      policy?.request_timeout_seconds,
+      policy?.dynamic_freshness_seconds,
+      policy?.retry_delay_ms,
+      policy?.batch_delay_ms,
+    ],
+  );
   const [slots, setSlots] = useState<Record<string, StatusSlot>>({});
   const register = useCallback(
     (route: string, key: string, component: ComponentType) => {

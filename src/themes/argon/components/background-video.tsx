@@ -42,9 +42,13 @@ export function useBackgroundPlayback() {
 
 export function BackgroundVideoProvider({
   poster,
+  source = VIDEO_SOURCE,
+  defaultPlay = true,
   children,
 }: {
   poster: string;
+  source?: string;
+  defaultPlay?: boolean;
   children: ReactNode;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -63,7 +67,11 @@ export function BackgroundVideoProvider({
   const [hasFrame, setHasFrame] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [failed, setFailed] = useState(false);
-  const enabled = resolvePlayback(preference, motion.enabled);
+  const enabled =
+    Boolean(source) &&
+    (preference === "auto" && !defaultPlay
+      ? false
+      : resolvePlayback(preference, motion.enabled));
   const shouldPlay = visible && enabled;
 
   useEffect(() => {
@@ -75,7 +83,7 @@ export function BackgroundVideoProvider({
     }
     video.muted = true;
     if (!video.getAttribute("src")) {
-      video.src = VIDEO_SOURCE;
+      video.src = source;
       video.load();
     }
     let cancelled = false;
@@ -86,7 +94,7 @@ export function BackgroundVideoProvider({
       cancelled = true;
       video.pause();
     };
-  }, [shouldPlay]);
+  }, [shouldPlay, source]);
 
   useEffect(() => {
     if (!blocked || !shouldPlay) return;
@@ -110,7 +118,7 @@ export function BackgroundVideoProvider({
     setFailed(false);
     if (!video) return;
     video.muted = true;
-    if (!video.getAttribute("src")) video.src = VIDEO_SOURCE;
+    if (!video.getAttribute("src")) video.src = source;
     if (video.error) video.load();
     void video.play().catch(() => setBlocked(true));
   }

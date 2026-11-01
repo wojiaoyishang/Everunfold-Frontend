@@ -7,6 +7,9 @@ import type { AdminPageIcon } from "@/core/admin/registry";
 import { Icon, type IconName } from "../../components/icon";
 import { RouteLink } from "../../components/ui/route-link";
 const navigationIcons: Record<AdminPageIcon, IconName> = {
+  settings: "settings",
+  theme: "sun",
+  system: "cloud",
   overview: "grid",
   content: "copy",
   media: "image",

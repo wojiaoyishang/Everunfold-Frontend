@@ -89,6 +89,18 @@ export function navigationTarget(href: string) {
 
 /** Presentation overrides for the reference theme, without inventing business data. */
 export function siteNavigation(site: Site): NavigationItem[] {
+  if (site.settings)
+    return (site.settings.site.navigation ?? []).map((item) => ({
+      label: item.label,
+      href: item.href,
+      icon: item.icon ?? "link",
+      children: item.children?.map((child) => ({
+        label: child.label,
+        href: child.href,
+        icon: child.icon ?? "link",
+        description: "",
+      })),
+    }));
   const items = site.navigation.length
     ? site.navigation
     : [
@@ -118,7 +130,8 @@ export function campfireIdentity(site: Site) {
   return {
     title: site.hero_title || site.name,
     alias: campfire ? "(梦吃丘)" : "",
-    subtitle: campfire ? "等待着、探索着、期待着" : site.description,
+    subtitle:
+      campfire && !site.settings ? "等待着、探索着、期待着" : site.description,
     social: campfire
       ? [
           { label: "BiliBili", href: "https://space.bilibili.com/197741923" },

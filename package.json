@@ -27,7 +27,8 @@
     "check": "npm run failure:check && npm run lint && npm run typecheck && npm run format:check && npm run test",
     "contract:sync": "node tools/sync-contract.mjs",
     "test": "tsx --test tests/*.test.ts",
-    "verify:http": "node tools/verify-public-http.mjs"
+    "verify:http": "node tools/verify-public-http.mjs",
+    "settings:receiver": "tsx tools/settings-receiver.mts"
   },
   "dependencies": {
     "ajv": "8.20.0",
@@ -39,7 +40,8 @@
     "react-dom": "19.3.1",
     "sanitize-html": "2.18.1",
     "server-only": "0.0.1",
-    "smol-toml": "1.9.1"
+    "smol-toml": "1.9.1",
+    "tsx": "4.23.15"
   },
   "devDependencies": {
     "@types/markdown-it": "14.2.0",
@@ -52,7 +54,6 @@
     "eslint-config-prettier": "10.1.8",
     "json-schema-to-typescript": "16.0.0",
     "prettier": "3.9.10",
-    "tsx": "4.23.15",
     "typescript": "5.9.3"
   }
 }

@@ -4,6 +4,8 @@
 
 相关：[当前后台导航注册](admin-navigation.md)、[设置设计](settings-design.md)、[ADR 0023](../decisions/0023-settings-and-extension-boundaries.md)。
 
+实施更新（2026-11-01）：三个设置入口已复用可信页面登记，实际 `SettingsStore`/`FileSettingsStore` 在 `src/server/settings` 提供设置副本存储边界。完整组件/编辑器注册域、模块设置 Schema、通用运行时插件加载器仍未实现，不能把下面建议 API 名称当作现有方法。见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md)。
+
 ## 从已有实现继续，而不是平行建立第二套菜单
 
 当前 `src/core/admin/registry.ts` 接受可信模块的分组/页面元信息，`navigation.ts` 是唯一装配点；路由仍由 `src/app` 的真实适配器提供。它不包含组件工厂、编辑器或缓存存储提供器。后端页面声明 provider 也还未实现。

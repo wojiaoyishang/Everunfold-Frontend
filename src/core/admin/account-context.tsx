@@ -8,3 +8,13 @@ export function useAdminAccount() {
     throw new Error("Admin pages require a confirmed account boundary.");
   return user;
 }
+
+export const AdminRequestContext = createContext<{
+  baseUrl: string;
+  csrfToken: string;
+} | null>(null);
+export function useAdminRequest() {
+  const value = useContext(AdminRequestContext);
+  if (!value) throw new Error("Admin operations require a confirmed session");
+  return value;
+}

@@ -11,6 +11,7 @@ html:has([data-surface="admin"]),
   --admin-accent: #415fb7;
   --admin-accent-soft: #edf1fc;
   --admin-on-accent: #ffffff;
+  --admin-danger: #b54343;
   --admin-positive: #28775a;
   --admin-positive-soft: #edf6f1;
   --admin-shadow: 0 10px 32px #17223812, 0 2px 8px #17223808;
@@ -60,6 +61,7 @@ html:has([data-admin-mode="dark"]),
   --admin-accent: #a4baff;
   --admin-accent-soft: #29354e;
   --admin-on-accent: #182033;
+  --admin-danger: #f0a1a1;
   --admin-positive: #8bceb1;
   --admin-positive-soft: #22382e;
   --admin-shadow: 0 10px 32px #0004;
@@ -77,6 +79,7 @@ html:has([data-admin-mode="dark"]),
     --admin-accent: #a4baff;
     --admin-accent-soft: #29354e;
     --admin-on-accent: #182033;
+    --admin-danger: #f0a1a1;
     --admin-positive: #8bceb1;
     --admin-positive-soft: #22382e;
     --admin-shadow: 0 10px 32px #0004;

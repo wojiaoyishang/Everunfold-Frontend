@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读、按页面注册的动态请求、演示身份/浏览量、真实匿名历史评论点赞和阅读反馈，以及真实账号登录、独立后台壳与内容/媒体准备页；完整博客/CMS 尚未全部实现。
+本目录是跨上下文、跨开发者的长期交接入口。当前已有公开阅读、按页面注册的动态请求、演示身份/浏览量、真实匿名历史评论点赞和阅读反馈，以及真实账号登录、独立后台壳、基本站点/主题/系统设置与内容/媒体准备页；完整博客/CMS 尚未全部实现。
 
 ## 先从这里读
 
@@ -16,7 +16,7 @@
 10. [前台功能决定](decisions/0006-public-ui-completion.md)：二级导航、文章头图、评论预览、整卡点击和保存背景偏好。
 11. [内容类型衔接](architecture/content-types.md)：0.2 展示草案与前台原型已实现，在线 0.1 类型迁移/整体导入后置。
 12. [说说与阅读工具决定](decisions/0007-shuoshuo-and-reader-features.md)：后端草案、前端适配、共享评论/图片/正文工具与偏好边界。
-13. [主题优化决定](decisions/0008-theme-polish-and-configuration.md) 与 [主题配置/缓存边界](architecture/theme-configuration.md)：首页偏好、紧凑卡片、横向推荐、品牌色联动；明确后台配置尚未实现。
+13. [主题优化决定](decisions/0008-theme-polish-and-configuration.md) 与 [主题配置/缓存边界](architecture/theme-configuration.md)：首页偏好、紧凑卡片、横向推荐、品牌色联动；后台首批设置现由 ADR 0024 落地。
 14. [导航就绪与反馈决定](decisions/0009-navigation-readiness-and-feedback.md)：完整页面准备、切换后定位、5 秒导航延伸横幅、20 秒超时和竞争请求处理。
 15. [自动反馈与倒计时](decisions/0010-navigation-feedback-countdown.md)：无按钮的单行横幅、哭哭失败表情、10 秒整幅倒计时和气泡装饰，更新 ADR 0009 的展示部分。
 16. [评论焦点与主题滚动条](decisions/0011-comment-focus-and-scrollbars.md)：完整颜文字排版、轻量选中/键盘焦点、全站原生滚动条共用主题色。
@@ -34,7 +34,9 @@
 
 27. [后台导航注册](architecture/admin-navigation.md) 与 [ADR 0022](decisions/0022-admin-navigation-and-motion.md)：可信模块菜单组装、系统/扩展职责、后台独立动效偏好；后端挂钩仍为设计。
 
-28. [设置项盘点](design/settings-reference-inventory.md)、[站点/主题/系统设置设计](architecture/settings-design.md)、[前端扩展提案](architecture/frontend-extensions.md) 与 [ADR 0023](decisions/0023-settings-and-extension-boundaries.md)：Argon/WP 可配置项分类、SEO、配置存放与缓存分层、编辑器/页面/存储注册边界；仅调研提案，系统设置存放方案待商定。
+28. [设置项盘点](design/settings-reference-inventory.md)、[站点/主题/系统设置设计](architecture/settings-design.md)、[前端扩展提案](architecture/frontend-extensions.md) 与 [ADR 0023](decisions/0023-settings-and-extension-boundaries.md)：Argon/WP 可配置项分类、SEO、配置存放与缓存分层、编辑器/页面/存储注册边界；保留调研与扩展提案，已实施子集和存放决定见 ADR 0024。
+
+29. [基本设置实施](decisions/0024-versioned-settings-delivery.md)、[运行指南](development/settings.md) 与 [实际验证](handoff/settings-verification.md)：PostgreSQL 权威保存、审计/可靠事件、独立投递、节点完整副本及后台三页。
 
 ## 目录职责
 

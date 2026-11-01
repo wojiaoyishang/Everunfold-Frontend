@@ -8,7 +8,7 @@ import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Parser } from "htmlparser2";
 
-export async function verifyAdminRuntime({ workspace }) {
+export async function verifyAdminRuntime({ workspace, projectRoot }) {
   let backendRequests = 0;
   const offlineBackend = createHttpServer((_request, response) => {
     backendRequests++;
@@ -39,6 +39,9 @@ FRONTEND_NODE_ID = "admin-verification"
 [backend]
 connect_timeout_seconds = 1
 request_timeout_seconds = 1
+[settings]
+directory = "./var/settings-verification"
+source_epoch = "00000000-0000-0000-0000-000000000001"
 [cache]
 directory = "./var/absent-admin-verification-cache"
 `,
@@ -100,6 +103,9 @@ directory = "./var/absent-admin-verification-cache"
       "/admin",
       "/admin/content",
       "/admin/media",
+      "/admin/settings",
+      "/admin/settings/theme",
+      "/admin/settings/system",
     ]) {
       const response = await fetch(base + route, {
         signal: AbortSignal.timeout(5000),
@@ -140,6 +146,56 @@ directory = "./var/absent-admin-verification-cache"
     );
     console.log(
       "Admin route isolation passed with an unavailable backend and no public cache.",
+    );
+    assert.equal(
+      (await fetch(base + "/")).status,
+      503,
+      "cold public cache must fail honestly",
+    );
+    await new Promise((resolve, reject) => {
+      const fixture = spawn(
+        process.execPath,
+        ["--import", "tsx", "tools/fixtures/settings-snapshot.mts", workspace],
+        { cwd: projectRoot, stdio: "inherit", windowsHide: true },
+      );
+      fixture.once("error", reject);
+      fixture.once("exit", (code) =>
+        code === 0 ? resolve() : reject(new Error("Settings fixture failed")),
+      );
+    });
+    const home = await fetch(base + "/");
+    assert.equal(home.status, 200);
+    const body = await home.text();
+    assert.ok(body.includes("离线主题标题") && body.includes("同步导航"));
+    const article = await fetch(base + "/hello.html");
+    assert.equal(article.status, 200);
+    const html = await article.text();
+    assert.match(html, /<title>一篇文章 — 本地设置<\/title>/);
+    assert.match(html, /name="robots" content="noindex, follow"/);
+    assert.equal(
+      backendRequests,
+      0,
+      "public reading must not reach the offline backend",
+    );
+    await writeFile(
+      path.join(
+        workspace,
+        "var/settings-verification/admin-verification/00000000-0000-0000-0000-000000000001/public-settings.3.json",
+      ),
+      "corrupt",
+    );
+    assert.equal(
+      (await fetch(base + "/")).status,
+      503,
+      "corrupt latest settings must not fall back to an older revision",
+    );
+    assert.equal(
+      (await fetch(base + "/admin/settings")).status,
+      200,
+      "configuration failure must not block the repair interface",
+    );
+    console.log(
+      "Offline settings passed: cold 503; local snapshot + applied settings 200 with SEO; corrupt latest 503; admin remains accessible.",
     );
   } finally {
     if (child && child.exitCode === null && child.signalCode === null) {

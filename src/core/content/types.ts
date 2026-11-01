@@ -1,7 +1,15 @@
-import type { PublicSnapshot } from "@/generated/public-contract";
+import type { PublicSnapshot as StoredSnapshot } from "@/generated/public-contract";
 
-export type { PublicSnapshot };
-export type Site = PublicSnapshot["site"];
+import type {
+  CachePolicy,
+  PublicSettings,
+} from "@/generated/settings-contract";
+export type Site = StoredSnapshot["site"] & {
+  settings?: PublicSettings;
+  settingsRevision?: number;
+  cachePolicy?: CachePolicy;
+};
+export type PublicSnapshot = Omit<StoredSnapshot, "site"> & { site: Site };
 export type Content = PublicSnapshot["contents"][number];
 export type ReadableContent = Omit<Content, "kind">;
 export type Taxonomy = PublicSnapshot["taxonomies"][number];

@@ -1,5 +1,12 @@
 /** Trusted, build-time page metadata. A registry entry never grants permission. */
-export type AdminPageIcon = "overview" | "content" | "media" | "extension";
+export type AdminPageIcon =
+  | "overview"
+  | "content"
+  | "media"
+  | "extension"
+  | "settings"
+  | "theme"
+  | "system";
 export interface AdminMenuGroup {
   readonly id: string;
   readonly label: string;

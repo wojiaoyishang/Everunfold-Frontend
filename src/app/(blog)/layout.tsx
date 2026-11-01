@@ -11,9 +11,15 @@ export async function generateMetadata(): Promise<Metadata> {
     return {
       title: {
         default: site.name,
-        template: `%s · ${site.hero_title || site.name}`,
+        template: (
+          site.settings?.site.title_template ?? "%s · %site%"
+        ).replaceAll("%site%", site.name),
       },
-      description: site.description,
+      description: site.settings?.site.seo_description || site.description,
+      robots:
+        site.settings?.site.allow_indexing === false
+          ? { index: false, follow: true }
+          : undefined,
     };
   } catch {
     return {

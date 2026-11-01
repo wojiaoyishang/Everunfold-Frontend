@@ -57,7 +57,7 @@
 .admin-breadcrumb-current {
   animation: admin-breadcrumb-enter 200ms var(--admin-motion-ease) both;
 }
-/* Only the keyed page's top-level sections enter; fields and nested controls never replay. */
+/* New route sections enter without remounting shared layouts or discarding form drafts. */
 .admin-page > * {
   animation: admin-section-enter var(--admin-motion-enter)
     var(--admin-motion-ease) both;

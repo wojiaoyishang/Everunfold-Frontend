@@ -50,6 +50,17 @@ export async function postJSON<T>(
   return sendJSON(baseUrl, path, {}, validate, options, body, "POST");
 }
 
+/** Revision-guarded configuration writes; never automatically retried. */
+export async function patchJSON<T>(
+  baseUrl: string,
+  path: string,
+  body: object,
+  validate: (input: unknown) => input is T,
+  options: RequestOptions = {},
+): Promise<T> {
+  return sendJSON(baseUrl, path, {}, validate, options, body, "PATCH");
+}
+
 async function sendJSON<T>(
   baseUrl: string,
   path: string,
@@ -63,7 +74,7 @@ async function sendJSON<T>(
     credentials = "omit",
   }: RequestOptions,
   body?: object,
-  method: "GET" | "PUT" | "POST" = "GET",
+  method: "GET" | "PUT" | "POST" | "PATCH" = "GET",
 ): Promise<T> {
   const url = new URL(path, `${baseUrl}/`);
   for (const [key, input] of Object.entries(query)) {

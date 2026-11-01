@@ -43,7 +43,7 @@ test("admin modules compose deterministic groups and entries independently of re
   assert.deepEqual(first.navigation, reversed.navigation);
   assert.deepEqual(
     first.navigation.map((g) => g.id),
-    ["core.workspace", "example.tools"],
+    ["core.workspace", "core.settings", "example.tools"],
   );
   assert.deepEqual(
     first.navigation[0].items.map((p) => p.id),

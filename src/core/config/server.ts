@@ -51,6 +51,10 @@ export function readConfiguration() {
   const settings = parseConfiguration(input, process.env);
   return {
     ...settings,
+    settings: {
+      ...settings.settings,
+      directory: path.resolve(root, settings.settings.directory),
+    },
     cache: {
       ...settings.cache,
       directory: path.resolve(root, settings.cache.directory),

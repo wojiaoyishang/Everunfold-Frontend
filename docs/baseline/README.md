@@ -67,3 +67,20 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 `everunfold-frontend/AGENTS.md` 中由 Next.js 开发服务器自动维护的 `<!-- BEGIN:nextjs-agent-rules -->` 区块是该仓库工具专属内容，不复制到后端。根 `AGENTS.md` 的其余共享内容仍须保持一致；比较时先移除该区块。
 
 根 README、锁文件、代码、检查结果、`docs/handoff/STATUS.md` 与仓库专属设计各自维护，不要求相同。两个根 `config.example.toml` 分别对应各自角色，必须不同；共同参数含义以后端契约与基线为准。版本化契约只由后端发布，前端生成内容不是第二份可编辑契约源。
+
+- 基本设置实施同步 ADR 0024、settings-runtime-1、settings-design-2、settings-verification 与主题设置截图，并更新原设置/扩展/导航设计的已实施边界。公开契约 settings-1 的前端来源固定为后端提交 a4237da，生成目录记录 SHA256；原 v2.11/v0.14 字节不变，开发协议 development-5 不变。
+
+## settings-runtime-1 同步摘要（2026-11-01）
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `faf28e22bc2023646d94e4b61c2dd26ef18711b8573a65201343c402036e6908` |
+| `docs/architecture/admin-navigation.md` | `c5b6d82c59147b43eb7ce95b509ed6063452ff1c11b86d7f347ac7de41c71b5e` |
+| `docs/architecture/frontend-extensions.md` | `8b44a3cda8ad9bb27f6d26704bb512c752c02cb87a78f35ac410842e0769bd24` |
+| `docs/architecture/settings-design.md` | `ad3658f08e8334487831c948ef34ba17d31807d8cde1c99885be22de088f507f` |
+| `docs/architecture/theme-configuration.md` | `d6c1f163043499e688bcf7eac049bbf76ba4a88a3c23081bc26e27db7f6e34e5` |
+| `docs/decisions/0023-settings-and-extension-boundaries.md` | `d09ac013190f48a0ac110dfc24990057c086ca981238ebf9085d3ecee7a86d9d` |
+| `docs/decisions/0024-versioned-settings-delivery.md` | `e72e7f3e0e029f3b2c4fc9429c5a41ef6581137e44814cbd2a960ea45ffaceb3` |
+| `docs/development/settings.md` | `59c0edaca523b5f35415d601605b6652a67ac409a6919a9089f66618f6584cd9` |
+| `docs/handoff/settings-verification.md` | `56907d457760fe209ddc09eefc485a2ca551c1d6f4791cc7c331aeed33888bb7` |
+| `docs/design/settings-theme-desktop.png` | `1f0950483422861039e72438eeb38ac48a1a63b4b75bbd47760f8165043707f9` |
