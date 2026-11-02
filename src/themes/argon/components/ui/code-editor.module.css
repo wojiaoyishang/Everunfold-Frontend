@@ -3,39 +3,44 @@
   background: var(--admin-canvas);
   color: var(--admin-text);
   transition:
-    box-shadow 180ms ease,
-    background 180ms ease;
-}
-.editor:focus-within {
-  box-shadow: inset 3px 0 var(--admin-accent);
+    background var(--admin-motion-fast);
 }
 .editor[data-disabled] {
   opacity: 0.65;
 }
 .editor :global(.cm-editor) {
   outline: none;
-  font-size: 13px;
+  font-size: 14px;
 }
 .editor :global(.cm-scroller) {
-  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
-  line-height: 1.85;
-  min-height: 250px;
+  font-family: "Cascadia Code", Consolas, "Microsoft YaHei", monospace;
+  line-height: 1.75;
+  min-height: 230px;
   max-height: 540px;
   overflow: auto;
 }
 .editor :global(.cm-content) {
-  padding: 18px 16px 24px;
+  padding: 16px 0 24px;
   caret-color: var(--admin-accent);
+}
+.editor :global(.cm-line) {
+  padding: 0 16px;
 }
 .editor :global(.cm-gutters) {
   background: var(--admin-subtle);
   color: var(--admin-muted);
   border-right: 1px solid var(--admin-border);
-  padding: 16px 4px 0;
-  font-size: 11px;
+  /* CodeMirror measures content padding and positions each gutter row itself. */
+  padding: 0;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
 }
 .editor :global(.cm-lineNumbers .cm-gutterElement) {
-  min-width: 24px;
+  min-width: 42px;
+  padding: 0 10px;
+}
+.editor :global(.cm-activeLineGutter) {
+  color: var(--admin-accent);
 }
 .editor :global(.cm-activeLine),
 .editor :global(.cm-activeLineGutter) {
@@ -58,8 +63,12 @@
   .editor :global(.cm-scroller) {
     min-height: 220px;
   }
-  .editor :global(.cm-content) {
-    padding-inline: 10px;
+  .editor :global(.cm-line) {
+    padding-inline: 12px;
+  }
+  .editor :global(.cm-lineNumbers .cm-gutterElement) {
+    min-width: 34px;
+    padding-inline: 6px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

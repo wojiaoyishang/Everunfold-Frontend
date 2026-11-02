@@ -5,6 +5,7 @@ import {
   EditorView,
   drawSelection,
   highlightActiveLine,
+  highlightActiveLineGutter,
   keymap,
   lineNumbers,
 } from "@codemirror/view";
@@ -156,6 +157,7 @@ export function CodeEditor({
         extensions: [
           lineNumbers(),
           highlightActiveLine(),
+          highlightActiveLineGutter(),
           drawSelection(),
           bracketMatching(),
           syntaxHighlighting(sourceHighlight),
