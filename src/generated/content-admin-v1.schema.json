@@ -75,6 +75,21 @@
     "ContentDetail": {
       "additionalProperties": false,
       "properties": {
+        "comments_open": {
+          "default": true,
+          "title": "Comments Open",
+          "type": "boolean"
+        },
+        "seo_title": {
+          "default": "",
+          "title": "Seo Title",
+          "type": "string"
+        },
+        "seo_description": {
+          "default": "",
+          "title": "Seo Description",
+          "type": "string"
+        },
         "id": {
           "title": "Id",
           "type": "string"
@@ -284,6 +299,13 @@
         "editor": {
           "title": "Editor",
           "type": "string"
+        },
+        "panels": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Panels",
+          "type": "array"
         }
       },
       "required": [
@@ -381,8 +403,11 @@
           "type": "string"
         },
         "type": {
-          "const": "markdown",
           "default": "markdown",
+          "enum": [
+            "markdown",
+            "html"
+          ],
           "title": "Type",
           "type": "string"
         },
@@ -554,6 +579,16 @@
           },
           "title": "Body",
           "type": "array"
+        },
+        "settings": {
+          "$ref": "#/$defs/EditorSettings"
+        },
+        "media_urls": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MediaURL"
+          },
+          "title": "Media Urls",
+          "type": "object"
         }
       },
       "required": [
@@ -596,6 +631,17 @@
           "minItems": 1,
           "title": "Body",
           "type": "array"
+        },
+        "settings": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EditorSettings"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -832,6 +878,119 @@
       "title": "DraftSummary",
       "type": "object"
     },
+    "EditorCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "terms": {
+          "items": {
+            "$ref": "#/$defs/EditorTerm"
+          },
+          "title": "Terms",
+          "type": "array"
+        }
+      },
+      "required": [
+        "terms"
+      ],
+      "title": "EditorCatalog",
+      "type": "object"
+    },
+    "EditorSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Path",
+          "type": "string"
+        },
+        "display_published_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Published At"
+        },
+        "cover_media_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cover Media Id"
+        },
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Categories",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Tags",
+          "type": "array"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        },
+        "comments_open": {
+          "default": true,
+          "title": "Comments Open",
+          "type": "boolean"
+        },
+        "seo_title": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Seo Title",
+          "type": "string"
+        },
+        "seo_description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Seo Description",
+          "type": "string"
+        }
+      },
+      "title": "EditorSettings",
+      "type": "object"
+    },
+    "EditorTerm": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "kind"
+      ],
+      "title": "EditorTerm",
+      "type": "object"
+    },
     "MediaURL": {
       "additionalProperties": false,
       "properties": {
@@ -1042,14 +1201,43 @@
       "title": "PublicResponse[DraftDetail]",
       "type": "object"
     },
+    "PublicResponse_EditorCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/EditorCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[EditorCatalog]",
+      "type": "object"
+    },
     "PublicSnapshot": {
       "additionalProperties": false,
       "properties": {
         "schema_version": {
-          "default": "0.2.0",
+          "default": "0.3.0",
           "enum": [
             "0.1.0",
-            "0.2.0"
+            "0.2.0",
+            "0.3.0"
           ],
           "title": "Schema Version",
           "type": "string"
@@ -1265,6 +1453,9 @@
   },
   "additionalProperties": false,
   "properties": {
+    "editor_catalog": {
+      "$ref": "#/$defs/PublicResponse_EditorCatalog_"
+    },
     "query": {
       "$ref": "#/$defs/DraftQuery"
     },
@@ -1297,6 +1488,7 @@
     }
   },
   "required": [
+    "editor_catalog",
     "query",
     "lookup",
     "create",
@@ -1311,7 +1503,7 @@
   "title": "ContentAdminContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.1.0",
+  "x-everunfold-contract-version": "1.2.0",
   "x-everunfold-content-types": [
     {
       "id": "article",
@@ -1322,7 +1514,14 @@
       "order": 10,
       "title_required": true,
       "supports_excerpt": true,
-      "editor": "core.markdown"
+      "editor": "core.markdown",
+      "panels": [
+        "publication",
+        "cover",
+        "taxonomy",
+        "discussion",
+        "seo"
+      ]
     },
     {
       "id": "shuoshuo",
@@ -1333,10 +1532,23 @@
       "order": 20,
       "title_required": false,
       "supports_excerpt": false,
-      "editor": "core.markdown"
+      "editor": "core.markdown",
+      "panels": [
+        "publication",
+        "cover",
+        "taxonomy",
+        "discussion",
+        "seo"
+      ]
     }
   ],
   "x-everunfold-operations": [
+    {
+      "name": "readEditorOptions",
+      "path": "/v1/admin/content/editor-options",
+      "method": "GET",
+      "response": "editor_catalog"
+    },
     {
       "name": "readContentTypes",
       "path": "/v1/admin/content/types",

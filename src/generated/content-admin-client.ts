@@ -17,6 +17,22 @@ ajv.addSchema(
   "content-admin",
 );
 
+const readEditorOptionsValidator = ajv.compile<
+  ContentAdminContract["editor_catalog"]
+>({ $ref: "content-admin#/properties/editor_catalog" });
+export function readEditorOptions(
+  baseUrl: string,
+  options: RequestOptions = {},
+) {
+  return requestJSON(
+    baseUrl,
+    "/v1/admin/content/editor-options",
+    {},
+    readEditorOptionsValidator,
+    { ...options, credentials: "include", headers: { ...options.headers } },
+  );
+}
+
 const readContentTypesValidator = ajv.compile<ContentAdminContract["types"]>({
   $ref: "content-admin#/properties/types",
 });

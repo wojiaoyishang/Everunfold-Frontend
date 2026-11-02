@@ -24,10 +24,12 @@ export function CommentSection({
   comments,
   path,
   initialPage = 1,
+  open = true,
 }: {
   comments: PublicComment[];
   path: string;
   initialPage?: number;
+  open?: boolean;
 }) {
   const [local, setLocal] = useState<CommentEntry[]>([]);
   const [examples, setExamples] = useState(true);
@@ -44,10 +46,10 @@ export function CommentSection({
     () =>
       orderComments([
         ...historicalComments(comments),
-        ...(examples ? exampleComments : []),
+        ...(examples && open ? exampleComments : []),
         ...local,
       ]),
-    [comments, examples, local],
+    [comments, examples, local, open],
   );
   const { entries: paged, page, pages } = commentPage(entries, requestedPage);
   const shown = continuous ? entries.slice(0, page * COMMENT_PAGE_SIZE) : paged;
@@ -120,46 +122,52 @@ export function CommentSection({
             </h2>
             <p>
               {comments.length} 条历史留言
-              {examples ? ` · ${exampleComments.length} 条示例` : ""}
+              {examples && open ? ` · ${exampleComments.length} 条示例` : ""}
               {local.length ? ` · ${local.length} 条本页留言` : ""}
             </p>
           </div>
-          <TextLink
-            href="#comment-composer"
-            className="comments-write"
-            onClick={(event) => {
-              if (
-                !event.ctrlKey &&
-                !event.metaKey &&
-                !event.shiftKey &&
-                !event.altKey &&
-                !event.button
-              ) {
-                event.preventDefault();
-                setTarget({ id: "comment-composer" });
-              }
-            }}
-          >
-            <Icon name="edit" />
-            写留言
-          </TextLink>
+          {open && (
+            <TextLink
+              href="#comment-composer"
+              className="comments-write"
+              onClick={(event) => {
+                if (
+                  !event.ctrlKey &&
+                  !event.metaKey &&
+                  !event.shiftKey &&
+                  !event.altKey &&
+                  !event.button
+                ) {
+                  event.preventDefault();
+                  setTarget({ id: "comment-composer" });
+                }
+              }}
+            >
+              <Icon name="edit" />
+              写留言
+            </TextLink>
+          )}
         </header>
-        <div className="comments-demo-note">
-          <span>
-            <span className="preview-badge">效果预览</span>
-            历史留言保留原文，示例人物与对话均为虚构。
-          </span>
-          <Button
-            type="button"
-            aria-pressed={examples}
-            onClick={() => {
-              setExamples(!examples);
-              setRequestedPage(1);
-            }}
-          >
-            {examples ? "隐藏示例" : "显示示例"}
-          </Button>
-        </div>
+        {open ? (
+          <div className="comments-demo-note">
+            <span>
+              <span className="preview-badge">效果预览</span>
+              历史留言保留原文，示例人物与对话均为虚构。
+            </span>
+            <Button
+              type="button"
+              aria-pressed={examples}
+              onClick={() => {
+                setExamples(!examples);
+                setRequestedPage(1);
+              }}
+            >
+              {examples ? "隐藏示例" : "显示示例"}
+            </Button>
+          </div>
+        ) : (
+          <p className="comments-demo-note">评论已关闭，已有留言仍可阅读。</p>
+        )}
         <div className="comment-view-options" aria-label="留言浏览方式">
           <Button
             type="button"
@@ -200,11 +208,15 @@ export function CommentSection({
               onLike={() => {
                 void likes.toggle(entry.id);
               }}
-              onReply={() => {
-                setReply({ entry, active: true });
-                setTarget({ id: "comment-composer" });
-                setNotice("");
-              }}
+              onReply={
+                open
+                  ? () => {
+                      setReply({ entry, active: true });
+                      setTarget({ id: "comment-composer" });
+                      setNotice("");
+                    }
+                  : undefined
+              }
               onLocate={locate}
             />
           ))}
@@ -255,15 +267,17 @@ export function CommentSection({
           </nav>
         )}
       </section>
-      <CommentComposer
-        reply={reply.entry}
-        replying={reply.active}
-        onCancelReply={() =>
-          setReply((current) => ({ ...current, active: false }))
-        }
-        onAdd={add}
-        notice={notice}
-      />
+      {open && (
+        <CommentComposer
+          reply={reply.entry}
+          replying={reply.active}
+          onCancelReply={() =>
+            setReply((current) => ({ ...current, active: false }))
+          }
+          onAdd={add}
+          notice={notice}
+        />
+      )}
     </>
   );
 }

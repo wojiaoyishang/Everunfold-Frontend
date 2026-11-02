@@ -8,7 +8,9 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
-import { AdminPageHeading } from "../components/page-heading";
+import { useEditorResources } from "@/core/content-management/use-editor-resources";
+import { EditorPanels } from "./editor-panels";
+import styles from "./editor-workspace.module.css";
 import { contentEditors } from "./editor-registry";
 import { DraftPreview } from "./draft-preview";
 import { ContentSync } from "./content-sync";
@@ -23,6 +25,9 @@ export function DraftEditor({
 }) {
   const editor = useDraftEditor(type, id);
   const router = useRouter();
+  const resources = useEditorResources();
+  const media = { ...editor.detail?.media_urls, ...resources.media };
+  const [section, setSection] = useState<"body" | "settings">("body");
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [confirm, setConfirm] = useState<
     "close" | "reload" | "withdraw" | null
@@ -77,7 +82,7 @@ export function DraftEditor({
   return (
     <div
       ref={surface}
-      className="admin-content-editor-page"
+      className={`admin-content-editor-page ${styles.workspace}`}
       data-leaving={leaving}
     >
       <div className="admin-editor-back">
@@ -101,10 +106,91 @@ export function DraftEditor({
           </RouteLink>
         )}
       </div>
-      <AdminPageHeading
-        title={`${id ? "编辑" : "新建"}${type.label}`}
-        description={type.description}
-      />
+      <header className={styles.toolbar}>
+        <div>
+          <h1>{`${id ? "编辑" : "新建"}${type.label}`}</h1>
+          <p>
+            {" "}
+            <span
+              role="status"
+              className={editor.notice ? "admin-draft-saved" : ""}
+              key={editor.notice || "idle"}
+            >
+              {editor.notice ? (
+                <>
+                  <Icon name="check" />
+                  {editor.notice}
+                </>
+              ) : editor.dirty ? (
+                "有未保存的修改"
+              ) : editor.detail?.published_revision &&
+                editor.detail.published_revision < editor.detail.revision ? (
+                "草稿已修改，发布后前台才会更新"
+              ) : (
+                "随时保存，准备好后再发布"
+              )}
+            </span>
+          </p>
+        </div>
+        <div className="admin-editor-actions">
+          {editor.detail?.published_revision && (
+            <Button
+              className="admin-button"
+              disabled={saveDisabled || editor.uncertain}
+              onClick={() => setConfirm("withdraw")}
+            >
+              <Icon name="eye-off" />
+              撤回
+            </Button>
+          )}
+          <Button
+            className={`admin-button ${!editor.detail || editor.uncertain ? "admin-button-primary" : ""}`}
+            disabled={
+              saveDisabled ||
+              Boolean(!editor.dirty && editor.detail && !editor.uncertain)
+            }
+            onClick={() => void save()}
+          >
+            <Icon
+              name={editor.busy ? "refresh" : "check"}
+              className={editor.busy ? "admin-draft-spin" : ""}
+            />
+            {editor.busy
+              ? "正在保存…"
+              : editor.uncertain
+                ? "重试上次操作"
+                : "保存草稿"}
+          </Button>
+          {editor.detail && !editor.uncertain && (
+            <Button
+              className="admin-button admin-button-primary"
+              disabled={
+                saveDisabled ||
+                (!editor.dirty &&
+                  editor.detail.published_revision === editor.detail.revision)
+              }
+              onClick={() => void save("publish")}
+            >
+              <Icon name="send" />
+              {editor.detail.published_revision ? "更新发布" : "发布"}
+            </Button>
+          )}
+        </div>
+      </header>
+      <div className={styles.mobileTabs} aria-label="编辑区域">
+        <Button
+          aria-pressed={section === "body"}
+          onClick={() => setSection("body")}
+        >
+          正文
+        </Button>
+        <Button
+          aria-pressed={section === "settings"}
+          onClick={() => setSection("settings")}
+        >
+          内容设置
+        </Button>
+      </div>
       <ConfirmDialog
         open={confirm !== null}
         title={
@@ -141,165 +227,113 @@ export function DraftEditor({
           setConfirm(null);
         }}
       />
-      <section
-        className="admin-content-editor-card"
-        aria-label={`${type.label}编辑器`}
-      >
-        <div className="admin-draft-editor-toolbar">
-          <div className="admin-draft-tabs" aria-label="编辑视图">
-            <Button
-              aria-pressed={mode === "edit"}
-              onClick={() => setMode("edit")}
-            >
-              <Icon name="edit" />
-              编辑
-            </Button>
-            <Button
-              aria-pressed={mode === "preview"}
-              disabled={editor.loading}
-              onClick={() => setMode("preview")}
-            >
-              <Icon name="eye" />
-              预览
-            </Button>
+      <div className={styles.layout} data-section={section}>
+        <section className={styles.main} aria-label={`${type.label}编辑器`}>
+          <div className="admin-draft-editor-toolbar">
+            <div className="admin-draft-tabs" aria-label="编辑视图">
+              <Button
+                aria-pressed={mode === "edit"}
+                onClick={() => setMode("edit")}
+              >
+                <Icon name="edit" />
+                编辑
+              </Button>
+              <Button
+                aria-pressed={mode === "preview"}
+                disabled={editor.loading}
+                onClick={() => setMode("preview")}
+              >
+                <Icon name="eye" />
+                预览
+              </Button>
+            </div>
+            <span className="admin-badge">
+              {archived
+                ? "已回收"
+                : editor.detail?.published_revision
+                  ? "已发布"
+                  : "草稿"}
+              {editor.detail?.is_demo ? " · 示例" : ""}
+            </span>
           </div>
-          <span className="admin-badge">
-            {archived
-              ? "已回收"
-              : editor.detail?.published_revision
-                ? "已发布"
-                : "草稿"}
-            {editor.detail?.is_demo ? " · 示例" : ""}
-          </span>
-        </div>
-        <div className="admin-draft-editor-scroll" aria-busy={editor.loading}>
-          {archived && (
-            <p className="admin-draft-message">
-              这份内容已在回收站，请返回列表恢复后再编辑。
-            </p>
-          )}
-          {editor.error && (
-            <div className="admin-draft-message" role="alert">
-              <span>{editor.error}</span>
-              {id && !editor.detail && !editor.loading && (
-                <Button className="admin-button" onClick={editor.retryRead}>
-                  重新读取
-                </Button>
-              )}
-              {editor.conflict && (
-                <Button
-                  className="admin-button"
-                  disabled={editor.busy}
-                  onClick={() => void editor.readLatest()}
-                >
-                  查看最新内容
-                </Button>
-              )}
-            </div>
-          )}
-          {editor.loading ? (
-            <div className="admin-draft-empty" role="status">
-              正在读取内容…
-            </div>
-          ) : (
-            (!id || editor.detail) && (
-              <div key={mode} className="admin-draft-editor-view">
-                {mode === "preview" ? (
-                  <DraftPreview fields={editor.fields} />
-                ) : Fields ? (
-                  <Fields
-                    type={type}
-                    value={editor.fields}
-                    onChange={editor.setFields}
-                    disabled={Boolean(blocked)}
-                  />
-                ) : (
-                  <p>此类型的编辑器暂不可用，内容仍会保留。</p>
+          <div className="admin-draft-editor-scroll" aria-busy={editor.loading}>
+            {archived && (
+              <p className="admin-draft-message">
+                这份内容已在回收站，请返回列表恢复后再编辑。
+              </p>
+            )}
+            {editor.error && (
+              <div className="admin-draft-message" role="alert">
+                <span>{editor.error}</span>
+                {id && !editor.detail && !editor.loading && (
+                  <Button className="admin-button" onClick={editor.retryRead}>
+                    重新读取
+                  </Button>
+                )}
+                {editor.conflict && (
+                  <Button
+                    className="admin-button"
+                    disabled={editor.busy}
+                    onClick={() => void editor.readLatest()}
+                  >
+                    查看最新内容
+                  </Button>
                 )}
               </div>
-            )
-          )}
-          {editor.latest && (
-            <section className="admin-draft-conflict">
-              <header>
-                <strong>服务器上的最新内容</strong>
-                <Button
-                  className="admin-button"
-                  onClick={() => setConfirm("reload")}
-                >
-                  使用这个版本
-                </Button>
-              </header>
-              <DraftPreview fields={editor.latest} />
-            </section>
-          )}
-        </div>
-        <footer className="admin-draft-editor-footer">
-          <span
-            role="status"
-            className={editor.notice ? "admin-draft-saved" : ""}
-            key={editor.notice || "idle"}
-          >
-            {editor.notice ? (
-              <>
-                <Icon name="check" />
-                {editor.notice}
-              </>
-            ) : editor.dirty ? (
-              "有未保存的修改"
-            ) : editor.detail?.published_revision &&
-              editor.detail.published_revision < editor.detail.revision ? (
-              "草稿已修改，发布后前台才会更新"
+            )}
+            {editor.loading ? (
+              <div className="admin-draft-empty" role="status">
+                正在读取内容…
+              </div>
             ) : (
-              "随时保存，准备好后再发布"
+              (!id || editor.detail) && (
+                <div key={mode} className="admin-draft-editor-view">
+                  {mode === "preview" ? (
+                    <DraftPreview fields={editor.fields} media={media} />
+                  ) : Fields ? (
+                    <Fields
+                      type={type}
+                      value={editor.fields}
+                      onChange={editor.setFields}
+                      disabled={Boolean(blocked)}
+                      onMedia={resources.remember}
+                    />
+                  ) : (
+                    <p>此类型的编辑器暂不可用，内容仍会保留。</p>
+                  )}
+                </div>
+              )
             )}
-          </span>
-          <div className="admin-editor-actions">
-            {editor.detail?.published_revision && (
-              <Button
-                className="admin-button"
-                disabled={saveDisabled || editor.uncertain}
-                onClick={() => setConfirm("withdraw")}
-              >
-                <Icon name="eye-off" />
-                撤回
-              </Button>
-            )}
-            <Button
-              className={`admin-button ${!editor.detail || editor.uncertain ? "admin-button-primary" : ""}`}
-              disabled={
-                saveDisabled ||
-                Boolean(!editor.dirty && editor.detail && !editor.uncertain)
-              }
-              onClick={() => void save()}
-            >
-              <Icon
-                name={editor.busy ? "refresh" : "check"}
-                className={editor.busy ? "admin-draft-spin" : ""}
-              />
-              {editor.busy
-                ? "正在保存…"
-                : editor.uncertain
-                  ? "重试上次操作"
-                  : "保存草稿"}
-            </Button>
-            {editor.detail && !editor.uncertain && (
-              <Button
-                className="admin-button admin-button-primary"
-                disabled={
-                  saveDisabled ||
-                  (!editor.dirty &&
-                    editor.detail.published_revision === editor.detail.revision)
-                }
-                onClick={() => void save("publish")}
-              >
-                <Icon name="send" />
-                {editor.detail.published_revision ? "更新发布" : "发布"}
-              </Button>
+            {editor.latest && (
+              <section className="admin-draft-conflict">
+                <header>
+                  <strong>服务器上的最新内容</strong>
+                  <Button
+                    className="admin-button"
+                    onClick={() => setConfirm("reload")}
+                  >
+                    使用这个版本
+                  </Button>
+                </header>
+                <DraftPreview
+                  fields={editor.latest}
+                  media={editor.latest.media_urls}
+                />
+              </section>
             )}
           </div>
-        </footer>
-      </section>
+        </section>
+        <EditorPanels
+          type={type}
+          fields={editor.fields}
+          onChange={editor.setFields}
+          detail={editor.detail}
+          disabled={Boolean(blocked || (id && !editor.detail))}
+          terms={resources.terms}
+          media={media}
+          onMedia={resources.remember}
+        />
+      </div>
       <ContentSync refreshKey={editor.detail?.revision ?? 0} />
     </div>
   );

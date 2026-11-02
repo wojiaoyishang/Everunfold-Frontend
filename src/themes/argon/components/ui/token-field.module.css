@@ -1,0 +1,60 @@
+.field {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+}
+.tokens,
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tokens:empty,
+.suggestions:empty {
+  display: none;
+}
+.tokens > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: 5px;
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+  padding: 4px 7px;
+  overflow-wrap: anywhere;
+  animation: admin-section-enter var(--admin-motion-enter)
+    var(--admin-motion-ease) both;
+}
+.tokens button {
+  padding: 2px;
+  display: flex;
+  color: inherit;
+  background: transparent;
+}
+.tokens svg {
+  width: 14px;
+  height: 14px;
+}
+.entry {
+  display: flex;
+  gap: 6px;
+}
+.entry input {
+  width: 100%;
+  min-width: 0;
+}
+.entry button {
+  flex-shrink: 0;
+  padding: 9px;
+}
+.suggestions button {
+  font-size: 12px;
+  padding: 3px 7px;
+  color: var(--admin-muted);
+  border: 1px solid var(--admin-border);
+  background: transparent;
+}
+.suggestions button:hover {
+  color: var(--admin-accent);
+  border-color: var(--admin-accent);
+}

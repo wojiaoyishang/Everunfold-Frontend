@@ -56,7 +56,11 @@ export function Article({
               </time>
             </p>
           </footer>
-          <ArticleActions path={content.path} title={content.title} />
+          <ArticleActions
+            path={content.path}
+            title={content.title}
+            commentsOpen={content.comments_open ?? true}
+          />
         </div>
       </article>
       {content.kind === "article" && (
@@ -66,6 +70,7 @@ export function Article({
         </div>
       )}
       <CommentSection
+        open={content.comments_open ?? true}
         key={content.id}
         comments={snapshot.comments[content.id] ?? []}
         path={content.path}

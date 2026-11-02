@@ -197,6 +197,16 @@
       "title": "Comments Open",
       "type": "boolean"
     },
+    "seo_title": {
+      "default": "",
+      "title": "Seo Title",
+      "type": "string"
+    },
+    "seo_description": {
+      "default": "",
+      "title": "Seo Description",
+      "type": "string"
+    },
     "reaction_count": {
       "minimum": 0,
       "title": "Reaction Count",

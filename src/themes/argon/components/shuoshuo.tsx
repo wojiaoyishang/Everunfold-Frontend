@@ -111,17 +111,11 @@ export function ShuoshuoDetail({
           commentsOpen={entry.content.comments_open}
         />
       </div>
-      {entry.content.comments_open ? (
-        <CommentSection
-          comments={snapshot.comments[entry.content.id] ?? []}
-          path={entry.content.path}
-        />
-      ) : (
-        <section id="comments" className="surface comments-card">
-          <h2>评论已关闭</h2>
-          <p>这一刻，安静地留在这里。</p>
-        </section>
-      )}
+      <CommentSection
+        open={entry.content.comments_open}
+        comments={snapshot.comments[entry.content.id] ?? []}
+        path={entry.content.path}
+      />
     </>
   );
 }

@@ -26,7 +26,7 @@ export function CommentItem({
   liking?: boolean;
   likeCount?: number;
   onLike: () => void;
-  onReply: () => void;
+  onReply?: () => void;
   onLocate: (id: string) => void;
 }) {
   const parent = entries.find((item) => item.id === entry.parentId);
@@ -114,14 +114,16 @@ export function CommentItem({
           />
         </CollapsibleContent>
         <div className="comment-actions">
-          <Button
-            type="button"
-            onClick={onReply}
-            aria-label={`回复 ${entry.author}`}
-          >
-            <Icon name="reply" />
-            回复
-          </Button>
+          {onReply && (
+            <Button
+              type="button"
+              onClick={onReply}
+              aria-label={`回复 ${entry.author}`}
+            >
+              <Icon name="reply" />
+              回复
+            </Button>
+          )}
           <Button
             type="button"
             className="comment-like"

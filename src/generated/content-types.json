@@ -8,7 +8,8 @@
     "order": 10,
     "title_required": true,
     "supports_excerpt": true,
-    "editor": "core.markdown"
+    "editor": "core.markdown",
+    "panels": ["publication", "cover", "taxonomy", "discussion", "seo"]
   },
   {
     "id": "shuoshuo",
@@ -19,6 +20,7 @@
     "order": 20,
     "title_required": false,
     "supports_excerpt": false,
-    "editor": "core.markdown"
+    "editor": "core.markdown",
+    "panels": ["publication", "cover", "taxonomy", "discussion", "seo"]
   }
 ]

@@ -5,6 +5,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { compile } from "json-schema-to-typescript";
+import { format } from "prettier";
 
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -250,6 +251,8 @@ if (contentAdmin) {
   });
   await writeFile(
     path.join(output, "content-types.json"),
-    `${JSON.stringify(schema["x-everunfold-content-types"], null, 2)}\n`,
+    await format(JSON.stringify(schema["x-everunfold-content-types"]), {
+      parser: "json",
+    }),
   );
 }

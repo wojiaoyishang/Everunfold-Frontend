@@ -1,10 +1,10 @@
 /* Generated from the backend public contract. Do not edit by hand. */
 
 /**
- * 公开阅读快照 0.2；支持真实文章/说说，兼容旧 0.1 已发布快照。
+ * 公开阅读快照 0.3；内容属性、媒体引用及 SEO，兼容 0.1/0.2。
  */
 export interface PublicSnapshot {
-  schema_version: "0.1.0" | "0.2.0";
+  schema_version: "0.1.0" | "0.2.0" | "0.3.0";
   source_epoch: string;
   generation: number;
   exported_at: string;
@@ -65,6 +65,9 @@ export interface ContentDetail {
       webp?: string;
     };
   };
+  comments_open?: boolean;
+  seo_title?: string;
+  seo_description?: string;
 }
 export interface Taxonomy {
   id: string;

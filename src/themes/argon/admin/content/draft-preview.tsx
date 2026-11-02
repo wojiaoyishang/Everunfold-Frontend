@@ -1,19 +1,25 @@
 import { useMemo } from "react";
 import { renderContent } from "@/core/rendering/content";
-import type { DraftFields } from "@/generated/content-admin-contract";
+import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
 
-export function DraftPreview({ fields }: { fields: DraftFields }) {
+export function DraftPreview({
+  fields,
+  media = {},
+}: {
+  fields: DraftFields;
+  media?: Record<string, MediaURL>;
+}) {
   const html = useMemo(
     () =>
       renderContent({
         id: "draft-preview",
         content: fields.body.map((block) => ({
           ...block,
-          type: "markdown" as const,
+          type: block.type ?? "markdown",
         })),
-        media_urls: {},
+        media_urls: media,
       }).html,
-    [fields.body],
+    [fields.body, media],
   );
   return (
     <article className="admin-draft-preview">

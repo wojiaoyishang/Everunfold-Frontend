@@ -7,9 +7,11 @@ export function contentMetadata(
   siteUrl?: string,
   example = false,
 ): Metadata {
-  const title = content.title || "一则随记";
+  const title = content.seo_title?.trim() || content.title || "一则随记";
   const description =
-    content.access === "public" ? content.excerpt : "这段内容暂未开放。";
+    content.access === "public"
+      ? content.seo_description?.trim() || content.excerpt
+      : "这段内容暂未开放。";
   const url =
     siteUrl && !example ? new URL(content.path, siteUrl).href : undefined;
   const cover =

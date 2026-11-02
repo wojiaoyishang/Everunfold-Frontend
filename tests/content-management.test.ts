@@ -21,6 +21,15 @@ import {
 } from "../src/generated/content-admin-client";
 import { DraftPreview } from "../src/themes/argon/admin/content/draft-preview";
 import type { DraftDetail } from "../src/generated/content-admin-contract";
+import {
+  moveBlock,
+  parseEditorDate,
+  formatEditorDate,
+  mediaMarkup,
+} from "../src/core/content-management/editor-fields";
+import { contentMetadata } from "../src/core/content/metadata";
+import { presentLegacyContent } from "../src/core/content/presentation";
+import type { Content } from "../src/core/content/types";
 
 test("registered content types own separate entries and pages remain code-owned", () => {
   const registry = createAdminRegistry([
@@ -71,6 +80,113 @@ test("editing preserves stable block identity and registered title requirements"
   assert.equal(uncertainWrite(new RequestError("timeout")), true);
   assert.equal(uncertainWrite(new RequestError("http", 503)), true);
   assert.equal(uncertainWrite(new RequestError("http", 409, 40951)), false);
+});
+
+test("editor properties are copied independently and block movement never replaces IDs", () => {
+  const source = {
+    ...detail,
+    settings: { categories: ["日常"], comments_open: false },
+  };
+  const fields = draftFields(source);
+  fields.settings!.categories!.push("测试");
+  assert.deepEqual(source.settings.categories, ["日常"]);
+  const body = [
+    ...fields.body,
+    { id: crypto.randomUUID(), type: "html" as const, content: "<p>HTML</p>" },
+  ];
+  const moved = moveBlock(body, body[1].id, -1);
+  assert.equal(moved[0], body[1]);
+  assert.equal(moved[1], body[0]);
+  assert.equal(moveBlock(body, body[0].id, -1), body);
+  assert.equal(moveBlock(body, "missing", 1), body);
+});
+
+test("local display dates round-trip and incomplete/invalid input cannot be saved", () => {
+  const valid = parseEditorDate("2026-11-02 14:30");
+  assert.equal(formatEditorDate(valid), "2026-11-02 14:30");
+  assert.equal(parseEditorDate(""), null);
+  for (const input of ["2026-02-30 12:00", "2026-11-02 25:00", "2026-11-"]) {
+    assert.equal(parseEditorDate(input), input);
+    assert.match(
+      validateDraft(
+        {
+          ...draftFields(detail),
+          settings: { display_published_at: parseEditorDate(input) },
+        },
+        registeredContentTypes[0],
+      ),
+      /有效/,
+    );
+  }
+});
+
+test("mixed block preview resolves stable media references and sanitizes HTML", () => {
+  const id = crypto.randomUUID();
+  const item = {
+    id: `media:${id}`,
+    label: "picture.png",
+    url: "https://cdn.example.test/image.png",
+    kind: "image" as const,
+    mime: "image/png",
+    size: 1,
+    created_at: "2026-01-01T00:00:00Z",
+  };
+  const html = renderToStaticMarkup(
+    React.createElement(DraftPreview, {
+      fields: {
+        body: [
+          {
+            id: crypto.randomUUID(),
+            type: "markdown",
+            content: mediaMarkup(item, "markdown", "示例"),
+          },
+          {
+            id: crypto.randomUUID(),
+            type: "html",
+            content:
+              '<p>第二块</p><script>alert(1)</script><img onerror="alert(1)">',
+          },
+        ],
+      },
+      media: { [id]: { original: item.url } },
+    }),
+  );
+  assert.ok(html.includes(item.url));
+  assert.ok(html.includes("第二块"));
+  assert.ok(!html.includes("onerror"));
+  assert.ok(!html.includes("<script"));
+  assert.match(mediaMarkup(item, "html", '\"<script>'), /&quot;&lt;script&gt;/);
+});
+
+test("published editor properties reach presentation and search metadata", () => {
+  const source: Content = {
+    id: "test",
+    kind: "article",
+    title: "内容标题",
+    path: "/posts/test.html",
+    excerpt: "正文摘要",
+    language: "zh",
+    published_at: "2026-11-01T00:00:00Z",
+    updated_at: "2026-11-01T00:00:00Z",
+    author: "admin",
+    cover_url: null,
+    reading_minutes: 1,
+    word_count: 1,
+    categories: [],
+    tags: [],
+    comment_count: 0,
+    pinned: true,
+    content: [],
+    media_urls: {},
+    comments_open: false,
+    seo_title: "搜索标题",
+    seo_description: "搜索描述",
+  };
+  const view = presentLegacyContent(source);
+  assert.equal(view.comments_open, false);
+  const metadata = contentMetadata(view, "Test", "https://example.test");
+  assert.equal(metadata.title, "搜索标题");
+  assert.equal(metadata.description, "搜索描述");
 });
 
 test("generated draft calls carry private credentials, CSRF, stable operation and revision payload", async () => {

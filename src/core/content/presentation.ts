@@ -18,7 +18,7 @@ export function presentLegacyContent({
   return {
     ...content,
     type: kind,
-    comments_open: true,
+    comments_open: content.comments_open ?? true,
     reaction_count: 0,
     access: "public",
     opens_at: null,

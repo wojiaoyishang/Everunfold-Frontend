@@ -28,6 +28,8 @@ export type Content = ContentBlock[];
 export type Original = string;
 export type Webp = string;
 export type CommentsOpen = boolean;
+export type SeoTitle = string;
+export type SeoDescription = string;
 export type ReactionCount = number;
 export type Access = "public" | "password" | "scheduled";
 export type OpensAt = string | null;
@@ -55,6 +57,8 @@ export interface ContentPresentation {
   content: Content;
   media_urls: MediaUrls;
   comments_open: CommentsOpen;
+  seo_title?: SeoTitle;
+  seo_description?: SeoDescription;
   reaction_count: ReactionCount;
   access: Access;
   opens_at: OpensAt;
