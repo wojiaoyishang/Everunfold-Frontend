@@ -96,3 +96,7 @@ Next.js 派生缓存适配器与公开快照提供器分开：前者受锁定框
 以后有实际代码时可逐步扩展 `src/core/extensions/`（清单/装配和纯元信息）、`src/core/cache/`（核心流程/提供器协议）、单独 server-only 适配目录；主题内继续放 admin 表单和组件。不要先为每个候选能力创建空目录或巨型单文件注册器。
 
 设置第一期只需要页面登记、共享字段控件和设置分组装配；业务 Schema 后端发布，前端生成。后续新增编辑器或缓存实现时再落实对应协议版本与真实替换样例。最低检查包括：重复 ID/路由冲突、前后端兼容、SSR/浏览器入口隔离、未知扩展降级、停用保留数据、权限切换/请求取消，以及缓存多进程/断线/重启/撤回的 P0 验证。
+
+## 编辑器实施补充（2026-11-02）
+
+已实现 core/editor/registry 与主题内 Markdown/HTML 两个可信编译插件，复用共享 CodeEditor/媒体/协同/撤销/发布；没有冻结通用 npm SDK 或远端 JS 加载格式。旧类型级 core.markdown 是宿主兼容标识，块级 format 与插件实现各自独立。实际规范见 [协同架构](collaborative-editing.md) 与 [ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md)。本文其他扩展提案不因此自动完成。

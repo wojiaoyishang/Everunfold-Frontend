@@ -29,7 +29,7 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 ## 接口与配置
 
 - 浏览器向 Next.js 获取公开页面，直接向 FastAPI 执行业务操作；Next.js 不是必经业务代理。公开 SSR 不混入身份和私有内容。
-- 业务路径 `/v1/*`；FastAPI 内部 `/internal/v1/*`；Next.js 缓存 `/internal/cache/v1/*`；协同规划路径 `/ws/v1/collab/{draft_id}`。除已定前缀外，具体端点/字段仍需正式契约。
+- 业务路径 `/v1/*`；FastAPI 内部 `/internal/v1/*`；Next.js 缓存 `/internal/cache/v1/*`；协同路径 `/ws/v1/collab/{draft_id}`（试用契约 collaboration-1）。除已定前缀外，具体端点/字段仍需正式契约。
 - 可选开发代理把 `/api/v1/*` 仅剥离一次 `/api`，转发为后端 `/v1/*`；不得代理内部接口。生产仍验收浏览器跨源访问。
 - `BACKEND_BASE_URL` 是不含凭据、`/v1`、`/api` 的绝对 HTTP(S) 地址，没有固定生产域名。前端服务端可用 `[backend].base_url` 显式覆盖；该覆盖不改变浏览器公开地址。
 - 后端 `frontends.<node_id>` 绑定地址、投递 `enabled`、双向 Token 环境变量引用；根级 `FRONTEND_NODE_ID` 标识前端。更换域名不改变身份，`enabled` 不授予或撤销入站权限。
@@ -79,6 +79,10 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 
 ## 待定与后续验收
 
-待定：完整业务 DDL/主键/枚举、扩展错误码及 API/WS/ICP Schema、改密/找回/2FA、生产 Cookie 域名选择、语言与 slug/保留路由、编辑器与 Python Yjs 互操作、搜索中文策略、审计留存、精确资源配额和协同压缩周期。基础 Session 已选择 PostgreSQL 并以配置控制有效期；无需重新开启已经确认的架构选择。
+待定：完整业务 DDL/主键/枚举、扩展错误码及 API/WS/ICP Schema、改密/找回/2FA、生产 Cookie 域名选择、语言与 slug/保留路由、额外编辑器格式的 Python/Yjs 互操作、搜索中文策略、审计留存、精确资源配额和协同压缩周期。基础 Session 已选择 PostgreSQL 并以配置控制有效期；无需重新开启已经确认的架构选择。
 
 对应功能交付前执行原文 P0 与真实多进程验证；各阶段实际覆盖范围见交接状态，不能将构建成功、占位接口成功或配置文件存在视为完成上述验收。
+
+## 协同试用实施更新（2026-11-02）
+
+Markdown/HTML 编译插件、整篇共享文档、PostgreSQL 持久确认、State Vector 恢复、Redis 通知/临时光标、多标签页 IndexedDB 合并、截点保存/发布与会话失效导出已实施。实际结构及未实现的压缩/GC、细粒度 ACL、富文本/跨块选区见 [协同架构](collaborative-editing.md)；以 [验收](../handoff/collaborative-editing-verification.md) 为检查依据，不能把试用当作完整生产协同。

@@ -259,3 +259,26 @@ ADR0033–0036、content-management-4、content-types-5、admin-ui-4、developme
 | `docs/design/editor-block-remove-popover.jpg` | `0d8b76f0c3ee1617e9f1e1f0fa2cd52108457555869b6feb1d3c6317da6b242f` |
 | `docs/design/public-content-edit-link.jpg` | `66c723071bc1dcd0133ccbd3fc885f837662f514eb6dc642cb542073dae79cb4` |
 | `docs/design/public-meta-alignment.jpg` | `3922d1e12b9e5d347cb36db52fdbd91a5756c50e948a60f587cc139615515247` |
+
+
+## 2026-11-02 协同试用同步清单
+
+原始基线 v2.11/v0.14 不变。协议 development-10、协同 collaborative-editing-1、编辑器 editor-plugins-1；ADR0037、公共约束/索引和验收逐字节同步。AGENTS保留Next.js框架自动生成块并在两仓库同步，该段仅适用于前端；不得删除以制造干净状态。STATUS保留各仓库历史，最新交付段分别更新。以下是本次当前文件哈希，前表保留历史记录。
+
+| 文件 | SHA256 |
+| --- | --- |
+| `AGENTS.md` | `f8489f2bfb060035f56d912a906ef04689c1954eb7fa9c44438f2fff4e6cec26` |
+| `docs/README.md` | `df2b49267e98e895fc9f8a80b772b46ce3b27111da04f4278d0b77b8995e0c40` |
+| `docs/architecture/constraints.md` | `2b4fbd17bc823b2f97b361a36c0d91b2e099cdf47ec05d0d5a1aa8f52064f8cb` |
+| `docs/architecture/content-types.md` | `8f0554a294a351d775563877e9cacdee4fd70769768bba9042bac3457d7f33bc` |
+| `docs/architecture/frontend-extensions.md` | `dae0ea48aa97b92b1fb662711b1b5952f50e0d0ee10543a9c85816283dc5dfc0` |
+| `docs/development/protocol.md` | `dac00ea02717f251147c38227f6cd0b7a883ee9debafdc55b544ad4d49de1030` |
+| `docs/development/content-management.md` | `0acd4727aa6c360dbfabf423b6994b2c4ee6ef611b9364836f660aa334ec55fd` |
+| `docs/decisions/0037-plugin-editors-and-collaborative-drafts.md` | `71dfbd8d563c482d7feb24812788781cf5f473f129d96047ca2f1e6dd14d2ecf` |
+| `docs/architecture/collaborative-editing.md` | `f311532d288f3a46955c81892bc7b3c1673637a0f99d82dbaec1753acca53882` |
+| `docs/development/editor-plugins.md` | `8d3d93efe9ec133e188bc3de0886a519eb303dc204e44aa68c645a2f4d1061d6` |
+| `docs/handoff/collaborative-editing-verification.md` | `6fcf71bb5ca1af27069d37b86c880ac3006264f3f967e5616d713f5fd4180e03` |
+| `docs/design/collaboration-editor-desktop.png` | `bdb4069c445253650248bce2d297d80b85e89419399c645543d82aec1bfd53f6` |
+| `docs/design/collaboration-mobile.png` | `31443f624795ac1ddfd1254d6b978ecf9676801592b65bd64d02073abe97e1c7` |
+| `docs/design/collaboration-offline.png` | `0b0e075d490d1f998dd5ffa4cb8f843123b1ea780467332b6f93300ca3547932` |
+| `docs/design/collaboration-recovery.png` | `59b8a60c891909dc17daf4f65a090bc3ecde551d653accb4c0306a27e227f84b` |
