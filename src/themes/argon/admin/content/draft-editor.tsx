@@ -129,6 +129,7 @@ export function DraftEditor({
       },
     },
   ]);
+  const notice = editor.dirty ? "" : editor.notice;
   return (
     <DraftCollaborationContext value={editor.session}>
       <div
@@ -191,12 +192,10 @@ export function DraftEditor({
             />
             <span
               role="status"
-              className={
-                editor.notice ? "admin-draft-saved" : styles.visuallyHidden
-              }
-              key={editor.notice || "idle"}
+              className={notice ? "admin-draft-saved" : styles.visuallyHidden}
+              key={notice || "idle"}
             >
-              {editor.notice || (editor.dirty ? "有未保存的修改" : "")}
+              {notice || (editor.dirty ? "有未保存的修改" : "")}
             </span>
           </div>
         </div>
