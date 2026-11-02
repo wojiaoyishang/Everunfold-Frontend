@@ -282,3 +282,17 @@ ADR0033–0036、content-management-4、content-types-5、admin-ui-4、developme
 | `docs/design/collaboration-mobile.png` | `31443f624795ac1ddfd1254d6b978ecf9676801592b65bd64d02073abe97e1c7` |
 | `docs/design/collaboration-offline.png` | `0b0e075d490d1f998dd5ffa4cb8f843123b1ea780467332b6f93300ca3547932` |
 | `docs/design/collaboration-recovery.png` | `59b8a60c891909dc17daf4f65a090bc3ecde551d653accb4c0306a27e227f84b` |
+
+## 2026-11-02 源码编辑器交互同步清单
+
+ADR0038、editor-plugins-2、共享索引/验收/截图逐字节同步。插件界面版本1.1.0；协议development-10、协同schema1.0、数据库0013和原始v2.11/v0.14不变。STATUS各仓库分别保留历史，最新交付段一致。历史哈希表保留，以下是本次文件摘要。
+
+| 文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `d1795e3639f5942a789c6d2b638b0d69ec77f6474bc5d3fe377466cb98756c75` |
+| `docs/development/editor-plugins.md` | `a0c1e18a94427f85d32a2919be201af70ac8b85c5ef52e01f1f21b770e4bdb84` |
+| `docs/decisions/0038-source-editor-interactions-and-shortcuts.md` | `29d8e20e0c0ee01189e3594f33910881ba006912a71b691ec3fd88002cf0b202` |
+| `docs/handoff/source-editor-verification.md` | `c775c9927486d2187273b460e44cb0bba5a9c1a9d98d3d83daf79a0ffd1e3981` |
+| `docs/design/source-editor-desktop.png` | `14e4076ca1aa8967415934a38bb474b3033dab3384ed8953be1e1dd3d251ec29` |
+| `docs/design/source-editor-mobile.png` | `2b20518a326fbdc4a10f9cf8fd2da131848b0392c82b551d2ba36fb7394ffc77` |
+| `docs/design/source-editor-dark.png` | `78d8c4e6a3b6875fd82da9c6faebdb1219d544ba67002240b32d6e85acab2057` |

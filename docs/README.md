@@ -118,3 +118,5 @@
 - [协同架构](architecture/collaborative-editing.md)：数据库/WS/Redis/本机缓存及权限边界。
 - [插件开发与试用](development/editor-plugins.md)：注册入口、启动及两页面验证。
 - [实际验收](handoff/collaborative-editing-verification.md)：双进程故障、浏览器离线/多窗口/恢复、截图与后续。
+
+- [源码工具与场景快捷键](decisions/0038-source-editor-interactions-and-shortcuts.md) 与 [本轮界面验收](handoff/source-editor-verification.md)：行号/折行对齐、内容高度、格式/插入、搜索补全与快捷保存。

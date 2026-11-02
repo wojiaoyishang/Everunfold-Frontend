@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-1，2026-11-02。使用 [协同架构](../architecture/collaborative-editing.md) 与 [ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md)，不另维护业务 Schema。
+版本：editor-plugins-2，2026-11-02。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 ## 启动与验证
 
@@ -28,3 +28,12 @@
 - 前端 npm run check；npm run verify:admin 使用隔离副本构建，不写运行中的 .next。tests/collaboration.test.ts 覆盖并发源文、结构墓碑、仅本人撤销、跨标签页缓存合并、ACK 防复活、密码剔除、失效会话导出范围和协议验证。
 - Backend contracts/collaboration-v1.schema.json 是唯一字段权威；提交后 npm run contract:sync -- <后端契约的绝对路径> 生成，生成器按仓库格式输出。前端 collaboration-source.json 固定源版本/提交/哈希，不能手改业务字段。
 - 每改可见组件立即检查内置浏览器；P0/截图/未执行项记入验收和 STATUS。只做本地提交，用户自行推送。
+
+## 源码工具与快捷键
+
+- 当前两个块编辑插件版本为 1.1.0。SourceToolbar 管段落样式与动作/模板；SourceSearchPanel 管查找表单；SourceBlockEditor 组合这些控件，不接管业务保存。CodeEditor/useCodeEditorHandle 封装原生编辑面、选择、输入和 Y.Text 绑定。core/editor 处理局部格式变换和可见区搜索高亮。
+- 标题/列表作用于当前行或选中多行，常用行内格式可切换；空选区插入并选中占位文本。链接、表格、HTML 列表等为源码模板，插入后继续手工编辑。HTML 代码块转义选中标签；已有 HTML 标题的属性保留。
+- Ctrl/Cmd+B 加粗，Ctrl/Cmd+I 斜体，Ctrl/Cmd+F 当前块查找；Ctrl/Cmd+Z、Shift+Z/Y 保持原全篇本人撤销/重做。查找框 Enter 下一项、Shift+Enter 上一项，替换框 Enter 替换，Escape 关闭并回正文。
+- 当前编辑页面 Ctrl/Cmd+S 和 Shift+S 均保存草稿，不发布；保存、错误/不确定状态和确认仍复用原逻辑。无修改不生成新修订，按住按键不重复提交，模态弹窗内不触发页面保存。控件恢复后回原焦点。未确认的上次操作只能通过明确重试按钮处理。
+- 高度随内容变化，不设置固定大块留白；超过 540px 内部滚动。换行和查找是当前块的临时界面状态，不进入协同正文。匹配计数最多显示 1000+，不表示全部替换只处理这些匹配。
+- 验证入口：试用草稿分别测试两种工具栏、跨窗口格式/替换与本人撤销；输入后按 Ctrl+S 检查“草稿已保存”和焦点；再修改应显示未保存。长文、320px 折行、模态弹窗、深色与减少动态检查见 [本轮验收](../handoff/source-editor-verification.md)。
