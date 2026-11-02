@@ -112,8 +112,10 @@ export function DraftEditor({
           )
             return;
           if (
-            event.target instanceof HTMLInputElement &&
-            event.target.type === "password"
+            (event.target instanceof Element &&
+              event.target.closest("[data-editor-local-control]")) ||
+            (event.target instanceof HTMLInputElement &&
+              event.target.type === "password")
           )
             return;
           const key = event.key.toLowerCase();

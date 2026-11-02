@@ -1,6 +1,21 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  bold: "M6 4h7a4 4 0 0 1 0 8H6V4ZM6 12h8a4 4 0 0 1 0 8H6v-8Z",
+  italic: "M10 4h10M4 20h10M15 4 9 20",
+  strike:
+    "M17 5c-1-1-3-2-5-2-3 0-5 2-5 4 0 2 2 3 5 4M4 12h16M8 17c1 2 3 3 5 3 3 0 5-2 5-4",
+  code: "m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16",
+  quote: "M4 6h6v6H5v5h4v2H3V9l1-3ZM15 6h6v6h-5v5h4v2h-6V9l1-3Z",
+  table: "M3 4h18v16H3V4ZM3 9h18M3 14h18M9 4v16M15 4v16",
+  "ordered-list":
+    "M9 6h12M9 12h12M9 18h12M3 4h1v4M3 12c0-2 3-2 3 0l-3 3h3M3 18h3l-2 2h2",
+  checklist:
+    "m3 5 1 1 2-2M10 5h11M3 11h3v3H3v-3ZM10 12h11M3 18h3v3H3v-3ZM10 19h11",
+  "code-block": "M3 4h18v16H3V4Zm5 5-3 3 3 3m8-6 3 3-3 3M13 8l-2 8",
+  wrap: "M3 6h18M3 11h14a4 4 0 0 1 0 8h-5m3-3-3 3 3 3M3 16h4",
+  "indent-more": "M10 5h11M10 12h11M10 19h11M3 8l4 4-4 4",
+  "indent-less": "M10 5h11M10 12h11M10 19h11M7 8l-4 4 4 4",
   trash: "M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7",
   crop: "M6 3v15h15M3 6h15v15M18 6l3-3",
   rotate: "M3 10a9 9 0 1 1 3 9M3 4v6h6",

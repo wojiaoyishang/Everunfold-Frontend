@@ -10,14 +10,14 @@ export const blockEditors = createBlockEditorRegistry<
 >([
   {
     id: "core.markdown",
-    version: "1.0.0",
+    version: "1.1.0",
     format: "markdown",
     label: "Markdown",
     adapter: MarkdownEditor,
   },
   {
     id: "core.html",
-    version: "1.0.0",
+    version: "1.1.0",
     format: "html",
     label: "HTML",
     adapter: HtmlEditor,

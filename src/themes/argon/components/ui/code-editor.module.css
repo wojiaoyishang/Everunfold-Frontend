@@ -2,8 +2,7 @@
   min-width: 0;
   background: var(--admin-canvas);
   color: var(--admin-text);
-  transition:
-    background var(--admin-motion-fast);
+  transition: background var(--admin-motion-fast);
 }
 .editor[data-disabled] {
   opacity: 0.65;
@@ -53,6 +52,34 @@
     var(--admin-accent) 20%,
     transparent
   ) !important;
+}
+.editor :global(.cm-searchMatch) {
+  background: color-mix(in srgb, var(--admin-accent) 15%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--admin-accent) 28%, transparent);
+  border-radius: 2px;
+}
+.editor :global(.cm-searchMatch-selected) {
+  background: color-mix(in srgb, var(--admin-accent) 28%, transparent);
+  outline-color: var(--admin-accent);
+}
+.editor :global(.cm-tooltip) {
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+  box-shadow: var(--admin-shadow);
+  overflow: hidden;
+  font:
+    13px/1.6 "Cascadia Code",
+    Consolas,
+    monospace;
+}
+.editor :global(.cm-tooltip-autocomplete > ul > li) {
+  padding: 4px 10px;
+}
+.editor :global(.cm-tooltip-autocomplete > ul > li[aria-selected]) {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
 }
 .editor :global(.cm-ySelectionInfo) {
   border-radius: 3px;
