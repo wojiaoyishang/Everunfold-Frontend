@@ -4,7 +4,13 @@ import { resourceUrl, taxonomyHref } from "@/core/content/urls";
 import { AppLink as Link } from "./navigation-link";
 import { PostMeta } from "./post-meta";
 
-export function ArticleHeader({ content }: { content: Content }) {
+export function ArticleHeader({
+  content,
+  liveMetrics = true,
+}: {
+  content: Content;
+  liveMetrics?: boolean;
+}) {
   const cover = resourceUrl(content.cover_url);
   return (
     <header className={`article-header${cover ? " has-cover" : ""}`}>
@@ -29,7 +35,7 @@ export function ArticleHeader({ content }: { content: Content }) {
           ))}
         </div>
         <h1>{content.title}</h1>
-        <PostMeta content={content} article />
+        <PostMeta content={content} article liveMetrics={liveMetrics} />
       </div>
     </header>
   );

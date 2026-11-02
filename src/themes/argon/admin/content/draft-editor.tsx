@@ -9,6 +9,8 @@ import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
 import { useEditorResources } from "@/core/content-management/use-editor-resources";
+import { EditorTitle } from "./editor-title";
+import { EditorActions } from "./editor-actions";
 import { EditorPanels } from "./editor-panels";
 import styles from "./editor-workspace.module.css";
 import { contentEditors } from "./editor-registry";
@@ -94,89 +96,48 @@ export function DraftEditor({
           <Icon name="arrow-left" />
           返回{type.label}列表
         </Button>
-        {editor.detail?.published_revision && editor.detail.public_path && (
-          <RouteLink
-            className="admin-button"
-            href={editor.detail.public_path}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Icon name="external" />
-            查看前台
-          </RouteLink>
-        )}
-      </div>
-      <header className={styles.toolbar}>
-        <div>
-          <h1>{`${id ? "编辑" : "新建"}${type.label}`}</h1>
-          <p>
-            {" "}
-            <span
-              role="status"
-              className={editor.notice ? "admin-draft-saved" : ""}
-              key={editor.notice || "idle"}
-            >
-              {editor.notice ? (
-                <>
-                  <Icon name="check" />
-                  {editor.notice}
-                </>
-              ) : editor.dirty ? (
-                "有未保存的修改"
-              ) : editor.detail?.published_revision &&
-                editor.detail.published_revision < editor.detail.revision ? (
-                "草稿已修改，发布后前台才会更新"
-              ) : (
-                "随时保存，准备好后再发布"
-              )}
-            </span>
-          </p>
-        </div>
-        <div className="admin-editor-actions">
-          {editor.detail?.published_revision && (
-            <Button
+        <div className={styles.headerActions}>
+          {editor.detail?.published_revision && editor.detail.public_path && (
+            <RouteLink
               className="admin-button"
-              disabled={saveDisabled || editor.uncertain}
-              onClick={() => setConfirm("withdraw")}
+              href={editor.detail.public_path}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              <Icon name="eye-off" />
-              撤回
-            </Button>
+              <Icon name="external" />
+              查看前台
+            </RouteLink>
           )}
-          <Button
-            className={`admin-button ${!editor.detail || editor.uncertain ? "admin-button-primary" : ""}`}
-            disabled={
-              saveDisabled ||
-              Boolean(!editor.dirty && editor.detail && !editor.uncertain)
+          <EditorActions
+            detail={editor.detail}
+            busy={editor.busy}
+            uncertain={editor.uncertain}
+            dirty={editor.dirty}
+            disabled={saveDisabled}
+            onSave={(action) => void save(action)}
+            onWithdraw={() => setConfirm("withdraw")}
+          />
+          <span
+            role="status"
+            className={
+              editor.notice ? "admin-draft-saved" : styles.visuallyHidden
             }
-            onClick={() => void save()}
+            key={editor.notice || "idle"}
           >
-            <Icon
-              name={editor.busy ? "refresh" : "check"}
-              className={editor.busy ? "admin-draft-spin" : ""}
-            />
-            {editor.busy
-              ? "正在保存…"
-              : editor.uncertain
-                ? "重试上次操作"
-                : "保存草稿"}
-          </Button>
-          {editor.detail && !editor.uncertain && (
-            <Button
-              className="admin-button admin-button-primary"
-              disabled={
-                saveDisabled ||
-                (!editor.dirty &&
-                  editor.detail.published_revision === editor.detail.revision)
-              }
-              onClick={() => void save("publish")}
-            >
-              <Icon name="send" />
-              {editor.detail.published_revision ? "更新发布" : "发布"}
-            </Button>
-          )}
+            {editor.notice || (editor.dirty ? "有未保存的修改" : "")}
+          </span>
         </div>
-      </header>
+      </div>
+      <h1
+        className={styles.visuallyHidden}
+      >{`${id ? "编辑" : "新建"}${type.label}`}</h1>
+      <EditorTitle
+        type={type}
+        fields={editor.fields}
+        detail={editor.detail}
+        onChange={editor.setFields}
+        disabled={Boolean(blocked || (id && !editor.detail))}
+      />
       <div className={styles.mobileTabs} aria-label="编辑区域">
         <Button
           aria-pressed={section === "body"}
@@ -330,6 +291,7 @@ export function DraftEditor({
           detail={editor.detail}
           disabled={Boolean(blocked || (id && !editor.detail))}
           terms={resources.terms}
+          createCategory={resources.createCategory}
           media={media}
           onMedia={resources.remember}
         />

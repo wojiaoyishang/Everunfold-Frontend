@@ -154,6 +154,17 @@
 .admin-library-page {
   max-width: 1080px;
 }
+.admin-library-page :is(.admin-media-browser, .admin-icon-browser) {
+  background: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  padding: 22px;
+}
+@media (max-width: 580px) {
+  .admin-library-page :is(.admin-media-browser, .admin-icon-browser) {
+    padding: 16px;
+  }
+}
 .admin-icon-browser {
   min-width: 0;
 }

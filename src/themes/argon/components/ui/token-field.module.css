@@ -39,6 +39,29 @@
   display: flex;
   gap: 6px;
 }
+.field[data-compact-label="true"] > label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.field[data-compact-label="true"] .entry {
+  order: 0;
+}
+.field[data-compact-label="true"] .tokens {
+  order: 1;
+}
+.field[data-compact-label="true"] .entry button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  padding-inline: 10px;
+}
+.field[data-compact-label="true"] .entry button svg {
+  display: none;
+}
 .entry input {
   width: 100%;
   min-width: 0;

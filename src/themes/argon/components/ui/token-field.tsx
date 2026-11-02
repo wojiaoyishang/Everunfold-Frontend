@@ -10,6 +10,8 @@ export function TokenField({
   suggestions = [],
   limit = 30,
   disabled = false,
+  multiple = false,
+  compactLabel = false,
 }: {
   label: string;
   value: string[];
@@ -17,31 +19,32 @@ export function TokenField({
   suggestions?: string[];
   limit?: number;
   disabled?: boolean;
+  multiple?: boolean;
+  compactLabel?: boolean;
 }) {
   const id = useId();
   const [input, setInput] = useState("");
   const [message, setMessage] = useState("");
   const add = (text: string) => {
-    const name = text.trim().normalize("NFC");
-    if (!name) return;
-    if (
-      value.some(
-        (item) => item.toLocaleLowerCase() === name.toLocaleLowerCase(),
-      )
-    ) {
-      setMessage("已经添加了这个名称。");
-      return;
-    }
-    if (name.length > 60 || value.length >= limit) {
+    const names = (multiple ? text.split(/[,，]/) : [text])
+      .map((name) => name.trim().normalize("NFC"))
+      .filter(Boolean);
+    if (!names.length) return;
+    const next = [
+      ...new Map(
+        [...value, ...names].map((name) => [name.toLocaleLowerCase(), name]),
+      ).values(),
+    ];
+    if (names.some((name) => name.length > 60) || next.length > limit) {
       setMessage(`每项最多 60 字符，最多 ${limit} 项。`);
       return;
     }
-    onChange([...value, name]);
+    onChange(next);
     setInput("");
     setMessage("");
   };
   return (
-    <div className={styles.field}>
+    <div className={styles.field} data-compact-label={compactLabel}>
       <label htmlFor={id}>{label}</label>
       <div className={styles.tokens}>
         {value.map((name) => (
@@ -62,7 +65,7 @@ export function TokenField({
           id={id}
           disabled={disabled}
           value={input}
-          maxLength={60}
+          maxLength={multiple ? 1000 : 60}
           placeholder={`输入${label}名称`}
           onChange={(event) => setInput(event.target.value)}
           onKeyDown={(event) => {
@@ -79,6 +82,7 @@ export function TokenField({
           onClick={() => add(input)}
         >
           <Icon name="plus" />
+          {compactLabel && <span>添加</span>}
         </Button>
       </div>
       <div className={styles.suggestions}>

@@ -123,7 +123,7 @@ export function SettingsFrame({
   children,
 }: {
   title: string;
-  description: string;
+  description?: string;
   children: ReactNode;
 }) {
   const editor = useSettingsEditor();

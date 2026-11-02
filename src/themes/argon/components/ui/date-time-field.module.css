@@ -1,0 +1,178 @@
+.field {
+  display: block;
+  min-width: 0;
+}
+.trigger {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  text-align: left;
+  font-size: 13px;
+}
+.trigger > span {
+  flex: 1;
+  min-width: 0;
+}
+.trigger [data-empty="true"] {
+  color: var(--muted);
+}
+.trigger > svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.trigger > svg:last-child {
+  width: 13px;
+  transform: rotate(90deg);
+}
+.trigger:hover:not(:disabled),
+.trigger[aria-expanded="true"] {
+  border-color: var(--accent);
+}
+.calendar {
+  padding: 14px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  overflow: auto;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.heading button,
+.navigation > button {
+  display: grid;
+  place-items: center;
+  padding: 5px;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 5px;
+}
+.heading svg,
+.navigation > button svg {
+  width: 16px;
+  height: 16px;
+}
+.navigation {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr 28px;
+  gap: 4px;
+  align-items: center;
+}
+.calendar :global(.ui-select) {
+  width: 100%;
+  min-width: 0;
+}
+.calendar :global(.ui-select-trigger) {
+  width: 100%;
+  min-width: 0;
+}
+.calendar {
+  overflow-x: hidden;
+}
+.navigation :global(.ui-select-trigger) {
+  font-size: 12px;
+  min-height: 32px;
+  padding: 5px 7px;
+}
+.weekdays,
+.days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 3px;
+}
+.weekdays {
+  padding-top: 14px;
+  padding-bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  text-align: center;
+}
+.days button {
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 6px;
+  color: var(--text);
+  background: transparent;
+  font-size: 12px;
+  border: 1px solid transparent;
+}
+.days [data-outside="true"] {
+  color: var(--muted);
+  opacity: 0.5;
+}
+.days [aria-current="date"] {
+  border-color: var(--accent);
+}
+.days button:hover:not(:disabled) {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.days [aria-pressed="true"] {
+  color: var(--admin-on-accent, #fff);
+  background: var(--brand-accent);
+  opacity: 1;
+}
+.days button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.time {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 16px 1fr 65px 6px 65px;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.time :global(.ui-select-trigger) {
+  min-height: 32px;
+  font-size: 12px;
+  padding: 5px 7px;
+}
+.time > svg {
+  width: 16px;
+  height: 16px;
+}
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+.footer button {
+  padding: 6px 10px;
+  background: var(--surface-soft);
+  color: var(--text);
+  font-size: 12px;
+  border-radius: 5px;
+}
+.footer button:first-child {
+  margin-right: auto;
+  color: var(--accent);
+  background: transparent;
+}
+.footer .confirm {
+  background: var(--brand-accent);
+  color: var(--admin-on-accent, #fff);
+}

@@ -7,6 +7,7 @@ import { resolvePresentation } from "@/core/content/presentation";
 import { ShuoshuoDetail } from "@/themes/argon/components/shuoshuo";
 import { contentMetadata } from "@/core/content/metadata";
 import { readConfiguration } from "@/core/config/server";
+import { ProtectedArticle } from "@/themes/argon/components/protected-article";
 type Parameters = {
   params: Promise<{ contentPath: string[] }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -36,6 +37,23 @@ export default async function ContentPage({
     searchParams,
   ]);
   const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
+  const protectedContent = resolveContent(
+    snapshot,
+    `/${contentPath.join("/")}`,
+  );
+  if (
+    protectedContent &&
+    protectedContent.access &&
+    protectedContent.access !== "public"
+  )
+    return (
+      <ProtectedArticle
+        key={`${protectedContent.id}:${protectedContent.updated_at}`}
+        content={protectedContent}
+        site={snapshot.site}
+        baseUrl={readConfiguration().backendBaseUrl}
+      />
+    );
   if (presented?.content.type === "shuoshuo")
     return <ShuoshuoDetail snapshot={snapshot} entry={presented} />;
   const content = resolveContent(snapshot, `/${contentPath.join("/")}`);

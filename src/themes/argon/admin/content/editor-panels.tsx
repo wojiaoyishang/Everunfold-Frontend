@@ -9,13 +9,13 @@ import type {
   MediaURL,
 } from "@/generated/content-admin-contract";
 import type { MediaItem } from "@/generated/settings-contract";
-import {
-  formatEditorDate,
-  parseEditorDate,
-} from "@/core/content-management/editor-fields";
 import { Button, TextArea, TextField } from "../../components/ui/primitives";
+import { DateTimeField } from "../../components/ui/date-time-field";
+import { Select } from "../../components/ui/select";
+import { PasswordField } from "../../components/ui/password-field";
 import { Switch } from "../../components/ui/switch";
-import { TokenField } from "../../components/ui/token-field";
+import { CategorySelector, type CreateCategory } from "./category-selector";
+import { TagSelector } from "./tag-selector";
 import { Icon } from "../../components/icon";
 import { MediaPreview } from "../media/media-preview";
 import { EditorMediaDialog } from "./editor-media-dialog";
@@ -66,12 +66,10 @@ interface PanelProps {
   terms: EditorTerm[];
   media: Record<string, MediaURL>;
   onMedia: (item: MediaItem) => void;
+  createCategory: CreateCategory;
+  updateFields: (patch: Partial<DraftFields>) => void;
 }
 function PublicationPanel({ settings, update, detail, disabled }: PanelProps) {
-  const date = formatEditorDate(settings.display_published_at);
-  const invalidDate = Boolean(
-    date && !/^\d{4}-\d{2}-\d{2}T/.test(settings.display_published_at ?? ""),
-  );
   return (
     <Panel title="发布设置">
       <dl className={styles.publicationInfo}>
@@ -86,36 +84,18 @@ function PublicationPanel({ settings, update, detail, disabled }: PanelProps) {
           <dd>{detail?.author || "当前登录用户"}</dd>
         </div>
       </dl>
-      <label className="admin-field">
-        <span>访问路径</span>
-        <TextField
-          value={settings.path ?? ""}
-          placeholder={detail?.public_path || "/posts/自定义路径.html"}
-          maxLength={500}
-          disabled={disabled}
-          onChange={(event) => update({ path: event.target.value })}
-        />
-        <small>留空使用原路径；新内容自动生成。改址后旧链接不再可用。</small>
-      </label>
-      <label className="admin-field">
+      <div className="admin-field">
         <span>显示时间</span>
-        <TextField
-          value={date}
+        <DateTimeField
+          label="显示时间"
+          value={settings.display_published_at}
           disabled={disabled}
-          placeholder="YYYY-MM-DD HH:mm"
-          aria-invalid={invalidDate}
-          onChange={(event) =>
-            update({
-              display_published_at: parseEditorDate(event.target.value),
-            })
+          onValueChange={(display_published_at) =>
+            update({ display_published_at })
           }
         />
-        <small>
-          {invalidDate
-            ? "请输入有效日期，如 2026-11-02 14:30。"
-            : "按当前设备时区填写；留空保留原时间，新内容使用发布时间。"}
-        </small>
-      </label>
+        <small>留空保留原时间；新内容使用发布时间。</small>
+      </div>
       <div className={styles.switchRow}>
         <span>首页置顶</span>
         <Switch
@@ -125,6 +105,91 @@ function PublicationPanel({ settings, update, detail, disabled }: PanelProps) {
           onCheckedChange={(pinned) => update({ pinned })}
         />
       </div>
+    </Panel>
+  );
+}
+function AccessPanel({
+  settings,
+  detail,
+  disabled,
+  fields,
+  updateFields,
+}: PanelProps) {
+  const protectedContent = settings.visibility === "password";
+  return (
+    <Panel title="访问权限">
+      <Select
+        name="content-visibility"
+        label="文章可见性"
+        disabled={disabled}
+        value={settings.visibility ?? "public"}
+        options={[
+          { value: "public", label: "公开" },
+          { value: "password", label: "密码保护" },
+        ]}
+        onValueChange={(value) =>
+          updateFields({
+            settings: {
+              ...settings,
+              visibility: value as "public" | "password",
+              opens_at: value === "public" ? null : settings.opens_at,
+            },
+            access_password: null,
+          })
+        }
+      />
+      <div
+        className={styles.panelReveal}
+        data-open={protectedContent}
+        inert={!protectedContent}
+      >
+        <div>
+          <div className={styles.accessFields}>
+            <label className="admin-field">
+              <span>文章密码</span>
+              <PasswordField
+                aria-label="文章密码"
+                autoComplete="new-password"
+                disabled={disabled || !protectedContent}
+                value={fields.access_password ?? ""}
+                maxLength={200}
+                placeholder={
+                  detail?.has_password
+                    ? "已设置；留空保持原密码"
+                    : "设置访问密码"
+                }
+                onChange={(event) =>
+                  updateFields({ access_password: event.target.value || null })
+                }
+              />
+            </label>
+            <small>
+              读者输入密码后才能阅读正文。文中的媒体文件仍使用公开链接。
+            </small>
+          </div>
+        </div>
+      </div>
+    </Panel>
+  );
+}
+function OpeningPanel({ settings, update, disabled }: PanelProps) {
+  const enabled = settings.visibility === "password";
+  return (
+    <Panel title="定时开放" initialOpen={Boolean(settings.opens_at)}>
+      <div className="admin-field">
+        <span>自动开放时间</span>
+        <DateTimeField
+          label="自动开放时间"
+          value={settings.opens_at}
+          disabled={disabled || !enabled}
+          onValueChange={(opens_at) => update({ opens_at })}
+        />
+      </div>
+      <small>
+        {enabled
+          ? "开放前可凭文章密码提前访问，到点后自动公开。按当前设备时区填写；留空则一直需要密码。"
+          : "先将文章可见性设为密码保护，再设置开放时间。"}
+      </small>
     </Panel>
   );
 }
@@ -183,33 +248,33 @@ function CoverPanel({
     </Panel>
   );
 }
-function TaxonomyPanel({
-  type,
+function CategoryPanel({
   settings,
   update,
   terms,
   disabled,
+  createCategory,
 }: PanelProps) {
   return (
-    <Panel title="分类与标签" initialOpen={type.id === "article"}>
-      <TokenField
-        label="分类"
+    <Panel title="分类目录">
+      <CategorySelector
+        terms={terms}
         value={settings.categories ?? []}
-        limit={20}
-        disabled={disabled}
-        suggestions={terms
-          .filter((term) => term.kind === "category")
-          .map((term) => term.name)}
         onChange={(categories) => update({ categories })}
-      />
-      <TokenField
-        label="标签"
-        value={settings.tags ?? []}
         disabled={disabled}
-        suggestions={terms
-          .filter((term) => term.kind === "tag")
-          .map((term) => term.name)}
+        createCategory={createCategory}
+      />
+    </Panel>
+  );
+}
+function TagsPanel({ settings, update, terms, disabled }: PanelProps) {
+  return (
+    <Panel title="标签">
+      <TagSelector
+        terms={terms}
+        value={settings.tags ?? []}
         onChange={(tags) => update({ tags })}
+        disabled={disabled}
       />
     </Panel>
   );
@@ -262,8 +327,11 @@ function SeoPanel({ settings, update, fields, disabled }: PanelProps) {
 const panels: Readonly<Record<string, ComponentType<PanelProps>>> =
   Object.freeze({
     publication: PublicationPanel,
+    access: AccessPanel,
+    opening: OpeningPanel,
     cover: CoverPanel,
-    taxonomy: TaxonomyPanel,
+    taxonomy: CategoryPanel,
+    tags: TagsPanel,
     discussion: DiscussionPanel,
     seo: SeoPanel,
   });
@@ -271,7 +339,7 @@ export function EditorPanels({
   fields,
   onChange,
   ...props
-}: Omit<PanelProps, "settings" | "update"> & {
+}: Omit<PanelProps, "settings" | "update" | "updateFields"> & {
   onChange: (fields: DraftFields) => void;
 }) {
   const settings = fields.settings ?? {};
@@ -287,18 +355,28 @@ export function EditorPanels({
           "discussion",
           "seo",
         ]
-      ).map((id) => {
-        const Component = panels[id];
-        return Component ? (
-          <Component
-            key={id}
-            {...props}
-            fields={fields}
-            settings={settings}
-            update={update}
-          />
-        ) : null;
-      })}
+      )
+        .flatMap((id) =>
+          id === "taxonomy"
+            ? ["taxonomy", "tags"]
+            : id === "publication"
+              ? ["publication", "access", "opening"]
+              : [id],
+        )
+        .filter((id, index, all) => all.indexOf(id) === index)
+        .map((id) => {
+          const Component = panels[id];
+          return Component ? (
+            <Component
+              key={id}
+              {...props}
+              fields={fields}
+              settings={settings}
+              update={update}
+              updateFields={(patch) => onChange({ ...fields, ...patch })}
+            />
+          ) : null;
+        })}
     </aside>
   );
 }

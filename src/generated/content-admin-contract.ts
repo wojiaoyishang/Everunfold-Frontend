@@ -3,20 +3,30 @@
 export type Success = boolean;
 export type Code = number;
 export type Msg = string;
-export type Name = string;
-export type Kind = string;
-export type Terms = EditorTerm[];
+export type Id = string;
 export type TypeId = string;
+export type Name = string;
+export type ParentId = string | null;
+export type Success1 = boolean;
+export type Code1 = number;
+export type Msg1 = string;
+export type Name1 = string;
+export type Kind = string;
+export type Id1 = string;
+export type Count = number;
+export type ParentId1 = string | null;
+export type Terms = EditorTerm[];
+export type TypeId1 = string;
 export type Search = string;
 export type Status = "all" | "draft" | "published" | "trash";
 export type Page = number;
 export type PageSize = number;
-export type Id = string;
+export type Id2 = string;
 export type OperationId = string;
-export type TypeId1 = string;
+export type TypeId2 = string;
 export type Title = string;
 export type Excerpt = string;
-export type Id1 = string;
+export type Id3 = string;
 export type Type = "markdown" | "html";
 export type Content = string;
 /**
@@ -39,17 +49,20 @@ export type Pinned = boolean;
 export type CommentsOpen = boolean;
 export type SeoTitle = string;
 export type SeoDescription = string;
-export type Id2 = string;
+export type Visibility = "public" | "password";
+export type OpensAt = string | null;
+export type AccessPassword = string | null;
+export type Id4 = string;
 export type OperationId1 = string;
 export type ExpectedRevision = number;
-export type Id3 = string;
+export type Id5 = string;
 export type OperationId2 = string;
 export type ExpectedRevision1 = number;
-export type Success1 = boolean;
-export type Code1 = number;
-export type Msg1 = string;
-export type Id4 = string;
-export type TypeId2 = string;
+export type Success2 = boolean;
+export type Code2 = number;
+export type Msg2 = string;
+export type Id6 = string;
+export type TypeId3 = string;
 export type Title1 = string;
 export type Excerpt1 = string;
 export type Preview = string;
@@ -66,11 +79,11 @@ export type Items = DraftSummary[];
 export type Total = number;
 export type Page1 = number;
 export type PageSize1 = number;
-export type Success2 = boolean;
-export type Code2 = number;
-export type Msg2 = string;
-export type Id5 = string;
-export type TypeId3 = string;
+export type Success3 = boolean;
+export type Code3 = number;
+export type Msg3 = string;
+export type Id7 = string;
+export type TypeId4 = string;
 export type Title2 = string;
 export type Excerpt2 = string;
 export type Preview1 = string;
@@ -86,10 +99,11 @@ export type UpdatedAt1 = string;
 export type Body1 = DraftBlock[];
 export type Original = string;
 export type Webp = string;
-export type Success3 = boolean;
-export type Code3 = number;
-export type Msg3 = string;
-export type Id6 = string;
+export type HasPassword = boolean;
+export type Success4 = boolean;
+export type Code4 = number;
+export type Msg4 = string;
+export type Id8 = string;
 export type Owner = string;
 export type Label = string;
 export type Description = string;
@@ -100,9 +114,9 @@ export type SupportsExcerpt = boolean;
 export type Editor = string;
 export type Panels = string[];
 export type Items1 = ContentTypeDefinition[];
-export type Success4 = boolean;
-export type Code4 = number;
-export type Msg4 = string;
+export type Success5 = boolean;
+export type Code5 = number;
+export type Msg5 = string;
 export type SourceEpoch = string;
 export type Revision2 = number;
 export type NodeId = string;
@@ -118,11 +132,11 @@ export type NodeId1 = string;
 export type SourceEpoch1 = string;
 export type Resource = "public-content";
 export type Revision3 = number;
-export type SchemaVersion = "0.1.0" | "0.2.0" | "0.3.0";
+export type SchemaVersion = "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0";
 export type SourceEpoch2 = string;
 export type Generation = number;
 export type ExportedAt = string;
-export type Name1 = string;
+export type Name2 = string;
 export type Description1 = string;
 export type Author2 = string;
 export type AvatarUrl = string | null;
@@ -142,7 +156,9 @@ export type Categories1 = number;
 export type CommentsOpen1 = boolean;
 export type SeoTitle1 = string;
 export type SeoDescription1 = string;
-export type Id7 = string;
+export type Access = "public" | "password" | "scheduled";
+export type OpensAt1 = string | null;
+export type Id9 = string;
 export type Kind1 = "article" | "shuoshuo" | "page";
 export type Title3 = string;
 export type Path1 = string;
@@ -154,22 +170,22 @@ export type Author3 = string;
 export type CoverUrl = string | null;
 export type ReadingMinutes = number;
 export type WordCount = number;
-export type Id8 = string;
+export type Id10 = string;
 export type Slug = string;
-export type Name2 = string;
+export type Name3 = string;
 export type Kind2 = "category" | "tag";
-export type Count = number;
+export type Count1 = number;
 export type Categories2 = TaxonomyDTO[];
 export type Tags2 = TaxonomyDTO[];
 export type CommentCount = number;
 export type Pinned1 = boolean;
-export type Id9 = string;
+export type Id11 = string;
 export type Type1 = "markdown" | "html";
 export type Content2 = string;
 export type Content1 = ContentBlock[];
 export type Contents = ContentDetail[];
-export type Id10 = string;
-export type ParentId = string | null;
+export type Id12 = string;
+export type ParentId2 = string | null;
 export type Author4 = string;
 /**
  * 纯文本，按文本展示，不再作为 HTML 解析
@@ -180,6 +196,8 @@ export type ReplyTo = string | null;
 export type Taxonomies = TaxonomyDTO[];
 
 export interface ContentAdminContract {
+  actions: PublicResponseContentActions;
+  create_category: EditorTermCreate;
   editor_catalog: PublicResponseEditorCatalog;
   query: DraftQuery;
   lookup: DraftLookup;
@@ -192,32 +210,52 @@ export interface ContentAdminContract {
   sync_state: PublicResponseContentSyncState;
   delivery: ContentDelivery;
 }
-export interface PublicResponseEditorCatalog {
+export interface PublicResponseContentActions {
   success?: Success;
   code?: Code;
   msg?: Msg;
+  data: ContentActions;
+}
+export interface ContentActions {
+  edit?: ContentEditAction | null;
+}
+export interface ContentEditAction {
+  id: Id;
+  type_id: TypeId;
+}
+export interface EditorTermCreate {
+  name: Name;
+  parent_id?: ParentId;
+}
+export interface PublicResponseEditorCatalog {
+  success?: Success1;
+  code?: Code1;
+  msg?: Msg1;
   data: EditorCatalog;
 }
 export interface EditorCatalog {
   terms: Terms;
 }
 export interface EditorTerm {
-  name: Name;
+  name: Name1;
   kind: Kind;
+  id: Id1;
+  count?: Count;
+  parent_id?: ParentId1;
 }
 export interface DraftQuery {
-  type_id: TypeId;
+  type_id: TypeId1;
   search?: Search;
   status?: Status;
   page?: Page;
   page_size?: PageSize;
 }
 export interface DraftLookup {
-  id: Id;
+  id: Id2;
 }
 export interface DraftCreate {
   operation_id: OperationId;
-  type_id: TypeId1;
+  type_id: TypeId2;
   fields: DraftFields;
 }
 export interface DraftFields {
@@ -225,9 +263,10 @@ export interface DraftFields {
   excerpt?: Excerpt;
   body: Body;
   settings?: EditorSettings | null;
+  access_password?: AccessPassword;
 }
 export interface DraftBlock {
-  id: Id1;
+  id: Id3;
   type?: Type;
   content: Content;
 }
@@ -241,22 +280,24 @@ export interface EditorSettings {
   comments_open?: CommentsOpen;
   seo_title?: SeoTitle;
   seo_description?: SeoDescription;
+  visibility?: Visibility;
+  opens_at?: OpensAt;
 }
 export interface DraftSave {
-  id: Id2;
+  id: Id4;
   operation_id: OperationId1;
   expected_revision: ExpectedRevision;
   fields: DraftFields;
 }
 export interface DraftMutation {
-  id: Id3;
+  id: Id5;
   operation_id: OperationId2;
   expected_revision: ExpectedRevision1;
 }
 export interface PublicResponseDraftCatalog {
-  success?: Success1;
-  code?: Code1;
-  msg?: Msg1;
+  success?: Success2;
+  code?: Code2;
+  msg?: Msg2;
   data: DraftCatalog;
 }
 export interface DraftCatalog {
@@ -266,8 +307,8 @@ export interface DraftCatalog {
   page_size: PageSize1;
 }
 export interface DraftSummary {
-  id: Id4;
-  type_id: TypeId2;
+  id: Id6;
+  type_id: TypeId3;
   title: Title1;
   excerpt: Excerpt1;
   preview: Preview;
@@ -282,14 +323,14 @@ export interface DraftSummary {
   updated_at: UpdatedAt;
 }
 export interface PublicResponseDraftDetail {
-  success?: Success2;
-  code?: Code2;
-  msg?: Msg2;
+  success?: Success3;
+  code?: Code3;
+  msg?: Msg3;
   data: DraftDetail;
 }
 export interface DraftDetail {
-  id: Id5;
-  type_id: TypeId3;
+  id: Id7;
+  type_id: TypeId4;
   title: Title2;
   excerpt: Excerpt2;
   preview: Preview1;
@@ -305,6 +346,7 @@ export interface DraftDetail {
   body: Body1;
   settings?: EditorSettings;
   media_urls?: MediaUrls;
+  has_password?: HasPassword;
 }
 export interface MediaUrls {
   [k: string]: MediaURL;
@@ -314,16 +356,16 @@ export interface MediaURL {
   webp?: Webp;
 }
 export interface PublicResponseContentTypeCatalog {
-  success?: Success3;
-  code?: Code3;
-  msg?: Msg3;
+  success?: Success4;
+  code?: Code4;
+  msg?: Msg4;
   data: ContentTypeCatalog;
 }
 export interface ContentTypeCatalog {
   items: Items1;
 }
 export interface ContentTypeDefinition {
-  id: Id6;
+  id: Id8;
   owner: Owner;
   label: Label;
   description: Description;
@@ -335,9 +377,9 @@ export interface ContentTypeDefinition {
   panels?: Panels;
 }
 export interface PublicResponseContentSyncState {
-  success?: Success4;
-  code?: Code4;
-  msg?: Msg4;
+  success?: Success5;
+  code?: Code5;
+  msg?: Msg5;
   data: ContentSyncState;
 }
 export interface ContentSyncState {
@@ -373,7 +415,7 @@ export interface PublicSnapshot {
   taxonomies: Taxonomies;
 }
 export interface SiteDTO {
-  name: Name1;
+  name: Name2;
   description: Description1;
   author: Author2;
   avatar_url: AvatarUrl;
@@ -400,7 +442,9 @@ export interface ContentDetail {
   comments_open?: CommentsOpen1;
   seo_title?: SeoTitle1;
   seo_description?: SeoDescription1;
-  id: Id7;
+  access?: Access;
+  opens_at?: OpensAt1;
+  id: Id9;
   kind: Kind1;
   title: Title3;
   path: Path1;
@@ -420,14 +464,14 @@ export interface ContentDetail {
   media_urls: MediaUrls1;
 }
 export interface TaxonomyDTO {
-  id: Id8;
+  id: Id10;
   slug: Slug;
-  name: Name2;
+  name: Name3;
   kind: Kind2;
-  count: Count;
+  count: Count1;
 }
 export interface ContentBlock {
-  id: Id9;
+  id: Id11;
   type: Type1;
   content: Content2;
 }
@@ -438,8 +482,8 @@ export interface Comments1 {
   [k: string]: PublicComment[];
 }
 export interface PublicComment {
-  id: Id10;
-  parent_id: ParentId;
+  id: Id12;
+  parent_id: ParentId2;
   author: Author4;
   content: Content3;
   created_at: CreatedAt2;

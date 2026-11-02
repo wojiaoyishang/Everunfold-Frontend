@@ -274,6 +274,13 @@ export class ReaderStore {
     this.publish({ persona });
     this.tasks.restart("reader:identity");
   }
+  refreshTask(route: string, key: string) {
+    if (
+      this.snapshot.route === route &&
+      this.snapshot.requests[key]?.status !== "loading"
+    )
+      this.tasks.restart(key);
+  }
   refresh() {
     const ids = Object.keys(this.snapshot.metrics);
     const route = this.snapshot.route;

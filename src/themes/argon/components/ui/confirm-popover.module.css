@@ -1,0 +1,68 @@
+.panel {
+  --local-danger: var(--admin-danger, var(--color-danger, #b54343));
+  padding: 16px;
+  border-color: var(--line);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.heading > svg {
+  width: 17px;
+  height: 17px;
+  color: var(--local-danger);
+  flex-shrink: 0;
+}
+.heading strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.panel p {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: auto;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+}
+.actions .remove {
+  border-color: transparent;
+  background: var(--local-danger);
+  color: var(--surface);
+}
+.actions > button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.actions .remove:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--local-danger) 88%, var(--text));
+  border-color: transparent;
+}
+.actions svg {
+  width: 14px;
+  height: 14px;
+}
+.panel[data-closing="true"] {
+  pointer-events: none;
+}

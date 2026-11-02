@@ -20,8 +20,8 @@ export function presentLegacyContent({
     type: kind,
     comments_open: content.comments_open ?? true,
     reaction_count: 0,
-    access: "public",
-    opens_at: null,
+    access: content.access ?? "public",
+    opens_at: content.opens_at ?? null,
   };
 }
 

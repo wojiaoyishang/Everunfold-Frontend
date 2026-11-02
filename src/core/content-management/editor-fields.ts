@@ -1,6 +1,16 @@
 import type { DraftBlock } from "@/generated/content-admin-contract";
 import type { MediaItem } from "@/generated/settings-contract";
 
+export function titlePath(title: string): string {
+  const slug = title
+    .normalize("NFC")
+    .trim()
+    .replace(/[^\p{L}\p{N}_-]+/gu, "-")
+    .replace(/^[-_]+|[-_]+$/g, "")
+    .slice(0, 160);
+  return slug ? `/${slug}.html` : "";
+}
+
 export function moveBlock(body: DraftBlock[], id: string, direction: -1 | 1) {
   const index = body.findIndex((part) => part.id === id);
   const target = index + direction;

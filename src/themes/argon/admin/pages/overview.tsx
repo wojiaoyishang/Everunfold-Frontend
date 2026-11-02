@@ -7,15 +7,7 @@ export function AdminOverview() {
   const user = useAdminAccount();
   return (
     <>
-      <AdminPageHeading
-        title="工作台"
-        description={`欢迎回来，${user.display_name || user.username}。`}
-      />
-      <section className="admin-overview-intro">
-        <span className="admin-eyebrow">你的工作空间</span>
-        <h2>内容与资源，各有其位。</h2>
-        <p>开始一篇文章，记录一则说说，整理创作素材。</p>
-      </section>
+      <AdminPageHeading title="工作台" />
       <div className="admin-shortcuts">
         <RouteLink href="/admin/content" showPending className="admin-shortcut">
           <span className="admin-shortcut-icon">
@@ -23,7 +15,6 @@ export function AdminOverview() {
           </span>
           <div>
             <h2>内容管理</h2>
-            <p>集中查看文章与说说</p>
           </div>
           <Icon name="arrow" />
         </RouteLink>
@@ -33,7 +24,6 @@ export function AdminOverview() {
           </span>
           <div>
             <h2>媒体库</h2>
-            <p>统一整理图片与文件</p>
           </div>
           <Icon name="arrow" />
         </RouteLink>
@@ -81,9 +71,6 @@ export function AdminOverview() {
           </ul>
         </section>
       </div>
-      <p className="admin-page-note">
-        新内容先保存到草稿，方便随时回来继续创作。
-      </p>
     </>
   );
 }

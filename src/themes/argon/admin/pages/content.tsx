@@ -6,7 +6,7 @@ import { AdminPageHeading } from "../components/page-heading";
 export function AdminContent() {
   return (
     <>
-      <AdminPageHeading title="内容" description="选择一种方式，开始记录。" />
+      <AdminPageHeading title="内容" />
       <div className="admin-content-type-grid">
         {registeredContentTypes.map((type) => (
           <RouteLink
@@ -16,7 +16,6 @@ export function AdminContent() {
           >
             <Icon name={type.icon === "leaf" ? "leaf" : "book"} />
             <h2>{type.label}</h2>
-            <p>{type.description}</p>
             <span>
               打开草稿列表
               <Icon name="arrow" />

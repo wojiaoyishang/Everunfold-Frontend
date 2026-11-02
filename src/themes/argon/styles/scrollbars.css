@@ -45,8 +45,9 @@ html:has(.site-header.is-scrolled) {
       /* Viewport scrollbars may originate from body; paint their header segment too. */
       background: linear-gradient(
         to bottom,
-        var(--gutter-header-fill) 0 var(--header-height),
-        transparent var(--header-height)
+        var(--gutter-header-fill) 0
+          var(--header-block-size, var(--header-height)),
+        transparent var(--header-block-size, var(--header-height))
       );
       border-radius: 0;
     }

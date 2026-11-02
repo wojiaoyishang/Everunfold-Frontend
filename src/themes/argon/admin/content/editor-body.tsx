@@ -9,9 +9,9 @@ import {
   mediaMarkup,
   moveBlock,
 } from "@/core/content-management/editor-fields";
-import { Button, TextArea, TextField } from "../../components/ui/primitives";
+import { Button, TextArea } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
-import { ConfirmDialog } from "../../components/ui/confirm-dialog";
+import { ConfirmPopover } from "../../components/ui/confirm-popover";
 import { Icon } from "../../components/icon";
 import { EditorMediaDialog } from "./editor-media-dialog";
 import styles from "./editor-workspace.module.css";
@@ -29,7 +29,6 @@ export function EditorBody({
   disabled,
   onMedia,
 }: EditorProps) {
-  const [remove, setRemove] = useState<string | null>(null);
   const [mediaTarget, setMediaTarget] = useState<{
     id: string;
     start: number;
@@ -40,21 +39,6 @@ export function EditorBody({
   const [announcement, setAnnouncement] = useState("");
   return (
     <fieldset className={styles.bodyFields} disabled={disabled}>
-      <label className={`admin-field ${styles.title}`}>
-        <span>标题{!type.title_required && <small>（可选）</small>}</span>
-        <TextField
-          value={value.title ?? ""}
-          maxLength={200}
-          placeholder={
-            type.title_required
-              ? "给这篇文章起个标题"
-              : "记录此刻，也可以不写标题"
-          }
-          onChange={(event) =>
-            onChange({ ...value, title: event.target.value })
-          }
-        />
-      </label>
       <div className={styles.blockList}>
         {value.body.map((block, index) => (
           <section
@@ -119,14 +103,28 @@ export function EditorBody({
                 >
                   <Icon name="down" />
                 </Button>
-                <Button
-                  className="admin-icon-button"
-                  aria-label={`删除第 ${index + 1} 块`}
+                <ConfirmPopover
+                  triggerClassName="admin-icon-button"
+                  label={`删除第 ${index + 1} 块`}
+                  title="删除这个正文块？"
+                  description="从当前草稿中移除，保存后生效。"
                   disabled={disabled || value.body.length === 1}
-                  onClick={() => setRemove(block.id)}
+                  onConfirmed={() => {
+                    if (disabled || value.body.length === 1) return;
+                    onChange({
+                      ...value,
+                      body: value.body.filter((part) => part.id !== block.id),
+                    });
+                    setAnnouncement(`已删除第 ${index + 1} 块`);
+                    const neighbor =
+                      value.body[index + 1] ?? value.body[index - 1];
+                    requestAnimationFrame(() =>
+                      inputs.current.get(neighbor.id)?.focus(),
+                    );
+                  }}
                 >
                   <Icon name="trash" />
-                </Button>
+                </ConfirmPopover>
               </div>
             </header>
             <TextArea
@@ -208,23 +206,6 @@ export function EditorBody({
       <span role="status" className="sr-only">
         {announcement}
       </span>
-      <ConfirmDialog
-        open={remove !== null}
-        title="删除这个正文块？"
-        description="这个块的内容将从草稿中移除，保存后生效。"
-        icon="trash"
-        confirmLabel="删除正文块"
-        onCancel={() => setRemove(null)}
-        onConfirm={() => true}
-        onConfirmed={() => {
-          if (!disabled && value.body.length > 1)
-            onChange({
-              ...value,
-              body: value.body.filter((block) => block.id !== remove),
-            });
-          setRemove(null);
-        }}
-      />
       {mediaTarget && (
         <EditorMediaDialog
           onClose={() => setMediaTarget(null)}

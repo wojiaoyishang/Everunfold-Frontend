@@ -16,10 +16,7 @@ export function SiteSettingsPage() {
       current ? { ...current, site: { ...current.site, ...value } } : current,
     );
   return (
-    <SettingsFrame
-      title="站点设置"
-      description="维护站点的基本资料、导航与搜索展示。"
-    >
+    <SettingsFrame title="站点设置">
       {site && (
         <>
           <SettingsSection

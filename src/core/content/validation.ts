@@ -14,6 +14,26 @@ const validate = ajv.compile<PublicSnapshot>(
 
 export function parsePublicSnapshot(input: unknown): PublicSnapshot {
   if (!validate(input)) throw new Error("Invalid public snapshot contract");
+  if (
+    input.contents.some(
+      (item) =>
+        item.access &&
+        item.access !== "public" &&
+        (item.content.length ||
+          Object.keys(item.media_urls).length ||
+          item.excerpt ||
+          item.cover_url ||
+          item.seo_description ||
+          item.seo_title ||
+          item.word_count ||
+          item.comment_count),
+    )
+  )
+    throw new Error("Restricted content leaked into public snapshot");
+  if (
+    input.contents.some((item) => item.access === "scheduled" && !item.opens_at)
+  )
+    throw new Error("Scheduled content is missing its opening time");
   const ids = new Set(input.contents.map((item) => item.id));
   const paths = new Set(input.contents.map((item) => normalizePath(item.path)));
   if (

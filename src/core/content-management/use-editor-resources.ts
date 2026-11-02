@@ -1,12 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { readEditorOptions } from "@/generated/content-admin-client";
+import {
+  readEditorOptions,
+  createContentCategory,
+} from "@/generated/content-admin-client";
 import type { EditorTerm, MediaURL } from "@/generated/content-admin-contract";
 import type { MediaItem } from "@/generated/settings-contract";
 
 export function useEditorResources() {
-  const { baseUrl } = useAdminRequest();
+  const { baseUrl, csrfToken } = useAdminRequest();
   const [terms, setTerms] = useState<EditorTerm[]>([]);
   const [media, setMedia] = useState<Record<string, MediaURL>>({});
   useEffect(() => {
@@ -25,5 +28,19 @@ export function useEditorResources() {
       ...current,
       [item.id.replace(/^media:/, "")]: { original: item.url },
     }));
-  return { terms, media, remember };
+  const createCategory = async (name: string, parentId: string | null) => {
+    const response = await createContentCategory(
+      baseUrl,
+      { name, parent_id: parentId },
+      csrfToken,
+    );
+    setTerms(response.data.terms);
+    return response.data.terms.find(
+      (term) =>
+        term.kind === "category" &&
+        term.name.toLocaleLowerCase() ===
+          name.trim().normalize("NFC").toLocaleLowerCase(),
+    );
+  };
+  return { terms, media, remember, createCategory };
 }

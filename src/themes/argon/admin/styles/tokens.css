@@ -3,9 +3,11 @@ html:has([data-surface="admin"]),
 .admin-root {
   color-scheme: light;
   --admin-canvas: #ffffff;
-  --admin-sidebar: #f7f8fa;
+  --admin-surface: var(--admin-canvas);
+  --admin-workspace: #f0f3f8;
+  --admin-sidebar: #fafbfd;
   --admin-subtle: #f4f5f7;
-  --admin-border: #e8eaee;
+  --admin-border: #e0e5ed;
   --admin-text: #242a35;
   --admin-muted: #697280;
   --admin-accent: #415fb7;
@@ -35,7 +37,7 @@ html:has([data-surface="admin"]),
   --gutter-header-fill: transparent;
   --header-height: 56px;
   color: var(--admin-text);
-  background: var(--admin-canvas);
+  background: var(--admin-workspace);
   font:
     400 14px/1.55 -apple-system,
     BlinkMacSystemFont,
@@ -53,6 +55,7 @@ html:has([data-admin-mode="dark"]),
 .admin-root[data-admin-mode="dark"] {
   color-scheme: dark;
   --admin-canvas: #191c22;
+  --admin-workspace: #10141b;
   --admin-sidebar: #15181e;
   --admin-subtle: #22262e;
   --admin-border: #303640;
@@ -71,6 +74,7 @@ html:has([data-admin-mode="dark"]),
   .admin-root[data-admin-mode="system"] {
     color-scheme: dark;
     --admin-canvas: #191c22;
+    --admin-workspace: #10141b;
     --admin-sidebar: #15181e;
     --admin-subtle: #22262e;
     --admin-border: #303640;

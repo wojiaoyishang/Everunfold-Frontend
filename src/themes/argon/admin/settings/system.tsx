@@ -115,10 +115,7 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
   };
   return (
     <div className="admin-settings-page">
-      <AdminPageHeading
-        title="系统设置"
-        description="管理前端节点的运行策略，并检查配置是否已应用。"
-      />
+      <AdminPageHeading title="系统设置" />
       <SettingsSection
         title="节点策略"
         description="策略由后端保存，节点接收后保留本地副本。后端暂时离线时继续使用上次成功应用的版本。"

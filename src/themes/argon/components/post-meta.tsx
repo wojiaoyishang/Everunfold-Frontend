@@ -4,14 +4,18 @@ import { taxonomyHref } from "@/core/content/urls";
 import { AppLink as Link } from "./navigation-link";
 import { Icon } from "./icon";
 import { ViewMetric } from "./reader-data";
+import { ContentEditLink } from "./content-edit-link";
 
 export function PostMeta({
   content,
   article = false,
+  liveMetrics = true,
 }: {
   content: ReadableContent;
   article?: boolean;
+  liveMetrics?: boolean;
 }) {
+  const locked = Boolean(content.access && content.access !== "public");
   return (
     <div className="post-meta">
       {article && (
@@ -24,7 +28,12 @@ export function PostMeta({
         <Icon name="calendar" />
         {displayDate(content.published_at)}
       </time>
-      {article ? (
+      {locked ? (
+        <span>
+          <Icon name={content.opens_at ? "clock" : "lock"} />
+          {content.opens_at ? "定时开放" : "密码保护"}
+        </span>
+      ) : article ? (
         <span>
           <Icon name="book" />
           {content.word_count.toLocaleString("zh-CN")} 字
@@ -37,18 +46,24 @@ export function PostMeta({
           </Link>
         ))
       )}
-      <span>
-        <Icon name="clock" />
-        {content.reading_minutes} 分钟
-      </span>
-      <Link
-        href={article ? "#comments" : `${content.path}#comments`}
-        expectedContent={!article}
-      >
-        <Icon name="comment" />
-        {content.comment_count}
-      </Link>
-      <ViewMetric contentId={content.id} />
+      {!locked && (
+        <span>
+          <Icon name="clock" />
+          {content.reading_minutes} 分钟
+        </span>
+      )}
+      {!locked &&
+        (content.comments_open !== false || content.comment_count > 0) && (
+          <Link
+            href={article ? "#comments" : `${content.path}#comments`}
+            expectedContent={!article}
+          >
+            <Icon name="comment" />
+            {content.comment_count}
+          </Link>
+        )}
+      {!locked && liveMetrics && <ViewMetric contentId={content.id} />}
+      {article && <ContentEditLink contentId={content.id} />}
     </div>
   );
 }

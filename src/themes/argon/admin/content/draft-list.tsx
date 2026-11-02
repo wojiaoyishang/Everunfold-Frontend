@@ -31,7 +31,6 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
     <>
       <AdminPageHeading
         title={type.label}
-        description={type.description}
         action={
           <RouteLink
             className="admin-button admin-button-primary"

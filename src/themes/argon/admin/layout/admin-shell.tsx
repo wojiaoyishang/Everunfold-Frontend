@@ -51,12 +51,6 @@ export function AdminShell({
           <span>Everunfold</span>
         </RouteLink>
         <AdminNavigation pathname={pathname} />
-        <div className="admin-sidebar-bottom">
-          <div className="admin-sidebar-note">
-            <span>你的内容工作空间</span>
-            <small>专注创作，有序整理。</small>
-          </div>
-        </div>
       </aside>
       <div className="admin-main-column">
         <header className="admin-header">

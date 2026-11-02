@@ -1,0 +1,103 @@
+.gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: clamp(32px, 6vw, 72px) clamp(20px, 5vw, 56px);
+}
+.mark {
+  display: grid;
+  place-items: center;
+  color: var(--accent);
+  background: var(--accent-soft);
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+}
+.mark svg {
+  width: 26px;
+  height: 26px;
+}
+.gate h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+.gate p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.8;
+  max-width: 520px;
+  margin: 0;
+}
+.gate form {
+  display: flex;
+  gap: 10px;
+  width: min(440px, 100%);
+  margin-top: 8px;
+}
+.gate form > span {
+  flex: 1;
+  min-width: 0;
+}
+.gate input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.gate input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.gate form > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: var(--brand-accent);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+.gate .checkTime {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  padding: 4px;
+  background: transparent;
+  font-size: 13px;
+}
+.gate .error {
+  color: var(--accent);
+  animation: access-enter 240ms ease both;
+}
+.revealed {
+  animation: access-enter 400ms ease both;
+}
+@keyframes access-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (max-width: 480px) {
+  .gate form {
+    flex-direction: column;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .revealed,
+  .gate .error {
+    animation: none;
+  }
+}

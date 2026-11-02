@@ -11,6 +11,7 @@ import { PagePresentation } from "./route-state";
 import { CommentSection } from "./comments/comment-section";
 import { ArticleActions } from "./article-actions";
 import { ViewMetric } from "./reader-data";
+import { ContentEditLink } from "./content-edit-link";
 
 export function ShuoshuoCard({
   entry,
@@ -60,6 +61,7 @@ export function ShuoshuoCard({
         <CollapsibleContent limit={240}>{body}</CollapsibleContent>
       )}
       <footer className="shuoshuo-actions">
+        {detail && <ContentEditLink contentId={content.id} />}
         <ReactionButton id={content.id} count={content.reaction_count} />
         {!example && <ViewMetric contentId={content.id} />}
         {content.comments_open ? (

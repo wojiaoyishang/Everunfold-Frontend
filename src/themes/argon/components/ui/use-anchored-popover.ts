@@ -13,7 +13,7 @@ import { placePopover } from "./select-model";
 const noSubscription = () => () => {};
 
 /** Native top-layer/light-dismiss with bounded positioning inside dialogs and popovers. */
-export function useAnchoredPopover(minWidth = 180) {
+export function useAnchoredPopover(minWidth = 180, overlapAnchor = false) {
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -43,12 +43,20 @@ export function useAnchoredPopover(minWidth = 180) {
       width: minWidth,
       height: panel.current.scrollHeight,
     });
+    if (overlapAnchor && panel.current.scrollHeight > placement.maxHeight) {
+      const height = Math.min(panel.current.scrollHeight, viewport.height - 24);
+      placement.top = Math.max(
+        12,
+        Math.min(bounds.bottom + 6, viewport.height - height - 12),
+      );
+      placement.maxHeight = viewport.height - 24;
+    }
     for (const [key, value] of Object.entries(placement)) {
       panel.current.style[key as "left" | "top" | "width" | "maxHeight"] =
         `${value}px`;
     }
     panel.current.dataset.positioned = "true";
-  }, [minWidth]);
+  }, [minWidth, overlapAnchor]);
   useLayoutEffect(() => {
     if (!open || !trigger.current || !panel.current) return;
     position();

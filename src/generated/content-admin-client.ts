@@ -17,6 +17,45 @@ ajv.addSchema(
   "content-admin",
 );
 
+const readContentActionsValidator = ajv.compile<
+  ContentAdminContract["actions"]
+>({ $ref: "content-admin#/properties/actions" });
+export function readContentActions(
+  baseUrl: string,
+  input: ContentAdminContract["lookup"],
+  options: RequestOptions = {},
+) {
+  return requestJSON(
+    baseUrl,
+    "/v1/admin/content/actions",
+    input,
+    readContentActionsValidator,
+    { ...options, credentials: "include", headers: { ...options.headers } },
+  );
+}
+
+const createContentCategoryValidator = ajv.compile<
+  ContentAdminContract["editor_catalog"]
+>({ $ref: "content-admin#/properties/editor_catalog" });
+export function createContentCategory(
+  baseUrl: string,
+  input: ContentAdminContract["create_category"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/categories",
+    input,
+    createContentCategoryValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
 const readEditorOptionsValidator = ajv.compile<
   ContentAdminContract["editor_catalog"]
 >({ $ref: "content-admin#/properties/editor_catalog" });

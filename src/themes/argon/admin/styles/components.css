@@ -72,12 +72,14 @@
   background: var(--admin-positive-soft);
 }
 .admin-panel {
+  background: var(--admin-canvas);
   min-width: 0;
   border: 1px solid var(--admin-border);
   border-radius: 8px;
   overflow: hidden;
 }
 .admin-panel > header {
+  background: color-mix(in srgb, var(--admin-subtle) 55%, var(--admin-canvas));
   min-height: 58px;
   padding: 16px 20px;
   display: flex;

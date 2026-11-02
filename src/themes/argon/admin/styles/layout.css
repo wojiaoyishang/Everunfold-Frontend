@@ -97,24 +97,6 @@
   color: var(--admin-accent);
   font-weight: 550;
 }
-.admin-sidebar-bottom {
-  margin-top: auto;
-  padding-top: 24px;
-  display: grid;
-  gap: 20px;
-}
-.admin-sidebar-note {
-  display: grid;
-  gap: 4px;
-  padding-inline: 12px;
-  color: var(--admin-muted);
-  font-size: 12px;
-  white-space: nowrap;
-}
-.admin-sidebar-note small {
-  font-size: 11px;
-  opacity: 0.8;
-}
 .admin-main-column {
   min-width: 0;
   margin-left: var(--sidebar-width);
@@ -194,6 +176,8 @@
 }
 .admin-main {
   padding: var(--admin-space) clamp(20px, 3vw, 40px) 48px;
+  min-height: calc(100dvh - 56px);
+  background: var(--admin-workspace);
 }
 .admin-main:focus {
   outline: none;

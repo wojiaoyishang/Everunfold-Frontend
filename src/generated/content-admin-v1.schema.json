@@ -1,5 +1,23 @@
 {
   "$defs": {
+    "ContentActions": {
+      "additionalProperties": false,
+      "properties": {
+        "edit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ContentEditAction"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "ContentActions",
+      "type": "object"
+    },
     "ContentBlock": {
       "additionalProperties": false,
       "properties": {
@@ -89,6 +107,29 @@
           "default": "",
           "title": "Seo Description",
           "type": "string"
+        },
+        "access": {
+          "default": "public",
+          "enum": [
+            "public",
+            "password",
+            "scheduled"
+          ],
+          "title": "Access",
+          "type": "string"
+        },
+        "opens_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Opens At"
         },
         "id": {
           "title": "Id",
@@ -214,6 +255,26 @@
         "media_urls"
       ],
       "title": "ContentDetail",
+      "type": "object"
+    },
+    "ContentEditAction": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type_id": {
+          "title": "Type Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type_id"
+      ],
+      "title": "ContentEditAction",
       "type": "object"
     },
     "ContentSyncState": {
@@ -589,6 +650,11 @@
           },
           "title": "Media Urls",
           "type": "object"
+        },
+        "has_password": {
+          "default": false,
+          "title": "Has Password",
+          "type": "boolean"
         }
       },
       "required": [
@@ -642,6 +708,20 @@
             }
           ],
           "default": null
+        },
+        "access_password": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Access Password"
         }
       },
       "required": [
@@ -967,6 +1047,28 @@
           "maxLength": 500,
           "title": "Seo Description",
           "type": "string"
+        },
+        "visibility": {
+          "default": "public",
+          "enum": [
+            "public",
+            "password"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "opens_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Opens At"
         }
       },
       "title": "EditorSettings",
@@ -982,13 +1084,67 @@
         "kind": {
           "title": "Kind",
           "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
         }
       },
       "required": [
         "name",
-        "kind"
+        "kind",
+        "id"
       ],
       "title": "EditorTerm",
+      "type": "object"
+    },
+    "EditorTermCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 60,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "parent_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parent Id"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "EditorTermCreate",
       "type": "object"
     },
     "MediaURL": {
@@ -1087,6 +1243,34 @@
         "created_at"
       ],
       "title": "PublicComment",
+      "type": "object"
+    },
+    "PublicResponse_ContentActions_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/ContentActions"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[ContentActions]",
       "type": "object"
     },
     "PublicResponse_ContentSyncState_": {
@@ -1233,11 +1417,12 @@
       "additionalProperties": false,
       "properties": {
         "schema_version": {
-          "default": "0.3.0",
+          "default": "0.4.0",
           "enum": [
             "0.1.0",
             "0.2.0",
-            "0.3.0"
+            "0.3.0",
+            "0.4.0"
           ],
           "title": "Schema Version",
           "type": "string"
@@ -1453,6 +1638,12 @@
   },
   "additionalProperties": false,
   "properties": {
+    "actions": {
+      "$ref": "#/$defs/PublicResponse_ContentActions_"
+    },
+    "create_category": {
+      "$ref": "#/$defs/EditorTermCreate"
+    },
     "editor_catalog": {
       "$ref": "#/$defs/PublicResponse_EditorCatalog_"
     },
@@ -1488,6 +1679,8 @@
     }
   },
   "required": [
+    "actions",
+    "create_category",
     "editor_catalog",
     "query",
     "lookup",
@@ -1503,7 +1696,7 @@
   "title": "ContentAdminContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.2.0",
+  "x-everunfold-contract-version": "1.4.0",
   "x-everunfold-content-types": [
     {
       "id": "article",
@@ -1543,6 +1736,20 @@
     }
   ],
   "x-everunfold-operations": [
+    {
+      "name": "readContentActions",
+      "path": "/v1/admin/content/actions",
+      "method": "GET",
+      "input": "lookup",
+      "response": "actions"
+    },
+    {
+      "name": "createContentCategory",
+      "path": "/v1/admin/content/categories",
+      "method": "POST",
+      "input": "create_category",
+      "response": "editor_catalog"
+    },
     {
       "name": "readEditorOptions",
       "path": "/v1/admin/content/editor-options",

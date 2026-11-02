@@ -12,12 +12,14 @@ export function draftFields(detail?: DraftDetail | null): DraftFields {
         excerpt: detail.excerpt,
         body: detail.body.map((block) => ({ ...block })),
         settings: structuredClone(detail.settings ?? {}),
+        access_password: null,
       }
     : {
         title: "",
         excerpt: "",
         body: [{ id: crypto.randomUUID(), type: "markdown", content: "" }],
         settings: {},
+        access_password: null,
       };
 }
 export function validateDraft(
@@ -32,6 +34,14 @@ export function validateDraft(
     (!/^\d{4}-\d{2}-\d{2}T/.test(date) || !Number.isFinite(Date.parse(date)))
   )
     return "请填写有效的显示时间，格式为 YYYY-MM-DD HH:mm。";
+  const opens = fields.settings?.opens_at;
+  if (
+    opens &&
+    (!/^\d{4}-\d{2}-\d{2}T/.test(opens) || !Number.isFinite(Date.parse(opens)))
+  )
+    return "请填写有效的自动开放时间。";
+  if (fields.access_password && fields.access_password.length > 200)
+    return "文章密码不能超过 200 字符。";
   if (fields.body.length < 1 || fields.body.length > 128)
     return "正文需要 1 至 128 个块。";
   if (
@@ -53,6 +63,8 @@ export function draftError(error: unknown): string {
       return "这个访问路径已被其他内容使用，请换一个路径。";
     if (error.code === 42258)
       return "暂不支持定时发布，请使用当前或过去的显示时间。";
+    if (error.code === 42259)
+      return "请先设置文章密码，再启用密码保护或定时开放。";
     if (error.status === 404) return "没有找到这份内容，请刷新列表。";
     if (error.status === 409) return "内容状态已变化，请重新读取后操作。";
     if (error.status === 422)

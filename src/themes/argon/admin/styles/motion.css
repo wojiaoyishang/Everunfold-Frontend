@@ -16,8 +16,7 @@
 }
 .admin-brand > span:last-child,
 .admin-sidebar .admin-nav-text,
-.admin-sidebar .admin-nav-label,
-.admin-sidebar .admin-sidebar-note {
+.admin-sidebar .admin-nav-label {
   opacity: 1;
   transition:
     opacity var(--admin-motion-fast) ease,
@@ -30,12 +29,7 @@
 }
 .admin-shell[data-collapsed="true"]
   .admin-sidebar
-  :is(
-    .admin-brand > span:last-child,
-    .admin-nav-text,
-    .admin-nav-label,
-    .admin-sidebar-note
-  ) {
+  :is(.admin-brand > span:last-child, .admin-nav-text, .admin-nav-label) {
   opacity: 0;
   visibility: hidden;
 }

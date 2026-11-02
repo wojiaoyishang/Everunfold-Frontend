@@ -2,11 +2,18 @@
   max-width: 1120px;
 }
 .admin-settings-section {
-  display: grid;
-  grid-template-columns: minmax(170px, 0.8fr) minmax(0, 2.2fr);
-  gap: 40px;
-  padding: 28px 0;
-  border-top: 1px solid var(--admin-border);
+  display: block;
+  padding: 0;
+  margin-bottom: 20px;
+  background: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+}
+.admin-settings-section-heading {
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--admin-border);
+  background: color-mix(in srgb, var(--admin-subtle) 55%, var(--admin-canvas));
+  border-radius: 8px 8px 0 0;
 }
 .admin-settings-section-heading h2 {
   font-size: 15px;
@@ -21,6 +28,7 @@
   margin: 0;
 }
 .admin-settings-fields {
+  padding: 22px;
   display: grid;
   gap: 22px;
   min-width: 0;
@@ -305,7 +313,13 @@
     gap: 20px;
   }
   .admin-settings-section {
-    padding: 22px 0;
+    padding: 0;
+  }
+  .admin-settings-section-heading {
+    padding: 15px 18px;
+  }
+  .admin-settings-fields {
+    padding: 18px;
   }
   .admin-settings-savebar {
     align-items: stretch;

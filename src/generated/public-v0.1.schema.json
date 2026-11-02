@@ -20,7 +20,8 @@
       "enum": [
         "0.1.0",
         "0.2.0",
-        "0.3.0"
+        "0.3.0",
+        "0.4.0"
       ]
     },
     "source_epoch": {
@@ -296,6 +297,23 @@
         "seo_description": {
           "type": "string",
           "default": ""
+        },
+        "access": {
+          "type": "string",
+          "enum": [
+            "public",
+            "password",
+            "scheduled"
+          ],
+          "default": "public"
+        },
+        "opens_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "default": null
         }
       }
     },
@@ -446,6 +464,23 @@
         "seo_description": {
           "type": "string",
           "default": ""
+        },
+        "access": {
+          "type": "string",
+          "enum": [
+            "public",
+            "password",
+            "scheduled"
+          ],
+          "default": "public"
+        },
+        "opens_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time",
+          "default": null
         }
       }
     },
@@ -489,5 +524,5 @@
       }
     }
   },
-  "x-everunfold-contract-version": "0.3.0"
+  "x-everunfold-contract-version": "0.4.0"
 }

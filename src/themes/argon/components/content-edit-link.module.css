@@ -1,0 +1,28 @@
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  animation: edit-link-enter 240ms var(--motion-ease) both;
+}
+.link:hover {
+  color: var(--accent);
+}
+@keyframes edit-link-enter {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+:global(html[data-motion="reduced"]) .link {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(html:not([data-motion="full"])) .link {
+    animation: none;
+  }
+}

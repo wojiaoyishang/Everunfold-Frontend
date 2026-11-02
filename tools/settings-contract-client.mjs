@@ -18,12 +18,16 @@ export async function generateSettingsClient(
     operations.some(
       (op) =>
         !/^[a-z][a-zA-Z]+$/.test(op.name) ||
-        !/^\/v1\/admin\/[a-z/{}_-]+$/.test(op.path) ||
+        !(stem === "content-access"
+          ? op.path === "/v1/reader/access"
+          : /^\/v1\/admin\/[a-z/{}_-]+$/.test(op.path)) ||
         !["GET", "PATCH", "POST"].includes(op.method) ||
         !schema.properties[op.response] ||
         (op.input && !schema.properties[op.input]) ||
         (op.encoding !== undefined && op.encoding !== "binary") ||
-        (op.encoding === "binary" && (op.method !== "POST" || !op.input)),
+        (op.encoding === "binary" && (op.method !== "POST" || !op.input)) ||
+        (op.csrf === false && stem !== "content-access") ||
+        (op.credentials === "omit" && stem !== "content-access"),
     )
   )
     throw new Error("Invalid settings operation metadata");
@@ -34,8 +38,8 @@ export async function generateSettingsClient(
         : JSON.stringify(op.path);
       return `
 const ${op.name}Validator = ajv.compile<${contractName}[${JSON.stringify(op.response)}]>({ $ref: ${JSON.stringify(`${stem}#/properties/${op.response}`)} });
-export function ${op.name}(baseUrl: string, ${op.path.includes("{node_id}") ? "nodeId: string, " : ""}${op.input ? `input: ${contractName}[${JSON.stringify(op.input)}], ` : ""}${op.encoding === "binary" ? "file: Blob, " : ""}${op.method !== "GET" ? "csrfToken: string, " : ""}options: RequestOptions = {}) {
-  return ${op.encoding === "binary" ? "postBinary" : op.method === "GET" ? "requestJSON" : op.method === "PATCH" ? "patchJSON" : "postJSON"}(baseUrl, ${target}, ${op.input ? "input" : op.method === "GET" ? "{}" : "undefined"}, ${op.encoding === "binary" ? "file, " : ""}${op.name}Validator, { ...options, credentials: "include", headers: { ...options.headers${op.method !== "GET" ? ', "X-CSRF-Token": csrfToken' : ""} } });
+export function ${op.name}(baseUrl: string, ${op.path.includes("{node_id}") ? "nodeId: string, " : ""}${op.input ? `input: ${contractName}[${JSON.stringify(op.input)}], ` : ""}${op.encoding === "binary" ? "file: Blob, " : ""}${op.method !== "GET" && op.csrf !== false ? "csrfToken: string, " : ""}options: RequestOptions = {}) {
+  return ${op.encoding === "binary" ? "postBinary" : op.method === "GET" ? "requestJSON" : op.method === "PATCH" ? "patchJSON" : "postJSON"}(baseUrl, ${target}, ${op.input ? "input" : op.method === "GET" ? "{}" : "undefined"}, ${op.encoding === "binary" ? "file, " : ""}${op.name}Validator, { ...options, credentials: ${JSON.stringify(op.credentials ?? "include")}, headers: { ...options.headers${op.method !== "GET" && op.csrf !== false ? ', "X-CSRF-Token": csrfToken' : ""} } });
 }`;
     })
     .join("\n");
