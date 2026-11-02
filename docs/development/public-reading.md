@@ -10,6 +10,8 @@
 
 2026-11-02 更新：功能测试只使用新后台发布内容；开发库旧 WordPress 78 篇文章/9 个页面已撤回并同步，当前公开记录为 2 篇文章、2 则说说。不要为填充界面重新导入或恢复历史内容，详见 [ADR 0032](../decisions/0032-functional-test-data-and-sync-status.md)。下文导入步骤仅保留迁移工具说明，当前阶段不执行。
 
+2026-11-02 编辑阶段补充：本期另外创建两篇后端联调文章，均非旧博客数据；正文、分类标签、封面、SEO/评论和密码/开放状态已正式接入，公开快照0.4。受限正文通过private/no-store接口读取，不进入SSR/磁盘公开副本。最新操作与限制见 [内容指南](content-management.md) 和 [编辑验收](../handoff/editor-workspace-verification.md)。下文旧数量和旧能力限制均是历史记录。
+
 ## 初始本机准备情况（历史）
 
 - PostgreSQL 18 与 Redis 已连通，专用 `everunfold_dev` / `everunfold_test` 已建立并显式迁移；真实配置已写入两个项目各自被忽略的 `config.toml`。

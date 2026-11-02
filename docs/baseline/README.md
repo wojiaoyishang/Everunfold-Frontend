@@ -228,3 +228,33 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 | `docs/design/content-sync-status-desktop.png` | `466e3a4a9684e817575e7da4a08da763cd614390fb95c6c910b7042210566da4` |
 | `docs/design/content-sync-status-mobile.png` | `f631906a9944827eb50862e79718e58c3fca7c8c7ba25291ba2c6fd35fd0f5a6` |
 | `docs/design/content-test-data-home.png` | `0975949893f10f8831eda097c0649d76290b312cfce7fb7a27cea5880ab033d1` |
+
+## editor-workspace-1 同步摘要（2026-11-02）
+
+ADR0033–0036、content-management-4、content-types-5、admin-ui-4、development-9已实施。content-admin1.4固定d31b359，public0.4/content-access1.0固定fe1a651，数据库0012；settings1.6和原始基线不变。AGENTS公共部分同步、前端保留Next附录；STATUS按仓库维护。截图仅本地新系统测试数据。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `66df65469d4934a74307a803cfa580baaf9584d6957b348a4724b0c6a01679b7` |
+| `docs/architecture/constraints.md` | `4696aec8a2a901f3f19d08a649286d3398bb130d0f880ca956e817abf0e7c438` |
+| `docs/architecture/content-types.md` | `8a8c5281a854a701a788b2b8d193d20d7d9e4ebae1fc274573c1b416a986a18c` |
+| `docs/architecture/admin-ui.md` | `56b33703292c654593ecdd59ee71e36ec1c07624e10d857869c5f08f37341be5` |
+| `docs/development/protocol.md` | `82103e355fd78c6c61e36403243704e0daea378317397cb94841a6bec5f9ee4c` |
+| `docs/development/content-management.md` | `3d6bdfe0ee7c7e4d55f2a1c7de024e6eec16741d0417df90e7a79a7d20356d32` |
+| `docs/development/public-reading.md` | `291af97b7e5733f48e005c65a6209daa3976bde251a562405ad97c0dfb9efcd9` |
+| `docs/decisions/0033-content-editor-workspace.md` | `783f4955845d50cf42b00c6530317b410486fb1a79b8344aa7cd27fcfb7284be` |
+| `docs/decisions/0034-wordpress-editor-access-and-taxonomy.md` | `5964451bf2caa57e8dcadaa81e3ba3ebd248d23f731c2f5a471c3f03e112043a` |
+| `docs/decisions/0035-admin-panels-and-editor-controls.md` | `f33c1d4718056ad99944745b0a7a69fb62233b2906fb63ff22247dfa39499d24` |
+| `docs/decisions/0036-inline-confirmation-and-authorized-editor-links.md` | `ccd955083f2be3649c3c6a2b2246d61b3d760bf5dbb50642cbcb397b258f5078` |
+| `docs/handoff/editor-workspace-verification.md` | `4cb5c1dc79990beb0b687f4da67a6c2ea37bc87325d06a2972641c2316161418` |
+| `docs/design/editor-workspace-desktop.jpg` | `631ecbaa3e19ef2af14f54567b28eef99b0bf7610e3a81dd2c6bbf6c2e1b8b03` |
+| `docs/design/editor-taxonomy-desktop.jpg` | `81a26abd207750f198e5e3a15e6844c74ce163f7b91a5cf07186d492df7ae6e3` |
+| `docs/design/editor-date-time.jpg` | `978ff35fb0382fece172fef8a5ee7c61a9952bfaea79868719792f0ba5fcc199` |
+| `docs/design/editor-date-time-mobile.jpg` | `1ab304d346a18b1313b0b3bcbdc800440ae185508b9d57fd72cdaa354385c771` |
+| `docs/design/editor-date-time-dark.jpg` | `8b46dc1cd41012cb6fa62737788f84e86435e11e569c6686184e94d5346aecc0` |
+| `docs/design/admin-settings-panels.jpg` | `4fcd188b1dfb32694addf3a0455d2f66bd1a2f2a279b5ef32719375b7efddf2f` |
+| `docs/design/admin-settings-mobile.jpg` | `c2f4639b938422ae59f4c8b5d83f4a47f1691be3b2fc1ce42024abe1dc24aadf` |
+| `docs/design/admin-panels-overview.jpg` | `955b95ca27aae916d667b16fe4228fd5723082e1c47dd511948026cca6f6bb89` |
+| `docs/design/public-navbar-gutter.jpg` | `9705bd3a7d5bedb61375beb13574a731fe2f1ff931b0fab3e603fdc024e572fe` |
+| `docs/design/editor-block-remove-popover.jpg` | `0d8b76f0c3ee1617e9f1e1f0fa2cd52108457555869b6feb1d3c6317da6b242f` |
+| `docs/design/public-content-edit-link.jpg` | `66c723071bc1dcd0133ccbd3fc885f837662f514eb6dc642cb542073dae79cb4` |

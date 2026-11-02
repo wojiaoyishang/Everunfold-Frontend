@@ -96,3 +96,5 @@ CI 使用相同的检查与构建命令。
 基本站点/主题/系统设置已接入真实 FastAPI 保存与节点应用状态，操作及接收器启动见 [设置运行指南](docs/development/settings.md)，范围与离线验证见 [设置验证记录](docs/handoff/settings-verification.md)。
 
 文章与说说独立入口、示例草稿和开发边界见 [内容管理](docs/development/content-management.md)，当前新增内容保存为私有草稿，不会自动出现在公开首页。
+
+最新编辑器提供顶置标题、根级固定链接、混合 Markdown/HTML 多块、分类标签/封面/SEO/评论设置、文章密码与定时开放；日期控件和后台面板已统一，逐组件浏览器检查为开发约定。版本与结果见 [编辑工作台验收](docs/handoff/editor-workspace-verification.md)。
