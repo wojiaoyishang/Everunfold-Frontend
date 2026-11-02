@@ -12,6 +12,8 @@
   margin-inline-start: calc(-1 * var(--post-meta-gap));
 }
 .dynamic-metric-sizer {
+  display: flex;
+  align-items: center;
   overflow: hidden;
   min-width: 0;
 }
@@ -20,7 +22,7 @@
   margin-inline-start: 0;
 }
 .dynamic-metric-value {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: 0.35em;
   white-space: nowrap;

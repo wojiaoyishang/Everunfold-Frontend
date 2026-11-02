@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--muted);
+  color: inherit;
   animation: edit-link-enter 240ms var(--motion-ease) both;
 }
 .link:hover {
