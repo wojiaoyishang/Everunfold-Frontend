@@ -19,6 +19,7 @@ import { ContentSync } from "./content-sync";
 import { afterDialogMotion } from "../../hooks/dialog-motion";
 import { DraftCollaborationContext } from "@/core/collaboration/context";
 import { CollaborationBar } from "./collaboration-bar";
+import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 
 export function DraftEditor({
   type,
@@ -43,6 +44,15 @@ export function DraftEditor({
   const [destination, setDestination] = useState(`/admin/content/${type.id}`);
   const [leaving, setLeaving] = useState(false);
   const surface = useRef<HTMLDivElement>(null);
+  const saveFocus = useRef<HTMLElement | null>(null);
+  const [focusRequest, setFocusRequest] = useState(0);
+  useEffect(() => {
+    if (!focusRequest || editor.busy) return;
+    const focused = saveFocus.current;
+    saveFocus.current = null;
+    if (focused?.isConnected && document.activeElement === document.body)
+      focused.focus({ preventScroll: true });
+  }, [focusRequest, editor.busy]);
   const Fields = contentEditors[type.editor];
   const archived = editor.detail?.status === "trash";
   const blocked =
@@ -96,6 +106,29 @@ export function DraftEditor({
     archived ||
     !Fields ||
     Boolean(id && (!editor.detail || editor.collaboration?.phase !== "ready"));
+  useSceneShortcuts([
+    {
+      key: "s",
+      shift: "any",
+      run: () => {
+        // An uncertain operation could have been a publication: only the explicit retry may replay it.
+        if (
+          saveDisabled ||
+          confirm !== null ||
+          editor.uncertain ||
+          (editor.detail && !editor.dirty)
+        )
+          return;
+        saveFocus.current =
+          document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : null;
+        void save("save").then(() => {
+          if (surface.current) setFocusRequest((value) => value + 1);
+        });
+      },
+    },
+  ]);
   return (
     <DraftCollaborationContext value={editor.session}>
       <div

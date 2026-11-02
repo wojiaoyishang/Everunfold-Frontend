@@ -34,6 +34,12 @@ export function EditorActions({
       )}
       <Button
         className={`admin-button ${!detail || uncertain ? "admin-button-primary" : ""}`}
+        title={uncertain ? "重试上次操作" : "保存草稿 (Ctrl/Cmd+S)"}
+        aria-keyshortcuts={
+          uncertain
+            ? undefined
+            : "Control+s Meta+s Control+Shift+s Meta+Shift+s"
+        }
         disabled={disabled || Boolean(!dirty && detail && !uncertain)}
         onClick={() => onSave("save")}
       >

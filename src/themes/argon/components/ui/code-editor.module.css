@@ -14,7 +14,7 @@
 .editor :global(.cm-scroller) {
   font-family: "Cascadia Code", Consolas, "Microsoft YaHei", monospace;
   line-height: 1.75;
-  min-height: 230px;
+  min-height: 0;
   max-height: 540px;
   overflow: auto;
 }
@@ -87,9 +87,6 @@
   font-family: inherit;
 }
 @media (max-width: 640px) {
-  .editor :global(.cm-scroller) {
-    min-height: 220px;
-  }
   .editor :global(.cm-line) {
     padding-inline: 12px;
   }
