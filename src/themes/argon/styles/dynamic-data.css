@@ -28,10 +28,6 @@
   white-space: nowrap;
   animation: reader-metric-appear 200ms ease both;
 }
-.dynamic-metric-value small {
-  font-size: 0.72em;
-  color: var(--muted);
-}
 .backend-status {
   position: relative;
 }

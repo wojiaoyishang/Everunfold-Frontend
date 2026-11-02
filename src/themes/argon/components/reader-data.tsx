@@ -195,15 +195,14 @@ export function ViewMetric({ contentId }: { contentId: string }) {
       data-ready={value !== null}
       data-content-id={contentId}
       aria-hidden={value === null}
-      aria-label={value === null ? undefined : `演示浏览量：${value}`}
-      title={value === null ? undefined : "演示浏览量，不代表历史访问统计"}
+      aria-label={value === null ? undefined : `浏览量：${value}`}
+      title={value === null ? undefined : "开发预览数据，尚未接入真实访问统计"}
     >
       <span className="dynamic-metric-sizer">
         {value !== null && (
           <span className="dynamic-metric-value">
             <Icon name="eye" />
             <span>{value.toLocaleString("zh-CN")}</span>
-            <small>演示</small>
           </span>
         )}
       </span>
