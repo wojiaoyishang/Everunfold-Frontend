@@ -1,0 +1,871 @@
+{
+  "$defs": {
+    "ClientAuth": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "auth",
+          "default": "auth",
+          "title": "Type",
+          "type": "string"
+        },
+        "ticket": {
+          "maxLength": 128,
+          "title": "Ticket",
+          "type": "string"
+        },
+        "client_id": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "title": "Client Id",
+          "type": "integer"
+        },
+        "state_vector": {
+          "maxLength": 16384,
+          "title": "State Vector",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ticket",
+        "client_id",
+        "state_vector"
+      ],
+      "title": "ClientAuth",
+      "type": "object"
+    },
+    "ClientUpdate": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "update",
+          "default": "update",
+          "title": "Type",
+          "type": "string"
+        },
+        "epoch": {
+          "format": "uuid",
+          "title": "Epoch",
+          "type": "string"
+        },
+        "update_id": {
+          "format": "uuid",
+          "title": "Update Id",
+          "type": "string"
+        },
+        "payload": {
+          "maxLength": 1400000,
+          "title": "Payload",
+          "type": "string"
+        }
+      },
+      "required": [
+        "epoch",
+        "update_id",
+        "payload"
+      ],
+      "title": "ClientUpdate",
+      "type": "object"
+    },
+    "CommitDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "epoch": {
+          "format": "uuid",
+          "title": "Epoch",
+          "type": "string"
+        },
+        "committed_seq": {
+          "minimum": 0,
+          "title": "Committed Seq",
+          "type": "integer"
+        },
+        "action": {
+          "default": "save",
+          "enum": [
+            "save",
+            "publish",
+            "withdraw"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "visibility": {
+          "default": "public",
+          "enum": [
+            "public",
+            "password"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "opens_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Opens At"
+        },
+        "access_password": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Access Password"
+        }
+      },
+      "required": [
+        "id",
+        "operation_id",
+        "expected_revision",
+        "epoch",
+        "committed_seq"
+      ],
+      "title": "CommitDraft",
+      "type": "object"
+    },
+    "CommittedDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "draft": {
+          "$ref": "#/$defs/DraftDetail"
+        },
+        "committed_seq": {
+          "title": "Committed Seq",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "draft",
+        "committed_seq"
+      ],
+      "title": "CommittedDraft",
+      "type": "object"
+    },
+    "Cursor": {
+      "additionalProperties": false,
+      "properties": {
+        "anchor": {
+          "maxLength": 512,
+          "title": "Anchor",
+          "type": "string"
+        },
+        "head": {
+          "maxLength": 512,
+          "title": "Head",
+          "type": "string"
+        }
+      },
+      "required": [
+        "anchor",
+        "head"
+      ],
+      "title": "Cursor",
+      "type": "object"
+    },
+    "DraftBlock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "default": "markdown",
+          "enum": [
+            "markdown",
+            "html"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "content": {
+          "maxLength": 100000,
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "content"
+      ],
+      "title": "DraftBlock",
+      "type": "object"
+    },
+    "DraftDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type_id": {
+          "title": "Type Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "preview": {
+          "title": "Preview",
+          "type": "string"
+        },
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "trash"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "is_demo": {
+          "title": "Is Demo",
+          "type": "boolean"
+        },
+        "published_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published Revision"
+        },
+        "public_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Public Path"
+        },
+        "published_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published At"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "body": {
+          "items": {
+            "$ref": "#/$defs/DraftBlock"
+          },
+          "title": "Body",
+          "type": "array"
+        },
+        "settings": {
+          "$ref": "#/$defs/EditorSettings"
+        },
+        "media_urls": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MediaURL"
+          },
+          "title": "Media Urls",
+          "type": "object"
+        },
+        "has_password": {
+          "default": false,
+          "title": "Has Password",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "type_id",
+        "title",
+        "excerpt",
+        "preview",
+        "author",
+        "revision",
+        "status",
+        "is_demo",
+        "created_at",
+        "updated_at",
+        "body"
+      ],
+      "title": "DraftDetail",
+      "type": "object"
+    },
+    "DraftLookup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "DraftLookup",
+      "type": "object"
+    },
+    "EditorSettings": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Path",
+          "type": "string"
+        },
+        "display_published_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Display Published At"
+        },
+        "cover_media_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cover Media Id"
+        },
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Categories",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Tags",
+          "type": "array"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        },
+        "comments_open": {
+          "default": true,
+          "title": "Comments Open",
+          "type": "boolean"
+        },
+        "seo_title": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Seo Title",
+          "type": "string"
+        },
+        "seo_description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Seo Description",
+          "type": "string"
+        },
+        "visibility": {
+          "default": "public",
+          "enum": [
+            "public",
+            "password"
+          ],
+          "title": "Visibility",
+          "type": "string"
+        },
+        "opens_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Opens At"
+        }
+      },
+      "title": "EditorSettings",
+      "type": "object"
+    },
+    "MediaURL": {
+      "additionalProperties": false,
+      "properties": {
+        "original": {
+          "title": "Original",
+          "type": "string"
+        },
+        "webp": {
+          "default": "",
+          "title": "Webp",
+          "type": "string"
+        }
+      },
+      "required": [
+        "original"
+      ],
+      "title": "MediaURL",
+      "type": "object"
+    },
+    "Peer": {
+      "additionalProperties": false,
+      "properties": {
+        "connection_id": {
+          "format": "uuid",
+          "title": "Connection Id",
+          "type": "string"
+        },
+        "client_id": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "title": "Client Id",
+          "type": "integer"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "color": {
+          "title": "Color",
+          "type": "string"
+        },
+        "block_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Id"
+        },
+        "cursor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cursor"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "connection_id",
+        "client_id",
+        "name",
+        "color"
+      ],
+      "title": "Peer",
+      "type": "object"
+    },
+    "PresenceInput": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "const": "presence",
+          "default": "presence",
+          "title": "Type",
+          "type": "string"
+        },
+        "block_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Block Id"
+        },
+        "cursor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cursor"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "PresenceInput",
+      "type": "object"
+    },
+    "PublicResponse_CommittedDraft_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/CommittedDraft"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[CommittedDraft]",
+      "type": "object"
+    },
+    "PublicResponse_TicketState_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/TicketState"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[TicketState]",
+      "type": "object"
+    },
+    "ServerFrame": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "sync",
+            "update",
+            "ack",
+            "peers",
+            "error",
+            "revision",
+            "media"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "epoch": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Epoch"
+        },
+        "committed_seq": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Committed Seq"
+        },
+        "payload": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Payload"
+        },
+        "update_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Update Id"
+        },
+        "peers": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Peer"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Peers"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code"
+        },
+        "msg": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Msg"
+        },
+        "media_urls": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/MediaURL"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Media Urls"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "ServerFrame",
+      "type": "object"
+    },
+    "TicketState": {
+      "additionalProperties": false,
+      "properties": {
+        "ticket": {
+          "title": "Ticket",
+          "type": "string"
+        },
+        "draft_id": {
+          "format": "uuid",
+          "title": "Draft Id",
+          "type": "string"
+        },
+        "epoch": {
+          "format": "uuid",
+          "title": "Epoch",
+          "type": "string"
+        },
+        "ws_path": {
+          "title": "Ws Path",
+          "type": "string"
+        },
+        "protocol": {
+          "const": "collab-1",
+          "default": "collab-1",
+          "title": "Protocol",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ticket",
+        "draft_id",
+        "epoch",
+        "ws_path"
+      ],
+      "title": "TicketState",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "lookup": {
+      "$ref": "#/$defs/DraftLookup"
+    },
+    "ticket": {
+      "$ref": "#/$defs/PublicResponse_TicketState_"
+    },
+    "commit": {
+      "$ref": "#/$defs/CommitDraft"
+    },
+    "committed": {
+      "$ref": "#/$defs/PublicResponse_CommittedDraft_"
+    },
+    "update": {
+      "$ref": "#/$defs/ClientUpdate"
+    },
+    "presence": {
+      "$ref": "#/$defs/PresenceInput"
+    },
+    "frame": {
+      "$ref": "#/$defs/ServerFrame"
+    },
+    "auth": {
+      "$ref": "#/$defs/ClientAuth"
+    }
+  },
+  "required": [
+    "lookup",
+    "ticket",
+    "commit",
+    "committed",
+    "update",
+    "presence",
+    "frame",
+    "auth"
+  ],
+  "title": "CollaborationContract",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-everunfold-contract-version": "1.0.0",
+  "x-everunfold-operations": [
+    {
+      "name": "createCollaborationTicket",
+      "path": "/v1/admin/content/collaboration/ticket",
+      "method": "POST",
+      "input": "lookup",
+      "response": "ticket"
+    },
+    {
+      "name": "commitCollaborationDraft",
+      "path": "/v1/admin/content/collaboration/commit",
+      "method": "POST",
+      "input": "commit",
+      "response": "committed"
+    }
+  ]
+}

@@ -30,6 +30,41 @@ function deferred<T>() {
 }
 const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 
+test("offline revalidation keeps an already-open private editor until expiry; new access and explicit revocation fail closed", async () => {
+  const states: SessionView[] = [];
+  let failure: RequestError | null = null;
+  const checker = createSessionCheck(
+    async () => {
+      if (failure) throw failure;
+      return {
+        ...admin,
+        expires_at: new Date(Date.now() + 60000).toISOString(),
+      };
+    },
+    (state) => states.push(state),
+    true,
+  );
+  await checker.check();
+  failure = new RequestError("network");
+  await checker.check(true);
+  assert.equal(states.at(-1)?.phase, "ready");
+  failure = new RequestError("http", 403);
+  await checker.check(true);
+  assert.equal(states.at(-1)?.phase, "failed");
+  checker.dispose();
+  const cold: SessionView[] = [];
+  const denied = createSessionCheck(
+    async () => {
+      throw new RequestError("network");
+    },
+    (state) => cold.push(state),
+    true,
+  );
+  await denied.check(true);
+  assert.equal(cold.at(-1)?.phase, "failed");
+  denied.dispose();
+});
+
 test("initial, focus and restore checks share the pending request without aborting it", async () => {
   const request = deferred<AuthSessionState>();
   const states: SessionView[] = [];

@@ -10,6 +10,7 @@ import { useAdminPreferences } from "@/core/admin/use-admin-preferences";
 import { AdminAccessState } from "@/themes/argon/admin/components/access-state";
 import { AdminShell } from "@/themes/argon/admin/layout/admin-shell";
 import type { AuthUser } from "@/generated/auth-contract";
+import { LocalDraftRecovery } from "@/themes/argon/admin/content/local-recovery";
 
 export function AdminWorkspace({
   baseUrl,
@@ -19,6 +20,10 @@ export function AdminWorkspace({
   children: ReactNode;
 }) {
   const access = useAdminAccess(baseUrl);
+  if (!access.user && access.recovery)
+    return (
+      <LocalDraftRecovery recovery={access.recovery} onRetry={access.retry} />
+    );
   if (!access.user)
     return (
       <AdminAccessState

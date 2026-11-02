@@ -1,5 +1,12 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import {
+  clearRecovery,
+  noServerRecovery,
+  recoverySnapshot,
+  recoveryForPage,
+  subscribeRecovery,
+} from "@/core/collaboration/recovery";
 import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "@/core/auth/use-session";
 import { authFailureMessage, checkedSession } from "@/core/auth/session";
@@ -12,6 +19,15 @@ export function useAdminAccess(baseUrl: string) {
   const router = useRouter();
   const pathname = usePathname();
   const { state, check, fail } = useSession(baseUrl, true);
+  const cachedRecovery = useSyncExternalStore(
+    subscribeRecovery,
+    recoverySnapshot,
+    noServerRecovery,
+  );
+  const recovery =
+    state.phase === "failed"
+      ? recoveryForPage(cachedRecovery, pathname, state.previous?.user?.id)
+      : null;
   const [leaving, setLeaving] = useState(false);
   const [message, setMessage] = useState("");
   const action = useRef<AbortController | null>(null);
@@ -21,19 +37,20 @@ export function useAdminAccess(baseUrl: string) {
     state.error instanceof RequestError &&
     state.error.status === 401;
   useEffect(() => {
-    if (!signedOut) return;
+    if (!signedOut || recovery) return;
     const destination =
       loginReturnPath(
         `${pathname}${window.location.search}${window.location.hash}`,
       ) ?? "/admin";
     router.replace(`/login?next=${encodeURIComponent(destination)}`);
-  }, [signedOut, pathname, router]);
+  }, [signedOut, pathname, router, recovery]);
   const previousPath = useRef(pathname);
   useEffect(() => {
     if (previousPath.current === pathname) return;
     previousPath.current = pathname;
+    if (cachedRecovery?.path !== pathname) clearRecovery();
     void check(true);
-  }, [pathname, check]);
+  }, [pathname, check, cachedRecovery?.path]);
 
   async function signOut() {
     if (action.current || state.phase !== "ready") return;
@@ -47,6 +64,7 @@ export function useAdminAccess(baseUrl: string) {
       const session = checkedSession(response.data);
       if (session.authenticated || session.user !== null)
         throw new RequestError("invalid");
+      clearRecovery();
       if (!controller.signal.aborted) router.replace("/login");
     } catch (error) {
       if (!controller.signal.aborted) {
@@ -59,6 +77,7 @@ export function useAdminAccess(baseUrl: string) {
     }
   }
   return {
+    recovery,
     csrfToken: state.phase === "ready" ? state.session.csrf_token : "",
     user: !leaving && state.phase === "ready" ? state.session.user : null,
     error:

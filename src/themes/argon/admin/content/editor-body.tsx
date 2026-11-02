@@ -14,6 +14,9 @@ import { Select } from "../../components/ui/select";
 import { ConfirmPopover } from "../../components/ui/confirm-popover";
 import { Icon } from "../../components/icon";
 import { EditorMediaDialog } from "./editor-media-dialog";
+import { blockEditors, RegisteredBlockEditor } from "./plugins/registry";
+import type { CodeEditorHandle } from "../../components/ui/code-editor";
+import { useBlockCollaboration } from "@/core/collaboration/context";
 import styles from "./editor-workspace.module.css";
 export interface EditorProps {
   type: ContentTypeDefinition;
@@ -31,10 +34,9 @@ export function EditorBody({
 }: EditorProps) {
   const [mediaTarget, setMediaTarget] = useState<{
     id: string;
-    start: number;
-    end: number;
+    insert: (value: string) => void;
   } | null>(null);
-  const inputs = useRef(new Map<string, HTMLTextAreaElement>());
+  const inputs = useRef(new Map<string, CodeEditorHandle>());
   const [moved, setMoved] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
   return (
@@ -57,10 +59,10 @@ export function EditorBody({
                 label={`正文块 ${index + 1} 格式`}
                 value={block.type ?? "markdown"}
                 disabled={disabled}
-                options={[
-                  { value: "markdown", label: "Markdown" },
-                  { value: "html", label: "HTML" },
-                ]}
+                options={blockEditors.entries.map((p) => ({
+                  value: p.format,
+                  label: p.label,
+                }))}
                 onValueChange={(format) =>
                   onChange({
                     ...value,
@@ -107,7 +109,7 @@ export function EditorBody({
                   triggerClassName="admin-icon-button"
                   label={`删除第 ${index + 1} 块`}
                   title="删除这个正文块？"
-                  description="从当前草稿中移除，保存后生效。"
+                  description="从草稿中移除，可以通过撤销恢复。"
                   disabled={disabled || value.body.length === 1}
                   onConfirmed={() => {
                     if (disabled || value.body.length === 1) return;
@@ -127,28 +129,21 @@ export function EditorBody({
                 </ConfirmPopover>
               </div>
             </header>
-            <TextArea
-              ref={(node) => {
+            <CollaborativeBlock
+              id={block.id}
+              format={block.type ?? "markdown"}
+              editorRef={(node) => {
                 if (node) inputs.current.set(block.id, node);
                 else inputs.current.delete(block.id);
               }}
-              aria-label={`正文块 ${index + 1} 内容`}
+              label={`正文块 ${index + 1} 内容`}
               value={block.content}
-              rows={index === 0 ? 12 : 6}
-              maxLength={100000}
-              spellCheck={false}
-              placeholder={
-                block.type === "html"
-                  ? "<p>从这里开始写…</p>"
-                  : "从这里开始写，支持 Markdown…"
-              }
-              onChange={(event) =>
+              disabled={disabled}
+              onChange={(content) =>
                 onChange({
                   ...value,
                   body: value.body.map((part) =>
-                    part.id === block.id
-                      ? { ...part, content: event.target.value }
-                      : part,
+                    part.id === block.id ? { ...part, content } : part,
                   ),
                 })
               }
@@ -160,8 +155,7 @@ export function EditorBody({
                   const node = inputs.current.get(block.id);
                   setMediaTarget({
                     id: block.id,
-                    start: node?.selectionStart ?? block.content.length,
-                    end: node?.selectionEnd ?? block.content.length,
+                    insert: node?.captureInsertion() ?? (() => {}),
                   });
                 }}
               >
@@ -212,22 +206,22 @@ export function EditorBody({
           onPick={(item) => {
             if (disabled) return;
             onMedia(item);
-            onChange({
-              ...value,
-              body: value.body.map((block) => {
-                if (block.id !== mediaTarget.id) return block;
-                return {
-                  ...block,
-                  content:
-                    block.content.slice(0, mediaTarget.start) +
-                    `\n${mediaMarkup(item, block.type)}\n` +
-                    block.content.slice(mediaTarget.end),
-                };
-              }),
-            });
+            const target = value.body.find(
+              (block) => block.id === mediaTarget.id,
+            );
+            if (target)
+              mediaTarget.insert(`\n${mediaMarkup(item, target.type)}\n`);
           }}
         />
       )}
     </fieldset>
   );
+}
+
+function CollaborativeBlock({
+  id,
+  ...props
+}: React.ComponentProps<typeof RegisteredBlockEditor> & { id: string }) {
+  const shared = useBlockCollaboration(id);
+  return <RegisteredBlockEditor {...props} shared={shared} />;
 }

@@ -1,0 +1,69 @@
+.editor {
+  min-width: 0;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+  transition:
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+.editor:focus-within {
+  box-shadow: inset 3px 0 var(--admin-accent);
+}
+.editor[data-disabled] {
+  opacity: 0.65;
+}
+.editor :global(.cm-editor) {
+  outline: none;
+  font-size: 13px;
+}
+.editor :global(.cm-scroller) {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  line-height: 1.85;
+  min-height: 250px;
+  max-height: 540px;
+  overflow: auto;
+}
+.editor :global(.cm-content) {
+  padding: 18px 16px 24px;
+  caret-color: var(--admin-accent);
+}
+.editor :global(.cm-gutters) {
+  background: var(--admin-subtle);
+  color: var(--admin-muted);
+  border-right: 1px solid var(--admin-border);
+  padding: 16px 4px 0;
+  font-size: 11px;
+}
+.editor :global(.cm-lineNumbers .cm-gutterElement) {
+  min-width: 24px;
+}
+.editor :global(.cm-activeLine),
+.editor :global(.cm-activeLineGutter) {
+  background: color-mix(in srgb, var(--admin-accent) 5%, transparent);
+}
+.editor :global(.cm-selectionBackground),
+.editor :global(.cm-focused .cm-selectionBackground) {
+  background: color-mix(
+    in srgb,
+    var(--admin-accent) 20%,
+    transparent
+  ) !important;
+}
+.editor :global(.cm-ySelectionInfo) {
+  border-radius: 3px;
+  padding: 2px 5px;
+  font-family: inherit;
+}
+@media (max-width: 640px) {
+  .editor :global(.cm-scroller) {
+    min-height: 220px;
+  }
+  .editor :global(.cm-content) {
+    padding-inline: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .editor {
+    transition: none;
+  }
+}

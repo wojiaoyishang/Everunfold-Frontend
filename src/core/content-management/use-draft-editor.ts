@@ -1,6 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useAdminRequest } from "@/core/admin/account-context";
+import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
+import {
+  DraftSession,
+  type CollaborationStatus,
+} from "@/core/collaboration/session";
+import { commitCollaborationDraft } from "@/generated/collaboration-client";
+import type { CommitDraft } from "@/generated/collaboration-contract";
+import { rememberRecovery } from "@/core/collaboration/recovery";
 import {
   createDraft,
   readDraft,
@@ -25,17 +32,25 @@ import {
 } from "./draft-state";
 
 type Write =
+  | { action: "collaboration"; input: CommitDraft }
   | { action: "create"; input: DraftCreate }
   | { action: "save" | "publish"; input: DraftSave }
   | { action: "withdraw"; input: DraftMutation };
 export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
   const { baseUrl, csrfToken } = useAdminRequest();
+  const account = useAdminAccount();
+  const sessionRef = useRef<DraftSession | null>(null);
+  const [session, setSession] = useState<DraftSession | null>(null);
+  const [collaboration, setCollaboration] =
+    useState<CollaborationStatus | null>(null);
   const [detail, setDetail] = useState<DraftDetail | null>(null);
   const [fields, setFields] = useState<DraftFields>(() => draftFields());
+  const privateFields = useRef(fields);
   const [baseline, setBaseline] = useState(() => JSON.stringify(fields));
   const [loading, setLoading] = useState(id !== null);
   const [busy, setBusy] = useState(false);
   const inFlight = useRef(false);
+  const preparing = useRef(false);
   const mounted = useRef(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -48,6 +63,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     const next = draftFields(value);
     setBaseline(JSON.stringify(next));
     setFields(next);
+    privateFields.current = next;
     setDetail(value);
   };
   useEffect(() => {
@@ -59,6 +75,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
   useEffect(() => {
     if (!id) return;
     const abort = new AbortController();
+    let owner: DraftSession | null = null;
     void readDraft(baseUrl, { id }, csrfToken, { signal: abort.signal })
       .then((response) => {
         if (!abort.signal.aborted) {
@@ -66,6 +83,28 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
             throw new RequestError("invalid");
           apply(response.data);
           setError("");
+          if (response.data.status !== "trash") {
+            owner = new DraftSession(baseUrl, csrfToken, id, account.id);
+            sessionRef.current = owner;
+            setSession(owner);
+            const active = owner;
+            active.onChange = () => {
+              if (abort.signal.aborted) return;
+              setCollaboration({ ...active.state });
+              if (active.state.ready) {
+                const restored = active.project(privateFields.current);
+                setFields(restored);
+                rememberRecovery(
+                  account.id,
+                  window.location.pathname,
+                  id,
+                  restored,
+                  active.removedBlocks(restored),
+                );
+              }
+            };
+            void active.start();
+          }
         }
       })
       .catch((reason) => {
@@ -74,19 +113,26 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
       .finally(() => {
         if (!abort.signal.aborted) setLoading(false);
       });
-    return () => abort.abort();
-  }, [id, type.id, baseUrl, csrfToken, readAttempt]);
+    return () => {
+      abort.abort();
+      if (owner) {
+        owner.onChange = () => {};
+        void owner.dispose();
+      }
+      if (sessionRef.current === owner) sessionRef.current = null;
+    };
+  }, [id, type.id, baseUrl, csrfToken, readAttempt, account.id]);
   const dirty = JSON.stringify(fields) !== baseline;
   useEffect(() => {
-    if (!dirty && !uncertain && !busy) return;
+    if (!dirty && !uncertain && !busy && !collaboration?.pending) return;
     const warn = (event: BeforeUnloadEvent) => {
       event.preventDefault();
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty, uncertain, busy]);
+  }, [dirty, uncertain, busy, collaboration?.pending]);
   const save = async (action: "save" | "publish" | "withdraw" = "save") => {
-    if (inFlight.current || conflict) return null;
+    if (inFlight.current || preparing.current || conflict) return null;
     const invalid = validateDraft(fields, type);
     if (invalid) {
       setError(invalid);
@@ -102,7 +148,36 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
             fields,
           },
         };
-      else {
+      else if (sessionRef.current) {
+        preparing.current = true;
+        setBusy(true);
+        try {
+          const current = sessionRef.current;
+          const committed = await current.cutoff();
+          operation.current = {
+            action: "collaboration",
+            input: {
+              id: detail.id,
+              operation_id: crypto.randomUUID(),
+              expected_revision: detail.revision,
+              epoch: current.epoch,
+              committed_seq: committed,
+              action,
+              visibility: fields.settings?.visibility ?? "public",
+              opens_at: fields.settings?.opens_at ?? null,
+              access_password: fields.access_password ?? null,
+            },
+          };
+        } catch (reason) {
+          setBusy(false);
+          setError(
+            reason instanceof Error ? reason.message : "请等待同步后重试。",
+          );
+          return null;
+        } finally {
+          preparing.current = false;
+        }
+      } else {
         const mutation = {
           id: detail.id,
           operation_id: crypto.randomUUID(),
@@ -121,20 +196,47 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     try {
       const request = operation.current;
       const response =
-        request.action === "create"
-          ? await createDraft(baseUrl, request.input, csrfToken)
-          : request.action === "withdraw"
-            ? await withdrawDraft(baseUrl, request.input, csrfToken)
-            : request.action === "publish"
-              ? await publishDraft(baseUrl, request.input, csrfToken)
-              : await saveDraft(baseUrl, request.input, csrfToken);
+        request.action === "collaboration"
+          ? {
+              data: (
+                await commitCollaborationDraft(
+                  baseUrl,
+                  request.input,
+                  csrfToken,
+                )
+              ).data.draft,
+            }
+          : request.action === "create"
+            ? await createDraft(baseUrl, request.input, csrfToken)
+            : request.action === "withdraw"
+              ? await withdrawDraft(baseUrl, request.input, csrfToken)
+              : request.action === "publish"
+                ? await publishDraft(baseUrl, request.input, csrfToken)
+                : await saveDraft(baseUrl, request.input, csrfToken);
       if (mounted.current) {
-        apply(response.data);
+        if (request.action === "collaboration" && sessionRef.current) {
+          const saved = draftFields(response.data);
+          setBaseline(JSON.stringify(saved));
+          privateFields.current = saved;
+          setDetail(response.data);
+          setFields(sessionRef.current.project(saved));
+          rememberRecovery(
+            account.id,
+            window.location.pathname,
+            detail!.id,
+            sessionRef.current.project(saved),
+            sessionRef.current.removedBlocks(sessionRef.current.project(saved)),
+          );
+        } else apply(response.data);
         setUncertain(false);
         setNotice(
-          request.action === "publish"
+          (request.action === "collaboration"
+            ? request.input.action
+            : request.action) === "publish"
             ? "内容已发布"
-            : request.action === "withdraw"
+            : (request.action === "collaboration"
+                  ? request.input.action
+                  : request.action) === "withdraw"
               ? "内容已撤回"
               : "草稿已保存",
         );
@@ -161,6 +263,8 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
   };
   return {
     detail,
+    session,
+    collaboration,
     fields,
     loading,
     busy,
@@ -173,7 +277,23 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     save,
     setFields: (next: DraftFields) => {
       if (!inFlight.current && !uncertain) {
-        setFields(next);
+        privateFields.current = next;
+        if (sessionRef.current?.state.ready) {
+          if (
+            JSON.stringify(fields.body.map((b) => [b.id, b.type])) !==
+            JSON.stringify(next.body.map((b) => [b.id, b.type]))
+          )
+            sessionRef.current.undo.stopCapturing();
+          sessionRef.current.setFields(next, fields);
+          setFields(sessionRef.current.project(next));
+          rememberRecovery(
+            account.id,
+            window.location.pathname,
+            sessionRef.current.id,
+            sessionRef.current.project(next),
+            sessionRef.current.removedBlocks(sessionRef.current.project(next)),
+          );
+        } else setFields(next);
         setNotice("");
       }
     },
@@ -197,7 +317,13 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     },
     acceptLatest: () => {
       if (latest) {
-        apply(latest);
+        if (sessionRef.current?.state.ready) {
+          const saved = draftFields(latest);
+          privateFields.current = saved;
+          setDetail(latest);
+          setBaseline(JSON.stringify(saved));
+          setFields(sessionRef.current.project(saved));
+        } else apply(latest);
         setConflict(false);
         setLatest(null);
         setError("");

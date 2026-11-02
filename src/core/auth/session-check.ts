@@ -5,7 +5,7 @@ import { checkedSession } from "./session";
 export type SessionView =
   | { phase: "checking" }
   | { phase: "ready"; session: AuthSessionState }
-  | { phase: "failed"; error: unknown };
+  | { phase: "failed"; error: unknown; previous?: AuthSessionState };
 
 /** One private page owns one check. Focus/restore events cannot restart its deadline. */
 export function createSessionCheck(
@@ -14,6 +14,7 @@ export function createSessionCheck(
   admin = false,
 ) {
   let disposed = false;
+  let lastReady: AuthSessionState | null = null;
   let pending:
     { controller: AbortController; result: Promise<void> } | undefined;
 
@@ -32,13 +33,26 @@ export function createSessionCheck(
         if (controller.signal.aborted) return;
         try {
           const session = checkedSession(await read(controller.signal), admin);
+          lastReady = session;
           if (!disposed && !controller.signal.aborted)
             publish({ phase: "ready", session });
         } catch (error) {
+          // Keep an already-open editor available for local recovery on a network outage.
+          // No cached identity authorizes a new page or a server write; 401/403 still fail closed.
+          if (
+            background &&
+            lastReady &&
+            Date.parse(lastReady.expires_at) > Date.now() &&
+            (!(error instanceof RequestError) ||
+              error.status === undefined ||
+              error.status >= 500)
+          )
+            return;
           if (!disposed && !controller.signal.aborted)
             publish({
               phase: "failed",
               error: error ?? new RequestError("network"),
+              previous: lastReady ?? undefined,
             });
         } finally {
           if (pending?.controller === controller) pending = undefined;
@@ -49,6 +63,7 @@ export function createSessionCheck(
     },
     accept(session: AuthSessionState) {
       const validated = checkedSession(session, admin);
+      lastReady = validated;
       cancel();
       if (!disposed) publish({ phase: "ready", session: validated });
     },
@@ -58,6 +73,7 @@ export function createSessionCheck(
         publish({
           phase: "failed",
           error: error ?? new RequestError("network"),
+          previous: lastReady ?? undefined,
         });
     },
     dispose() {

@@ -5,7 +5,7 @@ import { readFile, writeFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { compile } from "json-schema-to-typescript";
-import { format } from "prettier";
+import { format, resolveConfig } from "prettier";
 
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -35,36 +35,42 @@ const contentAdmin =
   path.basename(absoluteSource) === "content-admin-v1.schema.json";
 const contentAccess =
   path.basename(absoluteSource) === "content-access-v1.schema.json";
-const rootName = contentAccess
-  ? "ContentAccessContract"
-  : contentAdmin
-    ? "ContentAdminContract"
-    : settings
-      ? "SettingsContract"
-      : auth
-        ? "AuthContract"
-        : likes
-          ? "CommentLikesContract"
-          : reader
-            ? "ReaderPreviewContract"
-            : presentation
-              ? "ContentPresentation"
-              : "PublicSnapshot";
-const outputName = contentAccess
-  ? "content-access-contract"
-  : contentAdmin
-    ? "content-admin-contract"
-    : settings
-      ? "settings-contract"
-      : auth
-        ? "auth-contract"
-        : likes
-          ? "comment-likes-contract"
-          : reader
-            ? "reader-preview-contract"
-            : presentation
-              ? "presentation-contract"
-              : "public-contract";
+const collaboration =
+  path.basename(absoluteSource) === "collaboration-v1.schema.json";
+const rootName = collaboration
+  ? "CollaborationContract"
+  : contentAccess
+    ? "ContentAccessContract"
+    : contentAdmin
+      ? "ContentAdminContract"
+      : settings
+        ? "SettingsContract"
+        : auth
+          ? "AuthContract"
+          : likes
+            ? "CommentLikesContract"
+            : reader
+              ? "ReaderPreviewContract"
+              : presentation
+                ? "ContentPresentation"
+                : "PublicSnapshot";
+const outputName = collaboration
+  ? "collaboration-contract"
+  : contentAccess
+    ? "content-access-contract"
+    : contentAdmin
+      ? "content-admin-contract"
+      : settings
+        ? "settings-contract"
+        : auth
+          ? "auth-contract"
+          : likes
+            ? "comment-likes-contract"
+            : reader
+              ? "reader-preview-contract"
+              : presentation
+                ? "presentation-contract"
+                : "public-contract";
 const backendRoot = path.dirname(path.dirname(absoluteSource));
 const relativeSource = path
   .relative(backendRoot, absoluteSource)
@@ -95,29 +101,43 @@ const types = await compile(schema, rootName, {
     "/* Generated from the backend public contract. Do not edit by hand. */",
   additionalProperties: false,
   ignoreMinAndMaxItems:
-    reader || likes || settings || contentAdmin || contentAccess,
+    reader ||
+    likes ||
+    settings ||
+    contentAdmin ||
+    contentAccess ||
+    collaboration,
   style: { singleQuote: false, semi: true, printWidth: 100 },
 });
-await writeFile(path.join(output, `${outputName}.ts`), types);
+const typesPath = path.join(output, `${outputName}.ts`);
+await writeFile(
+  typesPath,
+  await format(types, {
+    ...(await resolveConfig(typesPath)),
+    filepath: typesPath,
+  }),
+);
 await writeFile(path.join(output, path.basename(absoluteSource)), source);
 await writeFile(
   path.join(
     output,
-    contentAccess
-      ? "content-access-source.json"
-      : contentAdmin
-        ? "content-admin-source.json"
-        : settings
-          ? "settings-source.json"
-          : auth
-            ? "auth-source.json"
-            : likes
-              ? "comment-likes-source.json"
-              : reader
-                ? "reader-preview-source.json"
-                : presentation
-                  ? "presentation-source.json"
-                  : "contract-source.json",
+    collaboration
+      ? "collaboration-source.json"
+      : contentAccess
+        ? "content-access-source.json"
+        : contentAdmin
+          ? "content-admin-source.json"
+          : settings
+            ? "settings-source.json"
+            : auth
+              ? "auth-source.json"
+              : likes
+                ? "comment-likes-source.json"
+                : reader
+                  ? "reader-preview-source.json"
+                  : presentation
+                    ? "presentation-source.json"
+                    : "contract-source.json",
   ),
   `${JSON.stringify(
     {
@@ -252,6 +272,12 @@ ${functions}\n`,
 console.log(`Generated contract from backend ${commit.slice(0, 7)}`);
 
 if (settings) await generateSettingsClient(schema, output);
+if (collaboration)
+  await generateSettingsClient(schema, output, {
+    contractName: "CollaborationContract",
+    stem: "collaboration",
+    schemaFile: path.basename(absoluteSource),
+  });
 if (contentAccess)
   await generateSettingsClient(schema, output, {
     contractName: "ContentAccessContract",
