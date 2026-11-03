@@ -1,4 +1,5 @@
 .editor {
+  --source-editor-min-height: calc(17.5em + 32px);
   min-width: 0;
   background: var(--admin-canvas);
   color: var(--admin-text);
@@ -19,13 +20,17 @@
   overflow: auto;
 }
 .editor :global(.cm-content) {
-  padding: 0 0 12px;
+  /* Reserve ten visible lines without adding empty lines to the document. */
+  min-height: var(--source-editor-min-height);
+  padding: 16px 0;
   caret-color: var(--admin-accent);
 }
 .editor :global(.cm-line) {
   padding: 0 16px;
 }
 .editor :global(.cm-gutters) {
+  align-self: stretch;
+  height: auto;
   background: var(--admin-subtle);
   color: var(--admin-muted);
   border-right: 1px solid var(--admin-border);
