@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-6，2026-11-03。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-7，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 ## 启动与验证
 
@@ -63,3 +63,10 @@ Markdown源码修改即时进入共享工作文档；HTML可视化使用结构�
 - 不支持的自定义HTML、复杂内联CSS保留为源码原子。可视化展示清理后的预览，修改原始结构需进源码；不承诺复刻WordPress插件/短代码。字体加载规则见[字体库指南](font-library.md)。
 
 本机本轮试用草稿：322062a6-039a-494d-8685-127b5045b0a6（字体与编辑器验收1103），已撤回公开发布，保留Markdown/HTML及测试媒体供后续验证。详细证据见[验收](../handoff/visual-editor-font-verification.md)。
+
+
+## 2026-11-04 生命周期与SDK辅助数据
+
+编辑面以本地或doc.guid+blockId绑定为生命周期边界；不要仅用useEditor依赖变化销毁旧引擎，再让同轮其他效果/快捷句柄访问它。除isDestroyed外必须确认extensionManager仍有效，延迟插入需重新检查。销毁与重挂不能销毁宿主UndoManager，也不能重置Y.Doc。
+
+新增编辑引擎时用真实结构编辑验证其Yjs辅助数据；当前只额外接受已严格校验的__tiptap_position_migrations:item命名空间，不能让插件向任意根写业务/权限数据。兼容问题不得以删除缓存或ACK未提交更新处理。具体边界和回归见[ADR0043](../decisions/0043-rich-editor-lifetime-and-position-history.md)及[验收](../handoff/editor-lifecycle-fix-verification.md)。

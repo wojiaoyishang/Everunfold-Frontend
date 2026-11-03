@@ -129,3 +129,5 @@
 
 
 - [可视化编辑器与字体库](decisions/0042-visual-editors-and-font-library.md)、[字体按需加载指南](development/font-library.md) 与 [本轮验收](handoff/visual-editor-font-verification.md)：HTML默认可视化/受保护源码、Markdown预览分屏、轻量工具栏及字体注册/上传/选择。
+
+- [富文本实例与位置历史修复](decisions/0043-rich-editor-lifetime-and-position-history.md)及[本轮验收](handoff/editor-lifecycle-fix-verification.md)：编辑页空实例保护、真实结构协同与只追加辅助元数据。

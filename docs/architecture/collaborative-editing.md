@@ -1,6 +1,6 @@
 # 插件编辑器与共享草稿
 
-版本：collaborative-editing-2，2026-11-03。状态：试用版已实现；[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 记录决定，[验收](../handoff/collaborative-editing-verification.md) 区分真实进程、浏览器和未执行项目。
+版本：collaborative-editing-3，2026-11-04。状态：试用版已实现；[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 记录决定，[验收](../handoff/collaborative-editing-verification.md) 区分真实进程、浏览器和未执行项目。
 
 ## 边界与目录
 
@@ -63,3 +63,8 @@ source_leases以文档/块记录generation、客户端、会话哈希和60秒租
 服务端拒绝租约期间同块富文本、修改保留源文、旧世代离线更新；其他块可继续写。失效更新不ACK、不从outbox删除，留作恢复导出。源码租约过期不是丢弃本地草稿；重新取得后必须核对当前正文。暂存源码为每标签页sessionStorage，和已提交CRDT的IndexedDB持久化分开，使用边界见[编辑器指南](../development/editor-plugins.md)。
 
 字体描述由后端媒体记录解析进公开/私有映射，富文本只保存稳定site://media/ID，不保存CDN地址。字体被协同草稿引用后沿用媒体引用守卫，不能因尚未手工保存而误删。
+
+
+## 2026-11-04 位置历史兼容
+
+[ADR0043](../decisions/0043-rich-editor-lifetime-and-position-history.md)限定接收y-tiptap3.0.12嵌套块的位置迁移根Map，验证数据形状、数值/容量和只追加不变量；这些不是业务根，不进入正文投影。任意其他根和业务策略仍被拒绝。所有富文本操作仍等待PG提交后ACK，不通过清除旧客户端outbox规避兼容问题。界面以文档/块绑定隔离引擎实例，管理器为空时不再访问命令或渲染工具栏。

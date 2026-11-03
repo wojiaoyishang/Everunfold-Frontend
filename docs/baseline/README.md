@@ -362,3 +362,16 @@ development-11字体按需加载规则已落地；editor-plugins-6、collaborati
 | `docs/design/editor-visual-mobile.png` | `70a384730f1fb4b9883f29618e45af54f101ff095cbfa481ae0197d106196f64` |
 | `docs/design/editor-visual-desktop.png` | `4c0f6a661695ecd2fd130905a06e6ee1cf1beb4adf7cdb6e4032e856cbb6a06c` |
 | `docs/design/font-library-desktop.png` | `db36535d28eeffa3f5925f4a92746354580e4afaab7f6c53ee4b6639e02b47a4` |
+
+## 2026-11-04 编辑器生命周期与位置历史修复
+
+ADR0043、协同架构3、编辑器指南7与实际回归同步；以下记录更新后的文件哈希，原始基线及development-11不变。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/decisions/0043-rich-editor-lifetime-and-position-history.md` | `269e2c34a5ee1e48114dcd5f357869ea6528dea863d7c6ec5e10f51c646721f7` |
+| `docs/handoff/editor-lifecycle-fix-verification.md` | `5057898b2e56d96c5694e33461985fc8eaf07342de97e8da7db4a2ea62cf760a` |
+| `docs/architecture/collaborative-editing.md` | `d8cf8562ed8ea4d5a5d6390564c3b9caa3c54a1476ea579c224eaea99b863be5` |
+| `docs/development/editor-plugins.md` | `a0d04992d66b58dc1901422449ad39bc771c65c7154f2cda76dbe4b9c3f4dc03` |
+| `docs/README.md` | `5fe560a12a60d1673a289d8376c4b219acba6eb066286ea52c275ed442401c0f` |
+| `docs/design/editor-lifecycle-fix-desktop.png` | `41af02af36b1d919b14873d8e891e2aa8a20a463511f8ea0d3953058097d5de7` |
