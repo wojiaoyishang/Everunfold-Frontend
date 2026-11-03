@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-4，2026-11-03。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-5，2026-11-03。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 ## 启动与验证
 
@@ -40,9 +40,9 @@
 
 ## 区块库与排序
 
-见 [ADR0039](../decisions/0039-block-library-and-anchored-dragging.md)。桌面右侧区块/内容设置切换，不挤压正文；区块类型从blockEditors注册表读取名称/说明。手机使用弹出库点击添加。
+见 [ADR0039](../decisions/0039-block-library-and-anchored-dragging.md)。桌面右侧区块/内容设置切换，不挤压正文；区块类型从blockEditors注册表读取名称/说明。所有屏幕的添加按钮均打开弹出选择器；桌面保留右侧区块库点击/拖入。
 
-- 先点块间加号选择位置，再点类型；或直接拖入插入线。末尾入口选择追加。
+- 点击块间或末尾加号，直接弹出类型选择器；选中类型后插入到对应位置并聚焦新块。也可从右侧区块库拖入插入线。弹出选择器始终显式绑定入口的before ID，详见 [ADR0041](../decisions/0041-block-insert-picker-feedback.md)。
 - 从六点手柄拖动已有块。键盘空格/Enter拾起，方向键/Home/End选目标，放下或Esc取消；移动作为一次本人撤销。正文文字选择不启动拖动。
 - 更多菜单保留位置移动、格式切换与确认删除。格式切换保留源文，不承诺自动转换。
 - 结构操作只能经过useDraftEditor.commandBlock，核心按最新ID解析，已有草稿用单个LOCAL事务更新order；不要从主题直接改Y.Doc或提交整篇JSON。

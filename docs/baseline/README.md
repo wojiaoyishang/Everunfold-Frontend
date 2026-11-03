@@ -325,3 +325,16 @@ ADR0039、editor-plugins-3、公共索引/验收/4张截图逐字节同步。协
 | `docs/decisions/0040-source-editor-spacing-and-minimum-height.md` | `55d9fdea03bf4f83d2687aeb86d9d2adc4bd04687f86f97b824c37d849aa2a77` |
 | `docs/design/editor-minimum-height-desktop.png` | `bc7921e0b8a834140801ea99ee2f7fc752ceb7d6226f2c2e558afc8d40a6fe6f` |
 | `docs/design/editor-minimum-height-mobile.png` | `c4597b150e13efe6c32412db4264aff5d0e0d3c3639f8233baac222b256a094b` |
+
+## 2026-11-03 添加区块选择器同步清单
+
+ADR0041、editor-plugins-5、ADR0039补充/公共索引和2张截图逐字节同步；STATUS分别保留仓库历史。原始基线、协议development-10、协同schema1.0和数据库0013不变，仅本地提交。
+
+| 文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `9156cad3ce0b3caf13052d727acf085b8a6b721ea5d23cdad5b0905ee44acfae` |
+| `docs/development/editor-plugins.md` | `86c4812e47a85eab9e765d456c146c1555b3aa8c6b150e98f39e0bf5402695d4` |
+| `docs/decisions/0039-block-library-and-anchored-dragging.md` | `f1c7497b77ca53dc5079e4f31d995adf647b57126fffc54c02d6110184d8fdd0` |
+| `docs/decisions/0041-block-insert-picker-feedback.md` | `afdd13195e592047c74501bb01948bcd528a470f0532f9a44406c78403fbb984` |
+| `docs/design/block-insert-picker-desktop.png` | `3719e933e0246c5dbf25b54baa5c56c0768128bd7963a68762d4e4af73e42b0e` |
+| `docs/design/block-insert-picker-mobile.png` | `b74083d8a899852688fbf465eccc98d9a9c8de3c998560e6efc77413996ef2e2` |

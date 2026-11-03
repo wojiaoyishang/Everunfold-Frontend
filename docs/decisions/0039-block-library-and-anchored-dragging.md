@@ -35,3 +35,5 @@ DragAndDrop 封装传感器、中文读屏提示、碰撞和滚动；BlockCompos
 参考：[官方安装与包说明](https://dndkit.com/legacy/introduction/installation/)、[键盘传感器](https://dndkit.com/legacy/api-documentation/sensors/keyboard/)。本实现封装了该版本接口，后续升级须重新核验，不混用新版包的 API。
 
 未覆盖手机实机长按、多点触控、系统输入法、长文/大量区块压力及跨块连续选区。当前移动区块库以点击添加为主，不承诺从手机弹层拖到页面；手机已有块可通过手柄或操作菜单排序。
+
+添加按钮的当前统一交互见 [ADR0041](0041-block-insert-picker-feedback.md)：所有屏幕直接弹出选择器，修复原桌面按钮仅选中右侧区块库而无可感知反馈的问题。

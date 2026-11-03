@@ -124,3 +124,5 @@
 - [区块库与按ID拖放](decisions/0039-block-library-and-anchored-dragging.md) 与 [实际验收](handoff/block-composer-verification.md)：注册卡片、手柄/键盘排序、协同撤销与窄屏弹层。
 
 - [编辑留白与十行高度](decisions/0040-source-editor-spacing-and-minimum-height.md)：用户最新排版要求、CSS规则、浏览器检查与截图。
+
+- [添加区块反馈修复](decisions/0041-block-insert-picker-feedback.md)：所有添加入口弹出类型选择、明确插入位置与浏览器验收。
