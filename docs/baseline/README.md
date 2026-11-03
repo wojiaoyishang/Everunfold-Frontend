@@ -338,3 +338,10 @@ ADR0041、editor-plugins-5、ADR0039补充/公共索引和2张截图逐字节同
 | `docs/decisions/0041-block-insert-picker-feedback.md` | `afdd13195e592047c74501bb01948bcd528a470f0532f9a44406c78403fbb984` |
 | `docs/design/block-insert-picker-desktop.png` | `3719e933e0246c5dbf25b54baa5c56c0768128bd7963a68762d4e4af73e42b0e` |
 | `docs/design/block-insert-picker-mobile.png` | `b74083d8a899852688fbf465eccc98d9a9c8de3c998560e6efc77413996ef2e2` |
+
+## 2026-11-03 字体按需加载规范
+
+development-11 按用户要求明确前台仅请求所用字体、文章依赖收集、系统回退及网络验收；后台预览可独立加载。实施仍在进行，非完成声明。
+
+- docs/development/protocol.md SHA256: 022b4c4734982860db39b1c87c036db626d46048a4bda7e0fa9a51919ffc040f
+
