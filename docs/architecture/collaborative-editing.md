@@ -1,6 +1,6 @@
 # 插件编辑器与共享草稿
 
-版本：collaborative-editing-1，2026-11-02。状态：试用版已实现；[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 记录决定，[验收](../handoff/collaborative-editing-verification.md) 区分真实进程、浏览器和未执行项目。
+版本：collaborative-editing-2，2026-11-03。状态：试用版已实现；[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 记录决定，[验收](../handoff/collaborative-editing-verification.md) 区分真实进程、浏览器和未执行项目。
 
 ## 边界与目录
 
@@ -9,20 +9,20 @@
 | 层 | 实际职责 |
 | --- | --- |
 | 前端 core/editor/registry.ts | 可信插件登记、重复 ID/格式检查；不依赖主题 |
-| 主题 admin/content/plugins | Markdown、HTML 各自语言与工具栏，组合封装 CodeEditor |
+| 主题 admin/content/plugins | Markdown源码/预览、HTML可视化/源码，各自组合封装编辑面 |
 | 主题 components/ui/code-editor | CodeMirror 生命周期、键盘、选择、相对位置媒体插入；原生 contenteditable 只在此封装层 |
 | core/collaboration | 文档投影、更新队列、传输、IndexedDB、跨标签页合并、导出与失效会话恢复 |
 | core/content-management/use-draft-editor | 创建、保存/发布命令、权限策略、冲突与共享草稿衔接 |
 | 后端 content/collaboration | 私有票据、鉴权、文档校验、持久更新、在线状态、截点提交；由 content.router_init 装配 |
 
-首版两种插件均为源码编辑器，分别提供 Markdown/HTML 工具栏和语法高亮，安全预览复用已有 renderContent。没有加载用户上传的 JS，没有另建编辑器上传通道或独立发布流程。增加新的持久块格式仍须后端契约与渲染策略先支持。
+当前Markdown使用CodeMirror源码/安全预览，HTML使用Tiptap可视化和独立源码视图；安全预览复用renderContent。没有加载用户上传的 JS，没有另建编辑器上传通道或独立发布流程。增加新的持久块格式仍须后端契约与渲染策略先支持。
 
 ## 一篇草稿一个文档
 
 同一稳定草稿 ID 只在服务器事务内从现有 JSON 初始化一次，生成 epoch。每个浏览器建立自己的 Yjs 客户端，不能从 HTTP JSON 反复播种。
 
 - meta：title/excerpt/seo_title/seo_description 为 Y.Text；settings 为 Y.Map，保存路径、分类、标签、封面、显示时间、置顶、评论开关等。
-- blocks：稳定块 ID → Y.Map(type/content/deleted)，content 为 Y.Text。
+- blocks：稳定块 ID → Y.Map(type/content/deleted)，content 为 Y.Text。HTML另含rich:Y.XmlFragment及rich_base，原content作为保留源文，富文本变化后从rich投影；不逐字覆盖整段HTML。
 - order：Y.Array 块 ID 列表；投影去重，跳过墓碑。排序不重建文本；删除保留源文，撤销可恢复。并发排序采用 CRDT 的确定性合并，不承诺任意多人移动都等于各人的局部顺序。
 - 密码、visibility、opens_at、发布状态、账号、权限不在 CRDT，也不写入本地正文缓存。分类/标签首版为字段级最后写入，正文和协同元文本按 CRDT 合并。
 
@@ -52,4 +52,14 @@ POST /v1/admin/content/collaboration/commit 接受 epoch、确认过的序号、
 
 ## 明确后续
 
-当前状态是检查点，但保留初始状态、全部持久日志/回执和本机 ACK 记录，没有自动 GC/历史压缩删除。老截点重建成本随日志增长，未做长时间/大文档/大房间压测。完整审核工作流、代码页面协同、细粒度 ACL、跨块选区、富文本、显式冲突分支恢复、导出文件自动导入都未交付。原始 WordPress 文章不恢复来填充测试。
+当前状态是检查点，但保留初始状态、全部持久日志/回执和本机 ACK 记录，没有自动 GC/历史压缩删除。老截点重建成本随日志增长，未做长时间/大文档/大房间压测。完整审核工作流、代码页面协同、细粒度 ACL、跨块选区、显式冲突分支恢复、导出文件自动导入都未交付。原始 WordPress 文章不恢复来填充测试。
+
+## 结构化 HTML 与源码事务
+
+HTML片段保存段落、文字格式、列表、表格、图片说明/对齐与稳定字体引用。schema1.1增加sources帧及rich_versions；原collab-1传输、稳定更新ID、PG提交后ACK和精确保存截点不变。旧草稿首次取得新票据时在行锁内补齐缺失片段，保留原epoch与日志。
+
+source_leases以文档/块记录generation、客户端、会话哈希和60秒租约，数据库为权威，Redis在线状态不授予编辑权。源码acquire/renew/release/apply使用认证HTTP；apply按指纹、租约和稳定operation_id校验，与协同更新、媒体引用及持久回执同事务提交。WS传播提交结果；本人与远端来源区分，宿主UndoManager保留本人撤销。
+
+服务端拒绝租约期间同块富文本、修改保留源文、旧世代离线更新；其他块可继续写。失效更新不ACK、不从outbox删除，留作恢复导出。源码租约过期不是丢弃本地草稿；重新取得后必须核对当前正文。暂存源码为每标签页sessionStorage，和已提交CRDT的IndexedDB持久化分开，使用边界见[编辑器指南](../development/editor-plugins.md)。
+
+字体描述由后端媒体记录解析进公开/私有映射，富文本只保存稳定site://media/ID，不保存CDN地址。字体被协同草稿引用后沿用媒体引用守卫，不能因尚未手工保存而误删。

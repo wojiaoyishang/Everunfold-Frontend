@@ -341,7 +341,24 @@ ADR0041、editor-plugins-5、ADR0039补充/公共索引和2张截图逐字节同
 
 ## 2026-11-03 字体按需加载规范
 
-development-11 按用户要求明确前台仅请求所用字体、文章依赖收集、系统回退及网络验收；后台预览可独立加载。实施仍在进行，非完成声明。
+development-11 按用户要求明确前台仅请求所用字体、文章依赖收集、系统回退及网络验收；后台预览可独立加载。此段记录规范修订；实施与验收见本页后续交付段。
 
 - docs/development/protocol.md SHA256: 022b4c4734982860db39b1c87c036db626d46048a4bda7e0fa9a51919ffc040f
 
+## 2026-11-03 可视化编辑器与字体库交付
+
+development-11字体按需加载规则已落地；editor-plugins-6、collaborative-editing-2、font-library-1与ADR0042同步。以下是实施/验收文档及真实截图，不替代原始基线。后台字体和暂存源码的范围/限制见验收。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/decisions/0042-visual-editors-and-font-library.md` | `8ba2eebb26e88dad6f595c24cb9813e4d71748aab9b5ab04caa28c3efe3eaf09` |
+| `docs/development/editor-plugins.md` | `6495f0154497920c414efa7cc5e18bbf3755d107ef3ef77cb6df284e5ba10e2b` |
+| `docs/architecture/collaborative-editing.md` | `e00f7d1fb42e76b00eb0b0840c22005525045c2d5b5fd685ee0c678aa7b07ed0` |
+| `docs/development/font-library.md` | `91ebeb746a050f61928b14c9762896787047a67a7b28e59acca46baa8a3678ef` |
+| `docs/handoff/visual-editor-font-verification.md` | `9fa9f3fc3d349fbd2f03796e4637e359579cbc1b1edb9b8bfe75e1cff932f253` |
+| `docs/README.md` | `90966a5bbe153fc426d75988f4e8f5c706565bae58156468523b649522ab61a7` |
+| `docs/design/editor-font-public.png` | `6b4bcac81d189bd25bc2cdeda0e13c8c44d55a67dbf346340504f038ac9066fe` |
+| `docs/design/editor-source-recovery.png` | `5b0872b71facde337d5cc01a3bda38dcc11638f90dae1cbc121cb88fa404f607` |
+| `docs/design/editor-visual-mobile.png` | `70a384730f1fb4b9883f29618e45af54f101ff095cbfa481ae0197d106196f64` |
+| `docs/design/editor-visual-desktop.png` | `4c0f6a661695ecd2fd130905a06e6ee1cf1beb4adf7cdb6e4032e856cbb6a06c` |
+| `docs/design/font-library-desktop.png` | `db36535d28eeffa3f5925f4a92746354580e4afaab7f6c53ee4b6639e02b47a4` |

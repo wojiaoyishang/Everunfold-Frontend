@@ -1,11 +1,11 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-5，2026-11-03。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-6，2026-11-03。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 ## 启动与验证
 
-1. 后端执行 uv sync --locked，再显式 uv run python init.database.py --config config.toml。迁移 head 为 0013_collaboration，启动服务不会自动迁移。
-2. 本地后端：uv run python -m uvicorn app.entrypoints.api:app --host 127.0.0.1 --port 8001 --no-proxy-headers --ws-max-size 1500000。部署需支持 WS 升级并配置实际前端 Origin；不使用查询参数 Token。
+1. 后端执行 uv sync --locked，再显式 uv run python init.database.py --config config.toml。迁移 head 为 0015_rich_source_leases，启动服务不会自动迁移。
+2. 本地后端：uv run uvicorn app.entrypoints.api:create_app --factory --host 127.0.0.1 --port 8001 --no-proxy-headers --ws-max-size 1500000。部署需支持 WS 升级并配置实际前端 Origin；不使用查询参数 Token。
 3. 前端 npm ci --ignore-scripts、npm run dev，保留 3000。动态加载两种编辑器；新建内容先保存一次取得稳定 ID，再进入共享草稿。
 4. 本轮新增库/协议后，旧开发标签页手动刷新一次。系统没有添加循环刷新或自动硬跳转。
 5. 同一文章打开两页，分别在 Markdown/HTML 输入，检查另一页文字、在线会话和光标；Ctrl/Cmd+Z 只撤销本人操作。工具栏也提供全篇撤销/重做。
@@ -20,7 +20,7 @@
 
 复用 SourceBlockEditor/封装 CodeEditor，提供自己的语言扩展和工具栏动作；通过 shared.text、awareness、undo 接入宿主，不能在插件内建第二个 Y.Doc、独立文本历史或整篇 JSON 保存。媒体使用统一选择器/上传队列和相对位置插入，不能在插件中直传文件、猜物理路径或持久保存解析后的 Base URL。样式使用后台主题变量，深色高亮也由变量派生。
 
-首版源码修改即时进入共享工作文档；格式切换保留原源文，不进行有损 Markdown↔HTML 转换。预览使用统一可信渲染/清理，不能执行正文脚本。
+Markdown源码修改即时进入共享工作文档；HTML可视化使用结构化共享片段，HTML源码需暂存后应用；格式切换保留原源文，不进行有损 Markdown↔HTML 转换。预览使用统一可信渲染/清理，不能执行正文脚本。
 
 ## 检查与交接
 
@@ -31,7 +31,7 @@
 
 ## 源码工具与快捷键
 
-- 当前两个块编辑插件版本为 1.1.0。SourceToolbar 管段落样式与动作/模板；SourceSearchPanel 管查找表单；SourceBlockEditor 组合这些控件，不接管业务保存。CodeEditor/useCodeEditorHandle 封装原生编辑面、选择、输入和 Y.Text 绑定。core/editor 处理局部格式变换和可见区搜索高亮。
+- 当前两个块编辑插件版本为 2.0.0，HTML默认可视化；以下源码工具仍供Markdown及HTML源码视图复用。SourceToolbar 管段落样式与动作/模板；SourceSearchPanel 管查找表单；SourceBlockEditor 组合这些控件，不接管业务保存。CodeEditor/useCodeEditorHandle 封装原生编辑面、选择、输入和 Y.Text 绑定。core/editor 处理局部格式变换和可见区搜索高亮。
 - 标题/列表作用于当前行或选中多行，常用行内格式可切换；空选区插入并选中占位文本。链接、表格、HTML 列表等为源码模板，插入后继续手工编辑。HTML 代码块转义选中标签；已有 HTML 标题的属性保留。
 - Ctrl/Cmd+B 加粗，Ctrl/Cmd+I 斜体，Ctrl/Cmd+F 当前块查找；Ctrl/Cmd+Z、Shift+Z/Y 保持原全篇本人撤销/重做。查找框 Enter 下一项、Shift+Enter 上一项，替换框 Enter 替换，Escape 关闭并回正文。
 - 当前编辑页面 Ctrl/Cmd+S 和 Shift+S 均保存草稿，不发布；保存、错误/不确定状态和确认仍复用原逻辑。无修改不生成新修订，按住按键不重复提交，模态弹窗内不触发页面保存。控件恢复后回原焦点。未确认的上次操作只能通过明确重试按钮处理。
@@ -50,3 +50,16 @@
 - 源码上下各保留16px；以十行可见文本为最小高度（当前277px），行号栏铺满同样高度，仍由CodeMirror测量行号。不要为了高度往正文插入空行；规则见 [ADR0040](../decisions/0040-source-editor-spacing-and-minimum-height.md)。
 
 本轮检查、截图和真实未覆盖项见 [区块验收](../handoff/block-composer-verification.md)。
+
+## 可视化 HTML 与 Markdown 预览（2.0）
+
+- Markdown支持编写、实时预览和桌面分屏；窄屏隐藏分屏入口，编写/预览不会销毁原CodeMirror实例和选区。分屏滚动按比例联动，预览沿用统一安全渲染。
+- HTML默认可视化：段落/标题、加粗/斜体/下划线/删除线、列表、引用、链接、代码、分隔线、表格及上下文行列操作；图片支持替代文本、说明、宽度及对齐；字体/字号复用字体库选择。
+- core/editor/rich-text、rich-extensions管理结构导入/投影及可信扩展；主题components/ui/rich-text-editor封装引擎；主题plugins管理模式、轻量工具栏和界面反馈。插件通过shared.rich/host接入原文档，不得反向把整篇HTML写回Y.Text。
+- HTML按钮取得单块源码租约。改动仅在本页暂存，应用才进入共享正文；期间禁止保存/发布/整篇预览。其他编辑者的同块可视化暂时只读，其他块仍可输入。取消有确认，退场后返回并恢复焦点。
+- 暂存源码使用sessionStorage，可在同一标签页内离开后返回恢复；显示当前共享源码，核对后才能应用。关闭标签页、隐私模式或存储失败不承诺保留，先应用或下载HTML/整篇导出。导出unapplied_html不包含文章密码。
+- 源码编辑中断后最长等待60秒过期；正常离开主动释放编辑权。续期/指纹/世代冲突时不自动覆盖正文，保留并提示下载对照。未确认的应用只能重试原operation_id；刷新后不保证保留该HTTP操作的内存重试状态，应先核对服务器结果。
+- 普通富文本操作可CRDT合并；整块源码替换不承诺自动合并旧离线富文本。旧世代更新被拒绝且仍保留在本地恢复/导出中。更新插件和契约后手动刷新旧编辑页。
+- 不支持的自定义HTML、复杂内联CSS保留为源码原子。可视化展示清理后的预览，修改原始结构需进源码；不承诺复刻WordPress插件/短代码。字体加载规则见[字体库指南](font-library.md)。
+
+本机本轮试用草稿：322062a6-039a-494d-8685-127b5045b0a6（字体与编辑器验收1103），已撤回公开发布，保留Markdown/HTML及测试媒体供后续验证。详细证据见[验收](../handoff/visual-editor-font-verification.md)。

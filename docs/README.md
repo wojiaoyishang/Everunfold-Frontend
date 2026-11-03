@@ -126,3 +126,6 @@
 - [编辑留白与十行高度](decisions/0040-source-editor-spacing-and-minimum-height.md)：用户最新排版要求、CSS规则、浏览器检查与截图。
 
 - [添加区块反馈修复](decisions/0041-block-insert-picker-feedback.md)：所有添加入口弹出类型选择、明确插入位置与浏览器验收。
+
+
+- [可视化编辑器与字体库](decisions/0042-visual-editors-and-font-library.md)、[字体按需加载指南](development/font-library.md) 与 [本轮验收](handoff/visual-editor-font-verification.md)：HTML默认可视化/受保护源码、Markdown预览分屏、轻量工具栏及字体注册/上传/选择。
