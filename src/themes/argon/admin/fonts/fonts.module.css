@@ -1,0 +1,130 @@
+.previewBar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 24px 0;
+  padding: 16px 20px;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+}
+.previewBar label,
+.previewBar > span {
+  white-space: nowrap;
+  color: var(--admin-muted);
+  font-size: 13px;
+}
+.previewBar input {
+  flex: 1;
+  min-width: 0;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 20px;
+}
+.card {
+  min-width: 0;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    transform 0.2s;
+  animation: font-arrive 0.24s ease both;
+}
+.card:hover {
+  border-color: var(--admin-accent);
+  box-shadow: 0 7px 22px color-mix(in srgb, var(--admin-text) 7%, transparent);
+  transform: translateY(-2px);
+}
+.cardHeading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 20px 0;
+}
+.cardHeading strong {
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.cardHeading small {
+  display: block;
+  color: var(--admin-muted);
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.cardHeading > span {
+  font-size: 11px;
+  color: var(--admin-accent);
+}
+.sample {
+  min-height: 148px;
+  padding: 28px 20px;
+  font-size: 25px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--admin-border);
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.card footer button {
+  min-height: 32px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.empty {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 60px 20px;
+  background: var(--admin-surface);
+  border: 1px dashed var(--admin-border);
+  border-radius: 12px;
+  color: var(--admin-muted);
+}
+.empty > svg {
+  width: 32px;
+  height: 32px;
+  color: var(--admin-accent);
+}
+@keyframes font-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 600px) {
+  .previewBar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .previewBar input {
+    flex-basis: 100%;
+    order: 2;
+  }
+  .previewBar > span {
+    margin-left: auto;
+  }
+  .sample {
+    font-size: 22px;
+  }
+}
+:global([data-admin-motion="reduced"]) .card {
+  animation: none;
+  transition: none;
+}

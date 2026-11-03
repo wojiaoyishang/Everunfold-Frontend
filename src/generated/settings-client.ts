@@ -4,10 +4,10 @@ import addFormats from "ajv-formats";
 import schema from "./settings-v1.schema.json";
 import type { SettingsContract } from "./settings-contract";
 import {
-  requestJSON,
-  patchJSON,
   postJSON,
   postBinary,
+  requestJSON,
+  patchJSON,
   type RequestOptions,
 } from "@/core/http/request";
 const ajv = new Ajv({ strict: true });
@@ -18,6 +18,28 @@ ajv.addSchema(
   ),
   "settings",
 );
+
+const queryFontsValidator = ajv.compile<SettingsContract["fonts"]>({
+  $ref: "settings#/properties/fonts",
+});
+export function queryFonts(
+  baseUrl: string,
+  input: SettingsContract["icon_query"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/fonts/query",
+    input,
+    queryFontsValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
 
 const previewMediaRemovalValidator = ajv.compile<
   SettingsContract["media_removal_preview"]

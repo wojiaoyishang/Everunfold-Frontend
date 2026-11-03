@@ -1,13 +1,33 @@
 /* Generated from the backend public contract. Do not edit by hand. */
 
-export type Id = string;
-export type ExpectedRevision = number;
-export type DeleteOriginal = boolean;
-export type SafeDelete = boolean;
 export type Success = boolean;
 export type Code = number;
 export type Msg = string;
+export type Id = string;
+export type Label = string;
+export type Url = string;
+export type Mime = string;
+export type Size = number;
+export type CreatedAt = string;
+export type Reused = boolean;
+export type Family = string;
+export type Style = "normal" | "italic";
+export type WeightMin = number;
+export type WeightMax = number;
+export type Format = "woff2" | "woff" | "truetype" | "opentype";
+export type CssFamily = string;
+export type Items = FontAsset[];
+export type Page = number;
+export type Total = number;
+export type PageSize = number;
 export type Id1 = string;
+export type ExpectedRevision = number;
+export type DeleteOriginal = boolean;
+export type SafeDelete = boolean;
+export type Success1 = boolean;
+export type Code1 = number;
+export type Msg1 = string;
+export type Id2 = string;
 export type Token = string;
 export type RecordCount = number;
 export type FileCount = number;
@@ -15,30 +35,30 @@ export type FileRetained = boolean;
 export type DeleteOriginal1 = boolean;
 export type SafeDelete1 = boolean;
 export type ResumeOperationId = string | null;
-export type Id2 = string;
+export type Id3 = string;
 export type ExpectedRevision1 = number;
 export type DeleteOriginal2 = boolean;
 export type SafeDelete2 = boolean;
 export type OperationId = string;
 export type ExpectedPlan = string;
-export type Success1 = boolean;
-export type Code1 = number;
-export type Msg1 = string;
-export type Id3 = string;
+export type Success2 = boolean;
+export type Code2 = number;
+export type Msg2 = string;
+export type Id4 = string;
 export type Deleted = boolean;
 export type Purged = boolean;
 export type PurgePending = boolean;
 export type RecordsRemoved = number;
 export type FilesDeleted = number;
 export type FileRetained1 = boolean;
-export type Id4 = string;
 export type Id5 = string;
+export type Id6 = string;
 export type ExpectedRevision2 = number;
 export type Title = string;
 export type AltText = string;
 export type Caption = string;
 export type Description = string;
-export type Id6 = string;
+export type Id7 = string;
 export type EditId = string;
 export type Rotation = 0 | 90 | 180 | 270;
 export type FlipHorizontal = boolean;
@@ -48,16 +68,16 @@ export type Y = number;
 export type Width = number;
 export type Height = number;
 export type OutputWidth = number | null;
-export type Success2 = boolean;
-export type Code2 = number;
-export type Msg2 = string;
-export type Id7 = string;
-export type Label = string;
-export type Url = string;
-export type Mime = string;
-export type Size = number;
-export type CreatedAt = string;
-export type Reused = boolean;
+export type Success3 = boolean;
+export type Code3 = number;
+export type Msg3 = string;
+export type Id8 = string;
+export type Label1 = string;
+export type Url1 = string;
+export type Mime1 = string;
+export type Size1 = number;
+export type CreatedAt1 = string;
+export type Reused1 = boolean;
 export type Kind = "image" | "video" | "file";
 export type Title1 = string;
 export type Deleted1 = boolean;
@@ -69,36 +89,15 @@ export type Uploader = string;
 export type SourceId = string | null;
 export type Editable = boolean;
 export type Query = string;
-export type Page = number;
+export type Page1 = number;
 export type Kind1 = "all" | "image" | "video" | "file";
 export type Trash = boolean;
-export type Purpose = "library" | "icon";
+export type Purpose = "library" | "icon" | "font";
 export type Filename = string;
 export type UploadId = string;
-export type Success3 = boolean;
-export type Code3 = number;
-export type Msg3 = string;
-export type Id8 = string;
-export type Label1 = string;
-export type Url1 = string;
-export type Mime1 = string;
-export type Size1 = number;
-export type CreatedAt1 = string;
-export type Reused1 = boolean;
-export type Kind2 = "image" | "video" | "file";
-export type Title2 = string;
-export type Deleted2 = boolean;
-export type PurgePending2 = boolean;
-export type Items = MediaItem[];
-export type Page1 = number;
-export type Total = number;
-export type PageSize = number;
 export type Success4 = boolean;
 export type Code4 = number;
 export type Msg4 = string;
-export type Success5 = boolean;
-export type Code5 = number;
-export type Msg5 = string;
 export type Id9 = string;
 export type Label2 = string;
 export type Url2 = string;
@@ -106,21 +105,42 @@ export type Mime2 = string;
 export type Size2 = number;
 export type CreatedAt2 = string;
 export type Reused2 = boolean;
-export type Items1 = IconAsset[];
+export type Kind2 = "image" | "video" | "file";
+export type Title2 = string;
+export type Deleted2 = boolean;
+export type PurgePending2 = boolean;
+export type Items1 = MediaItem[];
 export type Page2 = number;
 export type Total1 = number;
 export type PageSize1 = number;
-export type Query1 = string;
-export type Page3 = number;
-export type Filename1 = string;
-export type DataBase64 = string;
-export type UploadId1 = string;
+export type Success5 = boolean;
+export type Code5 = number;
+export type Msg5 = string;
 export type Success6 = boolean;
 export type Code6 = number;
 export type Msg6 = string;
+export type Id10 = string;
+export type Label3 = string;
+export type Url3 = string;
+export type Mime3 = string;
+export type Size3 = number;
+export type CreatedAt3 = string;
+export type Reused3 = boolean;
+export type Items2 = IconAsset[];
+export type Page3 = number;
+export type Total2 = number;
+export type PageSize2 = number;
+export type Query1 = string;
+export type Page4 = number;
+export type Filename1 = string;
+export type DataBase64 = string;
+export type UploadId1 = string;
 export type Success7 = boolean;
 export type Code7 = number;
 export type Msg7 = string;
+export type Success8 = boolean;
+export type Code8 = number;
+export type Msg8 = string;
 export type SourceEpoch = string;
 export type Revision1 = number;
 export type Name = string;
@@ -130,8 +150,8 @@ export type AvatarMediaId = string;
 export type AvatarUrl = string;
 export type NoticeTitle = string;
 export type Notice = string;
-export type Id10 = string;
-export type Label3 = string;
+export type Id11 = string;
+export type Label4 = string;
 export type Href = string;
 export type Icon = string;
 export type Children = MenuItem[];
@@ -157,9 +177,9 @@ export type AppliedAt = string | null;
 export type Error = string | null;
 export type Delivery = DeliveryState[];
 export type ExpectedRevision3 = number;
-export type Success8 = boolean;
-export type Code8 = number;
-export type Msg8 = string;
+export type Success9 = boolean;
+export type Code9 = number;
+export type Msg9 = string;
 export type NodeId1 = string;
 export type SourceEpoch1 = string;
 export type Revision2 = number;
@@ -168,9 +188,9 @@ export type RequestTimeoutSeconds = number;
 export type RetryDelayMs = number;
 export type BatchDelayMs = number;
 export type ExpectedRevision4 = number;
-export type Success9 = boolean;
-export type Code9 = number;
-export type Msg9 = string;
+export type Success10 = boolean;
+export type Code10 = number;
+export type Msg10 = string;
 export type Nodes = PolicyState[];
 export type Protocol = "settings-1";
 export type NodeId2 = string;
@@ -186,6 +206,7 @@ export type Digest = string;
 export type Durable = true;
 
 export interface SettingsContract {
+  fonts: PublicResponseFontCatalog;
   media_removal_intent: MediaRemovalIntent;
   media_removal_preview: PublicResponseMediaRemovalPreview;
   media_remove: MediaRemove;
@@ -210,20 +231,50 @@ export interface SettingsContract {
   delivery: SettingsDelivery;
   receipt: DeliveryReceipt;
 }
-export interface MediaRemovalIntent {
+export interface PublicResponseFontCatalog {
+  success?: Success;
+  code?: Code;
+  msg?: Msg;
+  data: FontCatalog;
+}
+export interface FontCatalog {
+  items: Items;
+  page: Page;
+  total: Total;
+  page_size?: PageSize;
+}
+export interface FontAsset {
   id: Id;
+  label: Label;
+  url: Url;
+  mime: Mime;
+  size: Size;
+  created_at: CreatedAt;
+  reused?: Reused;
+  info: FontInfo;
+  css_family: CssFamily;
+}
+export interface FontInfo {
+  family: Family;
+  style: Style;
+  weight_min: WeightMin;
+  weight_max: WeightMax;
+  format: Format;
+}
+export interface MediaRemovalIntent {
+  id: Id1;
   expected_revision: ExpectedRevision;
   delete_original?: DeleteOriginal;
   safe_delete?: SafeDelete;
 }
 export interface PublicResponseMediaRemovalPreview {
-  success?: Success;
-  code?: Code;
-  msg?: Msg;
+  success?: Success1;
+  code?: Code1;
+  msg?: Msg1;
   data: MediaRemovalPreview;
 }
 export interface MediaRemovalPreview {
-  id: Id1;
+  id: Id2;
   token: Token;
   record_count: RecordCount;
   file_count: FileCount;
@@ -233,7 +284,7 @@ export interface MediaRemovalPreview {
   resume_operation_id?: ResumeOperationId;
 }
 export interface MediaRemove {
-  id: Id2;
+  id: Id3;
   expected_revision: ExpectedRevision1;
   delete_original?: DeleteOriginal2;
   safe_delete?: SafeDelete2;
@@ -241,13 +292,13 @@ export interface MediaRemove {
   expected_plan: ExpectedPlan;
 }
 export interface PublicResponseMediaRemoval {
-  success?: Success1;
-  code?: Code1;
-  msg?: Msg1;
+  success?: Success2;
+  code?: Code2;
+  msg?: Msg2;
   data: MediaRemoval;
 }
 export interface MediaRemoval {
-  id: Id3;
+  id: Id4;
   deleted: Deleted;
   purged: Purged;
   purge_pending: PurgePending;
@@ -256,10 +307,10 @@ export interface MediaRemoval {
   file_retained?: FileRetained1;
 }
 export interface MediaLookup {
-  id: Id4;
+  id: Id5;
 }
 export interface MediaUpdate {
-  id: Id5;
+  id: Id6;
   expected_revision: ExpectedRevision2;
   metadata: MediaMetadata;
 }
@@ -270,7 +321,7 @@ export interface MediaMetadata {
   description?: Description;
 }
 export interface MediaEdit {
-  id: Id6;
+  id: Id7;
   edit_id: EditId;
   recipe: ImageRecipe;
 }
@@ -288,19 +339,19 @@ export interface CropRect {
   height: Height;
 }
 export interface PublicResponseMediaDetails {
-  success?: Success2;
-  code?: Code2;
-  msg?: Msg2;
+  success?: Success3;
+  code?: Code3;
+  msg?: Msg3;
   data: MediaDetails;
 }
 export interface MediaDetails {
-  id: Id7;
-  label: Label;
-  url: Url;
-  mime: Mime;
-  size: Size;
-  created_at: CreatedAt;
-  reused?: Reused;
+  id: Id8;
+  label: Label1;
+  url: Url1;
+  mime: Mime1;
+  size: Size1;
+  created_at: CreatedAt1;
+  reused?: Reused1;
   kind: Kind;
   title?: Title1;
   deleted?: Deleted1;
@@ -315,7 +366,7 @@ export interface MediaDetails {
 }
 export interface MediaQuery {
   query?: Query;
-  page?: Page;
+  page?: Page1;
   kind?: Kind1;
   trash?: Trash;
 }
@@ -325,49 +376,18 @@ export interface MediaUpload {
   upload_id: UploadId;
 }
 export interface PublicResponseMediaCatalog {
-  success?: Success3;
-  code?: Code3;
-  msg?: Msg3;
-  data: MediaCatalog;
-}
-export interface MediaCatalog {
-  items: Items;
-  page: Page1;
-  total: Total;
-  page_size?: PageSize;
-}
-export interface MediaItem {
-  id: Id8;
-  label: Label1;
-  url: Url1;
-  mime: Mime1;
-  size: Size1;
-  created_at: CreatedAt1;
-  reused?: Reused1;
-  kind: Kind2;
-  title?: Title2;
-  deleted?: Deleted2;
-  purge_pending?: PurgePending2;
-}
-export interface PublicResponseMediaItem {
   success?: Success4;
   code?: Code4;
   msg?: Msg4;
-  data: MediaItem;
+  data: MediaCatalog;
 }
-export interface PublicResponseIconCatalog {
-  success?: Success5;
-  code?: Code5;
-  msg?: Msg5;
-  data: IconCatalog;
-}
-export interface IconCatalog {
+export interface MediaCatalog {
   items: Items1;
   page: Page2;
   total: Total1;
   page_size?: PageSize1;
 }
-export interface IconAsset {
+export interface MediaItem {
   id: Id9;
   label: Label2;
   url: Url2;
@@ -375,10 +395,41 @@ export interface IconAsset {
   size: Size2;
   created_at: CreatedAt2;
   reused?: Reused2;
+  kind: Kind2;
+  title?: Title2;
+  deleted?: Deleted2;
+  purge_pending?: PurgePending2;
+}
+export interface PublicResponseMediaItem {
+  success?: Success5;
+  code?: Code5;
+  msg?: Msg5;
+  data: MediaItem;
+}
+export interface PublicResponseIconCatalog {
+  success?: Success6;
+  code?: Code6;
+  msg?: Msg6;
+  data: IconCatalog;
+}
+export interface IconCatalog {
+  items: Items2;
+  page: Page3;
+  total: Total2;
+  page_size?: PageSize2;
+}
+export interface IconAsset {
+  id: Id10;
+  label: Label3;
+  url: Url3;
+  mime: Mime3;
+  size: Size3;
+  created_at: CreatedAt3;
+  reused?: Reused3;
 }
 export interface IconQuery {
   query?: Query1;
-  page?: Page3;
+  page?: Page4;
 }
 export interface IconUpload {
   filename: Filename1;
@@ -386,15 +437,15 @@ export interface IconUpload {
   upload_id: UploadId1;
 }
 export interface PublicResponseIconAsset {
-  success?: Success6;
-  code?: Code6;
-  msg?: Msg6;
-  data: IconAsset;
-}
-export interface PublicResponseSettingsState {
   success?: Success7;
   code?: Code7;
   msg?: Msg7;
+  data: IconAsset;
+}
+export interface PublicResponseSettingsState {
+  success?: Success8;
+  code?: Code8;
+  msg?: Msg8;
   data: SettingsState;
 }
 export interface SettingsState {
@@ -422,8 +473,8 @@ export interface SitePreferences {
   allow_indexing?: AllowIndexing;
 }
 export interface MenuItem {
-  id: Id10;
-  label: Label3;
+  id: Id11;
+  label: Label4;
   href: Href;
   icon?: Icon;
   children?: Children;
@@ -456,9 +507,9 @@ export interface SaveSettings {
   value: PublicSettings;
 }
 export interface PublicResponsePolicyState {
-  success?: Success8;
-  code?: Code8;
-  msg?: Msg8;
+  success?: Success9;
+  code?: Code9;
+  msg?: Msg9;
   data: PolicyState;
 }
 export interface PolicyState {
@@ -482,9 +533,9 @@ export interface SavePolicy {
   value: CachePolicy;
 }
 export interface PublicResponseNodeList {
-  success?: Success9;
-  code?: Code9;
-  msg?: Msg9;
+  success?: Success10;
+  code?: Code10;
+  msg?: Msg10;
   data: NodeList;
 }
 export interface NodeList {

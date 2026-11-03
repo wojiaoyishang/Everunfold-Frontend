@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  type: "M4 4h16M12 4v16M8 20h8M4 4v3M20 4v3",
   grip: "M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01",
   more: "M5 12h.01M12 12h.01M19 12h.01",
   bold: "M6 4h7a4 4 0 0 1 0 8H6V4ZM6 12h8a4 4 0 0 1 0 8H6v-8Z",

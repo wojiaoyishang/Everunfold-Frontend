@@ -9,6 +9,14 @@ export const builtinAdminModule = {
   ],
   pages: [
     {
+      id: "core.fonts",
+      href: "/admin/fonts",
+      label: "字体库",
+      description: "上传和预览字体",
+      icon: "font",
+      menu: { group: "core.workspace", order: 36 },
+    },
+    {
       id: "core.icons",
       href: "/admin/icons",
       label: "图标库",

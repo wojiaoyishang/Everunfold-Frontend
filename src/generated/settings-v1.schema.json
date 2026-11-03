@@ -189,6 +189,140 @@
       "title": "DeliveryState",
       "type": "object"
     },
+    "FontAsset": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "mime": {
+          "title": "Mime",
+          "type": "string"
+        },
+        "size": {
+          "title": "Size",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "reused": {
+          "default": false,
+          "title": "Reused",
+          "type": "boolean"
+        },
+        "info": {
+          "$ref": "#/$defs/FontInfo"
+        },
+        "css_family": {
+          "title": "Css Family",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "url",
+        "mime",
+        "size",
+        "created_at",
+        "info",
+        "css_family"
+      ],
+      "title": "FontAsset",
+      "type": "object"
+    },
+    "FontCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/FontAsset"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 60,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "page",
+        "total"
+      ],
+      "title": "FontCatalog",
+      "type": "object"
+    },
+    "FontInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "title": "Family",
+          "type": "string"
+        },
+        "style": {
+          "enum": [
+            "normal",
+            "italic"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "weight_min": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Min",
+          "type": "integer"
+        },
+        "weight_max": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Max",
+          "type": "integer"
+        },
+        "format": {
+          "enum": [
+            "woff2",
+            "woff",
+            "truetype",
+            "opentype"
+          ],
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "family",
+        "style",
+        "weight_min",
+        "weight_max",
+        "format"
+      ],
+      "title": "FontInfo",
+      "type": "object"
+    },
     "IconAsset": {
       "additionalProperties": false,
       "properties": {
@@ -908,7 +1042,8 @@
           "default": "library",
           "enum": [
             "library",
-            "icon"
+            "icon",
+            "font"
           ],
           "title": "Purpose",
           "type": "string"
@@ -1021,6 +1156,34 @@
         "delivery"
       ],
       "title": "PolicyState",
+      "type": "object"
+    },
+    "PublicResponse_FontCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/FontCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[FontCatalog]",
       "type": "object"
     },
     "PublicResponse_IconAsset_": {
@@ -1594,6 +1757,9 @@
   },
   "additionalProperties": false,
   "properties": {
+    "fonts": {
+      "$ref": "#/$defs/PublicResponse_FontCatalog_"
+    },
     "media_removal_intent": {
       "$ref": "#/$defs/MediaRemovalIntent"
     },
@@ -1665,6 +1831,7 @@
     }
   },
   "required": [
+    "fonts",
     "media_removal_intent",
     "media_removal_preview",
     "media_remove",
@@ -1692,8 +1859,15 @@
   "title": "SettingsContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.6.0",
+  "x-everunfold-contract-version": "1.7.0",
   "x-everunfold-operations": [
+    {
+      "name": "queryFonts",
+      "path": "/v1/admin/fonts/query",
+      "method": "POST",
+      "input": "icon_query",
+      "response": "fonts"
+    },
     {
       "name": "previewMediaRemoval",
       "path": "/v1/admin/media/remove-preview",
