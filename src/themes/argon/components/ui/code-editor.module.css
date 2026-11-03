@@ -19,7 +19,7 @@
   overflow: auto;
 }
 .editor :global(.cm-content) {
-  padding: 16px 0 24px;
+  padding: 0 0 12px;
   caret-color: var(--admin-accent);
 }
 .editor :global(.cm-line) {
