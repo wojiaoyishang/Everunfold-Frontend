@@ -63,16 +63,7 @@ const ReadonlyGuard = Extension.create<
   },
 });
 
-export function RichTextEditor({
-  value,
-  onChange,
-  label,
-  disabled,
-  shared,
-  editorRef,
-  media = {},
-  toolbar,
-}: {
+interface RichTextEditorProps {
   value: string;
   onChange: (html: string) => void;
   label: string;
@@ -81,7 +72,34 @@ export function RichTextEditor({
   editorRef?: Ref<CodeEditorHandle>;
   media?: Record<string, MediaURL>;
   toolbar: (editor: Editor) => ReactNode;
-}) {
+}
+
+function hasLiveEditor(editor: Editor | null): editor is Editor {
+  // A destroyed engine can outlive its view in React's current render snapshot.
+  // Check the manager as well before touching commands, schema or plugin state.
+  return Boolean(editor?.extensionManager && !editor.isDestroyed);
+}
+
+export function RichTextEditor(props: RichTextEditorProps) {
+  const shared = props.shared;
+  const binding = shared?.rich
+    ? `${shared.rich.doc?.guid}:${shared.blockId}`
+    : "local";
+  // Binding a newly loaded Y.Doc owns a fresh component/engine lifetime. Do not
+  // destroy an engine inside useEditor's effect while sibling effects still hold it.
+  return <RichTextEditorInstance key={binding} {...props} />;
+}
+
+function RichTextEditorInstance({
+  value,
+  onChange,
+  label,
+  disabled,
+  shared,
+  editorRef,
+  media = {},
+  toolbar,
+}: RichTextEditorProps) {
   const latest = useRef({ onChange, media });
   useEffect(() => {
     latest.current = { onChange, media };
@@ -118,64 +136,61 @@ export function RichTextEditor({
       }),
     );
   }
-  const editor = useEditor(
-    {
-      extensions,
-      immediatelyRender: false,
-      editable: !disabled,
-      content: shared?.rich ? undefined : sourceDocument(value),
-      editorProps: {
-        handlePaste: (view, event) => {
-          const html = event.clipboardData?.getData("text/html");
-          if (!html) return false;
-          event.preventDefault();
-          const fragment = view.state.schema.nodeFromJSON(
-            sourceDocument(html),
-          ).content;
-          view.dispatch(
-            view.state.tr
-              .replaceSelection(new Slice(fragment, 0, 0))
-              .scrollIntoView(),
-          );
-          return true;
-        },
-        attributes: {
-          role: "textbox",
-          "aria-multiline": "true",
-          "aria-label": label,
-        },
-        handleDOMEvents: {
-          focus: () => {
-            if (shared)
-              shared.awareness.setLocalStateField("blockId", shared.blockId);
-            return false;
-          },
-        },
+  const editor = useEditor({
+    extensions,
+    immediatelyRender: false,
+    editable: !disabled,
+    content: shared?.rich ? undefined : sourceDocument(value),
+    editorProps: {
+      handlePaste: (view, event) => {
+        const html = event.clipboardData?.getData("text/html");
+        if (!html) return false;
+        event.preventDefault();
+        const fragment = view.state.schema.nodeFromJSON(
+          sourceDocument(html),
+        ).content;
+        view.dispatch(
+          view.state.tr
+            .replaceSelection(new Slice(fragment, 0, 0))
+            .scrollIntoView(),
+        );
+        return true;
       },
-      onUpdate: ({ editor }) => {
-        if (!shared?.rich)
-          latest.current.onChange(renderRichNode(editor.getJSON()));
+      attributes: {
+        role: "textbox",
+        "aria-multiline": "true",
+        "aria-label": label,
+      },
+      handleDOMEvents: {
+        focus: () => {
+          if (shared)
+            shared.awareness.setLocalStateField("blockId", shared.blockId);
+          return false;
+        },
       },
     },
-    [shared?.rich],
-  );
+    onUpdate: ({ editor }) => {
+      if (hasLiveEditor(editor) && !shared?.rich)
+        latest.current.onChange(renderRichNode(editor.getJSON()));
+    },
+  });
   useEffect(() => {
-    if (!editor || editor.isDestroyed) return;
+    if (!hasLiveEditor(editor)) return;
     editor.commands.setReadonlyGuard(disabled);
     editor?.setEditable(!disabled);
   }, [editor, disabled]);
   useEffect(() => {
     if (
-      editor &&
-      !editor.isDestroyed &&
+      hasLiveEditor(editor) &&
       !shared?.rich &&
       value !== renderRichNode(editor.getJSON())
     )
       editor.commands.setContent(sourceDocument(value), { emitUpdate: false });
   }, [editor, shared?.rich, value]);
   useEffect(() => {
-    if (!editor || editor.isDestroyed) return;
+    if (!hasLiveEditor(editor)) return;
     const render = () => {
+      if (!hasLiveEditor(editor)) return;
       for (const img of root.current?.querySelectorAll<HTMLImageElement>(
         "img[data-media-source]",
       ) ?? []) {
@@ -209,13 +224,18 @@ export function RichTextEditor({
   useImperativeHandle(
     editorRef,
     () => ({
-      focus: () => editor?.commands.focus(),
-      selection: () => ({
-        start: editor?.state.selection.from ?? 0,
-        end: editor?.state.selection.to ?? 0,
-      }),
+      focus: () => {
+        if (hasLiveEditor(editor)) editor.commands.focus();
+      },
+      selection: () =>
+        hasLiveEditor(editor)
+          ? {
+              start: editor.state.selection.from,
+              end: editor.state.selection.to,
+            }
+          : { start: 0, end: 0 },
       insert: (before, after = "") => {
-        if (editor && !disabled)
+        if (hasLiveEditor(editor) && !disabled)
           editor
             .chain()
             .focus()
@@ -223,7 +243,7 @@ export function RichTextEditor({
             .run();
       },
       captureInsertion: () => {
-        if (!editor) return () => {};
+        if (!hasLiveEditor(editor)) return () => {};
         const sync = ySyncPluginKey.getState(editor.state),
           at = editor.state.selection.from;
         const relative =
@@ -235,7 +255,7 @@ export function RichTextEditor({
               )
             : null;
         return (html) => {
-          if (editor.isDestroyed || !editor.isEditable) return;
+          if (!hasLiveEditor(editor) || !editor.isEditable) return;
           const current = ySyncPluginKey.getState(editor.state);
           const position =
             relative && shared?.rich && current
@@ -268,12 +288,15 @@ export function RichTextEditor({
         data-editor-fonts
         dangerouslySetInnerHTML={{ __html: referencedFontFaces(value, media) }}
       />
-      {editor && (
+      {editor?.extensionManager && (
         <fieldset disabled={disabled} className={styles.tools}>
           {toolbar(editor)}
         </fieldset>
       )}
-      <EditorContent editor={editor} className={styles.canvas} />
+      <EditorContent
+        editor={editor?.extensionManager ? editor : null}
+        className={styles.canvas}
+      />
     </div>
   );
 }
