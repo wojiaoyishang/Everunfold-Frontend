@@ -13,7 +13,7 @@ import { EditorTitle } from "./editor-title";
 import { EditorActions } from "./editor-actions";
 import { EditorPanels } from "./editor-panels";
 import { BlockComposer } from "./block-composer";
-import { ComposerSidebar, MobileBlockLibrary } from "./block-library";
+import { ComposerSidebar, BlockLibraryPicker } from "./block-library";
 import composerStyles from "./block-composer.module.css";
 import styles from "./editor-workspace.module.css";
 import { contentEditors } from "./editor-registry";
@@ -307,7 +307,7 @@ export function DraftEditor({
                     预览
                   </Button>
                 </div>
-                <MobileBlockLibrary
+                <BlockLibraryPicker
                   label="区块"
                   className={composerStyles.mobileToolbar}
                 />

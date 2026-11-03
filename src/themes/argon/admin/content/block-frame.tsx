@@ -1,15 +1,13 @@
 "use client";
 import { useRef, type ReactNode } from "react";
 import type { DraftBlock } from "@/generated/content-admin-contract";
-import { Button } from "../../components/ui/primitives";
-import { Icon } from "../../components/icon";
 import {
   useDragItem,
   useDropPosition,
   useReorderMotion,
 } from "../../components/ui/drag-and-drop";
 import { BlockHeader } from "./block-header";
-import { MobileBlockLibrary } from "./block-library";
+import { BlockLibraryPicker } from "./block-library";
 import { useBlockComposer } from "./block-composer";
 import styles from "./block-composer.module.css";
 import workspace from "./editor-workspace.module.css";
@@ -37,19 +35,10 @@ export function BlockPosition({
       <span className={styles.dropLine} aria-hidden="true">
         <span>{source?.kind === "palette" ? "添加区块" : "移到这里"}</span>
       </span>
-      <Button
-        className={styles.insertAt}
-        disabled={host.disabled || host.body.length >= 128}
-        aria-label={end ? "在末尾插入区块" : "在此处插入区块"}
-        onClick={() => host.choose(before)}
-      >
-        <Icon name="plus" />
-        {end ? "添加区块" : null}
-      </Button>
-      <MobileBlockLibrary
+      <BlockLibraryPicker
         before={before}
         label={end ? "添加区块" : "在此处插入区块"}
-        className={styles.mobileInsert}
+        className={styles.positionPicker}
       />
     </div>
   );

@@ -239,33 +239,33 @@
   height: 58px;
   margin-top: 8px;
 }
-.position > .insertAt {
+.positionPicker {
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 24px;
-  padding: 3px 8px;
-  border: 1px solid var(--admin-border);
-  border-radius: 5px;
-  font-size: 11px;
-  color: var(--admin-muted);
-  background: var(--admin-canvas);
+  display: inline-flex;
   opacity: 0;
   transform: scale(0.9);
+  transition:
+    opacity var(--admin-motion-fast),
+    transform var(--admin-motion-fast);
 }
-.position:hover > .insertAt,
-.position:focus-within > .insertAt,
-.position[data-end="true"] > .insertAt {
+.position:hover > .positionPicker,
+.position:focus-within > .positionPicker,
+.position[data-end="true"] > .positionPicker {
   opacity: 1;
   transform: none;
 }
-.position .insertAt:hover {
+.position .openLibrary {
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-canvas);
+  color: var(--admin-muted);
+}
+.position .openLibrary:hover {
   color: var(--admin-accent);
   border-color: var(--admin-accent);
 }
-.insertAt svg {
+.position .openLibrary svg {
   width: 13px;
   height: 13px;
 }
@@ -309,8 +309,7 @@
   color: var(--admin-canvas);
   font-size: 10px;
 }
-.position[data-drag-active="true"] > .insertAt,
-.position[data-drag-active="true"] > .mobileInsert {
+.position[data-drag-active="true"] > .positionPicker {
   opacity: 0;
   pointer-events: none;
 }
@@ -352,14 +351,13 @@
   width: 17px;
   color: var(--admin-accent);
 }
-.mobileToolbar,
-.mobileInsert {
+.mobileToolbar {
   display: none;
 }
-.mobileLibrary {
+.libraryPickerPanel {
   padding: 0;
 }
-.mobileLibrary .library {
+.libraryPickerPanel .library {
   border: 0;
 }
 .openLibrary {
@@ -394,30 +392,14 @@
   .inspector {
     position: static;
   }
-  .mobileToolbar,
-  .mobileInsert {
+  .mobileToolbar {
     display: inline-flex;
   }
   .mobileToolbar {
     margin-left: auto;
   }
-  .position > .insertAt {
-    display: none;
-  }
-  .position .openLibrary {
+  .position > .positionPicker {
     opacity: 1;
-    padding: 3px 7px;
-    background: var(--admin-canvas);
-    border: 1px solid var(--admin-border);
-  }
-  .position:focus-within .openLibrary,
-  .position:hover .openLibrary,
-  .position[data-end="true"] .openLibrary {
-    opacity: 1;
-  }
-  .mobileLibrary .libraryCard {
-    touch-action: manipulation;
-    cursor: pointer;
   }
   .header {
     padding: 4px 6px;
@@ -429,7 +411,12 @@
   }
 }
 @media (hover: none) {
-  .position .openLibrary {
+  .position > .positionPicker {
     opacity: 1;
   }
+}
+
+.libraryPickerPanel .libraryCard {
+  touch-action: manipulation;
+  cursor: pointer;
 }

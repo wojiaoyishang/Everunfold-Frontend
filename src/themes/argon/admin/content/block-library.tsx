@@ -11,15 +11,18 @@ import styles from "./block-composer.module.css";
 export function BlockLibrary({
   compact = false,
   onInsert,
+  before,
 }: {
   compact?: boolean;
   onInsert?: () => void;
+  before?: string | null;
 }) {
   const host = useBlockComposer();
+  const insertionBefore = before === undefined ? host.anchor : before;
   const target =
-    host.anchor === null
+    insertionBefore === null
       ? host.body.length
-      : host.body.findIndex((b) => b.id === host.anchor);
+      : host.body.findIndex((b) => b.id === insertionBefore);
   return (
     <div className={styles.library}>
       <div className={styles.libraryHeading}>
@@ -27,7 +30,7 @@ export function BlockLibrary({
         <span>
           {target < 0
             ? "请重新选择位置"
-            : `插入到${host.anchor === null ? "末尾" : `第 ${target + 1} 块之前`}`}
+            : `插入到${insertionBefore === null ? "末尾" : `第 ${target + 1} 块之前`}`}
         </span>
       </div>
       <div className={styles.cards}>
@@ -37,6 +40,7 @@ export function BlockLibrary({
             plugin={plugin}
             compact={compact}
             onInsert={onInsert}
+            before={insertionBefore}
           />
         ))}
       </div>
@@ -46,38 +50,53 @@ export function BlockLibrary({
     </div>
   );
 }
-function LibraryCard({
-  plugin,
-  compact,
-  onInsert,
-}: {
+type LibraryCardProps = {
   plugin: (typeof blockEditors.entries)[number];
   compact: boolean;
   onInsert?: () => void;
-}) {
-  const host = useBlockComposer(),
-    disabled = host.disabled || host.body.length >= 128;
-  const drag = useDragItem(
-    { id: plugin.id, kind: "palette", label: plugin.label },
-    disabled || compact,
+  before: string | null;
+};
+function LibraryCard({ compact, ...props }: LibraryCardProps) {
+  return compact ? (
+    <LibraryChoice {...props} />
+  ) : (
+    <DraggableLibraryCard {...props} />
   );
+}
+function DraggableLibraryCard(props: Omit<LibraryCardProps, "compact">) {
+  const host = useBlockComposer();
+  const drag = useDragItem(
+    { id: props.plugin.id, kind: "palette", label: props.plugin.label },
+    host.disabled || host.body.length >= 128,
+  );
+  return <LibraryChoice {...props} drag={drag} />;
+}
+/** Popup choices never register duplicate draggable IDs or start a drag. */
+function LibraryChoice({
+  plugin,
+  before,
+  onInsert,
+  drag,
+}: Omit<LibraryCardProps, "compact"> & {
+  drag?: ReturnType<typeof useDragItem>;
+}) {
+  const host = useBlockComposer();
   return (
     <Button
-      {...(!compact ? drag.handle : {})}
+      {...drag?.handle}
       ref={(node) => {
-        drag.ref(node);
-        if (typeof drag.handle.ref === "function") drag.handle.ref(node);
+        drag?.ref(node);
+        if (typeof drag?.handle.ref === "function") drag.handle.ref(node);
       }}
       className={styles.libraryCard}
-      disabled={disabled}
+      disabled={host.disabled || host.body.length >= 128}
       aria-label={`添加 ${plugin.label} 区块`}
-      data-dragging={drag.dragging}
+      data-dragging={drag?.dragging}
       onClick={() => {
-        host.insert(plugin.format);
-        onInsert?.();
+        if (host.insert(plugin.format, before)) onInsert?.();
       }}
       onKeyDown={(event) => {
-        if (event.code !== "Enter") drag.handle.onKeyDown?.(event);
+        if (event.code !== "Enter") drag?.handle.onKeyDown?.(event);
       }}
     >
       <span className={styles.cardIcon}>
@@ -189,7 +208,7 @@ function subscribeViewport(changed: () => void) {
   media.addEventListener("change", changed);
   return () => media.removeEventListener("change", changed);
 }
-export function MobileBlockLibrary({
+export function BlockLibraryPicker({
   before = null,
   label = "添加区块",
   className,
@@ -205,7 +224,7 @@ export function MobileBlockLibrary({
         label={label}
         disabled={host.disabled || host.body.length >= 128}
         className={styles.openLibrary}
-        panelClassName={styles.mobileLibrary}
+        panelClassName={styles.libraryPickerPanel}
         triggerContent={
           <>
             <Icon name="plus" />
@@ -213,7 +232,7 @@ export function MobileBlockLibrary({
           </>
         }
       >
-        {(close) => <BlockLibrary compact onInsert={close} />}
+        {(close) => <BlockLibrary compact before={before} onInsert={close} />}
       </ActionPopover>
     </span>
   );

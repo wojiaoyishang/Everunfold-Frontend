@@ -20,7 +20,7 @@ type Composer = {
   setTab: (tab: "blocks" | "settings") => void;
   anchor: string | null;
   choose: (before: string | null) => void;
-  insert: (format: DraftBlock["type"]) => void;
+  insert: (format: DraftBlock["type"], before?: string | null) => boolean;
   move: (id: string, before: string | null) => void;
   focus: React.RefObject<string | null>;
   moved: string | null;
@@ -51,11 +51,11 @@ export function BlockComposer({
     [message, setMessage] = useState("");
   const focus = useRef<string | null>(null);
   const finish = (commandValue: BlockCommand) => {
-    if (disabled) return;
+    if (disabled) return false;
     const changed = command(commandValue);
     if (!changed) {
       setMessage("插入位置已变化，请重新选择。");
-      return;
+      return false;
     }
     const id =
       commandValue.kind === "insert" ? commandValue.block.id : commandValue.id;
@@ -64,10 +64,11 @@ export function BlockComposer({
       commandValue.kind === "insert" ? "已添加区块" : "已调整区块顺序",
     );
     if (commandValue.kind === "insert") focus.current = id;
+    return true;
   };
   const insert = (format: DraftBlock["type"], before = anchor) => {
-    if (!blockEditors.get(format ?? "markdown")) return;
-    finish({
+    if (!blockEditors.get(format ?? "markdown")) return false;
+    return finish({
       kind: "insert",
       block: { id: crypto.randomUUID(), type: format, content: "" },
       before,
