@@ -121,4 +121,6 @@
 
 - [源码工具与场景快捷键](decisions/0038-source-editor-interactions-and-shortcuts.md) 与 [本轮界面验收](handoff/source-editor-verification.md)：行号/折行对齐、内容高度、格式/插入、搜索补全与快捷保存。
 
-- [区块库与按ID拖放](decisions/0039-block-library-and-anchored-dragging.md) 与 [实际验收](handoff/block-composer-verification.md)：注册卡片、手柄/键盘排序、协同撤销、窄屏弹层与首行紧贴。
+- [区块库与按ID拖放](decisions/0039-block-library-and-anchored-dragging.md) 与 [实际验收](handoff/block-composer-verification.md)：注册卡片、手柄/键盘排序、协同撤销与窄屏弹层。
+
+- [编辑留白与十行高度](decisions/0040-source-editor-spacing-and-minimum-height.md)：用户最新排版要求、CSS规则、浏览器检查与截图。

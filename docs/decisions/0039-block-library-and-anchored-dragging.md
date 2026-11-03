@@ -24,6 +24,8 @@ DragAndDrop 封装传感器、中文读屏提示、碰撞和滚动；BlockCompos
 
 区块头按钮样式只匹配直接子元素，不影响嵌套确认框。共享确认按钮保持至少64px、不收缩、不换行。320px 下工具栏允许自然排列，无裁切。
 
+本段高度/留白规则已被用户随后要求的 [ADR0040](0040-source-editor-spacing-and-minimum-height.md) 替代，下面保留当时决定。
+
 按用户最新要求，CodeMirror 内容顶部 padding 为0、底部12px；首行紧贴工具栏，行号交给 CodeMirror 同步测量，不用空行撑高。颜色均从后台变量派生。
 
 ## 依赖与未覆盖项

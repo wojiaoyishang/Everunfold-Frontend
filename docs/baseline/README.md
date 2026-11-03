@@ -311,3 +311,17 @@ ADR0039、editor-plugins-3、公共索引/验收/4张截图逐字节同步。协
 | `docs/design/block-composer-drag.png` | `20b481cd50f7a743d69eea5b017f0487c08297cd4e9760a31d05a760cb6c161a` |
 | `docs/design/block-composer-mobile.png` | `a133bd92849909dbbe4701dbe135df1b0d8e8c61123f8eaf6add5185ea01af19` |
 | `docs/design/block-composer-mobile-dark.png` | `f5251db94c8e0696a4951ab72b45d96e1cb2f95ce2e224f9b8eea04ea04f8b0a` |
+
+## 2026-11-03 编辑留白与十行高度同步清单
+
+用户最新要求替代首行紧贴/无最小高度；ADR0040、editor-plugins-4、前述ADR替代标记、公共索引/2张截图逐字节同步。STATUS各自保留历史，原始基线、协议development-10、协同schema1.0和数据库0013未改。
+
+| 文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `23b365ab82e3519a6574ebdcaa815ed177287dad1c1631f3c861047584e99770` |
+| `docs/development/editor-plugins.md` | `90e5025e92c34c51a19498f635d3a662f5ab6d055acd213ada0730fb848f6914` |
+| `docs/decisions/0038-source-editor-interactions-and-shortcuts.md` | `35c5042bdf2c005e09e64a72be85687f089797d09b38bc2050199c1810e61db5` |
+| `docs/decisions/0039-block-library-and-anchored-dragging.md` | `4aef31c5180e76d726b93749d1c9ec1ae7e15682dc23620299a4f57b0156eda8` |
+| `docs/decisions/0040-source-editor-spacing-and-minimum-height.md` | `55d9fdea03bf4f83d2687aeb86d9d2adc4bd04687f86f97b824c37d849aa2a77` |
+| `docs/design/editor-minimum-height-desktop.png` | `bc7921e0b8a834140801ea99ee2f7fc752ceb7d6226f2c2e558afc8d40a6fe6f` |
+| `docs/design/editor-minimum-height-mobile.png` | `c4597b150e13efe6c32412db4264aff5d0e0d3c3639f8233baac222b256a094b` |

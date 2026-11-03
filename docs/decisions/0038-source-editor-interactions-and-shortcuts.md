@@ -6,6 +6,8 @@
 
 CodeMirror 负责行高、折行和行号测量。正文、行号共用 14px/1.75 字体指标；不为 .cm-gutters 添加顶部 padding，不覆盖引擎计算的行高。视觉留白放在正文容器，活动行/行号和配色从后台变量派生。
 
+本段高度/留白规则已被用户随后要求的 [ADR0040](0040-source-editor-spacing-and-minimum-height.md) 替代，下面保留当时决定。
+
 编辑区按内容自然增长，去掉桌面/手机的固定最小高度；达到 540px 后内部滚动。空块保留一行的自然输入高度。不得通过插入空行或固定空白区域撑版。
 
 SourceBlockEditor 只组合工具栏、查找面板、封装 CodeEditor 和位置状态。SourceToolbar、SourceSearchPanel 独立复用；Markdown/HTML 插件各自提供语言、常用动作、插入模板和快捷键。格式变换放 core/editor/source-commands.ts，使用 CodeMirror transaction 的局部修改和选区映射，不整块覆写共享文本。每个工具操作单独形成撤销边界。

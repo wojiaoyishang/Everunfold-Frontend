@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-3，2026-11-03。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-4，2026-11-03。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 ## 启动与验证
 
@@ -35,7 +35,7 @@
 - 标题/列表作用于当前行或选中多行，常用行内格式可切换；空选区插入并选中占位文本。链接、表格、HTML 列表等为源码模板，插入后继续手工编辑。HTML 代码块转义选中标签；已有 HTML 标题的属性保留。
 - Ctrl/Cmd+B 加粗，Ctrl/Cmd+I 斜体，Ctrl/Cmd+F 当前块查找；Ctrl/Cmd+Z、Shift+Z/Y 保持原全篇本人撤销/重做。查找框 Enter 下一项、Shift+Enter 上一项，替换框 Enter 替换，Escape 关闭并回正文。
 - 当前编辑页面 Ctrl/Cmd+S 和 Shift+S 均保存草稿，不发布；保存、错误/不确定状态和确认仍复用原逻辑。无修改不生成新修订，按住按键不重复提交，模态弹窗内不触发页面保存。控件恢复后回原焦点。未确认的上次操作只能通过明确重试按钮处理。
-- 高度随内容变化，不设置固定大块留白；超过 540px 内部滚动。换行和查找是当前块的临时界面状态，不进入协同正文。匹配计数最多显示 1000+，不表示全部替换只处理这些匹配。
+- 按用户最新要求保留十行最小编辑高度；超过十行后随内容增长，超过 540px 内部滚动，详见ADR0040。换行和查找是当前块的临时界面状态，不进入协同正文。匹配计数最多显示 1000+，不表示全部替换只处理这些匹配。
 - 验证入口：试用草稿分别测试两种工具栏、跨窗口格式/替换与本人撤销；输入后按 Ctrl+S 检查“草稿已保存”和焦点；再修改应显示未保存。长文、320px 折行、模态弹窗、深色与减少动态检查见 [本轮验收](../handoff/source-editor-verification.md)。
 
 ## 区块库与排序
@@ -47,6 +47,6 @@
 - 更多菜单保留位置移动、格式切换与确认删除。格式切换保留源文，不承诺自动转换。
 - 结构操作只能经过useDraftEditor.commandBlock，核心按最新ID解析，已有草稿用单个LOCAL事务更新order；不要从主题直接改Y.Doc或提交整篇JSON。
 - 拖动反馈和FLIP复用封装DragAndDrop，遵循后台减少动态；拖动中暂停保存/发布/撤销/预览切换。
-- 源码首行顶部padding为0，底部12px；行号仍由CodeMirror测量。不要重新加顶部空白或用空行撑版。
+- 源码上下各保留16px；以十行可见文本为最小高度（当前277px），行号栏铺满同样高度，仍由CodeMirror测量行号。不要为了高度往正文插入空行；规则见 [ADR0040](../decisions/0040-source-editor-spacing-and-minimum-height.md)。
 
 本轮检查、截图和真实未覆盖项见 [区块验收](../handoff/block-composer-verification.md)。
