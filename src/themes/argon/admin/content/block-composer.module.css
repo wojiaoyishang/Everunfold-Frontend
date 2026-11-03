@@ -1,0 +1,435 @@
+.header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 42px;
+  padding: 5px 10px;
+  background: var(--admin-subtle);
+  border-bottom: 1px solid var(--admin-border);
+}
+.header > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  min-height: 30px;
+  padding: 5px;
+  color: var(--admin-muted);
+  background: transparent;
+  border-radius: 5px;
+}
+.header > button:hover {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.header .handle {
+  cursor: grab;
+  touch-action: none;
+}
+.handle svg {
+  stroke-width: 4;
+  width: 16px;
+  height: 20px;
+}
+.format {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+.format svg {
+  width: 14px;
+  height: 14px;
+  color: var(--admin-muted);
+}
+.number {
+  font-size: 11px;
+  color: var(--admin-muted);
+  font-variant-numeric: tabular-nums;
+}
+.header .more {
+  margin-left: auto;
+}
+.actions {
+  padding: 6px;
+  font-size: 12px;
+}
+.actions > button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 9px;
+  padding: 8px 10px;
+  background: transparent;
+  color: var(--admin-text);
+  border-radius: 5px;
+}
+.actions > button:hover:not(:disabled) {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+}
+.actions > button svg {
+  width: 15px;
+  height: 15px;
+}
+.actions > .delete {
+  color: var(--admin-danger);
+}
+.menuDivider {
+  height: 1px;
+  margin: 5px 4px;
+  background: var(--admin-border);
+}
+
+.inspector {
+  min-width: 0;
+  position: sticky;
+  top: 82px;
+}
+.inspectorTabs {
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  margin-bottom: 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+}
+.inspectorTabs button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  flex: 1;
+  padding: 9px 5px;
+  font-size: 12px;
+  border-radius: 5px;
+  color: var(--admin-muted);
+  background: transparent;
+}
+.inspectorTabs button[aria-selected="true"] {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+}
+.inspectorTabs svg {
+  width: 15px;
+  height: 15px;
+}
+.inspectorViews {
+  display: grid;
+}
+.inspectorView {
+  grid-area: 1/1;
+  opacity: 0;
+  visibility: hidden;
+  max-height: 0;
+  overflow: hidden;
+  transform: translateY(5px);
+  transition:
+    opacity var(--admin-motion-fast),
+    transform var(--admin-motion-layout) var(--admin-motion-ease),
+    visibility var(--admin-motion-fast);
+}
+.inspectorView[data-active="true"] {
+  opacity: 1;
+  visibility: visible;
+  max-height: none;
+  overflow: visible;
+  transform: none;
+}
+.library {
+  padding: 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+}
+.libraryHeading {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.libraryHeading strong {
+  font-size: 14px;
+}
+.libraryHeading span {
+  font-size: 11px;
+  color: var(--admin-muted);
+}
+.cards {
+  display: grid;
+  gap: 10px;
+}
+.cards .libraryCard {
+  position: relative;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 14px;
+  gap: 3px 10px;
+  align-items: center;
+  text-align: left;
+  width: 100%;
+  padding: 13px 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  color: var(--admin-text);
+  background: var(--admin-canvas);
+  cursor: grab;
+  touch-action: none;
+}
+.libraryCard:hover:not(:disabled) {
+  border-color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--admin-accent) 8%, transparent);
+}
+.libraryCard:active {
+  cursor: grabbing;
+}
+.libraryCard[data-dragging="true"] {
+  opacity: 0.45;
+}
+.libraryCard strong {
+  font-size: 13px;
+}
+.libraryCard small {
+  grid-column: 2;
+  font-size: 11px;
+  color: var(--admin-muted);
+  line-height: 1.5;
+}
+.libraryCard > svg {
+  grid-column: 3;
+  grid-row: 1/3;
+  width: 14px;
+  height: 14px;
+  color: var(--admin-muted);
+}
+.cardIcon {
+  grid-row: 1/3;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  background: var(--admin-subtle);
+  border-radius: 6px;
+  color: var(--admin-accent);
+}
+.cardIcon svg {
+  width: 20px;
+  height: 20px;
+}
+.libraryHelp {
+  margin: 16px 0 0;
+  font-size: 11px;
+  color: var(--admin-muted);
+  line-height: 1.7;
+}
+.position {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+}
+.position:first-child {
+  margin-top: -14px;
+}
+.position[data-end="true"] {
+  height: 58px;
+  margin-top: 8px;
+}
+.position > .insertAt {
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 24px;
+  padding: 3px 8px;
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+  font-size: 11px;
+  color: var(--admin-muted);
+  background: var(--admin-canvas);
+  opacity: 0;
+  transform: scale(0.9);
+}
+.position:hover > .insertAt,
+.position:focus-within > .insertAt,
+.position[data-end="true"] > .insertAt {
+  opacity: 1;
+  transform: none;
+}
+.position .insertAt:hover {
+  color: var(--admin-accent);
+  border-color: var(--admin-accent);
+}
+.insertAt svg {
+  width: 13px;
+  height: 13px;
+}
+.dropLine {
+  position: absolute;
+  inset: 50% 0 auto;
+  height: 2px;
+  background: var(--admin-accent);
+  opacity: 0;
+  transform: scaleX(0.85);
+  transition:
+    opacity var(--admin-motion-fast),
+    transform var(--admin-motion-fast);
+  pointer-events: none;
+}
+.dropLine::before,
+.dropLine::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--admin-accent);
+  border-radius: 50%;
+  background: var(--admin-canvas);
+}
+.dropLine::before {
+  left: 0;
+}
+.dropLine::after {
+  right: 0;
+}
+.dropLine span {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--admin-accent);
+  color: var(--admin-canvas);
+  font-size: 10px;
+}
+.position[data-drag-active="true"] > .insertAt,
+.position[data-drag-active="true"] > .mobileInsert {
+  opacity: 0;
+  pointer-events: none;
+}
+.position[data-drag-active="true"] .dropLine {
+  opacity: 0.15;
+  transform: none;
+}
+.position[data-over="true"] .dropLine {
+  opacity: 1;
+}
+.frame[data-dragging="true"] {
+  opacity: 0.28;
+  border-style: dashed;
+}
+.frame[data-arrived="true"] {
+  animation: arrival var(--admin-motion-enter) var(--admin-motion-ease);
+}
+.ghost {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 260px;
+  padding: 14px 16px;
+  border: 1px solid var(--admin-accent);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+  box-shadow: 0 12px 32px color-mix(in srgb, var(--admin-text) 16%, transparent);
+  cursor: grabbing;
+}
+.ghost strong {
+  font-size: 13px;
+}
+.ghost span {
+  font-size: 11px;
+  color: var(--admin-muted);
+}
+.ghost svg {
+  width: 17px;
+  color: var(--admin-accent);
+}
+.mobileToolbar,
+.mobileInsert {
+  display: none;
+}
+.mobileLibrary {
+  padding: 0;
+}
+.mobileLibrary .library {
+  border: 0;
+}
+.openLibrary {
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+  border-radius: 5px;
+  padding: 6px 8px;
+  font-size: 11px;
+}
+.openLibrary svg {
+  width: 14px;
+  height: 14px;
+}
+@keyframes arrival {
+  from {
+    box-shadow: 0 0 0 3px var(--admin-accent-soft);
+    border-color: var(--admin-accent);
+  }
+  to {
+    box-shadow: none;
+    border-color: var(--admin-border);
+  }
+}
+@media (max-width: 800px) {
+  .inspector[data-settings-only="true"] .inspectorTabs {
+    display: none;
+  }
+  .inspector {
+    position: static;
+  }
+  .mobileToolbar,
+  .mobileInsert {
+    display: inline-flex;
+  }
+  .mobileToolbar {
+    margin-left: auto;
+  }
+  .position > .insertAt {
+    display: none;
+  }
+  .position .openLibrary {
+    opacity: 1;
+    padding: 3px 7px;
+    background: var(--admin-canvas);
+    border: 1px solid var(--admin-border);
+  }
+  .position:focus-within .openLibrary,
+  .position:hover .openLibrary,
+  .position[data-end="true"] .openLibrary {
+    opacity: 1;
+  }
+  .mobileLibrary .libraryCard {
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+  .header {
+    padding: 4px 6px;
+    gap: 6px;
+  }
+  .header .handle {
+    width: 34px;
+    min-height: 34px;
+  }
+}
+@media (hover: none) {
+  .position .openLibrary {
+    opacity: 1;
+  }
+}

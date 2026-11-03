@@ -12,6 +12,9 @@ import { useEditorResources } from "@/core/content-management/use-editor-resourc
 import { EditorTitle } from "./editor-title";
 import { EditorActions } from "./editor-actions";
 import { EditorPanels } from "./editor-panels";
+import { BlockComposer } from "./block-composer";
+import { ComposerSidebar, MobileBlockLibrary } from "./block-library";
+import composerStyles from "./block-composer.module.css";
 import styles from "./editor-workspace.module.css";
 import { contentEditors } from "./editor-registry";
 import { DraftPreview } from "./draft-preview";
@@ -43,6 +46,7 @@ export function DraftEditor({
   >(null);
   const [destination, setDestination] = useState(`/admin/content/${type.id}`);
   const [leaving, setLeaving] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const surface = useRef<HTMLDivElement>(null);
   const saveFocus = useRef<HTMLElement | null>(null);
   const [focusRequest, setFocusRequest] = useState(0);
@@ -99,6 +103,7 @@ export function DraftEditor({
     return Boolean(result);
   };
   const saveDisabled =
+    dragging ||
     editor.busy ||
     editor.loading ||
     leaving ||
@@ -138,6 +143,16 @@ export function DraftEditor({
         data-leaving={leaving}
         onKeyDownCapture={(event) => {
           if (
+            dragging &&
+            (event.ctrlKey || event.metaKey) &&
+            ["z", "y"].includes(event.key.toLowerCase())
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+          }
+          if (
+            dragging ||
             !editor.session ||
             blocked ||
             event.nativeEvent.isComposing ||
@@ -163,7 +178,7 @@ export function DraftEditor({
         <div className="admin-editor-back">
           <Button
             className="admin-button"
-            disabled={editor.busy || leaving}
+            disabled={editor.busy || leaving || dragging}
             onClick={() => requestLeave(`/admin/content/${type.id}`)}
           >
             <Icon name="arrow-left" />
@@ -213,7 +228,7 @@ export function DraftEditor({
           session={editor.session}
           status={editor.collaboration}
           fields={editor.fields}
-          disabled={Boolean(blocked)}
+          disabled={Boolean(blocked || dragging)}
         />
         <div className={styles.mobileTabs} aria-label="编辑区域">
           <Button
@@ -265,117 +280,134 @@ export function DraftEditor({
             setConfirm(null);
           }}
         />
-        <div className={styles.layout} data-section={section}>
-          <section className={styles.main} aria-label={`${type.label}编辑器`}>
-            <div className="admin-draft-editor-toolbar">
-              <div className="admin-draft-tabs" aria-label="编辑视图">
-                <Button
-                  aria-pressed={mode === "edit"}
-                  onClick={() => setMode("edit")}
-                >
-                  <Icon name="edit" />
-                  编辑
-                </Button>
-                <Button
-                  aria-pressed={mode === "preview"}
-                  disabled={editor.loading}
-                  onClick={() => setMode("preview")}
-                >
-                  <Icon name="eye" />
-                  预览
-                </Button>
+        <BlockComposer
+          body={editor.fields.body}
+          disabled={Boolean(blocked || mode === "preview")}
+          command={editor.commandBlock}
+          onBusyChange={setDragging}
+        >
+          <div className={styles.layout} data-section={section}>
+            <section className={styles.main} aria-label={`${type.label}编辑器`}>
+              <div className="admin-draft-editor-toolbar">
+                <div className="admin-draft-tabs" aria-label="编辑视图">
+                  <Button
+                    aria-pressed={mode === "edit"}
+                    disabled={dragging}
+                    onClick={() => setMode("edit")}
+                  >
+                    <Icon name="edit" />
+                    编辑
+                  </Button>
+                  <Button
+                    aria-pressed={mode === "preview"}
+                    disabled={editor.loading || dragging}
+                    onClick={() => setMode("preview")}
+                  >
+                    <Icon name="eye" />
+                    预览
+                  </Button>
+                </div>
+                <MobileBlockLibrary
+                  label="区块"
+                  className={composerStyles.mobileToolbar}
+                />
+                <span className="admin-badge">
+                  {archived
+                    ? "已回收"
+                    : editor.detail?.published_revision
+                      ? "已发布"
+                      : "草稿"}
+                  {editor.detail?.is_demo ? " · 示例" : ""}
+                </span>
               </div>
-              <span className="admin-badge">
-                {archived
-                  ? "已回收"
-                  : editor.detail?.published_revision
-                    ? "已发布"
-                    : "草稿"}
-                {editor.detail?.is_demo ? " · 示例" : ""}
-              </span>
-            </div>
-            <div
-              className="admin-draft-editor-scroll"
-              aria-busy={editor.loading}
-            >
-              {archived && (
-                <p className="admin-draft-message">
-                  这份内容已在回收站，请返回列表恢复后再编辑。
-                </p>
-              )}
-              {editor.error && (
-                <div className="admin-draft-message" role="alert">
-                  <span>{editor.error}</span>
-                  {id && !editor.detail && !editor.loading && (
-                    <Button className="admin-button" onClick={editor.retryRead}>
-                      重新读取
-                    </Button>
-                  )}
-                  {editor.conflict && (
-                    <Button
-                      className="admin-button"
-                      disabled={editor.busy}
-                      onClick={() => void editor.readLatest()}
-                    >
-                      查看最新内容
-                    </Button>
-                  )}
-                </div>
-              )}
-              {editor.loading ? (
-                <div className="admin-draft-empty" role="status">
-                  正在读取内容…
-                </div>
-              ) : (
-                (!id || editor.detail) && (
-                  <div key={mode} className="admin-draft-editor-view">
-                    {mode === "preview" ? (
-                      <DraftPreview fields={editor.fields} media={media} />
-                    ) : Fields ? (
-                      <Fields
-                        type={type}
-                        value={editor.fields}
-                        onChange={editor.setFields}
-                        disabled={Boolean(blocked)}
-                        onMedia={resources.remember}
-                      />
-                    ) : (
-                      <p>此类型的编辑器暂不可用，内容仍会保留。</p>
+              <div
+                className="admin-draft-editor-scroll"
+                aria-busy={editor.loading}
+              >
+                {archived && (
+                  <p className="admin-draft-message">
+                    这份内容已在回收站，请返回列表恢复后再编辑。
+                  </p>
+                )}
+                {editor.error && (
+                  <div className="admin-draft-message" role="alert">
+                    <span>{editor.error}</span>
+                    {id && !editor.detail && !editor.loading && (
+                      <Button
+                        className="admin-button"
+                        onClick={editor.retryRead}
+                      >
+                        重新读取
+                      </Button>
+                    )}
+                    {editor.conflict && (
+                      <Button
+                        className="admin-button"
+                        disabled={editor.busy}
+                        onClick={() => void editor.readLatest()}
+                      >
+                        查看最新内容
+                      </Button>
                     )}
                   </div>
-                )
-              )}
-              {editor.latest && (
-                <section className="admin-draft-conflict">
-                  <header>
-                    <strong>服务器上的最新内容</strong>
-                    <Button
-                      className="admin-button"
-                      onClick={() => setConfirm("reload")}
-                    >
-                      使用这个版本
-                    </Button>
-                  </header>
-                  <DraftPreview
-                    fields={editor.latest}
-                    media={editor.latest.media_urls}
-                  />
-                </section>
-              )}
-            </div>
-          </section>
-          <EditorPanels
-            type={type}
-            fields={editor.fields}
-            onChange={editor.setFields}
-            detail={editor.detail}
-            disabled={Boolean(blocked || (id && !editor.detail))}
-            terms={resources.terms}
-            createCategory={resources.createCategory}
-            media={media}
-            onMedia={resources.remember}
-          />
-        </div>
+                )}
+                {editor.loading ? (
+                  <div className="admin-draft-empty" role="status">
+                    正在读取内容…
+                  </div>
+                ) : (
+                  (!id || editor.detail) && (
+                    <div key={mode} className="admin-draft-editor-view">
+                      {mode === "preview" ? (
+                        <DraftPreview fields={editor.fields} media={media} />
+                      ) : Fields ? (
+                        <Fields
+                          type={type}
+                          value={editor.fields}
+                          onChange={editor.setFields}
+                          disabled={Boolean(blocked)}
+                          onMedia={resources.remember}
+                        />
+                      ) : (
+                        <p>此类型的编辑器暂不可用，内容仍会保留。</p>
+                      )}
+                    </div>
+                  )
+                )}
+                {editor.latest && (
+                  <section className="admin-draft-conflict">
+                    <header>
+                      <strong>服务器上的最新内容</strong>
+                      <Button
+                        className="admin-button"
+                        onClick={() => setConfirm("reload")}
+                      >
+                        使用这个版本
+                      </Button>
+                    </header>
+                    <DraftPreview
+                      fields={editor.latest}
+                      media={editor.latest.media_urls}
+                    />
+                  </section>
+                )}
+              </div>
+            </section>
+            <ComposerSidebar settingsOnly={section === "settings"}>
+              <EditorPanels
+                type={type}
+                fields={editor.fields}
+                onChange={editor.setFields}
+                detail={editor.detail}
+                disabled={Boolean(blocked || (id && !editor.detail))}
+                terms={resources.terms}
+                createCategory={resources.createCategory}
+                media={media}
+                onMedia={resources.remember}
+              />
+            </ComposerSidebar>
+          </div>
+        </BlockComposer>
         <ContentSync refreshKey={editor.detail?.revision ?? 0} />
       </div>
     </DraftCollaborationContext>

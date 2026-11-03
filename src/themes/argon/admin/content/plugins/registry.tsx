@@ -13,6 +13,7 @@ export const blockEditors = createBlockEditorRegistry<
     version: "1.1.0",
     format: "markdown",
     label: "Markdown",
+    description: "标题、列表与轻量标记",
     adapter: MarkdownEditor,
   },
   {
@@ -20,6 +21,7 @@ export const blockEditors = createBlockEditorRegistry<
     version: "1.1.0",
     format: "html",
     label: "HTML",
+    description: "标签与自定义内容结构",
     adapter: HtmlEditor,
   },
 ]);

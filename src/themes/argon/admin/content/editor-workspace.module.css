@@ -289,7 +289,7 @@
 }
 .blockList {
   display: grid;
-  gap: 18px;
+  gap: 0;
 }
 .block {
   border: 1px solid var(--admin-border);
@@ -533,6 +533,19 @@
   }
 }
 @media (max-width: 800px) {
+  .main :global(.admin-draft-editor-toolbar) {
+    gap: 6px;
+    padding: 10px 12px;
+    flex-wrap: wrap;
+  }
+  .main :global(.admin-draft-editor-toolbar .admin-draft-tabs > .ui-button) {
+    padding: 6px 8px;
+    gap: 5px;
+    font-size: 12px;
+  }
+  .main :global(.admin-draft-editor-toolbar .admin-badge) {
+    font-size: 10px;
+  }
   .layout {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -552,7 +565,7 @@
     color: var(--admin-accent);
     background: var(--admin-accent-soft);
   }
-  .layout[data-section="body"] > .sidebar,
+  .layout[data-section="body"] > :global([data-composer-sidebar]),
   .layout[data-section="settings"] > .main {
     display: none;
   }

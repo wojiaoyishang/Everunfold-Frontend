@@ -5,16 +5,13 @@ import type {
   DraftFields,
 } from "@/generated/content-admin-contract";
 import type { MediaItem } from "@/generated/settings-contract";
-import {
-  mediaMarkup,
-  moveBlock,
-} from "@/core/content-management/editor-fields";
+import { mediaMarkup } from "@/core/content-management/editor-fields";
 import { Button, TextArea } from "../../components/ui/primitives";
-import { Select } from "../../components/ui/select";
-import { ConfirmPopover } from "../../components/ui/confirm-popover";
+import { BlockFrame, BlockPosition } from "./block-frame";
+import { useBlockComposer } from "./block-composer";
 import { Icon } from "../../components/icon";
 import { EditorMediaDialog } from "./editor-media-dialog";
-import { blockEditors, RegisteredBlockEditor } from "./plugins/registry";
+import { RegisteredBlockEditor } from "./plugins/registry";
 import type { CodeEditorHandle } from "../../components/ui/code-editor";
 import { useBlockCollaboration } from "@/core/collaboration/context";
 import styles from "./editor-workspace.module.css";
@@ -37,104 +34,47 @@ export function EditorBody({
     insert: (value: string) => void;
   } | null>(null);
   const inputs = useRef(new Map<string, CodeEditorHandle>());
-  const [moved, setMoved] = useState<string | null>(null);
+  const composer = useBlockComposer();
   const [announcement, setAnnouncement] = useState("");
   return (
     <fieldset className={styles.bodyFields} disabled={disabled}>
       <div className={styles.blockList}>
         {value.body.map((block, index) => (
-          <section
+          <BlockFrame
             key={block.id}
-            className={styles.block}
-            data-moved={moved === block.id}
-            onAnimationEnd={() => setMoved(null)}
-            aria-label={`正文块 ${index + 1}`}
+            block={block}
+            index={index}
+            onFormat={(format) =>
+              onChange({
+                ...value,
+                body: value.body.map((b) =>
+                  b.id === block.id ? { ...b, type: format } : b,
+                ),
+              })
+            }
+            onDelete={() => {
+              onChange({
+                ...value,
+                body: value.body.filter((b) => b.id !== block.id),
+              });
+              setAnnouncement(`已删除第 ${index + 1} 块`);
+              const neighbor = value.body[index + 1] ?? value.body[index - 1];
+              requestAnimationFrame(() =>
+                inputs.current.get(neighbor.id)?.focus(),
+              );
+            }}
           >
-            <header className={styles.blockToolbar}>
-              <span className={styles.blockNumber}>
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <Select
-                name={`format-${block.id}`}
-                label={`正文块 ${index + 1} 格式`}
-                value={block.type ?? "markdown"}
-                disabled={disabled}
-                options={blockEditors.entries.map((p) => ({
-                  value: p.format,
-                  label: p.label,
-                }))}
-                onValueChange={(format) =>
-                  onChange({
-                    ...value,
-                    body: value.body.map((part) =>
-                      part.id === block.id
-                        ? { ...part, type: format as "markdown" | "html" }
-                        : part,
-                    ),
-                  })
-                }
-              />
-              <div className={styles.blockTools}>
-                <Button
-                  className="admin-icon-button"
-                  aria-label={`向上移动第 ${index + 1} 块`}
-                  disabled={disabled || index === 0}
-                  onClick={() => {
-                    onChange({
-                      ...value,
-                      body: moveBlock(value.body, block.id, -1),
-                    });
-                    setMoved(block.id);
-                    setAnnouncement(`已移动到第 ${index} 块`);
-                  }}
-                >
-                  <Icon name="up" />
-                </Button>
-                <Button
-                  className="admin-icon-button"
-                  aria-label={`向下移动第 ${index + 1} 块`}
-                  disabled={disabled || index === value.body.length - 1}
-                  onClick={() => {
-                    onChange({
-                      ...value,
-                      body: moveBlock(value.body, block.id, 1),
-                    });
-                    setMoved(block.id);
-                    setAnnouncement(`已移动到第 ${index + 2} 块`);
-                  }}
-                >
-                  <Icon name="down" />
-                </Button>
-                <ConfirmPopover
-                  triggerClassName="admin-icon-button"
-                  label={`删除第 ${index + 1} 块`}
-                  title="删除这个正文块？"
-                  description="从草稿中移除，可以通过撤销恢复。"
-                  disabled={disabled || value.body.length === 1}
-                  onConfirmed={() => {
-                    if (disabled || value.body.length === 1) return;
-                    onChange({
-                      ...value,
-                      body: value.body.filter((part) => part.id !== block.id),
-                    });
-                    setAnnouncement(`已删除第 ${index + 1} 块`);
-                    const neighbor =
-                      value.body[index + 1] ?? value.body[index - 1];
-                    requestAnimationFrame(() =>
-                      inputs.current.get(neighbor.id)?.focus(),
-                    );
-                  }}
-                >
-                  <Icon name="trash" />
-                </ConfirmPopover>
-              </div>
-            </header>
             <CollaborativeBlock
               id={block.id}
               format={block.type ?? "markdown"}
               editorRef={(node) => {
-                if (node) inputs.current.set(block.id, node);
-                else inputs.current.delete(block.id);
+                if (node) {
+                  inputs.current.set(block.id, node);
+                  if (composer.focus.current === block.id) {
+                    composer.focus.current = null;
+                    requestAnimationFrame(() => node.focus());
+                  }
+                } else inputs.current.delete(block.id);
               }}
               label={`正文块 ${index + 1} 内容`}
               value={block.content}
@@ -163,23 +103,9 @@ export function EditorBody({
               </Button>
               <small>{block.content.length.toLocaleString()} 字符</small>
             </footer>
-          </section>
+          </BlockFrame>
         ))}
-        <Button
-          className={styles.addBlock}
-          disabled={disabled || value.body.length >= 128}
-          onClick={() => {
-            const id = crypto.randomUUID();
-            onChange({
-              ...value,
-              body: [...value.body, { id, type: "markdown", content: "" }],
-            });
-            setAnnouncement("已添加正文块");
-            requestAnimationFrame(() => inputs.current.get(id)?.focus());
-          }}
-        >
-          <Icon name="plus" /> 添加正文块
-        </Button>
+        <BlockPosition end />
       </div>
       {type.supports_excerpt && (
         <label className={`admin-field ${styles.excerpt}`}>
