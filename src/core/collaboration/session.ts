@@ -26,6 +26,8 @@ import {
 } from "./document";
 import { mergeLocalDocuments, openLocalDocument } from "./local-store";
 import { readServerFrame } from "./wire";
+import { commandDocument } from "./block-commands";
+import type { BlockCommand } from "@/core/editor/block-commands";
 
 export type CollaborationStatus = {
   phase: "connecting" | "ready" | "offline" | "stopped";
@@ -107,6 +109,13 @@ export class DraftSession {
   setFields(fields: DraftFields, previous: DraftFields) {
     if (this.state.ready && this.state.phase !== "stopped")
       applyFields(this.doc, fields, previous);
+  }
+  commandBlock(fields: DraftFields, command: BlockCommand) {
+    if (!this.state.ready || this.stopped()) return false;
+    this.undo.stopCapturing();
+    const changed = commandDocument(this.doc, fields, command);
+    this.undo.stopCapturing();
+    return changed;
   }
   private publish(patch: Partial<CollaborationStatus> = {}) {
     this.state = { ...this.state, ...patch, pending: this.pending.length };

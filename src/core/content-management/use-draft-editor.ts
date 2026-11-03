@@ -1,4 +1,5 @@
 "use client";
+import { commandBody, type BlockCommand } from "@/core/editor/block-commands";
 import { useEffect, useRef, useState } from "react";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import {
@@ -275,6 +276,29 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     latest,
     uncertain,
     save,
+    commandBlock: (command: BlockCommand) => {
+      if (inFlight.current || preparing.current || uncertain) return false;
+      const active = sessionRef.current;
+      if (active) {
+        if (!active.commandBlock(privateFields.current, command)) return false;
+        const next = active.project(privateFields.current);
+        setFields(next);
+        rememberRecovery(
+          account.id,
+          window.location.pathname,
+          active.id,
+          next,
+          active.removedBlocks(next),
+        );
+      } else {
+        const body = commandBody(privateFields.current.body, command);
+        if (!body) return false;
+        privateFields.current = { ...privateFields.current, body };
+        setFields(privateFields.current);
+      }
+      setNotice("");
+      return true;
+    },
     setFields: (next: DraftFields) => {
       if (!inFlight.current && !uncertain) {
         privateFields.current = next;

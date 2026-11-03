@@ -3,6 +3,7 @@ export interface BlockEditorPlugin<Adapter> {
   version: string;
   format: "markdown" | "html";
   label: string;
+  description?: string;
   adapter: Adapter;
 }
 
