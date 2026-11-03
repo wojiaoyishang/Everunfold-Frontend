@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-2，2026-11-02。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-3，2026-11-03。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 ## 启动与验证
 
@@ -37,3 +37,16 @@
 - 当前编辑页面 Ctrl/Cmd+S 和 Shift+S 均保存草稿，不发布；保存、错误/不确定状态和确认仍复用原逻辑。无修改不生成新修订，按住按键不重复提交，模态弹窗内不触发页面保存。控件恢复后回原焦点。未确认的上次操作只能通过明确重试按钮处理。
 - 高度随内容变化，不设置固定大块留白；超过 540px 内部滚动。换行和查找是当前块的临时界面状态，不进入协同正文。匹配计数最多显示 1000+，不表示全部替换只处理这些匹配。
 - 验证入口：试用草稿分别测试两种工具栏、跨窗口格式/替换与本人撤销；输入后按 Ctrl+S 检查“草稿已保存”和焦点；再修改应显示未保存。长文、320px 折行、模态弹窗、深色与减少动态检查见 [本轮验收](../handoff/source-editor-verification.md)。
+
+## 区块库与排序
+
+见 [ADR0039](../decisions/0039-block-library-and-anchored-dragging.md)。桌面右侧区块/内容设置切换，不挤压正文；区块类型从blockEditors注册表读取名称/说明。手机使用弹出库点击添加。
+
+- 先点块间加号选择位置，再点类型；或直接拖入插入线。末尾入口选择追加。
+- 从六点手柄拖动已有块。键盘空格/Enter拾起，方向键/Home/End选目标，放下或Esc取消；移动作为一次本人撤销。正文文字选择不启动拖动。
+- 更多菜单保留位置移动、格式切换与确认删除。格式切换保留源文，不承诺自动转换。
+- 结构操作只能经过useDraftEditor.commandBlock，核心按最新ID解析，已有草稿用单个LOCAL事务更新order；不要从主题直接改Y.Doc或提交整篇JSON。
+- 拖动反馈和FLIP复用封装DragAndDrop，遵循后台减少动态；拖动中暂停保存/发布/撤销/预览切换。
+- 源码首行顶部padding为0，底部12px；行号仍由CodeMirror测量。不要重新加顶部空白或用空行撑版。
+
+本轮检查、截图和真实未覆盖项见 [区块验收](../handoff/block-composer-verification.md)。

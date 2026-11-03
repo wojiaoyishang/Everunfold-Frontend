@@ -296,3 +296,18 @@ ADR0038、editor-plugins-2、共享索引/验收/截图逐字节同步。插件�
 | `docs/design/source-editor-desktop.png` | `14e4076ca1aa8967415934a38bb474b3033dab3384ed8953be1e1dd3d251ec29` |
 | `docs/design/source-editor-mobile.png` | `2b20518a326fbdc4a10f9cf8fd2da131848b0392c82b551d2ba36fb7394ffc77` |
 | `docs/design/source-editor-dark.png` | `78d8c4e6a3b6875fd82da9c6faebdb1219d544ba67002240b32d6e85acab2057` |
+
+## 2026-11-03 区块库与拖放同步清单
+
+ADR0039、editor-plugins-3、公共索引/验收/4张截图逐字节同步。协议development-10、协同schema1.0、数据库0013及原始v2.11/v0.14不变；STATUS分别保留仓库历史。本轮仅本地提交，远程由用户推送。
+
+| 文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `27f030323ecb7ad44ebb31eeed0868a8cbd443270a833241e8a43b704df9a25b` |
+| `docs/development/editor-plugins.md` | `93d7f93b84286b844a2cfc2bbd7a39a1d6338c03333cfb8b105099c0191cfd62` |
+| `docs/decisions/0039-block-library-and-anchored-dragging.md` | `10f7323969f2644429eb84b0eaed35d8e1bdb5065578e1cd7c5bd955f6d09c30` |
+| `docs/handoff/block-composer-verification.md` | `18dcba0328a1dba32d88a396d525c7caf314d361aeb2f2d58279b1d4779db69a` |
+| `docs/design/block-composer-desktop.png` | `6c7239dca51239967e5957de171a5c070c3e47cb709f3470dccaf8c91c989b3c` |
+| `docs/design/block-composer-drag.png` | `20b481cd50f7a743d69eea5b017f0487c08297cd4e9760a31d05a760cb6c161a` |
+| `docs/design/block-composer-mobile.png` | `a133bd92849909dbbe4701dbe135df1b0d8e8c61123f8eaf6add5185ea01af19` |
+| `docs/design/block-composer-mobile-dark.png` | `f5251db94c8e0696a4951ab72b45d96e1cb2f95ce2e224f9b8eea04ea04f8b0a` |
