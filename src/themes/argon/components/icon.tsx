@@ -2,6 +2,11 @@ import type { CSSProperties } from "react";
 
 const paths = {
   type: "M4 4h16M12 4v16M8 20h8M4 4v3M20 4v3",
+  download: "M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4",
+  underline: "M6 3v7a6 6 0 0 0 12 0V3M4 21h16",
+  "align-left": "M3 5h18M3 10h12M3 15h18M3 20h12",
+  "align-center": "M3 5h18M6 10h12M3 15h18M6 20h12",
+  "align-right": "M3 5h18M9 10h12M3 15h18M9 20h12",
   grip: "M9 5h.01M15 5h.01M9 12h.01M15 12h.01M9 19h.01M15 19h.01",
   more: "M5 12h.01M12 12h.01M19 12h.01",
   bold: "M6 4h7a4 4 0 0 1 0 8H6V4ZM6 12h8a4 4 0 0 1 0 8H6v-8Z",

@@ -217,6 +217,54 @@
       "title": "ContentDetail",
       "type": "object"
     },
+    "FontInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "title": "Family",
+          "type": "string"
+        },
+        "style": {
+          "enum": [
+            "normal",
+            "italic"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "weight_min": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Min",
+          "type": "integer"
+        },
+        "weight_max": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Max",
+          "type": "integer"
+        },
+        "format": {
+          "enum": [
+            "woff2",
+            "woff",
+            "truetype",
+            "opentype"
+          ],
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "family",
+        "style",
+        "weight_min",
+        "weight_max",
+        "format"
+      ],
+      "title": "FontInfo",
+      "type": "object"
+    },
     "MediaURL": {
       "additionalProperties": false,
       "properties": {
@@ -228,6 +276,17 @@
           "default": "",
           "title": "Webp",
           "type": "string"
+        },
+        "font": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FontInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -320,7 +379,7 @@
   "title": "ContentAccessContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.0.0",
+  "x-everunfold-contract-version": "1.1.0",
   "x-everunfold-operations": [
     {
       "name": "readProtectedContent",

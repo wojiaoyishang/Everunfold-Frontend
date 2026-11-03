@@ -1,10 +1,19 @@
 /* Generated from the backend public contract. Do not edit by hand. */
 
+export type SchemaVersion = "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0";
+export type Original = string;
+export type Webp = string;
+export type Family = string;
+export type Style = "normal" | "italic";
+export type WeightMin = number;
+export type WeightMax = number;
+export type Format = "woff2" | "woff" | "truetype" | "opentype";
+
 /**
- * 公开阅读快照 0.3；内容属性、媒体引用及 SEO，兼容 0.1/0.2。
+ * 公开阅读快照 0.5；按内容引用提供字体描述，兼容已有快照。
  */
 export interface PublicSnapshot {
-  schema_version: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0";
+  schema_version: SchemaVersion;
   source_epoch: string;
   generation: number;
   exported_at: string;
@@ -60,10 +69,7 @@ export interface ContentDetail {
     content: string;
   }[];
   media_urls: {
-    [k: string]: {
-      original: string;
-      webp?: string;
-    };
+    [k: string]: MediaURL;
   };
   comments_open?: boolean;
   seo_title?: string;
@@ -77,6 +83,18 @@ export interface Taxonomy {
   name: string;
   kind: "category" | "tag";
   count: number;
+}
+export interface MediaURL {
+  original: Original;
+  webp?: Webp;
+  font?: FontInfo | null;
+}
+export interface FontInfo {
+  family: Family;
+  style: Style;
+  weight_min: WeightMin;
+  weight_max: WeightMax;
+  format: Format;
 }
 export interface PublicComment {
   id: string;

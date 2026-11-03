@@ -159,6 +159,8 @@ export type Navigation = MenuItem[];
 export type SeoDescription = string;
 export type TitleTemplate = string;
 export type AllowIndexing = boolean;
+export type FontMediaId = string;
+export type FontUrl = string;
 export type Accent = string;
 export type Mode = "system" | "light" | "dark";
 export type HeroTitle = string;
@@ -480,6 +482,9 @@ export interface MenuItem {
   children?: Children;
 }
 export interface ThemePreferences {
+  font_media_id?: FontMediaId;
+  font_url?: FontUrl;
+  font_info?: FontInfo | null;
   accent?: Accent;
   mode?: Mode;
   hero_title?: HeroTitle;

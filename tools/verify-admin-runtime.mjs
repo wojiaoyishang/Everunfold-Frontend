@@ -111,6 +111,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/pages",
       "/admin/media",
       "/admin/icons",
+      "/admin/fonts",
       "/admin/settings",
       "/admin/settings/theme",
       "/admin/settings/system",

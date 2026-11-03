@@ -242,7 +242,13 @@
   border-color: var(--accent);
   background: var(--accent-soft);
 }
+.ui-select-trigger > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .ui-select-trigger > .icon {
+  flex-shrink: 0;
   width: 14px;
   transform: rotate(90deg);
   transition: transform 220ms;

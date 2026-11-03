@@ -8,6 +8,7 @@ import {
   type Ref,
 } from "react";
 import type { Extension } from "@codemirror/state";
+import type { MediaURL } from "@/generated/content-admin-contract";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/icon";
 import {
@@ -31,6 +32,8 @@ export interface BlockEditorProps {
   disabled: boolean;
   shared?: SharedSource;
   editorRef?: Ref<CodeEditorHandle>;
+  media?: Record<string, MediaURL>;
+  onStaging?: (active: boolean) => void;
 }
 const emptyStatus: SourceStatus = {
   line: 1,

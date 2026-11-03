@@ -101,6 +101,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
                   id,
                   restored,
                   active.removedBlocks(restored),
+                  Object.fromEntries(active.sources.drafts),
                 );
               }
             };
@@ -125,14 +126,31 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
   }, [id, type.id, baseUrl, csrfToken, readAttempt, account.id]);
   const dirty = JSON.stringify(fields) !== baseline;
   useEffect(() => {
-    if (!dirty && !uncertain && !busy && !collaboration?.pending) return;
+    if (
+      !dirty &&
+      !uncertain &&
+      !busy &&
+      !collaboration?.pending &&
+      !collaboration?.sourceStaged
+    )
+      return;
     const warn = (event: BeforeUnloadEvent) => {
       event.preventDefault();
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty, uncertain, busy, collaboration?.pending]);
+  }, [
+    dirty,
+    uncertain,
+    busy,
+    collaboration?.pending,
+    collaboration?.sourceStaged,
+  ]);
   const save = async (action: "save" | "publish" | "withdraw" = "save") => {
+    if (sessionRef.current?.sources.staged) {
+      setError("请先应用或取消尚未完成的 HTML 源码修改。");
+      return null;
+    }
     if (inFlight.current || preparing.current || conflict) return null;
     const invalid = validateDraft(fields, type);
     if (invalid) {

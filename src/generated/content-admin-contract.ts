@@ -99,6 +99,11 @@ export type UpdatedAt1 = string;
 export type Body1 = DraftBlock[];
 export type Original = string;
 export type Webp = string;
+export type Family = string;
+export type Style = "normal" | "italic";
+export type WeightMin = number;
+export type WeightMax = number;
+export type Format = "woff2" | "woff" | "truetype" | "opentype";
 export type HasPassword = boolean;
 export type Success4 = boolean;
 export type Code4 = number;
@@ -132,7 +137,7 @@ export type NodeId1 = string;
 export type SourceEpoch1 = string;
 export type Resource = "public-content";
 export type Revision3 = number;
-export type SchemaVersion = "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0";
+export type SchemaVersion = "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0";
 export type SourceEpoch2 = string;
 export type Generation = number;
 export type ExportedAt = string;
@@ -354,6 +359,14 @@ export interface MediaUrls {
 export interface MediaURL {
   original: Original;
   webp?: Webp;
+  font?: FontInfo | null;
+}
+export interface FontInfo {
+  family: Family;
+  style: Style;
+  weight_min: WeightMin;
+  weight_max: WeightMax;
+  format: Format;
 }
 export interface PublicResponseContentTypeCatalog {
   success?: Success4;

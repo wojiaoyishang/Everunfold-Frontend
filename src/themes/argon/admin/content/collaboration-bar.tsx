@@ -90,7 +90,11 @@ export function CollaborationBar({
         <DownloadButton
           filename={`draft-${session.id}.json`}
           content={() =>
-            serializeDraftExport(fields, session.removedBlocks(fields))
+            serializeDraftExport(
+              fields,
+              session.removedBlocks(fields),
+              Object.fromEntries(session.sources.drafts),
+            )
           }
         >
           <Icon name="down" />

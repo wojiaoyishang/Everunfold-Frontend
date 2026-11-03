@@ -5,20 +5,20 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 3px;
+  padding: 4px 10px;
   border-bottom: 1px solid var(--admin-border);
-  background: var(--admin-canvas);
+  background: color-mix(in srgb, var(--admin-subtle) 65%, var(--admin-surface));
 }
 .tools :global(.ui-select) {
   min-width: 0;
   width: 104px;
 }
-.tools :global(.ui-select-trigger) {
-  min-height: 32px;
-  padding: 5px 9px;
+.source .tools :global(.ui-select-trigger) {
+  min-height: 27px;
+  padding: 3px 7px;
   font-size: 12px;
-  background: var(--admin-subtle);
+  background: transparent;
   border-color: transparent;
 }
 .toolGroup {
@@ -31,11 +31,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  min-width: 30px;
-  height: 32px;
-  min-height: 32px;
-  padding: 6px;
+  width: 28px;
+  min-width: 28px;
+  height: 27px;
+  min-height: 27px;
+  padding: 4px;
   border: 0;
   border-radius: 5px;
   background: transparent;
@@ -48,8 +48,8 @@
 .tool :global(.icon),
 .insertTrigger :global(.icon),
 .statusButton :global(.icon) {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 .source .tool:hover:not(:disabled),
@@ -76,8 +76,8 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  min-height: 32px;
-  padding: 5px 8px;
+  min-height: 27px;
+  padding: 3px 6px;
   border-radius: 5px;
   background: transparent;
   color: var(--admin-text);

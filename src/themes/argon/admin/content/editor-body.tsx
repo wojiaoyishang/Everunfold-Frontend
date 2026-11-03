@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import type {
   ContentTypeDefinition,
   DraftFields,
@@ -14,6 +14,8 @@ import { EditorMediaDialog } from "./editor-media-dialog";
 import { RegisteredBlockEditor } from "./plugins/registry";
 import type { CodeEditorHandle } from "../../components/ui/code-editor";
 import { useBlockCollaboration } from "@/core/collaboration/context";
+import { DraftCollaborationContext } from "@/core/collaboration/context";
+import type { MediaURL } from "@/generated/content-admin-contract";
 import styles from "./editor-workspace.module.css";
 export interface EditorProps {
   type: ContentTypeDefinition;
@@ -21,6 +23,9 @@ export interface EditorProps {
   onChange: (value: DraftFields) => void;
   disabled: boolean;
   onMedia: (item: MediaItem) => void;
+  media?: Record<string, MediaURL>;
+  onStaging?: (id: string, active: boolean) => void;
+  stagingBlocks?: ReadonlySet<string>;
 }
 export function EditorBody({
   type,
@@ -28,6 +33,9 @@ export function EditorBody({
   onChange,
   disabled,
   onMedia,
+  media,
+  onStaging,
+  stagingBlocks,
 }: EditorProps) {
   const [mediaTarget, setMediaTarget] = useState<{
     id: string;
@@ -35,6 +43,7 @@ export function EditorBody({
   } | null>(null);
   const inputs = useRef(new Map<string, CodeEditorHandle>());
   const composer = useBlockComposer();
+  const session = useContext(DraftCollaborationContext);
   const [announcement, setAnnouncement] = useState("");
   return (
     <fieldset className={styles.bodyFields} disabled={disabled}>
@@ -44,6 +53,9 @@ export function EditorBody({
             key={block.id}
             block={block}
             index={index}
+            disabled={Boolean(
+              stagingBlocks?.has(block.id) || session?.sources.locked(block.id),
+            )}
             onFormat={(format) =>
               onChange({
                 ...value,
@@ -78,6 +90,8 @@ export function EditorBody({
               }}
               label={`正文块 ${index + 1} 内容`}
               value={block.content}
+              media={media}
+              onStaging={(active) => onStaging?.(block.id, active)}
               disabled={disabled}
               onChange={(content) =>
                 onChange({
@@ -90,7 +104,13 @@ export function EditorBody({
             />
             <footer className={styles.blockFooter}>
               <Button
-                disabled={disabled}
+                disabled={
+                  disabled ||
+                  Boolean(
+                    session?.sources.locked(block.id) &&
+                    !stagingBlocks?.has(block.id),
+                  )
+                }
                 onClick={() => {
                   const node = inputs.current.get(block.id);
                   setMediaTarget({

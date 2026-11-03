@@ -1693,6 +1693,29 @@
     "ThemePreferences": {
       "additionalProperties": false,
       "properties": {
+        "font_media_id": {
+          "default": "",
+          "pattern": "^(?:|media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$",
+          "title": "Font Media Id",
+          "type": "string"
+        },
+        "font_url": {
+          "default": "",
+          "maxLength": 2048,
+          "title": "Font Url",
+          "type": "string"
+        },
+        "font_info": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FontInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "accent": {
           "default": "#673bb7",
           "pattern": "^#[0-9a-fA-F]{6}$",

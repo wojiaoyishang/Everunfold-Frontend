@@ -1,8 +1,10 @@
 import * as Y from "yjs";
 import type { DraftFields } from "@/generated/content-admin-contract";
+import { richFields, richHtml } from "@/core/editor/rich-text";
 
 export const LOCAL = Symbol("editor-local");
 export const REMOTE = Symbol("server-or-local-recovery");
+export const SOURCE_OWN = Symbol("own-committed-source");
 const texts = ["title", "excerpt", "seo_title", "seo_description"] as const;
 const policy = new Set(["visibility", "opens_at"]);
 type Settings = NonNullable<DraftFields["settings"]>;
@@ -32,11 +34,12 @@ export function createScratch(fields: DraftFields) {
   return doc;
 }
 
-function makeBlock(block: DraftFields["body"][number]) {
+export function makeBlock(block: DraftFields["body"][number]) {
   return new Y.Map<unknown>([
     ["type", block.type ?? "markdown"],
     ["content", new Y.Text(block.content)],
     ["deleted", false],
+    ...(block.type === "html" ? Object.entries(richFields(block.content)) : []),
   ]);
 }
 
@@ -59,7 +62,7 @@ export function removedBlocks(
           {
             id,
             type: block.get("type") as "markdown" | "html",
-            content: String(block.get("content") ?? ""),
+            content: richHtml(block),
           },
         ],
   );
@@ -86,7 +89,7 @@ export function projectDocument(
         {
           id,
           type: block.get("type") as "markdown" | "html",
-          content: blockText(doc, id).toString(),
+          content: richHtml(block),
         },
       ];
     });
@@ -168,10 +171,20 @@ export function applyFields(
       if (!block) blocks.set(part.id, makeBlock(part));
       else if (!block.get("deleted")) {
         const before = previous.body.find((b) => b.id === part.id);
-        if (before && before.type !== part.type)
+        if (before && before.type !== part.type) {
           block.set("type", part.type ?? "markdown");
-        if (before && before.content !== part.content)
           replaceText(block.get("content") as Y.Text, part.content);
+          if (part.type === "html")
+            for (const [key, value] of Object.entries(richFields(part.content)))
+              block.set(key, value);
+          else {
+            block.delete("rich");
+            block.delete("rich_base");
+          }
+        }
+        if (before && before.content !== part.content)
+          if (!(block.get("rich") instanceof Y.XmlFragment))
+            replaceText(block.get("content") as Y.Text, part.content);
       }
     }
     const order = doc.getArray<string>("order");

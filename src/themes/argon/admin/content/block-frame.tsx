@@ -49,12 +49,14 @@ export function BlockFrame({
   children,
   onFormat,
   onDelete,
+  disabled = false,
 }: {
   block: DraftBlock;
   index: number;
   children: ReactNode;
   onFormat: (format: "markdown" | "html") => void;
   onDelete: () => void;
+  disabled?: boolean;
 }) {
   const host = useBlockComposer(),
     node = useRef<HTMLElement | null>(null);
@@ -64,7 +66,7 @@ export function BlockFrame({
       id: block.id,
       label: block.type === "html" ? "HTML" : "Markdown",
     },
-    host.disabled,
+    host.disabled || disabled,
   );
   useReorderMotion(node, host.body.map((b) => b.id).join("|"));
   return (
@@ -84,7 +86,7 @@ export function BlockFrame({
           block={block}
           index={index}
           total={host.body.length}
-          disabled={host.disabled}
+          disabled={host.disabled || disabled}
           handle={drag.handle}
           onFormat={onFormat}
           onDelete={onDelete}

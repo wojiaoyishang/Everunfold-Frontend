@@ -20,8 +20,9 @@ export function rememberRecovery(
   id: string,
   fields: DraftFields,
   removedBlocks: DraftBlock[] = [],
+  unappliedHtml: Record<string, string> = {},
 ) {
-  const content = serializeDraftExport(fields, removedBlocks);
+  const content = serializeDraftExport(fields, removedBlocks, unappliedHtml);
   if (
     current?.ownerId === ownerId &&
     current.path === path &&

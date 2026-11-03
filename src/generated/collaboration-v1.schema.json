@@ -57,6 +57,17 @@
           "maxLength": 1400000,
           "title": "Payload",
           "type": "string"
+        },
+        "rich_versions": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "maxProperties": 512,
+          "propertyNames": {
+            "format": "uuid"
+          },
+          "title": "Rich Versions",
+          "type": "object"
         }
       },
       "required": [
@@ -466,6 +477,54 @@
       "title": "EditorSettings",
       "type": "object"
     },
+    "FontInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "title": "Family",
+          "type": "string"
+        },
+        "style": {
+          "enum": [
+            "normal",
+            "italic"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "weight_min": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Min",
+          "type": "integer"
+        },
+        "weight_max": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Max",
+          "type": "integer"
+        },
+        "format": {
+          "enum": [
+            "woff2",
+            "woff",
+            "truetype",
+            "opentype"
+          ],
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "family",
+        "style",
+        "weight_min",
+        "weight_max",
+        "format"
+      ],
+      "title": "FontInfo",
+      "type": "object"
+    },
     "MediaURL": {
       "additionalProperties": false,
       "properties": {
@@ -477,6 +536,17 @@
           "default": "",
           "title": "Webp",
           "type": "string"
+        },
+        "font": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FontInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -606,6 +676,90 @@
       "title": "PublicResponse[CommittedDraft]",
       "type": "object"
     },
+    "PublicResponse_SourceAcquired_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/SourceAcquired"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[SourceAcquired]",
+      "type": "object"
+    },
+    "PublicResponse_SourceApplied_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/SourceApplied"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[SourceApplied]",
+      "type": "object"
+    },
+    "PublicResponse_SourceReleased_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/SourceReleased"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[SourceReleased]",
+      "type": "object"
+    },
     "PublicResponse_TicketState_": {
       "additionalProperties": false,
       "properties": {
@@ -645,7 +799,8 @@
             "peers",
             "error",
             "revision",
-            "media"
+            "media",
+            "sources"
           ],
           "title": "Type",
           "type": "string"
@@ -765,12 +920,247 @@
           ],
           "default": null,
           "title": "Media Urls"
+        },
+        "sources": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/SourceState"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sources"
         }
       },
       "required": [
         "type"
       ],
       "title": "ServerFrame",
+      "type": "object"
+    },
+    "SourceAcquire": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "block_id": {
+          "format": "uuid",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "client_id": {
+          "maximum": 4294967295,
+          "minimum": 0,
+          "title": "Client Id",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "block_id",
+        "client_id"
+      ],
+      "title": "SourceAcquire",
+      "type": "object"
+    },
+    "SourceAcquired": {
+      "additionalProperties": false,
+      "properties": {
+        "lease_id": {
+          "format": "uuid",
+          "title": "Lease Id",
+          "type": "string"
+        },
+        "html": {
+          "title": "Html",
+          "type": "string"
+        },
+        "expected_hash": {
+          "title": "Expected Hash",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lease_id",
+        "html",
+        "expected_hash",
+        "expires_at"
+      ],
+      "title": "SourceAcquired",
+      "type": "object"
+    },
+    "SourceApplied": {
+      "additionalProperties": false,
+      "properties": {
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "committed_seq": {
+          "title": "Committed Seq",
+          "type": "integer"
+        },
+        "payload": {
+          "title": "Payload",
+          "type": "string"
+        },
+        "generation": {
+          "title": "Generation",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "operation_id",
+        "committed_seq",
+        "payload",
+        "generation"
+      ],
+      "title": "SourceApplied",
+      "type": "object"
+    },
+    "SourceApply": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "block_id": {
+          "format": "uuid",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "lease_id": {
+          "format": "uuid",
+          "title": "Lease Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Expected Hash",
+          "type": "string"
+        },
+        "html": {
+          "maxLength": 100000,
+          "title": "Html",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "block_id",
+        "lease_id",
+        "operation_id",
+        "expected_hash",
+        "html"
+      ],
+      "title": "SourceApply",
+      "type": "object"
+    },
+    "SourceCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "block_id": {
+          "format": "uuid",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "lease_id": {
+          "format": "uuid",
+          "title": "Lease Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "block_id",
+        "lease_id"
+      ],
+      "title": "SourceCommand",
+      "type": "object"
+    },
+    "SourceReleased": {
+      "additionalProperties": false,
+      "properties": {
+        "released": {
+          "const": true,
+          "default": true,
+          "title": "Released",
+          "type": "boolean"
+        }
+      },
+      "title": "SourceReleased",
+      "type": "object"
+    },
+    "SourceState": {
+      "additionalProperties": false,
+      "properties": {
+        "block_id": {
+          "format": "uuid",
+          "title": "Block Id",
+          "type": "string"
+        },
+        "generation": {
+          "minimum": 0,
+          "title": "Generation",
+          "type": "integer"
+        },
+        "client_id": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Client Id"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        }
+      },
+      "required": [
+        "block_id",
+        "generation",
+        "client_id",
+        "expires_at"
+      ],
+      "title": "SourceState",
       "type": "object"
     },
     "TicketState": {
@@ -813,6 +1203,24 @@
   },
   "additionalProperties": false,
   "properties": {
+    "source_acquire": {
+      "$ref": "#/$defs/SourceAcquire"
+    },
+    "source_command": {
+      "$ref": "#/$defs/SourceCommand"
+    },
+    "source_apply": {
+      "$ref": "#/$defs/SourceApply"
+    },
+    "source_acquired": {
+      "$ref": "#/$defs/PublicResponse_SourceAcquired_"
+    },
+    "source_applied": {
+      "$ref": "#/$defs/PublicResponse_SourceApplied_"
+    },
+    "source_released": {
+      "$ref": "#/$defs/PublicResponse_SourceReleased_"
+    },
     "lookup": {
       "$ref": "#/$defs/DraftLookup"
     },
@@ -839,6 +1247,12 @@
     }
   },
   "required": [
+    "source_acquire",
+    "source_command",
+    "source_apply",
+    "source_acquired",
+    "source_applied",
+    "source_released",
     "lookup",
     "ticket",
     "commit",
@@ -851,8 +1265,36 @@
   "title": "CollaborationContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.0.0",
+  "x-everunfold-contract-version": "1.1.0",
   "x-everunfold-operations": [
+    {
+      "name": "acquireHtmlSource",
+      "path": "/v1/admin/content/collaboration/source/acquire",
+      "method": "POST",
+      "input": "source_acquire",
+      "response": "source_acquired"
+    },
+    {
+      "name": "renewHtmlSource",
+      "path": "/v1/admin/content/collaboration/source/renew",
+      "method": "POST",
+      "input": "source_command",
+      "response": "source_acquired"
+    },
+    {
+      "name": "releaseHtmlSource",
+      "path": "/v1/admin/content/collaboration/source/release",
+      "method": "POST",
+      "input": "source_command",
+      "response": "source_released"
+    },
+    {
+      "name": "applyHtmlSource",
+      "path": "/v1/admin/content/collaboration/source/apply",
+      "method": "POST",
+      "input": "source_apply",
+      "response": "source_applied"
+    },
     {
       "name": "createCollaborationTicket",
       "path": "/v1/admin/content/collaboration/ticket",

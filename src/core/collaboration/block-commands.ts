@@ -1,7 +1,7 @@
 import * as Y from "yjs";
 import type { DraftFields } from "@/generated/content-admin-contract";
 import { commandBody, type BlockCommand } from "@/core/editor/block-commands";
-import { LOCAL, projectDocument } from "./document";
+import { LOCAL, projectDocument, makeBlock } from "./document";
 
 /** A single structural transaction leaves every existing Y.Text and editor binding intact. */
 export function commandDocument(
@@ -17,14 +17,7 @@ export function commandDocument(
     const order = doc.getArray<string>("order");
     const id = command.kind === "insert" ? command.block.id : command.id;
     if (command.kind === "insert") {
-      blocks.set(
-        id,
-        new Y.Map<unknown>([
-          ["type", command.block.type ?? "markdown"],
-          ["content", new Y.Text(command.block.content)],
-          ["deleted", false],
-        ]),
-      );
+      blocks.set(id, makeBlock(command.block));
     } else {
       for (let i = order.length - 1; i >= 0; i--)
         if (order.get(i) === id) order.delete(i, 1);

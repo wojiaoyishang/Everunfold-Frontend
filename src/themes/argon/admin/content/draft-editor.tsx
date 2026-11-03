@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ContentTypeDefinition } from "@/generated/content-admin-contract";
 import { useDraftEditor } from "@/core/content-management/use-draft-editor";
@@ -47,6 +47,22 @@ export function DraftEditor({
   const [destination, setDestination] = useState(`/admin/content/${type.id}`);
   const [leaving, setLeaving] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [stagingBlocks, setStagingBlocks] = useState<ReadonlySet<string>>(
+    new Set(),
+  );
+  const markStaging = useCallback(
+    (id: string, active: boolean) =>
+      setStagingBlocks((old) => {
+        if (old.has(id) === active) return old;
+        const next = new Set(old);
+        if (active) next.add(id);
+        else next.delete(id);
+        return next;
+      }),
+    [],
+  );
+  const sourceStaged =
+    stagingBlocks.size > 0 || Boolean(editor.collaboration?.sourceStaged);
   const surface = useRef<HTMLDivElement>(null);
   const saveFocus = useRef<HTMLElement | null>(null);
   const [focusRequest, setFocusRequest] = useState(0);
@@ -86,23 +102,25 @@ export function DraftEditor({
   }, [leaving, destination, router]);
   const requestLeave = (href: string) => {
     if (editor.busy || leaving) return;
-    if (editor.dirty || editor.uncertain) {
+    if (editor.dirty || editor.uncertain || sourceStaged) {
       setDestination(href);
       setConfirm("close");
     } else navigate(href);
   };
   useEditorNavigation(
-    editor.dirty || editor.uncertain,
+    editor.dirty || editor.uncertain || sourceStaged,
     editor.busy || leaving,
     requestLeave,
   );
   const save = async (action: "save" | "publish" | "withdraw" = "save") => {
+    if (sourceStaged) return false;
     const result = await editor.save(action);
     if (result && !id)
       router.replace(`/admin/content/${type.id}/${result.id}/edit`);
     return Boolean(result);
   };
   const saveDisabled =
+    sourceStaged ||
     dragging ||
     editor.busy ||
     editor.loading ||
@@ -300,7 +318,7 @@ export function DraftEditor({
                   </Button>
                   <Button
                     aria-pressed={mode === "preview"}
-                    disabled={editor.loading || dragging}
+                    disabled={editor.loading || dragging || sourceStaged}
                     onClick={() => setMode("preview")}
                   >
                     <Icon name="eye" />
@@ -367,6 +385,9 @@ export function DraftEditor({
                           onChange={editor.setFields}
                           disabled={Boolean(blocked)}
                           onMedia={resources.remember}
+                          media={media}
+                          onStaging={markStaging}
+                          stagingBlocks={stagingBlocks}
                         />
                       ) : (
                         <p>此类型的编辑器暂不可用，内容仍会保留。</p>

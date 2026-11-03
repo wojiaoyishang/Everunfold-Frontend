@@ -5,6 +5,7 @@ import { DomUtils, parseDocument } from "htmlparser2";
 import type { Content } from "@/core/content/types";
 import { publicHref, resourceUrl } from "@/core/content/urls";
 import { expandPresentationShortcodes } from "./shortcodes";
+import { fontFamily, referencedFontFaces } from "./fonts";
 
 export interface TableOfContentsItem {
   id: string;
@@ -69,6 +70,8 @@ const options: sanitizeHtml.IOptions = {
     "source",
   ],
   allowedAttributes: {
+    p: ["style"],
+    figure: ["style"],
     a: ["href", "title", "target", "rel", "id", "class", "aria-label"],
     img: ["src", "alt", "title", "width", "height", "loading", "decoding"],
     code: ["class"],
@@ -76,16 +79,16 @@ const options: sanitizeHtml.IOptions = {
     ol: ["start"],
     th: ["colspan", "rowspan", "scope"],
     td: ["colspan", "rowspan"],
-    h1: ["id"],
-    h2: ["id"],
-    h3: ["id"],
-    h4: ["id"],
-    h5: ["id"],
-    h6: ["id"],
+    h1: ["id", "style"],
+    h2: ["id", "style"],
+    h3: ["id", "style"],
+    h4: ["id", "style"],
+    h5: ["id", "style"],
+    h6: ["id", "style"],
     details: ["open", "class"],
     div: ["class"],
     strong: ["class"],
-    span: ["class", "title", "tabindex"],
+    span: ["class", "title", "tabindex", "data-font", "style"],
     abbr: ["title"],
     audio: ["src", "controls", "preload"],
     video: ["src", "poster", "controls", "preload"],
@@ -108,6 +111,14 @@ const options: sanitizeHtml.IOptions = {
     pre: [/^language-[a-zA-Z0-9_-]+$/],
   },
   allowedSchemes: ["http", "https", "mailto"],
+  allowedStyles: {
+    "*": { "text-align": [/^(left|center|right|justify)$/] },
+    span: {
+      "font-family": [/^ef-font-[0-9a-f-]{36}$/],
+      "font-size": [/^(?:[8-9]|[1-6][0-9]|7[0-2])px$/],
+      color: [/^#[a-fA-F0-9]{6}$/],
+    },
+  },
   allowProtocolRelative: false,
   nestingLimit: 100,
   disallowedTagsMode: "discard",
@@ -151,6 +162,25 @@ export function renderContent(
       function visit(nodes: ParsedNode[]): void {
         for (const node of nodes) {
           if ("attribs" in node) {
+            if (node.name === "span" && node.attribs["data-font"]) {
+              const reference = node.attribs["data-font"];
+              const id = reference.startsWith("site://media/")
+                ? reference.slice(13)
+                : "";
+              const family = fontFamily(id);
+              const style = (node.attribs.style ?? "")
+                .replace(/(?:^|;)\s*font-family\s*:[^;]*/gi, "")
+                .replace(/^;|;$/g, "");
+              if (family && content.media_urls?.[id]?.font)
+                node.attribs.style = [style, `font-family:${family}`]
+                  .filter(Boolean)
+                  .join(";");
+              else {
+                delete node.attribs["data-font"];
+                if (style) node.attribs.style = style;
+                else delete node.attribs.style;
+              }
+            }
             // Only generated references may create anchors outside the heading namespace.
             if (node.name === "a") delete node.attribs.id;
             if (
@@ -240,5 +270,12 @@ export function renderContent(
   const notes = references.length
     ? `<div class="reader-references"><strong>参考资料</strong><ol>${references.map((text, index) => `<li id="${prefix}-note-${index + 1}">${escape(text)} <a href="#${prefix}-source-${index + 1}" aria-label="返回引用 ${index + 1}">返回</a></li>`).join("")}</ol></div>`
     : "";
-  return { html: html + notes, toc };
+  const faces = referencedFontFaces(html, content.media_urls);
+  return {
+    html:
+      (faces ? `<style data-content-fonts>${faces}</style>` : "") +
+      html +
+      notes,
+    toc,
+  };
 }

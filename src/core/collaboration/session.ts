@@ -1,4 +1,6 @@
 import * as Y from "yjs";
+import { ySyncPluginKey, defaultDeleteFilter } from "@tiptap/y-tiptap";
+import { SourceEditing } from "./source-editing";
 import {
   Awareness,
   applyAwarenessUpdate,
@@ -21,6 +23,7 @@ import {
   LOCAL,
   projectDocument,
   REMOTE,
+  SOURCE_OWN,
   toBase64,
   removedBlocks,
 } from "./document";
@@ -38,6 +41,7 @@ export type CollaborationStatus = {
   local: boolean;
   localSaving: boolean;
   peers: Peer[];
+  sourceStaged: number;
 };
 export class DraftSession {
   readonly doc = new Y.Doc();
@@ -48,7 +52,22 @@ export class DraftSession {
       this.doc.getMap("blocks"),
       this.doc.getArray("order"),
     ],
-    { trackedOrigins: new Set([LOCAL]), captureTimeout: 500 },
+    {
+      trackedOrigins: new Set([LOCAL, SOURCE_OWN, ySyncPluginKey]),
+      captureTimeout: 500,
+      deleteFilter: (item) =>
+        defaultDeleteFilter(
+          item,
+          new Set([
+            "paragraph",
+            "heading",
+            "codeBlock",
+            "listItem",
+            "tableCell",
+            "tableHeader",
+          ]),
+        ),
+    },
   );
   state: CollaborationStatus = {
     phase: "connecting",
@@ -59,9 +78,11 @@ export class DraftSession {
     local: true,
     localSaving: false,
     peers: [],
+    sourceStaged: 0,
   };
   epoch = "";
   mediaUrls: Record<string, MediaURL> = {};
+  readonly sources: SourceEditing;
   private localWrites = 0;
   private acknowledged: Record<string, number> = {};
   private pending: ClientUpdate[] = [];
@@ -95,6 +116,25 @@ export class DraftSession {
     readonly id: string,
     private userId: string,
   ) {
+    this.sources = new SourceEditing(
+      {
+        id,
+        doc: this.doc,
+        cutoff: () => this.cutoff(),
+        notify: () => this.publish(),
+        applyOwn: (payload, seq) => {
+          this.undo.stopCapturing();
+          Y.applyUpdate(this.doc, fromBase64(payload), SOURCE_OWN);
+          this.undo.stopCapturing();
+          this.highestAck = Math.max(this.highestAck, seq);
+          void this.persist();
+          this.publish();
+        },
+      },
+      baseUrl,
+      csrf,
+      userId,
+    );
     this.awareness.setLocalState({});
     this.doc.on("update", this.changed);
     this.awareness.on("change", this.presenceChanged);
@@ -118,16 +158,39 @@ export class DraftSession {
     return changed;
   }
   private publish(patch: Partial<CollaborationStatus> = {}) {
-    this.state = { ...this.state, ...patch, pending: this.pending.length };
+    this.state = {
+      ...this.state,
+      ...patch,
+      pending: this.pending.length,
+      sourceStaged: this.sources?.staged ?? 0,
+    };
     if (!this.disposed) this.onChange();
   }
-  private changed = (_update: Uint8Array, origin: unknown) => {
-    if (origin === REMOTE || !this.state.ready) return;
+  private changed = (
+    _update: Uint8Array,
+    origin: unknown,
+    _doc: Y.Doc,
+    transaction: Y.Transaction,
+  ) => {
+    if (origin === REMOTE || origin === SOURCE_OWN || !this.state.ready) return;
+    const versions: Record<string, number> = {};
+    const changedTypes = new Set<unknown>(
+      transaction.changedParentTypes.keys(),
+    );
+    for (const [id, block] of this.doc.getMap<Y.Map<unknown>>("blocks")) {
+      const rich = block.get("rich");
+      if (
+        rich instanceof Y.XmlFragment &&
+        (changedTypes.has(rich) || changedTypes.has(block))
+      )
+        versions[id] = this.sources.version(id);
+    }
     this.pending.push({
       type: "update",
       epoch: this.epoch,
       update_id: crypto.randomUUID(),
       payload: toBase64(_update),
+      rich_versions: versions,
     });
     this.publish();
     void this.persist().then(() => this.flush());
@@ -299,7 +362,17 @@ export class DraftSession {
       if (frame.committed_seq <= this.state.seq) return;
       if (frame.committed_seq !== this.state.seq + 1)
         throw new Error("更新序号不连续");
-      Y.applyUpdate(this.doc, fromBase64(frame.payload), REMOTE);
+      const own = frame.update_id && this.sources.held.has(frame.update_id);
+      if (own) {
+        this.undo.stopCapturing();
+        this.sources.observed.add(frame.update_id!);
+      }
+      Y.applyUpdate(
+        this.doc,
+        fromBase64(frame.payload),
+        own ? SOURCE_OWN : REMOTE,
+      );
+      if (own) this.undo.stopCapturing();
       this.publish({ seq: frame.committed_seq });
       void this.persist();
     } else if (
@@ -315,6 +388,8 @@ export class DraftSession {
       if (this.inFlight === frame.update_id) this.inFlight = null;
       this.publish();
       void this.persist().then(() => this.flush());
+    } else if (frame.type === "sources") {
+      this.sources.accept(frame.sources ?? []);
     } else if (frame.type === "peers") {
       this.applyPeers(frame.peers ?? []);
       this.publish({ peers: frame.peers ?? [] });

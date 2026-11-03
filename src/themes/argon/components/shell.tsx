@@ -5,6 +5,7 @@ import { useEffect, type CSSProperties, type ReactNode } from "react";
 import type { Site } from "@/core/content/types";
 import { setSiteAppearance } from "@/core/browser/appearance";
 import { resourceUrl } from "@/core/content/urls";
+import { fontFace, fontFamily } from "@/core/rendering/fonts";
 
 import { SiteHeader } from "./site-header";
 import { Sidebar } from "./sidebar";
@@ -52,6 +53,14 @@ function ShellFrame({ children }: { children: ReactNode }) {
   }, [site.settings?.theme.mode, site.settings?.theme.accent]);
   const background =
     resourceUrl(site.hero_url) ?? "/reference/campfire-background.webp";
+  const theme = site.settings?.theme;
+  const themeFont =
+    theme?.font_media_id && theme.font_url && theme.font_info
+      ? fontFace(theme.font_media_id, {
+          original: theme.font_url,
+          font: theme.font_info,
+        })
+      : "";
   return (
     <div
       className="blog-shell"
@@ -59,9 +68,20 @@ function ShellFrame({ children }: { children: ReactNode }) {
       style={
         {
           "--site-background": `url(${JSON.stringify(background)})`,
+          ...(themeFont
+            ? {
+                fontFamily: `"${fontFamily(theme?.font_media_id ?? "")}", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif`,
+              }
+            : {}),
         } as CSSProperties
       }
     >
+      {themeFont && (
+        <style
+          data-theme-font
+          dangerouslySetInnerHTML={{ __html: themeFont }}
+        />
+      )}
       <BackgroundVideoProvider
         key={site.settings?.theme.background_video_url}
         poster={background}

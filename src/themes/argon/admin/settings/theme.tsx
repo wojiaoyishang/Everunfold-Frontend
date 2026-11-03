@@ -12,8 +12,11 @@ import { ColorPicker } from "../../components/ui/color-picker";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import type { ThemePreferences } from "@/generated/settings-contract";
+import { useFontLibrary } from "@/core/media/font-library";
+import { FontField } from "../fonts/font-field";
 const palette = ["#673bb7", "#3865b9", "#397566", "#ad466f", "#a26032"];
 export function ThemeSettingsPage() {
+  const fonts = useFontLibrary();
   const { draft, setDraft } = useSettingsEditor();
   const theme = draft?.theme;
   const update = (value: Partial<ThemePreferences>) =>
@@ -106,6 +109,20 @@ export function ThemeSettingsPage() {
               maxLength={300}
               onChange={(hero_subtitle) => update({ hero_subtitle })}
             />
+          </SettingsSection>
+          <SettingsSection
+            title="字体"
+            description="设置站点默认字体；文章可以为选中的文字单独指定字体。"
+          >
+            <div className="admin-settings-field">
+              <label>默认字体</label>
+              <FontField
+                value={theme.font_media_id ?? ""}
+                fonts={fonts.items}
+                onChange={(font_media_id) => update({ font_media_id })}
+              />
+              <small>仅在页面实际使用时加载，下载期间保留系统字体。</small>
+            </div>
           </SettingsSection>
           <SettingsSection
             title="背景"

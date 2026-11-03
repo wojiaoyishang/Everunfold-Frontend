@@ -1,0 +1,144 @@
+.root {
+  min-width: 0;
+  background: var(--admin-surface);
+}
+.tools {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.canvas {
+  min-height: 277px;
+  padding: 20px 26px;
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--admin-text);
+  overflow-wrap: anywhere;
+}
+.canvas :global(.tiptap) {
+  outline: none;
+  min-height: 237px;
+}
+.canvas :global(.tiptap) > :first-child {
+  margin-top: 0;
+}
+.canvas p {
+  margin: 0 0 1em;
+}
+.canvas h1,
+.canvas h2,
+.canvas h3 {
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 1.2em 0 0.6em;
+}
+.canvas h1 {
+  font-size: 2em;
+}
+.canvas h2 {
+  font-size: 1.65em;
+}
+.canvas h3 {
+  font-size: 1.35em;
+}
+.canvas a {
+  color: var(--admin-accent);
+  text-decoration: underline;
+}
+.canvas img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+.canvas blockquote {
+  margin: 1em 0;
+  padding: 4px 18px;
+  border-left: 3px solid var(--admin-accent);
+  background: var(--admin-subtle);
+}
+.canvas ul,
+.canvas ol {
+  padding-left: 1.6em;
+}
+.canvas li p {
+  margin-bottom: 0.25em;
+}
+.canvas pre {
+  background: var(--admin-subtle);
+  padding: 16px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  overflow-x: auto;
+}
+.canvas code {
+  font-family: Consolas, monospace;
+}
+.canvas table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  margin: 1em 0;
+}
+.canvas th,
+.canvas td {
+  min-width: 40px;
+  border: 1px solid var(--admin-border);
+  padding: 8px 12px;
+  position: relative;
+  vertical-align: top;
+}
+.canvas th {
+  background: var(--admin-subtle);
+  font-weight: 600;
+}
+.canvas :global(.selectedCell)::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--admin-accent) 12%, transparent);
+  pointer-events: none;
+}
+.canvas :global(.ProseMirror-selectednode) {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 3px;
+}
+.canvas :global([data-raw-html]) {
+  padding: 14px;
+  border: 1px dashed var(--admin-border);
+  border-radius: 6px;
+}
+.canvas :global(.rich-raw-label) {
+  color: var(--admin-muted);
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+.canvas :global(.ProseMirror-yjs-cursor) {
+  position: relative;
+  margin-left: -1px;
+  margin-right: -1px;
+  border-left: 1px solid;
+  border-right: 1px solid;
+  pointer-events: none;
+  word-break: normal;
+}
+.canvas :global(.ProseMirror-yjs-cursor) > div {
+  position: absolute;
+  top: -1.4em;
+  left: -1px;
+  color: white;
+  font-size: 10px;
+  line-height: normal;
+  border-radius: 3px;
+  padding: 2px 5px;
+  white-space: nowrap;
+}
+.root[data-disabled="true"] .canvas {
+  opacity: 0.7;
+}
+@media (max-width: 600px) {
+  .canvas {
+    padding: 16px;
+    font-size: 15px;
+  }
+}

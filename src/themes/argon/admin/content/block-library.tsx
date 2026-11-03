@@ -44,9 +44,9 @@ export function BlockLibrary({
           />
         ))}
       </div>
-      <p className={styles.libraryHelp}>
-        {compact ? "点击添加到所选位置。" : "拖到正文插入线，或点击添加。"}
-      </p>
+      {!compact && (
+        <p className={styles.libraryHelp}>拖到正文插入线，或点击添加。</p>
+      )}
     </div>
   );
 }

@@ -44,6 +44,7 @@ import { tags } from "@lezer/highlight";
 import { yCollab, yUndoManagerKeymap } from "y-codemirror.next";
 import type * as Y from "yjs";
 import type { Awareness } from "y-protocols/awareness";
+import type { DraftSession } from "@/core/collaboration/session";
 import styles from "./code-editor.module.css";
 import { useCodeEditorHandle } from "./use-code-editor-handle";
 
@@ -100,6 +101,8 @@ export interface SharedSource {
   awareness: Awareness;
   undo: Y.UndoManager;
   blockId: string;
+  rich?: Y.XmlFragment;
+  host?: DraftSession;
 }
 export interface CodeEditorProps {
   value: string;

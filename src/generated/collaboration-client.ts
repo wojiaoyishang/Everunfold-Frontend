@@ -13,6 +13,94 @@ ajv.addSchema(
   "collaboration",
 );
 
+const acquireHtmlSourceValidator = ajv.compile<
+  CollaborationContract["source_acquired"]
+>({ $ref: "collaboration#/properties/source_acquired" });
+export function acquireHtmlSource(
+  baseUrl: string,
+  input: CollaborationContract["source_acquire"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/collaboration/source/acquire",
+    input,
+    acquireHtmlSourceValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const renewHtmlSourceValidator = ajv.compile<
+  CollaborationContract["source_acquired"]
+>({ $ref: "collaboration#/properties/source_acquired" });
+export function renewHtmlSource(
+  baseUrl: string,
+  input: CollaborationContract["source_command"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/collaboration/source/renew",
+    input,
+    renewHtmlSourceValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const releaseHtmlSourceValidator = ajv.compile<
+  CollaborationContract["source_released"]
+>({ $ref: "collaboration#/properties/source_released" });
+export function releaseHtmlSource(
+  baseUrl: string,
+  input: CollaborationContract["source_command"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/collaboration/source/release",
+    input,
+    releaseHtmlSourceValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const applyHtmlSourceValidator = ajv.compile<
+  CollaborationContract["source_applied"]
+>({ $ref: "collaboration#/properties/source_applied" });
+export function applyHtmlSource(
+  baseUrl: string,
+  input: CollaborationContract["source_apply"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/collaboration/source/apply",
+    input,
+    applyHtmlSourceValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
 const createCollaborationTicketValidator = ajv.compile<
   CollaborationContract["ticket"]
 >({ $ref: "collaboration#/properties/ticket" });

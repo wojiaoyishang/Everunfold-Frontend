@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://everunfold.local/contracts/public-v0.1.schema.json",
   "title": "PublicSnapshot",
-  "description": "公开阅读快照 0.3；内容属性、媒体引用及 SEO，兼容 0.1/0.2。",
+  "description": "公开阅读快照 0.5；按内容引用提供字体描述，兼容已有快照。",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -17,12 +17,16 @@
   ],
   "properties": {
     "schema_version": {
+      "default": "0.5.0",
       "enum": [
         "0.1.0",
         "0.2.0",
         "0.3.0",
-        "0.4.0"
-      ]
+        "0.4.0",
+        "0.5.0"
+      ],
+      "title": "Schema Version",
+      "type": "string"
     },
     "source_epoch": {
       "type": "string",
@@ -438,19 +442,34 @@
         "media_urls": {
           "type": "object",
           "additionalProperties": {
-            "type": "object",
             "additionalProperties": false,
-            "required": [
-              "original"
-            ],
             "properties": {
               "original": {
+                "title": "Original",
                 "type": "string"
               },
               "webp": {
+                "default": "",
+                "title": "Webp",
                 "type": "string"
+              },
+              "font": {
+                "anyOf": [
+                  {
+                    "$ref": "#/definitions/FontInfo"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "default": null
               }
-            }
+            },
+            "required": [
+              "original"
+            ],
+            "title": "MediaURL",
+            "type": "object"
           }
         },
         "comments_open": {
@@ -522,7 +541,55 @@
           ]
         }
       }
+    },
+    "FontInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "title": "Family",
+          "type": "string"
+        },
+        "style": {
+          "enum": [
+            "normal",
+            "italic"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "weight_min": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Min",
+          "type": "integer"
+        },
+        "weight_max": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Max",
+          "type": "integer"
+        },
+        "format": {
+          "enum": [
+            "woff2",
+            "woff",
+            "truetype",
+            "opentype"
+          ],
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "family",
+        "style",
+        "weight_min",
+        "weight_max",
+        "format"
+      ],
+      "title": "FontInfo",
+      "type": "object"
     }
   },
-  "x-everunfold-contract-version": "0.4.0"
+  "x-everunfold-contract-version": "0.5.0"
 }

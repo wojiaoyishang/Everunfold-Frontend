@@ -12,7 +12,10 @@ import type { FontAsset } from "@/generated/settings-contract";
 import { Icon } from "../../components/icon";
 import styles from "./fonts.module.css";
 
-export function FontLibraryPage() {
+export function FontLibraryPage({
+  onSelect,
+  compact = false,
+}: { onSelect?: (font: FontAsset) => void; compact?: boolean } = {}) {
   const library = useFontLibrary();
   useFontPreviews(library.items);
   const [sample, setSample] = useState(
@@ -21,7 +24,7 @@ export function FontLibraryPage() {
   const [selected, setSelected] = useState<FontAsset | null>(null);
   return (
     <div className="admin-settings-page admin-library-page">
-      <AdminPageHeading title="字体库" />
+      {!compact && <AdminPageHeading title="字体库" />}
       <div className="admin-library-toolbar">
         <TextField
           type="search"
@@ -46,6 +49,7 @@ export function FontLibraryPage() {
         onRetry={(id) => library.queue.retry(id)}
         onCancel={(id) => library.queue.cancel(id)}
         onClear={() => library.queue.clearFinished()}
+        onSelect={onSelect}
       />
       <div className={styles.previewBar}>
         <label htmlFor="font-sample">预览文字</label>
@@ -91,11 +95,15 @@ export function FontLibraryPage() {
               </span>
               <Button
                 className="admin-button"
-                aria-label={`查看 ${font.info.family} 资料`}
-                onClick={() => setSelected(font)}
+                aria-label={
+                  onSelect
+                    ? `使用 ${font.info.family} ${font.info.format}`
+                    : `查看 ${font.info.family} 资料`
+                }
+                onClick={() => (onSelect ? onSelect(font) : setSelected(font))}
               >
-                <Icon name="settings" />
-                资料
+                <Icon name={onSelect ? "check" : "settings"} />
+                {onSelect ? "使用字体" : "资料"}
               </Button>
             </footer>
           </article>

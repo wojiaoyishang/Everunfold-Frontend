@@ -37,6 +37,11 @@ export type Content1 = string;
 export type Content = ContentBlock[];
 export type Original = string;
 export type Webp = string;
+export type Family = string;
+export type Style = "normal" | "italic";
+export type WeightMin = number;
+export type WeightMax = number;
+export type Format = "woff2" | "woff" | "truetype" | "opentype";
 
 export interface ContentAccessContract {
   request: ContentAccessInput;
@@ -95,4 +100,12 @@ export interface MediaUrls {
 export interface MediaURL {
   original: Original;
   webp?: Webp;
+  font?: FontInfo | null;
+}
+export interface FontInfo {
+  family: Family;
+  style: Style;
+  weight_min: WeightMin;
+  weight_max: WeightMax;
+  format: Format;
 }

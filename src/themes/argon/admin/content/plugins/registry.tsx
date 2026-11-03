@@ -10,7 +10,7 @@ export const blockEditors = createBlockEditorRegistry<
 >([
   {
     id: "core.markdown",
-    version: "1.1.0",
+    version: "2.0.0",
     format: "markdown",
     label: "Markdown",
     description: "标题、列表与轻量标记",
@@ -18,10 +18,10 @@ export const blockEditors = createBlockEditorRegistry<
   },
   {
     id: "core.html",
-    version: "1.1.0",
+    version: "2.0.0",
     format: "html",
     label: "HTML",
-    description: "标签与自定义内容结构",
+    description: "可视化排版与 HTML 源码",
     adapter: HtmlEditor,
   },
 ]);

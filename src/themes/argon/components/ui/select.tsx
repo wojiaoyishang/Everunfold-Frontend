@@ -19,6 +19,7 @@ export function Select({
   value,
   onValueChange,
   disabled = false,
+  className,
 }: {
   name: string;
   label: string;
@@ -27,6 +28,7 @@ export function Select({
   value?: string;
   onValueChange?: (value: string) => void;
   disabled?: boolean;
+  className?: string;
 }) {
   const id = useId();
   const {
@@ -123,7 +125,7 @@ export function Select({
     }
   }
   return (
-    <div className="ui-select">
+    <div className={className ? `ui-select ${className}` : "ui-select"}>
       <input
         type="hidden"
         name={hydrated ? name : undefined}
