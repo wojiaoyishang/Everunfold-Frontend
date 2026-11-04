@@ -1,0 +1,46 @@
+[data-content-features],
+.tiptap {
+  --code-keyword: var(--admin-accent, var(--accent));
+  --code-string: var(--admin-positive, #36806a);
+  --code-number: var(--admin-warning, #a46a30);
+  --code-comment: var(--admin-muted, var(--muted, #7f8494));
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-type,
+.hljs-built_in {
+  color: var(--code-keyword);
+}
+.hljs-string,
+.hljs-attr,
+.hljs-regexp,
+.hljs-addition {
+  color: var(--code-string);
+}
+.hljs-number,
+.hljs-literal,
+.hljs-symbol,
+.hljs-bullet {
+  color: var(--code-number);
+}
+.hljs-comment,
+.hljs-quote,
+.hljs-meta {
+  color: var(--code-comment);
+  font-style: italic;
+}
+.hljs-title,
+.hljs-name,
+.hljs-section {
+  color: var(--code-keyword);
+  font-weight: 600;
+}
+.hljs-deletion {
+  color: var(--admin-danger, #ba5050);
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}

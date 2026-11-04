@@ -73,17 +73,7 @@ const inserts = [
       placeholder: "链接文字",
     },
   },
-  {
-    label: "代码块",
-    icon: "code-block",
-    command: {
-      kind: "wrap",
-      before: "```\n",
-      after: "\n```",
-      placeholder: "代码",
-      block: true,
-    },
-  },
+
   {
     label: "表格",
     icon: "table",
@@ -117,6 +107,7 @@ export default function MarkdownEditor(props: BlockEditorProps) {
   const [preferredMode, setMode] = useState<"write" | "split" | "visual">(
     "write",
   );
+  const [statusTarget, setStatusTarget] = useState<HTMLDivElement | null>(null);
   const wide = useSyncExternalStore(
     subscribeSplitLayout,
     canSplitLayout,
@@ -213,6 +204,8 @@ export default function MarkdownEditor(props: BlockEditorProps) {
           <SourceBlockEditor
             {...props}
             editorRef={source}
+            statusTarget={statusTarget}
+            hideStatusBar={mode === "visual"}
             initialSelection={
               selection?.pane === "source" ? selection.range : undefined
             }
@@ -243,6 +236,8 @@ export default function MarkdownEditor(props: BlockEditorProps) {
                 selection?.pane === "visual" ? selection.range : undefined
               }
               editorRef={visual}
+              statusTarget={statusTarget}
+              hideStatusBar={mode === "split"}
               media={props.media}
               toolbar={(editor) => (
                 <RichToolbar
@@ -256,6 +251,11 @@ export default function MarkdownEditor(props: BlockEditorProps) {
           )}
         </div>
       </div>
+      <div
+        ref={setStatusTarget}
+        className={styles.status}
+        data-editor-status-outlet
+      />
     </div>
   );
 }

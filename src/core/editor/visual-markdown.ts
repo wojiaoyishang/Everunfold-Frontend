@@ -20,7 +20,7 @@ const children = (node: Node) =>
 
 export function markdownRichSource(source: string) {
   return normalizeVisualDocument(
-    sourceDocument(renderMarkdownSource(source)),
+    sourceDocument(renderMarkdownSource(source), true),
     true,
   );
 }
@@ -100,6 +100,22 @@ function serialize(node: Node): string {
         .join("\n");
     case "horizontalRule":
       return "---";
+    case "codeBlock": {
+      const code = node.textContent;
+      const fence = "`".repeat(
+        Math.max(
+          3,
+          ...Array.from(code.matchAll(/`+/g), (match) => match[0].length + 1),
+        ),
+      );
+      return (
+        fence + String(node.attrs.language ?? "") + "\n" + code + "\n" + fence
+      );
+    }
+    case "inlineMath":
+      return "$" + String(node.attrs.latex).replace(/\r?\n/g, " ") + "$";
+    case "blockMath":
+      return "$$\n" + String(node.attrs.latex) + "\n$$";
     case "hardBreak":
       return "  \n";
     default:

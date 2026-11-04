@@ -20,6 +20,9 @@ import { richExtensions } from "@/core/editor/rich-extensions";
 import { sourceDocument, renderRichNode } from "@/core/editor/rich-text";
 import { htmlRichSource } from "@/core/editor/visual-document";
 import { renderContent } from "@/core/rendering/content";
+import { inspectContentFeatures } from "@/core/rendering/features/content-features";
+import { renderMarkdownSource } from "@/core/rendering/content";
+import { ContentResources } from "../content-resources";
 import { referencedFontFaces } from "@/core/rendering/fonts";
 import type { UploadEntry } from "@/core/media/upload-queue";
 import type { MediaItem } from "@/generated/settings-contract";
@@ -86,6 +89,8 @@ interface RichTextEditorProps {
   afterToolbar?: ReactNode;
   uploadEntries?: UploadEntry<MediaItem>[];
   format?: "html" | "markdown";
+  statusTarget?: HTMLElement | null;
+  hideStatusBar?: boolean;
 }
 
 function hasLiveEditor(editor: Editor | null): editor is Editor {
@@ -106,6 +111,8 @@ export function RichTextEditor({
   format = "html",
   afterToolbar,
   uploadEntries,
+  statusTarget,
+  hideStatusBar,
 }: RichTextEditorProps) {
   const readSource =
     format === "markdown" ? markdownRichSource : htmlRichSource;
@@ -237,15 +244,28 @@ export function RichTextEditor({
         "div[data-raw-html]",
       ) ?? []) {
         const html = raw.dataset.rawHtml ?? "";
-        const safe = renderContent({
+        const rendered = renderContent({
           id: "editor-raw",
           content: [{ id: "raw", type: "html", content: html }],
           media_urls: latest.current.media,
-        }).html;
+        });
+        const safe = rendered.html;
         if (raw.dataset.rendered !== safe) {
           raw.innerHTML = `<div class="rich-raw-label">自定义 HTML · 在源码模式编辑</div><div>${safe}</div>`;
           raw.dataset.rendered = safe;
           raw.contentEditable = "false";
+          if (rendered.features.code || rendered.features.math)
+            void import("@/core/rendering/features/content-features")
+              .then(({ enhanceContentHtml }) => enhanceContentHtml(safe))
+              .then((html) => {
+                if (
+                  hasLiveEditor(editor) &&
+                  raw.isConnected &&
+                  raw.dataset.rendered === safe
+                )
+                  raw.innerHTML = `<div class="rich-raw-label">自定义 HTML · 在源码模式编辑</div><div>${html}</div>`;
+              })
+              .catch(() => {});
         }
       }
     };
@@ -305,6 +325,11 @@ export function RichTextEditor({
       data-disabled={disabled}
       data-editor-local-control
     >
+      <ContentResources
+        features={inspectContentFeatures(
+          format === "markdown" ? renderMarkdownSource(value) : value,
+        )}
+      />
       <style
         data-editor-fonts
         dangerouslySetInnerHTML={{ __html: referencedFontFaces(value, media) }}
@@ -324,7 +349,11 @@ export function RichTextEditor({
         editor={editor?.extensionManager ? editor : null}
         className={styles.canvas}
       />
-      <EditorStatusBar count={value.length}>
+      <EditorStatusBar
+        count={value.length}
+        target={statusTarget}
+        hidden={hideStatusBar}
+      >
         {selectedText ? `已选 ${selectedText} 字符` : null}
       </EditorStatusBar>
     </div>

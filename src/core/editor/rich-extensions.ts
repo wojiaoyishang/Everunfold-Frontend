@@ -5,6 +5,7 @@ import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Image from "@tiptap/extension-image";
 import { UPLOAD_SCHEME, uploadPlaceholderImage } from "./upload-placeholders";
+import { localFormulaNodes, LocalCodeHighlight } from "./feature-extensions";
 
 const RawHtml = Node.create({
   name: "rawHtml",
@@ -117,5 +118,6 @@ export function richExtensions(
     TableKit.configure({ table: { resizable: false } }),
     RichImage.configure({ inline: inlineImages }),
     RawHtml,
+    ...(!shared ? [...localFormulaNodes, LocalCodeHighlight] : []),
   ];
 }

@@ -28,6 +28,7 @@ import {
 import styles from "./source-block-editor.module.css";
 import { SourceToolbar, type SourceAction } from "./source-toolbar";
 import { SourceSearchPanel } from "./source-search-panel";
+import { featureSource } from "@/core/editor/content-feature-source";
 export type { SourceAction } from "./source-toolbar";
 
 export interface BlockEditorProps {
@@ -43,6 +44,8 @@ export interface BlockEditorProps {
   onUpload?: (files: File[]) => void;
   uploadStatus?: ReactNode;
   uploadEntries?: UploadEntry<MediaItem>[];
+  statusTarget?: HTMLElement | null;
+  hideStatusBar?: boolean;
 }
 const emptyStatus: SourceStatus = {
   line: 1,
@@ -63,6 +66,8 @@ export function SourceBlockEditor({
   modeControls: _modeControls,
   initialSelection,
   uploadStatus,
+  statusTarget,
+  hideStatusBar,
   ...props
 }: BlockEditorProps & {
   language: Extension;
@@ -123,6 +128,20 @@ export function SourceBlockEditor({
         inserts={inserts}
         onMedia={props.onMedia}
         onUpload={props.onUpload}
+        onFeature={(kind) => {
+          const range = input.current?.selection() ?? { start: 0, end: 0 };
+          const insert = input.current?.captureInsertion();
+          return {
+            initial: { source: props.value.slice(range.start, range.end) },
+            apply: (value) => {
+              const block = kind === "code" || value.display;
+              const leading = block && range.start > 0 ? "\n\n" : "";
+              const trailing =
+                block && range.end < props.value.length ? "\n\n" : "";
+              insert?.(leading + featureSource(kind, value, format) + trailing);
+            },
+          };
+        }}
         onCommand={(command) => input.current?.run(command)}
         onIndent={(direction) => input.current?.indent(direction)}
       />
@@ -153,6 +172,8 @@ export function SourceBlockEditor({
         onSearchRequest={openSearch}
       />
       <EditorStatusBar
+        target={statusTarget}
+        hidden={hideStatusBar}
         count={props.value.length}
         actions={
           <>

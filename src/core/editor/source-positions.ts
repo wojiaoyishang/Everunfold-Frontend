@@ -114,6 +114,11 @@ export function transferRange(
 export function richTextUnits(doc: RichNode) {
   const units: Unit[] = [];
   doc.descendants((node, pos) => {
+    if (["inlineMath", "blockMath"].includes(node.type.name)) {
+      for (const key of String(node.attrs.latex))
+        units.push({ key, start: pos, end: pos + node.nodeSize });
+      return false;
+    }
     if (node.isText)
       for (const unit of textUnits(node.text ?? "", pos)) units.push(unit);
     const tag = { image: "img", hardBreak: "br", horizontalRule: "hr" }[

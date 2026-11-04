@@ -39,7 +39,7 @@ export function normalizeVisualDocument(
     };
     for (const child of content) {
       if (
-        ["text", "hardBreak"].includes(child.type ?? "") ||
+        ["text", "hardBreak", "inlineMath"].includes(child.type ?? "") ||
         (inlineImages && child.type === "image")
       )
         inline.push(child);
@@ -62,5 +62,5 @@ export function normalizeVisualDocument(
 }
 
 export function htmlRichSource(source: string, inlineImages = false) {
-  return normalizeVisualDocument(sourceDocument(source), inlineImages);
+  return normalizeVisualDocument(sourceDocument(source, true), inlineImages);
 }

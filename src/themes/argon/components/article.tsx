@@ -2,7 +2,8 @@ import { AppLink as Link } from "./navigation-link";
 import type { Content, PublicSnapshot } from "@/core/content/types";
 import { displayDate } from "@/core/content/query";
 import { taxonomyHref } from "@/core/content/urls";
-import { renderContent } from "@/core/rendering/content";
+import { renderContentForReader } from "@/core/rendering/render-content-server";
+import { ContentMarkup } from "./content-markup";
 import { CommentSection } from "./comments/comment-section";
 import { PagePresentation } from "./route-state";
 import { ArticleHeader } from "./article-header";
@@ -13,7 +14,7 @@ import { RelatedArticles } from "./related-articles";
 import { ArticleNeighbors } from "./article-neighbors";
 import { ReaderPreviewRegistration } from "./reader-preview";
 
-export function Article({
+export async function Article({
   snapshot,
   content,
   commentsPage = 1,
@@ -22,7 +23,7 @@ export function Article({
   content: Content;
   commentsPage?: number;
 }) {
-  const rendered = renderContent(content);
+  const rendered = await renderContentForReader(content);
   return (
     <>
       <PagePresentation
@@ -35,9 +36,10 @@ export function Article({
         <ArticleHeader content={content} />
         <div className="article-body">
           <ArticleMedia>
-            <div
+            <ContentMarkup
               className="article-content"
-              dangerouslySetInnerHTML={{ __html: rendered.html }}
+              html={rendered.html}
+              features={rendered.features}
             />
           </ArticleMedia>
           <footer className="article-footer">

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { renderContent } from "@/core/rendering/content";
 import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
+import { ContentMarkup } from "../../components/content-markup";
 
 export function DraftPreview({
   fields,
@@ -9,7 +10,7 @@ export function DraftPreview({
   fields: DraftFields;
   media?: Record<string, MediaURL>;
 }) {
-  const html = useMemo(
+  const rendered = useMemo(
     () =>
       renderContent({
         id: "draft-preview",
@@ -18,7 +19,7 @@ export function DraftPreview({
           type: block.type ?? "markdown",
         })),
         media_urls: media,
-      }).html,
+      }),
     [fields.body, media],
   );
   return (
@@ -28,7 +29,7 @@ export function DraftPreview({
         <p className="admin-draft-excerpt">{fields.excerpt}</p>
       )}
       {fields.body.some((block) => block.content.trim()) ? (
-        <div dangerouslySetInnerHTML={{ __html: html }} />
+        <ContentMarkup html={rendered.html} features={rendered.features} />
       ) : (
         <p className="admin-draft-empty">写一点正文后，就能在这里预览。</p>
       )}

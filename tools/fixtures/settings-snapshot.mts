@@ -15,6 +15,19 @@ if (
   throw new Error("Expected an isolated verification workspace");
 const epoch = "00000000-0000-0000-0000-000000000001";
 const value = snapshot();
+value.contents[1].content = [
+  {
+    id: "markdown-features",
+    type: "markdown",
+    content: "行内 $a^2$。\n\n```python\nprint(42)\n```",
+  },
+  {
+    id: "html-features",
+    type: "html",
+    content:
+      '<div data-math="block" data-latex="E=mc^2">E=mc^2</div><pre><code class="language-javascript">const answer = 42;</code></pre>',
+  },
+];
 value.source_epoch = epoch;
 const cache = path.join(root, "var/absent-admin-verification-cache");
 await mkdir(cache, { recursive: true });

@@ -6,6 +6,9 @@ import type { Content } from "@/core/content/types";
 import { publicHref, resourceUrl } from "@/core/content/urls";
 import { expandPresentationShortcodes } from "./shortcodes";
 import { fontFamily, referencedFontFaces } from "./fonts";
+import { markdownMath } from "./features/markdown-math";
+import { inspectContentFeatures } from "./features/content-features";
+import type { ContentFeatures } from "./features/model";
 
 export interface TableOfContentsItem {
   id: string;
@@ -14,6 +17,7 @@ export interface TableOfContentsItem {
 }
 
 const markdown = new MarkdownIt({ html: true, linkify: true, breaks: true });
+markdown.use(markdownMath);
 const defaultValidateLink = markdown.validateLink;
 markdown.validateLink = (url: string) =>
   /^site:\/\/media\/[^\s]+$/.test(url) || defaultValidateLink(url);
@@ -90,9 +94,17 @@ const options: sanitizeHtml.IOptions = {
     h5: ["id", "style"],
     h6: ["id", "style"],
     details: ["open", "class"],
-    div: ["class"],
+    div: ["class", "data-math", "data-latex"],
     strong: ["class"],
-    span: ["class", "title", "tabindex", "data-font", "style"],
+    span: [
+      "class",
+      "title",
+      "tabindex",
+      "data-font",
+      "style",
+      "data-math",
+      "data-latex",
+    ],
     abbr: ["title"],
     audio: ["src", "controls", "preload"],
     video: ["src", "poster", "controls", "preload"],
@@ -143,6 +155,7 @@ export function renderContent(
 ): {
   html: string;
   toc: TableOfContentsItem[];
+  features: ContentFeatures;
 } {
   const toc: TableOfContentsItem[] = [];
   const seenHeadings = new Map<string, number>();
@@ -281,5 +294,6 @@ export function renderContent(
       html +
       notes,
     toc,
+    features: inspectContentFeatures(html),
   };
 }

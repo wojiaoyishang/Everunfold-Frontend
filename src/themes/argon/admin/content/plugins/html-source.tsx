@@ -95,18 +95,7 @@ const inserts = [
       placeholder: "链接文字",
     },
   },
-  {
-    label: "代码块",
-    icon: "code-block",
-    command: {
-      kind: "wrap",
-      before: "<pre><code>",
-      after: "</code></pre>",
-      placeholder: "代码",
-      block: true,
-      escapeHtml: true,
-    },
-  },
+
   {
     label: "表格",
     icon: "table",

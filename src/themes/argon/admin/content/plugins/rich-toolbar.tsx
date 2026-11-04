@@ -10,6 +10,8 @@ import { ActionPopover } from "../../../components/ui/action-popover";
 import { Select } from "../../../components/ui/select";
 import { Icon, type IconName } from "../../../components/icon";
 import styles from "./rich-editor.module.css";
+import { ContentFeatureButtons } from "../../../components/ui/content-feature-dialog";
+import { prepareVisualFeature } from "@/core/editor/visual-feature-insertion";
 
 export function RichToolbar({
   editor,
@@ -154,11 +156,6 @@ export function RichToolbar({
               () => editor.chain().focus().toggleBlockquote().run(),
             ],
             [
-              "代码块",
-              "code-block",
-              () => editor.chain().focus().toggleCodeBlock().run(),
-            ],
-            [
               "表格",
               "table",
               () =>
@@ -181,6 +178,10 @@ export function RichToolbar({
           ].map(([label, icon, run]) =>
             button(label as string, icon as IconName, run as () => void),
           )}
+          <ContentFeatureButtons
+            className={styles.toolButton}
+            prepare={(kind) => prepareVisualFeature(editor, kind)}
+          />
           {button("插入图片", "image", () => onMedia?.("image"))}
           {button("插入媒体或附件", "folder", () => onMedia?.("all"))}
           {onUpload && (

@@ -182,6 +182,40 @@ directory = "./var/absent-admin-verification-cache"
     const html = await article.text();
     assert.match(html, /<title>一篇文章 — 本地设置<\/title>/);
     assert.match(html, /name="robots" content="noindex, follow"/);
+    const resources = (markup) => {
+      const result = [];
+      new Parser({
+        onopentag(tag, attributes) {
+          if (tag === "link" && attributes["data-content-resource"])
+            result.push(attributes.href);
+        },
+      }).end(markup);
+      return result;
+    };
+    assert.deepEqual(
+      resources(html),
+      [],
+      "plain articles must not declare code/math assets",
+    );
+    const richArticle = await fetch(base + "/second.html");
+    assert.equal(richArticle.status, 200);
+    const richHtml = await richArticle.text();
+    assert.match(richHtml, /data-typeset="true"/);
+    assert.match(richHtml, /<math .*MathML/);
+    assert.match(richHtml, /hljs-keyword/);
+    assert.match(richHtml, /hljs-built_in/);
+    assert.equal(resources(richHtml).length, 3);
+    for (const asset of [
+      ...resources(richHtml),
+      "/content-features/katex-0.19.1/fonts/KaTeX_Main-Regular.woff2",
+    ]) {
+      const response = await fetch(base + asset);
+      assert.equal(response.status, 200, asset);
+      assert.match(response.headers.get("content-type") ?? "", /css|font|woff/);
+    }
+    console.log(
+      "Content features passed: mixed Markdown/HTML SSR math/highlight, conditional local CSS/fonts, no assets for plain articles.",
+    );
     assert.equal(
       backendRequests,
       0,

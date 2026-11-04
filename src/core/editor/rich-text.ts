@@ -1,7 +1,8 @@
 import * as Y from "yjs";
 import type { JSONContent } from "@tiptap/core";
 import { yXmlFragmentToProsemirrorJSON } from "@tiptap/y-tiptap";
-import { parseDocument } from "htmlparser2";
+import { parseDocument, DomUtils } from "htmlparser2";
+import { formulaHtml } from "@/core/rendering/features/model";
 
 const tags: Record<string, string> = {
   p: "paragraph",
@@ -42,7 +43,10 @@ const attributes: Record<string, string[]> = {
 type HtmlNode = ReturnType<typeof parseDocument>["children"][number];
 
 /** Conservative source import: preserve unsupported HTML as a source-editable atom. */
-export function sourceDocument(source: string): JSONContent {
+export function sourceDocument(
+  source: string,
+  visualFeatures = false,
+): JSONContent {
   try {
     const root = parseDocument(source);
     const convert = (
@@ -64,6 +68,52 @@ export function sourceDocument(source: string): JSONContent {
           throw new Error("保留原始 HTML");
         const tag = node.name,
           props = node.attribs;
+        if (
+          visualFeatures &&
+          ["span", "div"].includes(tag) &&
+          ["inline", "block"].includes(props["data-math"])
+        ) {
+          if (
+            Object.keys(props).some(
+              (key) => !["data-math", "data-latex"].includes(key),
+            )
+          )
+            throw new Error("自定义公式属性");
+          return [
+            {
+              type: props["data-math"] === "block" ? "blockMath" : "inlineMath",
+              attrs: {
+                latex: props["data-latex"] ?? DomUtils.textContent(node),
+              },
+            },
+          ];
+        }
+        if (visualFeatures && tag === "pre") {
+          const code = node.children.find(
+            (child) => "name" in child && child.name === "code",
+          );
+          if (
+            Object.keys(props).some((key) => key !== "class") ||
+            (code &&
+              "attribs" in code &&
+              Object.keys(code.attribs).some((key) => key !== "class"))
+          )
+            throw new Error("自定义代码属性");
+          const language =
+            /(?:^|\s)language-([\w+-]+)/.exec(
+              code && "attribs" in code
+                ? (code.attribs.class ?? "")
+                : (props.class ?? ""),
+            )?.[1] ?? null;
+          const text = DomUtils.textContent(node);
+          return [
+            {
+              type: "codeBlock",
+              attrs: { language },
+              ...(text ? { content: [{ type: "text", text }] } : {}),
+            },
+          ];
+        }
         if (
           ["thead", "tbody", "tfoot"].includes(tag) &&
           !Object.keys(props).length
@@ -279,6 +329,8 @@ export function renderRichNode(node: JSONContent): string {
     return result;
   }
   if (type === "rawHtml") return String(attrs.html ?? "");
+  if (type === "inlineMath" || type === "blockMath")
+    return formulaHtml(String(attrs.latex ?? ""), type === "blockMath");
   const content = (node.content ?? []).map(renderRichNode).join("");
   if (type === "doc") return content;
   if (type === "codeBlock")

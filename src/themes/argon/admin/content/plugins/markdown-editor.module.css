@@ -2,10 +2,17 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
+  background: var(--admin-surface);
 }
 .sourcePane,
 .visualPane {
   min-width: 0;
+  background: var(--admin-surface);
+}
+.status {
+  min-width: 0;
+  position: relative;
+  z-index: 1;
 }
 .panes[data-mode="write"] > .visualPane,
 .panes[data-mode="visual"] > .sourcePane {
@@ -15,10 +22,12 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 .panes[data-mode="split"] > .visualPane {
-  border-left: 1px solid var(--admin-border);
   max-height: 645px;
   overflow: auto;
   scrollbar-gutter: stable;
+}
+.panes[data-mode="split"] > .sourcePane {
+  border-right: 1px solid var(--admin-border);
 }
 @media (max-width: 800px) {
   .panes[data-mode="split"] {

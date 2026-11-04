@@ -25,6 +25,7 @@ const blocks = new Set([
   "h5",
   "h6",
   "pre",
+  "div",
   "figcaption",
   "img",
   "hr",

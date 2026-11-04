@@ -1,16 +1,22 @@
 "use client";
 import type { ReactNode } from "react";
+import { createPortal } from "react-dom";
 import styles from "./editor-status-bar.module.css";
 export function EditorStatusBar({
   count,
   children,
   actions,
+  target,
+  hidden = false,
 }: {
   count: number;
   children?: ReactNode;
   actions?: ReactNode;
+  target?: HTMLElement | null;
+  hidden?: boolean;
 }) {
-  return (
+  if (hidden) return null;
+  const bar = (
     <div className={styles.bar}>
       <span className={styles.position}>{children}</span>
       <div className={styles.actions}>
@@ -19,4 +25,5 @@ export function EditorStatusBar({
       </div>
     </div>
   );
+  return target ? createPortal(bar, target) : bar;
 }

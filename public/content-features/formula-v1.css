@@ -1,0 +1,22 @@
+[data-math="block"] {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.65em 0.15em;
+  margin: 0.8em 0;
+}
+[data-math="inline"] {
+  display: inline;
+}
+[data-math] .katex {
+  font-size: 1.12em;
+}
+[data-math] .katex-display {
+  margin: 0.35em 0;
+}
+.formula-error {
+  color: var(--admin-danger, var(--danger, #ba5050));
+  font-family: Consolas, monospace;
+  white-space: pre-wrap;
+}

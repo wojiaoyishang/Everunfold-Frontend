@@ -1,6 +1,7 @@
 import type { FeedEntry } from "@/core/content/presentation";
 import type { PublicSnapshot } from "@/core/content/types";
-import { renderContent } from "@/core/rendering/content";
+import { renderContentForReader } from "@/core/rendering/render-content-server";
+import { ContentMarkup } from "./content-markup";
 import { AppLink as Link } from "./navigation-link";
 import { ArticleMedia } from "./article-media";
 import { CollapsibleContent } from "./collapsible-content";
@@ -13,7 +14,7 @@ import { ArticleActions } from "./article-actions";
 import { ViewMetric } from "./reader-data";
 import { ContentEditLink } from "./content-edit-link";
 
-export function ShuoshuoCard({
+export async function ShuoshuoCard({
   entry,
   detail = false,
 }: {
@@ -21,12 +22,13 @@ export function ShuoshuoCard({
   detail?: boolean;
 }) {
   const { content, example } = entry;
-  const rendered = renderContent(content);
+  const rendered = await renderContentForReader(content);
   const body = (
     <ArticleMedia>
-      <div
+      <ContentMarkup
         className="article-content shuoshuo-content"
-        dangerouslySetInnerHTML={{ __html: rendered.html }}
+        html={rendered.html}
+        features={rendered.features}
       />
     </ArticleMedia>
   );

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import type { Content, Site } from "@/core/content/types";
 import { useProtectedContent } from "@/core/content/use-protected-content";
 import { renderContent } from "@/core/rendering/content";
+import { ContentMarkup } from "./content-markup";
 import { ArticleHeader } from "./article-header";
 import { ArticleMedia } from "./article-media";
 import { PagePresentation } from "./route-state";
@@ -32,9 +33,10 @@ export function ProtectedArticle({
         {access.content ? (
           <div className={`article-body ${styles.revealed}`}>
             <ArticleMedia>
-              <div
+              <ContentMarkup
                 className="article-content"
-                dangerouslySetInnerHTML={{ __html: rendered.html }}
+                html={rendered.html}
+                features={rendered.features}
               />
             </ArticleMedia>
           </div>

@@ -6,6 +6,11 @@ import { Button } from "../../../components/ui/primitives";
 import { FilePicker } from "../../../components/ui/file-picker";
 import { Select } from "../../../components/ui/select";
 import styles from "./source-block-editor.module.css";
+import {
+  ContentFeatureButtons,
+  type FeatureInsertion,
+} from "../../../components/ui/content-feature-dialog";
+import type { ContentFeatureKind } from "@/core/editor/content-feature-source";
 export interface SourceAction {
   label: string;
   icon: IconName;
@@ -31,6 +36,7 @@ export function SourceToolbar({
   onIndent,
   onMedia,
   onUpload,
+  onFeature,
 }: {
   label: string;
   disabled: boolean;
@@ -42,6 +48,7 @@ export function SourceToolbar({
   onIndent: (direction: -1 | 1) => void;
   onMedia?: (kind: "image" | "all") => void;
   onUpload?: (files: File[]) => void;
+  onFeature: (kind: ContentFeatureKind) => FeatureInsertion;
 }) {
   const id = useId();
   const formatLabel = format === "markdown" ? "Markdown" : "HTML";
@@ -78,6 +85,11 @@ export function SourceToolbar({
       <div className={styles.toolGroup}>{buttons(actions)}</div>
       <div className={styles.insertGroup} role="group" aria-label="插入">
         {buttons(inserts)}
+        <ContentFeatureButtons
+          className={styles.tool}
+          disabled={disabled}
+          prepare={onFeature}
+        />
         <Button
           className={styles.tool}
           title="插入图片"

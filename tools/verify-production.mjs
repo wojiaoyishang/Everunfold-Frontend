@@ -54,6 +54,11 @@ try {
     path.join(projectRoot, "public/favicon.ico"),
     path.join(workspace, "public/favicon.ico"),
   );
+  await cp(
+    path.join(projectRoot, "public/content-features"),
+    path.join(workspace, "public/content-features"),
+    { recursive: true },
+  );
   if (process.argv.includes("--failure-ui")) {
     // Deliberate rendering failure exists only in this disposable copy, never in the app source.
     const fixture = path.join(workspace, "src/app/health/verification-error");
