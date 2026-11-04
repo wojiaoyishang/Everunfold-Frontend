@@ -179,7 +179,7 @@ export function FormulaField({
         mf.readOnly = !latest.current.valid || latest.current.disabled;
         mf.resetUndo();
         setState("ready");
-        mf.focus();
+        // Loading the visual engine must not steal focus from the source editor.
         release = () => {
           MathfieldElement.locale = previousLocale;
           keyboard.hide({ animate: false });
