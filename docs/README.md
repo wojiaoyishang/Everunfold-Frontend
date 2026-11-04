@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+[Markdown源码高亮](decisions/0055-markdown-source-highlighting.md)及[实页验收](handoff/markdown-source-highlighting-verification.md)：标记分色、浅深色与窄屏、代码围栏按语言加载，211项检查通过。
+
 [编辑器预览操作随滚动进入顶栏](decisions/0054-scroll-editor-preview-actions.md)及[实页验收](handoff/editor-preview-dock-verification.md)：单组预览操作、双向动效、焦点保留与窄屏导航第二行。
 
 [功能测试长文与本地验收](handoff/feature-lab-article-verification.md)：7 个混合区块、代码/公式/媒体/字体/阅读交互，文章已发布并保留。

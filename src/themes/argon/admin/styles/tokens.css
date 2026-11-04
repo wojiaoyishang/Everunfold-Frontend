@@ -16,6 +16,10 @@ html:has([data-surface="admin"]),
   --admin-danger: #b54343;
   --admin-positive: #28775a;
   --admin-positive-soft: #edf6f1;
+  --admin-syntax-mark: #52688b;
+  --admin-syntax-keyword: #7c3f9e;
+  --admin-syntax-emphasis: #936018;
+  --admin-syntax-quote: #276e84;
   --admin-shadow: 0 10px 32px #17223812, 0 2px 8px #17223808;
   --accent: var(--admin-accent);
   --brand-accent: var(--admin-accent);
@@ -67,6 +71,10 @@ html:has([data-admin-mode="dark"]),
   --admin-danger: #f0a1a1;
   --admin-positive: #8bceb1;
   --admin-positive-soft: #22382e;
+  --admin-syntax-mark: #a5bad9;
+  --admin-syntax-keyword: #d2a5ee;
+  --admin-syntax-emphasis: #dfba83;
+  --admin-syntax-quote: #8fc7db;
   --admin-shadow: 0 10px 32px #0004;
 }
 @media (prefers-color-scheme: dark) {
@@ -86,6 +94,10 @@ html:has([data-admin-mode="dark"]),
     --admin-danger: #f0a1a1;
     --admin-positive: #8bceb1;
     --admin-positive-soft: #22382e;
+    --admin-syntax-mark: #a5bad9;
+    --admin-syntax-keyword: #d2a5ee;
+    --admin-syntax-emphasis: #dfba83;
+    --admin-syntax-quote: #8fc7db;
     --admin-shadow: 0 10px 32px #0004;
   }
 }

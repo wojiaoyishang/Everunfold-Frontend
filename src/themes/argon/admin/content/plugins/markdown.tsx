@@ -6,7 +6,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
-import { markdownSourceLanguage as language } from "@/core/editor/visual-markdown";
+import { markdownEditorLanguage as language } from "@/core/editor/markdown-language";
 import { RichTextEditor } from "../../../components/ui/rich-text-editor";
 import { RichToolbar } from "./rich-toolbar";
 import { EditorViewToggle } from "./editor-view-toggle";

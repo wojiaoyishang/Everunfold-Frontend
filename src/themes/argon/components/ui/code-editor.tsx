@@ -24,7 +24,6 @@ import {
 } from "@codemirror/commands";
 import {
   bracketMatching,
-  HighlightStyle,
   syntaxHighlighting,
   indentOnInput,
   indentUnit,
@@ -46,7 +45,6 @@ import {
   type SourceCommand,
 } from "@/core/editor/source-commands";
 import { sourceSearchHighlights } from "@/core/editor/source-search";
-import { tags } from "@lezer/highlight";
 import { yCollab, yUndoManagerKeymap } from "y-codemirror.next";
 import type * as Y from "yjs";
 import type { Awareness } from "y-protocols/awareness";
@@ -58,25 +56,7 @@ import {
 import type { DraftSession } from "@/core/collaboration/session";
 import styles from "./code-editor.module.css";
 import { useCodeEditorHandle } from "./use-code-editor-handle";
-
-const sourceHighlight = HighlightStyle.define([
-  { tag: tags.heading, color: "var(--admin-text)", fontWeight: "600" },
-  {
-    tag: [tags.keyword, tags.tagName, tags.attributeName, tags.operator],
-    color: "var(--admin-accent)",
-  },
-  {
-    tag: [tags.string, tags.number, tags.bool, tags.special(tags.string)],
-    color: "var(--admin-positive)",
-  },
-  {
-    tag: [tags.comment, tags.meta, tags.processingInstruction],
-    color: "var(--admin-muted)",
-  },
-  { tag: tags.link, color: "var(--admin-accent)", textDecoration: "underline" },
-  { tag: tags.strong, fontWeight: "600" },
-  { tag: tags.emphasis, fontStyle: "italic" },
-]);
+import { sourceHighlight } from "./source-highlight";
 
 const externalSource = Annotation.define<boolean>();
 export type SourceSelection = { start: number; end: number };

@@ -528,3 +528,16 @@ ADR0054：单组预览操作随滚动迁移，焦点/状态保留、双向动效
 | `docs/handoff/editor-preview-dock-verification.md` | `72399a937c2e8784dd76d51cb771a6cef4b395ed67ea87436ad5fa7c7266f47a` |
 | `docs/design/editor-preview-dock-desktop.jpg` | `d3ef55c2bd3847821f5da969f2cc8f5898e993abeaa7aa2a244e4135b15ad007` |
 | `docs/design/editor-preview-dock-mobile.jpg` | `5b4d07b412aee99de26dad3dde48fb9ab683241e545db5d4984380c0a12a2ba3` |
+
+## 2026-11-04 Markdown源码语法高亮
+
+ADR0055：共享源码标记分色与浅深色变量、围栏按语言加载；复用既有语言清单和窗口加载缓存。共同验收、索引与3张自建文章截图同步，依赖/业务契约/数据结构不变。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `6467814991dd8c9ec6ba84ae4055059411be2df147fee58f309390684ef9b13f` |
+| `docs/decisions/0055-markdown-source-highlighting.md` | `711686eff7b8218a18ad1e6f8f195c155004e0729fe679bc968a68287ba57cb4` |
+| `docs/handoff/markdown-source-highlighting-verification.md` | `6730852f6c3f430e6f812396c2cbb8b12681b164d8dc5f36c8df0f03e1ead0b5` |
+| `docs/design/markdown-source-highlight-light.jpg` | `a04f8b8b70b515b2e10d10f4f994e77e070b5c2da2e08b3dcb7fce3ea0208620` |
+| `docs/design/markdown-source-highlight-dark.jpg` | `7746574acfa16dc3738cae561daecdbab9e7d7e23f98698833c9193d0428f79d` |
+| `docs/design/markdown-source-highlight-mobile.jpg` | `3df6f462cb9dd352e90f30855734f37fe41651604ae113328b0e992063541910` |
