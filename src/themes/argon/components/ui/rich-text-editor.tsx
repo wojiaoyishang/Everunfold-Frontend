@@ -18,6 +18,7 @@ import { Slice } from "@tiptap/pm/model";
 import { NodeSelection, Plugin, TextSelection } from "@tiptap/pm/state";
 import { richExtensions } from "@/core/editor/rich-extensions";
 import { sourceDocument, renderRichNode } from "@/core/editor/rich-text";
+import { htmlRichSource } from "@/core/editor/visual-document";
 import { renderContent } from "@/core/rendering/content";
 import { referencedFontFaces } from "@/core/rendering/fonts";
 import type { UploadEntry } from "@/core/media/upload-queue";
@@ -107,7 +108,7 @@ export function RichTextEditor({
   uploadEntries,
 }: RichTextEditorProps) {
   const readSource =
-    format === "markdown" ? markdownRichSource : sourceDocument;
+    format === "markdown" ? markdownRichSource : htmlRichSource;
   const mapSelection =
     format === "markdown" ? richMarkdownSelection : richSourceSelection;
   const latest = useRef({ onChange, media });
@@ -130,7 +131,7 @@ export function RichTextEditor({
         if (!html) return false;
         event.preventDefault();
         const fragment = view.state.schema.nodeFromJSON(
-          sourceDocument(html),
+          htmlRichSource(html, format === "markdown"),
         ).content;
         view.dispatch(
           view.state.tr

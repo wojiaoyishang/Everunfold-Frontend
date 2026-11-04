@@ -10,7 +10,8 @@ import { htmlElementSelection } from "../src/core/editor/html-element-selection"
 import { EditorState } from "@codemirror/state";
 import { getSchema } from "@tiptap/core";
 import { richExtensions } from "../src/core/editor/rich-extensions";
-import { sourceDocument } from "../src/core/editor/rich-text";
+import { sourceDocument, renderRichNode } from "../src/core/editor/rich-text";
+import { htmlRichSource } from "../src/core/editor/visual-document";
 import { patchVisualHtml } from "../src/core/editor/patch-visual-html";
 import { richSourceSelection } from "../src/core/editor/source-positions";
 import {
@@ -183,6 +184,50 @@ test("Markdown visual lists and blockquotes import as schema-valid block content
     after.check();
     assert.equal(patchVisualMarkdown(raw, before, after), expected);
   }
+});
+
+test("HTML cells and compact lists import as editable blocks while source patches preserve layout", () => {
+  const raw =
+    "<p>前文</p>\r\n<table>\n<tbody>\n<tr><th>标题</th><td>单元格 &amp; 文本</td><td></td></tr>\n</tbody>\n</table>\r\n";
+  const doc = schema.nodeFromJSON(htmlRichSource(raw));
+  doc.check();
+  const before = renderRichNode(doc.toJSON());
+  assert.equal(patchVisualHtml(raw, before, before), raw);
+  assert.equal(
+    patchVisualHtml(raw, before, before.replace("单元格", "已修改")),
+    raw.replace("单元格", "已修改"),
+  );
+  for (const source of [
+    "<ul>\n<li>第一项</li><li></li>\n</ul>",
+    "<blockquote>直接引用文字</blockquote>",
+  ])
+    schema.nodeFromJSON(htmlRichSource(source)).check();
+});
+
+test("table merges and splits preserve the surrounding source with implicit cell paragraphs", () => {
+  const prefix = "<P>原文 &amp;  空白</P>\r\n\r\n",
+    suffix = "\r\n<p>后文</p>\r\n";
+  const raw =
+    prefix + "<table><tr><td>甲</td><td>乙</td></tr></table>" + suffix;
+  const normalize = (html: string) => renderRichNode(htmlRichSource(html));
+  const merged = normalize(raw).replace(
+    "<td><p>甲</p></td><td><p>乙</p></td>",
+    '<td colspan="2"><p>甲</p><p>乙</p></td>',
+  );
+  const result = patchVisualHtml(raw, normalize(raw), merged);
+  assert.ok(result);
+  assert.ok(result.startsWith(prefix));
+  assert.ok(result.endsWith(suffix));
+  assert.equal(normalize(result), merged);
+  const split = merged.replace(
+    '<td colspan="2"><p>甲</p><p>乙</p></td>',
+    "<td><p>甲</p><p>乙</p></td><td><p></p></td>",
+  );
+  const restored = patchVisualHtml(result, merged, split);
+  assert.ok(restored);
+  assert.equal(normalize(restored), split);
+  assert.ok(restored.startsWith(prefix));
+  assert.ok(restored.endsWith(suffix));
 });
 
 test("upload placeholders replace independently without replacing user edits", () => {

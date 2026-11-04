@@ -1,5 +1,7 @@
 import { alignUnits, htmlUnits } from "./source-positions";
-import { renderRichNode, sourceDocument } from "./rich-text";
+import { renderRichNode } from "./rich-text";
+import { htmlRichSource } from "./visual-document";
+import { parseDocument } from "htmlparser2";
 
 type Change = { from: number; to: number; start: number; end: number };
 
@@ -87,7 +89,7 @@ export function patchVisualHtml(
           ? raw[last].end
           : undefined;
     if (start === undefined || end === undefined || end > limit || end < start)
-      return;
+      return patchChangedTable(source, before, after);
     result =
       result.slice(0, start) +
       right.slice(edit.start, edit.end).join("") +
@@ -96,6 +98,47 @@ export function patchVisualHtml(
   }
   // The visual model can normalize constructs it cannot round-trip. Do not
   // write a misleading splice if its new projection is different.
-  const normalize = (value: string) => renderRichNode(sourceDocument(value));
+  const normalize = (value: string) => renderRichNode(htmlRichSource(value));
+  if (normalize(result) === normalize(after)) return result;
+  return patchChangedTable(source, before, after);
+}
+
+/** Cell merges/splits can add schema-only paragraphs absent from the raw HTML.
+ * Replace one changed top-level table after verifying both full projections;
+ * all source outside that table remains byte-for-byte intact.
+ */
+function patchChangedTable(source: string, before: string, after: string) {
+  const normalize = (value: string) => renderRichNode(htmlRichSource(value));
+  if (normalize(source) !== normalize(before)) return;
+  const parts = (html: string) =>
+    parseDocument(html, { withStartIndices: true, withEndIndices: true })
+      .children.filter((node) => node.type !== "text" || node.data.trim())
+      .map((node) => ({
+        tag: "name" in node ? node.name : "",
+        start: node.startIndex ?? 0,
+        end: (node.endIndex ?? -1) + 1,
+      }));
+  const old = parts(before),
+    next = parts(after),
+    raw = parts(source);
+  if (old.length !== next.length || old.length !== raw.length) return;
+  const changed = old
+    .map((part, index) =>
+      before.slice(part.start, part.end) ===
+      after.slice(next[index].start, next[index].end)
+        ? -1
+        : index,
+    )
+    .filter((index) => index >= 0);
+  if (changed.length !== 1) return;
+  const index = changed[0];
+  if (
+    [old[index], next[index], raw[index]].some((part) => part.tag !== "table")
+  )
+    return;
+  const result =
+    source.slice(0, raw[index].start) +
+    after.slice(next[index].start, next[index].end) +
+    source.slice(raw[index].end);
   if (normalize(result) === normalize(after)) return result;
 }
