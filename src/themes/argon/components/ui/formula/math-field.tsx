@@ -7,6 +7,7 @@ import {
   type Ref,
 } from "react";
 import type { MathfieldElement, Selector } from "mathlive";
+import { formulaArrayContext } from "@/core/editor/formula/structure";
 import styles from "./formula-editor.module.css";
 
 export interface FormulaFieldHandle {
@@ -206,7 +207,7 @@ export function FormulaField({
   useEffect(() => {
     const mf = field.current;
     if (!mf) return;
-    mf.readOnly = !valid || disabled;
+    mf.readOnly = disabled || (!valid && applied.current !== source);
     mf.defaultMode = display ? "math" : "inline-math";
     if (valid && applied.current !== source) {
       mf.setValue(source, { silenceNotifications: true });
@@ -231,6 +232,13 @@ export function FormulaField({
       command(command) {
         const mf = field.current;
         if (!mf || mf.readOnly) return false;
+        if (
+          /^(?:addRow|addColumn|removeRow|removeColumn)/.test(command) &&
+          formulaArrayContext(mf.position, mf.lastOffset, (offset) =>
+            mf.getElementInfo(offset),
+          ) === undefined
+        )
+          return false;
         mf.focus();
         return mf.executeCommand(command);
       },

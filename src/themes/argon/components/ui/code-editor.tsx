@@ -201,7 +201,7 @@ export function CodeEditor({
       latest.current.onStatus?.({
         line: line.number,
         column: selection.head - line.from + 1,
-        selected: selection.to - selection.from,
+        selected: Math.max(0, selection.to - selection.from),
         matches: matches.length,
         currentMatch:
           matches.findIndex(

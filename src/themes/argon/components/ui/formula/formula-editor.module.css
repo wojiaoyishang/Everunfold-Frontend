@@ -1,20 +1,32 @@
 .dialog {
   width: min(1060px, calc(100vw - 48px));
   max-width: none;
-  max-height: calc(100dvh - 48px);
+  height: min(760px, calc(100dvh - 32px));
+  max-height: calc(100dvh - 32px);
   padding: 0;
   overflow: hidden;
 }
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
 .dialog :global(.admin-library-modal-heading) {
-  min-height: 48px;
+  min-height: 44px;
   margin: 0;
-  padding: 8px 16px;
+  padding: 5px 12px;
+  flex-shrink: 0;
   border-bottom: 1px solid var(--admin-border);
+}
+.dialog :global(.admin-library-modal-heading h2) {
+  margin-right: auto;
+  font-size: 14px;
 }
 .form {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  flex: 1;
+  overflow: hidden;
 }
 .topbar,
 .topActions,
@@ -27,9 +39,8 @@
   gap: 8px;
 }
 .topbar {
-  padding: 8px 16px;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--admin-border);
+  padding: 0;
+  gap: 10px;
 }
 .segment {
   padding: 3px;
@@ -52,7 +63,7 @@
   border: 0;
   background: transparent;
   color: var(--admin-muted);
-  padding: 7px 10px;
+  padding: 5px 8px;
   border-radius: 4px;
   font-size: 12px;
   line-height: 1.4;
@@ -93,14 +104,17 @@
 }
 .body {
   min-height: 0;
-  max-height: calc(100dvh - 200px);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
   overflow: auto;
 }
 .library {
   display: grid;
   grid-template-columns: 1fr 190px;
-  gap: 12px;
-  padding: 10px 16px;
+  gap: 7px;
+  padding: 7px 12px;
+  flex-shrink: 0;
   background: var(--admin-subtle);
   border-bottom: 1px solid var(--admin-border);
 }
@@ -131,9 +145,14 @@
   padding: 2px;
 }
 .palette > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
   min-width: 48px;
-  height: 37px;
-  padding: 4px 10px;
+  min-height: 33px;
+  height: auto;
+  padding: 6px 9px;
   border: 1px solid var(--admin-border);
   border-radius: 5px;
   background: var(--admin-surface);
@@ -149,6 +168,8 @@
 }
 .workspace {
   display: grid;
+  flex: 1;
+  min-height: 0;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 .workspace[data-source="false"] {
@@ -157,6 +178,9 @@
 .visual,
 .source {
   min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 .visual {
   background: var(--admin-surface);
@@ -165,7 +189,9 @@
   border-left: 1px solid var(--admin-border);
 }
 .paneHeading {
-  height: 36px;
+  min-height: 29px;
+  height: 29px;
+  flex-shrink: 0;
   padding: 0 12px;
   justify-content: space-between;
   border-bottom: 1px solid var(--admin-border);
@@ -177,7 +203,9 @@
   padding: 5px;
 }
 .mathfield {
-  min-height: 224px;
+  min-height: 100px;
+  flex: 1;
+  overflow: auto;
   padding: 14px 12px;
   display: flex;
   align-items: center;
@@ -210,17 +238,24 @@
 }
 .source :global(.cm-editor) {
   font-size: 13px;
+  height: 100%;
+}
+.source > :last-child {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 .source :global(.cm-content) {
-  min-height: 224px;
+  min-height: 100%;
 }
 .source :global(.cm-scroller) {
-  max-height: 320px;
+  max-height: none;
 }
 .keyboard {
   position: relative;
   width: 100%;
   overflow: hidden;
+  flex-shrink: 0;
   --keyboard-zindex: 1;
   --keyboard-background: var(--admin-subtle);
   --keycap-background: var(--admin-surface);
@@ -246,6 +281,7 @@
   border-block: 1px solid var(--admin-border);
   color: var(--admin-muted);
   font-size: 11px;
+  flex-shrink: 0;
 }
 .error,
 .hint {
@@ -265,6 +301,7 @@
 .footer {
   padding: 7px 16px;
   border-top: 1px solid var(--admin-border);
+  flex-shrink: 0;
 }
 .footer :global(.admin-button) {
   min-height: 31px;
@@ -280,13 +317,28 @@
   .dialog {
     width: calc(100vw - 16px);
     max-height: calc(100dvh - 16px);
+    height: calc(100dvh - 16px);
   }
-  .dialog :global(.admin-library-modal-heading),
+  .dialog :global(.admin-library-modal-heading) {
+    padding-inline: 9px;
+    gap: 4px;
+  }
+  .dialog :global(.admin-library-modal-heading h2) {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .topActions button > span {
+    display: none;
+  }
   .topbar {
-    padding-inline: 14px;
+    gap: 3px;
   }
-  .body {
-    max-height: calc(100dvh - 180px);
+  .topActions {
+    gap: 0;
+  }
+  .segment button,
+  .topActions button {
+    padding: 5px 6px;
   }
   .library {
     grid-template-columns: minmax(0, 1fr);
@@ -295,35 +347,49 @@
   }
   .categories {
     gap: 1px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-block: 2px;
   }
   .categories button {
     padding: 6px 8px;
+    flex: 0 0 auto;
   }
   .palette {
-    max-height: 98px;
+    max-height: none;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 7px;
     gap: 5px;
   }
   .palette > button {
-    height: 37px;
+    min-height: 35px;
+    height: auto;
     min-width: 41px;
-    padding: 3px 8px;
+    padding: 6px 8px;
   }
   .workspace {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(min-content, 1fr) minmax(200px, 1fr);
+    min-height: 380px;
   }
   .source {
     border-left: 0;
     border-top: 1px solid var(--admin-border);
   }
+  .visual {
+    min-height: 170px;
+  }
   .mathfield {
-    min-height: 130px;
+    min-height: 100px;
     padding: 14px 10px;
   }
   .source :global(.cm-content) {
-    min-height: 155px;
+    min-height: 100%;
   }
   .source :global(.cm-scroller) {
-    max-height: 220px;
+    max-height: none;
   }
   .footer {
     padding: 7px 12px;

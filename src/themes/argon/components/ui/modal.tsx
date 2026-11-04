@@ -14,6 +14,7 @@ export function Modal({
   closeLabel = "关闭选择器",
   closing = false,
   onExited,
+  headerActions,
 }: {
   title: string;
   className?: string;
@@ -22,6 +23,7 @@ export function Modal({
   children: ReactNode;
   closing?: boolean;
   onExited?: () => void;
+  headerActions?: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -56,6 +58,7 @@ export function Modal({
     >
       <div className="admin-library-modal-heading">
         <h2 id={titleId}>{title}</h2>
+        {headerActions}
         <Button
           className="admin-icon-button"
           aria-label={closeLabel}

@@ -42,7 +42,7 @@ const editorTarget = path.join(
 await mkdir(path.join(editorTarget, "fonts"), { recursive: true });
 const editorCss = (
   await readFile(path.join(editorSource, "mathlive-fonts.css"), "utf8")
-).replace(/font-display:\s*\w+/g, "font-display:swap");
+).replace(/font-display:\s*["']?\w+["']?/g, "font-display:swap");
 await writeFile(path.join(editorTarget, "fonts.css"), editorCss);
 await copyFile(
   path.join(editorSource, "LICENSE.txt"),

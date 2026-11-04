@@ -115,6 +115,53 @@ export default function FormulaEditorDialog({
   return (
     <Modal
       title="公式编辑器"
+      headerActions={
+        <div className={styles.topbar} inert={closing}>
+          <div
+            className={styles.segment}
+            role="group"
+            aria-label="公式显示方式"
+          >
+            {(
+              [
+                [true, "独立公式", "独立"],
+                [false, "行内公式", "行内"],
+              ] as const
+            ).map(([value, label, text]) => (
+              <Button
+                key={label}
+                title={label}
+                aria-label={label}
+                aria-pressed={display === value}
+                onClick={() => setDisplay(value)}
+              >
+                {text}
+              </Button>
+            ))}
+          </div>
+          <div className={styles.topActions}>
+            <Button
+              title="数学键盘"
+              aria-label="数学键盘"
+              onClick={() => field.current?.keyboard()}
+            >
+              <Icon name="grid" />
+            </Button>
+            <Button
+              title="LaTeX 源码"
+              aria-label="LaTeX"
+              aria-pressed={showSource}
+              onClick={() => {
+                if (showSource) active.current = "visual";
+                setShowSource(!showSource);
+              }}
+            >
+              <Icon name="code" />
+              <span>LaTeX</span>
+            </Button>
+          </div>
+        </div>
+      }
       className={styles.dialog}
       closeLabel="关闭公式编辑器"
       closing={closing}
@@ -150,45 +197,6 @@ export default function FormulaEditorDialog({
           }
         }}
       >
-        <div className={styles.topbar}>
-          <div
-            className={styles.segment}
-            role="group"
-            aria-label="公式显示方式"
-          >
-            {[
-              [true, "独立公式"],
-              [false, "行内公式"],
-            ].map(([value, label]) => (
-              <Button
-                key={String(value)}
-                aria-pressed={display === value}
-                onClick={() => setDisplay(Boolean(value))}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
-          <div className={styles.topActions}>
-            <Button
-              title="数学键盘"
-              aria-label="数学键盘"
-              onClick={() => field.current?.keyboard()}
-            >
-              <Icon name="grid" />
-            </Button>
-            <Button
-              aria-pressed={showSource}
-              onClick={() => {
-                if (showSource) active.current = "visual";
-                setShowSource(!showSource);
-              }}
-            >
-              <Icon name="code" />
-              LaTeX
-            </Button>
-          </div>
-        </div>
         <div className={styles.body}>
           <div className={styles.library}>
             <div
@@ -262,7 +270,7 @@ export default function FormulaEditorDialog({
                   <Button
                     title="撤销公式编辑"
                     aria-label="撤销公式编辑"
-                    disabled={!history.undo || !valid}
+                    disabled={!history.undo}
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => field.current?.command("undo")}
                   >
@@ -271,7 +279,7 @@ export default function FormulaEditorDialog({
                   <Button
                     title="重做公式编辑"
                     aria-label="重做公式编辑"
-                    disabled={!history.redo || !valid}
+                    disabled={!history.redo}
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => field.current?.command("redo")}
                   >

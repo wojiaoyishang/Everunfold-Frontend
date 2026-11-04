@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFile } from "node:fs/promises";
 import { EditorState } from "@codemirror/state";
 import { CompletionContext } from "@codemirror/autocomplete";
 import {
@@ -12,6 +13,7 @@ import {
   latexLanguage,
 } from "../src/core/editor/formula/latex-language";
 import { formulaSourceRange } from "../src/core/editor/formula/selection";
+import { formulaArrayContext } from "../src/core/editor/formula/structure";
 import { renderFormula } from "../src/core/rendering/features/math";
 
 test("all structured formula templates are compatible with the publication renderer", () => {
@@ -66,5 +68,34 @@ test("incomplete and oversized formulas retain a diagnostic and do not produce e
   assert.equal(
     renderFormula("x".repeat(8001), true).message,
     "公式最多 8000 字符。",
+  );
+});
+test("authoring fonts use local files and an unquoted nonblocking swap policy", async () => {
+  const css = await readFile(
+    "public/content-features/mathlive-0.111.4/fonts.css",
+    "utf8",
+  );
+  assert.match(css, /font-display:swap/);
+  assert.doesNotMatch(css, /font-display:["']|https?:\/\//);
+});
+test("matrix actions require a containing array rather than creating an unrelated multiline expression", () => {
+  const atoms = [
+    { depth: 0 },
+    { depth: 1, latex: "a" },
+    { depth: 1, latex: "b" },
+    { depth: 0, latex: String.raw`\begin{bmatrix}a&b\end{bmatrix}` },
+    { depth: 0, latex: "x" },
+  ];
+  assert.equal(
+    formulaArrayContext(1, 4, (i) => atoms[i]),
+    3,
+  );
+  assert.equal(
+    formulaArrayContext(0, 4, (i) => atoms[i]),
+    undefined,
+  );
+  assert.equal(
+    formulaArrayContext(3, 4, (i) => atoms[i]),
+    undefined,
   );
 });
