@@ -1,6 +1,6 @@
 # Everunfold Frontend
 
-新 Docker 设备运行方式见[容器开发部署指南](docs/development/container-deployment.md)：浏览器通过宿主机 `http://172.16.3.2:3000` 访问；Nginx 统一转发页面、API 和 WebSocket，Next 开发进程在 3100。当前状态以最新交接为准。
+新 Docker 设备运行方式见[容器开发部署指南](docs/development/container-deployment.md)：当前本地联调通过 `http://127.0.0.1:3000` 访问，监听仍为 `0.0.0.0`；Nginx 统一转发页面、API 和 WebSocket，Next 开发进程在 3100。当前状态以最新交接为准。
 
 当前功能联调仅展示新后台发布的测试文章/说说；旧 WordPress 试导入内容已撤回。开发工具与恢复边界见 [内容管理指南](docs/development/content-management.md)。
 

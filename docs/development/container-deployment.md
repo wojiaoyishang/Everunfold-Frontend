@@ -1,6 +1,8 @@
 # 新设备容器开发部署
 
-版本：container-deployment-1，2026-11-04。用户要求在新的 Docker 桌面容器继续开发，服务监听 `0.0.0.0`，远程入口 `http://172.16.3.2:3000`，明确不使用 HTTPS。决定和兼容边界见 [ADR0053](../decisions/0053-container-http-development.md)。本页记录开发部署，不代表已切换原站生产流量。
+版本：container-deployment-2，2026-11-04。用户要求在新的 Docker 桌面容器继续开发，服务监听 `0.0.0.0`，最初规划宿主机入口 `http://172.16.3.2:3000`，明确不使用 HTTPS。决定和兼容边界见 [ADR0053](../decisions/0053-container-http-development.md)。本页记录开发部署，不代表已切换原站生产流量。
+
+本轮宿主机地址访问超时后，用户要求改用 **http://127.0.0.1:3000** 本地调试；当前公开 API/媒体/canonical 已选择回环地址，四个服务监听仍为 `0.0.0.0`。测试文章与实际检查见[功能长文验收](../handoff/feature-lab-article-verification.md)。
 
 ## 当前实例
 
@@ -13,7 +15,8 @@
 ## 入口与端口
 
 ```text
-浏览器 → 宿主机 172.16.3.2:3000 → Docker TCP 3000:3000
+本地调试：浏览器 → 容器 127.0.0.1:3000 → Nginx :3000
+远程预留：浏览器 → 宿主机 172.16.3.2:3000 → Docker TCP 3000:3000
        → 容器 Nginx :3000
            /v1/*、/ws/v1/*、/media/*、/health/*、API 文档 → FastAPI :8001
            页面、Next 静态资源、热更新连接 → Next.js :3100
@@ -37,7 +40,7 @@ Nginx 保留原 API 与 WS 路径，不引入 `/api` 前缀；`/internal` 和 `/
 | 前端 `config.toml` | 浏览器 API 地址、服务端回环连接、缓存目录、显式绑定的 source_epoch |
 | 后端 `var/container/nginx.conf` | 从 `deploy/nginx.container.conf.template` 替换占位符生成 |
 
-前后端公开 `BACKEND_BASE_URL` 与前端 `PUBLIC_SITE_URL` 都是 `http://172.16.3.2:3000`；前端仅服务端 `[backend].base_url` 是 `http://127.0.0.1:8001`。精确来源包含远程入口和本机 3000，不使用通配符。
+前后端公开 `BACKEND_BASE_URL` 与前端 `PUBLIC_SITE_URL` 当前都是 `http://127.0.0.1:3000`；前端仅服务端 `[backend].base_url` 是 `http://127.0.0.1:8001`。精确来源包含远程入口和本机 3000，不使用通配符。
 
 后端 `[auth]` 显式设置 `allow_private_http=true`、`cookie_secure=false`、`cookie_samesite="lax"`。该开关默认关闭，只对字面 RFC1918 IPv4 和 IPv6 ULA 地址生效；不通过 DNS 推断内网，不允许公网/链路本地地址。HttpOnly、CSRF、精确 Origin 和内部 IP AND Token 校验仍生效。内部接收 URL 为回环 HTTP，非回环内部凭据传输仍要求 HTTPS。
 

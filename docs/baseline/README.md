@@ -502,3 +502,17 @@ ADR0053、container-deployment-1、部署验收及公共索引逐字节同步。
 | `docs/development/container-deployment.md` | `7a01cac059735d99e06572da677613f6d72dd00cb09e41fb0a102411e3f804a7` |
 | `docs/decisions/0053-container-http-development.md` | `800d2bb8f36992affaf1f8e7016ce648c8d1e812bdf69c4380234da0e7869248` |
 | `docs/handoff/container-deployment-verification.md` | `9384a1cb18cb69116cbbb4ffca4e9bb0f17bc6a202f9d50b1667d8a31112492a` |
+
+## 2026-11-04 功能测试长文与本地联调
+
+公开测试文章保留在业务库；本次同步验收、container-deployment-2、公共索引及4张自建测试截图。无代码/依赖/契约/SQL迁移变化；文章源文、媒体、实际配置和辅助记录不提交。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `3a8d130c6b151959b1fcc76e0154612657550b4f462a04bd809c41b6e144aaf2` |
+| `docs/development/container-deployment.md` | `205d2de1fe896f863e845acf84bc9c498a190920c608a3637e0345bcdbe13afb` |
+| `docs/handoff/feature-lab-article-verification.md` | `cb235e2eaac4a7152e3328d90d6b5594a431b79e2c1747749f1fa119a9acd1f5` |
+| `docs/design/feature-lab-code.jpg` | `814e3c30e068819cd59befbb9de362b38c7e0465819aa484737644d8b132c0d6` |
+| `docs/design/feature-lab-formulas.jpg` | `a36373e34f9f3dd8e98dc13d54652ed885cd38101959856374eeefbb003f6d4b` |
+| `docs/design/feature-lab-dark.jpg` | `46104ea3e81857d1057398a7dc2f4586a84ed92b9c401653bf97d955e2d4f513` |
+| `docs/design/feature-lab-mobile.jpg` | `4497d3aea2c849724e6b2f4c87448b9074768f4f8137d099c6e3baf0afac7f61` |
