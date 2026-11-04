@@ -1,6 +1,8 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-11，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-12，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+
+当前共享[公式编辑器与全局吐司](formula-editor-and-toasts.md)提供结构化数学输入、LaTeX 源码、模板/键盘及逐文件上传通知。编辑页“正文预览”保留本页检查；“前台预览”读取已保存草稿，有修改/新建时显示“保存并预览”，复用原保存后在独立私有页呈现正式主题，支持刷新/返回。它不会发布内容或写入公开缓存，见[ADR0051](../decisions/0051-private-frontend-content-preview.md)及[验收](../handoff/content-frontend-preview-verification.md)。
 
 ## 启动与验证
 

@@ -447,3 +447,27 @@ ADR0049、development-13、editor-plugins-11、content-features-1、验收及5�
 | `docs/design/html-formula-dialog-mobile.png` | `778036582b5b5dcf210290cda1a88455c10e15afe78d6da39b141deb195a83d7` |
 | `docs/design/editor-code-formula-dark.png` | `1eb9bf940ad37d453820dea2d711a518993ff04640767fa01668119bff676525` |
 | `docs/design/reader-code-math.png` | `9c99242196f2aebd183cebd1231964c588c617097a277c0e79a012de6946bed8` |
+
+## 2026-11-04 结构化公式、主题吐司与私有前台预览
+
+ADR0050/0051、development-14、editor-plugins-12、content-features-2、新指南1、两份验收及8张截图逐字节同步。前端功能提交见交接；后端代码、契约及数据库0015不变。本表只记录下列文件当前版本，旧表为历史记录。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `7e37b75941de76d09e7733b89b45e83b22ee30f199f5c7606eb174a1d6fa9431` |
+| `docs/development/protocol.md` | `e0ffdc4feb75aae05f120ab1050bf0ebe407ac7b4f3eb4806436d035b3650b36` |
+| `docs/development/editor-plugins.md` | `295446613b256afe8d88023e374273dfe8d4e308d7e27687c5099f273d863f9a` |
+| `docs/development/content-features.md` | `6c89b026fbe7d4a89268b2cfdbd46ca139a5ca486c7f2033b9f856f4e9d58c0c` |
+| `docs/development/formula-editor-and-toasts.md` | `c0f5cb029c58ebaff9612d8e58005d8c1229c18014533bf0bf2469a4a805855e` |
+| `docs/decisions/0050-structured-formula-editor-and-theme-toasts.md` | `94dd45577fb7ec764a2369678a56d91112d147414ef5146276b96c5b30a721b0` |
+| `docs/decisions/0051-private-frontend-content-preview.md` | `3998c9121eba122d0306c86f0cd1d0481d2f1bdedca07b92146553f3c4b65107` |
+| `docs/handoff/formula-editor-verification.md` | `5bf1cdac8a07a989d9fcf760910a17a80c29074df1be6ca1959de76d81c12058` |
+| `docs/handoff/content-frontend-preview-verification.md` | `61c0cbd09c943126ce62aa63d587564a2e5a8f932f0fbfe9ab2f2bb565ba3b60` |
+| `docs/design/formula-editor-desktop.jpg` | `ca8da43e6ccdf71f39d8c94054161560290ebb397a750e450f0f48f3c35f3670` |
+| `docs/design/formula-editor-mobile.jpg` | `126027b0611fc1ab0073ea5cacf5c0b7cf65daccb831965689b8d2c5065dd695` |
+| `docs/design/editor-image-upload-toast.jpg` | `7095665f661e2208b24f70dbf4040d5acb4805591edb28f763e065ca9f7a4346` |
+| `docs/design/editor-image-upload-error.jpg` | `3a3a850559128ba93a33d4e4c9b23722f62cf9c7d93ae99e1b7d9832f1f56d4e` |
+| `docs/design/content-frontend-preview-desktop.jpg` | `df18e8a4e1b6274358c68d8ae191f25d93225b39d882bfe2910992309ae0210a` |
+| `docs/design/content-frontend-preview-mobile.jpg` | `3566c890b8ad82bea97a0e2abf86db2f11d0d93ca7893517dd5a333f52d1e286` |
+| `docs/design/content-frontend-preview-features.jpg` | `66b83ee7baf247963fa9a67cc143688d5d8cd494c68cf10d2228b001cd928dad` |
+| `docs/design/content-shuoshuo-preview.jpg` | `41d03cb879eb5fc635fd44ad45f781b448a37b5f176f5334ec674133adc80d99` |
