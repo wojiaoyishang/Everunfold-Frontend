@@ -133,4 +133,5 @@
 - [富文本实例与位置历史修复](decisions/0043-rich-editor-lifetime-and-position-history.md)及[本轮验收](handoff/editor-lifecycle-fix-verification.md)：编辑页空实例保护、真实结构协同与只追加辅助元数据。
 
 - [源码底稿与整篇保存](decisions/0044-source-first-blocks-and-whole-draft-save.md)、[图片上传与工具栏](decisions/0045-inline-image-upload-and-editor-controls.md)及[逐组件验收](handoff/source-first-editor-verification.md)记录当前2.1插件的即时切换、完整元素选区、正文保存事务、图片对齐/粘贴上传与中性编辑区。
-- [透明编辑区与锚定表单](decisions/0046-editor-canvas-and-anchored-forms.md)及[回归验收](handoff/editor-canvas-popover-verification.md)记录外层栏移除、链接/图片弹层的实际尺寸与焦点、可视化表格结构修复；编辑器指南为editor-plugins-9。
+- [透明编辑区与锚定表单](decisions/0046-editor-canvas-and-anchored-forms.md)及[回归验收](handoff/editor-canvas-popover-verification.md)记录外层栏移除、链接/图片弹层的实际尺寸与焦点、可视化表格结构修复。
+- [紧凑视图与大媒体窗口](decisions/0047-compact-editor-views-and-media-picker.md)、[新增 HTML 分行](decisions/0048-new-html-fragment-line-formatting.md)及[实际验收](handoff/editor-media-picker-verification.md)记录单图标直接切换、共享大媒体选择器、局部新增结构整理与真实保存；当前指南 editor-plugins-10、media-library-runtime-6。

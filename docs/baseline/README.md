@@ -410,3 +410,22 @@ ADR0046、editor-plugins-9、前轮尺寸验收更正、本轮回归及4张截�
 | `docs/design/editor-link-popover-desktop.png` | `a16e4b3d61fc142bf7f09d2602f579e2438857fb1f711a6d31df8bdce11b623f` |
 | `docs/design/editor-link-popover-mobile.png` | `25b208042d1315bca3294181b0f88cc622323953b8719870093769019e12ff91` |
 | `docs/design/editor-link-popover-dark.png` | `ca2fb9ca41abc295a7ba67f5d283161e8de52e1754e8fdcd2c1c46294ceef186` |
+
+## 2026-11-04 单图标视图、大媒体窗口与新增 HTML 分行
+
+ADR0047/0048、editor-plugins-10、media-library-runtime-6、本轮验收与6张截图逐字节同步。原始基线、development-12、协同契约与数据库0015不变。后端仅文档更新；阶段构建与最终检查的范围见验收。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/decisions/0047-compact-editor-views-and-media-picker.md` | `4094b9cc3b9a950147f0d9fe1a5d30cec80631c4deef39b53d0653989b7d94bf` |
+| `docs/decisions/0048-new-html-fragment-line-formatting.md` | `42466557467c65cbac533d1ed936021c4aa5779e9503eb07b19656461f48f886` |
+| `docs/development/editor-plugins.md` | `f1d904519b25cad06592529c8a96973dd4a1e4c459f73022eb03843ba7f9c0ab` |
+| `docs/development/media-library.md` | `6623320fe7959961c3a1c74c111d5e298c361bbbde2a56e4b5a1a31cba341220` |
+| `docs/handoff/editor-media-picker-verification.md` | `3eef954a96ed36aae89baf2f5b8e8124a8942a43ffcf0706d3ddcb43d9b41812` |
+| `docs/README.md` | `cae9282b6fe4c61b18b185b4886542ff5d162a6a6f0a2da4818810ff833a70d1` |
+| `docs/design/editor-view-icons-desktop.png` | `892d96da25ecef4e7fd96eaa52ce117141d857dd992eec3899989411b63c5c6a` |
+| `docs/design/editor-view-icons-mobile.png` | `9eaf26ba5942bcda457ff722a39ae2b3486fa697d9b645a87c4a2fdab89e62c1` |
+| `docs/design/editor-html-new-lines.png` | `58ac94e6b24dad7d650ebda3f7f847d900d1f7a5b7a1571dc69dc1807baf570f` |
+| `docs/design/media-picker-wide-library.png` | `5a41481f47e2f464c81b2036b803e4191bd020ccd0dc0bb3128cbf10f2dda0eb` |
+| `docs/design/media-picker-mobile-library.png` | `b0a9887e8db3ccf067f89b6be7f71bf292f399ffffa1f225002532fa4830507f` |
+| `docs/design/media-picker-wide-dark.png` | `7fbdbd13d37361d8da50fa3b5e5c8604f3dc16b40a86b2dd6ef779800e3acfe0` |

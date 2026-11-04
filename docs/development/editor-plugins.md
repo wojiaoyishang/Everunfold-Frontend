@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-9，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-10，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 ## 启动与验证
 
@@ -57,10 +57,12 @@ Markdown 和 HTML 均以原始字符串为底稿，切换视图直接同步本�
 
 当前规则见 [ADR0044](../decisions/0044-source-first-blocks-and-whole-draft-save.md) 和 [ADR0045](../decisions/0045-inline-image-upload-and-editor-controls.md)。
 
-- HTML 默认可视化，Markdown 默认编写并可切换可视化或桌面分屏。两种格式都可以在可视化中编辑。模式控件位于区块右上角，切换即时完成，带回对应选区。
+- HTML 默认可视化，单图标切换源码/可视化；Markdown 默认源码，桌面单图标依次切换源码/可视化/分屏，窄屏只在源码/可视化往返。两种格式的可视化均可编辑。模式控件位于区块右上角，图标和可访问名称表示下一次动作，单击直接切换，不弹菜单；详见 [ADR0047](../decisions/0047-compact-editor-views-and-media-picker.md)。
 - 切换本身保持原文。HTML 源码选择完整元素标签，Markdown 定位对应文字或图片。受影响部分按源码映射更新，未改部分保留原排布。自定义结构使用安全预览和源码编辑。
+- HTML 可视化回车与新插入块级结构按新增片段分行、缩进，保留旧源码、行内内容和 pre 空白；整理后仍需核对完整语义投影，详见 [ADR0048](../decisions/0048-new-html-fragment-line-formatting.md)。
 - 两种工具栏的插入项均为直接图标按钮。选中图片后显示快速左/中/右对齐。图片入口和上传入口位于顶部，底部只有共享状态栏。
 - Ctrl+V 的二进制图片和顶部多选上传共用队列。视觉占位对应源码中的 everunfold-upload:// 临时 img 标记，完成后变为 site://media/ID。等待或失败占位需要完成/移除后才能保存，刷新后可移除中断占位并重新上传。
+- 媒体选择入口共用大窗口 MediaPickerDialog，上传/媒体库标签、左侧文件/右侧只读资料及固定确认区；点击文件只暂选，确认退出后才插入，取消不改正文。设置中的头像/背景也复用该窗口，资料编辑仍在独立媒体库。
 - 整篇保存传 block_sources 到原协同 commit 接口，前端生成类型固定在后端 a445b3f 的 collaboration1.2。冲突保留输入和导出，用户确认采用最新版本才丢弃本页改动。
 - 旧版源码租约接口仅用于兼容。新模式中移除了单块应用/取消动作。旧源码暂存仍可通过导出取回。
 - 正文内撤销历史按编辑面保存，跨 HTML 视图的统一历史尚未交付。前台字体继续按引用加载，后台字体选择与媒体管线共用已有封装。
