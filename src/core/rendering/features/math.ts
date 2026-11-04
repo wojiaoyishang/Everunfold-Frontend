@@ -18,10 +18,17 @@ export function renderFormula(source: string, display: boolean) {
       }),
       error: false,
     };
-  } catch {
+  } catch (error) {
     return {
       html: `<span class="formula-error" role="img" aria-label="公式无法解析">${escapeMarkup(source)}</span>`,
       error: true,
+      message:
+        source.length > 8000
+          ? "公式最多 8000 字符。"
+          : error instanceof Error
+            ? error.message.replace(/^KaTeX parse error:\s*/, "")
+            : "无法解析公式。",
+      position: error instanceof katex.ParseError ? error.position : undefined,
     };
   }
 }

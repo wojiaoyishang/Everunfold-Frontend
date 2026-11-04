@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useId, useState } from "react";
+import dynamic from "next/dynamic";
 import { codeLanguages } from "@/core/rendering/features/model";
 import {
   featureSource,
@@ -13,6 +14,10 @@ import { Button, Form, TextArea } from "./primitives";
 import { Select } from "./select";
 import { Icon } from "../icon";
 import styles from "./content-feature-dialog.module.css";
+const FormulaEditorDialog = dynamic(
+  () => import("./formula/formula-editor-dialog"),
+  { ssr: false },
+);
 
 export interface FeatureInsertion {
   initial?: Partial<ContentFeatureValue>;
@@ -53,12 +58,19 @@ export function ContentFeatureButtons({
           <Icon name={icon} />
         </Button>
       ))}
-      {opened && (
-        <ContentFeatureDialog
-          kind={opened.kind}
+      {opened?.kind === "math" ? (
+        <FormulaEditorDialog
           insertion={opened.insertion}
           onClose={() => setOpened(undefined)}
         />
+      ) : (
+        opened && (
+          <ContentFeatureDialog
+            kind={opened.kind}
+            insertion={opened.insertion}
+            onClose={() => setOpened(undefined)}
+          />
+        )
       )}
     </>
   );
