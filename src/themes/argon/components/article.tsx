@@ -1,15 +1,8 @@
-import { AppLink as Link } from "./navigation-link";
 import type { Content, PublicSnapshot } from "@/core/content/types";
-import { displayDate } from "@/core/content/query";
-import { taxonomyHref } from "@/core/content/urls";
 import { renderContentForReader } from "@/core/rendering/render-content-server";
-import { ContentMarkup } from "./content-markup";
 import { CommentSection } from "./comments/comment-section";
 import { PagePresentation } from "./route-state";
-import { ArticleHeader } from "./article-header";
-import { ArticleActions } from "./article-actions";
-import { ArticleMedia } from "./article-media";
-import { Icon } from "./icon";
+import { ArticleCard } from "./article-card";
 import { RelatedArticles } from "./related-articles";
 import { ArticleNeighbors } from "./article-neighbors";
 import { ReaderPreviewRegistration } from "./reader-preview";
@@ -32,39 +25,7 @@ export async function Article({
         id={content.id}
       />
       {content.kind === "article" && <ReaderPreviewRegistration />}
-      <article className="surface article-card">
-        <ArticleHeader content={content} />
-        <div className="article-body">
-          <ArticleMedia>
-            <ContentMarkup
-              className="article-content"
-              html={rendered.html}
-              features={rendered.features}
-            />
-          </ArticleMedia>
-          <footer className="article-footer">
-            <div className="article-tags">
-              {content.tags.map((tag) => (
-                <Link key={tag.id} href={taxonomyHref(tag)}>
-                  <Icon name="tag" />
-                  {tag.name}
-                </Link>
-              ))}
-            </div>
-            <p>
-              最后更新于{" "}
-              <time dateTime={content.updated_at}>
-                {displayDate(content.updated_at)}
-              </time>
-            </p>
-          </footer>
-          <ArticleActions
-            path={content.path}
-            title={content.title}
-            commentsOpen={content.comments_open ?? true}
-          />
-        </div>
-      </article>
+      <ArticleCard content={content} rendered={rendered} />
       {content.kind === "article" && (
         <div className="article-followup">
           <ArticleNeighbors snapshot={snapshot} content={content} />

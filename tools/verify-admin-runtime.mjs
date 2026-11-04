@@ -108,6 +108,8 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/content/shuoshuo/new",
       "/admin/content/article/00000000-0000-0000-0000-000000000001/edit",
       "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/edit",
+      "/admin/content/article/00000000-0000-0000-0000-000000000001/preview",
+      "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/preview",
       "/admin/pages",
       "/admin/media",
       "/admin/icons",

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import type { AuthUser } from "@/generated/auth-contract";
 import type { AdminPreferences } from "@/core/admin/preferences";
 import { adminDestination } from "@/core/admin/navigation";
+import { isContentPreviewPath } from "@/core/content-management/preview";
 import { Icon } from "../../components/icon";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
@@ -27,6 +28,8 @@ export function AdminShell({
   const pathname = usePathname();
   const destination = adminDestination(pathname);
   const name = user.display_name || user.username;
+  // Keep the confirmed account/request boundary, while the preview owns the public theme shell.
+  if (destination && isContentPreviewPath(pathname)) return children;
   return (
     <div
       className="admin-root admin-shell"

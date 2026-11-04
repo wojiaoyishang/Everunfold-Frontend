@@ -7,9 +7,11 @@ import { PostMeta } from "./post-meta";
 export function ArticleHeader({
   content,
   liveMetrics = true,
+  interactive = true,
 }: {
   content: Content;
   liveMetrics?: boolean;
+  interactive?: boolean;
 }) {
   const cover = resourceUrl(content.cover_url);
   return (
@@ -35,7 +37,12 @@ export function ArticleHeader({
           ))}
         </div>
         <h1>{content.title}</h1>
-        <PostMeta content={content} article liveMetrics={liveMetrics} />
+        <PostMeta
+          content={content}
+          article
+          liveMetrics={liveMetrics}
+          interactive={interactive}
+        />
       </div>
     </header>
   );

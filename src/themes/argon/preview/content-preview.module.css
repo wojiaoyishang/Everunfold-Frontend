@@ -1,0 +1,106 @@
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 13px 18px;
+  margin-bottom: 12px;
+}
+.label,
+.actions,
+.button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.label {
+  flex-wrap: wrap;
+  font-size: 13px;
+}
+.label > svg {
+  color: var(--accent);
+}
+.label > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.actions {
+  flex-shrink: 0;
+}
+.button {
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 12px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.bar svg,
+.button > svg {
+  width: 16px;
+  height: 16px;
+}
+.button:hover {
+  background: var(--accent);
+  color: var(--surface);
+}
+.button:active {
+  transform: translateY(1px);
+}
+.button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.notice {
+  margin: 0 3px 17px;
+  color: #fff;
+  font-size: 12px;
+  text-shadow: 0 1px 4px rgb(0 0 0 / 45%);
+}
+.state {
+  padding: 38px 20px;
+  text-align: center;
+  color: var(--muted);
+}
+.state h1 {
+  color: var(--text);
+  font-size: 20px;
+}
+.state > svg {
+  width: 28px;
+  height: 28px;
+  color: var(--accent);
+}
+.state .button {
+  margin: 18px auto 0;
+}
+.loading {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 640px) {
+  .bar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+  }
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .notice {
+    line-height: 1.7;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading {
+    animation: none;
+  }
+}

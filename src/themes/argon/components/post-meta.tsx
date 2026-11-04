@@ -10,10 +10,12 @@ export function PostMeta({
   content,
   article = false,
   liveMetrics = true,
+  interactive = true,
 }: {
   content: ReadableContent;
   article?: boolean;
   liveMetrics?: boolean;
+  interactive?: boolean;
 }) {
   const locked = Boolean(content.access && content.access !== "public");
   return (
@@ -52,7 +54,8 @@ export function PostMeta({
           {content.reading_minutes} 分钟
         </span>
       )}
-      {!locked &&
+      {interactive &&
+        !locked &&
         (content.comments_open !== false || content.comment_count > 0) && (
           <Link
             href={article ? "#comments" : `${content.path}#comments`}
@@ -63,7 +66,7 @@ export function PostMeta({
           </Link>
         )}
       {!locked && liveMetrics && <ViewMetric contentId={content.id} />}
-      {article && <ContentEditLink contentId={content.id} />}
+      {article && interactive && <ContentEditLink contentId={content.id} />}
     </div>
   );
 }

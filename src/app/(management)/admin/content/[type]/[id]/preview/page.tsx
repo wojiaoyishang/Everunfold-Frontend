@@ -1,0 +1,34 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { readPublicSnapshot } from "@/core/content/snapshot";
+import { contentType } from "@/core/content-management/registry";
+import { isContentPreviewPath } from "@/core/content-management/preview";
+import { ContentPreview } from "@/themes/argon/preview/content-preview";
+import "@/themes/argon/argon.css";
+
+export const metadata: Metadata = {
+  title: "前台预览",
+  robots: { index: false, follow: false, nocache: true },
+};
+export default async function PreviewPage({
+  params,
+}: {
+  params: Promise<{ type: string; id: string }>;
+}) {
+  const { type, id } = await params;
+  if (
+    !contentType(type) ||
+    !isContentPreviewPath(`/admin/content/${type}/${id}/preview`)
+  )
+    notFound();
+  // Only public theme data crosses SSR. Draft content is fetched after the workspace confirms identity.
+  const publicData = await readPublicSnapshot().catch(() => null);
+  return (
+    <ContentPreview
+      type={type}
+      id={id}
+      site={publicData?.site ?? null}
+      terms={publicData?.taxonomies ?? []}
+    />
+  );
+}

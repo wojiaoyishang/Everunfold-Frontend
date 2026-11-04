@@ -17,7 +17,7 @@ export const contentAdminModule: AdminModuleRegistration = {
       matchesChild: (pathname: string) =>
         pathname === `/admin/content/${type.id}/new` ||
         new RegExp(
-          `^/admin/content/${type.id}/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/edit$`,
+          `^/admin/content/${type.id}/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/(?:edit|preview)$`,
           "i",
         ).test(pathname),
       label: type.label,

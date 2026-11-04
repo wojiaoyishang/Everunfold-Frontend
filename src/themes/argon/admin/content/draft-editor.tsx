@@ -23,6 +23,7 @@ import { ContentSync } from "./content-sync";
 import { afterDialogMotion } from "../../hooks/dialog-motion";
 import { CollaborationBar } from "./collaboration-bar";
 import { InlineUploadToasts } from "./inline-upload-toasts";
+import { FrontendPreviewButton } from "./frontend-preview-button";
 import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 
 export function DraftEditor({
@@ -103,13 +104,15 @@ export function DraftEditor({
     editor.busy || leaving,
     requestLeave,
   );
-  const save = async (action: "save" | "publish" | "withdraw" = "save") => {
-    if (uploading && action !== "withdraw") return false;
+  const persist = async (action: "save" | "publish" | "withdraw" = "save") => {
+    if (uploading && action !== "withdraw") return null;
     const result = await editor.save(action);
     if (result && !id)
       router.replace(`/admin/content/${type.id}/${result.id}/edit`);
-    return Boolean(result);
+    return result;
   };
+  const save = async (action: "save" | "publish" | "withdraw" = "save") =>
+    Boolean(await persist(action));
   const saveDisabled =
     editor.awaitingSources ||
     uploading ||
@@ -207,8 +210,17 @@ export function DraftEditor({
               }}
             >
               <Icon name={mode === "preview" ? "edit" : "eye"} />
-              {mode === "preview" ? "返回编辑" : "预览"}
+              {mode === "preview" ? "返回编辑" : "正文预览"}
             </Button>
+            <FrontendPreviewButton
+              needsSave={editor.dirty || !editor.detail}
+              disabled={Boolean(saveDisabled || editor.uncertain)}
+              prepare={() =>
+                !editor.dirty && editor.detail
+                  ? Promise.resolve(editor.detail)
+                  : persist("save")
+              }
+            />
             {editor.detail?.published_revision && editor.detail.public_path && (
               <RouteLink
                 className="admin-button"

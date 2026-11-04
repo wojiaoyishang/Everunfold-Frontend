@@ -22,7 +22,7 @@
 @media (max-width: 640px) {
   .headerActions {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
     width: 100%;
   }
   .headerActions > :global(.admin-button) {
