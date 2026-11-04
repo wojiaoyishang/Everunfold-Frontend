@@ -1,10 +1,16 @@
 "use client";
-import { useImperativeHandle, useRef, useState } from "react";
+import {
+  useImperativeHandle,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 import { markdownSourceLanguage as language } from "@/core/editor/visual-markdown";
 import { RichTextEditor } from "../../../components/ui/rich-text-editor";
 import { RichToolbar } from "./rich-toolbar";
 import { Button } from "../../../components/ui/primitives";
+import { ActionPopover } from "../../../components/ui/action-popover";
 import { Icon } from "../../../components/icon";
 import type {
   CodeEditorHandle,
@@ -101,8 +107,24 @@ const shortcuts: readonly SourceShortcut[] = [
   { key: "Mod-b", command: actions[0].command },
   { key: "Mod-i", command: actions[1].command },
 ];
+const splitQuery = "(min-width: 801px)";
+function subscribeSplitLayout(listener: () => void) {
+  const query = matchMedia(splitQuery);
+  query.addEventListener("change", listener);
+  return () => query.removeEventListener("change", listener);
+}
+const canSplitLayout = () => matchMedia(splitQuery).matches;
+const serverSplitLayout = () => false;
 export default function MarkdownEditor(props: BlockEditorProps) {
-  const [mode, setMode] = useState<"write" | "split" | "visual">("write");
+  const [preferredMode, setMode] = useState<"write" | "split" | "visual">(
+    "write",
+  );
+  const wide = useSyncExternalStore(
+    subscribeSplitLayout,
+    canSplitLayout,
+    serverSplitLayout,
+  );
+  const mode = preferredMode === "split" && !wide ? "visual" : preferredMode;
   const source = useRef<CodeEditorHandle | null>(null);
   const visual = useRef<CodeEditorHandle | null>(null);
   const focused = useRef<"source" | "visual">("source");
@@ -175,25 +197,46 @@ export default function MarkdownEditor(props: BlockEditorProps) {
               <Icon name="edit" />
               编写
             </Button>
-            <Button
-              className={styles.splitButton}
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              aria-pressed={mode === "split"}
-              onClick={() => switchView("split")}
+            <ActionPopover
+              label="切换可视化布局"
+              className={`${styles.viewButton} ${mode !== "write" ? styles.viewActive : ""}`}
+              panelClassName={common.menu}
+              panelWidth={200}
+              triggerContent={
+                <>
+                  <Icon name={mode === "split" ? "sidebar" : "eye"} />
+                  {mode === "split" ? "分屏" : "可视化"}
+                  <Icon name="chevron" />
+                </>
+              }
             >
-              <Icon name="sidebar" />
-              分屏
-            </Button>
-            <Button
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              aria-pressed={mode === "visual"}
-              onClick={() => switchView("visual")}
-            >
-              <Icon name="eye" />
-              可视化
-            </Button>
+              {(close) => (
+                <>
+                  <Button
+                    aria-pressed={mode === "visual"}
+                    onClick={() => {
+                      close();
+                      switchView("visual");
+                    }}
+                  >
+                    <Icon name="eye" /> 可视化
+                    {mode === "visual" && <Icon name="check" />}
+                  </Button>
+                  <Button
+                    aria-pressed={mode === "split"}
+                    disabled={!wide}
+                    title={wide ? undefined : "分屏需要更宽的窗口"}
+                    onClick={() => {
+                      close();
+                      switchView("split");
+                    }}
+                  >
+                    <Icon name="sidebar" /> 分屏
+                    {mode === "split" && <Icon name="check" />}
+                  </Button>
+                </>
+              )}
+            </ActionPopover>
           </div>,
           props.modeControls,
         )}

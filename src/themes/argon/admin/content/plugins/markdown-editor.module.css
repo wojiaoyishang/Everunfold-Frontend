@@ -7,6 +7,18 @@
 .visualPane {
   min-width: 0;
 }
+.viewButton.viewActive {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.viewButton > svg:last-child {
+  width: 11px;
+  height: 11px;
+  transform: rotate(90deg);
+}
+.viewButton[aria-expanded="true"] > svg:last-child {
+  transform: rotate(270deg);
+}
 .panes[data-mode="write"] > .visualPane,
 .panes[data-mode="visual"] > .sourcePane {
   display: none;
@@ -21,9 +33,6 @@
   scrollbar-gutter: stable;
 }
 @media (max-width: 800px) {
-  .splitButton {
-    display: none !important;
-  }
   .panes[data-mode="split"] {
     grid-template-columns: minmax(0, 1fr);
   }
