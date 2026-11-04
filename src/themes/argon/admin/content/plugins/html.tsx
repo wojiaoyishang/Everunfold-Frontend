@@ -3,13 +3,12 @@ import { useImperativeHandle, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { htmlElementSelection } from "@/core/editor/html-element-selection";
 import { useFontLibrary } from "@/core/media/font-library";
-import { Button } from "../../../components/ui/primitives";
+import { EditorViewToggle } from "./editor-view-toggle";
 import { RichTextEditor } from "../../../components/ui/rich-text-editor";
 import type {
   CodeEditorHandle,
   SourceSelection,
 } from "../../../components/ui/code-editor";
-import { Icon } from "../../../components/icon";
 import type { BlockEditorProps } from "./source-block-editor";
 import HtmlSourceEditor from "./html-source";
 import { RichToolbar } from "./rich-toolbar";
@@ -50,22 +49,13 @@ export default function HtmlEditor(props: BlockEditorProps) {
             role="group"
             aria-label={props.label + " HTML 模式"}
           >
-            <Button
-              type="button"
-              aria-pressed={mode === "visual"}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => changeMode("visual")}
-            >
-              <Icon name="eye" /> 可视化
-            </Button>
-            <Button
-              type="button"
-              aria-pressed={mode === "source"}
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => changeMode("source")}
-            >
-              <Icon name="code" /> HTML
-            </Button>
+            <EditorViewToggle
+              current={mode}
+              next={mode === "visual" ? "source" : "visual"}
+              onToggle={() =>
+                changeMode(mode === "visual" ? "source" : "visual")
+              }
+            />
           </div>,
           props.modeControls,
         )}

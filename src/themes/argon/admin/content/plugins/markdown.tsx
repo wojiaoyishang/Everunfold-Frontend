@@ -9,9 +9,7 @@ import { createPortal } from "react-dom";
 import { markdownSourceLanguage as language } from "@/core/editor/visual-markdown";
 import { RichTextEditor } from "../../../components/ui/rich-text-editor";
 import { RichToolbar } from "./rich-toolbar";
-import { Button } from "../../../components/ui/primitives";
-import { ActionPopover } from "../../../components/ui/action-popover";
-import { Icon } from "../../../components/icon";
+import { EditorViewToggle } from "./editor-view-toggle";
 import type {
   CodeEditorHandle,
   SourceSelection,
@@ -125,6 +123,8 @@ export default function MarkdownEditor(props: BlockEditorProps) {
     serverSplitLayout,
   );
   const mode = preferredMode === "split" && !wide ? "visual" : preferredMode;
+  const nextMode =
+    mode === "write" ? "visual" : mode === "visual" && wide ? "split" : "write";
   const source = useRef<CodeEditorHandle | null>(null);
   const visual = useRef<CodeEditorHandle | null>(null);
   const focused = useRef<"source" | "visual">("source");
@@ -188,55 +188,11 @@ export default function MarkdownEditor(props: BlockEditorProps) {
             role="group"
             aria-label={props.label + " Markdown 模式"}
           >
-            <Button
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              aria-pressed={mode === "write"}
-              onClick={() => switchView("write")}
-            >
-              <Icon name="edit" />
-              编写
-            </Button>
-            <ActionPopover
-              label="切换可视化布局"
-              className={`${styles.viewButton} ${mode !== "write" ? styles.viewActive : ""}`}
-              panelClassName={common.menu}
-              panelWidth={200}
-              triggerContent={
-                <>
-                  <Icon name={mode === "split" ? "sidebar" : "eye"} />
-                  {mode === "split" ? "分屏" : "可视化"}
-                  <Icon name="chevron" />
-                </>
-              }
-            >
-              {(close) => (
-                <>
-                  <Button
-                    aria-pressed={mode === "visual"}
-                    onClick={() => {
-                      close();
-                      switchView("visual");
-                    }}
-                  >
-                    <Icon name="eye" /> 可视化
-                    {mode === "visual" && <Icon name="check" />}
-                  </Button>
-                  <Button
-                    aria-pressed={mode === "split"}
-                    disabled={!wide}
-                    title={wide ? undefined : "分屏需要更宽的窗口"}
-                    onClick={() => {
-                      close();
-                      switchView("split");
-                    }}
-                  >
-                    <Icon name="sidebar" /> 分屏
-                    {mode === "split" && <Icon name="check" />}
-                  </Button>
-                </>
-              )}
-            </ActionPopover>
+            <EditorViewToggle
+              current={mode === "write" ? "source" : mode}
+              next={nextMode === "write" ? "source" : nextMode}
+              onToggle={() => switchView(nextMode)}
+            />
           </div>,
           props.modeControls,
         )}

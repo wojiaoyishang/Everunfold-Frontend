@@ -22,6 +22,20 @@
   color: var(--admin-accent);
   background: var(--admin-accent-soft);
 }
+.header > .more {
+  color: var(--admin-text);
+  background: transparent;
+}
+.header > .more:hover,
+.header > .more[aria-expanded="true"] {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.more svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 3.5;
+}
 .header .handle {
   cursor: grab;
   touch-action: none;

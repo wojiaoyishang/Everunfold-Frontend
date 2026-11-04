@@ -21,6 +21,21 @@
   color: var(--admin-accent);
   background: var(--admin-accent-soft);
 }
+.tabs .viewToggle {
+  width: 30px;
+  min-height: 30px;
+  padding: 6px;
+  color: var(--admin-text);
+  background: transparent;
+}
+.tabs .viewToggle:hover {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.tabs .viewToggle svg {
+  width: 16px;
+  height: 16px;
+}
 .toolbar {
   background: color-mix(in srgb, var(--admin-surface) 96%, var(--admin-text));
   border-bottom: 1px solid var(--admin-border);
