@@ -1,6 +1,6 @@
 # 开发协议
 
-版本：development-14，2026-11-04。适用于两个 Everunfold 仓库。它规定持续开发与交接方式，不修改已确认产品范围；功能约束见 [架构约束](../architecture/constraints.md)。
+版本：development-15，2026-11-04。适用于两个 Everunfold 仓库。它规定持续开发与交接方式，不修改已确认产品范围；功能约束见 [架构约束](../architecture/constraints.md)。
 
 ## 需求依据与决定记录
 
@@ -22,6 +22,7 @@
 - Markdown/HTML必须复用统一代码高亮、公式引擎和插入/预览组件，正文保留原代码、语言与LaTeX；不得保存派生排版结果或为两种格式独立实现。
 - 资源遵循字体相同的按需原则：当前正文未使用就不下载/预加载公式样式、字体或高亮引擎/语法；不能在根布局批量导入。公开首屏优先服务端生成可读代码与MathML，客户端引擎只在确有需要的消费者加载。
 - 系统内置公式字体与用户上传字体分责；资源失败不阻断其余正文。核对含/不含功能文章的真实浏览器资源清单，见[ADR0049](../decisions/0049-shared-code-and-formula-features.md)和[指南](content-features.md)。
+- 代码片段参数保留在原始Markdown围栏或HTML pre白名单属性中，不保存高亮DOM；复制保留原代码。公开正文、预览、评论复用共享阅读框，全站默认沿后端theme.code，读者折行/展开只属本页交互。代码字体仅在含代码的正文声明，不因全站配置就对所有文章加载，见[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[代码指南](code-blocks.md)。
 
 公式编辑复用主题结构化窗口、CodeMirror 与原 KaTeX 校验，保持原始 LaTeX 和整篇保存；编辑器及内置字体只在窗口打开时加载。界面 SVG 尺寸不得影响公式内部图形。见 [ADR0050](../decisions/0050-structured-formula-editor-and-theme-toasts.md)。
 

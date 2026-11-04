@@ -471,3 +471,23 @@ ADR0050/0051、development-14、editor-plugins-12、content-features-2、新指�
 | `docs/design/content-frontend-preview-mobile.jpg` | `3566c890b8ad82bea97a0e2abf86db2f11d0d93ca7893517dd5a333f52d1e286` |
 | `docs/design/content-frontend-preview-features.jpg` | `66b83ee7baf247963fa9a67cc143688d5d8cd494c68cf10d2228b001cd928dad` |
 | `docs/design/content-shuoshuo-preview.jpg` | `41d03cb879eb5fc635fd44ad45f781b448a37b5f176f5334ec674133adc80d99` |
+
+## 2026-11-04 共享代码框与半透明展开
+
+ADR0052、development-15、editor-plugins-13、content-features-3、settings-runtime-7、code-blocks-1、最终验收及5张截图逐字节同步。后端settings1.8.0来自20ecd44，前端464bf54/93fc320；数据库head仍0015。下表为这些文件的当前版本，前面的表保留历史记录。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `ad3d55586c13a67ddac6b83b74186cb4789d7b04e7a43771e58af77c48e13beb` |
+| `docs/development/protocol.md` | `84aa16172dfd1f2ce9d9d13ecd629d5b0ae8e51287b1d998fc717429fdfd1404` |
+| `docs/development/editor-plugins.md` | `2afd308447a1af311dfe3ab6a509a05129b43a689e2db3a32a2f9cfc7ecb833e` |
+| `docs/development/content-features.md` | `ccbc069c6ff55e9b92ddd4cde9a2e77a53ad08352cdd49bc21c2d99a626c1a80` |
+| `docs/development/settings.md` | `ef78b23133ae81f12311ae2fb315daadcd6f4b8c7eafda4dfdceaa58ec5d711d` |
+| `docs/development/code-blocks.md` | `69f0e79094d2bddb8b315a798d3fe9c4f4cc9337c3b3c162e270f223aac33b07` |
+| `docs/decisions/0052-shared-code-frames-and-source-options.md` | `6574e0175e0b2ddb6f105d8b2a2d13f82e500edc63af202a43393a5fb6293513` |
+| `docs/handoff/code-blocks-verification.md` | `f642b29830255b6e968c5c4b9f6174b47e09205f1eafa0da4c128b4c02c0198f` |
+| `docs/design/code-editor-mobile.jpg` | `d3e5c0c1e2fd1bfe76a7f8df61bcd9d087196b08e0947a00502d33d7f3408cef` |
+| `docs/design/code-editor-desktop.jpg` | `6e2d391530304f9a5151e4a0728a4afe261348e5e5418988bc44005a2612c64f` |
+| `docs/design/code-reader-light.jpg` | `9176c9e82183c5bcdcaa92723dec93ffa52a8967062ab692288ac27dc7c54c2f` |
+| `docs/design/code-reader-dark.jpg` | `4c0f4d8e5c2cdf38f578754ab59be940b61c19f6dcfa1bdea33658c6888cdbe3` |
+| `docs/design/code-reader-mobile.jpg` | `3055428fb31a3cad4a7d0fe799fbba2e68b9105cf5d4cde6d7c8c92edcb1b3f3` |

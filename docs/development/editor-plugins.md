@@ -1,10 +1,12 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-12，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-13，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 当前共享[公式编辑器与全局吐司](formula-editor-and-toasts.md)提供结构化数学输入、LaTeX 源码、模板/键盘及逐文件上传通知。编辑页“正文预览”保留本页检查；“前台预览”读取已保存草稿，有修改/新建时显示“保存并预览”，复用原保存后在独立私有页呈现正式主题，支持刷新/返回。它不会发布内容或写入公开缓存，见[ADR0051](../decisions/0051-private-frontend-content-preview.md)及[验收](../handoff/content-frontend-preview-verification.md)。
 
 ## 启动与验证
+
+代码块窗口复用单栏 CodeMirror、按需语言和共享查找替换；Markdown/HTML共用片段参数、阅读框及theme.code默认值。四个整篇操作按钮按紧凑尺寸显示，详情见[代码块指南](code-blocks.md)和[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)。
 
 1. 后端执行 uv sync --locked，再显式 uv run python init.database.py --config config.toml。迁移 head 为 0015_rich_source_leases，启动服务不会自动迁移。
 2. 本地后端：uv run uvicorn app.entrypoints.api:create_app --factory --host 127.0.0.1 --port 8001 --no-proxy-headers --ws-max-size 1500000。部署需支持 WS 升级并配置实际前端 Origin；不使用查询参数 Token。

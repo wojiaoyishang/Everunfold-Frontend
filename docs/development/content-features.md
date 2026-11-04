@@ -1,10 +1,10 @@
 # 代码高亮与公式
 
-版本：content-features-2，2026-11-04。见 [ADR0049](../decisions/0049-shared-code-and-formula-features.md) 和 [ADR0050](../decisions/0050-structured-formula-editor-and-theme-toasts.md)。
+版本：content-features-3，2026-11-04。见 [ADR0049](../decisions/0049-shared-code-and-formula-features.md)、[ADR0050](../decisions/0050-structured-formula-editor-and-theme-toasts.md) 和 [ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)。
 
 ## 编辑入口
 
-Markdown/HTML 的源码、可视化工具栏均有代码块图标和公式Σ图标（项目SVG）。窗口共用：代码选择语言、输入并预览；公式使用结构化输入与 LaTeX 源码双栏、分类模板/搜索、数学键盘、矩阵行列和选区定位，选择行内/独立后插入。错误保留输入并禁用插入，取消/Escape不改草稿；具体边界见[指南](formula-editor-and-toasts.md)。
+Markdown/HTML 的源码、可视化工具栏均有代码块图标和公式Σ图标（项目SVG）。代码窗口为单个 CodeMirror 编辑框，选择语言/标题及片段参数，见[代码指南](code-blocks.md)。公式使用结构化输入与 LaTeX 源码双栏、分类模板/搜索、数学键盘、矩阵行列和选区定位，选择行内/独立后插入。错误保留输入并禁用插入，取消/Escape不改草稿；具体边界见[公式指南](formula-editor-and-toasts.md)。
 
 HTML可视化点击公式，或将光标放到代码内，再点击对应按钮可修改。源码可选中内容后插入，也可直接手写。单纯切换不重排原文，仍整篇保存/发布。Markdown示例：
 
@@ -38,6 +38,7 @@ def square(x):
 - 禁止在根布局、全局CSS或主题初始化导入KaTeX/全语言高亮包、批量预取字体。由当前渲染正文决定CSS/字体/客户端引擎，资源失败不阻断其他正文。
 - public/content-features为本地版本化系统资产。npm run features:assets从锁定KaTeX生成阅读样式/字体，并从MathLive0.111.4生成编辑字体/许可证，predev/prebuild执行；隔离构建复制这些资产。MathLive只在编辑窗口打开时加载，不进入前台阅读。升级须同步包版本、资源地址、锁文件及验证，不手改供应商压缩CSS。
 - 字体swap、无整库preload；上传字体仍从后端媒体稳定ID解析，遵守原字体按需规则。
+- 代码使用共享行号/重点行/标题框，底部半透明渐隐展开；片段参数保留在原始围栏/pre中。theme.code默认值沿settings1.8.0生成契约及原同步管线，代码字体只在含代码的正文声明。详见[代码指南](code-blocks.md)。
 
 限制：LaTeX8000字符、maxExpand1000、maxSize20、trust=false、每次独立宏；100000字符以上代码不高亮。复杂自定义HTML可使用安全只读预览和源码入口；跨视图统一撤销仍属原有未交付范围。
 

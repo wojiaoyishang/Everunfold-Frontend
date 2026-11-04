@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-6，2026-11-01。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-7，2026-11-04。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md) 与 [ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -11,8 +11,10 @@
 | `/admin/settings` | 站点名称、简介、作者、头像地址、公告；递归导航结构树/父级调整/排序/删除，复用图标库选择；SEO 描述、标题模板、允许索引 |
 | `/admin/icons` | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用 |
 | `/admin/media` | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取 |
-| `/admin/settings/theme` | 默认主题色/显示模式、首页横幅文字、背景图片/视频地址、默认播放 |
+| `/admin/settings/theme` | 默认主题色/显示模式、首页横幅文字、背景图片/视频地址、默认播放；代码深浅配色、行号/折行/折叠、字号/行高/tab-size、代码字体与实际阅读框预览 |
 | `/admin/settings/system` | 按稳定节点 ID 保存动态请求刷新间隔、超时、重试间隔、批处理窗口；查看期望/确认版本、重新同步；部署来源脱敏展示 |
+
+settings契约1.8.0新增theme.code，仍使用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库。旧设置JSON补默认值，无SQL迁移。代码字体只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL；沿既有可靠投递及媒体引用保护处理CDN改址。参数和加载规则见[代码指南](code-blocks.md)。
 
 头像/背景图片/背景视频均可从媒体库上传或选择，也可手填地址。小缩略图与输入框同行，点击查看大图/视频；选择后按稳定媒体 ID保存，服务端派生地址，手动改地址会解除关联。见 [媒体指南](media-library.md) 和 [菜单与图标指南](menu-icons.md)。公告分为可选标题和内容（原 notice 字段），保存并同步后显示在首页内容列表上方。无标题时显示内容；超过一行或标题下有正文时可点击「展开更多」原位展开，保留动画并可收起。两项都清空隐藏公告，当前不使用首次弹窗或导航栏公告入口。讨论/注册/邮件/媒体提供器及高级 SEO 尚未实现；正式站点地址仍由 `PUBLIC_SITE_URL` 部署配置确定。标题模板保留一个 `%s` 文章标题，可用 `%site%` 站点名；不允许索引生成页面 robots noindex，后台始终 private/no-store/noindex。
 
