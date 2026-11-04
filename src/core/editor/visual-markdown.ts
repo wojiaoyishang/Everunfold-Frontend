@@ -1,5 +1,6 @@
 import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
 import type { Node } from "@tiptap/pm/model";
+import type { JSONContent } from "@tiptap/core";
 import {
   markdownSourceTokens,
   renderMarkdownSource,
@@ -18,7 +19,48 @@ const children = (node: Node) =>
   Array.from({ length: node.childCount }, (_, index) => node.child(index));
 
 export function markdownRichSource(source: string) {
-  return sourceDocument(renderMarkdownSource(source));
+  const document = sourceDocument(renderMarkdownSource(source));
+  const containers = new Set([
+    "doc",
+    "blockquote",
+    "bulletList",
+    "orderedList",
+    "listItem",
+    "table",
+    "tableRow",
+    "tableHeader",
+    "tableCell",
+  ]);
+  const normalize = (node: JSONContent): JSONContent => {
+    let content = node.content?.map(normalize);
+    if (content && containers.has(node.type ?? ""))
+      content = content.filter(
+        (part) => part.type !== "text" || part.text?.trim(),
+      );
+    if (
+      content &&
+      ["listItem", "tableCell", "tableHeader"].includes(node.type ?? "")
+    ) {
+      const blocks: JSONContent[] = [];
+      let inline: JSONContent[] = [];
+      const flush = () => {
+        if (inline.length) blocks.push({ type: "paragraph", content: inline });
+        inline = [];
+      };
+      for (const child of content) {
+        if (["text", "hardBreak", "image"].includes(child.type ?? ""))
+          inline.push(child);
+        else {
+          flush();
+          blocks.push(child);
+        }
+      }
+      flush();
+      content = blocks.length ? blocks : [{ type: "paragraph" }];
+    }
+    return content ? { ...node, content } : node;
+  };
+  return normalize(document);
 }
 
 export function richMarkdownSelection(
@@ -68,6 +110,8 @@ function serialize(node: Node): string {
   const content = parts.join("");
   switch (node.type.name) {
     case "paragraph":
+      if (node.attrs.textAlign && node.attrs.textAlign !== "left")
+        return renderRichNode(node.toJSON());
       return content || "<p></p>";
     case "heading":
       return "#".repeat(Number(node.attrs.level)) + " " + content;

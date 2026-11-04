@@ -1,5 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {
+  hasUploadMarkers,
+  replaceUploadMarker,
+  uploadMarker,
+  uploadMarkers,
+} from "../src/core/editor/upload-placeholders";
+import { htmlElementSelection } from "../src/core/editor/html-element-selection";
 import { EditorState } from "@codemirror/state";
 import { getSchema } from "@tiptap/core";
 import { richExtensions } from "../src/core/editor/rich-extensions";
@@ -114,5 +121,99 @@ test("buffered patches use the actual initial editor source even after later sha
         bufferBlockSource({}, shared.body[0], "second", "shared latest"),
       )
     )[0].base_hash,
+  );
+});
+
+test("HTML source selection includes complete tags and sibling elements", () => {
+  const source = "<p>正文 <b>选中</b> 结尾</p>\n<p>下一段</p>";
+  const start = source.indexOf("选中");
+  const inline = htmlElementSelection(source, { start, end: start + 2 });
+  assert.equal(source.slice(inline.start, inline.end), "<b>选中</b>");
+  const paragraph = htmlElementSelection(source, {
+    start: source.indexOf("正文"),
+    end: start + 2,
+  });
+  assert.equal(
+    source.slice(paragraph.start, paragraph.end),
+    "<p>正文 <b>选中</b> 结尾</p>",
+  );
+  const siblings = htmlElementSelection(source, {
+    start,
+    end: source.indexOf("下一段") + 3,
+  });
+  assert.equal(source.slice(siblings.start, siblings.end), source);
+  const caret = htmlElementSelection(source, { start, end: start });
+  assert.deepEqual(caret, inline);
+  const image =
+    '<figure><img src="image.png"><figcaption>说明</figcaption></figure>';
+  const imgAt = image.indexOf("<img");
+  const picked = htmlElementSelection(image, {
+    start: imgAt,
+    end: imgAt + '<img src="image.png">'.length,
+  });
+  assert.equal(image.slice(picked.start, picked.end), '<img src="image.png">');
+});
+
+test("Markdown image alignment is represented in the source paragraph", () => {
+  const imageSchema = getSchema(richExtensions(false, true));
+  const source =
+    "## 图片\n\n![说明](https://example.com/a.png)\n\n后面原样。\n";
+  const before = imageSchema.nodeFromJSON(markdownRichSource(source));
+  const value = structuredClone(before.toJSON());
+  value.content[1].attrs.textAlign = "right";
+  const after = imageSchema.nodeFromJSON(value);
+  const result = patchVisualMarkdown(source, before, after);
+  assert.ok(result);
+  assert.match(
+    result,
+    /<p style="text-align:right"><img src="https:\/\/example.com\/a.png" alt="说明"><\/p>/,
+  );
+  assert.ok(result.startsWith("## 图片\n\n"));
+  assert.ok(result.endsWith("\n后面原样。\n"));
+});
+
+test("Markdown visual lists and blockquotes import as schema-valid block content", () => {
+  const md = (source: string) =>
+    schema.nodeFromJSON(markdownRichSource(source));
+  const raw = "前一段原样。\n\n目标段落\n\n后一段原样。\n";
+  const before = md(raw);
+  for (const inserted of ["- 目标段落", "1. 目标段落", "> 目标段落"]) {
+    const expected = raw.replace("目标段落", inserted);
+    const after = md(expected);
+    after.check();
+    assert.equal(patchVisualMarkdown(raw, before, after), expected);
+  }
+});
+
+test("upload placeholders replace independently without replacing user edits", () => {
+  const first = crypto.randomUUID(),
+    second = crypto.randomUUID();
+  const a = uploadMarker(first, 'a "quoted".png');
+  const b = uploadMarker(second, "b.png");
+  let source = "<p>原文</p>\n" + a + "\n" + b + "\n<p>上传期间继续输入</p>";
+  assert.equal(uploadMarkers(source).length, 2);
+  source = replaceUploadMarker(
+    source,
+    second,
+    '<img src="site://media/00000000-0000-4000-8000-000000000001">',
+  );
+  source = replaceUploadMarker(
+    source,
+    first,
+    '<img src="site://media/00000000-0000-4000-8000-000000000002">',
+  );
+  assert.ok(source.endsWith("<p>上传期间继续输入</p>"));
+  assert.equal(uploadMarkers(source).length, 0);
+  assert.equal(
+    hasUploadMarkers([{ id: crypto.randomUUID(), type: "html", content: a }]),
+    true,
+  );
+  assert.equal(
+    uploadMarkers('&lt;img src="everunfold-upload://example"&gt;').length,
+    0,
+  );
+  assert.equal(
+    replaceUploadMarker("用户已删除占位", first, "完成"),
+    "用户已删除占位",
   );
 });

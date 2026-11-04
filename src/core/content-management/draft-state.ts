@@ -1,3 +1,4 @@
+import { hasUploadMarkers } from "@/core/editor/upload-placeholders";
 import type {
   DraftDetail,
   DraftFields,
@@ -26,6 +27,8 @@ export function validateDraft(
   fields: DraftFields,
   type: ContentTypeDefinition,
 ): string {
+  if (hasUploadMarkers(fields.body))
+    return "请等待图片上传完成，或移除未完成的图片占位。";
   if (type.title_required && !fields.title?.trim()) return "请先填写标题。";
   if ((fields.title?.length ?? 0) > 200) return "标题不能超过 200 字符。";
   const date = fields.settings?.display_published_at;

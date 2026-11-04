@@ -1,7 +1,7 @@
 .editor {
   --source-editor-min-height: calc(17.5em + 32px);
   min-width: 0;
-  background: var(--admin-canvas);
+  background: var(--admin-surface);
   color: var(--admin-text);
   transition: background var(--admin-motion-fast);
 }
@@ -11,6 +11,8 @@
 .editor :global(.cm-editor) {
   outline: none;
   font-size: 14px;
+  box-shadow: inset 0 1px 3px
+    color-mix(in srgb, var(--admin-text) 4%, transparent);
 }
 .editor :global(.cm-scroller) {
   font-family: "Cascadia Code", Consolas, "Microsoft YaHei", monospace;
@@ -31,7 +33,7 @@
 .editor :global(.cm-gutters) {
   align-self: stretch;
   height: auto;
-  background: var(--admin-subtle);
+  background: color-mix(in srgb, var(--admin-surface) 97%, var(--admin-text));
   color: var(--admin-muted);
   border-right: 1px solid var(--admin-border);
   /* CodeMirror measures content padding and positions each gutter row itself. */
@@ -48,7 +50,7 @@
 }
 .editor :global(.cm-activeLine),
 .editor :global(.cm-activeLineGutter) {
-  background: color-mix(in srgb, var(--admin-accent) 5%, transparent);
+  background: color-mix(in srgb, var(--admin-accent) 3%, transparent);
 }
 .editor :global(.cm-selectionBackground),
 .editor :global(.cm-focused .cm-selectionBackground) {

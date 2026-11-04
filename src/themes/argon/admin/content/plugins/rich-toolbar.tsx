@@ -5,6 +5,7 @@ import type { FontAsset } from "@/generated/settings-contract";
 import { loadFont } from "@/core/media/font-preview";
 import { FontField } from "../../fonts/font-field";
 import { Button, TextField, Form } from "../../../components/ui/primitives";
+import { FilePicker } from "../../../components/ui/file-picker";
 import { ActionPopover } from "../../../components/ui/action-popover";
 import { Select } from "../../../components/ui/select";
 import { Icon, type IconName } from "../../../components/icon";
@@ -14,10 +15,14 @@ export function RichToolbar({
   editor,
   fonts = [],
   markdown = false,
+  onMedia,
+  onUpload,
 }: {
   editor: Editor;
   fonts?: FontAsset[];
   markdown?: boolean;
+  onMedia?: (kind: "image" | "all") => void;
+  onUpload?: (files: File[]) => void;
 }) {
   const state = useEditorState({
     editor,
@@ -28,6 +33,11 @@ export function RichToolbar({
       strike: e.isActive("strike"),
       table: e.isActive("table"),
       image: e.isActive("image"),
+      imageAlignment: String(
+        (markdown
+          ? e.getAttributes("paragraph").textAlign
+          : e.getAttributes("image").alignment) || "left",
+      ),
       heading: e.isActive("heading")
         ? String(e.getAttributes("heading").level)
         : "0",
@@ -47,6 +57,7 @@ export function RichToolbar({
     active = false,
   ) => (
     <Button
+      key={label}
       className={styles.toolButton}
       aria-label={label}
       title={label}
@@ -120,76 +131,99 @@ export function RichToolbar({
         >
           {(close) => <LinkForm editor={editor} close={close} />}
         </ActionPopover>
-        <ActionPopover
-          label="插入排版"
-          className={styles.insertButton}
-          triggerContent={
-            <>
-              <Icon name="plus" />
-              插入
-              <Icon name="down" />
-            </>
-          }
-        >
-          {(close) => (
-            <div className={styles.menu}>
-              {[
-                [
-                  "无序列表",
-                  "list",
-                  () => editor.chain().focus().toggleBulletList().run(),
-                ],
-                [
-                  "有序列表",
-                  "ordered-list",
-                  () => editor.chain().focus().toggleOrderedList().run(),
-                ],
-                [
-                  "引用",
-                  "quote",
-                  () => editor.chain().focus().toggleBlockquote().run(),
-                ],
-                [
-                  "代码块",
-                  "code-block",
-                  () => editor.chain().focus().toggleCodeBlock().run(),
-                ],
-                [
-                  "表格",
-                  "table",
-                  () =>
+        <div className={styles.insertGroup} role="group" aria-label="插入">
+          {[
+            [
+              "无序列表",
+              "list",
+              () => editor.chain().focus().toggleBulletList().run(),
+            ],
+            [
+              "有序列表",
+              "ordered-list",
+              () => editor.chain().focus().toggleOrderedList().run(),
+            ],
+            [
+              "引用",
+              "quote",
+              () => editor.chain().focus().toggleBlockquote().run(),
+            ],
+            [
+              "代码块",
+              "code-block",
+              () => editor.chain().focus().toggleCodeBlock().run(),
+            ],
+            [
+              "表格",
+              "table",
+              () =>
+                editor
+                  .chain()
+                  .focus()
+                  .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+                  .run(),
+            ],
+            [
+              "分隔线",
+              "minus",
+              () => editor.chain().focus().setHorizontalRule().run(),
+            ],
+            [
+              "清除格式",
+              "type",
+              () => editor.chain().focus().unsetAllMarks().clearNodes().run(),
+            ],
+          ].map(([label, icon, run]) =>
+            button(label as string, icon as IconName, run as () => void),
+          )}
+          {button("插入图片", "image", () => onMedia?.("image"))}
+          {button("插入媒体或附件", "folder", () => onMedia?.("all"))}
+          {onUpload && (
+            <FilePicker
+              className={styles.toolButton}
+              iconOnly
+              label="上传图片"
+              accept=".svg,.png,.jpg,.jpeg,.webp,image/svg+xml,image/png,image/jpeg,image/webp"
+              onFiles={onUpload}
+            />
+          )}
+        </div>
+        {state.image && (
+          <div
+            className={styles.imageTools}
+            role="group"
+            aria-label="图片快速对齐"
+          >
+            <span>图片</span>
+            {(
+              [
+                ["left", "图片居左", "align-left"],
+                ["center", "图片居中", "align-center"],
+                ["right", "图片居右", "align-right"],
+              ] as const
+            ).map(([alignment, label, icon]) =>
+              button(
+                label,
+                icon,
+                () => {
+                  if (markdown)
                     editor
                       .chain()
                       .focus()
-                      .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-                      .run(),
-                ],
-                [
-                  "分隔线",
-                  "minus",
-                  () => editor.chain().focus().setHorizontalRule().run(),
-                ],
-                [
-                  "清除格式",
-                  "type",
-                  () =>
-                    editor.chain().focus().unsetAllMarks().clearNodes().run(),
-                ],
-              ].map(([label, icon, run]) => (
-                <Button
-                  key={label as string}
-                  onClick={() => {
-                    (run as () => void)();
-                    close();
-                  }}
-                >
-                  <Icon name={icon as IconName} />
-                  {label as string}
-                </Button>
-              ))}
-            </div>
-          )}
-        </ActionPopover>
+                      .updateAttributes("paragraph", { textAlign: alignment })
+                      .run();
+                  else
+                    editor
+                      .chain()
+                      .focus()
+                      .updateAttributes("image", { alignment })
+                      .run();
+                },
+                state.imageAlignment === alignment,
+              ),
+            )}
+          </div>
+        )}
       </div>
       {!markdown && (
         <div className={styles.toolbarRow}>
@@ -228,24 +262,27 @@ export function RichToolbar({
             }
           />
           <span className={styles.divider} />
-          {button(
-            "左对齐",
-            "align-left",
-            () => editor.chain().focus().setTextAlign("left").run(),
-            state.alignment === "left",
-          )}
-          {button(
-            "居中对齐",
-            "align-center",
-            () => editor.chain().focus().setTextAlign("center").run(),
-            state.alignment === "center",
-          )}
-          {button(
-            "右对齐",
-            "align-right",
-            () => editor.chain().focus().setTextAlign("right").run(),
-            state.alignment === "right",
-          )}
+          {!state.image &&
+            button(
+              "左对齐",
+              "align-left",
+              () => editor.chain().focus().setTextAlign("left").run(),
+              state.alignment === "left",
+            )}
+          {!state.image &&
+            button(
+              "居中对齐",
+              "align-center",
+              () => editor.chain().focus().setTextAlign("center").run(),
+              state.alignment === "center",
+            )}
+          {!state.image &&
+            button(
+              "右对齐",
+              "align-right",
+              () => editor.chain().focus().setTextAlign("right").run(),
+              state.alignment === "right",
+            )}
           {state.image && (
             <ActionPopover
               label="图片设置"

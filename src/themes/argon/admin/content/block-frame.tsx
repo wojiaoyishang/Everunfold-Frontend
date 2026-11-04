@@ -83,6 +83,7 @@ export function BlockFrame({
         className={`${workspace.block} ${styles.frame}`}
         data-dragging={drag.dragging}
         data-arrived={host.moved === block.id}
+        data-block-id={block.id}
         aria-label={`正文块 ${index + 1}`}
       >
         <BlockHeader

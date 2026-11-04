@@ -1,6 +1,7 @@
 "use client";
 import { useImperativeHandle, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { htmlElementSelection } from "@/core/editor/html-element-selection";
 import { useFontLibrary } from "@/core/media/font-library";
 import { Button } from "../../../components/ui/primitives";
 import { RichTextEditor } from "../../../components/ui/rich-text-editor";
@@ -22,7 +23,11 @@ export default function HtmlEditor(props: BlockEditorProps) {
   const changeMode = (next: typeof mode) => {
     if (next === mode) return;
     const selected = active.current?.selection();
-    setSelection(selected);
+    setSelection(
+      selected && next === "source"
+        ? htmlElementSelection(props.value, selected)
+        : selected,
+    );
     setMode(next);
   };
   useImperativeHandle(
@@ -72,17 +77,22 @@ export default function HtmlEditor(props: BlockEditorProps) {
           onChange={props.onChange}
           editorRef={active}
           initialSelection={selection}
+          afterToolbar={props.uploadStatus}
+          uploadEntries={props.uploadEntries}
           media={props.media}
           toolbar={(editor) => (
-            <RichToolbar editor={editor} fonts={fonts.items} />
+            <RichToolbar
+              editor={editor}
+              fonts={fonts.items}
+              onMedia={props.onMedia}
+              onUpload={props.onUpload}
+            />
           )}
         />
       ) : (
         <HtmlSourceEditor
-          value={props.value}
-          onChange={props.onChange}
+          {...props}
           label={props.label + " HTML 源码"}
-          disabled={props.disabled}
           editorRef={active}
           initialSelection={selection}
         />

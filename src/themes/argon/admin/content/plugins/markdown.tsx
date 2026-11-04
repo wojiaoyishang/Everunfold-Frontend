@@ -245,7 +245,14 @@ export default function MarkdownEditor(props: BlockEditorProps) {
               }
               editorRef={visual}
               media={props.media}
-              toolbar={(editor) => <RichToolbar editor={editor} markdown />}
+              toolbar={(editor) => (
+                <RichToolbar
+                  editor={editor}
+                  markdown
+                  onMedia={props.onMedia}
+                  onUpload={props.onUpload}
+                />
+              )}
             />
           )}
         </div>

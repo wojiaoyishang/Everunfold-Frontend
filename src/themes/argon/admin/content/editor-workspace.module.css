@@ -357,25 +357,6 @@
   box-shadow: none;
   outline: none;
 }
-.blockFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 14px;
-  color: var(--admin-muted);
-  border-top: 1px solid var(--admin-border);
-}
-.blockFooter button,
-.textButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 0;
-  color: var(--admin-accent);
-  background: transparent;
-  font-size: 12px;
-}
 .addBlock {
   display: flex;
   align-items: center;
@@ -585,4 +566,18 @@
   .block textarea {
     padding: 14px;
   }
+}
+
+.uploadRecovery {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--admin-border);
+  color: var(--admin-danger);
+  font-size: 12px;
+}
+.uploadRecovery button {
+  color: var(--admin-accent);
 }

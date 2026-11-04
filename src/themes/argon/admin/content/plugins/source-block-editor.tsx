@@ -7,9 +7,13 @@ import {
   useRef,
   useState,
   type Ref,
+  type ReactNode,
 } from "react";
 import type { Extension } from "@codemirror/state";
+import type { UploadEntry } from "@/core/media/upload-queue";
+import type { MediaItem } from "@/generated/settings-contract";
 import type { MediaURL } from "@/generated/content-admin-contract";
+import { EditorStatusBar } from "../../../components/ui/editor-status-bar";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/icon";
 import {
@@ -35,6 +39,10 @@ export interface BlockEditorProps {
   media?: Record<string, MediaURL>;
   modeControls?: HTMLElement | null;
   initialSelection?: SourceSelection;
+  onMedia?: (kind: "all" | "image") => void;
+  onUpload?: (files: File[]) => void;
+  uploadStatus?: ReactNode;
+  uploadEntries?: UploadEntry<MediaItem>[];
 }
 const emptyStatus: SourceStatus = {
   line: 1,
@@ -54,6 +62,7 @@ export function SourceBlockEditor({
   editorRef,
   modeControls: _modeControls,
   initialSelection,
+  uploadStatus,
   ...props
 }: BlockEditorProps & {
   language: Extension;
@@ -112,9 +121,12 @@ export function SourceBlockEditor({
         heading={heading}
         actions={actions}
         inserts={inserts}
+        onMedia={props.onMedia}
+        onUpload={props.onUpload}
         onCommand={(command) => input.current?.run(command)}
         onIndent={(direction) => input.current?.indent(direction)}
       />
+      {uploadStatus}
       <SourceSearchPanel
         id={id}
         label={props.label}
@@ -128,7 +140,10 @@ export function SourceBlockEditor({
         onReplace={(all) => input.current?.replace(all)}
       />
       <CodeEditor
-        {...props}
+        value={props.value}
+        onChange={props.onChange}
+        disabled={props.disabled}
+        label={props.label}
         language={language}
         ref={input}
         wrapLines={wrapLines}
@@ -137,35 +152,39 @@ export function SourceBlockEditor({
         onStatus={setStatus}
         onSearchRequest={openSearch}
       />
-      <div className={styles.status}>
+      <EditorStatusBar
+        count={props.value.length}
+        actions={
+          <>
+            <Button
+              className={styles.statusButton}
+              title="自动换行"
+              aria-label="自动换行"
+              aria-pressed={wrapLines}
+              onClick={() => setWrapLines(!wrapLines)}
+            >
+              <Icon name="wrap" />
+              <span>换行</span>
+            </Button>
+            <Button
+              className={styles.statusButton}
+              title="查找与替换 (Ctrl/Cmd+F)"
+              aria-label="查找与替换"
+              aria-expanded={searchOpen}
+              aria-controls={id + "-search"}
+              onClick={searchOpen ? closeSearch : openSearch}
+            >
+              <Icon name="search" />
+              <span>查找</span>
+            </Button>
+          </>
+        }
+      >
         <span>
           行 {status.line}，列 {status.column}
           {status.selected ? " · 已选 " + status.selected + " 字符" : ""}
         </span>
-        <div>
-          <Button
-            className={styles.statusButton}
-            title="自动换行"
-            aria-label="自动换行"
-            aria-pressed={wrapLines}
-            onClick={() => setWrapLines(!wrapLines)}
-          >
-            <Icon name="wrap" />
-            <span>换行</span>
-          </Button>
-          <Button
-            className={styles.statusButton}
-            title="查找与替换 (Ctrl/Cmd+F)"
-            aria-label="查找与替换"
-            aria-expanded={searchOpen}
-            aria-controls={id + "-search"}
-            onClick={searchOpen ? closeSearch : openSearch}
-          >
-            <Icon name="search" />
-            <span>查找</span>
-          </Button>
-        </div>
-      </div>
+      </EditorStatusBar>
     </div>
   );
 }

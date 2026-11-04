@@ -4,6 +4,7 @@ import { TableKit } from "@tiptap/extension-table";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Image from "@tiptap/extension-image";
+import { UPLOAD_SCHEME, uploadPlaceholderImage } from "./upload-placeholders";
 
 const RawHtml = Node.create({
   name: "rawHtml",
@@ -68,9 +69,20 @@ export const RichImage = Image.extend({
   },
   renderHTML: ({ HTMLAttributes }) => {
     const { caption, alignment, ...rest } = HTMLAttributes;
+    const pending = String(rest.src).startsWith(UPLOAD_SCHEME);
     const image: [string, Record<string, unknown>] = [
       "img",
-      mergeAttributes(rest, { "data-media-source": rest.src }),
+      mergeAttributes(rest, {
+        "data-media-source": rest.src,
+        ...(pending
+          ? {
+              src: uploadPlaceholderImage,
+              "data-upload-placeholder": "",
+              width: 360,
+              height: 154,
+            }
+          : {}),
+      }),
     ];
     return caption || alignment
       ? [

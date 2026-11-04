@@ -11,7 +11,10 @@ import {
   type LibraryAdapter,
 } from "./asset-library";
 export type MediaUploadPayload = { metadata: MediaUpload; file: File };
-const adapter: LibraryAdapter<MediaItem, MediaUploadPayload> = {
+export const mediaLibraryAdapter: LibraryAdapter<
+  MediaItem,
+  MediaUploadPayload
+> = {
   read: async (base, query, page, context, csrf, signal) => {
     const [kind, state] = context.split(":");
     return (
@@ -66,5 +69,8 @@ export function useMediaLibrary(
   kind: NonNullable<MediaQuery["kind"]>,
   trash = false,
 ) {
-  return useAssetLibrary(adapter, `${kind}:${trash ? "trash" : "active"}`);
+  return useAssetLibrary(
+    mediaLibraryAdapter,
+    `${kind}:${trash ? "trash" : "active"}`,
+  );
 }

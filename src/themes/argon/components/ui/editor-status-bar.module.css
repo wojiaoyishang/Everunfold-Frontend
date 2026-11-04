@@ -1,0 +1,36 @@
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  min-height: 35px;
+  border-top: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  color: var(--admin-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.position {
+  min-width: 0;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.actions small {
+  font-size: 11px;
+}
+@media (max-width: 480px) {
+  .bar {
+    padding-inline: 8px;
+    font-size: 10px;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .actions {
+    margin-inline-start: auto;
+  }
+}

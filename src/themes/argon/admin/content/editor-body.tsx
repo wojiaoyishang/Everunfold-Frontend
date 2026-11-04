@@ -5,11 +5,13 @@ import type {
   DraftFields,
 } from "@/generated/content-admin-contract";
 import type { MediaItem } from "@/generated/settings-contract";
+import type { InlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
+import { uploadMarkers } from "@/core/editor/upload-placeholders";
+import { UploadQueueView } from "../../components/ui/upload-queue";
 import { mediaMarkup } from "@/core/content-management/editor-fields";
 import { Button, TextArea } from "../../components/ui/primitives";
 import { BlockFrame, BlockPosition } from "./block-frame";
 import { useBlockComposer } from "./block-composer";
-import { Icon } from "../../components/icon";
 import { EditorMediaDialog } from "./editor-media-dialog";
 import { RegisteredBlockEditor } from "./plugins/registry";
 import type { CodeEditorHandle } from "../../components/ui/code-editor";
@@ -24,6 +26,7 @@ export interface EditorProps {
   media?: Record<string, MediaURL>;
   onBlockChange: (id: string, content: string, previous: string) => void;
   stagedBlocks: string[];
+  uploads: InlineImageUploads;
   locked: (id: string) => boolean;
 }
 export function EditorBody({
@@ -36,16 +39,41 @@ export function EditorBody({
   onBlockChange,
   stagedBlocks,
   locked,
+  uploads,
 }: EditorProps) {
   const [mediaTarget, setMediaTarget] = useState<{
     id: string;
+    kind: "all" | "image";
     insert: (value: string) => void;
   } | null>(null);
   const inputs = useRef(new Map<string, CodeEditorHandle>());
   const composer = useBlockComposer();
   const [announcement, setAnnouncement] = useState("");
   return (
-    <fieldset className={styles.bodyFields} disabled={disabled}>
+    <fieldset
+      className={styles.bodyFields}
+      disabled={disabled}
+      onPasteCapture={(event) => {
+        if (disabled || !(event.target instanceof Element)) return;
+        const blockId = event.target
+          .closest("[data-block-id]")
+          ?.getAttribute("data-block-id");
+        if (
+          !blockId ||
+          !event.target.closest('[contenteditable="true"]') ||
+          locked(blockId)
+        )
+          return;
+        const files = Array.from(event.clipboardData.files).filter((file) =>
+          file.type.startsWith("image/"),
+        );
+        const insert = inputs.current.get(blockId)?.captureInsertion();
+        if (!files.length || !insert) return;
+        event.preventDefault();
+        event.stopPropagation();
+        uploads.add(files, blockId, insert);
+      }}
+    >
       <div className={styles.blockList}>
         {value.body.map((block, index) => (
           <BlockFrame
@@ -91,26 +119,56 @@ export function EditorBody({
                   label={`正文块 ${index + 1} 内容`}
                   value={block.content}
                   media={media}
+                  onMedia={(kind) =>
+                    setMediaTarget({
+                      id: block.id,
+                      kind,
+                      insert:
+                        inputs.current.get(block.id)?.captureInsertion() ??
+                        (() => {}),
+                    })
+                  }
+                  onUpload={(files) => {
+                    const insert = inputs.current
+                      .get(block.id)
+                      ?.captureInsertion();
+                    if (insert) uploads.add(files, block.id, insert);
+                  }}
+                  uploadEntries={uploads.items(block.id)}
+                  uploadStatus={
+                    <>
+                      <UploadQueueView
+                        items={uploads.items(block.id)}
+                        onRetry={(id) => uploads.queue.retry(id)}
+                        onCancel={(id) => uploads.queue.cancel(id)}
+                        onClear={() => uploads.clear(block.id)}
+                      />
+                      {uploadMarkers(block.content).some(
+                        (marker) =>
+                          !uploads
+                            .items(block.id)
+                            .some((entry) => entry.id === marker.id),
+                      ) && (
+                        <div className={styles.uploadRecovery} role="status">
+                          <span>图片上传已中断，请重新粘贴或选择图片。</span>
+                          <Button
+                            onClick={() =>
+                              uploadMarkers(block.content).forEach((marker) =>
+                                uploads.remove(marker.id, block.id),
+                              )
+                            }
+                          >
+                            移除上传占位
+                          </Button>
+                        </div>
+                      )}
+                    </>
+                  }
                   disabled={disabled || locked(block.id)}
                   onChange={(content, previous) =>
                     onBlockChange(block.id, content, previous)
                   }
                 />
-                <footer className={styles.blockFooter}>
-                  <Button
-                    disabled={disabled || locked(block.id)}
-                    onClick={() => {
-                      const node = inputs.current.get(block.id);
-                      setMediaTarget({
-                        id: block.id,
-                        insert: node?.captureInsertion() ?? (() => {}),
-                      });
-                    }}
-                  >
-                    <Icon name="image" /> 插入媒体
-                  </Button>
-                  <small>{block.content.length.toLocaleString()} 字符</small>
-                </footer>
               </>
             )}
           </BlockFrame>
@@ -138,6 +196,8 @@ export function EditorBody({
       </span>
       {mediaTarget && (
         <EditorMediaDialog
+          kind={mediaTarget.kind}
+          title={mediaTarget.kind === "image" ? "插入图片" : "插入媒体"}
           onClose={() => setMediaTarget(null)}
           onPick={(item) => {
             if (disabled) return;

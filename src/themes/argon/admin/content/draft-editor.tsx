@@ -8,6 +8,8 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
+import { useInlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
+import { hasUploadMarkers } from "@/core/editor/upload-placeholders";
 import { useEditorResources } from "@/core/content-management/use-editor-resources";
 import { EditorTitle } from "./editor-title";
 import { EditorActions } from "./editor-actions";
@@ -33,6 +35,11 @@ export function DraftEditor({
   const editor = useDraftEditor(type, id);
   const router = useRouter();
   const resources = useEditorResources();
+  const uploads = useInlineImageUploads({
+    onTransform: editor.transformBlockContent,
+    onMedia: resources.remember,
+  });
+  const uploading = hasUploadMarkers(editor.fields.body);
   const media = {
     ...editor.detail?.media_urls,
     ...resources.media,
@@ -97,6 +104,7 @@ export function DraftEditor({
     requestLeave,
   );
   const save = async (action: "save" | "publish" | "withdraw" = "save") => {
+    if (uploading && action !== "withdraw") return false;
     const result = await editor.save(action);
     if (result && !id)
       router.replace(`/admin/content/${type.id}/${result.id}/edit`);
@@ -104,6 +112,7 @@ export function DraftEditor({
   };
   const saveDisabled =
     editor.awaitingSources ||
+    uploading ||
     dragging ||
     editor.busy ||
     editor.loading ||
@@ -306,7 +315,7 @@ export function DraftEditor({
                   </Button>
                   <Button
                     aria-pressed={mode === "preview"}
-                    disabled={editor.loading || dragging}
+                    disabled={editor.loading || dragging || uploading}
                     onClick={() => setMode("preview")}
                   >
                     <Icon name="eye" />
@@ -376,6 +385,7 @@ export function DraftEditor({
                           media={media}
                           onBlockChange={editor.setBlockContent}
                           stagedBlocks={editor.stagedBlocks}
+                          uploads={uploads}
                           locked={(id) =>
                             Boolean(editor.session?.sources.locked(id))
                           }

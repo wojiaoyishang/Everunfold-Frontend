@@ -6,6 +6,7 @@ export type UploadState =
 export interface UploadEntry<T> {
   id: string;
   name: string;
+  context?: string;
   size: number;
   state: UploadState;
   percent: number | null;
@@ -26,7 +27,7 @@ interface Handler<T, P> {
     signal: AbortSignal,
     progress: (value: UploadProgress) => void,
   ): Promise<T>;
-  completed(result: T): void;
+  completed(result: T, entry: { id: string; context: string }): void;
   rejected: string;
 }
 /** Shared by every upload surface. Stable payloads survive retries; individual failures are isolated. */
@@ -40,6 +41,9 @@ export class UploadQueue<T, P> {
     private handler: Handler<T, P>,
     private concurrency = 2,
   ) {}
+  setCompleted(callback: Handler<T, P>["completed"]) {
+    this.handler.completed = callback;
+  }
   snapshot = () => this.entries;
   subscribe = (listener: () => void) => {
     this.listeners.add(listener);
@@ -58,22 +62,22 @@ export class UploadQueue<T, P> {
   }
   add(files: File[], context: string) {
     if (this.disposed) return;
-    this.entries = [
-      ...this.entries,
-      ...files.map((file) => {
-        const id = crypto.randomUUID();
-        this.jobs.set(id, { file, context });
-        return {
-          id,
-          name: file.name,
-          size: file.size,
-          state: "queued" as const,
-          percent: null,
-        };
-      }),
-    ];
+    const added = files.map((file) => {
+      const id = crypto.randomUUID();
+      this.jobs.set(id, { file, context });
+      return {
+        id,
+        name: file.name,
+        context,
+        size: file.size,
+        state: "queued" as const,
+        percent: null,
+      };
+    });
+    this.entries = [...this.entries, ...added];
     this.emit();
     this.pump();
+    return added;
   }
   retry(id: string) {
     const item = this.entries.find((entry) => entry.id === id);
@@ -94,13 +98,16 @@ export class UploadQueue<T, P> {
     this.patch(id, { state: "cancelled", percent: null, retryable: true });
     this.jobs.get(id)?.controller?.abort();
   }
-  clearFinished() {
-    const finished = this.entries.filter((item) =>
-      ["done", "failed", "cancelled"].includes(item.state),
+  clearFinished(ids?: string[]) {
+    const selected = ids ? new Set(ids) : null;
+    const finished = this.entries.filter(
+      (item) =>
+        ["done", "failed", "cancelled"].includes(item.state) &&
+        (!selected || selected.has(item.id)),
     );
     finished.forEach((item) => this.jobs.delete(item.id));
     this.entries = this.entries.filter(
-      (item) => !["done", "failed", "cancelled"].includes(item.state),
+      (item) => !finished.some((entry) => entry.id === item.id),
     );
     this.emit();
   }
@@ -148,7 +155,7 @@ export class UploadQueue<T, P> {
       if (controller.signal.aborted) return;
       this.patch(id, { state: "done", percent: 100, result });
       this.jobs.delete(id);
-      this.handler.completed(result);
+      this.handler.completed(result, { id, context: job.context });
     } catch (error) {
       if (!controller.signal.aborted) {
         const rejected =

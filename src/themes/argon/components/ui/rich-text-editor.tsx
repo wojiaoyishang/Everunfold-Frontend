@@ -7,7 +7,12 @@ import {
   type Ref,
   type ReactNode,
 } from "react";
-import { EditorContent, useEditor, type Editor } from "@tiptap/react";
+import {
+  EditorContent,
+  useEditor,
+  useEditorState,
+  type Editor,
+} from "@tiptap/react";
 import { Extension } from "@tiptap/core";
 import { Slice } from "@tiptap/pm/model";
 import { NodeSelection, Plugin, TextSelection } from "@tiptap/pm/state";
@@ -15,6 +20,9 @@ import { richExtensions } from "@/core/editor/rich-extensions";
 import { sourceDocument, renderRichNode } from "@/core/editor/rich-text";
 import { renderContent } from "@/core/rendering/content";
 import { referencedFontFaces } from "@/core/rendering/fonts";
+import type { UploadEntry } from "@/core/media/upload-queue";
+import type { MediaItem } from "@/generated/settings-contract";
+import { UPLOAD_SCHEME } from "@/core/editor/upload-placeholders";
 import type { MediaURL } from "@/generated/content-admin-contract";
 import type { CodeEditorHandle, SourceSelection } from "./code-editor";
 import { richSourceSelection } from "@/core/editor/source-positions";
@@ -24,6 +32,7 @@ import {
   richMarkdownSelection,
 } from "@/core/editor/visual-markdown";
 import { patchVisualHtml } from "@/core/editor/patch-visual-html";
+import { EditorStatusBar } from "./editor-status-bar";
 import styles from "./rich-text-editor.module.css";
 
 declare module "@tiptap/core" {
@@ -73,6 +82,8 @@ interface RichTextEditorProps {
   editorRef?: Ref<CodeEditorHandle>;
   media?: Record<string, MediaURL>;
   toolbar: (editor: Editor) => ReactNode;
+  afterToolbar?: ReactNode;
+  uploadEntries?: UploadEntry<MediaItem>[];
   format?: "html" | "markdown";
 }
 
@@ -92,6 +103,8 @@ export function RichTextEditor({
   media = {},
   toolbar,
   format = "html",
+  afterToolbar,
+  uploadEntries,
 }: RichTextEditorProps) {
   const readSource =
     format === "markdown" ? markdownRichSource : sourceDocument;
@@ -160,6 +173,17 @@ export function RichTextEditor({
       latest.current.onChange(next, previous);
     },
   });
+  const selectedText =
+    useEditorState({
+      editor,
+      selector: ({ editor: current }) =>
+        hasLiveEditor(current)
+          ? current.state.doc.textBetween(
+              current.state.selection.from,
+              current.state.selection.to,
+            ).length
+          : 0,
+    }) ?? 0;
   useEffect(() => {
     if (!hasLiveEditor(editor)) return;
     editor.commands.setReadonlyGuard(disabled);
@@ -187,6 +211,23 @@ export function RichTextEditor({
         "img[data-media-source]",
       ) ?? []) {
         const virtual = img.dataset.mediaSource ?? "";
+        if (virtual.startsWith(UPLOAD_SCHEME)) {
+          const entry = uploadEntries?.find(
+            (item) => virtual === UPLOAD_SCHEME + item.id,
+          );
+          const state = entry?.state ?? "cancelled";
+          img.dataset.uploadState = state;
+          img.setAttribute(
+            "aria-busy",
+            String(["queued", "uploading", "saving"].includes(state)),
+          );
+          img.alt =
+            (state === "failed"
+              ? "上传失败 "
+              : state === "cancelled"
+                ? "上传已中断 "
+                : "正在上传 ") + (entry?.name ?? "");
+        }
         const id = virtual.replace("site://media/", "");
         const url = latest.current.media[id]?.original;
         if (url && img.getAttribute("src") !== url) img.src = url;
@@ -212,7 +253,7 @@ export function RichTextEditor({
     return () => {
       editor.off("transaction", render);
     };
-  }, [editor, media]);
+  }, [editor, media, uploadEntries]);
   useImperativeHandle(
     editorRef,
     () => ({
@@ -272,6 +313,7 @@ export function RichTextEditor({
           {toolbar(editor)}
         </fieldset>
       )}
+      {afterToolbar}
       {problem && (
         <p className={styles.sourceWarning} role="alert">
           这次排版无法保留现有源码，请在源码视图中修改。
@@ -281,6 +323,9 @@ export function RichTextEditor({
         editor={editor?.extensionManager ? editor : null}
         className={styles.canvas}
       />
+      <EditorStatusBar count={value.length}>
+        {selectedText ? `已选 ${selectedText} 字符` : null}
+      </EditorStatusBar>
     </div>
   );
 }

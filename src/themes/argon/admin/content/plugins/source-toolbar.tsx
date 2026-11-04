@@ -2,9 +2,9 @@
 import { useId } from "react";
 import type { SourceCommand } from "@/core/editor/source-commands";
 import { Icon, type IconName } from "../../../components/icon";
-import { Button, Popover } from "../../../components/ui/primitives";
+import { Button } from "../../../components/ui/primitives";
+import { FilePicker } from "../../../components/ui/file-picker";
 import { Select } from "../../../components/ui/select";
-import { useAnchoredPopover } from "../../../components/ui/use-anchored-popover";
 import styles from "./source-block-editor.module.css";
 export interface SourceAction {
   label: string;
@@ -29,6 +29,8 @@ export function SourceToolbar({
   inserts,
   onCommand,
   onIndent,
+  onMedia,
+  onUpload,
 }: {
   label: string;
   disabled: boolean;
@@ -38,24 +40,29 @@ export function SourceToolbar({
   inserts: readonly SourceAction[];
   onCommand: (command: SourceCommand) => void;
   onIndent: (direction: -1 | 1) => void;
+  onMedia?: (kind: "image" | "all") => void;
+  onUpload?: (files: File[]) => void;
 }) {
   const id = useId();
-  const {
-    trigger,
-    panel,
-    open,
-    ready,
-    close,
-    onBeforeToggle,
-    onToggle,
-    onPanelKeyDown,
-  } = useAnchoredPopover(218);
-
   const formatLabel = format === "markdown" ? "Markdown" : "HTML";
+  const buttons = (items: readonly SourceAction[]) =>
+    items.map((action) => (
+      <Button
+        key={action.label}
+        className={styles.tool}
+        disabled={disabled}
+        title={action.label + (action.hint ? " (" + action.hint + ")" : "")}
+        aria-label={action.label}
+        onMouseDown={(event) => event.preventDefault()}
+        onClick={() => onCommand(action.command)}
+      >
+        <Icon name={action.icon} />
+      </Button>
+    ));
   return (
     <div
       className={styles.tools}
-      role="group"
+      role="toolbar"
       aria-label={formatLabel + " 工具栏"}
     >
       <Select
@@ -65,82 +72,65 @@ export function SourceToolbar({
         value={String(heading)}
         disabled={disabled}
         onValueChange={(level) =>
-          onCommand({
-            kind: "heading",
-            level: Number(level),
-            format,
-          })
+          onCommand({ kind: "heading", level: Number(level), format })
         }
       />
-      <div className={styles.toolGroup}>
-        {actions.map((action) => (
-          <Button
-            key={action.label}
-            className={styles.tool}
-            disabled={disabled}
-            title={action.label + (action.hint ? " (" + action.hint + ")" : "")}
-            aria-label={action.label}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => onCommand(action.command)}
-          >
-            <Icon name={action.icon} />
-          </Button>
-        ))}
-      </div>
-      <Button
-        className={styles.insertTrigger}
-        ref={trigger}
-        popoverTarget={id + "-insert"}
-        aria-expanded={open}
-        aria-label={formatLabel + " 插入工具"}
-        disabled={disabled || !ready}
-      >
-        <Icon name="plus" /> 插入 <Icon name="chevron" />
-      </Button>
-      <Popover
-        id={id + "-insert"}
-        ref={panel}
-        className={"ui-anchored-panel " + styles.insertMenu}
-        aria-label={formatLabel + " 插入选项"}
-        onBeforeToggle={onBeforeToggle}
-        onToggle={onToggle}
-        onKeyDown={onPanelKeyDown}
-      >
-        {inserts.map((action) => (
-          <Button
-            key={action.label}
-            disabled={disabled}
-            onClick={() => {
-              close();
-              onCommand(action.command);
-            }}
-          >
-            <Icon name={action.icon} />
-            {action.label}
-          </Button>
-        ))}
-        <div className={styles.menuDivider} />
+      <div className={styles.toolGroup}>{buttons(actions)}</div>
+      <div className={styles.insertGroup} role="group" aria-label="插入">
+        {buttons(inserts)}
         <Button
+          className={styles.tool}
+          title="插入图片"
+          aria-label="插入图片"
           disabled={disabled}
-          onClick={() => {
-            close();
-            onIndent(1);
-          }}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => onMedia?.("image")}
+        >
+          <Icon name="image" />
+        </Button>
+        <Button
+          className={styles.tool}
+          title="插入媒体或附件"
+          aria-label="插入媒体或附件"
+          disabled={disabled}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => onMedia?.("all")}
+        >
+          <Icon name="folder" />
+        </Button>
+        {onUpload && (
+          <FilePicker
+            className={styles.tool}
+            iconOnly
+            label="上传图片"
+            disabled={disabled}
+            accept=".svg,.png,.jpg,.jpeg,.webp,image/svg+xml,image/png,image/jpeg,image/webp"
+            onFiles={onUpload}
+          />
+        )}
+      </div>
+      <div className={styles.insertGroup} role="group" aria-label="缩进">
+        <Button
+          className={styles.tool}
+          disabled={disabled}
+          aria-label="增加缩进"
+          title="增加缩进"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => onIndent(1)}
         >
           <Icon name="indent-more" />
-          增加缩进
         </Button>
         <Button
+          className={styles.tool}
           disabled={disabled}
-          onClick={() => {
-            close();
-            onIndent(-1);
-          }}
+          aria-label="减少缩进"
+          title="减少缩进"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => onIndent(-1)}
         >
           <Icon name="indent-less" />
-          减少缩进
         </Button>
-      </Popover>
+      </div>
     </div>
   );
 }

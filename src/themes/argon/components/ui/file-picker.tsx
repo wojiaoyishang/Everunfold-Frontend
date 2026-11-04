@@ -7,12 +7,16 @@ export function FilePicker({
   onFiles,
   disabled,
   label = "上传图标",
+  className = "admin-button admin-button-primary",
+  iconOnly = false,
   accept = ".svg,.png,.webp,image/svg+xml,image/png,image/webp",
 }: {
   onFiles: (files: File[]) => void;
   disabled?: boolean;
   label?: string;
   accept?: string;
+  className?: string;
+  iconOnly?: boolean;
 }) {
   const input = useRef<HTMLInputElement>(null);
   return (
@@ -31,12 +35,14 @@ export function FilePicker({
         }}
       />
       <Button
-        className="admin-button admin-button-primary"
+        className={className}
+        title={label}
+        aria-label={label}
         disabled={disabled}
         onClick={() => input.current?.click()}
       >
         <Icon name="upload" />
-        {label}
+        {!iconOnly && label}
       </Button>
     </>
   );

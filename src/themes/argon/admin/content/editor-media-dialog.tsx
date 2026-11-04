@@ -5,10 +5,12 @@ import { Modal } from "../../components/ui/modal";
 import { MediaBrowser } from "../media/media-browser";
 export function EditorMediaDialog({
   kind = "all",
+  title,
   onPick,
   onClose,
 }: {
   kind?: "all" | "image";
+  title?: string;
   onPick: (item: MediaItem) => void;
   onClose: () => void;
 }) {
@@ -16,7 +18,7 @@ export function EditorMediaDialog({
   const [selected, setSelected] = useState<MediaItem | null>(null);
   return (
     <Modal
-      title={kind === "image" ? "选择封面" : "插入媒体"}
+      title={title ?? (kind === "image" ? "选择封面" : "插入媒体")}
       closing={closing}
       onClose={() => setClosing(true)}
       onExited={() => {

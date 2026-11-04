@@ -300,3 +300,31 @@ test("generated deletion clients validate the backend envelope for preview and r
   );
   assert.deepEqual(removed.data, result);
 });
+
+test("completion callbacks keep block identity and clearing one queue group preserves the other", async () => {
+  const completed: { id: string; context: string }[] = [];
+  const queue = new UploadQueue({
+    prepare: async (file: File) => file.name,
+    send: async (name: string) => name,
+    completed: () => assert.fail("replaced callback should run"),
+    rejected: "bad",
+  });
+  queue.setCompleted((_value, entry) => completed.push(entry));
+  const a = queue.add([new File(["a"], "a.png")], "block-a")!;
+  const b = queue.add([new File(["b"], "b.png")], "block-b")!;
+  await tick();
+  assert.deepEqual(completed.map((entry) => entry.context).sort(), [
+    "block-a",
+    "block-b",
+  ]);
+  assert.equal(
+    completed.find((entry) => entry.context === "block-a")?.id,
+    a[0].id,
+  );
+  queue.clearFinished(a.map((entry) => entry.id));
+  assert.deepEqual(
+    queue.snapshot().map((entry) => entry.id),
+    [b[0].id],
+  );
+  queue.dispose();
+});

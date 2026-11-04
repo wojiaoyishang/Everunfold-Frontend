@@ -389,6 +389,40 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
       if (mounted.current) setBusy(false);
     }
   };
+  const setBlockContent = (
+    blockId: string,
+    content: string,
+    previous: string,
+  ) => {
+    if (
+      inFlight.current ||
+      preparing.current ||
+      uncertain ||
+      receivedSave.current
+    )
+      return;
+    const active = sessionRef.current;
+    const shared = active?.state.ready
+      ? active.project(privateFields.current)
+      : privateFields.current;
+    const block = shared.body.find(({ id }) => id === blockId);
+    if (!block) return;
+    if (active?.state.ready) {
+      keepSources(
+        bufferBlockSource(sourceRef.current, block, content, previous),
+      );
+      recover(active, shared);
+    } else {
+      privateFields.current = {
+        ...shared,
+        body: shared.body.map((part) =>
+          part.id === blockId ? { ...part, content } : part,
+        ),
+      };
+      setFields(privateFields.current);
+    }
+    setNotice("");
+  };
   return {
     detail,
     session,
@@ -422,35 +456,19 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
       setNotice("");
       return true;
     },
-    setBlockContent: (blockId: string, content: string, previous: string) => {
-      if (
-        inFlight.current ||
-        preparing.current ||
-        uncertain ||
-        receivedSave.current
-      )
-        return;
+    setBlockContent,
+    transformBlockContent: (
+      id: string,
+      change: (block: DraftFields["body"][number]) => string,
+    ) => {
       const active = sessionRef.current;
       const shared = active?.state.ready
         ? active.project(privateFields.current)
         : privateFields.current;
-      const block = shared.body.find(({ id }) => id === blockId);
-      if (!block) return;
-      if (active?.state.ready) {
-        keepSources(
-          bufferBlockSource(sourceRef.current, block, content, previous),
-        );
-        recover(active, shared);
-      } else {
-        privateFields.current = {
-          ...shared,
-          body: shared.body.map((part) =>
-            part.id === blockId ? { ...part, content } : part,
-          ),
-        };
-        setFields(privateFields.current);
-      }
-      setNotice("");
+      const block = withBlockSources(shared, sourceRef.current).body.find(
+        (part) => part.id === id,
+      );
+      if (block) setBlockContent(id, change(block), block.content);
     },
     setFields: (next: DraftFields) => {
       if (
