@@ -2,6 +2,7 @@ import { alignUnits, htmlUnits } from "./source-positions";
 import { renderRichNode } from "./rich-text";
 import { htmlRichSource } from "./visual-document";
 import { parseDocument } from "htmlparser2";
+import { formatHtmlAddition } from "./format-html-addition";
 
 type Change = { from: number; to: number; start: number; end: number };
 
@@ -57,7 +58,18 @@ export function patchVisualHtml(
   after: string,
 ): string | undefined {
   if (before === after) return source;
-  if (!source.trim()) return source + after;
+  if (!source.trim())
+    return (
+      source +
+      formatHtmlAddition(
+        source,
+        source.length,
+        source.length,
+        [],
+        htmlUnits(after),
+        after,
+      )
+    );
   const raw = htmlUnits(source),
     old = htmlUnits(before),
     next = htmlUnits(after);
@@ -67,6 +79,7 @@ export function patchVisualHtml(
   const edits = changes(rawText(before, old), right);
   const map = alignUnits(old, raw);
   let result = source,
+    formatted = source,
     limit = source.length;
   for (const edit of edits.reverse()) {
     const first = map.get(edit.from);
@@ -94,11 +107,23 @@ export function patchVisualHtml(
       result.slice(0, start) +
       right.slice(edit.start, edit.end).join("") +
       result.slice(end);
+    formatted =
+      formatted.slice(0, start) +
+      formatHtmlAddition(
+        source,
+        start,
+        end,
+        old.slice(edit.from, edit.to),
+        next.slice(edit.start, edit.end),
+        after,
+      ) +
+      formatted.slice(end);
     limit = start;
   }
   // The visual model can normalize constructs it cannot round-trip. Do not
   // write a misleading splice if its new projection is different.
   const normalize = (value: string) => renderRichNode(htmlRichSource(value));
+  if (normalize(formatted) === normalize(after)) return formatted;
   if (normalize(result) === normalize(after)) return result;
   return patchChangedTable(source, before, after);
 }

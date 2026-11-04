@@ -230,6 +230,53 @@ test("table merges and splits preserve the surrounding source with implicit cell
   assert.ok(restored.endsWith(suffix));
 });
 
+test("visual Enter creates independent HTML lines using the surrounding newline and indentation", () => {
+  assert.equal(
+    patchVisualHtml("<p>甲乙</p>", "<p>甲乙</p>", "<p>甲</p><p>乙</p>"),
+    "<p>甲</p>\n<p>乙</p>",
+  );
+  const raw = "<P>旧 &amp; 原样</P>\r\n  <p>甲</p>";
+  assert.equal(
+    patchVisualHtml(
+      raw,
+      "<p>旧 &amp; 原样</p><p>甲</p>",
+      "<p>旧 &amp; 原样</p><p>甲</p><p>乙</p>",
+    ),
+    raw + "\r\n  <p>乙</p>",
+  );
+});
+
+test("new HTML containers receive lines while inline marks and preformatted text retain whitespace", () => {
+  const source = "<p>原文</p>";
+  const inserted = "<blockquote><p>引用</p></blockquote>";
+  assert.equal(
+    patchVisualHtml(source, source, source + inserted),
+    "<p>原文</p>\n<blockquote>\n  <p>引用</p>\n</blockquote>",
+  );
+  assert.equal(
+    patchVisualHtml("", "<p></p>", "<p>甲</p><p>乙</p>"),
+    "<p>甲</p>\n<p>乙</p>",
+  );
+  assert.equal(
+    patchVisualHtml(source, source, "<p><strong>原文</strong></p>"),
+    "<p><strong>原文</strong></p>",
+  );
+  const code = "<pre><code>  a\n    b</code></pre>";
+  assert.equal(
+    patchVisualHtml(source, source, source + code),
+    source + "\n" + code,
+  );
+  const list = "<ul><li><p>甲</p></li></ul>";
+  assert.equal(
+    patchVisualHtml(
+      list,
+      list,
+      "<ul><li><p>甲</p></li><li><p>乙</p></li></ul>",
+    ),
+    "<ul><li><p>甲</p></li>\n  <li>\n    <p>乙</p>\n  </li>\n</ul>",
+  );
+});
+
 test("upload placeholders replace independently without replacing user edits", () => {
   const first = crypto.randomUUID(),
     second = crypto.randomUUID();
