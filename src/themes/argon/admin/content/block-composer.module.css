@@ -102,7 +102,7 @@
 .inspector {
   min-width: 0;
   position: sticky;
-  top: 82px;
+  top: calc(82px + var(--admin-header-dock-height, 0px));
 }
 .inspectorTabs {
   display: flex;

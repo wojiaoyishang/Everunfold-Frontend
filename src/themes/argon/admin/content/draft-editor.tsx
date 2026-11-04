@@ -26,6 +26,7 @@ import { InlineUploadToasts } from "./inline-upload-toasts";
 import { FrontendPreviewButton } from "./frontend-preview-button";
 import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 import { CodePreferencesProvider } from "../../components/code-preferences";
+import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 
 export function DraftEditor({
   type,
@@ -200,39 +201,42 @@ export function DraftEditor({
             返回{type.label}列表
           </Button>
           <div className={styles.headerActions}>
-            <Button
-              className="admin-button admin-editor-preview-action"
-              aria-pressed={mode === "preview"}
-              aria-controls="draft-editor-view"
-              disabled={editor.loading || dragging || uploading}
-              onClick={() => {
-                setSection("body");
-                setMode(mode === "edit" ? "preview" : "edit");
-              }}
-            >
-              <Icon name={mode === "preview" ? "edit" : "eye"} />
-              {mode === "preview" ? "返回编辑" : "正文预览"}
-            </Button>
-            <FrontendPreviewButton
-              needsSave={editor.dirty || !editor.detail}
-              disabled={Boolean(saveDisabled || editor.uncertain)}
-              prepare={() =>
-                !editor.dirty && editor.detail
-                  ? Promise.resolve(editor.detail)
-                  : persist("save")
-              }
-            />
-            {editor.detail?.published_revision && editor.detail.public_path && (
-              <RouteLink
+            <ScrollHeaderActions className={styles.previewActions}>
+              <Button
                 className="admin-button admin-editor-preview-action"
-                href={editor.detail.public_path}
-                target="_blank"
-                rel="noopener noreferrer"
+                aria-pressed={mode === "preview"}
+                aria-controls="draft-editor-view"
+                disabled={editor.loading || dragging || uploading}
+                onClick={() => {
+                  setSection("body");
+                  setMode(mode === "edit" ? "preview" : "edit");
+                }}
               >
-                <Icon name="external" />
-                查看前台
-              </RouteLink>
-            )}
+                <Icon name={mode === "preview" ? "edit" : "eye"} />
+                {mode === "preview" ? "返回编辑" : "正文预览"}
+              </Button>
+              <FrontendPreviewButton
+                needsSave={editor.dirty || !editor.detail}
+                disabled={Boolean(saveDisabled || editor.uncertain)}
+                prepare={() =>
+                  !editor.dirty && editor.detail
+                    ? Promise.resolve(editor.detail)
+                    : persist("save")
+                }
+              />
+              {editor.detail?.published_revision &&
+                editor.detail.public_path && (
+                  <RouteLink
+                    className="admin-button admin-editor-preview-action"
+                    href={editor.detail.public_path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Icon name="external" />
+                    查看前台
+                  </RouteLink>
+                )}
+            </ScrollHeaderActions>
             <EditorActions
               detail={editor.detail}
               busy={editor.busy}

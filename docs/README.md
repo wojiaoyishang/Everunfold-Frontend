@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+[编辑器预览操作随滚动进入顶栏](decisions/0054-scroll-editor-preview-actions.md)及[实页验收](handoff/editor-preview-dock-verification.md)：单组预览操作、双向动效、焦点保留与窄屏导航第二行。
+
 [功能测试长文与本地验收](handoff/feature-lab-article-verification.md)：7 个混合区块、代码/公式/媒体/字体/阅读交互，文章已发布并保留。
 
 新设备部署入口：[Docker 容器与 HTTP 运行指南](development/container-deployment.md)、[ADR0053](decisions/0053-container-http-development.md)、[部署验收](handoff/container-deployment-verification.md)。

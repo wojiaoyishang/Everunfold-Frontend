@@ -516,3 +516,15 @@ ADR0053、container-deployment-1、部署验收及公共索引逐字节同步。
 | `docs/design/feature-lab-formulas.jpg` | `a36373e34f9f3dd8e98dc13d54652ed885cd38101959856374eeefbb003f6d4b` |
 | `docs/design/feature-lab-dark.jpg` | `46104ea3e81857d1057398a7dc2f4586a84ed92b9c401653bf97d955e2d4f513` |
 | `docs/design/feature-lab-mobile.jpg` | `4497d3aea2c849724e6b2f4c87448b9074768f4f8137d099c6e3baf0afac7f61` |
+
+## 2026-11-04 编辑器预览操作进入导航栏
+
+ADR0054：单组预览操作随滚动迁移，焦点/状态保留、双向动效和窄屏第二行；共同验收、索引及两张自建文章截图同步。只改前端主题布局，不改依赖、业务契约、数据库或实际部署。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `9eff5859d44af1bf585a6b588bf11a4a3d9ed437a2f4cf94f11f592228ef7def` |
+| `docs/decisions/0054-scroll-editor-preview-actions.md` | `cf43f0e92ccd6995167ac7574fc05f514de7a18b95f14256d25efa36810f64bf` |
+| `docs/handoff/editor-preview-dock-verification.md` | `72399a937c2e8784dd76d51cb771a6cef4b395ed67ea87436ad5fa7c7266f47a` |
+| `docs/design/editor-preview-dock-desktop.jpg` | `d3ef55c2bd3847821f5da969f2cc8f5898e993abeaa7aa2a244e4135b15ad007` |
+| `docs/design/editor-preview-dock-mobile.jpg` | `5b4d07b412aee99de26dad3dde48fb9ab683241e545db5d4984380c0a12a2ba3` |

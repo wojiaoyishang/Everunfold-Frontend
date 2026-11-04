@@ -19,24 +19,26 @@
   gap: 6px;
   margin-left: auto;
 }
-.headerActions > :global(.admin-button) {
+.headerActions > :global(.admin-button),
+.previewActions > :global(.admin-button) {
   min-height: 32px;
   padding: 5px 10px;
   gap: 6px;
   font-size: 12px;
   line-height: 1.5;
 }
-.headerActions > :global(.admin-button) svg {
+.headerActions > :global(.admin-button) svg,
+.previewActions > :global(.admin-button) svg {
   width: 15px;
   height: 15px;
 }
-.headerActions > :global(.admin-editor-preview-action) {
+.previewActions > :global(.admin-editor-preview-action) {
   background: transparent;
   border-color: transparent;
   color: var(--admin-muted);
 }
-.headerActions > :global(.admin-editor-preview-action):hover:not(:disabled),
-.headerActions > :global(.admin-editor-preview-action)[aria-pressed="true"] {
+.previewActions > :global(.admin-editor-preview-action):hover:not(:disabled),
+.previewActions > :global(.admin-editor-preview-action)[aria-pressed="true"] {
   background: var(--admin-subtle);
   color: var(--admin-accent);
 }
@@ -54,6 +56,13 @@
     gap: 5px;
     font-size: 12px;
     white-space: nowrap;
+  }
+  .headerActions > :global(.admin-header-dock-home) {
+    grid-column: 1 / -1;
+  }
+  .previewActions > :global(.admin-button) {
+    min-height: 36px;
+    padding-inline: 8px;
   }
   .headerActions > :global(.admin-button) svg {
     width: 14px;

@@ -80,6 +80,7 @@ export function AdminShell({
               {destination?.label ?? "后台"}
             </span>
           </div>
+          <div className="admin-header-dock" data-admin-header-dock />
           <nav className="admin-header-actions" aria-label="工作空间操作">
             <RouteLink href="/" className="admin-site-link" title="访问站点">
               <Icon name="external" />
