@@ -131,3 +131,5 @@
 - [可视化编辑器与字体库](decisions/0042-visual-editors-and-font-library.md)、[字体按需加载指南](development/font-library.md) 与 [本轮验收](handoff/visual-editor-font-verification.md)：HTML默认可视化/受保护源码、Markdown预览分屏、轻量工具栏及字体注册/上传/选择。
 
 - [富文本实例与位置历史修复](decisions/0043-rich-editor-lifetime-and-position-history.md)及[本轮验收](handoff/editor-lifecycle-fix-verification.md)：编辑页空实例保护、真实结构协同与只追加辅助元数据。
+
+- [源码底稿与整篇保存](decisions/0044-source-first-blocks-and-whole-draft-save.md)、[图片上传与工具栏](decisions/0045-inline-image-upload-and-editor-controls.md)及[逐组件验收](handoff/source-first-editor-verification.md)记录当前2.1插件的即时切换、完整元素选区、正文保存事务、图片对齐/粘贴上传与中性编辑区。

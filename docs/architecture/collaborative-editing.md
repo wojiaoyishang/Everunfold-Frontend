@@ -1,6 +1,6 @@
 # 插件编辑器与共享草稿
 
-版本：collaborative-editing-3，2026-11-04。状态：试用版已实现；[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 记录决定，[验收](../handoff/collaborative-editing-verification.md) 区分真实进程、浏览器和未执行项目。
+版本：collaborative-editing-4，2026-11-04。状态：试用版已实现；[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 记录决定，[验收](../handoff/collaborative-editing-verification.md) 区分真实进程、浏览器和未执行项目。
 
 ## 边界与目录
 
@@ -15,18 +15,18 @@
 | core/content-management/use-draft-editor | 创建、保存/发布命令、权限策略、冲突与共享草稿衔接 |
 | 后端 content/collaboration | 私有票据、鉴权、文档校验、持久更新、在线状态、截点提交；由 content.router_init 装配 |
 
-当前Markdown使用CodeMirror源码/安全预览，HTML使用Tiptap可视化和独立源码视图；安全预览复用renderContent。没有加载用户上传的 JS，没有另建编辑器上传通道或独立发布流程。增加新的持久块格式仍须后端契约与渲染策略先支持。
+当前两种格式共用原始源码底稿与本地双视图，正文通过整篇保存提交。CodeMirror、Tiptap 和统一安全渲染按 ADR0044 分责。没有加载用户上传的 JS，没有另建编辑器上传通道或独立发布流程。增加新的持久块格式仍须后端契约与渲染策略先支持。
 
 ## 一篇草稿一个文档
 
 同一稳定草稿 ID 只在服务器事务内从现有 JSON 初始化一次，生成 epoch。每个浏览器建立自己的 Yjs 客户端，不能从 HTTP JSON 反复播种。
 
 - meta：title/excerpt/seo_title/seo_description 为 Y.Text；settings 为 Y.Map，保存路径、分类、标签、封面、显示时间、置顶、评论开关等。
-- blocks：稳定块 ID → Y.Map(type/content/deleted)，content 为 Y.Text。HTML另含rich:Y.XmlFragment及rich_base，原content作为保留源文，富文本变化后从rich投影；不逐字覆盖整段HTML。
+- blocks：稳定块 ID → Y.Map(type/content/deleted)，content 为 Y.Text。HTML 保留旧 rich:Y.XmlFragment 及 rich_base 用于兼容，新前端通过正式保存提交精确 content，并在后端同事务重建派生片段。
 - order：Y.Array 块 ID 列表；投影去重，跳过墓碑。排序不重建文本；删除保留源文，撤销可恢复。并发排序采用 CRDT 的确定性合并，不承诺任意多人移动都等于各人的局部顺序。
-- 密码、visibility、opens_at、发布状态、账号、权限不在 CRDT，也不写入本地正文缓存。分类/标签首版为字段级最后写入，正文和协同元文本按 CRDT 合并。
+- 密码、visibility、opens_at、发布状态、账号、权限不在 CRDT，也不写入本地正文缓存。分类/标签首版为字段级最后写入，共享元文本按 CRDT 合并，正文通过保存时的版本/块哈希校验处理并发。
 
-本地全篇撤销只追踪本人事务及 CodeMirror 绑定来源，跨文本块/结构操作共用 UndoManager；不撤销远端修改。跨编辑器连续文字选区、富文本 HTML 转换和拖拽另做。撤销历史不承诺跨刷新保留。
+共享属性和结构撤销只追踪本人 Y.Doc 事务。当前正文编辑面的撤销历史分开，跨视图统一撤销为后续事项。跨编辑器连续文字选区、富文本 HTML 转换和拖拽另做。撤销历史不承诺跨刷新保留。
 
 ## 连接、持久化与恢复
 
@@ -44,19 +44,19 @@ IndexedDB 以 后端地址+已验证账号 ID+草稿 ID 隔离。读/写事务�
 
 ## 保存和发布
 
-POST /v1/admin/content/collaboration/commit 接受 epoch、确认过的序号、expected_revision、稳定 operation_id、动作及私有访问策略。服务器从持久状态重建该截点，再复用草稿完整修订、审计、公开投影与可靠分发事务；HTTP 应答不能覆盖之后的协同输入。旧 save/publish 整篇 JSON 入口对已经初始化的协同草稿返回 40972；更早已成功的幂等回执仍可重取。
+POST /v1/admin/content/collaboration/commit 接受 epoch、确认过的序号、expected_revision、稳定 operation_id、动作、私有访问策略和可选 block_sources。服务器从持久状态重建该截点，再复用草稿完整修订、审计、公开投影与可靠分发事务；HTTP 应答不能覆盖之后的协同输入。旧 save/publish 整篇 JSON 入口对已经初始化的协同草稿返回 40972；更早已成功的幂等回执仍可重取。
 
 账号权限读锁使用 PostgreSQL SHARE，阻止权限变更与当前写入交错，又兼容旧用例写入审计外键的 KEY SHARE。不能在全局引用锁前持有用户 UPDATE 锁再等待其他引用写入者。
 
-正文保存稳定 site://media/ID；新媒体映射经私有 socket 重新解析到编辑预览。媒体引用保守累计，覆盖尚未手动保存的协同输入和撤销；可能因此暂不能清理已经移出正文的文件，不能直接删媒体路径来绕开守卫。
+正文保存稳定 site://media/ID；新媒体映射经私有 socket 重新解析到编辑预览。媒体引用保守累计，覆盖已提交的共享输入和撤销历史；可能因此暂不能清理已经移出正文的文件，不能直接删媒体路径来绕开守卫。
 
 ## 明确后续
 
 当前状态是检查点，但保留初始状态、全部持久日志/回执和本机 ACK 记录，没有自动 GC/历史压缩删除。老截点重建成本随日志增长，未做长时间/大文档/大房间压测。完整审核工作流、代码页面协同、细粒度 ACL、跨块选区、显式冲突分支恢复、导出文件自动导入都未交付。原始 WordPress 文章不恢复来填充测试。
 
-## 结构化 HTML 与源码事务
+## 旧版结构化 HTML 与源码事务兼容
 
-HTML片段保存段落、文字格式、列表、表格、图片说明/对齐与稳定字体引用。schema1.1增加sources帧及rich_versions；原collab-1传输、稳定更新ID、PG提交后ACK和精确保存截点不变。旧草稿首次取得新票据时在行锁内补齐缺失片段，保留原epoch与日志。
+以下描述旧版客户端的兼容协议，新前端正文采用 ADR0044 的原始源码与整篇保存。HTML片段保存段落、文字格式、列表、表格、图片说明/对齐与稳定字体引用。schema1.1增加sources帧及rich_versions；原collab-1传输、稳定更新ID、PG提交后ACK和精确保存截点不变。旧草稿首次取得新票据时在行锁内补齐缺失片段，保留原epoch与日志。
 
 source_leases以文档/块记录generation、客户端、会话哈希和60秒租约，数据库为权威，Redis在线状态不授予编辑权。源码acquire/renew/release/apply使用认证HTTP；apply按指纹、租约和稳定operation_id校验，与协同更新、媒体引用及持久回执同事务提交。WS传播提交结果；本人与远端来源区分，宿主UndoManager保留本人撤销。
 
@@ -68,3 +68,11 @@ source_leases以文档/块记录generation、客户端、会话哈希和60秒租
 ## 2026-11-04 位置历史兼容
 
 [ADR0043](../decisions/0043-rich-editor-lifetime-and-position-history.md)限定接收y-tiptap3.0.12嵌套块的位置迁移根Map，验证数据形状、数值/容量和只追加不变量；这些不是业务根，不进入正文投影。任意其他根和业务策略仍被拒绝。所有富文本操作仍等待PG提交后ACK，不通过清除旧客户端outbox规避兼容问题。界面以文档/块绑定隔离引擎实例，管理器为空时不再访问命令或渲染工具栏。
+
+## 2026-11-04 正文保存与图片占位
+
+两种源码的未保存输入按账号、后端、草稿、标签页存放，与 IndexedDB 中的已确认共享文档分开。其后端媒体引用仅在正式提交时得到持久守卫，上传完成尚未保存的引用在保存时再次验证。
+
+block_sources 在历史截点和最新文档上分别检查块 ID、类型和原文 SHA256。精确源码、兼容富文本、协同更新、媒体引用、修订及回执同事务提交。失败回滚和双 API 幂等重试见本轮 P0，保存成功经原 WS 序列传播。
+
+插件复用宿主回调，上传共用 UploadQueue/mediaLibraryAdapter。临时占位仅在本页出现，后端通过正文校验拒绝未完成占位。恢复、格式限制及逐组件验收见[本轮记录](../handoff/source-first-editor-verification.md)。

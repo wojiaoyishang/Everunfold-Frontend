@@ -375,3 +375,22 @@ ADR0043、协同架构3、编辑器指南7与实际回归同步；以下记录�
 | `docs/development/editor-plugins.md` | `a0d04992d66b58dc1901422449ad39bc771c65c7154f2cda76dbe4b9c3f4dc03` |
 | `docs/README.md` | `5fe560a12a60d1673a289d8376c4b219acba6eb066286ea52c275ed442401c0f` |
 | `docs/design/editor-lifecycle-fix-desktop.png` | `41af02af36b1d919b14873d8e891e2aa8a20a463511f8ea0d3953058097d5de7` |
+
+
+## 2026-11-04 源码底稿与图片交互更新
+
+ADR0044/0045、editor-plugins-8、collaborative-editing-4及development-12按用户本轮要求同步。原始基线保留。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/decisions/0044-source-first-blocks-and-whole-draft-save.md` | `7bb17920d50490a5a40cfdd9722432f39c4f546937bcf8c566ee718ea5188a3f` |
+| `docs/decisions/0045-inline-image-upload-and-editor-controls.md` | `b781f0548ff838509c3d494ec08b5bf7118204c53150ccf212b58fe848759033` |
+| `docs/development/editor-plugins.md` | `573251cea6fc77e7e4cfb1c6263b938f28ad74ccb869901920d4eea19faeee0d` |
+| `docs/architecture/collaborative-editing.md` | `54657bad556253fe3e048a9328bd0731eff0a41d6658430ac14230c071d47baa` |
+| `docs/development/protocol.md` | `1b9a332dbb5bf713b298cdf7b239ea8c42afd0fb48d037135092ad0810b44a34` |
+| `docs/README.md` | `99723534027a8f41bad7067531c79ce93c7f36ed94c4456b0925ce244d71dc98` |
+| `docs/handoff/source-first-editor-verification.md` | `844efaee098508aa6a53c066adddd7d5917d199a66211eb25c49c46b60beea6d` |
+| `docs/design/editor-toolbar-neutral-desktop.png` | `c44e080a0e34e833ad3437ad4cbe6c418eaa5979035d854a8010d48d8d20d866` |
+| `docs/design/editor-source-element-selection.png` | `198583c46f1fe92ca4d2159e22dcde967e99778a3a36af6cc60cecb4a78cfaf7` |
+| `docs/design/editor-source-first-mobile.png` | `5d0f4547fcdb1a0b4276672b82d04f2bba95fb2145b2c38c406f572cfad7ef5d` |
+| `docs/design/editor-source-first-dark.png` | `076becf423a153d53736c37045fa86723cfc86592e75d1056410fa57f9186e10` |
