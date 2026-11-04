@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import { queryMedia, uploadMedia } from "@/generated/settings-client";
 import type {
   MediaItem,
@@ -51,7 +52,7 @@ export const mediaLibraryAdapter: LibraryAdapter<
         image ? "图片不超过 20 MB，SVG 不超过 1 MB" : "文件不超过 128 MB",
       );
     return {
-      metadata: { filename: file.name, upload_id: crypto.randomUUID() },
+      metadata: { filename: file.name, upload_id: randomUUID() },
       file,
     };
   },

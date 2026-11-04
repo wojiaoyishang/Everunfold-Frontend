@@ -1,5 +1,14 @@
 # 前端交接状态
 
+## 最新交付：新设备 Docker 内网 HTTP 部署（2026-11-04）
+
+- 已读取最新交接并配合后端部署新容器；当前入口 **http://172.16.3.2:3000**，用户完成宿主机3000映射，实际访问通过。Nginx3000统一代理Next3100/API8001/原WS/媒体，接收器3001；四个监听器绑定0.0.0.0。六个独立进程由同级后端Supervisor管理。
+- npm dev/start改为0.0.0.0；额外开发允许主机由EVERUNFOLD_DEV_ALLOWED_HOSTS显式配置。公开API地址使用宿主机HTTP，仅服务端backend.base_url保留回环8001。实际配置、source_epoch、副本和凭据不提交；新业务库显式初始化0015，未导入WordPress。
+- 适配非安全上下文缺少randomUUID/subtle：所有浏览器操作ID复用共享安全随机UUID，源文SHA-256使用现有lib0回退；不改协同/保存协议，无新依赖或锁文件变化。后端新增默认关闭的内网HTTP开关，精确Origin/CSRF/HttpOnly与内部IP AND Token保持。
+- 最终check的lint、类型、格式与207项测试通过；隔离verify:admin生产构建、18私有入口、SSR/按需资源、离线/撤回/设置损坏检查通过。后端锁文件、Ruff/296格式/mypy143及真实数据库完整156项通过，包含双API/协同/Worker/Scheduler/Node P0。
+- 浏览器在宿主机HTTP地址实际登录、新建并首次保存Markdown草稿，显示修改已同步/在线会话；后续工具连接中断，二次保存及视觉矩阵未冒称实页通过。随后真实HTTP/WS验证指纹提交、发布200/撤回404、持久投递、全服务重启及已有会话保留；测试稿fb825e14最终可恢复回收。详见[验收](container-deployment-verification.md)。
+- [容器运行指南](../development/container-deployment.md)、ADR0053、验收与索引/哈希双仓库同步；启停脚本和监督模板位于后端deploy。KDE登录自启已配置但整容器重启未验收。WordPress源备份只读保留、未导入，旧设备业务数据未恢复。仅本地提交，由用户推送，服务保留。
+
 ## 最新交付：共享代码块、紧凑操作与半透明展开（2026-11-04）
 
 - 464bf54完成单编辑框代码窗口、共享阅读框、片段参数、theme.code设置、按需编辑语法与代码字体。来源后端20ecd44/settings1.8.0；源码继续整篇保存，未扩展WS业务节点或数据库结构。

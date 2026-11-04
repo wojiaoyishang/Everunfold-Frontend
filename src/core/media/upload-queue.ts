@@ -1,3 +1,4 @@
+import { randomUUID } from "@/core/browser/crypto";
 import type { UploadProgress } from "../http/upload-transport";
 import { RequestError } from "../http/request";
 export class InvalidUpload extends Error {}
@@ -63,7 +64,7 @@ export class UploadQueue<T, P> {
   add(files: File[], context: string) {
     if (this.disposed) return;
     const added = files.map((file) => {
-      const id = crypto.randomUUID();
+      const id = randomUUID();
       this.jobs.set(id, { file, context });
       return {
         id,

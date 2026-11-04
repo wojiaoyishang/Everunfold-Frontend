@@ -1,5 +1,6 @@
 import type { DraftFields } from "@/generated/content-admin-contract";
 import type { BlockSourcePatch } from "@/generated/collaboration-contract";
+import { sha256Hex } from "@/core/browser/crypto";
 
 type Block = DraftFields["body"][number];
 type BufferedSource = {
@@ -68,16 +69,10 @@ export async function blockSourcePatches(
 ): Promise<BlockSourcePatch[]> {
   return Promise.all(
     Object.entries(sources).map(async ([id, { type, base, content }]) => {
-      const digest = await crypto.subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(base),
-      );
       return {
         id,
         type,
-        base_hash: Array.from(new Uint8Array(digest), (byte) =>
-          byte.toString(16).padStart(2, "0"),
-        ).join(""),
+        base_hash: await sha256Hex(base),
         content,
       };
     }),

@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import { commandBody, type BlockCommand } from "@/core/editor/block-commands";
 import { useEffect, useRef, useState } from "react";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
@@ -246,7 +247,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
           action: "create",
           input: {
             type_id: type.id,
-            operation_id: crypto.randomUUID(),
+            operation_id: randomUUID(),
             fields: displayed,
           },
         };
@@ -278,7 +279,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
             action: "collaboration",
             input: {
               id: detail.id,
-              operation_id: crypto.randomUUID(),
+              operation_id: randomUUID(),
               expected_revision: detail.revision,
               epoch: current.epoch,
               committed_seq: committed,
@@ -301,7 +302,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
       } else {
         const mutation = {
           id: detail.id,
-          operation_id: crypto.randomUUID(),
+          operation_id: randomUUID(),
           expected_revision: detail.revision,
         };
         operation.current =

@@ -491,3 +491,14 @@ ADR0052、development-15、editor-plugins-13、content-features-3、settings-run
 | `docs/design/code-reader-light.jpg` | `9176c9e82183c5bcdcaa92723dec93ffa52a8967062ab692288ac27dc7c54c2f` |
 | `docs/design/code-reader-dark.jpg` | `4c0f4d8e5c2cdf38f578754ab59be940b61c19f6dcfa1bdea33658c6888cdbe3` |
 | `docs/design/code-reader-mobile.jpg` | `3055428fb31a3cad4a7d0fe799fbba2e68b9105cf5d4cde6d7c8c92edcb1b3f3` |
+
+## 2026-11-04 新设备容器 HTTP 部署
+
+ADR0053、container-deployment-1、部署验收及公共索引逐字节同步。当前用户要求HTTP内网开发；原始基线、契约版本及SQL head0015不变。实际TOML、凭据、测试稿、缓存与日志不提交；STATUS各自维护。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `353754f4d0cdf5ebd01fc3e38bd83dcc925757498ab712a0c512b577cc2fc648` |
+| `docs/development/container-deployment.md` | `7a01cac059735d99e06572da677613f6d72dd00cb09e41fb0a102411e3f804a7` |
+| `docs/decisions/0053-container-http-development.md` | `800d2bb8f36992affaf1f8e7016ce648c8d1e812bdf69c4380234da0e7869248` |
+| `docs/handoff/container-deployment-verification.md` | `9384a1cb18cb69116cbbb4ffca4e9bb0f17bc6a202f9d50b1667d8a31112492a` |

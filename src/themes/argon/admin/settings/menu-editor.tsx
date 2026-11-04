@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import { useState, type CSSProperties } from "react";
 import type { MenuItem } from "@/generated/settings-contract";
 import {
@@ -45,7 +46,7 @@ export function MenuEditor({
   const add = (parentId: string | null) => {
     if (entries.length >= 256) return;
     const next: MenuItem = {
-      id: `menu-${crypto.randomUUID()}`,
+      id: `menu-${randomUUID()}`,
       label: "新菜单",
       href: "/",
       icon: "link",

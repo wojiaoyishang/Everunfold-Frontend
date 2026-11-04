@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import { useEffect, useRef, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { RequestError } from "@/core/http/request";
@@ -85,7 +86,7 @@ export function useMediaAttachment(id: string) {
       !pendingEdit.current ||
       JSON.stringify(pendingEdit.current.recipe) !== JSON.stringify(recipe)
     )
-      pendingEdit.current = { id, recipe, edit_id: crypto.randomUUID() };
+      pendingEdit.current = { id, recipe, edit_id: randomUUID() };
     setBusy(true);
     setError("");
     setNotice("");

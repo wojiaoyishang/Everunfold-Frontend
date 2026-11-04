@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import { Button, TextLink } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -88,7 +89,7 @@ export function CommentSection({
   }
   function add(draft: Omit<CommentDraft, "email">) {
     const entry: CommentEntry = {
-      id: `local-${crypto.randomUUID()}`,
+      id: `local-${randomUUID()}`,
       parentId: reply.active ? (reply.entry?.id ?? null) : null,
       replyTo: reply.active ? reply.entry?.author : null,
       author: draft.author,

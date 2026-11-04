@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import { useRef, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { restoreDraft, trashDraft } from "@/generated/content-admin-client";
@@ -12,7 +13,7 @@ export function useDraftAction(item: DraftSummary) {
   return {
     error,
     run: async () => {
-      operationId.current ??= crypto.randomUUID();
+      operationId.current ??= randomUUID();
       setError("");
       try {
         const action = item.status === "trash" ? restoreDraft : trashDraft;

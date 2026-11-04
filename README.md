@@ -1,5 +1,7 @@
 # Everunfold Frontend
 
+新 Docker 设备运行方式见[容器开发部署指南](docs/development/container-deployment.md)：浏览器通过宿主机 `http://172.16.3.2:3000` 访问；Nginx 统一转发页面、API 和 WebSocket，Next 开发进程在 3100。当前状态以最新交接为准。
+
 当前功能联调仅展示新后台发布的测试文章/说说；旧 WordPress 试导入内容已撤回。开发工具与恢复边界见 [内容管理指南](docs/development/content-management.md)。
 
 Everunfold 博客重构的独立前端仓库，使用 Next.js App Router、React 和 TypeScript。
@@ -32,7 +34,7 @@ npm ci --ignore-scripts
 npm run dev
 ```
 
-开发页：[http://127.0.0.1:3000](http://127.0.0.1:3000)。默认只监听本机。
+直接运行时的开发页：[http://127.0.0.1:3000](http://127.0.0.1:3000)，默认监听 `0.0.0.0`。当前容器部署由反向代理占用 3000，Next 使用 3100，按上述容器指南启动。
 管理员入口：[http://127.0.0.1:3000/login](http://127.0.0.1:3000/login)。首次管理员由后端 `init.database.py` 创建；本地默认凭据的适用范围和覆盖方式以后端交接为准，不能用于生产部署。
 本机 `config.toml` 和公开快照已经准备好；后端地址按用户要求为 `http://127.0.0.1:8001`。新环境需填写实例配置、显式迁移数据库并启动内容/设置接收链路，后台发布或重新同步可生成公开版本；历史导入仍需单独执行，见 [公开阅读运行指南](docs/development/public-reading.md)。缺失/无效快照返回 503，确认不存在的内容返回 404，不使用虚构内容填充。
 安装时禁用依赖生命周期脚本；当前 Next.js 所需的预编译包仍由锁文件安装。

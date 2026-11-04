@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 
 import {
   createContext,
@@ -25,7 +26,7 @@ export function FeedbackProvider({ children }: { children: ReactNode }) {
     visible: boolean;
   } | null>(null);
   const notify = useCallback((text: string, tone: Tone = "success") => {
-    setNotice({ id: crypto.randomUUID(), text, tone, visible: true });
+    setNotice({ id: randomUUID(), text, tone, visible: true });
   }, []);
   useEffect(() => {
     if (!notice) return;

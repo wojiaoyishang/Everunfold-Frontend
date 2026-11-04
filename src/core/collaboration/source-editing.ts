@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import * as Y from "yjs";
 import {
   acquireHtmlSource,
@@ -111,7 +112,7 @@ export class SourceEditing {
       id: this.host.id,
       block_id: id,
       lease_id: lease.lease_id,
-      operation_id: crypto.randomUUID(),
+      operation_id: randomUUID(),
       expected_hash: lease.expected_hash,
       html,
     };

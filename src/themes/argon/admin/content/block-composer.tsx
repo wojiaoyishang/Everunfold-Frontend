@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import {
   createContext,
   useContext,
@@ -70,7 +71,7 @@ export function BlockComposer({
     if (!blockEditors.get(format ?? "markdown")) return false;
     return finish({
       kind: "insert",
-      block: { id: crypto.randomUUID(), type: format, content: "" },
+      block: { id: randomUUID(), type: format, content: "" },
       before,
     });
   };

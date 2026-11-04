@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import { queryFonts, uploadMedia } from "@/generated/settings-client";
 import type { FontAsset } from "@/generated/settings-contract";
 import {
@@ -21,7 +22,7 @@ const adapter: LibraryAdapter<FontAsset, MediaUploadPayload> = {
     return {
       metadata: {
         filename: file.name,
-        upload_id: crypto.randomUUID(),
+        upload_id: randomUUID(),
         purpose: "font",
       },
       file,

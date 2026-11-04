@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+新设备部署入口：[Docker 容器与 HTTP 运行指南](development/container-deployment.md)、[ADR0053](decisions/0053-container-http-development.md)、[部署验收](handoff/container-deployment-verification.md)。
+
 1. [当前状态与下一步](handoff/STATUS.md)：本仓库实际完成了什么、验证结果、限制及接续任务。
 2. [开发协议](development/protocol.md)：协作、代码、依赖、Git、检查和交接规则。
 3. [架构约束](architecture/constraints.md)：已确认边界、工程提案与待决事项。

@@ -1,3 +1,4 @@
+import { randomUUID } from "@/core/browser/crypto";
 import { hasUploadMarkers } from "@/core/editor/upload-placeholders";
 import type {
   DraftDetail,
@@ -18,7 +19,7 @@ export function draftFields(detail?: DraftDetail | null): DraftFields {
     : {
         title: "",
         excerpt: "",
-        body: [{ id: crypto.randomUUID(), type: "markdown", content: "" }],
+        body: [{ id: randomUUID(), type: "markdown", content: "" }],
         settings: {},
         access_password: null,
       };

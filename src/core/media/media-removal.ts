@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import { useCallback, useRef, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { RequestError } from "@/core/http/request";
@@ -70,7 +71,7 @@ export function useMediaRemoval(detail: MediaDetails) {
         if (pending.current?.token !== plan.token)
           pending.current = {
             token: plan.token,
-            operationId: plan.resume_operation_id ?? crypto.randomUUID(),
+            operationId: plan.resume_operation_id ?? randomUUID(),
           };
         await removeMedia(
           baseUrl,

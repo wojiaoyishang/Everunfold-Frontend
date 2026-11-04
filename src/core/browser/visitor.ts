@@ -1,3 +1,4 @@
+import { randomUUID } from "@/core/browser/crypto";
 const visitors = new Map<string, string>();
 const uuid4 =
   /^[\da-f]{8}-[\da-f]{4}-4[\da-f]{3}-[89ab][\da-f]{3}-[\da-f]{12}$/i;
@@ -14,7 +15,7 @@ export function visitorId(baseUrl: string) {
     /* Memory-only if browser storage is unavailable. */
   }
   if (!value || !uuid4.test(value)) {
-    value = crypto.randomUUID();
+    value = randomUUID();
     try {
       localStorage.setItem(key, value);
     } catch {

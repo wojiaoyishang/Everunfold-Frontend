@@ -1,4 +1,5 @@
 "use client";
+import { randomUUID } from "@/core/browser/crypto";
 import { queryIcons, uploadMedia } from "@/generated/settings-client";
 import type { IconAsset } from "@/generated/settings-contract";
 import {
@@ -20,7 +21,7 @@ const adapter: LibraryAdapter<IconAsset, MediaUploadPayload> = {
     return {
       metadata: {
         filename: file.name,
-        upload_id: crypto.randomUUID(),
+        upload_id: randomUUID(),
         purpose: "icon",
       },
       file,

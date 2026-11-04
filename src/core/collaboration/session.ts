@@ -1,3 +1,4 @@
+import { randomUUID } from "@/core/browser/crypto";
 import * as Y from "yjs";
 import { ySyncPluginKey, defaultDeleteFilter } from "@tiptap/y-tiptap";
 import { SourceEditing } from "./source-editing";
@@ -188,7 +189,7 @@ export class DraftSession {
     this.pending.push({
       type: "update",
       epoch: this.epoch,
-      update_id: crypto.randomUUID(),
+      update_id: randomUUID(),
       payload: toBase64(_update),
       rich_versions: versions,
     });
