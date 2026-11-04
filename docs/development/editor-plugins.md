@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-8，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-9，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 ## 启动与验证
 
@@ -30,6 +30,8 @@ Markdown 和 HTML 均以原始字符串为底稿，切换视图直接同步本�
 - 每改可见组件立即检查内置浏览器；P0/截图/未执行项记入验收和 STATUS。只做本地提交，用户自行推送。
 
 ## 源码工具与快捷键
+
+外层正文容器透明、无独立编辑/预览/状态栏；整篇预览在页面顶部，区块模式按钮仍在块头。链接/图片属性使用有明确期望宽度且可收缩的ActionPopover，表单输入保留原生键盘语义。HTML表格的隐式段落只在编辑面适配，结构修改的有限回写边界见[ADR0046](../decisions/0046-editor-canvas-and-anchored-forms.md)及[本轮回归](../handoff/editor-canvas-popover-verification.md)。
 
 - 当前两个块编辑插件版本为 2.1.0，HTML默认可视化；以下源码工具仍供Markdown及HTML源码视图复用。SourceToolbar 管段落样式与动作/模板；SourceSearchPanel 管查找表单；SourceBlockEditor 组合这些控件，不接管业务保存。CodeEditor/useCodeEditorHandle 封装原生编辑面、选择、输入和 Y.Text 绑定。core/editor 处理局部格式变换和可见区搜索高亮。
 - 标题/列表作用于当前行或选中多行，常用行内格式可切换；空选区插入并选中占位文本。链接、表格、HTML 列表等为源码模板，插入后继续手工编辑。HTML 代码块转义选中标签；已有 HTML 标题的属性保留。

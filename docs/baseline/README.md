@@ -394,3 +394,19 @@ ADR0044/0045、editor-plugins-8、collaborative-editing-4及development-12按用
 | `docs/design/editor-source-element-selection.png` | `198583c46f1fe92ca4d2159e22dcde967e99778a3a36af6cc60cecb4a78cfaf7` |
 | `docs/design/editor-source-first-mobile.png` | `5d0f4547fcdb1a0b4276672b82d04f2bba95fb2145b2c38c406f572cfad7ef5d` |
 | `docs/design/editor-source-first-dark.png` | `076becf423a153d53736c37045fa86723cfc86592e75d1056410fa57f9186e10` |
+
+## 2026-11-04 编辑区容器与锚定表单修复
+
+ADR0046、editor-plugins-9、前轮尺寸验收更正、本轮回归及4张截图逐字节同步。原始基线、development-12、协同契约与数据库0015不变。后端此轮仅文档更新。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `3d08115c027f11e9c7a5b220516b6c5e9447fc936dcd9795d5043a9faceae962` |
+| `docs/development/editor-plugins.md` | `d9fc1b45b086558ed826385ee38d73164fe83055e0046c8f88bde2b5621211e4` |
+| `docs/decisions/0046-editor-canvas-and-anchored-forms.md` | `e225643fbab845cb6db33ef6d4d087db0451ea9bcbe5195c26ab012b9f433c32` |
+| `docs/handoff/source-first-editor-verification.md` | `b8a7c2374ff229726056d8df7663419e37eae04c1dccddb7987ad099ac12ab52` |
+| `docs/handoff/editor-canvas-popover-verification.md` | `2a79020d7db20eeef0fba3a085a5889fc8ba3c91440a1222f53660c127c4c896` |
+| `docs/design/editor-transparent-canvas-desktop.png` | `2afa07398d2a040847398cd313317a812817d338ae1fd8b873898752a0b363d4` |
+| `docs/design/editor-link-popover-desktop.png` | `a16e4b3d61fc142bf7f09d2602f579e2438857fb1f711a6d31df8bdce11b623f` |
+| `docs/design/editor-link-popover-mobile.png` | `25b208042d1315bca3294181b0f88cc622323953b8719870093769019e12ff91` |
+| `docs/design/editor-link-popover-dark.png` | `ca2fb9ca41abc295a7ba67f5d283161e8de52e1754e8fdcd2c1c46294ceef186` |
