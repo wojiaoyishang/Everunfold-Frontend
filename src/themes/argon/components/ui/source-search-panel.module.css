@@ -1,0 +1,123 @@
+.searchReveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--admin-motion-enter) var(--admin-motion-ease),
+    opacity var(--admin-motion-fast);
+}
+.searchReveal[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.searchReveal > div {
+  overflow: hidden;
+  min-height: 0;
+}
+.searchPanel {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: var(--admin-subtle);
+  border-bottom: 1px solid var(--admin-border);
+}
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.searchRow input {
+  width: 0;
+  min-width: 0;
+  flex: 1;
+  min-height: 32px;
+  padding: 5px 9px;
+  font-size: 12px;
+  background: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+  transition:
+    border-color var(--admin-motion-fast),
+    box-shadow var(--admin-motion-fast);
+}
+.searchRow input:focus-visible {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px var(--admin-accent-soft);
+}
+.case {
+  font:
+    600 12px/1 ui-monospace,
+    monospace;
+}
+.searchAction {
+  min-height: 32px;
+  padding: 5px 9px;
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+  white-space: nowrap;
+  font-size: 12px;
+  transition: background var(--admin-motion-fast);
+}
+.searchAction:hover:not(:disabled) {
+  background: var(--admin-accent-soft);
+}
+.searchAction:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.matchCount {
+  color: var(--admin-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.tool {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 5px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--admin-muted);
+  transition:
+    color 150ms,
+    background 150ms;
+}
+.tool:hover:not(:disabled),
+.tool[aria-pressed="true"] {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.tool:disabled {
+  opacity: 0.4;
+}
+.tool svg {
+  width: 14px;
+  height: 14px;
+}
+@media (max-width: 480px) {
+  .searchRow {
+    flex-wrap: wrap;
+  }
+  .searchRow input {
+    flex-basis: 100%;
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .searchReveal,
+  .searchRow input,
+  .searchAction,
+  .tool {
+    transition: none;
+  }
+}
+:global([data-admin-motion="reduced"]) .searchReveal {
+  transition: none;
+}

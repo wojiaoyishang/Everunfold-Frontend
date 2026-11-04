@@ -1,5 +1,6 @@
 import type { Editor } from "@tiptap/core";
 import { NodeSelection } from "@tiptap/pm/state";
+import { codeOptions } from "@/core/rendering/features/code-options";
 import type {
   ContentFeatureKind,
   ContentFeatureValue,
@@ -50,6 +51,9 @@ export function prepareVisualFeature(editor: Editor, kind: ContentFeatureKind) {
               kind === "code" ? node.textContent : String(node.attrs.latex),
             language: String(node.attrs.language ?? "plaintext"),
             display: node.type.name !== "inlineMath",
+            ...(kind === "code"
+              ? { codeOptions: codeOptions(node.attrs.codeOptions) }
+              : {}),
           }
         : {
             source: editor.state.doc.textBetween(selection.from, selection.to),
@@ -72,8 +76,13 @@ export function prepareVisualFeature(editor: Editor, kind: ContentFeatureKind) {
           kind === "code"
             ? {
                 type: "codeBlock",
-                attrs: { language: value.language },
-                content: [{ type: "text", text: value.source }],
+                attrs: {
+                  language: value.language,
+                  codeOptions: codeOptions(value.codeOptions),
+                },
+                ...(value.source
+                  ? { content: [{ type: "text", text: value.source }] }
+                  : {}),
               }
             : {
                 type: value.display ? "blockMath" : "inlineMath",

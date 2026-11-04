@@ -75,82 +75,6 @@
   align-items: center;
   gap: 2px;
 }
-.searchReveal {
-  display: grid;
-  grid-template-rows: 0fr;
-  opacity: 0;
-  transition:
-    grid-template-rows var(--admin-motion-enter) var(--admin-motion-ease),
-    opacity var(--admin-motion-fast);
-}
-.searchReveal[data-open="true"] {
-  grid-template-rows: 1fr;
-  opacity: 1;
-}
-.searchReveal > div {
-  overflow: hidden;
-  min-height: 0;
-}
-.searchPanel {
-  display: grid;
-  gap: 8px;
-  padding: 12px;
-  background: var(--admin-subtle);
-  border-bottom: 1px solid var(--admin-border);
-}
-.searchRow {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  min-width: 0;
-}
-.searchRow input {
-  width: 0;
-  min-width: 0;
-  flex: 1;
-  min-height: 32px;
-  padding: 5px 9px;
-  font-size: 12px;
-  background: var(--admin-canvas);
-  border: 1px solid var(--admin-border);
-  border-radius: 5px;
-  transition:
-    border-color var(--admin-motion-fast),
-    box-shadow var(--admin-motion-fast);
-}
-.searchRow input:focus-visible {
-  outline: none;
-  border-color: var(--admin-accent);
-  box-shadow: 0 0 0 2px var(--admin-accent-soft);
-}
-.case {
-  font:
-    600 12px/1 ui-monospace,
-    monospace;
-}
-.searchAction {
-  min-height: 32px;
-  padding: 5px 9px;
-  border: 1px solid var(--admin-border);
-  border-radius: 5px;
-  background: var(--admin-canvas);
-  color: var(--admin-text);
-  white-space: nowrap;
-  font-size: 12px;
-  transition: background var(--admin-motion-fast);
-}
-.searchAction:hover:not(:disabled) {
-  background: var(--admin-accent-soft);
-}
-.searchAction:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.matchCount {
-  color: var(--admin-muted);
-  font-size: 11px;
-  line-height: 1.5;
-}
 .statusButton {
   display: inline-flex;
   align-items: center;
@@ -183,21 +107,6 @@
   }
   .tools :global(.ui-select) {
     width: 95px;
-  }
-  .searchRow {
-    flex-wrap: wrap;
-  }
-  .searchRow input {
-    width: 100%;
-    flex-basis: 100%;
-  }
-  .searchPanel {
-    padding: 10px;
-  }
-}
-@media (forced-colors: active) {
-  .searchRow input:focus-visible {
-    outline: 2px solid Highlight;
   }
 }
 

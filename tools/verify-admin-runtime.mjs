@@ -206,6 +206,9 @@ directory = "./var/absent-admin-verification-cache"
     assert.match(richHtml, /<math .*MathML/);
     assert.match(richHtml, /hljs-keyword/);
     assert.match(richHtml, /hljs-built_in/);
+    assert.match(richHtml, /data-code-frame/);
+    assert.match(richHtml, /class="code-line/);
+    assert.match(richHtml, /data-code-source=/);
     assert.equal(resources(richHtml).length, 3);
     for (const asset of [
       ...resources(richHtml),

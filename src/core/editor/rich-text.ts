@@ -3,6 +3,10 @@ import type { JSONContent } from "@tiptap/core";
 import { yXmlFragmentToProsemirrorJSON } from "@tiptap/y-tiptap";
 import { parseDocument, DomUtils } from "htmlparser2";
 import { formulaHtml } from "@/core/rendering/features/model";
+import {
+  codeHtml,
+  parseCodeOptions,
+} from "@/core/rendering/features/code-options";
 
 const tags: Record<string, string> = {
   p: "paragraph",
@@ -93,7 +97,9 @@ export function sourceDocument(
             (child) => "name" in child && child.name === "code",
           );
           if (
-            Object.keys(props).some((key) => key !== "class") ||
+            Object.keys(props).some(
+              (key) => !["class", "data-code"].includes(key),
+            ) ||
             (code &&
               "attribs" in code &&
               Object.keys(code.attribs).some((key) => key !== "class"))
@@ -109,7 +115,10 @@ export function sourceDocument(
           return [
             {
               type: "codeBlock",
-              attrs: { language },
+              attrs: {
+                language,
+                codeOptions: parseCodeOptions(props["data-code"]),
+              },
               ...(text ? { content: [{ type: "text", text }] } : {}),
             },
           ];
@@ -334,7 +343,15 @@ export function renderRichNode(node: JSONContent): string {
   const content = (node.content ?? []).map(renderRichNode).join("");
   if (type === "doc") return content;
   if (type === "codeBlock")
-    return `<pre><code${attrs.language ? attrsHtml({ class: "language-" + attrs.language }) : ""}>${content}</code></pre>`;
+    return Object.keys(
+      parseCodeOptions(JSON.stringify(attrs.codeOptions ?? {})),
+    ).length
+      ? codeHtml(
+          (node.content ?? []).map((child) => child.text ?? "").join(""),
+          String(attrs.language ?? ""),
+          attrs.codeOptions,
+        )
+      : `<pre><code${attrs.language ? attrsHtml({ class: "language-" + attrs.language }) : ""}>${content}</code></pre>`;
   const tag =
     type === "heading"
       ? `h${attrs.level ?? 2}`

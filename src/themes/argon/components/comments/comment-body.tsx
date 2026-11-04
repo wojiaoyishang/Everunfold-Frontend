@@ -1,7 +1,7 @@
 import { CommentText } from "../comment-text";
 import { commentMarkdown } from "@/core/rendering/comment-markdown";
 import { ArticleMedia } from "../article-media";
-import { CodeBlock } from "../reader/code-tools";
+import { CodeBlock } from "../reader/code-block";
 
 export function CommentBody({
   body,

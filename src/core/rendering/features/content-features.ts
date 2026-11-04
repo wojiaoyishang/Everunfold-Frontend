@@ -1,5 +1,6 @@
 import { parseDocument, DomUtils } from "htmlparser2";
 import type { ContentFeatures } from "./model";
+import { codeLineMarkup } from "./code-frame";
 
 type Element = ReturnType<typeof DomUtils.findAll>[number];
 function isFormula(node: Element) {
@@ -51,8 +52,32 @@ export async function enhanceContentHtml(html: string) {
               code.attribs.class ?? node.attribs.class ?? "",
             )?.[1] ?? "plaintext";
           const { highlightCode } = await import("./code");
+          const frame =
+            node.parent &&
+            "attribs" in node.parent &&
+            "data-code-frame" in node.parent.attribs
+              ? node.parent
+              : undefined;
+          const source: string = frame
+            ? JSON.parse(frame.attribs["data-code-source"])
+            : DomUtils.textContent(code);
+          const rows = DomUtils.findAll(
+            (child) => child.attribs.class?.split(" ").includes("code-line"),
+            code.children,
+          );
+          const marked = rows
+            .filter((row) => row.attribs.class.includes("code-line-marked"))
+            .map((row) => row.attribs["data-line"])
+            .join(",");
+          const highlighted = await highlightCode(source, language);
           code.children = parseDocument(
-            await highlightCode(DomUtils.textContent(code), language),
+            frame && !code.attribs["data-code-plain"]
+              ? codeLineMarkup(
+                  highlighted,
+                  Number(rows[0]?.attribs["data-line"] ?? 1),
+                  marked,
+                )
+              : highlighted,
           ).children;
           code.attribs["data-highlighted"] = "true";
         } else {

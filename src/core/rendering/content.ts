@@ -9,6 +9,8 @@ import { fontFamily, referencedFontFaces } from "./fonts";
 import { markdownMath } from "./features/markdown-math";
 import { inspectContentFeatures } from "./features/content-features";
 import type { ContentFeatures } from "./features/model";
+import { codeHtml, parseCodeInfo } from "./features/code-options";
+import { frameCodeHtml } from "./features/code-frame";
 
 export interface TableOfContentsItem {
   id: string;
@@ -18,11 +20,23 @@ export interface TableOfContentsItem {
 
 const markdown = new MarkdownIt({ html: true, linkify: true, breaks: true });
 markdown.use(markdownMath);
+markdown.renderer.rules.fence = (tokens, index, _options, env) => {
+  const token = tokens[index],
+    info = parseCodeInfo(token.info);
+  return (
+    codeHtml(
+      env?.visualEditor ? token.content.replace(/\n$/, "") : token.content,
+      info.language,
+      info.options,
+    ) + "\n"
+  );
+};
 const defaultValidateLink = markdown.validateLink;
 markdown.validateLink = (url: string) =>
   /^site:\/\/media\/[^\s]+$/.test(url) || defaultValidateLink(url);
 
-export const renderMarkdownSource = (source: string) => markdown.render(source);
+export const renderMarkdownSource = (source: string, visualEditor = false) =>
+  markdown.render(source, { visualEditor });
 export const markdownSourceTokens = (source: string) =>
   markdown.parse(source, {});
 
@@ -83,7 +97,7 @@ const options: sanitizeHtml.IOptions = {
     a: ["href", "title", "target", "rel", "id", "class", "aria-label"],
     img: ["src", "alt", "title", "width", "height", "loading", "decoding"],
     code: ["class"],
-    pre: ["class"],
+    pre: ["class", "data-code"],
     ol: ["start"],
     th: ["colspan", "rowspan", "scope"],
     td: ["colspan", "rowspan"],
@@ -275,7 +289,9 @@ export function renderContent(
         }
       }
       visit(document.children);
-      return sanitizeHtml(DomUtils.getOuterHTML(document), options);
+      return frameCodeHtml(
+        sanitizeHtml(DomUtils.getOuterHTML(document), options),
+      );
     })
     .join("\n");
   const escape = (value: string) =>

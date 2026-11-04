@@ -159,8 +159,18 @@ export type Navigation = MenuItem[];
 export type SeoDescription = string;
 export type TitleTemplate = string;
 export type AllowIndexing = boolean;
+export type LightScheme = "paper" | "github";
+export type DarkScheme = "slate" | "github";
+export type LineNumbers = boolean;
+export type Wrap = boolean;
+export type CollapseLines = number;
+export type FontSize = number;
+export type LineHeight = number;
+export type TabSize = number;
 export type FontMediaId = string;
 export type FontUrl = string;
+export type FontMediaId1 = string;
+export type FontUrl1 = string;
 export type Accent = string;
 export type Mode = "system" | "light" | "dark";
 export type HeroTitle = string;
@@ -482,8 +492,9 @@ export interface MenuItem {
   children?: Children;
 }
 export interface ThemePreferences {
-  font_media_id?: FontMediaId;
-  font_url?: FontUrl;
+  code?: CodePreferences;
+  font_media_id?: FontMediaId1;
+  font_url?: FontUrl1;
   font_info?: FontInfo | null;
   accent?: Accent;
   mode?: Mode;
@@ -494,6 +505,19 @@ export interface ThemePreferences {
   background_url?: BackgroundUrl;
   background_video_url?: BackgroundVideoUrl;
   background_play?: BackgroundPlay;
+}
+export interface CodePreferences {
+  light_scheme?: LightScheme;
+  dark_scheme?: DarkScheme;
+  line_numbers?: LineNumbers;
+  wrap?: Wrap;
+  collapse_lines?: CollapseLines;
+  font_size?: FontSize;
+  line_height?: LineHeight;
+  tab_size?: TabSize;
+  font_media_id?: FontMediaId;
+  font_url?: FontUrl;
+  font_info?: FontInfo | null;
 }
 export interface IconUrls {
   [k: string]: string;

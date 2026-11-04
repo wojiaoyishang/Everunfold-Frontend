@@ -1,0 +1,219 @@
+.dialog:global(.admin-library-modal) {
+  width: min(960px, calc(100vw - 32px));
+  height: min(78dvh, 720px);
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+  overflow: hidden;
+}
+.dialog:global(.admin-library-modal)[open] {
+  display: flex;
+  flex-direction: column;
+}
+.dialog > :global(.admin-library-modal-heading) {
+  padding: 8px 14px;
+  min-height: 44px;
+  gap: 10px;
+  margin: 0;
+  border-bottom: 1px solid var(--admin-border);
+  flex-shrink: 0;
+}
+.dialog :global(.admin-library-modal-heading h2) {
+  font-size: 14px;
+}
+.optionsButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 5px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--admin-muted);
+  font-size: 12px;
+  transition:
+    color 150ms,
+    background 150ms;
+}
+.optionsButton:hover,
+.optionsButton[aria-expanded="true"] {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.optionsButton svg {
+  width: 14px;
+  height: 14px;
+}
+.form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.controls {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--admin-border);
+  background: var(--admin-subtle);
+}
+.controls > :global(.ui-select) {
+  width: 155px;
+  min-width: 100px;
+  flex-shrink: 0;
+}
+.controls > input {
+  flex: 1;
+  min-width: 0;
+}
+.dialog :is(.controls, .options) :global(.ui-select-trigger),
+.dialog :is(.controls, .options) input {
+  min-height: 32px;
+  padding: 5px 9px;
+  font-size: 12px;
+  line-height: 1.5;
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+}
+.optionsReveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 180ms var(--admin-motion-ease),
+    opacity 150ms;
+  flex-shrink: 0;
+}
+.optionsReveal[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.optionsReveal > div {
+  overflow: hidden;
+  min-height: 0;
+}
+.options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--admin-border);
+  background: var(--admin-subtle);
+}
+.options label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--admin-muted);
+}
+.options input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.options small {
+  grid-column: 1/-1;
+  color: var(--admin-danger);
+}
+.workspace {
+  flex: 1;
+  min-height: 100px;
+  display: flex;
+  overflow: hidden;
+}
+.workspace > div {
+  width: 100%;
+  min-height: 0;
+  --source-editor-min-height: 100%;
+}
+.workspace :global(.cm-editor) {
+  height: 100%;
+}
+.workspace :global(.cm-scroller) {
+  max-height: none;
+  height: 100%;
+  font-size: 13px;
+}
+.workspace :global(.cm-content) {
+  padding-block: 12px;
+}
+.statusButton {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 5px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--admin-muted);
+  transition:
+    color 150ms,
+    background 150ms;
+}
+.statusButton svg {
+  width: 14px;
+  height: 14px;
+}
+.statusButton:hover,
+.statusButton[aria-pressed="true"] {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--admin-border);
+  background: var(--admin-canvas);
+}
+.footer small {
+  margin-right: auto;
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+.footer :global(.admin-button) {
+  min-height: 32px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+@media (max-width: 640px) {
+  .dialog:global(.admin-library-modal) {
+    width: calc(100vw - 16px);
+    height: 86dvh;
+    max-height: calc(100dvh - 16px);
+  }
+  .controls {
+    padding: 8px;
+    flex-wrap: wrap;
+  }
+  .controls > :global(.ui-select) {
+    width: 125px;
+  }
+  .options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 8px;
+    gap: 8px;
+  }
+  .marks {
+    grid-column: 1/-1;
+  }
+  .footer small {
+    font-size: 10px;
+    max-width: 75px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .optionsButton,
+  .optionsReveal,
+  .statusButton {
+    transition: none;
+  }
+}
+:global([data-admin-motion="reduced"]) .optionsReveal {
+  transition: none;
+}

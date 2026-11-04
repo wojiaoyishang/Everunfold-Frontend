@@ -3,7 +3,7 @@ export interface ContentFeatures {
   math: boolean;
 }
 export const featureAssets = {
-  code: "/content-features/code-v1.css",
+  code: "/content-features/code-v2.css",
   math: "/content-features/katex-0.19.1/katex.min.css",
   formula: "/content-features/formula-v1.css",
 } as const;

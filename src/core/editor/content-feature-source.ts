@@ -1,13 +1,15 @@
+import { codeLanguage, formulaHtml } from "@/core/rendering/features/model";
 import {
-  codeLanguage,
-  escapeMarkup,
-  formulaHtml,
-} from "@/core/rendering/features/model";
+  codeHtml,
+  codeInfo,
+  type CodeOptions,
+} from "@/core/rendering/features/code-options";
 export type ContentFeatureKind = "code" | "math";
 export interface ContentFeatureValue {
   source: string;
   language: string;
   display: boolean;
+  codeOptions?: CodeOptions;
 }
 export function featureSource(
   kind: ContentFeatureKind,
@@ -22,7 +24,7 @@ export function featureSource(
         : "$" + value.source.replace(/\r?\n/g, " ") + "$";
   const language = codeLanguage(value.language);
   if (format === "html")
-    return `<pre><code class="language-${language}">${escapeMarkup(value.source)}</code></pre>`;
+    return codeHtml(value.source, language, value.codeOptions);
   const fence = "`".repeat(
     Math.max(
       3,
@@ -34,7 +36,7 @@ export function featureSource(
   );
   return (
     fence +
-    (language === "plaintext" ? "" : language) +
+    codeInfo(language, value.codeOptions) +
     "\n" +
     value.source +
     "\n" +

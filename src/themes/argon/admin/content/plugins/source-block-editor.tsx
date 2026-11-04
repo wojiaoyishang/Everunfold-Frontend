@@ -28,6 +28,7 @@ import {
 import styles from "./source-block-editor.module.css";
 import { SourceToolbar, type SourceAction } from "./source-toolbar";
 import { SourceSearchPanel } from "./source-search-panel";
+import { sourceCodeSnippet } from "@/core/editor/code-snippet-selection";
 import { featureSource } from "@/core/editor/content-feature-source";
 export type { SourceAction } from "./source-toolbar";
 
@@ -107,10 +108,9 @@ export function SourceBlockEditor({
   );
   useEffect(() => {
     if (!initialSelection) return;
-    const frame = requestAnimationFrame(() =>
-      input.current?.select(initialSelection),
-    );
-    return () => cancelAnimationFrame(frame);
+    // The child CodeMirror effect has already created its view. Applying now
+    // avoids a later animation frame overriding the user's first key press.
+    input.current?.select(initialSelection);
   }, [initialSelection]);
   const currentLine = props.value.split("\n")[status.line - 1] ?? "";
   const heading =
@@ -129,15 +129,29 @@ export function SourceBlockEditor({
         onMedia={props.onMedia}
         onUpload={props.onUpload}
         onFeature={(kind) => {
-          const range = input.current?.selection() ?? { start: 0, end: 0 };
+          let range = input.current?.selection() ?? { start: 0, end: 0 };
+          const existing =
+            kind === "code"
+              ? sourceCodeSnippet(props.value, range, format)
+              : undefined;
+          if (existing) {
+            range = existing.range;
+            input.current?.select(range);
+          }
           const insert = input.current?.captureInsertion();
           return {
-            initial: { source: props.value.slice(range.start, range.end) },
+            initial: existing?.initial ?? {
+              source: props.value.slice(range.start, range.end),
+            },
             apply: (value) => {
               const block = kind === "code" || value.display;
-              const leading = block && range.start > 0 ? "\n\n" : "";
-              const trailing =
-                block && range.end < props.value.length ? "\n\n" : "";
+              const leading =
+                !existing && block && range.start > 0 ? "\n\n" : "";
+              const trailing = existing
+                ? existing.suffix
+                : block && range.end < props.value.length
+                  ? "\n\n"
+                  : "";
               insert?.(leading + featureSource(kind, value, format) + trailing);
             },
           };

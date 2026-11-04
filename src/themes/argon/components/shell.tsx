@@ -18,6 +18,7 @@ import { RouteStateProvider, useRouteState } from "./route-state";
 import { HomeFeedPreference } from "./home-feed-settings";
 import { ReaderDataProvider } from "./reader-data";
 import { FeedbackProvider } from "./ui/feedback";
+import { CodePreferencesProvider } from "./code-preferences";
 
 export function BlogShell({
   site,
@@ -62,63 +63,65 @@ function ShellFrame({ children }: { children: ReactNode }) {
         })
       : "";
   return (
-    <div
-      className="blog-shell"
-      data-surface="public"
-      style={
-        {
-          "--site-background": `url(${JSON.stringify(background)})`,
-          ...(themeFont
-            ? {
-                fontFamily: `"${fontFamily(theme?.font_media_id ?? "")}", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif`,
-              }
-            : {}),
-        } as CSSProperties
-      }
-    >
-      {themeFont && (
-        <style
-          data-theme-font
-          dangerouslySetInnerHTML={{ __html: themeFont }}
-        />
-      )}
-      <BackgroundVideoProvider
-        key={site.settings?.theme.background_video_url}
-        poster={background}
-        source={site.settings?.theme.background_video_url}
-        defaultPlay={site.settings?.theme.background_play}
+    <CodePreferencesProvider value={theme?.code}>
+      <div
+        className="blog-shell"
+        data-surface="public"
+        style={
+          {
+            "--site-background": `url(${JSON.stringify(background)})`,
+            ...(themeFont
+              ? {
+                  fontFamily: `"${fontFamily(theme?.font_media_id ?? "")}", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif`,
+                }
+              : {}),
+          } as CSSProperties
+        }
       >
-        <HomeFeedPreference />
-        <TextLink className="skip-link" href="#main-content">
-          跳到正文
-        </TextLink>
-        <SiteHeader site={site} />
-        <section className="hero" aria-label="站点横幅">
-          <div className="hero-copy">
-            <p className="hero-title">{site.hero_title || site.name}</p>
-            <p className="hero-subtitle">
-              {site.hero_subtitle || site.description}
-            </p>
+        {themeFont && (
+          <style
+            data-theme-font
+            dangerouslySetInnerHTML={{ __html: themeFont }}
+          />
+        )}
+        <BackgroundVideoProvider
+          key={site.settings?.theme.background_video_url}
+          poster={background}
+          source={site.settings?.theme.background_video_url}
+          defaultPlay={site.settings?.theme.background_play}
+        >
+          <HomeFeedPreference />
+          <TextLink className="skip-link" href="#main-content">
+            跳到正文
+          </TextLink>
+          <SiteHeader site={site} />
+          <section className="hero" aria-label="站点横幅">
+            <div className="hero-copy">
+              <p className="hero-title">{site.hero_title || site.name}</p>
+              <p className="hero-subtitle">
+                {site.hero_subtitle || site.description}
+              </p>
+            </div>
+          </section>
+          <div className="blog-container">
+            <Sidebar site={site} toc={toc} contentKey={presentationId} />
+            <main id="main-content" className="main-column" tabIndex={-1}>
+              <RouteContent>{children}</RouteContent>
+            </main>
           </div>
-        </section>
-        <div className="blog-container">
-          <Sidebar site={site} toc={toc} contentKey={presentationId} />
-          <main id="main-content" className="main-column" tabIndex={-1}>
-            <RouteContent>{children}</RouteContent>
-          </main>
-        </div>
-        <footer className="site-footer">
-          <p>
-            © {new Date().getFullYear()} {site.author} ·{" "}
-            {site.hero_title || site.name}
-          </p>
-          <p>
-            Every story is still unfolding.{" "}
-            <span className="footer-separator">·</span> Powered by Everunfold
-          </p>
-        </footer>
-        <FloatingTools />
-      </BackgroundVideoProvider>
-    </div>
+          <footer className="site-footer">
+            <p>
+              © {new Date().getFullYear()} {site.author} ·{" "}
+              {site.hero_title || site.name}
+            </p>
+            <p>
+              Every story is still unfolding.{" "}
+              <span className="footer-separator">·</span> Powered by Everunfold
+            </p>
+          </footer>
+          <FloatingTools />
+        </BackgroundVideoProvider>
+      </div>
+    </CodePreferencesProvider>
   );
 }

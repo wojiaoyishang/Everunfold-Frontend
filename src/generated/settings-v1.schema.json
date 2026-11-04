@@ -36,6 +36,92 @@
       "title": "CachePolicy",
       "type": "object"
     },
+    "CodePreferences": {
+      "additionalProperties": false,
+      "properties": {
+        "light_scheme": {
+          "default": "paper",
+          "enum": [
+            "paper",
+            "github"
+          ],
+          "title": "Light Scheme",
+          "type": "string"
+        },
+        "dark_scheme": {
+          "default": "slate",
+          "enum": [
+            "slate",
+            "github"
+          ],
+          "title": "Dark Scheme",
+          "type": "string"
+        },
+        "line_numbers": {
+          "default": true,
+          "title": "Line Numbers",
+          "type": "boolean"
+        },
+        "wrap": {
+          "default": false,
+          "title": "Wrap",
+          "type": "boolean"
+        },
+        "collapse_lines": {
+          "default": 18,
+          "maximum": 200,
+          "minimum": 0,
+          "title": "Collapse Lines",
+          "type": "integer"
+        },
+        "font_size": {
+          "default": 13,
+          "maximum": 20,
+          "minimum": 11,
+          "title": "Font Size",
+          "type": "integer"
+        },
+        "line_height": {
+          "default": 1.7,
+          "maximum": 2.2,
+          "minimum": 1.3,
+          "title": "Line Height",
+          "type": "number"
+        },
+        "tab_size": {
+          "default": 4,
+          "maximum": 8,
+          "minimum": 2,
+          "title": "Tab Size",
+          "type": "integer"
+        },
+        "font_media_id": {
+          "default": "",
+          "pattern": "^(?:|media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$",
+          "title": "Font Media Id",
+          "type": "string"
+        },
+        "font_url": {
+          "default": "",
+          "maxLength": 2048,
+          "title": "Font Url",
+          "type": "string"
+        },
+        "font_info": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FontInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "CodePreferences",
+      "type": "object"
+    },
     "CropRect": {
       "additionalProperties": false,
       "properties": {
@@ -1693,6 +1779,9 @@
     "ThemePreferences": {
       "additionalProperties": false,
       "properties": {
+        "code": {
+          "$ref": "#/$defs/CodePreferences"
+        },
         "font_media_id": {
           "default": "",
           "pattern": "^(?:|media:[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$",
@@ -1882,7 +1971,7 @@
   "title": "SettingsContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.7.0",
+  "x-everunfold-contract-version": "1.8.0",
   "x-everunfold-operations": [
     {
       "name": "queryFonts",

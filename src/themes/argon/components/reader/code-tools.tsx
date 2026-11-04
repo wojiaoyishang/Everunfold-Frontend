@@ -1,84 +1,69 @@
 "use client";
-import { Button } from "@/themes/argon/components/ui/primitives";
-
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
+import { Button } from "../ui/primitives";
+import { Icon } from "../icon";
 export function CodeTools({
   code,
   onWrap,
   onExpand,
   wrapped,
   expanded,
+  canExpand,
 }: {
   code: string;
   onWrap: () => void;
   onExpand: () => void;
   wrapped: boolean;
   expanded: boolean;
+  canExpand: boolean;
 }) {
-  const [copied, setCopied] = useState(false);
-  const [error, setError] = useState(false);
+  const [result, setResult] = useState<"copied" | "error">();
+  useEffect(() => {
+    if (!result) return;
+    const timeout = window.setTimeout(() => setResult(undefined), 2500);
+    return () => window.clearTimeout(timeout);
+  }, [result]);
   return (
-    <div className="code-tools">
-      <Button type="button" aria-pressed={wrapped} onClick={onWrap}>
-        折行
-      </Button>
-      <Button type="button" aria-pressed={expanded} onClick={onExpand}>
-        {expanded ? "退出展开" : "展开代码"}
-      </Button>
+    <div className="content-code-tools" role="group" aria-label="代码操作">
       <Button
-        type="button"
+        aria-label="代码自动换行"
+        title="自动换行"
+        aria-pressed={wrapped}
+        onClick={onWrap}
+      >
+        <Icon name="wrap" />
+      </Button>
+      {canExpand && (
+        <Button
+          aria-label={expanded ? "折叠代码" : "展开全部代码"}
+          title={expanded ? "折叠代码" : "展开全部"}
+          aria-expanded={expanded}
+          onClick={onExpand}
+        >
+          <Icon name={expanded ? "chevron-up" : "chevron-down"} />
+        </Button>
+      )}
+      <Button
+        aria-label={result === "copied" ? "代码已复制" : "复制代码"}
+        title={result === "copied" ? "已复制" : "复制代码"}
         onClick={async () => {
           try {
             await navigator.clipboard.writeText(code);
-            setCopied(true);
-            setError(false);
+            setResult("copied");
           } catch {
-            setError(true);
+            setResult("error");
           }
         }}
       >
-        {copied ? "已复制" : "复制代码"}
+        <Icon name={result === "copied" ? "check" : "copy"} />
       </Button>
-      <span role="status">
-        {error
-          ? "复制未获允许，请选中代码手动复制。"
-          : copied
-            ? "代码已复制"
+      <span className="content-code-result" role="status">
+        {result === "error"
+          ? "请选中代码手动复制"
+          : result === "copied"
+            ? "已复制"
             : ""}
       </span>
     </div>
-  );
-}
-
-export function CodeBlock({
-  code,
-  language,
-}: {
-  code: string;
-  language?: string;
-}) {
-  const [wrapped, setWrapped] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  return (
-    <figure
-      className="reader-code"
-      data-wrapped={wrapped}
-      data-expanded={expanded}
-    >
-      <figcaption>
-        {language || "CODE"}
-        <CodeTools
-          code={code}
-          wrapped={wrapped}
-          expanded={expanded}
-          onWrap={() => setWrapped(!wrapped)}
-          onExpand={() => setExpanded(!expanded)}
-        />
-      </figcaption>
-      <pre>
-        <code>{code}</code>
-      </pre>
-    </figure>
   );
 }

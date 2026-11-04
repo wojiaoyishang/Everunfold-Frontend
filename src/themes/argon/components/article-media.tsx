@@ -3,7 +3,6 @@ import { Button } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useDetailsMotion } from "../hooks/use-details-motion";
-import { useCodeTools } from "../hooks/use-code-tools";
 import { ImageViewer, type GalleryImage } from "./reader/image-viewer";
 
 function imageTarget(image: HTMLImageElement): string | null {
@@ -27,7 +26,6 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
     items: GalleryImage[];
   } | null>(null);
   useDetailsMotion(container, children);
-  const codeTools = useCodeTools(container, children);
   useEffect(() => {
     const element = container.current;
     const images = Array.from(
@@ -123,7 +121,6 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
   return (
     <div ref={container}>
       {children}
-      {codeTools}
       {failed.length > 0 && (
         <div className="media-failures" role="status">
           {failed.map((index) => (

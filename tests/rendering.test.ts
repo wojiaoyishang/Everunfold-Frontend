@@ -6,6 +6,7 @@ import { renderContent } from "../src/core/rendering/content";
 import { CommentText } from "../src/themes/argon/components/comment-text";
 import { content } from "./fixtures";
 import { expandPresentationShortcodes } from "../src/core/rendering/shortcodes";
+import { DomUtils, parseDocument } from "htmlparser2";
 
 test("references number across blocks with safe return anchors and preserve code examples", () => {
   const result = renderContent(
@@ -154,7 +155,14 @@ test("virtual media mapping changes resource nodes but never code or plain text"
     2,
   );
   assert.match(result.html, /<code>site:\/\/media\/image-1<\/code>/);
-  assert.match(result.html, /&lt;img src="site:\/\/media\/image-1"&gt;/);
+  const frame = DomUtils.findOne(
+    (node) => "data-code-frame" in node.attribs,
+    parseDocument(result.html).children,
+  );
+  assert.equal(
+    JSON.parse(frame!.attribs["data-code-source"]),
+    '<img src="site://media/image-1">\n',
+  );
   assert.match(result.html, /<p>site:\/\/media\/image-1<\/p>/);
 });
 

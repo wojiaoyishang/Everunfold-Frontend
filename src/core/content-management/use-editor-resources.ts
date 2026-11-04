@@ -7,13 +7,24 @@ import {
 } from "@/generated/content-admin-client";
 import type { EditorTerm, MediaURL } from "@/generated/content-admin-contract";
 import type { MediaItem } from "@/generated/settings-contract";
+import type { CodePreferences } from "@/generated/settings-contract";
+import { readSettings } from "@/generated/settings-client";
 
 export function useEditorResources() {
   const { baseUrl, csrfToken } = useAdminRequest();
   const [terms, setTerms] = useState<EditorTerm[]>([]);
   const [media, setMedia] = useState<Record<string, MediaURL>>({});
+  const [codePreferences, setCodePreferences] = useState<CodePreferences>({});
   useEffect(() => {
     const abort = new AbortController();
+    void readSettings(baseUrl, { signal: abort.signal })
+      .then((response) => {
+        if (!abort.signal.aborted)
+          setCodePreferences(response.data.value.theme.code ?? {});
+      })
+      .catch(() => {
+        /* Editing remains available with built-in presentation defaults. */
+      });
     void readEditorOptions(baseUrl, { signal: abort.signal })
       .then((response) => {
         if (!abort.signal.aborted) setTerms(response.data.terms ?? []);
@@ -42,5 +53,5 @@ export function useEditorResources() {
           name.trim().normalize("NFC").toLocaleLowerCase(),
     );
   };
-  return { terms, media, remember, createCategory };
+  return { terms, media, remember, createCategory, codePreferences };
 }

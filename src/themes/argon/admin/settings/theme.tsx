@@ -14,6 +14,7 @@ import { Icon } from "../../components/icon";
 import type { ThemePreferences } from "@/generated/settings-contract";
 import { useFontLibrary } from "@/core/media/font-library";
 import { FontField } from "../fonts/font-field";
+import { CodeSettingsSection } from "./code-settings";
 const palette = ["#673bb7", "#3865b9", "#397566", "#ad466f", "#a26032"];
 export function ThemeSettingsPage() {
   const fonts = useFontLibrary();
@@ -124,6 +125,10 @@ export function ThemeSettingsPage() {
               <small>仅在页面实际使用时加载，下载期间保留系统字体。</small>
             </div>
           </SettingsSection>
+          <CodeSettingsSection
+            value={theme.code ?? {}}
+            onChange={(code) => update({ code })}
+          />
           <SettingsSection
             title="背景"
             description="图片作为静态背景，也用于视频播放前的占位。"

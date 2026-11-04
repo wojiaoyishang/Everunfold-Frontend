@@ -23,6 +23,8 @@ const paths = {
     "m3 5 1 1 2-2M10 5h11M3 11h3v3H3v-3ZM10 12h11M3 18h3v3H3v-3ZM10 19h11",
   "code-block": "M3 4h18v16H3V4Zm5 5-3 3 3 3m8-6 3 3-3 3M13 8l-2 8",
   wrap: "M3 6h18M3 11h14a4 4 0 0 1 0 8h-5m3-3-3 3 3 3M3 16h4",
+  "chevron-up": "m6 15 6-6 6 6",
+  "chevron-down": "m6 9 6 6 6-6",
   "indent-more": "M10 5h11M10 12h11M10 19h11M3 8l4 4-4 4",
   "indent-less": "M10 5h11M10 12h11M10 19h11M7 8l-4 4 4 4",
   trash: "M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7",

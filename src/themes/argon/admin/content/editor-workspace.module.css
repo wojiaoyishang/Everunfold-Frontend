@@ -16,18 +16,41 @@
   justify-content: flex-end;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   margin-left: auto;
+}
+.headerActions > :global(.admin-button) {
+  min-height: 32px;
+  padding: 5px 10px;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.headerActions > :global(.admin-button) svg {
+  width: 15px;
+  height: 15px;
+}
+.headerActions > :global(.admin-editor-preview-action) {
+  background: transparent;
+  border-color: transparent;
+  color: var(--admin-muted);
+}
+.headerActions > :global(.admin-editor-preview-action):hover:not(:disabled),
+.headerActions > :global(.admin-editor-preview-action)[aria-pressed="true"] {
+  background: var(--admin-subtle);
+  color: var(--admin-accent);
 }
 @media (max-width: 640px) {
   .headerActions {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
-    width: 100%;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: end;
+    width: auto;
   }
   .headerActions > :global(.admin-button) {
     min-width: 0;
-    padding: 8px 7px;
+    min-height: 36px;
+    padding: 5px 9px;
     gap: 5px;
     font-size: 12px;
     white-space: nowrap;

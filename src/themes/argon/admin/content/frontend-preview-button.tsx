@@ -61,7 +61,7 @@ export function FrontendPreviewButton({
   };
   return (
     <Button
-      className="admin-button"
+      className="admin-button admin-editor-preview-action"
       disabled={disabled || pending}
       aria-busy={pending}
       onClick={() => void open()}

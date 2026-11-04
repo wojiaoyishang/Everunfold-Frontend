@@ -158,6 +158,7 @@ export function CodeEditor({
     label,
     onStatus,
     onSearchRequest,
+    language,
   });
   useEffect(() => {
     latest.current = {
@@ -167,14 +168,16 @@ export function CodeEditor({
       label,
       onStatus,
       onSearchRequest,
+      language,
     };
-  }, [value, onChange, disabled, label, onStatus, onSearchRequest]);
+  }, [value, onChange, disabled, label, onStatus, onSearchRequest, language]);
   const text = shared?.text,
     awareness = shared?.awareness,
     undo = shared?.undo,
     blockId = shared?.blockId;
   const editable = useRef(new Compartment());
   const wrapping = useRef(new Compartment());
+  const syntax = useRef(new Compartment());
   useCodeEditorHandle(ref, view, latest, raw, text, undo);
   useEffect(() => {
     if (!host.current) return;
@@ -236,7 +239,7 @@ export function CodeEditor({
           searchExtension(),
           sourceSearchHighlights,
           syntaxHighlighting(sourceHighlight),
-          language,
+          syntax.current.of(latest.current.language),
           wrapping.current.of(EditorView.lineWrapping),
           editable.current.of([
             EditorView.editable.of(!latest.current.disabled),
@@ -316,6 +319,9 @@ export function CodeEditor({
       view.current = null;
       editor.destroy();
     };
+  }, [text, awareness, undo, blockId, shortcuts]);
+  useEffect(() => {
+    view.current?.dispatch({ effects: syntax.current.reconfigure(language) });
   }, [language, text, awareness, undo, blockId, shortcuts]);
   useEffect(() => {
     view.current?.dispatch({

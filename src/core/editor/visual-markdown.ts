@@ -7,6 +7,7 @@ import {
 import { markdownUnits } from "./markdown-selection";
 import { renderRichNode, sourceDocument } from "./rich-text";
 import { normalizeVisualDocument } from "./visual-document";
+import { codeInfo } from "@/core/rendering/features/code-options";
 import {
   richTextUnits,
   transferRange,
@@ -20,7 +21,7 @@ const children = (node: Node) =>
 
 export function markdownRichSource(source: string) {
   return normalizeVisualDocument(
-    sourceDocument(renderMarkdownSource(source), true),
+    sourceDocument(renderMarkdownSource(source, true), true),
     true,
   );
 }
@@ -109,7 +110,12 @@ function serialize(node: Node): string {
         ),
       );
       return (
-        fence + String(node.attrs.language ?? "") + "\n" + code + "\n" + fence
+        fence +
+        codeInfo(String(node.attrs.language ?? ""), node.attrs.codeOptions) +
+        "\n" +
+        code +
+        "\n" +
+        fence
       );
     }
     case "inlineMath":

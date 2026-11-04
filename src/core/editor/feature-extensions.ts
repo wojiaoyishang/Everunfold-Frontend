@@ -3,6 +3,35 @@ import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import { parseDocument } from "htmlparser2";
 import { codeLanguage } from "@/core/rendering/features/model";
+import {
+  codeOptions,
+  parseCodeOptions,
+} from "@/core/rendering/features/code-options";
+
+/** Only the local visual projection carries snippet options. Shared drafts retain source HTML. */
+export const LocalCodeOptions = Extension.create({
+  name: "localCodeOptions",
+  addGlobalAttributes: () => [
+    {
+      types: ["codeBlock"],
+      attributes: {
+        codeOptions: {
+          default: null,
+          parseHTML: (element) =>
+            parseCodeOptions(element.getAttribute("data-code") ?? ""),
+          renderHTML: (attributes) =>
+            Object.keys(codeOptions(attributes.codeOptions)).length
+              ? {
+                  "data-code": JSON.stringify(
+                    codeOptions(attributes.codeOptions),
+                  ),
+                }
+              : {},
+        },
+      },
+    },
+  ],
+});
 
 /** Local visual nodes only; shared richFields/WS schema continues to preserve source HTML. */
 function formulaNode(display: boolean) {

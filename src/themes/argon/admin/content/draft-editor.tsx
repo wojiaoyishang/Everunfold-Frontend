@@ -25,6 +25,7 @@ import { CollaborationBar } from "./collaboration-bar";
 import { InlineUploadToasts } from "./inline-upload-toasts";
 import { FrontendPreviewButton } from "./frontend-preview-button";
 import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
+import { CodePreferencesProvider } from "../../components/code-preferences";
 
 export function DraftEditor({
   type,
@@ -149,7 +150,7 @@ export function DraftEditor({
   ]);
   const notice = editor.dirty ? "" : editor.notice;
   return (
-    <>
+    <CodePreferencesProvider value={resources.codePreferences}>
       <InlineUploadToasts uploads={uploads} />
       <div
         ref={surface}
@@ -200,7 +201,7 @@ export function DraftEditor({
           </Button>
           <div className={styles.headerActions}>
             <Button
-              className="admin-button"
+              className="admin-button admin-editor-preview-action"
               aria-pressed={mode === "preview"}
               aria-controls="draft-editor-view"
               disabled={editor.loading || dragging || uploading}
@@ -223,7 +224,7 @@ export function DraftEditor({
             />
             {editor.detail?.published_revision && editor.detail.public_path && (
               <RouteLink
-                className="admin-button"
+                className="admin-button admin-editor-preview-action"
                 href={editor.detail.public_path}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -431,6 +432,6 @@ export function DraftEditor({
         </BlockComposer>
         <ContentSync refreshKey={editor.detail?.revision ?? 0} />
       </div>
-    </>
+    </CodePreferencesProvider>
   );
 }

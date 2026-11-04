@@ -64,7 +64,7 @@ test("Markdown formulas and HTML formulas use the same accessible renderer", asy
     createElement(ContentResources, { features: md.features }),
   );
   assert.match(assets, /katex-0\.19\.1/);
-  assert.doesNotMatch(assets, /code-v1/);
+  assert.doesNotMatch(assets, /code-v\d/);
 });
 test("both code formats highlight the declared language without executing code", async () => {
   for (const format of ["markdown", "html"] as const) {

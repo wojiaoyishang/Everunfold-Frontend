@@ -1,0 +1,27 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.grid > label {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--admin-text);
+}
+.grid :global(.ui-select) {
+  min-width: 0;
+}
+.preview {
+  min-width: 0;
+}
+.preview :global(.content-code-frame) {
+  margin: 0;
+}
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
