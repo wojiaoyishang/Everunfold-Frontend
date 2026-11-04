@@ -7,7 +7,6 @@ import type {
 import type { MediaItem } from "@/generated/settings-contract";
 import type { InlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
 import { uploadMarkers } from "@/core/editor/upload-placeholders";
-import { UploadQueueView } from "../../components/ui/upload-queue";
 import { mediaMarkup } from "@/core/content-management/editor-fields";
 import { Button, TextArea } from "../../components/ui/primitives";
 import { BlockFrame, BlockPosition } from "./block-frame";
@@ -137,12 +136,6 @@ export function EditorBody({
                   uploadEntries={uploads.items(block.id)}
                   uploadStatus={
                     <>
-                      <UploadQueueView
-                        items={uploads.items(block.id)}
-                        onRetry={(id) => uploads.queue.retry(id)}
-                        onCancel={(id) => uploads.queue.cancel(id)}
-                        onClear={() => uploads.clear(block.id)}
-                      />
                       {uploadMarkers(block.content).some(
                         (marker) =>
                           !uploads

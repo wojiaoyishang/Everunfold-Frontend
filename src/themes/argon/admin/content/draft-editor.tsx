@@ -22,6 +22,7 @@ import { DraftPreview } from "./draft-preview";
 import { ContentSync } from "./content-sync";
 import { afterDialogMotion } from "../../hooks/dialog-motion";
 import { CollaborationBar } from "./collaboration-bar";
+import { InlineUploadToasts } from "./inline-upload-toasts";
 import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 
 export function DraftEditor({
@@ -146,6 +147,7 @@ export function DraftEditor({
   const notice = editor.dirty ? "" : editor.notice;
   return (
     <>
+      <InlineUploadToasts uploads={uploads} />
       <div
         ref={surface}
         className={`admin-content-editor-page ${styles.workspace}`}

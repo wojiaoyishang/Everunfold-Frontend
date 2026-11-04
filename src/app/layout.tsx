@@ -5,6 +5,7 @@ import "./globals.css";
 import "@/themes/argon/shared.css";
 import { initializeMotion } from "@/core/browser/motion-policy";
 import { initializeAppearance } from "@/core/browser/appearance-policy";
+import { ToastProvider } from "@/themes/argon/components/ui/toast/toast-provider";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +25,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: initializeAppearance }} />
         <script dangerouslySetInnerHTML={{ __html: initializeMotion }} />
       </head>
-      <body>{children}</body>
+      <body>
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }
