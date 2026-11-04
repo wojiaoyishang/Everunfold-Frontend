@@ -156,6 +156,8 @@
   transform: none;
 }
 .library {
+  display: grid;
+  gap: 14px;
   padding: 18px;
   border: 1px solid var(--admin-border);
   border-radius: 8px;
@@ -164,7 +166,7 @@
 .libraryHeading {
   display: grid;
   gap: 6px;
-  margin-bottom: 18px;
+  margin: 0;
 }
 .libraryHeading strong {
   font-size: 14px;
@@ -206,12 +208,17 @@
 }
 .libraryCard strong {
   font-size: 13px;
+  min-width: 0;
+  line-height: 1.45;
 }
 .libraryCard small {
   grid-column: 2;
   font-size: 11px;
   color: var(--admin-muted);
   line-height: 1.5;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .libraryCard > svg {
   grid-column: 3;
@@ -234,8 +241,10 @@
   width: 20px;
   height: 20px;
 }
-.libraryHelp {
-  margin: 16px 0 0;
+.library .libraryHelp {
+  margin: 0;
+  padding-top: 11px;
+  border-top: 1px solid var(--admin-border);
   font-size: 11px;
   color: var(--admin-muted);
   line-height: 1.7;
