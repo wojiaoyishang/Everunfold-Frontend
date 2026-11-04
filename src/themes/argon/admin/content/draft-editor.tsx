@@ -15,8 +15,7 @@ import { EditorTitle } from "./editor-title";
 import { EditorActions } from "./editor-actions";
 import { EditorPanels } from "./editor-panels";
 import { BlockComposer } from "./block-composer";
-import { ComposerSidebar, BlockLibraryPicker } from "./block-library";
-import composerStyles from "./block-composer.module.css";
+import { ComposerSidebar } from "./block-library";
 import styles from "./editor-workspace.module.css";
 import { contentEditors } from "./editor-registry";
 import { DraftPreview } from "./draft-preview";
@@ -195,6 +194,19 @@ export function DraftEditor({
             返回{type.label}列表
           </Button>
           <div className={styles.headerActions}>
+            <Button
+              className="admin-button"
+              aria-pressed={mode === "preview"}
+              aria-controls="draft-editor-view"
+              disabled={editor.loading || dragging || uploading}
+              onClick={() => {
+                setSection("body");
+                setMode(mode === "edit" ? "preview" : "edit");
+              }}
+            >
+              <Icon name={mode === "preview" ? "edit" : "eye"} />
+              {mode === "preview" ? "返回编辑" : "预览"}
+            </Button>
             {editor.detail?.published_revision && editor.detail.public_path && (
               <RouteLink
                 className="admin-button"
@@ -302,40 +314,13 @@ export function DraftEditor({
           onBusyChange={setDragging}
         >
           <div className={styles.layout} data-section={section}>
-            <section className={styles.main} aria-label={`${type.label}编辑器`}>
-              <div className="admin-draft-editor-toolbar">
-                <div className="admin-draft-tabs" aria-label="编辑视图">
-                  <Button
-                    aria-pressed={mode === "edit"}
-                    disabled={dragging}
-                    onClick={() => setMode("edit")}
-                  >
-                    <Icon name="edit" />
-                    编辑
-                  </Button>
-                  <Button
-                    aria-pressed={mode === "preview"}
-                    disabled={editor.loading || dragging || uploading}
-                    onClick={() => setMode("preview")}
-                  >
-                    <Icon name="eye" />
-                    预览
-                  </Button>
-                </div>
-                <BlockLibraryPicker
-                  label="区块"
-                  className={composerStyles.mobileToolbar}
-                />
-                <span className="admin-badge">
-                  {archived
-                    ? "已回收"
-                    : editor.detail?.published_revision
-                      ? "已发布"
-                      : "草稿"}
-                  {editor.detail?.is_demo ? " · 示例" : ""}
-                </span>
-              </div>
+            <section
+              className={styles.main}
+              aria-label={`${type.label}编辑器`}
+              data-mode={mode}
+            >
               <div
+                id="draft-editor-view"
                 className="admin-draft-editor-scroll"
                 aria-busy={editor.loading}
               >

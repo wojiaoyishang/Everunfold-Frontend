@@ -9,6 +9,7 @@ export function ActionPopover({
   disabled,
   className,
   panelClassName,
+  panelWidth = 228,
   triggerContent,
   children,
 }: {
@@ -16,6 +17,7 @@ export function ActionPopover({
   disabled?: boolean;
   className?: string;
   panelClassName?: string;
+  panelWidth?: number;
   triggerContent: ReactNode;
   children: (close: () => void) => ReactNode;
 }) {
@@ -29,11 +31,13 @@ export function ActionPopover({
     onBeforeToggle,
     onToggle,
     onPanelKeyDown,
-  } = useAnchoredPopover(228, true);
+  } = useAnchoredPopover(panelWidth, true);
   useLayoutEffect(() => {
     if (open)
       panel.current
-        ?.querySelector<HTMLButtonElement>("button:not(:disabled)")
+        ?.querySelector<HTMLElement>(
+          'input:not(:disabled):not([type="hidden"]), textarea:not(:disabled), button:not(:disabled), [href], [tabindex="0"]',
+        )
         ?.focus({ preventScroll: true });
   }, [open, panel]);
   return (
@@ -60,6 +64,11 @@ export function ActionPopover({
         onToggle={onToggle}
         onKeyDown={(event) => {
           onPanelKeyDown(event);
+          if (
+            event.defaultPrevented ||
+            event.currentTarget.querySelector("form")
+          )
+            return;
           if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key))
             return;
           const buttons = [

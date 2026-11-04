@@ -31,8 +31,10 @@ export function RichToolbar({
       italic: e.isActive("italic"),
       underline: e.isActive("underline"),
       strike: e.isActive("strike"),
+      link: String(e.getAttributes("link").href ?? ""),
       table: e.isActive("table"),
       image: e.isActive("image"),
+      imageSettings: JSON.stringify(e.getAttributes("image")),
       imageAlignment: String(
         (markdown
           ? e.getAttributes("paragraph").textAlign
@@ -126,10 +128,13 @@ export function RichToolbar({
         <span className={styles.divider} />
         <ActionPopover
           label="插入或编辑链接"
+          panelWidth={340}
           className={styles.toolButton}
           triggerContent={<Icon name="link" />}
         >
-          {(close) => <LinkForm editor={editor} close={close} />}
+          {(close) => (
+            <LinkForm key={state.link} editor={editor} close={close} />
+          )}
         </ActionPopover>
         <div className={styles.insertGroup} role="group" aria-label="插入">
           {[
@@ -286,6 +291,7 @@ export function RichToolbar({
           {state.image && (
             <ActionPopover
               label="图片设置"
+              panelWidth={340}
               className={styles.insertButton}
               triggerContent={
                 <>
@@ -294,7 +300,13 @@ export function RichToolbar({
                 </>
               }
             >
-              {(close) => <ImageForm editor={editor} close={close} />}
+              {(close) => (
+                <ImageForm
+                  key={state.imageSettings}
+                  editor={editor}
+                  close={close}
+                />
+              )}
             </ActionPopover>
           )}
           {state.table && (
