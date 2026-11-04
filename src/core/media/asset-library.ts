@@ -33,7 +33,7 @@ export function useAssetLibrary<T, P>(
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [queryError, setQueryError] = useState("");
   const [refresh, setRefresh] = useState(0);
   useEffect(() => {

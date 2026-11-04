@@ -1,8 +1,6 @@
 "use client";
-import { useState } from "react";
 import type { MediaItem } from "@/generated/settings-contract";
-import { Modal } from "../../components/ui/modal";
-import { MediaBrowser } from "../media/media-browser";
+import { MediaPickerDialog } from "../media/media-picker-dialog";
 export function EditorMediaDialog({
   kind = "all",
   title,
@@ -14,27 +12,13 @@ export function EditorMediaDialog({
   onPick: (item: MediaItem) => void;
   onClose: () => void;
 }) {
-  const [closing, setClosing] = useState(false);
-  const [selected, setSelected] = useState<MediaItem | null>(null);
   return (
-    <Modal
+    <MediaPickerDialog
       title={title ?? (kind === "image" ? "选择封面" : "插入媒体")}
-      closing={closing}
-      onClose={() => setClosing(true)}
-      onExited={() => {
-        if (selected) onPick(selected);
-        onClose();
-      }}
-    >
-      <div inert={closing}>
-        <MediaBrowser
-          kind={kind}
-          onSelect={(item) => {
-            setSelected(item);
-            setClosing(true);
-          }}
-        />
-      </div>
-    </Modal>
+      kind={kind}
+      confirmLabel={title ? "插入至正文" : "使用此图片"}
+      onPick={onPick}
+      onClose={onClose}
+    />
   );
 }

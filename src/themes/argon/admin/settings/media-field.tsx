@@ -3,7 +3,7 @@ import { useEffect, useId, useState } from "react";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Modal } from "../../components/ui/modal";
 import { Icon } from "../../components/icon";
-import { MediaBrowser } from "../media/media-browser";
+import { MediaPickerDialog } from "../media/media-picker-dialog";
 import { MediaPreview } from "../media/media-preview";
 /** Compact media field, shared by avatar, background image and background video. */
 export function SettingsMediaField({
@@ -85,19 +85,14 @@ export function SettingsMediaField({
         </small>
       )}
       {open && (
-        <Modal
+        <MediaPickerDialog
           title={kind === "image" ? "选择图片" : "选择视频"}
           onClose={() => setOpen(false)}
-        >
-          <MediaBrowser
-            kind={kind}
-            value={mediaId}
-            onSelect={(item) => {
-              onChange(item.url, item.id);
-              setOpen(false);
-            }}
-          />
-        </Modal>
+          kind={kind}
+          value={mediaId}
+          confirmLabel={kind === "image" ? "使用此图片" : "使用此视频"}
+          onPick={(item) => onChange(item.url, item.id)}
+        />
       )}
       {enlarged && preview && (
         <Modal title={label} onClose={() => setEnlarged(false)}>
