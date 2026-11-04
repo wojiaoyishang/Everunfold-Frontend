@@ -1,6 +1,7 @@
 "use client";
 import {
   useCallback,
+  useEffect,
   useId,
   useImperativeHandle,
   useRef,
@@ -14,11 +15,11 @@ import { Icon } from "../../../components/icon";
 import {
   CodeEditor,
   type CodeEditorHandle,
-  type SharedSource,
   type SourceEditorHandle,
   type SourceSearch,
   type SourceShortcut,
   type SourceStatus,
+  type SourceSelection,
 } from "../../../components/ui/code-editor";
 import styles from "./source-block-editor.module.css";
 import { SourceToolbar, type SourceAction } from "./source-toolbar";
@@ -27,13 +28,13 @@ export type { SourceAction } from "./source-toolbar";
 
 export interface BlockEditorProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, previous: string) => void;
   label: string;
   disabled: boolean;
-  shared?: SharedSource;
   editorRef?: Ref<CodeEditorHandle>;
   media?: Record<string, MediaURL>;
-  onStaging?: (active: boolean) => void;
+  modeControls?: HTMLElement | null;
+  initialSelection?: SourceSelection;
 }
 const emptyStatus: SourceStatus = {
   line: 1,
@@ -51,6 +52,8 @@ export function SourceBlockEditor({
   format,
   shortcuts,
   editorRef,
+  modeControls: _modeControls,
+  initialSelection,
   ...props
 }: BlockEditorProps & {
   language: Extension;
@@ -59,6 +62,7 @@ export function SourceBlockEditor({
   inserts: readonly SourceAction[];
   shortcuts: readonly SourceShortcut[];
 }) {
+  void _modeControls;
   const id = useId();
   const input = useRef<SourceEditorHandle | null>(null);
   const [status, setStatus] = useState(emptyStatus);
@@ -80,12 +84,20 @@ export function SourceBlockEditor({
     editorRef,
     () => ({
       focus: () => input.current?.focus(),
+      select: (selection) => input.current?.select(selection),
       selection: () => input.current?.selection() ?? { start: 0, end: 0 },
       insert: (before, after) => input.current?.insert(before, after),
       captureInsertion: () => input.current?.captureInsertion() ?? (() => {}),
     }),
     [],
   );
+  useEffect(() => {
+    if (!initialSelection) return;
+    const frame = requestAnimationFrame(() =>
+      input.current?.select(initialSelection),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [initialSelection]);
   const currentLine = props.value.split("\n")[status.line - 1] ?? "";
   const heading =
     format === "markdown"

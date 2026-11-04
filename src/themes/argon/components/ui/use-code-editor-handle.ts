@@ -8,6 +8,10 @@ import {
   replaceNext,
   replaceAll,
 } from "@codemirror/search";
+import {
+  normalizedSourceOffset,
+  rawSourceOffset,
+} from "@/core/editor/source-lines";
 import { sourceCommand } from "@/core/editor/source-commands";
 import * as Y from "yjs";
 import type { SourceEditorHandle } from "./code-editor";
@@ -16,6 +20,7 @@ export function useCodeEditorHandle(
   ref: Ref<SourceEditorHandle> | undefined,
   view: RefObject<EditorView | null>,
   latest: RefObject<{ disabled?: boolean }>,
+  raw: RefObject<string>,
   text: Y.Text | undefined,
   undo: Y.UndoManager | undefined,
 ) {
@@ -23,9 +28,35 @@ export function useCodeEditorHandle(
     ref,
     () => ({
       focus: () => view.current?.focus(),
+      select: ({ start, end }) => {
+        const editor = view.current;
+        if (!editor) return;
+        const size = editor.state.doc.length;
+        editor.dispatch({
+          selection: {
+            anchor: Math.min(
+              text ? start : normalizedSourceOffset(raw.current, start),
+              size,
+            ),
+            head: Math.min(
+              text ? end : normalizedSourceOffset(raw.current, end),
+              size,
+            ),
+          },
+          scrollIntoView: true,
+        });
+        editor.focus();
+      },
       selection: () => {
         const sel = view.current?.state.selection.main;
-        return { start: sel?.from ?? 0, end: sel?.to ?? 0 };
+        const start = sel?.from ?? 0,
+          end = sel?.to ?? 0;
+        return text
+          ? { start, end }
+          : {
+              start: rawSourceOffset(raw.current, start),
+              end: rawSourceOffset(raw.current, end),
+            };
       },
       run: (command) => {
         const editor = view.current;
@@ -108,6 +139,6 @@ export function useCodeEditorHandle(
         };
       },
     }),
-    [view, latest, text, undo],
+    [view, latest, raw, text, undo],
   );
 }

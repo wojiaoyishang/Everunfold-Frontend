@@ -55,7 +55,7 @@ export function draftError(error: unknown): string {
   if (error instanceof RequestError) {
     if (error.status === 401 || error.status === 403)
       return "登录状态或权限已变化，请重新登录后再操作。";
-    if (error.code === 40951)
+    if (error.code === 40951 || error.code === 40976)
       return "这份内容已在其他地方修改。你的输入已保留，请先查看最新内容。";
     if (error.code === 40953)
       return "正文或封面引用的文件已删除或尚未上传完成，请重新选择。";

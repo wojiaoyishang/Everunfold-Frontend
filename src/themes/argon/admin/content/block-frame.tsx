@@ -1,5 +1,5 @@
 "use client";
-import { useRef, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import type { DraftBlock } from "@/generated/content-admin-contract";
 import {
   useDragItem,
@@ -50,14 +50,17 @@ export function BlockFrame({
   onFormat,
   onDelete,
   disabled = false,
+  formatDisabled,
 }: {
   block: DraftBlock;
   index: number;
-  children: ReactNode;
+  children: (controls: HTMLElement | null) => ReactNode;
+  formatDisabled: boolean;
   onFormat: (format: "markdown" | "html") => void;
   onDelete: () => void;
   disabled?: boolean;
 }) {
+  const [controls, setControls] = useState<HTMLDivElement | null>(null);
   const host = useBlockComposer(),
     node = useRef<HTMLElement | null>(null);
   const drag = useDragItem(
@@ -83,6 +86,8 @@ export function BlockFrame({
         aria-label={`正文块 ${index + 1}`}
       >
         <BlockHeader
+          controlsRef={setControls}
+          formatDisabled={formatDisabled}
           block={block}
           index={index}
           total={host.body.length}
@@ -102,7 +107,7 @@ export function BlockFrame({
             if (before !== undefined) host.move(block.id, before);
           }}
         />
-        {children}
+        {children(controls)}
       </section>
     </>
   );

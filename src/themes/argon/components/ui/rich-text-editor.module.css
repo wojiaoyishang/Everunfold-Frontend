@@ -142,3 +142,9 @@
     font-size: 15px;
   }
 }
+
+.sourceWarning {
+  padding: 8px 16px;
+  color: var(--admin-danger);
+  font-size: 12px;
+}

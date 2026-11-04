@@ -45,13 +45,21 @@ export type ExpectedRevision = number;
 export type Epoch1 = string;
 export type CommittedSeq1 = number;
 export type Action = "save" | "publish" | "withdraw";
+export type Id5 = string;
+export type Type = "markdown" | "html";
+export type BaseHash = string;
+export type Content = string;
+/**
+ * @maxItems 128
+ */
+export type BlockSources = BlockSourcePatch[];
 export type Visibility = "public" | "password";
 export type OpensAt = string | null;
 export type AccessPassword = string | null;
 export type Success4 = boolean;
 export type Code4 = number;
 export type Msg4 = string;
-export type Id5 = string;
+export type Id6 = string;
 export type TypeId = string;
 export type Title = string;
 export type Excerpt = string;
@@ -65,9 +73,9 @@ export type PublicPath = string | null;
 export type PublishedAt = string | null;
 export type CreatedAt = string;
 export type UpdatedAt = string;
-export type Id6 = string;
-export type Type = "markdown" | "html";
-export type Content = string;
+export type Id7 = string;
+export type Type1 = "markdown" | "html";
+export type Content1 = string;
 export type Body = DraftBlock[];
 export type Path = string;
 export type DisplayPublishedAt = string | null;
@@ -95,15 +103,15 @@ export type WeightMax = number;
 export type Format = "woff2" | "woff" | "truetype" | "opentype";
 export type HasPassword = boolean;
 export type CommittedSeq2 = number;
-export type Type1 = "update";
+export type Type2 = "update";
 export type Epoch2 = string;
 export type UpdateId = string;
 export type Payload1 = string;
-export type Type2 = "presence";
+export type Type3 = "presence";
 export type BlockId3 = string | null;
 export type Anchor = string;
 export type Head = string;
-export type Type3 =
+export type Type4 =
   | "sync"
   | "update"
   | "ack"
@@ -133,7 +141,7 @@ export type BlockId5 = string;
 export type Generation1 = number;
 export type ClientId2 = number | null;
 export type ExpiresAt1 = string | null;
-export type Type4 = "auth";
+export type Type5 = "auth";
 export type Ticket1 = string;
 export type ClientId3 = number;
 export type StateVector = string;
@@ -228,9 +236,16 @@ export interface CommitDraft {
   epoch: Epoch1;
   committed_seq: CommittedSeq1;
   action?: Action;
+  block_sources?: BlockSources;
   visibility?: Visibility;
   opens_at?: OpensAt;
   access_password?: AccessPassword;
+}
+export interface BlockSourcePatch {
+  id: Id5;
+  type: Type;
+  base_hash: BaseHash;
+  content: Content;
 }
 export interface PublicResponseCommittedDraft {
   success?: Success4;
@@ -243,7 +258,7 @@ export interface CommittedDraft {
   committed_seq: CommittedSeq2;
 }
 export interface DraftDetail {
-  id: Id5;
+  id: Id6;
   type_id: TypeId;
   title: Title;
   excerpt: Excerpt;
@@ -263,9 +278,9 @@ export interface DraftDetail {
   has_password?: HasPassword;
 }
 export interface DraftBlock {
-  id: Id6;
-  type?: Type;
-  content: Content;
+  id: Id7;
+  type?: Type1;
+  content: Content1;
 }
 export interface EditorSettings {
   path?: Path;
@@ -296,7 +311,7 @@ export interface FontInfo {
   format: Format;
 }
 export interface ClientUpdate {
-  type?: Type1;
+  type?: Type2;
   epoch: Epoch2;
   update_id: UpdateId;
   payload: Payload1;
@@ -306,7 +321,7 @@ export interface RichVersions {
   [k: string]: number;
 }
 export interface PresenceInput {
-  type?: Type2;
+  type?: Type3;
   block_id?: BlockId3;
   cursor?: Cursor | null;
 }
@@ -315,7 +330,7 @@ export interface Cursor {
   head: Head;
 }
 export interface ServerFrame {
-  type: Type3;
+  type: Type4;
   epoch?: Epoch3;
   committed_seq?: CommittedSeq3;
   payload?: Payload2;
@@ -342,7 +357,7 @@ export interface SourceState {
   expires_at: ExpiresAt1;
 }
 export interface ClientAuth {
-  type?: Type4;
+  type?: Type5;
   ticket: Ticket1;
   client_id: ClientId3;
   state_vector: StateVector;

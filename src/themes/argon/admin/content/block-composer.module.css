@@ -49,8 +49,9 @@
   color: var(--admin-muted);
   font-variant-numeric: tabular-nums;
 }
-.header .more {
-  margin-left: auto;
+.modeControls {
+  margin-inline-start: auto;
+  min-width: 0;
 }
 .actions {
   padding: 6px;

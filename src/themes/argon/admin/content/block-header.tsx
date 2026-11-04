@@ -1,5 +1,5 @@
 "use client";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ReactNode, Ref } from "react";
 import type { DraftBlock } from "@/generated/content-admin-contract";
 import { Icon } from "../../components/icon";
 import { Button } from "../../components/ui/primitives";
@@ -17,6 +17,8 @@ export function BlockHeader({
   onFormat,
   onDelete,
   handle,
+  controlsRef,
+  formatDisabled,
 }: {
   block: DraftBlock;
   index: number;
@@ -25,6 +27,8 @@ export function BlockHeader({
   onMove: (position: "up" | "down" | "first" | "last") => void;
   onFormat: (format: "markdown" | "html") => void;
   onDelete: () => void;
+  controlsRef: Ref<HTMLDivElement>;
+  formatDisabled: boolean;
   handle?: ComponentProps<typeof Button>;
 }) {
   const label = blockEditors.get(block.type ?? "markdown")?.label ?? block.type;
@@ -46,6 +50,7 @@ export function BlockHeader({
       <span className={styles.number}>
         {String(index + 1).padStart(2, "0")}
       </span>
+      <div ref={controlsRef} className={styles.modeControls} />
       <ActionPopover
         label={`第 ${index + 1} 块操作`}
         disabled={disabled}
@@ -101,6 +106,7 @@ export function BlockHeader({
               .map((p) => (
                 <MenuAction
                   key={p.id}
+                  disabled={formatDisabled}
                   icon="code"
                   onClick={() => {
                     close();

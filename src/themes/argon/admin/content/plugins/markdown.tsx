@@ -1,11 +1,15 @@
 "use client";
-import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { useImperativeHandle, useRef } from "react";
+import { useImperativeHandle, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { markdownSourceLanguage as language } from "@/core/editor/visual-markdown";
+import { RichTextEditor } from "../../../components/ui/rich-text-editor";
+import { RichToolbar } from "./rich-toolbar";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/icon";
-import type { CodeEditorHandle } from "../../../components/ui/code-editor";
-import { useEditorView } from "../../../hooks/use-editor-view";
-import { BlockPreview } from "./block-preview";
+import type {
+  CodeEditorHandle,
+  SourceSelection,
+} from "../../../components/ui/code-editor";
 import styles from "./markdown-editor.module.css";
 import common from "./rich-editor.module.css";
 import {
@@ -14,7 +18,6 @@ import {
   type SourceAction,
 } from "./source-block-editor";
 import type { SourceShortcut } from "../../../components/ui/code-editor";
-const language = markdown({ base: markdownLanguage });
 const actions = [
   {
     label: "加粗",
@@ -99,39 +102,35 @@ const shortcuts: readonly SourceShortcut[] = [
   { key: "Mod-i", command: actions[1].command },
 ];
 export default function MarkdownEditor(props: BlockEditorProps) {
-  const {
-    view: mode,
-    ref: viewRef,
-    exiting,
-    change,
-  } = useEditorView<"write" | "split" | "preview">("write");
+  const [mode, setMode] = useState<"write" | "split" | "visual">("write");
   const source = useRef<CodeEditorHandle | null>(null);
+  const visual = useRef<CodeEditorHandle | null>(null);
+  const focused = useRef<"source" | "visual">("source");
+  const [selection, setSelection] = useState<{
+    pane: "source" | "visual";
+    range: SourceSelection;
+  }>();
   const panes = useRef<HTMLDivElement>(null),
-    preview = useRef<HTMLDivElement>(null),
+    visualPane = useRef<HTMLDivElement>(null),
     scrolling = useRef(false);
-  useImperativeHandle(
-    props.editorRef,
-    () => ({
-      focus: () => {
-        change("write", () =>
-          requestAnimationFrame(() => source.current?.focus()),
-        );
-      },
-      selection: () => source.current?.selection() ?? { start: 0, end: 0 },
-      insert: (before, after) => {
-        change("write", () => source.current?.insert(before, after));
-      },
-      captureInsertion: () => {
-        const insert = source.current?.captureInsertion() ?? (() => {});
-        return (value) =>
-          change("write", () => {
-            insert(value);
-            source.current?.focus();
-          });
-      },
-    }),
-    [change],
-  );
+  const active = () =>
+    mode === "visual" || (mode === "split" && focused.current === "visual")
+      ? visual.current
+      : source.current;
+  const switchView = (next: typeof mode) => {
+    if (next === mode) return;
+    const range = active()?.selection();
+    const pane = next === "visual" ? "visual" : "source";
+    setSelection(range ? { pane, range } : undefined);
+    setMode(next);
+  };
+  useImperativeHandle(props.editorRef, () => ({
+    focus: () => active()?.focus(),
+    selection: () => active()?.selection() ?? { start: 0, end: 0 },
+    select: (range) => active()?.select(range),
+    insert: (before, after) => active()?.insert(before, after),
+    captureInsertion: () => active()?.captureInsertion() ?? (() => {}),
+  }));
   const syncScroll = (event: React.UIEvent<HTMLDivElement>) => {
     if (
       mode !== "split" ||
@@ -141,88 +140,114 @@ export default function MarkdownEditor(props: BlockEditorProps) {
       return;
     const from = event.target,
       cm = panes.current?.querySelector<HTMLElement>(".cm-scroller"),
-      to = from === cm ? preview.current : from === preview.current ? cm : null;
+      to =
+        from === cm
+          ? visualPane.current
+          : from === visualPane.current
+            ? cm
+            : null;
     if (!to || from.scrollHeight <= from.clientHeight) return;
     scrolling.current = true;
-    to.scrollTop =
-      (from.scrollTop / (from.scrollHeight - from.clientHeight)) *
-      (to.scrollHeight - to.clientHeight);
+    to.scrollTo({
+      top:
+        (from.scrollTop / (from.scrollHeight - from.clientHeight)) *
+        (to.scrollHeight - to.clientHeight),
+    });
     requestAnimationFrame(() => {
       scrolling.current = false;
     });
   };
   return (
     <div>
-      <div className={common.modeBar}>
-        <div
-          className={common.tabs}
-          aria-label={props.label + " Markdown 模式"}
-        >
-          <Button
-            aria-pressed={mode === "write"}
-            onClick={() => change("write")}
+      {props.modeControls &&
+        createPortal(
+          <div
+            className={common.tabs}
+            role="group"
+            aria-label={props.label + " Markdown 模式"}
           >
-            <Icon name="edit" />
-            编写
-          </Button>
-          <Button
-            className={styles.splitButton}
-            aria-pressed={mode === "split"}
-            onClick={() => change("split")}
-          >
-            <Icon name="sidebar" />
-            分屏
-          </Button>
-          <Button
-            aria-pressed={mode === "preview"}
-            onClick={() => change("preview")}
-          >
-            <Icon name="eye" />
-            预览
-          </Button>
-        </div>
-        <small>Markdown</small>
-      </div>
+            <Button
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              aria-pressed={mode === "write"}
+              onClick={() => switchView("write")}
+            >
+              <Icon name="edit" />
+              编写
+            </Button>
+            <Button
+              className={styles.splitButton}
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              aria-pressed={mode === "split"}
+              onClick={() => switchView("split")}
+            >
+              <Icon name="sidebar" />
+              分屏
+            </Button>
+            <Button
+              type="button"
+              onMouseDown={(event) => event.preventDefault()}
+              aria-pressed={mode === "visual"}
+              onClick={() => switchView("visual")}
+            >
+              <Icon name="eye" />
+              可视化
+            </Button>
+          </div>,
+          props.modeControls,
+        )}
       <div
-        className={common.view}
-        ref={viewRef}
-        data-exiting={exiting}
-        inert={exiting}
+        className={styles.panes}
+        data-mode={mode}
+        ref={panes}
+        onScrollCapture={syncScroll}
       >
         <div
-          className={styles.panes}
-          data-mode={mode}
-          ref={panes}
-          onScrollCapture={syncScroll}
+          className={styles.sourcePane}
+          inert={mode === "visual"}
+          aria-hidden={mode === "visual"}
+          onFocusCapture={() => {
+            focused.current = "source";
+          }}
         >
-          <div
-            className={styles.sourcePane}
-            inert={mode === "preview"}
-            aria-hidden={mode === "preview"}
-          >
-            <SourceBlockEditor
-              {...props}
-              editorRef={source}
-              language={language}
-              actions={actions}
-              inserts={inserts}
-              shortcuts={shortcuts}
+          <SourceBlockEditor
+            {...props}
+            editorRef={source}
+            initialSelection={
+              selection?.pane === "source" ? selection.range : undefined
+            }
+            language={language}
+            actions={actions}
+            inserts={inserts}
+            shortcuts={shortcuts}
+            format="markdown"
+          />
+        </div>
+        <div
+          className={styles.visualPane}
+          ref={visualPane}
+          inert={mode === "write"}
+          aria-hidden={mode === "write"}
+          onFocusCapture={() => {
+            focused.current = "visual";
+          }}
+        >
+          {mode !== "write" && (
+            <RichTextEditor
               format="markdown"
-            />
-          </div>
-          <div
-            className={styles.previewPane}
-            inert={mode === "write"}
-            aria-hidden={mode === "write"}
-          >
-            <BlockPreview
               value={props.value}
-              format="markdown"
-              label={props.label + " Markdown 实时预览"}
+              onChange={props.onChange}
+              label={props.label + " Markdown 可视化"}
+              disabled={props.disabled}
+              initialSelection={
+                selection?.pane === "visual" ? selection.range : undefined
+              }
+              editorRef={visual}
               media={props.media}
-              previewRef={preview}
+              toolbar={(editor) => <RichToolbar editor={editor} markdown />}
             />
-          </div>
+          )}
         </div>
       </div>
     </div>

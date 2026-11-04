@@ -14,11 +14,15 @@ export function CollaborationBar({
   session,
   status,
   fields,
+  localChanges,
+  recoveryContent,
   disabled,
 }: {
   session: DraftSession | null;
   status: CollaborationStatus | null;
   fields: DraftFields;
+  localChanges: boolean;
+  recoveryContent: () => string | undefined;
   disabled: boolean;
 }) {
   if (!session || !status) return null;
@@ -37,7 +41,9 @@ export function CollaborationBar({
               : "离线 · 请及时导出"
           : pending
             ? "正在同步修改"
-            : "修改已同步";
+            : localChanges
+              ? "正文有未保存修改"
+              : "修改已同步";
   return (
     <section
       className={styles.bar}
@@ -90,6 +96,7 @@ export function CollaborationBar({
         <DownloadButton
           filename={`draft-${session.id}.json`}
           content={() =>
+            recoveryContent() ??
             serializeDraftExport(
               fields,
               session.removedBlocks(fields),

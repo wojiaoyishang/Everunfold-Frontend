@@ -8,7 +8,11 @@ import {
 } from "@/core/collaboration/session";
 import { commitCollaborationDraft } from "@/generated/collaboration-client";
 import type { CommitDraft } from "@/generated/collaboration-contract";
-import { rememberRecovery } from "@/core/collaboration/recovery";
+import {
+  rememberRecovery,
+  recoveryForPage,
+  recoverySnapshot,
+} from "@/core/collaboration/recovery";
 import {
   createDraft,
   readDraft,
@@ -24,6 +28,13 @@ import type {
   DraftSave,
   DraftMutation,
 } from "@/generated/content-admin-contract";
+import {
+  blockSourcePatches,
+  bufferBlockSource,
+  readBlockSources,
+  withBlockSources,
+  type BufferedSources,
+} from "./block-sources";
 import { RequestError } from "@/core/http/request";
 import {
   draftError,
@@ -47,6 +58,60 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
   const [detail, setDetail] = useState<DraftDetail | null>(null);
   const [fields, setFields] = useState<DraftFields>(() => draftFields());
   const privateFields = useRef(fields);
+  const sourceKey = id
+    ? `everunfold-block-sources:${baseUrl}:${account.id}:${id}`
+    : null;
+  const [sources, setSources] = useState<BufferedSources>({});
+  const sourceRef = useRef<BufferedSources>({});
+  const receivedSave = useRef<{ seq: number; sources: BufferedSources } | null>(
+    null,
+  );
+  const [awaitingSources, setAwaitingSources] = useState(false);
+  const [storageError, setStorageError] = useState("");
+  const keepSources = (value: BufferedSources) => {
+    sourceRef.current = value;
+    setSources(value);
+    if (!sourceKey) return;
+    try {
+      if (Object.keys(value).length)
+        sessionStorage.setItem(sourceKey, JSON.stringify(value));
+      else sessionStorage.removeItem(sourceKey);
+      setStorageError("");
+    } catch {
+      setStorageError("浏览器无法备份正文修改，离开前请保存或导出。");
+    }
+  };
+  const recover = (active: DraftSession, shared: DraftFields) => {
+    const removed = active.removedBlocks(shared);
+    const hidden = Object.entries(sourceRef.current)
+      .filter(([blockId]) => !shared.body.some((block) => block.id === blockId))
+      .map(([id, source]) => ({
+        id,
+        type: source.type,
+        content: source.content,
+      }));
+    rememberRecovery(
+      account.id,
+      window.location.pathname,
+      active.id,
+      withBlockSources(shared, sourceRef.current),
+      [
+        ...removed.filter((block) => !hidden.some(({ id }) => id === block.id)),
+        ...hidden,
+      ],
+      Object.fromEntries(active.sources.drafts),
+    );
+  };
+  const confirmSources = (seq: number) => {
+    const saved = receivedSave.current;
+    if (!saved || seq < saved.seq) return;
+    receivedSave.current = null;
+    setAwaitingSources(false);
+    const next = { ...sourceRef.current };
+    for (const [id, part] of Object.entries(saved.sources))
+      if (next[id]?.content === part.content) delete next[id];
+    keepSources(next);
+  };
   const [baseline, setBaseline] = useState(() => JSON.stringify(fields));
   const [loading, setLoading] = useState(id !== null);
   const [busy, setBusy] = useState(false);
@@ -83,6 +148,11 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
           if (response.data.type_id !== type.id)
             throw new RequestError("invalid");
           apply(response.data);
+          if (sourceKey) {
+            const restored = readBlockSources(sourceKey);
+            sourceRef.current = restored;
+            setSources(restored);
+          }
           setError("");
           if (response.data.status !== "trash") {
             owner = new DraftSession(baseUrl, csrfToken, id, account.id);
@@ -95,14 +165,22 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
               if (active.state.ready) {
                 const restored = active.project(privateFields.current);
                 setFields(restored);
-                rememberRecovery(
-                  account.id,
-                  window.location.pathname,
-                  id,
-                  restored,
-                  active.removedBlocks(restored),
-                  Object.fromEntries(active.sources.drafts),
-                );
+                confirmSources(active.state.seq);
+                const local = sourceRef.current;
+                const matched = restored.body.filter((block) => {
+                  const pending = local[block.id];
+                  return (
+                    pending &&
+                    pending.content === block.content &&
+                    pending.type === block.type
+                  );
+                });
+                if (matched.length) {
+                  const next = { ...local };
+                  for (const block of matched) delete next[block.id];
+                  keepSources(next);
+                }
+                recover(active, restored);
               }
             };
             void active.start();
@@ -123,8 +201,17 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
       }
       if (sessionRef.current === owner) sessionRef.current = null;
     };
-  }, [id, type.id, baseUrl, csrfToken, readAttempt, account.id]);
-  const dirty = JSON.stringify(fields) !== baseline;
+    // The effect owns one authorized draft session and its stable storage key.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, type.id, baseUrl, csrfToken, readAttempt, account.id, sourceKey]);
+  const displayed = withBlockSources(fields, sources);
+  const dirty =
+    JSON.stringify(displayed) !== baseline ||
+    Object.keys(sources).some(
+      (key) =>
+        !sources[key].locallyRemoved &&
+        !fields.body.some((block) => block.id === key),
+    );
   useEffect(() => {
     if (
       !dirty &&
@@ -147,12 +234,8 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     collaboration?.sourceStaged,
   ]);
   const save = async (action: "save" | "publish" | "withdraw" = "save") => {
-    if (sessionRef.current?.sources.staged) {
-      setError("请先应用或取消尚未完成的 HTML 源码修改。");
-      return null;
-    }
     if (inFlight.current || preparing.current || conflict) return null;
-    const invalid = validateDraft(fields, type);
+    const invalid = validateDraft(displayed, type);
     if (invalid) {
       setError(invalid);
       return null;
@@ -164,7 +247,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
           input: {
             type_id: type.id,
             operation_id: crypto.randomUUID(),
-            fields,
+            fields: displayed,
           },
         };
       else if (sessionRef.current) {
@@ -173,6 +256,24 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
         try {
           const current = sessionRef.current;
           const committed = await current.cutoff();
+          if (receivedSave.current)
+            throw new Error("正在接收已保存的正文，请稍后重试。");
+          const sharedIds = new Set(
+            current
+              .project(privateFields.current)
+              .body.map((block) => block.id),
+          );
+          const block_sources =
+            action === "withdraw"
+              ? []
+              : await blockSourcePatches(
+                  Object.fromEntries(
+                    Object.entries(sourceRef.current).filter(
+                      ([id, entry]) =>
+                        !entry.locallyRemoved || sharedIds.has(id),
+                    ),
+                  ),
+                );
           operation.current = {
             action: "collaboration",
             input: {
@@ -181,6 +282,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
               expected_revision: detail.revision,
               epoch: current.epoch,
               committed_seq: committed,
+              block_sources,
               action,
               visibility: fields.settings?.visibility ?? "public",
               opens_at: fields.settings?.opens_at ?? null,
@@ -205,7 +307,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
         operation.current =
           action === "withdraw"
             ? { action, input: mutation }
-            : { action, input: { ...mutation, fields } };
+            : { action, input: { ...mutation, fields: displayed } };
       }
     }
     inFlight.current = true;
@@ -216,15 +318,25 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
       const request = operation.current;
       const response =
         request.action === "collaboration"
-          ? {
-              data: (
-                await commitCollaborationDraft(
-                  baseUrl,
-                  request.input,
-                  csrfToken,
-                )
-              ).data.draft,
-            }
+          ? await commitCollaborationDraft(
+              baseUrl,
+              request.input,
+              csrfToken,
+            ).then(({ data }) => {
+              if (
+                mounted.current &&
+                request.input.action !== "withdraw" &&
+                Object.keys(sourceRef.current).length
+              ) {
+                receivedSave.current = {
+                  seq: data.committed_seq,
+                  sources: sourceRef.current,
+                };
+                setAwaitingSources(true);
+                confirmSources(sessionRef.current?.state.seq ?? -1);
+              }
+              return { data: data.draft };
+            })
           : request.action === "create"
             ? await createDraft(baseUrl, request.input, csrfToken)
             : request.action === "withdraw"
@@ -239,13 +351,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
           privateFields.current = saved;
           setDetail(response.data);
           setFields(sessionRef.current.project(saved));
-          rememberRecovery(
-            account.id,
-            window.location.pathname,
-            detail!.id,
-            sessionRef.current.project(saved),
-            sessionRef.current.removedBlocks(sessionRef.current.project(saved)),
-          );
+          recover(sessionRef.current, sessionRef.current.project(saved));
         } else apply(response.data);
         setUncertain(false);
         setNotice(
@@ -267,7 +373,10 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
         const unknown = uncertainWrite(reason);
         setUncertain(unknown);
         if (!unknown) operation.current = null;
-        setConflict(reason instanceof RequestError && reason.code === 40951);
+        setConflict(
+          reason instanceof RequestError &&
+            (reason.code === 40951 || reason.code === 40976),
+        );
         setError(
           unknown
             ? "保存结果尚未确认，输入已保留。请重试确认后继续编辑。"
@@ -284,11 +393,13 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     detail,
     session,
     collaboration,
-    fields,
+    fields: displayed,
+    stagedBlocks: Object.keys(sources),
+    awaitingSources,
     loading,
     busy,
     dirty,
-    error,
+    error: error || storageError,
     notice,
     conflict,
     latest,
@@ -301,13 +412,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
         if (!active.commandBlock(privateFields.current, command)) return false;
         const next = active.project(privateFields.current);
         setFields(next);
-        rememberRecovery(
-          account.id,
-          window.location.pathname,
-          active.id,
-          next,
-          active.removedBlocks(next),
-        );
+        recover(active, next);
       } else {
         const body = commandBody(privateFields.current.body, command);
         if (!body) return false;
@@ -317,28 +422,83 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
       setNotice("");
       return true;
     },
-    setFields: (next: DraftFields) => {
-      if (!inFlight.current && !uncertain) {
-        privateFields.current = next;
-        if (sessionRef.current?.state.ready) {
-          if (
-            JSON.stringify(fields.body.map((b) => [b.id, b.type])) !==
-            JSON.stringify(next.body.map((b) => [b.id, b.type]))
-          )
-            sessionRef.current.undo.stopCapturing();
-          sessionRef.current.setFields(next, fields);
-          setFields(sessionRef.current.project(next));
-          rememberRecovery(
-            account.id,
-            window.location.pathname,
-            sessionRef.current.id,
-            sessionRef.current.project(next),
-            sessionRef.current.removedBlocks(sessionRef.current.project(next)),
-          );
-        } else setFields(next);
-        setNotice("");
+    setBlockContent: (blockId: string, content: string, previous: string) => {
+      if (
+        inFlight.current ||
+        preparing.current ||
+        uncertain ||
+        receivedSave.current
+      )
+        return;
+      const active = sessionRef.current;
+      const shared = active?.state.ready
+        ? active.project(privateFields.current)
+        : privateFields.current;
+      const block = shared.body.find(({ id }) => id === blockId);
+      if (!block) return;
+      if (active?.state.ready) {
+        keepSources(
+          bufferBlockSource(sourceRef.current, block, content, previous),
+        );
+        recover(active, shared);
+      } else {
+        privateFields.current = {
+          ...shared,
+          body: shared.body.map((part) =>
+            part.id === blockId ? { ...part, content } : part,
+          ),
+        };
+        setFields(privateFields.current);
       }
+      setNotice("");
     },
+    setFields: (next: DraftFields) => {
+      if (
+        inFlight.current ||
+        preparing.current ||
+        uncertain ||
+        receivedSave.current
+      )
+        return;
+      const active = sessionRef.current;
+      if (active?.state.ready) {
+        const shared = active.project(privateFields.current);
+        // The visible form includes local source. Strip it from structural and
+        // metadata updates so a reorder or title edit cannot transmit typing.
+        const prior = new Map(shared.body.map((block) => [block.id, block]));
+        const wanted = new Set(next.body.map((block) => block.id));
+        const retained = { ...sourceRef.current };
+        for (const key of Object.keys(retained))
+          if (prior.has(key) && !wanted.has(key))
+            retained[key] = { ...retained[key], locallyRemoved: true };
+        keepSources(retained);
+        next = {
+          ...next,
+          body: next.body.map((block) => ({
+            ...block,
+            content: prior.get(block.id)?.content ?? block.content,
+          })),
+        };
+        if (
+          JSON.stringify(shared.body.map((b) => [b.id, b.type])) !==
+          JSON.stringify(next.body.map((b) => [b.id, b.type]))
+        )
+          active.undo.stopCapturing();
+        active.setFields(next, shared);
+        privateFields.current = next;
+        const current = active.project(next);
+        setFields(current);
+        recover(active, current);
+      } else {
+        privateFields.current = next;
+        setFields(next);
+      }
+      setNotice("");
+    },
+    discardSources: () => keepSources({}),
+    recoveryContent: () =>
+      recoveryForPage(recoverySnapshot(), window.location.pathname, account.id)
+        ?.content,
     retryRead: () => {
       setLoading(true);
       setReadAttempt((value) => value + 1);
@@ -359,6 +519,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     },
     acceptLatest: () => {
       if (latest) {
+        keepSources({});
         if (sessionRef.current?.state.ready) {
           const saved = draftFields(latest);
           privateFields.current = saved;

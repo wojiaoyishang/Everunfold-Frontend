@@ -4,57 +4,21 @@
   min-width: 0;
 }
 .sourcePane,
-.previewPane {
+.visualPane {
   min-width: 0;
 }
-.panes[data-mode="write"] > .previewPane,
-.panes[data-mode="preview"] > .sourcePane {
+.panes[data-mode="write"] > .visualPane,
+.panes[data-mode="visual"] > .sourcePane {
   display: none;
 }
 .panes[data-mode="split"] {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
-.panes[data-mode="split"] > .previewPane {
+.panes[data-mode="split"] > .visualPane {
   border-left: 1px solid var(--admin-border);
-}
-.preview {
-  min-height: 277px;
   max-height: 645px;
   overflow: auto;
   scrollbar-gutter: stable;
-}
-.preview :global(.admin-draft-preview) {
-  padding: 20px 24px;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  background: var(--admin-surface);
-  font-size: 15px;
-  min-height: 277px;
-  overflow-wrap: anywhere;
-}
-.preview :global(.admin-draft-preview) > div > :first-child {
-  margin-top: 0;
-}
-.preview img {
-  max-width: 100%;
-  height: auto;
-}
-.preview pre {
-  overflow-x: auto;
-}
-.preview table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.preview td,
-.preview th {
-  padding: 8px;
-  border: 1px solid var(--admin-border);
-}
-.empty {
-  color: var(--admin-muted);
-  font-size: 13px;
 }
 @media (max-width: 800px) {
   .splitButton {
@@ -63,10 +27,7 @@
   .panes[data-mode="split"] {
     grid-template-columns: minmax(0, 1fr);
   }
-  .panes[data-mode="split"] > .previewPane {
+  .panes[data-mode="split"] > .visualPane {
     display: none;
-  }
-  .preview :global(.admin-draft-preview) {
-    padding: 16px;
   }
 }

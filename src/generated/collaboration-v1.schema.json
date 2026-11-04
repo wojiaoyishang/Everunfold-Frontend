@@ -1,5 +1,41 @@
 {
   "$defs": {
+    "BlockSourcePatch": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "markdown",
+            "html"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "base_hash": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Base Hash",
+          "type": "string"
+        },
+        "content": {
+          "maxLength": 100000,
+          "title": "Content",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "base_hash",
+        "content"
+      ],
+      "title": "BlockSourcePatch",
+      "type": "object"
+    },
     "ClientAuth": {
       "additionalProperties": false,
       "properties": {
@@ -115,6 +151,14 @@
           ],
           "title": "Action",
           "type": "string"
+        },
+        "block_sources": {
+          "items": {
+            "$ref": "#/$defs/BlockSourcePatch"
+          },
+          "maxItems": 128,
+          "title": "Block Sources",
+          "type": "array"
         },
         "visibility": {
           "default": "public",
@@ -1265,7 +1309,7 @@
   "title": "CollaborationContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.1.0",
+  "x-everunfold-contract-version": "1.2.0",
   "x-everunfold-operations": [
     {
       "name": "acquireHtmlSource",

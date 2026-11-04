@@ -1,5 +1,5 @@
 "use client";
-import { useContext, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type {
   ContentTypeDefinition,
   DraftFields,
@@ -13,8 +13,6 @@ import { Icon } from "../../components/icon";
 import { EditorMediaDialog } from "./editor-media-dialog";
 import { RegisteredBlockEditor } from "./plugins/registry";
 import type { CodeEditorHandle } from "../../components/ui/code-editor";
-import { useBlockCollaboration } from "@/core/collaboration/context";
-import { DraftCollaborationContext } from "@/core/collaboration/context";
 import type { MediaURL } from "@/generated/content-admin-contract";
 import styles from "./editor-workspace.module.css";
 export interface EditorProps {
@@ -24,8 +22,9 @@ export interface EditorProps {
   disabled: boolean;
   onMedia: (item: MediaItem) => void;
   media?: Record<string, MediaURL>;
-  onStaging?: (id: string, active: boolean) => void;
-  stagingBlocks?: ReadonlySet<string>;
+  onBlockChange: (id: string, content: string, previous: string) => void;
+  stagedBlocks: string[];
+  locked: (id: string) => boolean;
 }
 export function EditorBody({
   type,
@@ -34,8 +33,9 @@ export function EditorBody({
   disabled,
   onMedia,
   media,
-  onStaging,
-  stagingBlocks,
+  onBlockChange,
+  stagedBlocks,
+  locked,
 }: EditorProps) {
   const [mediaTarget, setMediaTarget] = useState<{
     id: string;
@@ -43,7 +43,6 @@ export function EditorBody({
   } | null>(null);
   const inputs = useRef(new Map<string, CodeEditorHandle>());
   const composer = useBlockComposer();
-  const session = useContext(DraftCollaborationContext);
   const [announcement, setAnnouncement] = useState("");
   return (
     <fieldset className={styles.bodyFields} disabled={disabled}>
@@ -53,9 +52,8 @@ export function EditorBody({
             key={block.id}
             block={block}
             index={index}
-            disabled={Boolean(
-              stagingBlocks?.has(block.id) || session?.sources.locked(block.id),
-            )}
+            disabled={locked(block.id)}
+            formatDisabled={stagedBlocks.includes(block.id)}
             onFormat={(format) =>
               onChange({
                 ...value,
@@ -76,53 +74,45 @@ export function EditorBody({
               );
             }}
           >
-            <CollaborativeBlock
-              id={block.id}
-              format={block.type ?? "markdown"}
-              editorRef={(node) => {
-                if (node) {
-                  inputs.current.set(block.id, node);
-                  if (composer.focus.current === block.id) {
-                    composer.focus.current = null;
-                    requestAnimationFrame(() => node.focus());
+            {(modeControls) => (
+              <>
+                <RegisteredBlockEditor
+                  modeControls={modeControls}
+                  format={block.type ?? "markdown"}
+                  editorRef={(node) => {
+                    if (node) {
+                      inputs.current.set(block.id, node);
+                      if (composer.focus.current === block.id) {
+                        composer.focus.current = null;
+                        requestAnimationFrame(() => node.focus());
+                      }
+                    } else inputs.current.delete(block.id);
+                  }}
+                  label={`正文块 ${index + 1} 内容`}
+                  value={block.content}
+                  media={media}
+                  disabled={disabled || locked(block.id)}
+                  onChange={(content, previous) =>
+                    onBlockChange(block.id, content, previous)
                   }
-                } else inputs.current.delete(block.id);
-              }}
-              label={`正文块 ${index + 1} 内容`}
-              value={block.content}
-              media={media}
-              onStaging={(active) => onStaging?.(block.id, active)}
-              disabled={disabled}
-              onChange={(content) =>
-                onChange({
-                  ...value,
-                  body: value.body.map((part) =>
-                    part.id === block.id ? { ...part, content } : part,
-                  ),
-                })
-              }
-            />
-            <footer className={styles.blockFooter}>
-              <Button
-                disabled={
-                  disabled ||
-                  Boolean(
-                    session?.sources.locked(block.id) &&
-                    !stagingBlocks?.has(block.id),
-                  )
-                }
-                onClick={() => {
-                  const node = inputs.current.get(block.id);
-                  setMediaTarget({
-                    id: block.id,
-                    insert: node?.captureInsertion() ?? (() => {}),
-                  });
-                }}
-              >
-                <Icon name="image" /> 插入媒体
-              </Button>
-              <small>{block.content.length.toLocaleString()} 字符</small>
-            </footer>
+                />
+                <footer className={styles.blockFooter}>
+                  <Button
+                    disabled={disabled || locked(block.id)}
+                    onClick={() => {
+                      const node = inputs.current.get(block.id);
+                      setMediaTarget({
+                        id: block.id,
+                        insert: node?.captureInsertion() ?? (() => {}),
+                      });
+                    }}
+                  >
+                    <Icon name="image" /> 插入媒体
+                  </Button>
+                  <small>{block.content.length.toLocaleString()} 字符</small>
+                </footer>
+              </>
+            )}
           </BlockFrame>
         ))}
         <BlockPosition end />
@@ -162,12 +152,4 @@ export function EditorBody({
       )}
     </fieldset>
   );
-}
-
-function CollaborativeBlock({
-  id,
-  ...props
-}: React.ComponentProps<typeof RegisteredBlockEditor> & { id: string }) {
-  const shared = useBlockCollaboration(id);
-  return <RegisteredBlockEditor {...props} shared={shared} />;
 }

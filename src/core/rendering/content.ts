@@ -18,6 +18,10 @@ const defaultValidateLink = markdown.validateLink;
 markdown.validateLink = (url: string) =>
   /^site:\/\/media\/[^\s]+$/.test(url) || defaultValidateLink(url);
 
+export const renderMarkdownSource = (source: string) => markdown.render(source);
+export const markdownSourceTokens = (source: string) =>
+  markdown.parse(source, {});
+
 const options: sanitizeHtml.IOptions = {
   allowedTags: [
     "p",
@@ -151,7 +155,7 @@ export function renderContent(
         block.type === "markdown",
       );
       const raw =
-        block.type === "markdown" ? markdown.render(expanded) : expanded;
+        block.type === "markdown" ? renderMarkdownSource(expanded) : expanded;
       // Permit the storage-only scheme in this intermediate tree, then resolve actual nodes.
       // Code text never participates in URL replacement.
       const clean = sanitizeHtml(raw, {

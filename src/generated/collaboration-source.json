@@ -1,7 +1,7 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
   "source_path": "contracts/collaboration-v1.schema.json",
-  "source_commit": "544a5c30f70756a1e57661f05e254ae87d49f089",
-  "sha256": "cb0679695a004b2a4ddb5a3ffb7ca1d94d2183c5471754b07f0c670586a4e053"
+  "source_commit": "a445b3ffa46423e9da8d002d07faea6f00ab722d",
+  "sha256": "2750b91f82f07c327bbf38d937c6cbff5265fd62f7e2cf2bd25eb448b1edec9f"
 }

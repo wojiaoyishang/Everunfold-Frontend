@@ -85,7 +85,10 @@ export const RichImage = Image.extend({
       : image;
   },
 });
-export function richExtensions(shared: boolean): Extensions {
+export function richExtensions(
+  shared: boolean,
+  inlineImages = false,
+): Extensions {
   return [
     StarterKit.configure({
       undoRedo: shared ? false : undefined,
@@ -100,7 +103,7 @@ export function richExtensions(shared: boolean): Extensions {
     RichTextStyle,
     TextAlign.configure({ types: ["heading", "paragraph"] }),
     TableKit.configure({ table: { resizable: false } }),
-    RichImage,
+    RichImage.configure({ inline: inlineImages }),
     RawHtml,
   ];
 }

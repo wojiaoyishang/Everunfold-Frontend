@@ -1,6 +1,12 @@
 "use client";
 import { useEffect, useRef, type Ref } from "react";
-import { Compartment, EditorState, type Extension } from "@codemirror/state";
+import {
+  Annotation,
+  Transaction,
+  Compartment,
+  EditorState,
+  type Extension,
+} from "@codemirror/state";
 import {
   EditorView,
   drawSelection,
@@ -44,6 +50,11 @@ import { tags } from "@lezer/highlight";
 import { yCollab, yUndoManagerKeymap } from "y-codemirror.next";
 import type * as Y from "yjs";
 import type { Awareness } from "y-protocols/awareness";
+import {
+  applySourceChanges,
+  normalizeSourceLines,
+  sourceSplice,
+} from "@/core/editor/source-lines";
 import type { DraftSession } from "@/core/collaboration/session";
 import styles from "./code-editor.module.css";
 import { useCodeEditorHandle } from "./use-code-editor-handle";
@@ -67,9 +78,12 @@ const sourceHighlight = HighlightStyle.define([
   { tag: tags.emphasis, fontStyle: "italic" },
 ]);
 
+const externalSource = Annotation.define<boolean>();
+export type SourceSelection = { start: number; end: number };
 export interface CodeEditorHandle {
   focus: () => void;
-  selection: () => { start: number; end: number };
+  selection: () => SourceSelection;
+  select: (selection: SourceSelection) => void;
   insert: (before: string, after?: string) => void;
   captureInsertion: () => (value: string) => void;
 }
@@ -106,7 +120,7 @@ export interface SharedSource {
 }
 export interface CodeEditorProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, previous: string) => void;
   label: string;
   language: Extension;
   disabled?: boolean;
@@ -136,6 +150,7 @@ export function CodeEditor({
 }: CodeEditorProps) {
   const host = useRef<HTMLDivElement>(null);
   const view = useRef<EditorView | null>(null);
+  const raw = useRef(value);
   const latest = useRef({
     value,
     onChange,
@@ -160,7 +175,7 @@ export function CodeEditor({
     blockId = shared?.blockId;
   const editable = useRef(new Compartment());
   const wrapping = useRef(new Compartment());
-  useCodeEditorHandle(ref, view, latest, text, undo);
+  useCodeEditorHandle(ref, view, latest, raw, text, undo);
   useEffect(() => {
     if (!host.current) return;
     let matches: { from: number; to: number }[] = [],
@@ -228,6 +243,7 @@ export function CodeEditor({
             EditorState.readOnly.of(Boolean(latest.current.disabled)),
           ]),
           EditorView.contentAttributes.of({
+            ...(!text ? { "data-editor-local-control": "true" } : {}),
             "aria-label": latest.current.label,
             "aria-multiline": "true",
             spellcheck: "false",
@@ -274,8 +290,17 @@ export function CodeEditor({
             },
           }),
           EditorView.updateListener.of((update) => {
-            if (update.docChanged && !text)
-              latest.current.onChange(update.state.doc.toString());
+            if (
+              update.docChanged &&
+              !text &&
+              !update.transactions.some((tr) => tr.annotation(externalSource))
+            ) {
+              const previous = raw.current;
+              raw.current = previous.includes("\r")
+                ? applySourceChanges(previous, update.changes)
+                : update.state.doc.toString();
+              latest.current.onChange(raw.current, previous);
+            }
             const queryChanged = update.transactions.some((tr) =>
               tr.effects.some((effect) => effect.is(setSearchQuery)),
             );
@@ -325,10 +350,19 @@ export function CodeEditor({
   useEffect(() => {
     const editor = view.current;
     if (!editor) return;
-    if (!text && editor.state.doc.toString() !== value)
-      editor.dispatch({
-        changes: { from: 0, to: editor.state.doc.length, insert: value },
-      });
+    if (!text) {
+      raw.current = value;
+      const normalized = normalizeSourceLines(value);
+      const current = editor.state.doc.toString();
+      if (current !== normalized)
+        editor.dispatch({
+          changes: sourceSplice(current, normalized),
+          annotations: [
+            externalSource.of(true),
+            Transaction.addToHistory.of(false),
+          ],
+        });
+    }
   }, [value, text]);
   return (
     <div

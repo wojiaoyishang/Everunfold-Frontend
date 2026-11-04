@@ -3,26 +3,27 @@ import {
   useEffect,
   useImperativeHandle,
   useRef,
+  useState,
   type Ref,
   type ReactNode,
 } from "react";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import { Extension } from "@tiptap/core";
 import { Slice } from "@tiptap/pm/model";
-import { Plugin } from "@tiptap/pm/state";
-import {
-  ySyncPlugin,
-  ySyncPluginKey,
-  yCursorPlugin,
-  absolutePositionToRelativePosition,
-  relativePositionToAbsolutePosition,
-} from "@tiptap/y-tiptap";
+import { NodeSelection, Plugin, TextSelection } from "@tiptap/pm/state";
 import { richExtensions } from "@/core/editor/rich-extensions";
 import { sourceDocument, renderRichNode } from "@/core/editor/rich-text";
 import { renderContent } from "@/core/rendering/content";
 import { referencedFontFaces } from "@/core/rendering/fonts";
 import type { MediaURL } from "@/generated/content-admin-contract";
-import type { CodeEditorHandle, SharedSource } from "./code-editor";
+import type { CodeEditorHandle, SourceSelection } from "./code-editor";
+import { richSourceSelection } from "@/core/editor/source-positions";
+import {
+  markdownRichSource,
+  patchVisualMarkdown,
+  richMarkdownSelection,
+} from "@/core/editor/visual-markdown";
+import { patchVisualHtml } from "@/core/editor/patch-visual-html";
 import styles from "./rich-text-editor.module.css";
 
 declare module "@tiptap/core" {
@@ -57,7 +58,7 @@ const ReadonlyGuard = Extension.create<
         filterTransaction: (transaction) =>
           !transaction.docChanged ||
           !storage.disabled ||
-          Boolean(transaction.getMeta(ySyncPluginKey)?.isChangeOrigin),
+          Boolean(transaction.getMeta("everunfoldSource")),
       }),
     ];
   },
@@ -65,13 +66,14 @@ const ReadonlyGuard = Extension.create<
 
 interface RichTextEditorProps {
   value: string;
-  onChange: (html: string) => void;
+  onChange: (html: string, previous: string) => void;
   label: string;
   disabled: boolean;
-  shared?: SharedSource;
+  initialSelection?: SourceSelection;
   editorRef?: Ref<CodeEditorHandle>;
   media?: Record<string, MediaURL>;
   toolbar: (editor: Editor) => ReactNode;
+  format?: "html" | "markdown";
 }
 
 function hasLiveEditor(editor: Editor | null): editor is Editor {
@@ -80,67 +82,35 @@ function hasLiveEditor(editor: Editor | null): editor is Editor {
   return Boolean(editor?.extensionManager && !editor.isDestroyed);
 }
 
-export function RichTextEditor(props: RichTextEditorProps) {
-  const shared = props.shared;
-  const binding = shared?.rich
-    ? `${shared.rich.doc?.guid}:${shared.blockId}`
-    : "local";
-  // Binding a newly loaded Y.Doc owns a fresh component/engine lifetime. Do not
-  // destroy an engine inside useEditor's effect while sibling effects still hold it.
-  return <RichTextEditorInstance key={binding} {...props} />;
-}
-
-function RichTextEditorInstance({
+export function RichTextEditor({
   value,
   onChange,
   label,
   disabled,
-  shared,
+  initialSelection,
   editorRef,
   media = {},
   toolbar,
+  format = "html",
 }: RichTextEditorProps) {
+  const readSource =
+    format === "markdown" ? markdownRichSource : sourceDocument;
+  const mapSelection =
+    format === "markdown" ? richMarkdownSelection : richSourceSelection;
   const latest = useRef({ onChange, media });
+  const source = useRef(value);
+  const [problem, setProblem] = useState(false);
   useEffect(() => {
     latest.current = { onChange, media };
   }, [onChange, media]);
   const root = useRef<HTMLDivElement>(null);
-  const extensions = richExtensions(Boolean(shared?.rich));
+  const extensions = richExtensions(false, format === "markdown");
   extensions.push(ReadonlyGuard.configure({ disabled }));
-  if (shared?.rich) {
-    const fragment = shared.rich;
-    extensions.push(
-      Extension.create({
-        name: "everunfoldSharedRich",
-        addProseMirrorPlugins: () => [
-          ySyncPlugin(fragment),
-          yCursorPlugin(shared.awareness, {
-            awarenessStateFilter: (current, other, state) =>
-              current !== other && state.blockId === shared.blockId,
-          }),
-        ],
-        addKeyboardShortcuts: () => ({
-          "Mod-z": () => {
-            shared.undo.undo();
-            return true;
-          },
-          "Mod-Shift-z": () => {
-            shared.undo.redo();
-            return true;
-          },
-          "Mod-y": () => {
-            shared.undo.redo();
-            return true;
-          },
-        }),
-      }),
-    );
-  }
   const editor = useEditor({
     extensions,
     immediatelyRender: false,
     editable: !disabled,
-    content: shared?.rich ? undefined : sourceDocument(value),
+    content: readSource(value),
     editorProps: {
       handlePaste: (view, event) => {
         const html = event.clipboardData?.getData("text/html");
@@ -161,17 +131,33 @@ function RichTextEditorInstance({
         "aria-multiline": "true",
         "aria-label": label,
       },
-      handleDOMEvents: {
-        focus: () => {
-          if (shared)
-            shared.awareness.setLocalStateField("blockId", shared.blockId);
-          return false;
-        },
-      },
     },
-    onUpdate: ({ editor }) => {
-      if (hasLiveEditor(editor) && !shared?.rich)
-        latest.current.onChange(renderRichNode(editor.getJSON()));
+    onUpdate: ({ editor, transaction }) => {
+      if (!hasLiveEditor(editor)) return;
+      const next =
+        format === "markdown"
+          ? patchVisualMarkdown(
+              source.current,
+              transaction.before,
+              editor.state.doc,
+            )
+          : patchVisualHtml(
+              source.current,
+              renderRichNode(transaction.before.toJSON()),
+              renderRichNode(editor.getJSON()),
+            );
+      if (next === undefined) {
+        setProblem(true);
+        queueMicrotask(() => {
+          if (hasLiveEditor(editor))
+            resetContent(editor, readSource(source.current));
+        });
+        return;
+      }
+      const previous = source.current;
+      source.current = next;
+      setProblem(false);
+      latest.current.onChange(next, previous);
     },
   });
   useEffect(() => {
@@ -180,13 +166,19 @@ function RichTextEditorInstance({
     editor?.setEditable(!disabled);
   }, [editor, disabled]);
   useEffect(() => {
-    if (
-      hasLiveEditor(editor) &&
-      !shared?.rich &&
-      value !== renderRichNode(editor.getJSON())
-    )
-      editor.commands.setContent(sourceDocument(value), { emitUpdate: false });
-  }, [editor, shared?.rich, value]);
+    if (hasLiveEditor(editor) && source.current !== value) {
+      source.current = value;
+      resetContent(editor, readSource(value));
+    }
+  }, [editor, readSource, value]);
+  useEffect(() => {
+    if (!hasLiveEditor(editor) || !initialSelection) return;
+    const frame = requestAnimationFrame(() => {
+      if (hasLiveEditor(editor))
+        selectSource(editor, source.current, initialSelection, mapSelection);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [editor, initialSelection, mapSelection]);
   useEffect(() => {
     if (!hasLiveEditor(editor)) return;
     const render = () => {
@@ -229,61 +221,48 @@ function RichTextEditorInstance({
       },
       selection: () =>
         hasLiveEditor(editor)
-          ? {
+          ? (mapSelection(editor.state.doc, source.current, {
               start: editor.state.selection.from,
               end: editor.state.selection.to,
-            }
+            }) ?? { start: 0, end: 0 })
           : { start: 0, end: 0 },
+      select: (range) => {
+        if (hasLiveEditor(editor))
+          selectSource(editor, source.current, range, mapSelection);
+      },
       insert: (before, after = "") => {
         if (hasLiveEditor(editor) && !disabled)
           editor
             .chain()
             .focus()
-            .insertContent(sourceDocument(before + after).content ?? [])
+            .insertContent(readSource(before + after).content ?? [])
             .run();
       },
       captureInsertion: () => {
         if (!hasLiveEditor(editor)) return () => {};
-        const sync = ySyncPluginKey.getState(editor.state),
-          at = editor.state.selection.from;
-        const relative =
-          shared?.rich && sync
-            ? absolutePositionToRelativePosition(
-                at,
-                shared.rich,
-                sync.binding.mapping,
-              )
-            : null;
+        const position = editor.state.selection.from;
         return (html) => {
           if (!hasLiveEditor(editor) || !editor.isEditable) return;
-          const current = ySyncPluginKey.getState(editor.state);
-          const position =
-            relative && shared?.rich && current
-              ? relativePositionToAbsolutePosition(
-                  shared.rich.doc!,
-                  shared.rich,
-                  relative,
-                  current.binding.mapping,
-                )
-              : at;
           editor
             .chain()
             .focus()
             .insertContentAt(
-              Math.min(
-                Math.max(position ?? 1, 1),
-                editor.state.doc.content.size,
-              ),
-              sourceDocument(html).content ?? [],
+              Math.min(Math.max(position, 1), editor.state.doc.content.size),
+              readSource(html).content ?? [],
             )
             .run();
         };
       },
     }),
-    [editor, disabled, shared],
+    [editor, disabled, mapSelection, readSource],
   );
   return (
-    <div className={styles.root} ref={root} data-disabled={disabled}>
+    <div
+      className={styles.root}
+      ref={root}
+      data-disabled={disabled}
+      data-editor-local-control
+    >
       <style
         data-editor-fonts
         dangerouslySetInnerHTML={{ __html: referencedFontFaces(value, media) }}
@@ -293,10 +272,57 @@ function RichTextEditorInstance({
           {toolbar(editor)}
         </fieldset>
       )}
+      {problem && (
+        <p className={styles.sourceWarning} role="alert">
+          这次排版无法保留现有源码，请在源码视图中修改。
+        </p>
+      )}
       <EditorContent
         editor={editor?.extensionManager ? editor : null}
         className={styles.canvas}
       />
     </div>
   );
+}
+
+function resetContent(
+  editor: Editor,
+  value: ReturnType<typeof sourceDocument>,
+) {
+  editor
+    .chain()
+    .setMeta("everunfoldSource", true)
+    .setMeta("addToHistory", false)
+    .setContent(value, { emitUpdate: false })
+    .run();
+}
+
+function selectSource(
+  editor: Editor,
+  source: string,
+  range: SourceSelection,
+  mapSelection: typeof richSourceSelection,
+) {
+  const { doc, tr } = editor.state;
+  const mapped = mapSelection(doc, source, range, true);
+  if (!mapped) {
+    editor.commands.focus();
+    return;
+  }
+  const from = doc.resolve(mapped.start),
+    to = doc.resolve(mapped.end);
+  if (
+    from.nodeAfter?.isAtom &&
+    !from.nodeAfter.isText &&
+    mapped.end === mapped.start + from.nodeAfter.nodeSize
+  ) {
+    editor.view.dispatch(
+      tr.setSelection(NodeSelection.create(doc, mapped.start)).scrollIntoView(),
+    );
+  } else {
+    editor.view.dispatch(
+      tr.setSelection(TextSelection.between(from, to)).scrollIntoView(),
+    );
+  }
+  editor.view.focus();
 }
