@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-10，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-11，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 ## 启动与验证
 
@@ -54,6 +54,8 @@ Markdown 和 HTML 均以原始字符串为底稿，切换视图直接同步本�
 本轮检查、截图和真实未覆盖项见 [区块验收](../handoff/block-composer-verification.md)。
 
 ## 源码底稿与双视图（2.1）
+
+代码/公式共用入口、可视化节点边界与前台按需资源见[ADR0049](../decisions/0049-shared-code-and-formula-features.md)及[指南](content-features.md)。HTML源码/可视化都有公式插入窗口；Markdown分屏只使用一条整宽状态栏，字符数不重复。公式节点只在本页视觉模型存在，不扩展共享WS节点Schema。
 
 当前规则见 [ADR0044](../decisions/0044-source-first-blocks-and-whole-draft-save.md) 和 [ADR0045](../decisions/0045-inline-image-upload-and-editor-controls.md)。
 

@@ -429,3 +429,21 @@ ADR0047/0048、editor-plugins-10、media-library-runtime-6、本轮验收与6张
 | `docs/design/media-picker-wide-library.png` | `5a41481f47e2f464c81b2036b803e4191bd020ccd0dc0bb3128cbf10f2dda0eb` |
 | `docs/design/media-picker-mobile-library.png` | `b0a9887e8db3ccf067f89b6be7f71bf292f399ffffa1f225002532fa4830507f` |
 | `docs/design/media-picker-wide-dark.png` | `7fbdbd13d37361d8da50fa3b5e5c8604f3dc16b40a86b2dd6ef779800e3acfe0` |
+
+## 2026-11-04 代码、公式与共享分屏状态栏
+
+ADR0049、development-13、editor-plugins-11、content-features-1、验收及5张截图逐字节同步。原始基线、后端契约、共享WS Schema及数据库0015不变；前端新增依赖与资源版本见ADR及锁文件。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/decisions/0049-shared-code-and-formula-features.md` | `73937607d0bd62a72a7675a0bc2c1eef9257632628d79abf640b91232a6a5b71` |
+| `docs/development/content-features.md` | `f51db28177c3ff9a6b5f27daaf03590065b6b32dae92053ee112642cf2533f65` |
+| `docs/handoff/content-features-verification.md` | `185f333007927be55e915f00c055631b6c438615ad464105202f77d1cd8b5c53` |
+| `docs/development/protocol.md` | `2abf989fdd50db3f890a8966052285dbf9b72dc2e7d53949c00c89de06cc858a` |
+| `docs/development/editor-plugins.md` | `6d54c1d3283ac1058e7f10e63352856104eef7db8742135877031bf6d5bff1c4` |
+| `docs/README.md` | `afed3b8178ecf29e04809a6baee44d961c85a2e35c9b2b8c92dc5238a6081da4` |
+| `docs/design/editor-code-math-split.png` | `f8a955b754b4962cc4982dba11dbb7b66d1460a313722274138135af962c91b1` |
+| `docs/design/html-formula-dialog-desktop.png` | `d775ce42e4c5642c984e1c7fcefbe848c6ae6d9f6a414237e3dac6ae26a1fc33` |
+| `docs/design/html-formula-dialog-mobile.png` | `778036582b5b5dcf210290cda1a88455c10e15afe78d6da39b141deb195a83d7` |
+| `docs/design/editor-code-formula-dark.png` | `1eb9bf940ad37d453820dea2d711a518993ff04640767fa01668119bff676525` |
+| `docs/design/reader-code-math.png` | `9c99242196f2aebd183cebd1231964c588c617097a277c0e79a012de6946bed8` |

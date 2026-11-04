@@ -134,4 +134,5 @@
 
 - [源码底稿与整篇保存](decisions/0044-source-first-blocks-and-whole-draft-save.md)、[图片上传与工具栏](decisions/0045-inline-image-upload-and-editor-controls.md)及[逐组件验收](handoff/source-first-editor-verification.md)记录当前2.1插件的即时切换、完整元素选区、正文保存事务、图片对齐/粘贴上传与中性编辑区。
 - [透明编辑区与锚定表单](decisions/0046-editor-canvas-and-anchored-forms.md)及[回归验收](handoff/editor-canvas-popover-verification.md)记录外层栏移除、链接/图片弹层的实际尺寸与焦点、可视化表格结构修复。
-- [紧凑视图与大媒体窗口](decisions/0047-compact-editor-views-and-media-picker.md)、[新增 HTML 分行](decisions/0048-new-html-fragment-line-formatting.md)及[实际验收](handoff/editor-media-picker-verification.md)记录单图标直接切换、共享大媒体选择器、局部新增结构整理与真实保存；当前指南 editor-plugins-10、media-library-runtime-6。
+- [紧凑视图与大媒体窗口](decisions/0047-compact-editor-views-and-media-picker.md)、[新增 HTML 分行](decisions/0048-new-html-fragment-line-formatting.md)及[实际验收](handoff/editor-media-picker-verification.md)记录单图标直接切换、共享大媒体选择器、局部新增结构整理与真实保存；对应指南 editor-plugins-10、media-library-runtime-6。
+- [统一代码与公式](decisions/0049-shared-code-and-formula-features.md)、[使用/资源指南](development/content-features.md)及[验收](handoff/content-features-verification.md)：两格式共用插入窗口、高亮/公式SSR、按引用加载CSS/字体、HTML公式窗口和Markdown分屏共用底栏；当前编辑器指南11、开发协议13。
