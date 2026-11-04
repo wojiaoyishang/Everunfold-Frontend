@@ -35,7 +35,8 @@ export function dispatchSceneShortcut(
   );
   if (!binding) return false;
   event.preventDefault();
-  event.stopPropagation();
+  // A modal owns its own handler; block browser Save without swallowing the modal's feedback.
+  if (!suspended) event.stopPropagation();
   if (!suspended && !event.repeat && !event.isComposing) binding.run();
   return true;
 }

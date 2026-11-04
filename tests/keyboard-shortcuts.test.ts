@@ -65,6 +65,10 @@ test("held keys, composition and modal suspension still block browser Save but n
       true,
     );
     assert.equal(input.result().prevented, true);
+    assert.equal(
+      input.result().stopped,
+      Boolean(modifiers.repeat || modifiers.isComposing),
+    );
   }
   assert.equal(calls, 0);
 });

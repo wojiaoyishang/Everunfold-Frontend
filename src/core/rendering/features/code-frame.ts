@@ -103,7 +103,8 @@ export function frameCodeHtml(html: string) {
         : "",
       "</span><span data-code-tools></span></figcaption>",
       `<pre tabindex="0" aria-label="${attr(options.title || language + " 代码")}">`,
-      `<code class="language-${language}"${large ? ' data-code-plain="true"' : ""}>${body}</code></pre></figure>`,
+      `<code class="language-${language}"${large ? ' data-code-plain="true"' : ""}>${body}</code></pre>`,
+      "<div data-code-fold-tools></div></figure>",
     ].join("");
     replacements.push({ start: pre.startIndex, end: pre.endIndex + 1, markup });
   }

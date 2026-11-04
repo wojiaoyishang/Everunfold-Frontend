@@ -5,17 +5,11 @@ import { Icon } from "../icon";
 export function CodeTools({
   code,
   onWrap,
-  onExpand,
   wrapped,
-  expanded,
-  canExpand,
 }: {
   code: string;
   onWrap: () => void;
-  onExpand: () => void;
   wrapped: boolean;
-  expanded: boolean;
-  canExpand: boolean;
 }) {
   const [result, setResult] = useState<"copied" | "error">();
   useEffect(() => {
@@ -33,16 +27,6 @@ export function CodeTools({
       >
         <Icon name="wrap" />
       </Button>
-      {canExpand && (
-        <Button
-          aria-label={expanded ? "折叠代码" : "展开全部代码"}
-          title={expanded ? "折叠代码" : "展开全部"}
-          aria-expanded={expanded}
-          onClick={onExpand}
-        >
-          <Icon name={expanded ? "chevron-up" : "chevron-down"} />
-        </Button>
-      )}
       <Button
         aria-label={result === "copied" ? "代码已复制" : "复制代码"}
         title={result === "copied" ? "已复制" : "复制代码"}
@@ -65,5 +49,28 @@ export function CodeTools({
             : ""}
       </span>
     </div>
+  );
+}
+
+export function CodeFoldControl({
+  expanded,
+  contentId,
+  onToggle,
+}: {
+  expanded: boolean;
+  contentId: string;
+  onToggle: () => void;
+}) {
+  return (
+    <Button
+      className="content-code-fold"
+      aria-label={expanded ? "折叠代码" : "展开全部代码"}
+      aria-expanded={expanded}
+      aria-controls={contentId}
+      onClick={onToggle}
+    >
+      <span>{expanded ? "收起代码" : "展开代码"}</span>
+      <Icon name={expanded ? "chevron-up" : "chevron-down"} />
+    </Button>
   );
 }
