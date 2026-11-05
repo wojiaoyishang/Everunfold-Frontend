@@ -5,7 +5,7 @@ import type {
   ContentTypeDefinition,
   MediaURL,
 } from "@/generated/content-admin-contract";
-import type { PublicShortcode } from "@/generated/settings-contract";
+import type { MediaItem, PublicShortcode } from "@/generated/settings-contract";
 import type { DraftSession } from "@/core/collaboration/session";
 import { useDraftEditor } from "@/core/content-management/use-draft-editor";
 import {
@@ -57,6 +57,7 @@ export function DraftVersionsPage({
             ...editor.session.mediaUrls,
           }}
           shortcodes={shortcodes}
+          onMedia={resources.remember}
           onCheckpoint={async (note) =>
             Boolean(await editor.save("save", note))
           }
@@ -86,6 +87,7 @@ function VersionsWorkspace({
   shortcodes,
   onCheckpoint,
   saveError,
+  onMedia,
 }: {
   session: DraftSession;
   type: ContentTypeDefinition;
@@ -93,6 +95,7 @@ function VersionsWorkspace({
   shortcodes: readonly PublicShortcode[];
   onCheckpoint: (note: string) => Promise<boolean>;
   saveError: string;
+  onMedia: (item: MediaItem) => void;
 }) {
   const router = useRouter(),
     search = useSearchParams();
@@ -404,6 +407,7 @@ function VersionsWorkspace({
             media={resolvedMedia}
             shortcodes={shortcodes}
             onResume={() => void startMerge(versioning.resumeResult())}
+            onMedia={onMedia}
           />
         ) : selectedInTab && view && before && after ? (
           <>

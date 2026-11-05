@@ -2,7 +2,7 @@
 import { useState } from "react";
 import type { DraftVersioning } from "@/core/content-management/use-draft-versions";
 import type { MediaURL } from "@/generated/content-admin-contract";
-import type { PublicShortcode } from "@/generated/settings-contract";
+import type { MediaItem, PublicShortcode } from "@/generated/settings-contract";
 import { serializeDraftExport } from "@/core/collaboration/export";
 import { Button } from "../../components/ui/primitives";
 import { DownloadButton } from "../../components/ui/download-button";
@@ -18,11 +18,13 @@ export function VersionMergeWorkspace({
   media,
   shortcodes,
   onResume,
+  onMedia,
 }: {
   versioning: DraftVersioning;
   media: Record<string, MediaURL>;
   shortcodes: readonly PublicShortcode[];
   onResume: () => void;
+  onMedia: (item: MediaItem) => void;
 }) {
   const [preview, setPreview] = useState(false);
   const [comparison, setComparison] = useState<"inputs" | "result" | null>(
@@ -119,6 +121,7 @@ export function VersionMergeWorkspace({
           onChange={versioning.setResult}
           disabled={versioning.busy || !versioning.canResolve}
           media={media}
+          onMedia={onMedia}
         />
       )}
       <div className={styles.mergeActions}>

@@ -16,6 +16,8 @@ const paths = {
   strike:
     "M17 5c-1-1-3-2-5-2-3 0-5 2-5 4 0 2 2 3 5 4M4 12h16M8 17c1 2 3 3 5 3 3 0 5-2 5-4",
   code: "m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16",
+  shortcode:
+    "M9 4H7a2 2 0 0 0-2 2v3a3 3 0 0 1-2 3 3 3 0 0 1 2 3v3a2 2 0 0 0 2 2h2M15 4h2a2 2 0 0 1 2 2v3a3 3 0 0 0 2 3 3 3 0 0 0-2 3v3a2 2 0 0 1-2 2h-2m-4-11 3 3-3 3",
   quote: "M4 6h6v6H5v5h4v2H3V9l1-3ZM15 6h6v6h-5v5h4v2h-6V9l1-3Z",
   table: "M3 4h18v16H3V4ZM3 9h18M3 14h18M9 4v16M15 4v16",
   "ordered-list":

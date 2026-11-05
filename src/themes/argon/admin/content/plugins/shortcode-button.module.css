@@ -1,0 +1,8 @@
+.button {
+  --editor-tool-width: auto;
+  gap: 6px;
+}
+.button > span {
+  font-size: 12px;
+  white-space: nowrap;
+}

@@ -15,7 +15,7 @@
   width: 94px;
 }
 .source .tools :global(.ui-select-trigger) {
-  min-height: 27px;
+  min-height: 32px;
   padding: 3px 7px;
   font-size: 12px;
   background: transparent;
@@ -31,10 +31,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  min-width: 24px;
-  height: 27px;
-  min-height: 27px;
+  width: var(--editor-tool-width, 32px);
+  min-width: var(--editor-tool-width, 32px);
+  height: 32px;
+  min-height: 32px;
   padding: 4px;
   border: 0;
   border-radius: 5px;
@@ -45,10 +45,9 @@
     color var(--admin-motion-fast),
     transform var(--admin-motion-fast);
 }
-.tool :global(.icon),
-.statusButton :global(.icon) {
-  width: 14px;
-  height: 14px;
+.tool :global(.icon) {
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 .source .tool:hover:not(:disabled),
@@ -118,8 +117,8 @@
 
 @media (max-width: 600px) {
   .source .tool {
-    width: 30px;
-    min-width: 30px;
-    height: 30px;
+    width: var(--editor-tool-width, 34px);
+    min-width: var(--editor-tool-width, 34px);
+    height: 34px;
   }
 }

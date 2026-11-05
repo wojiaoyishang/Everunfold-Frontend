@@ -13,6 +13,7 @@ import styles from "./rich-editor.module.css";
 import { ContentFeatureButtons } from "../../../components/ui/content-feature-dialog";
 import { prepareVisualFeature } from "@/core/editor/visual-feature-insertion";
 import { TextColorButton } from "./text-color-button";
+import { ShortcodeButton } from "./shortcode-button";
 
 export function RichToolbar({
   editor,
@@ -135,6 +136,7 @@ export function RichToolbar({
         <ActionPopover
           label="插入或编辑链接"
           panelWidth={340}
+          panelClassName={styles.linkPopover}
           className={styles.toolButton}
           triggerContent={<Icon name="link" />}
         >
@@ -186,7 +188,13 @@ export function RichToolbar({
             className={styles.toolButton}
             prepare={(kind) => prepareVisualFeature(editor, kind)}
           />
-          {onShortcode && button("插入短代码", "grid", onShortcode)}
+          {onShortcode && (
+            <ShortcodeButton
+              className={styles.toolButton}
+              disabled={!editor.isEditable}
+              onClick={onShortcode}
+            />
+          )}
           {button("插入视频", "video", () => onMedia?.("video"))}
           {button("插入图片", "image", () => onMedia?.("image"))}
           {button("插入媒体或附件", "folder", () => onMedia?.("all"))}
@@ -386,51 +394,59 @@ export function RichToolbar({
   );
 }
 function LinkForm({ editor, close }: { editor: Editor; close: () => void }) {
-  const [url, setUrl] = useState(
-    String(editor.getAttributes("link").href ?? "https://"),
-  );
+  const current = String(editor.getAttributes("link").href ?? "");
+  const [url, setUrl] = useState(current);
   const [error, setError] = useState("");
   return (
     <Form
-      className={styles.form}
+      className={`${styles.form} ${styles.linkForm}`}
       onSubmit={(e) => {
         e.preventDefault();
-        if (!/^(https?:\/\/|mailto:|\/|#|site:\/\/media\/)/i.test(url)) {
+        const href = url.trim();
+        if (!/^(https?:\/\/|mailto:|\/|#|site:\/\/media\/)/i.test(href)) {
           setError("请填写 HTTP、HTTPS、邮箱或站内链接。");
           return;
         }
-        editor
-          .chain()
-          .focus()
-          .extendMarkRange("link")
-          .setLink({ href: url })
-          .run();
+        editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
         close();
       }}
     >
+      <header className={styles.linkHeading}>
+        <Icon name="link" />
+        <strong>{current ? "编辑链接" : "插入链接"}</strong>
+      </header>
       <label>
-        链接地址
+        <span>链接地址</span>
         <TextField
           aria-label="链接地址"
           value={url}
+          placeholder="https://example.com"
+          autoComplete="url"
           onChange={(e) => setUrl(e.target.value)}
           autoFocus
         />
       </label>
       {error && <p role="alert">{error}</p>}
-      <div>
-        <Button
-          className="admin-button"
-          onClick={() => {
-            editor.chain().focus().extendMarkRange("link").unsetLink().run();
-            close();
-          }}
-        >
-          移除链接
-        </Button>
-        <Button type="submit" className="admin-button admin-button-primary">
-          应用
-        </Button>
+      <div className={styles.linkActions}>
+        {current && (
+          <Button
+            className={styles.removeLink}
+            onClick={() => {
+              editor.chain().focus().extendMarkRange("link").unsetLink().run();
+              close();
+            }}
+          >
+            移除链接
+          </Button>
+        )}
+        <div className={styles.linkSubmit}>
+          <Button className="admin-button" onClick={close}>
+            取消
+          </Button>
+          <Button type="submit" className="admin-button admin-button-primary">
+            应用
+          </Button>
+        </div>
       </div>
     </Form>
   );

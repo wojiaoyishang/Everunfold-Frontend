@@ -12,6 +12,7 @@ import {
 } from "../../../components/ui/content-feature-dialog";
 import type { ContentFeatureKind } from "@/core/editor/content-feature-source";
 import { TextColorButton } from "./text-color-button";
+import { ShortcodeButton } from "./shortcode-button";
 export interface SourceAction {
   label: string;
   icon: IconName;
@@ -110,16 +111,11 @@ export function SourceToolbar({
           prepare={onFeature}
         />
         {onShortcode && (
-          <Button
+          <ShortcodeButton
             className={styles.tool}
-            title="插入短代码"
-            aria-label="插入短代码"
             disabled={disabled}
-            onMouseDown={(event) => event.preventDefault()}
             onClick={onShortcode}
-          >
-            <Icon name="grid" />
-          </Button>
+          />
         )}
         <Button
           className={styles.tool}
