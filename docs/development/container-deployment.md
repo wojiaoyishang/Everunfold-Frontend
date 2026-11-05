@@ -1,8 +1,8 @@
 # 新设备容器开发部署
 
-版本：container-deployment-2，2026-11-04。用户要求在新的 Docker 桌面容器继续开发，服务监听 `0.0.0.0`，最初规划宿主机入口 `http://172.16.3.2:3000`，明确不使用 HTTPS。决定和兼容边界见 [ADR0053](../decisions/0053-container-http-development.md)。本页记录开发部署，不代表已切换原站生产流量。
+版本：container-deployment-3，2026-11-05（Asia/Shanghai）。用户要求在新的 Docker 桌面容器继续开发，服务监听 `0.0.0.0`，当前宿主机验收入口 `http://172.16.3.2:3000`，明确不使用 HTTPS。决定和兼容边界见 [ADR0053](../decisions/0053-container-http-development.md)。本页记录开发部署，不代表已切换原站生产流量。
 
-本轮宿主机地址访问超时后，用户要求改用 **http://127.0.0.1:3000** 本地调试；当前公开 API/媒体/canonical 已选择回环地址，四个服务监听仍为 `0.0.0.0`。测试文章与实际检查见[功能长文验收](../handoff/feature-lab-article-verification.md)。
+此前宿主机地址不可达时曾按用户要求改用127.0.0.1调试；2026-11-05用户完成宿主机映射并要求改回 **http://172.16.3.2:3000**，现公开API、媒体及canonical均使用该地址，四个服务仍监听 `0.0.0.0`。真实远程登录、7份媒体和协同WS已通过，[本次验收](../handoff/remote-address-verification.md)记录结果；[功能长文验收](../handoff/feature-lab-article-verification.md)中的回环地址保留为历史事实。
 
 ## 当前实例
 
@@ -15,13 +15,13 @@
 ## 入口与端口
 
 ```text
-本地调试：浏览器 → 容器 127.0.0.1:3000 → Nginx :3000
-远程预留：浏览器 → 宿主机 172.16.3.2:3000 → Docker TCP 3000:3000
+验收入口：浏览器 → 宿主机 172.16.3.2:3000 → Docker TCP 3000:3000
        → 容器 Nginx :3000
            /v1/*、/ws/v1/*、/media/*、/health/*、API 文档 → FastAPI :8001
            页面、Next 静态资源、热更新连接 → Next.js :3100
 
 Worker / Scheduler → Node 设置与内容接收器 :3001
+容器内也可访问127.0.0.1:3000；页面中的公开API/媒体地址仍为宿主机地址。
 ```
 
 四个监听器均绑定 `0.0.0.0`。宿主机只需映射 3000；3001 是内部接收器，8001/3100 是上游开发进程。容器内没有宿主机 Docker socket，映射由用户在宿主机完成；修改已有容器映射通常需要按原配置重建，须保留 `/config`、`/workspace` 和原桌面/网络配置，不能用一个简化的 `docker run` 覆盖原容器。
@@ -40,7 +40,9 @@ Nginx 保留原 API 与 WS 路径，不引入 `/api` 前缀；`/internal` 和 `/
 | 前端 `config.toml` | 浏览器 API 地址、服务端回环连接、缓存目录、显式绑定的 source_epoch |
 | 后端 `var/container/nginx.conf` | 从 `deploy/nginx.container.conf.template` 替换占位符生成 |
 
-前后端公开 `BACKEND_BASE_URL` 与前端 `PUBLIC_SITE_URL` 当前都是 `http://127.0.0.1:3000`；前端仅服务端 `[backend].base_url` 是 `http://127.0.0.1:8001`。精确来源包含远程入口和本机 3000，不使用通配符。
+前后端公开 `BACKEND_BASE_URL`、前端 `PUBLIC_SITE_URL` 与后端 `frontends.web-main.base_url` 当前都是 `http://172.16.3.2:3000`；前端仅服务端 `[backend].base_url` 仍是 `http://127.0.0.1:8001`，内部接收器仍为 `http://127.0.0.1:3001`。精确来源包含远程入口和本机3000，不使用通配符。
+
+公开内容会持久保存派生媒体地址，改配置后不能只重启。此次只重定向当前已发布投影中的原回环 `/media/` 地址，保留正文、时间、编辑属性及草稿修订，生成不可变内容release8并经原Outbox投递确认；历史release不改写。设置走既有重新同步，当前修订1已应用。实际配置和投影更新前备份、一次性检查位于后端忽略目录 `var/container/url-change-20261105/`，不得提交。
 
 后端 `[auth]` 显式设置 `allow_private_http=true`、`cookie_secure=false`、`cookie_samesite="lax"`。该开关默认关闭，只对字面 RFC1918 IPv4 和 IPv6 ULA 地址生效；不通过 DNS 推断内网，不允许公网/链路本地地址。HttpOnly、CSRF、精确 Origin 和内部 IP AND Token 校验仍生效。内部接收 URL 为回环 HTTP，非回环内部凭据传输仍要求 HTTPS。
 

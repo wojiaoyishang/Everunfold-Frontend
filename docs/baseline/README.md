@@ -541,3 +541,13 @@ ADR0055：共享源码标记分色与浅深色变量、围栏按语言加载；�
 | `docs/design/markdown-source-highlight-light.jpg` | `a04f8b8b70b515b2e10d10f4f994e77e070b5c2da2e08b3dcb7fce3ea0208620` |
 | `docs/design/markdown-source-highlight-dark.jpg` | `7746574acfa16dc3738cae561daecdbab9e7d7e23f98698833c9193d0428f79d` |
 | `docs/design/markdown-source-highlight-mobile.jpg` | `3df6f462cb9dd352e90f30855734f37fe41651604ae113328b0e992063541910` |
+
+## 2026-11-05 宿主机公开地址切换（Asia/Shanghai）
+
+运行指南升级container-deployment-3：当前公开入口172.16.3.2:3000，API/媒体/canonical及派生投影一致；内容release8与设置修订1已应用，远程登录/媒体/WS通过。只同步当前运行说明与验收，实际配置、数据库投影及私有备份不提交。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `d3cf273c36ab19132a9934b9c089f1ab119448af01a98726c4ede4fa7c597f11` |
+| `docs/development/container-deployment.md` | `5e397d50be3b3fab1c9b45552e08956a7178f0f75e95bb8a58f6adbd006175d8` |
+| `docs/handoff/remote-address-verification.md` | `f9e2d49442aac6b2e56f6c331aa8d5bd19cb1a43c9c8faf1bf94f08ba8c898cb` |

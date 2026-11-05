@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+[当前宿主机验收入口](handoff/remote-address-verification.md)：2026-11-05已切换至 `http://172.16.3.2:3000`，远程登录、媒体、投递和协同WS通过；[部署指南3](development/container-deployment.md)为当前运行说明。
+
 [Markdown源码高亮](decisions/0055-markdown-source-highlighting.md)及[实页验收](handoff/markdown-source-highlighting-verification.md)：标记分色、浅深色与窄屏、代码围栏按语言加载，211项检查通过。
 
 [编辑器预览操作随滚动进入顶栏](decisions/0054-scroll-editor-preview-actions.md)及[实页验收](handoff/editor-preview-dock-verification.md)：单组预览操作、双向动效、焦点保留与窄屏导航第二行。
