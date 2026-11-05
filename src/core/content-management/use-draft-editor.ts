@@ -37,6 +37,7 @@ import {
   type BufferedSources,
 } from "./block-sources";
 import { RequestError } from "@/core/http/request";
+import { hasPrivateDraftChanges } from "./draft-revision";
 import {
   draftError,
   draftFields,
@@ -59,6 +60,9 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
   const [detail, setDetail] = useState<DraftDetail | null>(null);
   const [fields, setFields] = useState<DraftFields>(() => draftFields());
   const privateFields = useRef(fields);
+  const currentDetail = useRef<DraftDetail | null>(null);
+  const pendingRevision = useRef(0);
+  const conflictCode = useRef<number | null>(null);
   const sourceKey = id
     ? `everunfold-block-sources:${baseUrl}:${account.id}:${id}`
     : null;
@@ -131,6 +135,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     setBaseline(JSON.stringify(next));
     setFields(next);
     privateFields.current = next;
+    currentDetail.current = value;
     setDetail(value);
   };
   useEffect(() => {
@@ -160,6 +165,54 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
             sessionRef.current = owner;
             setSession(owner);
             const active = owner;
+            active.onRevision = (revision) => {
+              pendingRevision.current = Math.max(
+                pendingRevision.current,
+                revision,
+              );
+              if (revision <= (currentDetail.current?.revision ?? 0)) return;
+              if (inFlight.current || preparing.current) return;
+              void readDraft(baseUrl, { id }, csrfToken, {
+                signal: abort.signal,
+              })
+                .then(({ data }) => {
+                  const prior = currentDetail.current;
+                  if (
+                    abort.signal.aborted ||
+                    !prior ||
+                    data.revision !== revision ||
+                    data.revision <= prior.revision ||
+                    inFlight.current ||
+                    preparing.current
+                  )
+                    return;
+                  const local = privateFields.current;
+                  // Private access changes are not CRDT fields. A newer save must
+                  // never silently replace a locally edited password or access rule.
+                  if (hasPrivateDraftChanges(local, prior)) {
+                    conflictCode.current = 40951;
+                    setConflict(true);
+                    setError(
+                      "访问设置已有新版本。你的输入已保留，请先查看最新内容。",
+                    );
+                    return;
+                  }
+                  const saved = draftFields(data);
+                  currentDetail.current = data;
+                  setDetail(data);
+                  setBaseline(JSON.stringify(saved));
+                  privateFields.current = active.project(saved);
+                  setFields(privateFields.current);
+                  if (conflictCode.current === 40951) {
+                    conflictCode.current = null;
+                    setConflict(false);
+                    setError("");
+                  }
+                })
+                .catch(() => {
+                  /* A failed refresh leaves the original revision guard in place. */
+                });
+            };
             active.onChange = () => {
               if (abort.signal.aborted) return;
               setCollaboration({ ...active.state });
@@ -198,6 +251,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
       abort.abort();
       if (owner) {
         owner.onChange = () => {};
+        owner.onRevision = () => {};
         void owner.dispose();
       }
       if (sessionRef.current === owner) sessionRef.current = null;
@@ -280,7 +334,8 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
             input: {
               id: detail.id,
               operation_id: randomUUID(),
-              expected_revision: detail.revision,
+              expected_revision:
+                currentDetail.current?.revision ?? detail.revision,
               epoch: current.epoch,
               committed_seq: committed,
               block_sources,
@@ -350,6 +405,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
           const saved = draftFields(response.data);
           setBaseline(JSON.stringify(saved));
           privateFields.current = saved;
+          currentDetail.current = response.data;
           setDetail(response.data);
           setFields(sessionRef.current.project(saved));
           recover(sessionRef.current, sessionRef.current.project(saved));
@@ -378,6 +434,8 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
           reason instanceof RequestError &&
             (reason.code === 40951 || reason.code === 40976),
         );
+        conflictCode.current =
+          reason instanceof RequestError ? (reason.code ?? null) : null;
         setError(
           unknown
             ? "保存结果尚未确认，输入已保留。请重试确认后继续编辑。"
@@ -388,6 +446,8 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     } finally {
       inFlight.current = false;
       if (mounted.current) setBusy(false);
+      if (pendingRevision.current > (currentDetail.current?.revision ?? 0))
+        sessionRef.current?.onRevision(pendingRevision.current);
     }
   };
   const setBlockContent = (
@@ -542,11 +602,13 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
         if (sessionRef.current?.state.ready) {
           const saved = draftFields(latest);
           privateFields.current = saved;
+          currentDetail.current = latest;
           setDetail(latest);
           setBaseline(JSON.stringify(saved));
           setFields(sessionRef.current.project(saved));
         } else apply(latest);
         setConflict(false);
+        conflictCode.current = null;
         setLatest(null);
         setError("");
       }

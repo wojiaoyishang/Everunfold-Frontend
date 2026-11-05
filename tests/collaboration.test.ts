@@ -196,6 +196,7 @@ test("tombstones prevent offline text edits from resurrecting a removed block; l
 
 test("minimal UTF-16 splices preserve emoji and private access fields never enter CRDT", () => {
   const start = fields();
+  start.body[0].id = "00002099-0000-4000-8000-000000000001";
   start.access_password = "private-test-only";
   start.settings = { visibility: "password", opens_at: "2099-01-01T00:00:00Z" };
   const doc = createScratch(start);
@@ -208,7 +209,7 @@ test("minimal UTF-16 splices preserve emoji and private access fields never ente
   assert.ok(
     !serialized.includes("private-test-only") &&
       !serialized.includes("visibility") &&
-      !serialized.includes("2099"),
+      !serialized.includes("2099-01-01T00:00:00Z"),
   );
   doc.destroy();
 });

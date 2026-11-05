@@ -396,8 +396,13 @@ export class DraftSession {
       this.publish({ peers: frame.peers ?? [] });
     } else if (frame.type === "media") {
       this.publish();
-    } else if (frame.type === "revision") this.setRevision(frame.revision ?? 0);
-    else if (frame.type === "error") {
+    } else if (frame.type === "revision") {
+      this.highestAck = Math.max(
+        this.highestAck,
+        frame.committed_seq ?? this.state.seq,
+      );
+      this.setRevision(frame.revision ?? 0);
+    } else if (frame.type === "error") {
       if ((frame.code ?? 0) >= 50000 || frame.code === 42970)
         this.socket?.close();
       else this.stop(frame.msg ?? "同步已停止，请先导出本地内容。");
