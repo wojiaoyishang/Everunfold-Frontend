@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+[顶部版本选择与HTML可视化差异](decisions/0062-revision-pairs-and-html-visual-diff.md)、[操作指南](development/draft-versions.md)及[本轮验收](handoff/version-revision-layout-verification.md)：编辑页式顶部双选、左右区块/行内高亮、HTML默认可视化和逐块切换。
+
 [版本对比与离线恢复](development/draft-versions.md)记录最新使用方式；[ADR0061](decisions/0061-cursors-offline-branches-and-version-merges.md)替代旧的正文整篇显式保存阶段，[验收](handoff/cursor-versions-verification.md)记录双窗口、输入法、真实多进程及独立版本页。
 
 [编辑器工具栏、视频、HTML颜色和滚动定位](decisions/0059-editor-inline-insertion-and-sticky-blocks.md)、[保存修订同步修复](decisions/0060-collaborative-draft-revision-refresh.md)及[本轮验收](handoff/editor-inline-tools-verification.md)：短代码在当前区块插入，视频使用原生Markdown扩展，切换保留光标，标题栏避让导航吸顶；接入协同修订通知并保留真实冲突守卫。

@@ -1,6 +1,6 @@
 # 草稿协作、版本对比与离线恢复
 
-版本：draft-versions-1，2026-11-05（Asia/Shanghai）。当前实现见[ADR0061](../decisions/0061-cursors-offline-branches-and-version-merges.md)，检查范围见[验收](../handoff/cursor-versions-verification.md)。
+版本：draft-versions-2，2026-11-05（Asia/Shanghai）。当前实现见[ADR0061](../decisions/0061-cursors-offline-branches-and-version-merges.md)，检查范围见[验收](../handoff/cursor-versions-verification.md)。
 
 ## 日常编辑
 
@@ -17,11 +17,11 @@
 
 ## 独立版本页
 
-编辑页 → 版本。历史版本、草稿分支和合并记录在目录中；选中项在页面主区比较。路由为 `/admin/content/{type}/{id}/versions`，链接保留选中的项目，可直接刷新；比较对象默认为实时线上最新版，也可选择列表中的其他检查点。
+编辑页 → 版本。文章标题下方选择基础版本（左侧）和对比版本（右侧），再看下面整宽区块差异；可交换左右，两侧都支持历史检查点或实时草稿。路由为 `/admin/content/{type}/{id}/versions`，`view=version&selected=左侧&compare=右侧`保留双方，`head`代表实时最新版，刷新仍恢复这组比较。默认选择上个检查点对比最新版；历史列表从“版本记录”展开，草稿分支/合并记录由同页分类进入。
 
-- 可视化对比按两份渲染正文展示，红色删除、绿色新增；区块提示新增、移除、移动或格式变化。
-- 源码对比按行及文字显示原始 Markdown/HTML 的变化；样式、媒体属性、代码与公式的精确差异在此核对。
-- 默认只显示修改区块，可显示完整正文。窄屏按上下两份展示，目录由“选择其他版本或草稿”展开。
+- HTML默认可视化，Markdown默认源码；每个区块顶部都可独立切换可视化/源码，并可收起或展开。可视化两份正文红删绿增；区块提示新增、移除、移动或格式变化。模式是本页临时状态，刷新恢复按格式默认。
+- 源码左右行号对齐，红绿背景、增删符号和行内高亮显示Markdown/HTML变化；标签、样式、媒体属性、代码与公式的精确差异在此核对。
+- 默认只显示修改区块和变化上下文；显示完整正文可展开未改区块与未改行。窄屏顶部选择器适配换行，正文按上下两份展示并各标版本。
 - 从历史或分支继续编辑，会先生成/打开独立本机分支，不覆盖最新版。导出包含源文及已移除块，剔除文章密码。
 - 旧历史可以删除；当前最新检查点受保护。合并中的记录不可删除，关联最新版的完成记录也受保护。删除使用持久确认窗口。
 
@@ -36,6 +36,6 @@
 ## 开发与部署
 
 - 显式运行后端0017迁移，启动不会自动变更数据库；工作区脚本继续复用现有六服务。
-- 接口与 source_first/控制帧由 collaboration 2.0.0 产物生成；版本页属于后台私有路由，禁止公开SSR注入正文。
+- 接口与 source_first/控制帧由 collaboration 2.0.0 产物生成；版本页属于后台私有路由，禁止公开SSR注入正文。顶部选择/逐块差异的实施见[ADR0062](../decisions/0062-revision-pairs-and-html-visual-diff.md)及[验收](../handoff/version-revision-layout-verification.md)。
 - core/content-management 负责请求/用例，core/collaboration 负责持久队列与文档；主题只组合目录、对比和合并编辑组件。派生差异标记不能持久化为正文。
 - 长期日志压缩/GC、跨块连续选区、细粒度权限和离线冷启动尚未实现。本轮仅验证容器 HTTP 部署，不约定具体设备地址。

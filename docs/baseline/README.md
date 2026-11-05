@@ -662,3 +662,21 @@ bootstrap-9、collaborative-editing-5、editor-plugins-15与draft-versions-1记�
 | `docs/design/versions-page-source.png` | `7392734fad4f028872e6d0235c78372a1c5b4fca952625fda6110e83a4f4159f` |
 | `docs/design/versions-page-narrow.png` | `3d4a73546564c223ee4d957e8f3dc6cf28f6e5475bd786a93b101307836df16c` |
 | `docs/design/versions-page-merge.png` | `5ff5a2c1c9f66a12c94274130624685bc780ed6734aec015592955b604306dcc` |
+
+## 顶部版本选择与逐块可视化对比（2026-11-05）
+
+ADR0062与draft-versions-2记录用户新要求和实施；顶部双选替代常驻目录侧栏，HTML默认视觉/Markdown默认源码并可逐块切换。以下当前哈希替代相关文件的上阶段记录，STATUS各仓库维护，不写实际设备地址。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `80f90a1a5ea171bfc82d6a8398a5e88a27f410e9f59e642ef1943c33fd0d6a8a` |
+| `docs/decisions/0061-cursors-offline-branches-and-version-merges.md` | `434729990ef09afb78b3807b831e0a773b414ce404ccd8745456f5fd99155935` |
+| `docs/decisions/0062-revision-pairs-and-html-visual-diff.md` | `72b8c63d4c26d41de1b07ebcce389c7a26ed8e349e5b78a4c734cd5dc3610e65` |
+| `docs/development/draft-versions.md` | `cd0c840e8ae6b51652d20be8c274434a9fccb5a95798f3fb7806c62b789bd16c` |
+| `docs/handoff/version-revision-layout-verification.md` | `b772198358dba64e045226778a32e437048fe21a9b827b6aa9cf1c1b192bf342` |
+| `docs/design/revision-top-source-desktop.png` | `30b9af9bdc89d55756562770ec5778fb61a63173cd9982b30b5e8969edda5fd6` |
+| `docs/design/revision-html-visual-desktop.png` | `6929991e861fc77814fdb13036974a601e9c35a7c8dad62c4f4b45359b483ae7` |
+| `docs/design/revision-source-dark.png` | `137c9fd6daff82cf3642e05223ccdcec140359e6aa3b577dfd8dac8b1a3a847e` |
+| `docs/design/revision-top-narrow.png` | `9cd962692889ce04cb1fc9936b9580480513c5b353394aa26035304667cdd15a` |
+| `docs/design/revision-source-narrow.png` | `3b9fd2374594250edbbc6e9d81ac0c69bee510392892650904a2acd68f9cf7e0` |
+| `docs/design/revision-visual-narrow.png` | `a5c61a4321e04781578a68b85b708d1a72c90fc9313b502c485abc5f3d846267` |
