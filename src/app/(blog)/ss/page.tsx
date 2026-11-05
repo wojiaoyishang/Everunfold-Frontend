@@ -1,18 +1,16 @@
-import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
-import { pageNumber } from "@/core/content/query";
-import { Feed } from "@/themes/argon/components/feed";
-export const metadata = { title: "说说", robots: { index: false } };
-export default async function MomentsPage({
+import { readPageSnapshot } from "@/core/i18n/server";
+import { CodePage, codePageMetadata, type PageParameters } from "../code-page";
+export async function generateMetadata() {
+  return codePageMetadata(await readPageSnapshot(), "/ss");
+}
+export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<PageParameters>;
 }) {
-  return (
-    <Feed
-      snapshot={await readPublicSnapshot()}
-      page={pageNumber((await searchParams).page)}
-      type="shuoshuo"
-      pathname="/ss"
-    />
-  );
+  const [snapshot, parameters] = await Promise.all([
+    readPageSnapshot(),
+    searchParams,
+  ]);
+  return <CodePage snapshot={snapshot} path="/ss" parameters={parameters} />;
 }

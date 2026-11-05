@@ -1,7 +1,16 @@
-import type { Metadata } from "next";
-import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
-import { TaxonomyIndex } from "@/themes/argon/components/taxonomy-index";
-export const metadata: Metadata = { title: "文章标签" };
-export default async function TagsPage() {
-  return <TaxonomyIndex snapshot={await readPublicSnapshot()} kind="tag" />;
+import { readPageSnapshot } from "@/core/i18n/server";
+import { CodePage, codePageMetadata, type PageParameters } from "../code-page";
+export async function generateMetadata() {
+  return codePageMetadata(await readPageSnapshot(), "/tags");
+}
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<PageParameters>;
+}) {
+  const [snapshot, parameters] = await Promise.all([
+    readPageSnapshot(),
+    searchParams,
+  ]);
+  return <CodePage snapshot={snapshot} path="/tags" parameters={parameters} />;
 }

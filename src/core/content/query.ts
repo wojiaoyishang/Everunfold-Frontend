@@ -1,6 +1,6 @@
 import type { Content, PublicSnapshot, Taxonomy } from "./types";
 import { normalizePath } from "./urls";
-import { languageContents } from "@/core/i18n/snapshot";
+import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";
 
 export interface ContentFilter {
   query?: string;
@@ -15,10 +15,7 @@ export function queryContents(
   filter: ContentFilter = {},
 ) {
   const query = filter.query?.trim().slice(0, 160).toLocaleLowerCase();
-  const all = languageContents(
-    snapshot.contents,
-    snapshot.site.locale ?? "zh-CN",
-  )
+  const all = languageContents(snapshot.contents, snapshotLocale(snapshot))
     .filter((item) => {
       if (item.kind !== "article") return false;
       if (

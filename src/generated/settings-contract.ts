@@ -200,7 +200,18 @@ export type Code11 = number;
 export type Msg11 = string;
 export type SourceEpoch = string;
 export type Revision3 = number;
+export type DefaultCode = string;
+export type Code12 = string;
 export type Name3 = string;
+export type Flag = string;
+export type Prefix = string;
+export type Enabled = boolean;
+export type UiLocale = "zh-CN" | "en";
+/**
+ * @minItems 1
+ */
+export type Languages = LanguageDefinition[];
+export type Name4 = string;
 export type Description3 = string;
 export type Author = string;
 export type AvatarMediaId = string;
@@ -242,7 +253,7 @@ export type BackgroundPlay = boolean;
  */
 export type Shortcodes = PublicShortcode[];
 export type NodeId = string;
-export type Enabled = boolean;
+export type Enabled1 = boolean;
 export type DesiredRevision = number;
 export type AppliedRevision1 = number | null;
 export type Status = "not_configured" | "pending" | "applied" | "failed";
@@ -251,7 +262,7 @@ export type Error1 = string | null;
 export type Delivery = DeliveryState[];
 export type ExpectedRevision6 = number;
 export type Success12 = boolean;
-export type Code12 = number;
+export type Code13 = number;
 export type Msg12 = string;
 export type NodeId1 = string;
 export type SourceEpoch1 = string;
@@ -262,7 +273,7 @@ export type RetryDelayMs = number;
 export type BatchDelayMs = number;
 export type ExpectedRevision7 = number;
 export type Success13 = boolean;
-export type Code13 = number;
+export type Code14 = number;
 export type Msg13 = string;
 export type Nodes = PolicyState[];
 export type Protocol = "settings-1";
@@ -630,7 +641,8 @@ export interface PublicSettings {
   shortcodes?: Shortcodes;
 }
 export interface SitePreferences {
-  name: Name3;
+  language_catalog?: LanguageCatalog;
+  name: Name4;
   description: Description3;
   author: Author;
   avatar_media_id?: AvatarMediaId;
@@ -641,6 +653,18 @@ export interface SitePreferences {
   seo_description?: SeoDescription;
   title_template?: TitleTemplate;
   allow_indexing?: AllowIndexing;
+}
+export interface LanguageCatalog {
+  default_code?: DefaultCode;
+  languages?: Languages;
+}
+export interface LanguageDefinition {
+  code: Code12;
+  name: Name3;
+  flag?: Flag;
+  prefix?: Prefix;
+  enabled?: Enabled;
+  ui_locale?: UiLocale;
 }
 export interface MenuItem {
   id: Id17;
@@ -682,7 +706,7 @@ export interface IconUrls {
 }
 export interface DeliveryState {
   node_id: NodeId;
-  enabled: Enabled;
+  enabled: Enabled1;
   desired_revision: DesiredRevision;
   applied_revision: AppliedRevision1;
   status: Status;
@@ -695,7 +719,7 @@ export interface SaveSettings {
 }
 export interface PublicResponsePolicyState {
   success?: Success12;
-  code?: Code12;
+  code?: Code13;
   msg?: Msg12;
   data: PolicyState;
 }
@@ -721,7 +745,7 @@ export interface SavePolicy {
 }
 export interface PublicResponseNodeList {
   success?: Success13;
-  code?: Code13;
+  code?: Code14;
   msg?: Msg13;
   data: NodeList;
 }

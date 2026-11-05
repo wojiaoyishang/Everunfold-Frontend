@@ -5,7 +5,7 @@ import { relativeTime } from "@/core/browser/relative-time";
 import { useLocale } from "@/core/i18n/provider";
 
 export function RelativeTime({ value }: { value: string }) {
-  const { locale } = useLocale();
+  const { uiLocale: locale } = useLocale();
   const [label, setLabel] = useState("");
   useEffect(() => {
     const update = () => setLabel(relativeTime(value, Date.now(), locale));

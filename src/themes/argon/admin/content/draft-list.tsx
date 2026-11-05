@@ -2,6 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
+import { useLanguageCatalog, useT } from "@/core/i18n/provider";
 import type {
   ContentTypeDefinition,
   DraftListItem,
@@ -19,6 +20,8 @@ import { Select } from "../../components/ui/select";
 
 export function DraftList({ type }: { type: ContentTypeDefinition }) {
   const catalog = useDraftCatalog(type);
+  const languages = useLanguageCatalog();
+  const t = useT();
   const [action, setAction] = useState<DraftListItem | null>(null);
   const [notice, setNotice] = useState("");
   const data = catalog.result;
@@ -77,18 +80,17 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
             }}
           >
             <Select
-              programOptions
               name="content-list-language"
               label="内容语言筛选"
               value={catalog.language}
               options={[
-                { value: "all", label: "全部语言" },
-                { value: "zh-CN", label: "简体中文" },
-                { value: "en", label: "English" },
+                { value: "__all", label: t("全部语言") },
+                ...languages.languages.map((item) => ({
+                  value: item.code,
+                  label: item.name,
+                })),
               ]}
-              onValueChange={(value) =>
-                catalog.setLanguage(value as "all" | "zh-CN" | "en")
-              }
+              onValueChange={(value) => catalog.setLanguage(value)}
             />
             <TextField
               type="search"

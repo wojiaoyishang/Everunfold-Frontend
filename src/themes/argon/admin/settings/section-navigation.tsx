@@ -99,7 +99,7 @@ export function SettingsLayout({ children }: { children: ReactNode }) {
               href={`#${section.id}`}
               aria-current={active === section.id ? "location" : undefined}
             >
-              {section.title}
+              <UiText text={section.title} />
             </TextLink>
           ))}
         </nav>

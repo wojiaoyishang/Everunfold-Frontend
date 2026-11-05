@@ -2,6 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
+import { useLanguageCatalog } from "@/core/i18n/provider";
 import type {
   ContentTypeDefinition,
   DraftFields,
@@ -18,20 +19,23 @@ export function EditorTitle({
   detail,
   onChange,
   disabled,
-  language = "zh-CN",
+  language,
 }: {
   type: ContentTypeDefinition;
   fields: DraftFields;
   detail: DraftDetail | null;
   onChange: (fields: DraftFields) => void;
   disabled: boolean;
-  language?: "zh-CN" | "en";
+  language?: string;
 }) {
+  const catalog = useLanguageCatalog();
   const [editing, setEditing] = useState(false);
   const path =
     fields.settings?.path ||
     detail?.public_path ||
-    (language === "en" ? "/en" : "") + titlePath(fields.title ?? "");
+    (catalog.languages.find(
+      (item) => item.code === (language ?? catalog.default_code),
+    )?.prefix ?? "") + titlePath(fields.title ?? "");
   const [input, setInput] = useState("");
   const updatePath = () => {
     onChange({

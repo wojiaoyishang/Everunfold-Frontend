@@ -8,6 +8,8 @@ import { ShuoshuoDetail } from "@/themes/argon/components/shuoshuo";
 import { contentMetadata } from "@/core/content/metadata";
 import { readConfiguration } from "@/core/config/server";
 import { ProtectedArticle } from "@/themes/argon/components/protected-article";
+import { localizedCodePath } from "@/core/i18n/routes";
+import { CodePage, codePageMetadata } from "../code-page";
 type Parameters = {
   params: Promise<{ contentPath: string[] }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -17,6 +19,8 @@ export async function generateMetadata({
 }: Parameters): Promise<Metadata> {
   const snapshot = await readPublicSnapshot();
   const { contentPath } = await params;
+  const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
+  if (codePath) return codePageMetadata(snapshot, codePath);
   const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
   return presented
     ? contentMetadata(
@@ -36,6 +40,11 @@ export default async function ContentPage({
     params,
     searchParams,
   ]);
+  const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
+  if (codePath)
+    return (
+      <CodePage snapshot={snapshot} path={codePath} parameters={parameters} />
+    );
   const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
   const protectedContent = resolveContent(
     snapshot,

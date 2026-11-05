@@ -4,13 +4,10 @@ import type { PublicSnapshot } from "@/core/content/types";
 import { displayDate } from "@/core/content/query";
 import { PagePresentation } from "./route-state";
 import { Icon } from "./icon";
-import { languageContents } from "@/core/i18n/snapshot";
+import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";
 
 export function Archives({ snapshot }: { snapshot: PublicSnapshot }) {
-  const articles = languageContents(
-    snapshot.contents,
-    snapshot.site.locale ?? "zh-CN",
-  )
+  const articles = languageContents(snapshot.contents, snapshotLocale(snapshot))
     .filter((entry) => entry.kind === "article")
     .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
   const groups = new Map<string, typeof articles>();

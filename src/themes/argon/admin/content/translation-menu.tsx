@@ -2,7 +2,8 @@
 import { UiText } from "@/core/i18n/provider";
 
 import type { TranslationMember } from "@/generated/content-admin-contract";
-import { localeNames, localeOf } from "@/core/i18n/locale";
+
+import { LanguageLabel } from "../../components/language-label";
 import { ActionPopover } from "../../components/ui/action-popover";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
@@ -43,11 +44,10 @@ export function TranslationMenu({
         <>
           <Icon name="languages" />
           <span>
-            {members.find((item) => item.id === current)?.language === "en" ? (
-              "EN"
-            ) : (
-              <UiText text="中文" />
-            )}
+            <LanguageLabel
+              code={members.find((item) => item.id === current)?.language}
+              compact
+            />
             {members.length > 1 ? ` · ${members.length}` : ""}
           </span>
         </>
@@ -63,7 +63,7 @@ export function TranslationMenu({
             const body = (
               <>
                 <span>
-                  {localeNames[localeOf(item.language)]}
+                  <LanguageLabel code={item.language} />
                   {item.is_original ? <UiText text=" · 原文" /> : ""}
                 </span>
                 <small>

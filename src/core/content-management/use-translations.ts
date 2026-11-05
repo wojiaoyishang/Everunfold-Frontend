@@ -117,9 +117,15 @@ export function useTranslations(id: string | null, contentRevision = 0) {
         linkTranslation(baseUrl, { ...input, target_id: target }, csrfToken),
       ),
     unlink: (target: string) =>
-      run(`unlink:${target}`, async(input) => {
-        const result=await unlinkTranslation(baseUrl, { ...input, id: target }, csrfToken);
-        return target===id?readTranslations(baseUrl,{id:target},csrfToken):result;
+      run(`unlink:${target}`, async (input) => {
+        const result = await unlinkTranslation(
+          baseUrl,
+          { ...input, id: target },
+          csrfToken,
+        );
+        return target === id
+          ? readTranslations(baseUrl, { id: target }, csrfToken)
+          : result;
       }),
     review: () =>
       run("review", (input) => reviewTranslation(baseUrl, input, csrfToken)),

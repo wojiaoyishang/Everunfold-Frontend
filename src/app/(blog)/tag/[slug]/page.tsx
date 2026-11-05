@@ -1,30 +1,22 @@
-import { notFound } from "next/navigation";
-import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
-import { pageNumber, resolveTaxonomy } from "@/core/content/query";
-import { taxonomyHref } from "@/core/content/urls";
-import { ArticleList } from "@/themes/argon/components/article-list";
-export default async function TagPage({
+import { readPageSnapshot } from "@/core/i18n/server";
+import { CodePage, type PageParameters } from "../../code-page";
+export default async function Page({
   params,
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<PageParameters>;
 }) {
   const [snapshot, { slug }, parameters] = await Promise.all([
-    readPublicSnapshot(),
+    readPageSnapshot(),
     params,
     searchParams,
   ]);
-  const tag = resolveTaxonomy(snapshot, "tag", slug);
-  if (!tag) notFound();
   return (
-    <ArticleList
+    <CodePage
       snapshot={snapshot}
-      title={`# ${tag.name}`}
-      subtitle={`标签 · ${tag.count} 篇文章`}
-      icon="tag"
-      filter={{ tag: tag.slug, page: pageNumber(parameters.page) }}
-      pathname={taxonomyHref(tag)}
+      path={`/tag/${slug}`}
+      parameters={parameters}
     />
   );
 }

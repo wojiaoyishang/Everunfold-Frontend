@@ -5,7 +5,7 @@ import type {
   PublicSettings,
 } from "@/generated/settings-contract";
 export type Site = StoredSnapshot["site"] & {
-  locale?: "zh-CN" | "en";
+  locale?: string;
   contentLocales?: Record<string, string>;
   contentTranslations?: Record<
     string,

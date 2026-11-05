@@ -9,8 +9,10 @@ import {
   localeOf,
   localePath,
   localizeHref,
-  unprefixedPath,
+  messageLocale,
 } from "@/core/i18n/locale";
+import { normalizeCatalog } from "@/core/i18n/catalog";
+import { localizedCodePath } from "@/core/i18n/routes";
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const headers = new Headers(request.headers);
@@ -22,6 +24,13 @@ export async function proxy(request: NextRequest) {
       localeOf(request.cookies.get("everunfold-admin-locale")?.value),
     );
     headers.set("x-everunfold-management", "true");
+    headers.set(
+      "x-everunfold-ui-locale",
+      messageLocale(
+        request.cookies.get("everunfold-admin-ui")?.value ??
+          request.cookies.get("everunfold-admin-locale")?.value,
+      ),
+    );
     const response = NextResponse.next({ request: { headers } });
     response.headers.set("Cache-Control", "private, no-store");
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
@@ -29,13 +38,40 @@ export async function proxy(request: NextRequest) {
   }
   try {
     const snapshot = await readPublicSnapshot();
+    const catalog = normalizeCatalog(
+      snapshot.site.settings?.site.language_catalog,
+    );
     const content = resolveContent(snapshot, path);
-    const locale = content ? localeOf(content.language) : localePath(path);
+    const locale = content
+      ? localeOf(content.language)
+      : localePath(path, catalog);
     headers.set("x-everunfold-locale", locale);
-    const base = unprefixedPath(path);
-    const rewrite =
-      !content && locale === "en" && localizeHref(base, "en") !== base;
-    if (!hasPublicRoute(snapshot, rewrite ? base : path)) {
+    headers.set(
+      "x-everunfold-ui-locale",
+      catalog.languages.find((item) => item.code === locale)?.ui_locale ??
+        catalog.languages.find((item) => item.code === catalog.default_code)!
+          .ui_locale,
+    );
+    const codePath = localizedCodePath(snapshot, path);
+    const active = catalog.languages.some(
+      (item) => item.code === locale && item.enabled,
+    );
+    const defaultLanguage = catalog.languages.find(
+      (item) => item.code === catalog.default_code,
+    )!;
+    if (
+      !content &&
+      !codePath &&
+      defaultLanguage.prefix &&
+      hasPublicRoute(snapshot, path)
+    ) {
+      const canonical = request.nextUrl.clone();
+      canonical.pathname = localizeHref(path, catalog.default_code, catalog);
+      const redirect = NextResponse.redirect(canonical, 307);
+      redirect.headers.set("Cache-Control", "no-store");
+      return redirect;
+    }
+    if ((!content && !active) || !hasPublicRoute(snapshot, codePath ?? path)) {
       return new NextResponse(failureDocument(404), {
         status: 404,
         headers: {
@@ -44,11 +80,7 @@ export async function proxy(request: NextRequest) {
         },
       });
     }
-    const target = request.nextUrl.clone();
-    if (rewrite) target.pathname = base;
-    const response = rewrite
-      ? NextResponse.rewrite(target, { request: { headers } })
-      : NextResponse.next({ request: { headers } });
+    const response = NextResponse.next({ request: { headers } });
     response.headers.set("Content-Language", locale);
     return response;
   } catch {

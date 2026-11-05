@@ -70,6 +70,8 @@
   padding: 0;
 }
 .menu {
+  max-height: min(65vh, 480px);
+  overflow: auto;
   display: grid;
   gap: 4px;
   padding: 12px;

@@ -59,23 +59,26 @@ export async function verifyReaderRuntime({
     projectRoot,
     config.cache?.directory ?? "var/public-snapshots",
   );
-  const { stdout } = await promisify(execFile)(
-    process.execPath,
-    ["--import", "tsx", "tools/fixtures/content-snapshot.mts"],
-    {
-      cwd: projectRoot,
-      env: {
-        ...process.env,
-        NODE_ENV: "test",
-        CONFIG_FILE: path.join(projectRoot, "config.toml"),
+  async function readSourceSnapshot() {
+    const { stdout } = await promisify(execFile)(
+      process.execPath,
+      ["--import", "tsx", "tools/fixtures/content-snapshot.mts"],
+      {
+        cwd: projectRoot,
+        env: {
+          ...process.env,
+          NODE_ENV: "test",
+          CONFIG_FILE: path.join(projectRoot, "config.toml"),
+        },
+        maxBuffer: 16 * 1024 * 1024,
       },
-      maxBuffer: 16 * 1024 * 1024,
-    },
-  );
-  const managed = JSON.parse(stdout);
-  const original = managed
-    ? Buffer.from(JSON.stringify(managed))
-    : await readFile(path.join(originalCache, "current.json"));
+    );
+    const managed = JSON.parse(stdout);
+    return managed
+      ? Buffer.from(JSON.stringify(managed))
+      : await readFile(path.join(originalCache, "current.json"));
+  }
+  const original = await readSourceSnapshot();
   const snapshot = JSON.parse(original.toString("utf8"));
   const content =
     snapshot.contents.find(
@@ -131,7 +134,12 @@ export async function verifyReaderRuntime({
       else await stop(backend);
     backendDelay = delay;
     backend = start(
-      path.join(backendRoot, ".venv/Scripts/python.exe"),
+      path.join(
+        backendRoot,
+        process.platform === "win32"
+          ? ".venv/Scripts/python.exe"
+          : ".venv/bin/python",
+      ),
       [
         "-c",
         [
@@ -263,6 +271,12 @@ export async function verifyReaderRuntime({
       assert.match(response.headers.get("x-robots-tag") ?? "", /noindex/);
       const html = await response.text();
       assert.equal(classCount(html, "blog-shell"), 0);
+      if (route === "/admin") {
+        assert.equal(classCount(html, "admin-access"), 1);
+        assert.equal(classCount(html, "admin-access-card"), 1);
+        assert.equal(classCount(html, "admin-account"), 0);
+        continue;
+      }
       assert.equal(classCount(html, "management-root"), 1);
       assert.equal(
         classCount(html, "login-card"),
@@ -290,10 +304,7 @@ export async function verifyReaderRuntime({
       );
       assert.match(visibleText(html), /正在确认登录状态/);
     }
-    assert.deepEqual(
-      await readFile(path.join(originalCache, "current.json")),
-      original,
-    );
+    assert.deepEqual(await readSourceSnapshot(), original);
     console.log(
       "PASS: real backend stopped; warm snapshot article/home/comments/SEO stay readable (200) with exactly one blog shell, empty snapshot article/home return 503 no-store/noindex; login/admin remain 200 private no-store/noindex with no public shell or private SSR data; original cache unchanged.",
     );

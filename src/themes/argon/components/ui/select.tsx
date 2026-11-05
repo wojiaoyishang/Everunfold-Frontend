@@ -158,7 +158,14 @@ export function Select({
         onClick={() => setActive(selectedIndex)}
         onKeyDown={keyDown}
       >
-        <span>{options[selectedIndex]?.label ?? <UiText text="请选择" />}</span>
+        <span>
+          {options[selectedIndex]?.flag && (
+            <span className="ui-language-flag" aria-hidden="true">
+              {options[selectedIndex].flag}
+            </span>
+          )}
+          {options[selectedIndex]?.label ?? <UiText text="请选择" />}
+        </span>
         <Icon name="chevron" />
       </Button>
       <Popover
@@ -187,7 +194,14 @@ export function Select({
             onMouseDown={(event) => event.preventDefault()}
             onClick={() => choose(index)}
           >
-            <span>{option.label}</span>
+            <span>
+              {option.flag && (
+                <span className="ui-language-flag" aria-hidden="true">
+                  {option.flag}
+                </span>
+              )}
+              {option.label}
+            </span>
             {selected === option.value && <Icon name="check" />}
           </Button>
         ))}

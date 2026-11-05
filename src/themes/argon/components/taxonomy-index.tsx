@@ -21,7 +21,9 @@ export function TaxonomyIndex({
       <header className="surface page-heading">
         <Icon name={kind === "category" ? "folder" : "tag"} />
         <div>
-          <h1>{title}</h1>
+          <h1>
+            <UiText text={title} />
+          </h1>
           <p>
             <UiText text="共" />
             {terms.length} <UiText text="个" />

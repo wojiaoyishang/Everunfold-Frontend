@@ -8,7 +8,7 @@ import { useRouteState } from "./route-state";
 import { useNavigation } from "./navigation-state";
 import { navigateToAnchor } from "@/core/browser/scroll-restoration";
 import { isManagementLink } from "@/core/auth/routes";
-import { useLocale } from "@/core/i18n/provider";
+import { useLocale, useLanguageCatalog } from "@/core/i18n/provider";
 import { localizeHref, localeOf, localePath } from "@/core/i18n/locale";
 import { normalizePath } from "@/core/content/urls";
 
@@ -29,6 +29,7 @@ export function AppLink({
 }: AppLinkProps) {
   const { navigate, site } = useRouteState();
   const { locale, preferred } = useLocale();
+  const catalog = useLanguageCatalog();
   const originalHref = sourceHref;
   const publicContent = site.contentTranslations?.[
     normalizePath(new URL(originalHref, "http://locale.invalid").pathname)
@@ -37,11 +38,11 @@ export function AppLink({
     normalizePath(new URL(sourceHref, "http://locale.invalid").pathname)
   ]
     ? (publicContent?.path ?? sourceHref)
-    : localizeHref(sourceHref, preferred);
+    : localizeHref(sourceHref, preferred, catalog);
   const contentLocale =
     site.contentLocales?.[
       normalizePath(new URL(href, "http://locale.invalid").pathname)
-    ] ?? localePath(new URL(href, "http://locale.invalid").pathname);
+    ] ?? localePath(new URL(href, "http://locale.invalid").pathname, catalog);
   return (
     <Link
       {...props}
@@ -112,6 +113,7 @@ export function SearchForm({
 }) {
   const { navigate } = useRouteState();
   const { locale } = useLocale();
+  const catalog = useLanguageCatalog();
   const { setOpen } = useNavigation();
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     if (event.defaultPrevented) return;
@@ -122,7 +124,7 @@ export function SearchForm({
     setOpen(false);
     onSearch?.();
     const url = new URL(
-      localizeHref(searchHref(value), locale),
+      localizeHref(searchHref(value), locale, catalog),
       window.location.origin,
     );
     const type = values.get("type");
@@ -134,7 +136,7 @@ export function SearchForm({
   }
   return (
     <Form
-      action={localizeHref("/search", locale)}
+      action={localizeHref("/search", locale, catalog)}
       className={className}
       onSubmit={onSubmit}
     >

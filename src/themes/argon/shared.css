@@ -5,3 +5,13 @@
 @import "./styles/ui-controls.css";
 @import "./styles/interaction-motion.css";
 @import "./styles/confirm-dialog.css";
+
+.ui-language-flag {
+  display: inline-block;
+  margin-inline-end: 6px;
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 18px;
+  line-height: 1;
+  vertical-align: middle;
+}

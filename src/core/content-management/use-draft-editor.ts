@@ -52,7 +52,7 @@ type Write =
 export function useDraftEditor(
   type: ContentTypeDefinition,
   id: string | null,
-  language: "zh-CN" | "en" = "zh-CN",
+  language?: string,
 ) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const account = useAdminAccount();

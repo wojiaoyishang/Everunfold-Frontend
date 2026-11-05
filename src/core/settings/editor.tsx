@@ -18,6 +18,10 @@ import { RequestError } from "@/core/http/request";
 
 export function settingsFailure(error: unknown) {
   if (error instanceof RequestError) {
+    if (error.code === 42292)
+      return "该语言仍有文章或说说，请保留语言或改为禁用。";
+    if (error.code === 42294)
+      return "语言前缀与已有公开地址冲突，请更换前缀或先调整内容地址。";
     if (error.status === 409)
       return "服务器上的设置已更新。你的修改已保留，请载入服务器版本后重新合并。";
     if (error.status === 401 || error.status === 403)
@@ -52,6 +56,7 @@ function useEditor() {
       const response = await readSettings(baseUrl);
       if (mounted.current && operation.current === id) {
         setSaved(response.data);
+        window.dispatchEvent(new Event("everunfold-language-catalog"));
         setDraft(response.data.value);
       }
     } catch {
@@ -121,6 +126,7 @@ function useEditor() {
       );
       if (!mounted.current) return;
       setSaved(response.data);
+      window.dispatchEvent(new Event("everunfold-language-catalog"));
       setDraft(response.data.value);
       setMessage("设置已保存。节点应用后，下一次页面访问将使用最新配置。");
     } catch (error) {

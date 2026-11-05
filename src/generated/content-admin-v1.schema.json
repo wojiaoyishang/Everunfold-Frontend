@@ -594,13 +594,19 @@
           "$ref": "#/$defs/DraftFields"
         },
         "language": {
-          "default": "zh-CN",
-          "enum": [
-            "zh-CN",
-            "en"
+          "anyOf": [
+            {
+              "maxLength": 32,
+              "minLength": 2,
+              "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "title": "Language",
-          "type": "string"
+          "default": null,
+          "title": "Language"
         }
       },
       "required": [
@@ -1076,10 +1082,9 @@
         "language": {
           "anyOf": [
             {
-              "enum": [
-                "zh-CN",
-                "en"
-              ],
+              "maxLength": 32,
+              "minLength": 2,
+              "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$",
               "type": "string"
             },
             {
@@ -1369,6 +1374,79 @@
       "title": "FontInfo",
       "type": "object"
     },
+    "LanguageCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "default_code": {
+          "default": "zh-CN",
+          "maxLength": 32,
+          "minLength": 2,
+          "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$",
+          "title": "Default Code",
+          "type": "string"
+        },
+        "languages": {
+          "items": {
+            "$ref": "#/$defs/LanguageDefinition"
+          },
+          "minItems": 1,
+          "title": "Languages",
+          "type": "array"
+        }
+      },
+      "title": "LanguageCatalog",
+      "type": "object"
+    },
+    "LanguageDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "maxLength": 32,
+          "minLength": 2,
+          "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$",
+          "title": "Code",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "flag": {
+          "default": "",
+          "maxLength": 16,
+          "title": "Flag",
+          "type": "string"
+        },
+        "prefix": {
+          "default": "",
+          "pattern": "^(?:|/[a-z0-9][a-z0-9-]{0,31})$",
+          "title": "Prefix",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "ui_locale": {
+          "default": "en",
+          "enum": [
+            "zh-CN",
+            "en"
+          ],
+          "title": "Ui Locale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "name"
+      ],
+      "title": "LanguageDefinition",
+      "type": "object"
+    },
     "MediaURL": {
       "additionalProperties": false,
       "properties": {
@@ -1644,6 +1722,34 @@
         "data"
       ],
       "title": "PublicResponse[EditorCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_LanguageCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/LanguageCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[LanguageCatalog]",
       "type": "object"
     },
     "PublicResponse_TranslationCatalog_": {
@@ -1956,10 +2062,9 @@
           "type": "integer"
         },
         "language": {
-          "enum": [
-            "zh-CN",
-            "en"
-          ],
+          "maxLength": 32,
+          "minLength": 2,
+          "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$",
           "title": "Language",
           "type": "string"
         },
@@ -2000,7 +2105,6 @@
           "additionalProperties": {
             "type": "integer"
           },
-          "maxProperties": 32,
           "minProperties": 1,
           "propertyNames": {
             "format": "uuid"
@@ -2217,6 +2321,9 @@
   },
   "additionalProperties": false,
   "properties": {
+    "languages": {
+      "$ref": "#/$defs/PublicResponse_LanguageCatalog_"
+    },
     "actions": {
       "$ref": "#/$defs/PublicResponse_ContentActions_"
     },
@@ -2273,6 +2380,7 @@
     }
   },
   "required": [
+    "languages",
     "actions",
     "create_category",
     "editor_catalog",
@@ -2295,7 +2403,7 @@
   "title": "ContentAdminContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.7.0",
+  "x-everunfold-contract-version": "1.8.0",
   "x-everunfold-content-types": [
     {
       "id": "article",
@@ -2335,6 +2443,12 @@
     }
   ],
   "x-everunfold-operations": [
+    {
+      "name": "readContentLanguages",
+      "path": "/v1/admin/content/languages",
+      "method": "GET",
+      "response": "languages"
+    },
     {
       "name": "readContentActions",
       "path": "/v1/admin/content/actions",

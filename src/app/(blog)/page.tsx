@@ -1,36 +1,16 @@
-import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
-import { pageNumber } from "@/core/content/query";
-import { feedType } from "@/core/content/presentation";
-import { Feed } from "@/themes/argon/components/feed";
-import { SearchResults } from "@/themes/argon/components/search-results";
-export default async function HomePage({
+import { readPageSnapshot } from "@/core/i18n/server";
+import { CodePage, codePageMetadata, type PageParameters } from "./code-page";
+export async function generateMetadata() {
+  return codePageMetadata(await readPageSnapshot(), "/");
+}
+export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<PageParameters>;
 }) {
-  const [snapshot, params] = await Promise.all([
-    readPublicSnapshot(),
+  const [snapshot, parameters] = await Promise.all([
+    readPageSnapshot(),
     searchParams,
   ]);
-  const query =
-    typeof params.q === "string"
-      ? params.q
-      : typeof params.s === "string"
-        ? params.s
-        : "";
-  const type = feedType(params.type);
-  return query ? (
-    <SearchResults
-      snapshot={snapshot}
-      query={query}
-      type={type}
-      page={pageNumber(params.page)}
-    />
-  ) : (
-    <Feed
-      snapshot={snapshot}
-      page={pageNumber(params.page)}
-      type={type === "page" ? "all" : type}
-    />
-  );
+  return <CodePage snapshot={snapshot} path="/" parameters={parameters} />;
 }

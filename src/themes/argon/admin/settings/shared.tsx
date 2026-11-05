@@ -156,7 +156,7 @@ export function SettingsFrame({
         </div>
       ) : !editor.draft ? (
         <div className="admin-settings-message" role="alert">
-          {editor.error}
+          <UiText text={editor.error} />
           <Button className="admin-button" onClick={() => void editor.reload()}>
             <UiText text="重新读取" />
           </Button>
@@ -174,7 +174,7 @@ export function SettingsFrame({
           </fieldset>
           {editor.error && (
             <div role="alert" className="admin-settings-message is-error">
-              {editor.error}
+              <UiText text={editor.error} />
               <Button
                 className="admin-button"
                 onClick={() => void editor.reload()}

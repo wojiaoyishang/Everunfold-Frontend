@@ -1,30 +1,18 @@
-import type { Metadata } from "next";
-import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
-import { pageNumber } from "@/core/content/query";
-import { feedType } from "@/core/content/presentation";
-import { SearchResults } from "@/themes/argon/components/search-results";
-export const metadata: Metadata = {
-  title: "站内搜索",
-  robots: { index: false, follow: true },
-};
-export default async function SearchPage({
+import { readPageSnapshot } from "@/core/i18n/server";
+import { CodePage, codePageMetadata, type PageParameters } from "../code-page";
+export async function generateMetadata() {
+  return codePageMetadata(await readPageSnapshot(), "/search");
+}
+export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: Promise<PageParameters>;
 }) {
-  const [snapshot, params] = await Promise.all([
-    readPublicSnapshot(),
+  const [snapshot, parameters] = await Promise.all([
+    readPageSnapshot(),
     searchParams,
   ]);
-  const query =
-    typeof params.q === "string" ? params.q.trim().slice(0, 160) : "";
   return (
-    <SearchResults
-      snapshot={snapshot}
-      query={query}
-      type={feedType(params.type)}
-      page={pageNumber(params.page)}
-      allLanguages={params.languages === "all"}
-    />
+    <CodePage snapshot={snapshot} path="/search" parameters={parameters} />
   );
 }

@@ -250,6 +250,68 @@ directory = "./var/absent-admin-verification-cache"
           "tsx",
           "tools/fixtures/settings-snapshot.mts",
           workspace,
+          "languages",
+        ],
+        { cwd: projectRoot, stdio: "inherit", windowsHide: true },
+      );
+      fixture.once("error", reject);
+      fixture.once("exit", (code) =>
+        code === 0 ? resolve() : reject(new Error("Language fixture failed")),
+      );
+    });
+    const landing = await fetch(base + "/", { redirect: "manual" });
+    assert.equal(landing.status, 307);
+    assert.equal(
+      new URL(landing.headers.get("location"), base).pathname.replace(
+        /\/$/,
+        "",
+      ),
+      "/zh",
+    );
+    const chinese = await fetch(base + "/hello.html", {
+      headers: {
+        Cookie: "everunfold-locale=en",
+        "x-everunfold-locale": "en",
+        "x-everunfold-ui-locale": "en",
+      },
+    });
+    assert.equal(chinese.status, 200);
+    assert.match(await chinese.text(), /<html[^>]*lang="zh-CN"/);
+    const english = await fetch(base + "/custom-english.html");
+    assert.equal(english.status, 200);
+    assert.equal(english.headers.get("content-language"), "en");
+    const englishHTML = await english.text();
+    assert.match(englishHTML, /<html[^>]*lang="en"/);
+    assert.match(englishHTML, /English fixture body/);
+    assert.doesNotMatch(englishHTML, /href="\/francais\/custom-english.html"/);
+    const englishHome = await (await fetch(base + "/en/")).text();
+    const titleNodes = DomUtils.findAll(
+      (node) =>
+        node.type === "tag" &&
+        node.attribs.class?.split(/\s+/).includes("post-title"),
+      parseDocument(englishHome).children,
+    );
+    const titles = titleNodes.map((node) => DomUtils.textContent(node));
+    assert.ok(titles.includes("English fixture story"));
+    assert.ok(!titles.includes("一篇文章"));
+    const french = await fetch(base + "/francais/search?q=English");
+    assert.equal(french.status, 200);
+    assert.equal(french.headers.get("content-language"), "fr");
+    const frenchHTML = await french.text();
+    assert.match(frenchHTML, /<html[^>]*lang="fr"/);
+    assert.match(frenchHTML, /data-ui-locale="en"/);
+    assert.equal((await fetch(base + "/francais/missing.html")).status, 404);
+    console.log(
+      "Configurable language routes passed: Chinese prefix, default landing, custom English URL, French interface fallback, grouped feeds and URL precedence over cookies/headers.",
+    );
+    await new Promise((resolve, reject) => {
+      const fixture = spawn(
+        process.execPath,
+        [
+          "--import",
+          "tsx",
+          "tools/fixtures/settings-snapshot.mts",
+          workspace,
           "withdraw",
         ],
         { cwd: projectRoot, stdio: "inherit", windowsHide: true },
@@ -270,7 +332,7 @@ directory = "./var/absent-admin-verification-cache"
     await writeFile(
       path.join(
         workspace,
-        "var/settings-verification/admin-verification/00000000-0000-0000-0000-000000000001/public-settings.3.json",
+        "var/settings-verification/admin-verification/00000000-0000-0000-0000-000000000001/public-settings.4.json",
       ),
       "corrupt",
     );

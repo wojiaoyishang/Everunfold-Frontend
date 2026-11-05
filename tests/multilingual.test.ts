@@ -1,8 +1,14 @@
+import { localizedCodePath } from "../src/core/i18n/routes";
+import { normalizeCatalog, languageName } from "../src/core/i18n/catalog";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { content, snapshot } from "./fixtures";
 import { localizedSnapshot, languageContents } from "../src/core/i18n/snapshot";
-import { localizeHref, localePath } from "../src/core/i18n/locale";
+import {
+  localizeHref,
+  localePath,
+  unprefixedPath,
+} from "../src/core/i18n/locale";
 import {
   publicFeed,
   queryFeed,
@@ -147,5 +153,88 @@ test("legacy snapshots retain their own published language without invented tran
   assert.equal(
     localized.site.contentTranslations?.["/中文.html"][0].language,
     "zh-CN",
+  );
+});
+
+test("configured languages drive arbitrary prefixes and default routes without a two-language limit", () => {
+  const catalogue = normalizeCatalog({
+    default_code: "ja",
+    languages: [
+      {
+        code: "ja",
+        name: "日本語",
+        prefix: "",
+        enabled: true,
+        ui_locale: "en",
+      },
+      {
+        code: "fr-CA",
+        name: "Français",
+        prefix: "/francais",
+        enabled: true,
+        ui_locale: "en",
+      },
+      {
+        code: "zh-CN",
+        name: "简体中文",
+        prefix: "/zh",
+        enabled: true,
+        ui_locale: "zh-CN",
+      },
+    ],
+  });
+  assert.equal(
+    localizeHref("/search?q=hello", "fr-CA", catalogue),
+    "/francais/search?q=hello",
+  );
+  assert.equal(
+    localizeHref("/francais/archives", "ja", catalogue),
+    "/archives",
+  );
+  assert.equal(localePath("/francais/search", catalogue), "fr-CA");
+  assert.equal(localePath("/unprefixed.html", catalogue), "ja");
+  assert.equal(unprefixedPath("/zh/tags", catalogue), "/tags");
+  assert.equal(languageName(catalogue, "fr-CA"), "Français");
+  assert.equal(languageName(catalogue, "unknown"), "unknown");
+  catalogue.languages[1].enabled = false;
+  assert.equal(localizeHref("/search", "fr-CA", catalogue), "/search");
+});
+
+test("prefixed routes resolve code pages directly and never invent translated article addresses", () => {
+  const value = bilingual();
+  value.site.settings = {
+    site: {
+      name: "Site",
+      description: "",
+      author: "Author",
+      language_catalog: {
+        default_code: "zh-CN",
+        languages: [
+          {
+            code: "zh-CN",
+            name: "简体中文",
+            prefix: "/zh",
+            enabled: true,
+            ui_locale: "zh-CN",
+          },
+          {
+            code: "fr",
+            name: "Français",
+            prefix: "/francais",
+            enabled: true,
+            ui_locale: "en",
+          },
+        ],
+      },
+    },
+    theme: {},
+  };
+  assert.equal(localizedCodePath(value, "/francais/search"), "/search");
+  assert.equal(localizedCodePath(value, "/francais/"), "/");
+  assert.equal(localizedCodePath(value, "/francais/original.html"), null);
+  assert.equal(localizedCodePath(value, "/custom-english.html"), null);
+  assert.equal(
+    localizedCodePath(value, "/francais/category/notes"),
+    "/category/notes",
   );
 });

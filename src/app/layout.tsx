@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
 import { LocaleProvider } from "@/core/i18n/provider";
-import { localeOf } from "@/core/i18n/locale";
+import { localeOf, messageLocale } from "@/core/i18n/locale";
+import { readPageSnapshot } from "@/core/i18n/server";
+import { normalizeCatalog } from "@/core/i18n/catalog";
 
 import "./globals.css";
 import "@/themes/argon/shared.css";
@@ -20,10 +22,16 @@ export default async function RootLayout({
   const request = await headers();
   const locale = localeOf(request.get("x-everunfold-locale"));
   const privateUI = request.get("x-everunfold-management") === "true";
+  const uiLocale = messageLocale(request.get("x-everunfold-ui-locale"));
+  const catalog = privateUI
+    ? undefined
+    : normalizeCatalog(
+        (await readPageSnapshot()).site.settings?.site.language_catalog,
+      );
   return (
     <html
       lang={locale}
-      data-ui-locale={locale}
+      data-ui-locale={uiLocale}
       data-motion="full"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
@@ -33,7 +41,12 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: initializeMotion }} />
       </head>
       <body>
-        <LocaleProvider initial={locale} privateUI={privateUI}>
+        <LocaleProvider
+          initial={locale}
+          initialUI={uiLocale}
+          catalog={catalog}
+          privateUI={privateUI}
+        >
           <ToastProvider>{children}</ToastProvider>
         </LocaleProvider>
       </body>

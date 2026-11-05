@@ -16,6 +16,7 @@ if (
   throw new Error("Expected an isolated verification workspace");
 const epoch = "00000000-0000-0000-0000-000000000001";
 const value = snapshot();
+const multilingual = process.argv[3] === "languages";
 value.contents[1].content = [
   {
     id: "markdown-features",
@@ -35,13 +36,51 @@ value.contents[1].content = [
       '{{< custom:offline title="离线原生模板" >}}\n\n**离线短代码正文**\n\n{{< /custom:offline >}}',
   },
 ];
+if (multilingual) {
+  value.schema_version = "0.6.0";
+  const source = value.contents[0];
+  source.translation_group_id = "00000000-0000-0000-0000-000000000041";
+  const english = {
+    ...source,
+    id: "article-en",
+    path: "/custom-english.html",
+    language: "en",
+    title: "English fixture story",
+    content: [
+      {
+        id: "en-body",
+        type: "markdown" as const,
+        content: "English fixture body",
+      },
+    ],
+  };
+  const translations = [
+    {
+      id: source.id,
+      language: source.language,
+      path: source.path,
+      access: "public" as const,
+      is_original: true,
+    },
+    {
+      id: english.id,
+      language: english.language,
+      path: english.path,
+      access: "public" as const,
+      is_original: false,
+    },
+  ];
+  source.translations = translations;
+  english.translations = translations;
+  value.contents.push(english);
+}
 value.source_epoch = epoch;
 const cache = path.join(root, "var/absent-admin-verification-cache");
 await mkdir(cache, { recursive: true });
 await writeFile(path.join(cache, "current.json"), JSON.stringify(value));
 const contentStore = new FileContentStore(cache, "admin-verification", epoch);
 const withdrawing = process.argv[3] === "withdraw";
-value.generation = withdrawing ? 3 : 2;
+value.generation = withdrawing ? 4 : multilingual ? 3 : 2;
 if (withdrawing) {
   value.contents = [];
   value.comments = {};
@@ -64,9 +103,42 @@ await store.apply({
   node_id: "admin-verification",
   source_epoch: epoch,
   resource: "public-settings",
-  revision: 2,
+  revision: withdrawing ? 4 : multilingual ? 3 : 2,
   value: {
     site: {
+      ...(multilingual
+        ? {
+            language_catalog: {
+              default_code: "zh-CN",
+              languages: [
+                {
+                  code: "zh-CN",
+                  name: "简体中文",
+                  flag: "🇨🇳",
+                  prefix: "/zh",
+                  enabled: true,
+                  ui_locale: "zh-CN",
+                },
+                {
+                  code: "en",
+                  name: "English",
+                  flag: "🇬🇧",
+                  prefix: "/en",
+                  enabled: true,
+                  ui_locale: "en",
+                },
+                {
+                  code: "fr",
+                  name: "Français",
+                  flag: "🇫🇷",
+                  prefix: "/francais",
+                  enabled: true,
+                  ui_locale: "en",
+                },
+              ],
+            },
+          }
+        : {}),
       name: "本地设置",
       description: "离线说明",
       author: "测试作者",

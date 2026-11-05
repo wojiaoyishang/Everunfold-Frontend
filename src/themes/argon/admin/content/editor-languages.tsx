@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "@/core/content-management/use-translations";
 import { useTranslationCandidates } from "@/core/content-management/use-translation-candidates";
 import type { Locale } from "@/core/i18n/locale";
-import { locales, localeNames, localeOf } from "@/core/i18n/locale";
+import { useLanguageCatalog } from "@/core/i18n/provider";
+import { languageName } from "@/core/i18n/catalog";
+import { LanguageLabel } from "../../components/language-label";
 import type { TranslationMember } from "@/generated/content-admin-contract";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
@@ -33,12 +35,13 @@ function LinkPicker({
   onPick: (id: string) => Promise<boolean>;
   onClose: () => void;
 }) {
+  const catalog = useLanguageCatalog();
   const [search, setSearch] = useState("");
   const [closing, setClosing] = useState(false);
   const results = useTranslationCandidates(type, language, search);
   return (
     <Modal
-      title={`关联已有${localeNames[language]}内容`}
+      title={`关联已有${languageName(catalog, language)}内容`}
       closeLabel="关闭译文选择器"
       closing={closing}
       onClose={() => setClosing(true)}
@@ -116,6 +119,8 @@ export function EditorLanguages({
   disabled: boolean;
   contentRevision?: number;
 }) {
+  const catalog = useLanguageCatalog();
+  const [chosen, setChosen] = useState("");
   const translations = useTranslations(id, contentRevision);
   const [open, setOpen] = useState(false);
   const [copy, setCopy] = useState(true);
@@ -133,10 +138,13 @@ export function EditorLanguages({
     return () => window.removeEventListener("hashchange", show);
   }, []);
   const group = translations.catalog;
-  const missing = locales.filter(
-    (locale) => !group?.members.some((member) => member.language === locale),
-  );
-  const target = missing[0];
+  const available = catalog.languages.filter((item) => item.enabled);
+  const missing = available
+    .map((item) => item.code)
+    .filter(
+      (locale) => !group?.members.some((member) => member.language === locale),
+    );
+  const target = missing.includes(chosen) ? chosen : missing[0];
   const current = group?.members.find((member) => member.id === id);
   const locked = disabled || translations.busy;
   return (
@@ -151,20 +159,21 @@ export function EditorLanguages({
             <Select
               name="new-content-language"
               label="内容语言"
-              options={locales.map((value) => ({
-                value,
-                label: localeNames[value],
+              options={available.map((item) => ({
+                value: item.code,
+                label: item.name,
+                flag: item.flag,
               }))}
               value={language}
               disabled={disabled}
-              onValueChange={(value) => onLanguage(localeOf(value))}
+              onValueChange={onLanguage}
             />
           </>
         ) : (
           <>
             <span>
               <Icon name="languages" />
-              {localeNames[localeOf(current?.language ?? language)]}
+              <LanguageLabel code={current?.language ?? language} />
               {current?.is_original ? (
                 <UiText text=" · 原文" />
               ) : (
@@ -233,7 +242,7 @@ export function EditorLanguages({
                       <div className={styles.row} key={member.id}>
                         <div>
                           <strong>
-                            {localeNames[localeOf(member.language)]}
+                            <LanguageLabel code={member.language} />
                           </strong>
                           {member.is_original && (
                             <small>
@@ -315,6 +324,20 @@ export function EditorLanguages({
                   )}
                   {target && (
                     <div className={styles.create}>
+                      <Select
+                        name="translation-target-language"
+                        label="新译文语言"
+                        value={target}
+                        options={missing.map((code) => ({
+                          value: code,
+                          label: languageName(catalog, code),
+                          flag: catalog.languages.find(
+                            (item) => item.code === code,
+                          )?.flag,
+                        }))}
+                        onValueChange={setChosen}
+                        disabled={locked}
+                      />
                       <label>
                         <Switch
                           aria-label="复制原文作为起点"
@@ -343,7 +366,7 @@ export function EditorLanguages({
                       >
                         <Icon name="plus" />
                         <UiText text="新建" />
-                        {localeNames[target]}
+                        {languageName(catalog, target)}
                         <UiText text="译文" />
                       </Button>
                       <Button
@@ -352,7 +375,7 @@ export function EditorLanguages({
                         onClick={() => setLinking(target)}
                       >
                         <UiText text="关联已有" />
-                        {localeNames[target]}
+                        {languageName(catalog, target)}
                         <UiText text="内容" />
                       </Button>
                     </div>

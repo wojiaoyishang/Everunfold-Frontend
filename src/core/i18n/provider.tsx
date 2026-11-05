@@ -7,25 +7,43 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import type { Locale } from "./locale";
-import { localeOf } from "./locale";
+import type { Locale, MessageLocale } from "./locale";
+import { localeOf, messageLocale } from "./locale";
 import { translate } from "./messages";
+import { initialCatalog, type LanguageCatalog } from "./catalog";
+
+const CatalogContext = createContext<LanguageCatalog>(initialCatalog);
+export const LanguageCatalogProvider = CatalogContext.Provider;
+export function useLanguageCatalog() {
+  return useContext(CatalogContext);
+}
 
 const LocaleContext = createContext<{
   locale: Locale;
+  uiLocale: MessageLocale;
   preferred: Locale;
-  change: (locale: Locale) => void;
-}>({ locale: "zh-CN", preferred: "zh-CN", change: () => {} });
+  change: (locale: Locale, uiLocale?: MessageLocale) => void;
+}>({
+  locale: "zh-CN",
+  uiLocale: "zh-CN",
+  preferred: "zh-CN",
+  change: () => {},
+});
 export function LocaleProvider({
   initial,
   privateUI,
+  initialUI,
+  catalog = initialCatalog,
   children,
 }: {
   initial: Locale;
   privateUI: boolean;
+  initialUI?: MessageLocale;
+  catalog?: LanguageCatalog;
   children: ReactNode;
 }) {
   const [locale, setLocale] = useState(initial);
+  const [uiLocale, setUI] = useState(initialUI ?? messageLocale(initial));
   // Public SSR follows the URL; cookie preferences are restored after hydration.
   const cookieName = privateUI
     ? "everunfold-admin-locale"
@@ -43,22 +61,29 @@ export function LocaleProvider({
   );
   useEffect(() => {
     document.documentElement.lang = locale;
-    document.documentElement.dataset.uiLocale = locale;
-  }, [locale]);
+    document.documentElement.dataset.uiLocale = uiLocale;
+  }, [locale, uiLocale]);
   return (
-    <LocaleContext
-      value={{
-        locale,
-        preferred,
-        change: (value) => {
-          document.cookie = `${privateUI ? "everunfold-admin-locale" : "everunfold-locale"}=${value}; Path=/; Max-Age=31536000; SameSite=Lax`;
-          if (privateUI) setLocale(value);
-          window.dispatchEvent(new Event("everunfold-locale-change"));
-        },
-      }}
-    >
-      {children}
-    </LocaleContext>
+    <LanguageCatalogProvider value={catalog}>
+      <LocaleContext
+        value={{
+          locale,
+          uiLocale,
+          preferred,
+          change: (value, fallback) => {
+            document.cookie = `${privateUI ? "everunfold-admin-locale" : "everunfold-locale"}=${value}; Path=/; Max-Age=31536000; SameSite=Lax`;
+            if (privateUI) {
+              setLocale(value);
+              setUI(fallback ?? messageLocale(value));
+              document.cookie = `everunfold-admin-ui=${fallback ?? messageLocale(value)}; Path=/; Max-Age=31536000; SameSite=Lax`;
+            }
+            window.dispatchEvent(new Event("everunfold-locale-change"));
+          },
+        }}
+      >
+        {children}
+      </LocaleContext>
+    </LanguageCatalogProvider>
   );
 }
 export function useLocale() {
@@ -79,9 +104,9 @@ export function UiText({
   text: string;
   values?: Record<string, string | number>;
 }) {
-  return translate(text, useLocale().locale, values);
+  return translate(text, useLocale().uiLocale, values);
 }
 export function useT() {
-  const { locale } = useLocale();
-  return (text: string) => translate(text, locale);
+  const { uiLocale } = useLocale();
+  return (text: string) => translate(text, uiLocale);
 }

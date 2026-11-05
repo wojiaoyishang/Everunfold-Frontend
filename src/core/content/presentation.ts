@@ -1,7 +1,7 @@
 import type { ContentPresentation } from "@/generated/presentation-contract";
 import type { Content, PublicSnapshot } from "./types";
 import { normalizePath } from "./urls";
-import { languageContents } from "@/core/i18n/snapshot";
+import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";
 
 export type { ContentPresentation };
 export type ContentType = ContentPresentation["type"];
@@ -27,13 +27,12 @@ export function presentLegacyContent({
 }
 
 export function publicFeed(snapshot: PublicSnapshot): FeedEntry[] {
-  return languageContents(
-    snapshot.contents,
-    snapshot.site.locale ?? "zh-CN",
-  ).map((content) => ({
-    content: presentLegacyContent(content),
-    example: false,
-  }));
+  return languageContents(snapshot.contents, snapshotLocale(snapshot)).map(
+    (content) => ({
+      content: presentLegacyContent(content),
+      example: false,
+    }),
+  );
 }
 
 export function resolvePresentation(snapshot: PublicSnapshot, path: string) {
@@ -63,7 +62,7 @@ export function queryFeed(
   } = {},
 ) {
   const query = options.query?.trim().slice(0, 160).toLocaleLowerCase();
-  const locale = snapshot.site.locale ?? "zh-CN";
+  const locale = snapshotLocale(snapshot);
   const candidates = (
     query
       ? snapshot.contents

@@ -1,4 +1,6 @@
 .menu {
+  max-height: min(65vh, 480px);
+  overflow: auto;
   padding: 6px;
   border: 1px solid var(--line);
   border-radius: 10px;
@@ -62,4 +64,42 @@
 .versions svg {
   width: 13px;
   height: 13px;
+}
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.flag {
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 18px;
+  line-height: 1;
+  flex: none;
+  max-width: 2em;
+  overflow: hidden;
+}
+.glyph {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.glyph > :global(.icon) {
+  width: 18px;
+  height: 18px;
+}
+.badge {
+  position: absolute;
+  inset: auto -5px -5px auto;
+  font-family:
+    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-size: 12px;
+  line-height: 1;
+  max-width: 18px;
+  overflow: hidden;
 }

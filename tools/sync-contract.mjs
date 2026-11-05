@@ -274,6 +274,13 @@ console.log(`Generated contract from backend ${commit.slice(0, 7)}`);
 if (settings) {
   await generateSettingsClient(schema, output);
   await writeFile(
+    path.join(output, "language-regions.json"),
+    await format(
+      JSON.stringify(schema["x-everunfold-language-regions"] ?? {}),
+      { parser: "json" },
+    ),
+  );
+  await writeFile(
     path.join(output, "shortcode-builtins.json"),
     await format(JSON.stringify(schema["x-everunfold-shortcodes"] ?? []), {
       parser: "json",

@@ -1,7 +1,18 @@
-import type { Metadata } from "next";
-import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
-import { Archives } from "@/themes/argon/components/archives";
-export const metadata: Metadata = { title: "文章归档" };
-export default async function ArchivesPage() {
-  return <Archives snapshot={await readPublicSnapshot()} />;
+import { readPageSnapshot } from "@/core/i18n/server";
+import { CodePage, codePageMetadata, type PageParameters } from "../code-page";
+export async function generateMetadata() {
+  return codePageMetadata(await readPageSnapshot(), "/archives");
+}
+export default async function Page({
+  searchParams,
+}: {
+  searchParams: Promise<PageParameters>;
+}) {
+  const [snapshot, parameters] = await Promise.all([
+    readPageSnapshot(),
+    searchParams,
+  ]);
+  return (
+    <CodePage snapshot={snapshot} path="/archives" parameters={parameters} />
+  );
 }

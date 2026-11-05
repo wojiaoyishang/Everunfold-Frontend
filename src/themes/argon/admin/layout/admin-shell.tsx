@@ -14,6 +14,7 @@ import { AdminAppearance } from "../components/preferences";
 import { AdminNavigation } from "./navigation";
 import { AdminMobileNavigation } from "./mobile-navigation";
 import { InterfaceLanguage } from "../../components/language-switcher";
+import { AdminLanguageCatalog } from "@/core/i18n/admin-languages";
 
 export function AdminShell({
   user,
@@ -34,92 +35,94 @@ export function AdminShell({
   // Keep the confirmed account/request boundary, while the preview owns the public theme shell.
   if (destination && isContentPreviewPath(pathname)) return children;
   return (
-    <div
-      className="admin-root admin-shell"
-      data-surface="admin"
-      data-admin-mode={preferences.mode}
-      data-density={preferences.density}
-      data-admin-motion={preferences.motion}
-      data-collapsed={preferences.sidebarCollapsed}
-    >
-      <RouteLink href="#admin-main" className="admin-skip-link">
-        <UiText text="跳至主要内容" />
-      </RouteLink>
-      <aside className="admin-sidebar">
-        <RouteLink
-          href="/admin"
-          className="admin-brand"
-          aria-label="Everunfold 工作台"
-        >
-          <span className="admin-brand-mark">
-            <Icon name="book" />
-          </span>
-          <span>Everunfold</span>
+    <AdminLanguageCatalog>
+      <div
+        className="admin-root admin-shell"
+        data-surface="admin"
+        data-admin-mode={preferences.mode}
+        data-density={preferences.density}
+        data-admin-motion={preferences.motion}
+        data-collapsed={preferences.sidebarCollapsed}
+      >
+        <RouteLink href="#admin-main" className="admin-skip-link">
+          <UiText text="跳至主要内容" />
         </RouteLink>
-        <AdminNavigation pathname={pathname} />
-      </aside>
-      <div className="admin-main-column">
-        <header className="admin-header">
-          <div className="admin-header-location">
-            <Button
-              className="admin-icon-button admin-desktop-toggle"
-              aria-label={
-                preferences.sidebarCollapsed ? "展开侧栏" : "收起侧栏"
-              }
-              title={preferences.sidebarCollapsed ? "展开侧栏" : "收起侧栏"}
-              aria-pressed={preferences.sidebarCollapsed}
-              onClick={() =>
-                onPreferencesChange({
-                  sidebarCollapsed: !preferences.sidebarCollapsed,
-                })
-              }
-            >
-              <Icon name="sidebar" />
-            </Button>
-            <AdminMobileNavigation pathname={pathname} />
-            <span className="admin-breadcrumb-root">
-              <UiText text="工作空间" />
+        <aside className="admin-sidebar">
+          <RouteLink
+            href="/admin"
+            className="admin-brand"
+            aria-label="Everunfold 工作台"
+          >
+            <span className="admin-brand-mark">
+              <Icon name="book" />
             </span>
-            <Icon name="chevron" />
-            <span className="admin-breadcrumb-current" key={pathname}>
-              <UiText text={destination?.label ?? "后台"} />
-            </span>
-          </div>
-          <div className="admin-header-dock" data-admin-header-dock />
-          <nav className="admin-header-actions" aria-label="工作空间操作">
-            <InterfaceLanguage />
-            <RouteLink href="/" className="admin-site-link" title="访问站点">
-              <Icon name="external" />
-              <span>
-                <UiText text="访问站点" />
+            <span>Everunfold</span>
+          </RouteLink>
+          <AdminNavigation pathname={pathname} />
+        </aside>
+        <div className="admin-main-column">
+          <header className="admin-header">
+            <div className="admin-header-location">
+              <Button
+                className="admin-icon-button admin-desktop-toggle"
+                aria-label={
+                  preferences.sidebarCollapsed ? "展开侧栏" : "收起侧栏"
+                }
+                title={preferences.sidebarCollapsed ? "展开侧栏" : "收起侧栏"}
+                aria-pressed={preferences.sidebarCollapsed}
+                onClick={() =>
+                  onPreferencesChange({
+                    sidebarCollapsed: !preferences.sidebarCollapsed,
+                  })
+                }
+              >
+                <Icon name="sidebar" />
+              </Button>
+              <AdminMobileNavigation pathname={pathname} />
+              <span className="admin-breadcrumb-root">
+                <UiText text="工作空间" />
               </span>
-            </RouteLink>
-            <AdminAppearance
-              preferences={preferences}
-              onChange={onPreferencesChange}
-            />
-            <span className="admin-header-divider" />
-            <div className="admin-account" title={`${name} · 管理员`}>
-              <span className="admin-account-avatar" aria-hidden="true">
-                {Array.from(name)[0]}
+              <Icon name="chevron" />
+              <span className="admin-breadcrumb-current" key={pathname}>
+                <UiText text={destination?.label ?? "后台"} />
               </span>
-              <span className="admin-account-name">{name}</span>
             </div>
-            <Button
-              className="admin-icon-button"
-              aria-label="退出登录"
-              title="退出登录"
-              onClick={() => void onSignOut()}
-            >
-              <Icon name="logout" />
-            </Button>
-          </nav>
-          <span className="admin-navigation-progress" aria-hidden="true" />
-        </header>
-        <main id="admin-main" tabIndex={-1} className="admin-main">
-          <div className="admin-page">{children}</div>
-        </main>
+            <div className="admin-header-dock" data-admin-header-dock />
+            <nav className="admin-header-actions" aria-label="工作空间操作">
+              <InterfaceLanguage />
+              <RouteLink href="/" className="admin-site-link" title="访问站点">
+                <Icon name="external" />
+                <span>
+                  <UiText text="访问站点" />
+                </span>
+              </RouteLink>
+              <AdminAppearance
+                preferences={preferences}
+                onChange={onPreferencesChange}
+              />
+              <span className="admin-header-divider" />
+              <div className="admin-account" title={`${name} · 管理员`}>
+                <span className="admin-account-avatar" aria-hidden="true">
+                  {Array.from(name)[0]}
+                </span>
+                <span className="admin-account-name">{name}</span>
+              </div>
+              <Button
+                className="admin-icon-button"
+                aria-label="退出登录"
+                title="退出登录"
+                onClick={() => void onSignOut()}
+              >
+                <Icon name="logout" />
+              </Button>
+            </nav>
+            <span className="admin-navigation-progress" aria-hidden="true" />
+          </header>
+          <main id="admin-main" tabIndex={-1} className="admin-main">
+            <div className="admin-page">{children}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </AdminLanguageCatalog>
   );
 }

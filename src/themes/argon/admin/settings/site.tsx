@@ -10,6 +10,8 @@ import {
 } from "./shared";
 import { SettingsMediaField } from "./media-field";
 import { MenuEditor } from "./menu-editor";
+import { SettingsLanguages } from "./languages";
+import { normalizeCatalog } from "@/core/i18n/catalog";
 export function SiteSettingsPage() {
   const { draft, setDraft } = useSettingsEditor();
   const site = draft?.site;
@@ -72,6 +74,10 @@ export function SiteSettingsPage() {
               onChange={(notice) => update({ notice })}
             />
           </SettingsSection>
+          <SettingsLanguages
+            value={normalizeCatalog(site.language_catalog)}
+            onChange={(language_catalog) => update({ language_catalog })}
+          />
           <SettingsSection
             id="settings-navigation"
             title="导航菜单"

@@ -588,6 +588,79 @@
       "title": "ImageRecipe",
       "type": "object"
     },
+    "LanguageCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "default_code": {
+          "default": "zh-CN",
+          "maxLength": 32,
+          "minLength": 2,
+          "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$",
+          "title": "Default Code",
+          "type": "string"
+        },
+        "languages": {
+          "items": {
+            "$ref": "#/$defs/LanguageDefinition"
+          },
+          "minItems": 1,
+          "title": "Languages",
+          "type": "array"
+        }
+      },
+      "title": "LanguageCatalog",
+      "type": "object"
+    },
+    "LanguageDefinition": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "maxLength": 32,
+          "minLength": 2,
+          "pattern": "^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$",
+          "title": "Code",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "flag": {
+          "default": "",
+          "maxLength": 16,
+          "title": "Flag",
+          "type": "string"
+        },
+        "prefix": {
+          "default": "",
+          "pattern": "^(?:|/[a-z0-9][a-z0-9-]{0,31})$",
+          "title": "Prefix",
+          "type": "string"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "ui_locale": {
+          "default": "en",
+          "enum": [
+            "zh-CN",
+            "en"
+          ],
+          "title": "Ui Locale",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "name"
+      ],
+      "title": "LanguageDefinition",
+      "type": "object"
+    },
     "MediaCatalog": {
       "additionalProperties": false,
       "properties": {
@@ -2200,6 +2273,9 @@
     "SitePreferences": {
       "additionalProperties": false,
       "properties": {
+        "language_catalog": {
+          "$ref": "#/$defs/LanguageCatalog"
+        },
         "name": {
           "maxLength": 120,
           "minLength": 1,
@@ -2497,7 +2573,41 @@
   "title": "SettingsContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.9.0",
+  "x-everunfold-contract-version": "1.10.0",
+  "x-everunfold-language-regions": {
+    "zh": "CN",
+    "en": "GB",
+    "ja": "JP",
+    "fr": "FR",
+    "de": "DE",
+    "es": "ES",
+    "pt": "PT",
+    "ru": "RU",
+    "ar": "SA",
+    "ko": "KR",
+    "it": "IT",
+    "nl": "NL",
+    "hi": "IN",
+    "uk": "UA",
+    "vi": "VN",
+    "th": "TH",
+    "id": "ID",
+    "tr": "TR",
+    "pl": "PL",
+    "fi": "FI",
+    "sv": "SE",
+    "nb": "NO",
+    "da": "DK",
+    "el": "GR",
+    "he": "IL",
+    "fa": "IR",
+    "bn": "BD",
+    "ta": "IN",
+    "ms": "MY",
+    "fil": "PH",
+    "ur": "PK",
+    "sw": "TZ"
+  },
   "x-everunfold-shortcodes": [
     {
       "id": "15184599-2f9b-541f-a81f-439ce0ea0e8f",

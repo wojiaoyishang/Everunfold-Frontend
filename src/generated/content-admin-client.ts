@@ -17,6 +17,22 @@ ajv.addSchema(
   "content-admin",
 );
 
+const readContentLanguagesValidator = ajv.compile<
+  ContentAdminContract["languages"]
+>({ $ref: "content-admin#/properties/languages" });
+export function readContentLanguages(
+  baseUrl: string,
+  options: RequestOptions = {},
+) {
+  return requestJSON(
+    baseUrl,
+    "/v1/admin/content/languages",
+    {},
+    readContentLanguagesValidator,
+    { ...options, credentials: "include", headers: { ...options.headers } },
+  );
+}
+
 const readContentActionsValidator = ajv.compile<
   ContentAdminContract["actions"]
 >({ $ref: "content-admin#/properties/actions" });

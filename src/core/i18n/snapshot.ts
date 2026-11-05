@@ -1,6 +1,14 @@
 import type { Locale } from "./locale";
 import type { Content, PublicSnapshot } from "@/core/content/types";
 import { normalizePath } from "@/core/content/urls";
+import { normalizeCatalog } from "./catalog";
+
+export function snapshotLocale(snapshot: PublicSnapshot): Locale {
+  return (
+    snapshot.site.locale ??
+    normalizeCatalog(snapshot.site.settings?.site.language_catalog).default_code
+  );
+}
 
 /** Pick one published member per group before pagination, preserving real paths. */
 export function languageContents(

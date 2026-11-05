@@ -32,6 +32,7 @@ import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { EditorLanguages } from "./editor-languages";
 import type { Locale } from "@/core/i18n/locale";
+import { useLanguageCatalog } from "@/core/i18n/provider";
 
 export function DraftEditor({
   type,
@@ -40,8 +41,9 @@ export function DraftEditor({
   type: ContentTypeDefinition;
   id: string | null;
 }) {
-  const [language, setLanguage] = useState<Locale>("zh-CN");
-  const editor = useDraftEditor(type, id, language);
+  const languages = useLanguageCatalog();
+  const [language, setLanguage] = useState<Locale>("");
+  const editor = useDraftEditor(type, id, language || undefined);
   const router = useRouter();
   const resources = useEditorResources();
   const shortcodes = useAppliedShortcodes();
@@ -275,7 +277,9 @@ export function DraftEditor({
           type={type}
           fields={editor.fields}
           detail={editor.detail}
-          language={language}
+          language={
+            editor.detail?.language || language || languages.default_code
+          }
           onChange={editor.setFields}
           disabled={Boolean(blocked || (id && !editor.detail))}
         />
@@ -284,7 +288,9 @@ export function DraftEditor({
           id={id}
           contentRevision={editor.detail?.revision}
           type={type.id}
-          language={language}
+          language={
+            editor.detail?.language || language || languages.default_code
+          }
           onLanguage={setLanguage}
           disabled={Boolean(editor.busy || leaving || uploading)}
           onNavigate={(href) => {
