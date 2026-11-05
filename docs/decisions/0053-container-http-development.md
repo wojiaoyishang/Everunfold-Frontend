@@ -4,7 +4,7 @@
 
 ## 来源与决定
 
-用户要求在新 Docker 容器部署已有博客、服务监听 `0.0.0.0`，远程使用宿主机 `172.16.3.2:3000`，随后明确“不要 https”。此前配置加载器只允许回环 HTTP，不能满足该要求，因此增加默认关闭的 `[auth].allow_private_http`。
+用户要求在Docker容器中临时测试已有博客、服务监听 `0.0.0.0`，经宿主机映射访问，并明确“不要 https”。此前配置加载器只允许回环HTTP，不能满足该测试要求，因此增加默认关闭的 `[auth].allow_private_http`。2026-11-05用户明确该入口只用于当前容器测试，具体IP不记录到交接，也不作为长期部署约定。
 
 该配置只对字面 RFC1918 IPv4 / IPv6 ULA 地址启用 HTTP Cookie；不接受公网地址、链路本地地址或以 DNS 名称推断内网。保留 HTTPS 必须 Secure、SameSite=None 必须 Secure 的规则。精确 Origin、CSRF、HttpOnly、真实 socket IP AND 内部 Token 校验不变，非回环内部凭据传输仍需 HTTPS。
 

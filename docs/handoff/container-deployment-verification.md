@@ -1,6 +1,6 @@
 # 新设备容器 HTTP 部署验收
 
-日期：2026-11-04。用户要求在新 Docker 设备部署并使用 HTTP；实际入口 `http://172.16.3.2:3000`。操作见[部署指南](../development/container-deployment.md)，决定见 [ADR0053](../decisions/0053-container-http-development.md)。
+日期：2026-11-04。记录当前Docker容器中的临时HTTP测试，具体入口由本地忽略配置提供，不记录设备IP或约定长期部署地址。操作见[运行说明](../development/container-deployment.md)，决定见 [ADR0053](../decisions/0053-container-http-development.md)。
 
 ## 已完成
 
@@ -21,7 +21,7 @@
 | 隔离 `npm run verify:admin` | 生产构建、18 个私有入口、匿名隔离、按需代码/公式、离线/撤回/设置损坏检查通过 |
 | 远程 HTTP 实际 Cookie/CSRF/管理员登录与退出 | 通过；HttpOnly、`Path=/v1`、HTTP Cookie 无 Secure |
 | 匿名管理、错误 Origin、缺失 CSRF、公开内部路径 | 按预期拒绝 |
-| 真实 `ws://172.16.3.2:3000/ws/v1/collab/...` | 一次性票据、首帧认证和同步通过，无凭据进入 URL |
+| 经本容器临时入口的真实WS `/ws/v1/collab/...` | 一次性票据、首帧认证和同步通过，无凭据进入 URL |
 | 既有协同草稿源文指纹保存 | SHA-256 校验、整篇 commit 和持久结果核对通过 |
 | 测试文章发布与撤回 | 发布投递确认后页面 200，撤回投递确认后 404 |
 | 六进程 `restart all`、重复 `start`、重启后已有 Session | 全部通过，Scheduler 租约没有阻塞重启 |

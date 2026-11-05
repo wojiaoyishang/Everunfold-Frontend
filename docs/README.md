@@ -4,7 +4,7 @@
 
 ## 先从这里读
 
-[当前宿主机验收入口](handoff/remote-address-verification.md)：2026-11-05已切换至 `http://172.16.3.2:3000`，远程登录、媒体、投递和协同WS通过；[部署指南3](development/container-deployment.md)为当前运行说明。
+[本容器临时连通性验收](handoff/remote-address-verification.md)：登录、媒体、投递和协同WS通过；只记录本次容器测试，不约定长期部署地址。[运行说明4](development/container-deployment.md)保留通用步骤，实际IP与临时URL仅在本地忽略配置中维护。
 
 [Markdown源码高亮](decisions/0055-markdown-source-highlighting.md)及[实页验收](handoff/markdown-source-highlighting-verification.md)：标记分色、浅深色与窄屏、代码围栏按语言加载，211项检查通过。
 
@@ -149,4 +149,4 @@
 
 - [结构化公式与主题吐司](decisions/0050-structured-formula-editor-and-theme-toasts.md)、[指南](development/formula-editor-and-toasts.md)及[验收](handoff/formula-editor-verification.md)：MathLive/CodeMirror共用窗口、模板/矩阵/键盘、保留LaTeX、按打开加载资源及统一上传通知。当前功能指南2、编辑器指南12、开发协议14。
 - [私有前台预览](decisions/0051-private-frontend-content-preview.md)及[验收](handoff/content-frontend-preview-verification.md)：文章/说说保存并预览、共用正式主题展示、独立鉴权、no-store/noindex与匿名SSR隔离。
-- [共享代码框与片段参数](decisions/0052-shared-code-frames-and-source-options.md)、[代码指南](development/code-blocks.md)及[验收](handoff/code-blocks-verification.md)：单编辑框、theme.code默认值、源码参数、行号/重点行、底部半透明展开和代码字体按需。当前开发协议15、编辑器指南13、功能指南3、设置指南7。
+- [共享代码框与片段参数](decisions/0052-shared-code-frames-and-source-options.md)、[代码指南](development/code-blocks.md)及[验收](handoff/code-blocks-verification.md)：单编辑框、theme.code默认值、源码参数、行号/重点行、底部半透明展开和代码字体按需。当前开发协议16、编辑器指南13、功能指南3、设置指南7。

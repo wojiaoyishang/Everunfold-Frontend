@@ -542,12 +542,26 @@ ADR0055：共享源码标记分色与浅深色变量、围栏按语言加载；�
 | `docs/design/markdown-source-highlight-dark.jpg` | `7746574acfa16dc3738cae561daecdbab9e7d7e23f98698833c9193d0428f79d` |
 | `docs/design/markdown-source-highlight-mobile.jpg` | `3df6f462cb9dd352e90f30855734f37fe41651604ae113328b0e992063541910` |
 
-## 2026-11-05 宿主机公开地址切换（Asia/Shanghai）
+## 2026-11-05 本容器临时入口测试（Asia/Shanghai）
 
-运行指南升级container-deployment-3：当前公开入口172.16.3.2:3000，API/媒体/canonical及派生投影一致；内容release8与设置修订1已应用，远程登录/媒体/WS通过。只同步当前运行说明与验收，实际配置、数据库投影及私有备份不提交。
+当次container-deployment-3记录了本容器测试中API/媒体/canonical及派生投影的一致性；内容release8与设置修订1已应用，登录/媒体/WS通过。具体设备IP已按用户要求从说明中移除，该测试不构成长期部署约定。实际配置、数据库投影及私有备份不提交；下表保留该次文档版本的历史哈希，当前版本见后续记录。
 
 | 公共文件 | SHA256 |
 | --- | --- |
 | `docs/README.md` | `d3cf273c36ab19132a9934b9c089f1ab119448af01a98726c4ede4fa7c597f11` |
 | `docs/development/container-deployment.md` | `5e397d50be3b3fab1c9b45552e08956a7178f0f75e95bb8a58f6adbd006175d8` |
 | `docs/handoff/remote-address-verification.md` | `f9e2d49442aac6b2e56f6c331aa8d5bd19cb1a43c9c8faf1bf94f08ba8c898cb` |
+
+## 2026-11-05 临时容器信息与交接边界
+
+按用户要求移除交接、旧验收、索引、运行说明和ADR中的具体设备IP；仅记录本容器临时测试，不作为长期部署约定。实际IP/临时URL留在忽略的本地配置与运行记录，通用监听/回环示例保留。运行说明升级container-deployment-4，协议development-16；本轮只改文档，运行配置和服务未改。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `cf1b4a3c083ba846459368f4b04a3f2578dc99a4160ca542dece4b5b3f15089b` |
+| `docs/development/container-deployment.md` | `656ac1a0ff25d9ce06f80077c6d2799b797301004c93668d48065bb9659eec84` |
+| `docs/development/protocol.md` | `8fd2af4c0ed857f8c8069f3ed4262fa9184f8a72dc6e1bcb999dd4397924baaa` |
+| `docs/decisions/0053-container-http-development.md` | `7f613f1bba457cdae56e98de104752b3e79e20d57e0daf25cf8544cb796eeb66` |
+| `docs/handoff/remote-address-verification.md` | `348b1976056caf2db9807659e7d42e98001827021d6eb675ed186e9818812afa` |
+| `docs/handoff/container-deployment-verification.md` | `5edde5332d8a52c2a94e80fc4ebcea19702043f82a4d698546710d92f5e3a3d2` |
+| `docs/handoff/feature-lab-article-verification.md` | `59e0816f8ca02c9f2f04fa34f2fc34b3d9d7859a4f45e07cd9ea860e83b4aa50` |

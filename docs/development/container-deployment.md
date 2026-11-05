@@ -1,8 +1,8 @@
-# 新设备容器开发部署
+# 容器临时测试运行说明
 
-版本：container-deployment-3，2026-11-05（Asia/Shanghai）。用户要求在新的 Docker 桌面容器继续开发，服务监听 `0.0.0.0`，当前宿主机验收入口 `http://172.16.3.2:3000`，明确不使用 HTTPS。决定和兼容边界见 [ADR0053](../decisions/0053-container-http-development.md)。本页记录开发部署，不代表已切换原站生产流量。
+版本：container-deployment-4，2026-11-05（Asia/Shanghai）。本页仅记录当前Docker桌面容器的临时测试过程，端口和目录为该测试环境的运行示例，不约定项目长期部署方式。具体IP与临时公开URL只保留在本地忽略配置和运行记录中。测试按用户要求使用HTTP，服务监听 `0.0.0.0`；决定与兼容边界见 [ADR0053](../decisions/0053-container-http-development.md)。
 
-此前宿主机地址不可达时曾按用户要求改用127.0.0.1调试；2026-11-05用户完成宿主机映射并要求改回 **http://172.16.3.2:3000**，现公开API、媒体及canonical均使用该地址，四个服务仍监听 `0.0.0.0`。真实远程登录、7份媒体和协同WS已通过，[本次验收](../handoff/remote-address-verification.md)记录结果；[功能长文验收](../handoff/feature-lab-article-verification.md)中的回环地址保留为历史事实。
+测试中先使用本机回环入口，随后由用户完成宿主机映射，公开API、媒体及canonical同步到本容器临时测试入口。真实登录、7份媒体和协同WS已通过，[本次验收](../handoff/remote-address-verification.md)只记录测试结果；[功能长文验收](../handoff/feature-lab-article-verification.md)中的回环示例保留为历史测试记录。
 
 ## 当前实例
 
@@ -15,13 +15,13 @@
 ## 入口与端口
 
 ```text
-验收入口：浏览器 → 宿主机 172.16.3.2:3000 → Docker TCP 3000:3000
+本容器测试：浏览器 → 临时宿主机入口 → Docker测试端口映射
        → 容器 Nginx :3000
            /v1/*、/ws/v1/*、/media/*、/health/*、API 文档 → FastAPI :8001
            页面、Next 静态资源、热更新连接 → Next.js :3100
 
 Worker / Scheduler → Node 设置与内容接收器 :3001
-容器内也可访问127.0.0.1:3000；页面中的公开API/媒体地址仍为宿主机地址。
+容器内也可使用回环入口；页面中的公开API/媒体地址以本地实际配置为准。
 ```
 
 四个监听器均绑定 `0.0.0.0`。宿主机只需映射 3000；3001 是内部接收器，8001/3100 是上游开发进程。容器内没有宿主机 Docker socket，映射由用户在宿主机完成；修改已有容器映射通常需要按原配置重建，须保留 `/config`、`/workspace` 和原桌面/网络配置，不能用一个简化的 `docker run` 覆盖原容器。
@@ -40,13 +40,13 @@ Nginx 保留原 API 与 WS 路径，不引入 `/api` 前缀；`/internal` 和 `/
 | 前端 `config.toml` | 浏览器 API 地址、服务端回环连接、缓存目录、显式绑定的 source_epoch |
 | 后端 `var/container/nginx.conf` | 从 `deploy/nginx.container.conf.template` 替换占位符生成 |
 
-前后端公开 `BACKEND_BASE_URL`、前端 `PUBLIC_SITE_URL` 与后端 `frontends.web-main.base_url` 当前都是 `http://172.16.3.2:3000`；前端仅服务端 `[backend].base_url` 仍是 `http://127.0.0.1:8001`，内部接收器仍为 `http://127.0.0.1:3001`。精确来源包含远程入口和本机3000，不使用通配符。
+测试时前后端公开 `BACKEND_BASE_URL`、前端 `PUBLIC_SITE_URL` 与后端 `frontends.web-main.base_url` 指向同一临时入口；实际值只在忽略配置中维护。仅服务端API和内部接收器使用回环连接，精确Origin按测试需要配置，不使用通配符。回环地址是内部通信方式，不是对外部署入口。
 
 公开内容会持久保存派生媒体地址，改配置后不能只重启。此次只重定向当前已发布投影中的原回环 `/media/` 地址，保留正文、时间、编辑属性及草稿修订，生成不可变内容release8并经原Outbox投递确认；历史release不改写。设置走既有重新同步，当前修订1已应用。实际配置和投影更新前备份、一次性检查位于后端忽略目录 `var/container/url-change-20261105/`，不得提交。
 
 后端 `[auth]` 显式设置 `allow_private_http=true`、`cookie_secure=false`、`cookie_samesite="lax"`。该开关默认关闭，只对字面 RFC1918 IPv4 和 IPv6 ULA 地址生效；不通过 DNS 推断内网，不允许公网/链路本地地址。HttpOnly、CSRF、精确 Origin 和内部 IP AND Token 校验仍生效。内部接收 URL 为回环 HTTP，非回环内部凭据传输仍要求 HTTPS。
 
-前端开发服务的允许主机来自 `EVERUNFOLD_DEV_ALLOWED_HOSTS`，当前仅 `172.16.3.2,localhost,127.0.0.1`。更换宿主机地址时同步更新两端实际 TOML、Origin 和该变量，再重启相应服务。`npm run dev/start` 默认监听 `0.0.0.0`；本部署给 Next 传入 `--port 3100`。
+前端开发服务的允许主机来自 `EVERUNFOLD_DEV_ALLOWED_HOSTS`，只包含本容器测试需要的显式主机；具体列表留在忽略的环境文件中。更换测试入口时同步更新两端实际TOML、Origin和该变量，再重启相应服务。`npm run dev/start` 默认监听 `0.0.0.0`；本次容器测试给Next传入 `--port 3100`。
 
 ## 启停与重启
 
