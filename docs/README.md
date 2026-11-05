@@ -164,3 +164,5 @@
 最新界面交付：[紧凑内容列表与编辑工具](decisions/0063-compact-content-lists-and-editor-tools.md)、[操作指南](development/content-management.md)及[实际验收](handoff/content-list-tools-verification.md)：封面缩略图、作者/分类/标签/评论/日期、明确搜索，以及链接弹层和统一短代码入口。
 
 最新设置交付：[桌面分区导航](decisions/0064-desktop-settings-section-navigation.md)、[运行指南](development/settings.md)与[实页验收](handoff/settings-section-navigation-verification.md)：站点/主题/系统设置共用右侧目录、锚点及滚动高亮。
+
+当前设计阶段：[多语言内容与界面入口](architecture/multilingual-content.md)及[ADR0065](decisions/0065-multilingual-content-entry-design.md)：首批简体中文/英文已选择，已复盘独立语言ID、发布与界面语言边界；入口、路径取舍、数据/接口和验收仍是待实施方案，不是多语言功能交付。

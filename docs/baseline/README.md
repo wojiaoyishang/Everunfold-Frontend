@@ -712,3 +712,13 @@ ADR0064、settings-runtime-8与实际验收记录右侧目录、原生锚点、�
 | `docs/design/settings-navigation-code.png` | `6339eada8dff658e18d6d4acb8211f8d50f3ff3ad652c28903946d5be25bec9a` |
 | `docs/design/settings-navigation-dark.png` | `67472a5ea3444c9a9435cb9bdf0e8d0f97536267148cd2cdc2a5dd7a47a2329e` |
 | `docs/design/settings-navigation-narrow.png` | `6619a284fa1d99805fe4875ef1072d2061cd16db511b6bfff682a281b89b38c8` |
+
+## 多语言内容设计复盘（2026-11-05）
+
+multilingual-design-1及ADR0065记录本轮首批zh-CN/en选择、旧约定和源码缺口，提出入口、URL取舍、事务/语言运行时/公开缓存及验收方案。没有实施业务代码或迁移；下列当前哈希替代相关旧文件记录，STATUS分别维护，实际设备地址不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `19212bbe4ab3838d58b467d6fe6b502f465b05108b02a5307869eeaf02cbf6ce` |
+| `docs/architecture/multilingual-content.md` | `dc4f3cfd5d4f23c707052cd7f8e3f2d3b40eb0acd59fea7084178775ceed6a3e` |
+| `docs/decisions/0065-multilingual-content-entry-design.md` | `341095d5489fa16fe4a0b58ca92d13a259ddac46421c8a9adda6c708ba6586ec` |
