@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { UiText, useT } from "@/core/i18n/provider";
 import type { LanguageCatalog, Language } from "@/core/i18n/catalog";
 import { defaultFlag } from "@/core/i18n/catalog";
@@ -27,6 +27,13 @@ export function SettingsLanguages({
   const t = useT();
   const [flagIndex, setFlagIndex] = useState<number | null>(null);
   const [adding, setAdding] = useState(false);
+  const pickerTrigger = useRef<HTMLButtonElement | null>(null);
+  useEffect(() => {
+    if (adding || flagIndex !== null) return;
+    const trigger = pickerTrigger.current;
+    pickerTrigger.current = null;
+    if (trigger?.isConnected) trigger.focus({ preventScroll: true });
+  }, [adding, flagIndex]);
   const update = (index: number, patch: Partial<Language>) => {
     const old = value.languages[index];
     const next = { ...old, ...patch };
@@ -116,7 +123,10 @@ export function SettingsLanguages({
                 className={styles.flagButton}
                 aria-label={`${t("选择语言标志")} ${index + 1}`}
                 title={t("选择语言标志")}
-                onClick={() => setFlagIndex(index)}
+                onClick={(event) => {
+                  pickerTrigger.current = event.currentTarget;
+                  setFlagIndex(index);
+                }}
               >
                 <span className={styles.emoji} aria-hidden="true">
                   {item.flag || defaultFlag(item.code)}
@@ -231,7 +241,10 @@ export function SettingsLanguages({
       )}
       <Button
         className={`admin-button ${styles.add}`}
-        onClick={() => setAdding(true)}
+        onClick={(event) => {
+          pickerTrigger.current = event.currentTarget;
+          setAdding(true);
+        }}
       >
         <Icon name="plus" />
         <UiText text="添加语言" />
