@@ -1,10 +1,10 @@
 # 文章与说说管理
 
-版本：content-management-5，2026-11-02。当前：注册式独立文章/说说、多块编辑、属性、发布同步、密码访问与定时开放。依据为 ADR 0030–0035；[本次验收](../handoff/editor-workspace-verification.md) 记录实际检查与限制。
+版本：content-management-6，2026-11-05。当前：注册式独立文章/说说、多块编辑、属性、发布同步、密码访问与定时开放。依据为 ADR 0030–0035；[本次验收](../handoff/editor-workspace-verification.md) 记录实际检查与限制。
 
 ## 数据范围
 
-功能测试只使用新后台创建并发布的内容。旧 WordPress 78篇文章/9个页面已撤回，原行/媒体/评论保留；不恢复或重新导入来填充界面。本期保留原有两篇文章、两则说说，以及新建「编辑功能验证」「密码保护阅读验证」供联调，均由后端产生，前端没有硬编码内容。示例数量随管理操作变化。
+功能测试只使用新后台创建并发布的内容。旧 WordPress 78篇文章/9个页面已撤回，原行/媒体/评论保留；不恢复或重新导入来填充界面。2026-11-02阶段曾保留两篇文章、两则说说，以及新建「编辑功能验证」「密码保护阅读验证」供联调，均由后端产生，前端没有硬编码内容。示例数量随管理操作变化。
 
 显式开发工具 `uv run python -m tools.withdraw_wordpress_preview` 默认预检，`--apply` 才撤回；只接受本机开发/专用测试库，业务、审计、release和Outbox同事务，重复执行不升版。恢复历史内容需用户明确调整范围，不手工删除快照或过滤前端。
 
@@ -62,7 +62,7 @@ uv run pytest -q --tb=short
 
 ## 架构与剩余边界
 
-content-admin1.4 的生成来源是后端提交 d31b359；public0.4/content-access1.0仍固定fe1a651；public历史文件名保留 public-v0.1.schema.json，接受0.1/0.2/0.3。settings1.6.0不变。0011增加工作/公开编辑属性，0012增加私有密码哈希、开放标记与分类父级，保留旧数据。
+当前content-admin1.6.0的生成来源是后端已提交d42cb8b；本轮列表使用DraftListItem，详情与协同契约不变。先前1.4来源为d31b359；public0.4/content-access1.0仍固定fe1a651；public历史文件名保留 public-v0.1.schema.json，接受0.1/0.2/0.3。settings1.6.0不变。0011增加工作/公开编辑属性，0012增加私有密码哈希、开放标记与分类父级，保留旧数据。
 
 后端 draft_* 处理工作版本，editor_schema/editor_service/content_paths 隔离属性和路径，publication 负责公开投影，access_policy/access_router/timed_projection 处理读取和到点刷新。前端 core/content-management 管请求/状态，themes/argon/admin/content 管展示；标题、正文、分类、标签、属性独立，DateTimeField复用共享控件。媒体删除守卫覆盖当前草稿、修订与发布引用。
 
@@ -77,3 +77,11 @@ content-admin1.4 的生成来源是后端提交 d31b359；public0.4/content-acce
 ## 协同与插件编辑器（2026-11-02）
 
 已有草稿使用私有 collaboration-1 接口及整篇 Y.Doc，原 JSON 保存不再覆盖共享内容。当前检查点/日志/回执显式迁移到 0013_collaboration。标题/正文/SEO/分类等共享；访问密码/策略保留业务 API。源码编辑、撤销、离线/多窗口合并、导出与实际限制见 [运行指南](editor-plugins.md) 和 [验收](../handoff/collaborative-editing-verification.md)。
+
+## 紧凑列表与搜索（2026-11-05）
+
+文章、说说列表共用封面缩略图：有可用封面时显示46px裁切图，无封面或加载失败显示类型图标。桌面显示标题/单行摘要、作者、分类、标签、已审核评论数、状态/日期和操作，常规行最小82px；窄屏改为带字段标签的多行布局。置顶、示例、有未发布修改仍有标记；已发布条目显示发布时间，其他条目显示修改时间。
+
+输入关键词后点“搜索”或按Enter，覆盖标题、摘要、正文、作者、分类与标签，仍按当前文章/说说类型及全部/草稿/已发布/回收站过滤。搜索会回到第一页；下方显示实际生效的关键词和“清除搜索”，刷新重试保留当前条件。未提交的输入不会逐字查询。分类与标签列当前只展示名称，未增加独立筛选、列排序或批量操作。
+
+新接口字段只属于管理员查询结果：cover_url、categories、tags、comment_count、pinned，不返回正文数组或访问密码。封面及评论计数按当前页批量读取；不新增迁移、依赖或公开内容字段。当前实时保存、离线分支和版本操作详见[版本指南](draft-versions.md)，本轮列表/工具决定及实页检查见[ADR0063](../decisions/0063-compact-content-lists-and-editor-tools.md)与[验收](../handoff/content-list-tools-verification.md)。

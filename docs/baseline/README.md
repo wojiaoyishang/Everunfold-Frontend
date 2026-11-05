@@ -680,3 +680,20 @@ ADR0062与draft-versions-2记录用户新要求和实施；顶部双选替代常
 | `docs/design/revision-top-narrow.png` | `9cd962692889ce04cb1fc9936b9580480513c5b353394aa26035304667cdd15a` |
 | `docs/design/revision-source-narrow.png` | `3b9fd2374594250edbbc6e9d81ac0c69bee510392892650904a2acd68f9cf7e0` |
 | `docs/design/revision-visual-narrow.png` | `a5c61a4321e04781578a68b85b708d1a72c90fc9313b502c485abc5f3d846267` |
+
+## 紧凑列表与编辑工具交付（2026-11-05）
+
+content-admin1.6.0来自后端已提交d42cb8b；content-management-6、editor-plugins-16与ADR0063记录封面/元数据/搜索和链接/短代码工具。以下当前哈希替代相关旧文件记录，STATUS分别维护，实际设备地址/密码不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `145e1da1a7bdc995039da3b0aae23b34a28b23c06d9350281965d306deed59b4` |
+| `docs/development/content-management.md` | `2831cafd5fcd6ffef55b584ae655977def48425fb6b160ab05ecef300b429d7a` |
+| `docs/development/editor-plugins.md` | `faa1dcf5cca41d0aa264da98d6a9df36220de1cd5cfca9cda809d2bbe1930f40` |
+| `docs/decisions/0063-compact-content-lists-and-editor-tools.md` | `0afbc242b512e52c98eafe646eb3f8f0b44efbeda2c824383b5f34bbe0f2adab` |
+| `docs/handoff/content-list-tools-verification.md` | `a0619f54c3267bf567cd087af11fc9f21fc68b4cf26d05422bae68b9d37af366` |
+| `docs/design/content-list-compact-desktop.png` | `924623dfeb653236bea19d12fc3b4dcdc1656cd64d35ddeabdd9df84f6443900` |
+| `docs/design/content-list-compact-narrow.png` | `2f4b0f6ad9ec430381e3ccc126d439be9674540f065670ae71800a2d89910cb2` |
+| `docs/design/content-list-compact-dark.png` | `870fcecf05b45bf64a28e719a4c5e90bad406a2472b5b9292a226f6e44eb6b6e` |
+| `docs/design/editor-link-tools-desktop.png` | `6d0bfa2b79ac7cb32d1dae7e35821666b647e45e59bbf2c2188d158b50bf3d00` |
+| `docs/design/editor-link-tools-narrow.png` | `c6e6cf6ed59f1143cb1ae01289f1c2a2cba897c225d9329139f3f2d2f9d768a8` |

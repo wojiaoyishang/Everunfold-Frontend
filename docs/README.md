@@ -160,3 +160,5 @@
 - [共享代码框与片段参数](decisions/0052-shared-code-frames-and-source-options.md)、[代码指南](development/code-blocks.md)及[验收](handoff/code-blocks-verification.md)：单编辑框、theme.code默认值、源码参数、行号/重点行、底部半透明展开和代码字体按需。当前开发协议16、编辑器指南13、功能指南3、设置指南7。
 
 最新交付：[光标、离线分支与独立版本页](decisions/0061-cursors-offline-branches-and-version-merges.md)、[操作指南](development/draft-versions.md)及[真实验收](handoff/cursor-versions-verification.md)：正文实时保存、块内成员选区、独立可视化/源码差异、版本保护与持久合并锁。
+
+最新界面交付：[紧凑内容列表与编辑工具](decisions/0063-compact-content-lists-and-editor-tools.md)、[操作指南](development/content-management.md)及[实际验收](handoff/content-list-tools-verification.md)：封面缩略图、作者/分类/标签/评论/日期、明确搜索，以及链接弹层和统一短代码入口。

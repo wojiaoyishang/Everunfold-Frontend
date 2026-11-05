@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-15，2026-11-05（Asia/Shanghai）。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-16，2026-11-05（Asia/Shanghai）。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 当前共享[公式编辑器与全局吐司](formula-editor-and-toasts.md)提供结构化数学输入、LaTeX 源码、模板/键盘及逐文件上传通知。编辑页“正文预览”保留本页检查；“前台预览”读取已保存草稿，有修改/新建时显示“保存并预览”，复用原保存后在独立私有页呈现正式主题，支持刷新/返回。它不会发布内容或写入公开缓存，见[ADR0051](../decisions/0051-private-frontend-content-preview.md)及[验收](../handoff/content-frontend-preview-verification.md)。
 
@@ -90,3 +90,9 @@ Markdown 和 HTML 均以原始字符串为底稿，切换视图直接同步本�
 ## 当前共享编辑与版本管理（collaboration 2.0.0）
 
 上文整篇block_sources提交、分离的正文撤销栈属于历史阶段。现有宿主以source_first的Y.Text作为唯一正文，源码与视觉编辑写最小变更、共享本人撤销和成员位置。无源码变化的presence不能重置表单。新插件应复用SharedSource及统一媒体/上传通道；不能向旧整篇save写入协同草稿，也不能绕过持久合并锁。详细流程见[ADR0061](../decisions/0061-cursors-offline-branches-and-version-merges.md)及[版本指南](draft-versions.md)。
+
+## 工具入口与链接表单（2026-11-05）
+
+Markdown/HTML源码和可视化工具栏复用18px主要图标。短代码使用“图标＋短代码”文字按钮，合并结果编辑器也提供相同入口；选区捕获、原生调用和区块内插入沿原实现。暂停或无权编辑合并时按钮禁用。
+
+可视化链接弹层提供标题、地址、取消/应用；已有链接才显示移除。新链接为空地址，提交去除首尾空白，非法协议保留输入和错误提示。340px期望宽度按视口收缩，焦点回到原触发器，原生键盘输入和Escape关闭保持。实现与验收见[ADR0063](../decisions/0063-compact-content-lists-and-editor-tools.md)及[检查记录](../handoff/content-list-tools-verification.md)。
