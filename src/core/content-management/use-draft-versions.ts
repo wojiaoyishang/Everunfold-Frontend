@@ -37,6 +37,11 @@ import {
 } from "@/generated/collaboration-client";
 import { draftError } from "./draft-state";
 import { RequestError } from "@/core/http/request";
+import {
+  renewedMerge,
+  resumedDecisions,
+  sameMergeTarget,
+} from "./merge-resume";
 
 export type VersionSelection = {
   kind: "version" | "branch" | "local" | "merge";
@@ -64,6 +69,7 @@ export function useDraftVersions(
   const [saving, setSaving] = useState(false);
   const [localSaved, setLocalSaved] = useState(true);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [pages, setPages] = useState({
     page: 1,
     branch_page: 1,
@@ -80,6 +86,7 @@ export function useDraftVersions(
     working.current = true;
     setBusy(true);
     setError("");
+    setNotice("");
     try {
       return await work();
     } catch (cause) {
@@ -226,15 +233,21 @@ export function useDraftVersions(
       )
         .then(({ data }) => {
           if (mounted.current) {
-            mergeRef.current = data;
-            setMerge(data);
+            const renewed = renewedMerge(mergeRef.current, data);
+            mergeRef.current = renewed;
+            setMerge(renewed);
           }
         })
         .catch((cause) => {
-          if (!mounted.current) return;
-          setError(draftError(cause));
           const current = mergeRef.current;
-          if (current && Date.parse(current.expires_at) < Date.now()) {
+          if (
+            !mounted.current ||
+            current?.id !== mergeId ||
+            current.status !== "active"
+          )
+            return;
+          setError(draftError(cause));
+          if (Date.parse(current.expires_at) < Date.now()) {
             const expired = { ...current, status: "expired" as const };
             mergeRef.current = expired;
             setMerge(expired);
@@ -256,6 +269,8 @@ export function useDraftVersions(
     if (loadedSelection.current === selectionKey || working.current) return;
     loadedSelection.current = selectionKey;
     if (!selection || selection.kind === "local") return;
+    if (selection.kind === "merge" && mergeRef.current?.id === selection.id)
+      return;
     void run(async () => {
       if (selection.kind === "version") {
         const { data } = await readDraftVersion(
@@ -339,6 +354,7 @@ export function useDraftVersions(
     localSaved,
     serverSaved: JSON.stringify(result) === JSON.stringify(merge?.result),
     error,
+    notice,
     pages,
     setPages,
     refresh,
@@ -431,19 +447,32 @@ export function useDraftVersions(
     resumeResult: () =>
       run(async () => {
         if (!mergeRef.current || !resultRef.current) return false;
-        const current = mergeRef.current;
-        const payload = {
-          ...lookup,
-          branch_id: randomUUID(),
-          note: "继续处理合并结果",
-          base_epoch: current.epoch,
-          base_seq: current.target_seq,
-          base_revision: current.target_revision,
-          fields: privateDraftFields(resultRef.current),
-          updates: [],
-        };
-        const { data } = await uploadDraftBranch(baseUrl, payload, csrfToken);
-        return begin(data.branch.id);
+        const previous = mergeRef.current,
+          savedResult = resultRef.current;
+        await cacheResult(savedResult, previous);
+        beginIds.current.delete(previous.branch_id);
+        // Restart the original input branch so unresolved choices cannot disappear.
+        const id = await begin(previous.branch_id);
+        const current = mergeRef.current!;
+        if (sameMergeTarget(previous, current)) {
+          const { data } = await resolveDraftMerge(
+            baseUrl,
+            {
+              ...lookup,
+              merge_id: id,
+              result: savedResult,
+              resolutions: resumedDecisions(previous, current, savedResult),
+            },
+            csrfToken,
+          );
+          acceptMerge(data);
+          await cacheResult(data.result, data);
+        } else {
+          setNotice(
+            "最新版已有新修改，已重新比较原分支。上次合并结果保留在合并记录和本机恢复草稿中，可对照取用。",
+          );
+        }
+        return id;
       }),
     setResult: replaceResult,
     resolve: (resolution: ConflictResolution) =>

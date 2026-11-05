@@ -274,6 +274,11 @@ function VersionsWorkspace({
           </Button>
         </div>
       )}
+      {versioning.notice && (
+        <p className={styles.information} role="status">
+          {versioning.notice}
+        </p>
+      )}
       <Button
         className={`admin-button ${styles.mobileCatalogToggle}`}
         aria-expanded={catalogOpen}

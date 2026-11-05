@@ -165,6 +165,12 @@
   padding: 12px;
   margin-bottom: 14px;
 }
+.information {
+  border-inline-start: 3px solid var(--admin-accent);
+  padding: 12px;
+  margin-bottom: 14px;
+  background: var(--admin-subtle);
+}
 .pager {
   justify-content: center;
   margin-top: 14px;
