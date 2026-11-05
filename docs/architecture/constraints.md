@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-8，2026-11-05（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经实现。
+版本：bootstrap-9，2026-11-05（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经实现。
 
 ## 已确认的范围
 
@@ -93,3 +93,7 @@ Markdown/HTML 编译插件、整篇共享文档、PostgreSQL 持久确认、Stat
 用户确认短代码在工具栏进行区块内插入、Markdown视频使用`![](){type=video}`、HTML支持文字颜色，视图切换定位到当前光标，区块标题在本块范围内吸顶。按[ADR0059](../decisions/0059-editor-inline-insertion-and-sticky-blocks.md)实施；这些是本地源文投影，不扩大共享rich Schema。
 
 [ADR0060](../decisions/0060-collaborative-draft-revision-refresh.md)接入已有修订通知，避免正文已同步但保存仍用旧修订；授权读取更新基线，未保存正文和私有策略改动保持。服务端版本/指纹/租约守卫继续执行，不以强制保存消除真实冲突。
+
+## 光标、离线分支与独立版本页（2026-11-05）
+
+用户确认离线冻结个人基线、在线继续；正式合并固定并锁住该文章最新版，迟到输入保留分支。旧历史可软删除，最新版受保护。正文实时保存、块内共享光标/选区、本人撤销、回执核对、三方合并及独立可视化/源码对比页已按[ADR0061](../decisions/0061-cursors-offline-branches-and-version-merges.md)实现，取代旧的显式整篇正文保存阶段。PG继续是事实来源，Redis仅临时通知；真实范围见[验收](../handoff/cursor-versions-verification.md)。

@@ -642,3 +642,23 @@ container-deployment-5记录工作区可执行入口、既有Supervisor复用、
 | --- | --- |
 | `docs/development/container-deployment.md` | `70fdf1537df886be277b8e60bb650257e414d9bb6e4d0ced5dca314e12fedc97` |
 | `docs/handoff/container-deployment-verification.md` | `2796bbc4f19d2e24f156a594266f4d85919a1b4d2d39c4181e8cabc368a999da` |
+
+## collaboration-2 与独立版本页交付（2026-11-05）
+
+bootstrap-9、collaborative-editing-5、editor-plugins-15与draft-versions-1记录正文实时保存、光标/离线分支、PG合并锁与独立对比页。以下当前哈希替代此前后端阶段记录；STATUS分别维护，实际设备地址/密码不进入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `89cfa94a417766ded0e89fdf3d54e1d323cb63309c98671a1fdf2e6f2977fe0c` |
+| `docs/architecture/constraints.md` | `ba2b85252f5e1802165ad4c251f69a0f4106abd5f5f035e9a560154c5505d5dc` |
+| `docs/architecture/collaborative-editing.md` | `be967396b342452a7f293845591d7240ca17c696d9c9e0dae3a7aa7ec0f35395` |
+| `docs/development/editor-plugins.md` | `5fec91dcdf43668f22976fe0face699898889630f5be9508793d276e2db1f85e` |
+| `docs/development/draft-versions.md` | `3128a966c6d4a369df86db67632a58c8ef4cc982872eeb6b2615f6515a13d6b0` |
+| `docs/decisions/0061-cursors-offline-branches-and-version-merges.md` | `5f4e57f33e1efab38d07e1fdef697e9bb76aa62fbdffe2ffb6143925a67ff3e8` |
+| `docs/handoff/cursor-versions-verification.md` | `a0d29cc3ce4e1af86819c353c90fca2376f7bbb44428a61e9879d86e8cb59b9e` |
+| `docs/design/cursor-selection.png` | `91e002fe22c650be8a68725ed89827a684ec3225f4a3d752116c69011d03e23e` |
+| `docs/design/offline-branch.png` | `ba70e3fbb2571ae8abde7e1a88b9e0e290f093a24204883433444cb99cbe0823` |
+| `docs/design/versions-page-visual.png` | `db19001cb9aab6420384944b860a9d4aa7c1e2538d2496d8544c98ee29545dd1` |
+| `docs/design/versions-page-source.png` | `7392734fad4f028872e6d0235c78372a1c5b4fca952625fda6110e83a4f4159f` |
+| `docs/design/versions-page-narrow.png` | `3d4a73546564c223ee4d957e8f3dc6cf28f6e5475bd786a93b101307836df16c` |
+| `docs/design/versions-page-merge.png` | `5ff5a2c1c9f66a12c94274130624685bc780ed6734aec015592955b604306dcc` |

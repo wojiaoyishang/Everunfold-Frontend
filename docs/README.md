@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+[版本对比与离线恢复](development/draft-versions.md)记录最新使用方式；[ADR0061](decisions/0061-cursors-offline-branches-and-version-merges.md)替代旧的正文整篇显式保存阶段，[验收](handoff/cursor-versions-verification.md)记录双窗口、输入法、真实多进程及独立版本页。
+
 [编辑器工具栏、视频、HTML颜色和滚动定位](decisions/0059-editor-inline-insertion-and-sticky-blocks.md)、[保存修订同步修复](decisions/0060-collaborative-draft-revision-refresh.md)及[本轮验收](handoff/editor-inline-tools-verification.md)：短代码在当前区块插入，视频使用原生Markdown扩展，切换保留光标，标题栏避让导航吸顶；接入协同修订通知并保留真实冲突守卫。
 
 [原生短代码与后台短代码库](architecture/shortcodes.md)、[ADR0057](decisions/0057-native-shortcode-implementation.md)及[验收](handoff/native-shortcodes-verification.md)：采用`{{< … >}}`原生调用，已移除旧兼容，支持真实模板草稿/应用、代码注册项只读与文章插入。[ADR0058](decisions/0058-preserved-html-visual-editing.md)记录源码HTML的可视化修改与源文保留。
@@ -154,3 +156,5 @@
 - [结构化公式与主题吐司](decisions/0050-structured-formula-editor-and-theme-toasts.md)、[指南](development/formula-editor-and-toasts.md)及[验收](handoff/formula-editor-verification.md)：MathLive/CodeMirror共用窗口、模板/矩阵/键盘、保留LaTeX、按打开加载资源及统一上传通知。当前功能指南2、编辑器指南12、开发协议14。
 - [私有前台预览](decisions/0051-private-frontend-content-preview.md)及[验收](handoff/content-frontend-preview-verification.md)：文章/说说保存并预览、共用正式主题展示、独立鉴权、no-store/noindex与匿名SSR隔离。
 - [共享代码框与片段参数](decisions/0052-shared-code-frames-and-source-options.md)、[代码指南](development/code-blocks.md)及[验收](handoff/code-blocks-verification.md)：单编辑框、theme.code默认值、源码参数、行号/重点行、底部半透明展开和代码字体按需。当前开发协议16、编辑器指南13、功能指南3、设置指南7。
+
+最新交付：[光标、离线分支与独立版本页](decisions/0061-cursors-offline-branches-and-version-merges.md)、[操作指南](development/draft-versions.md)及[真实验收](handoff/cursor-versions-verification.md)：正文实时保存、块内成员选区、独立可视化/源码差异、版本保护与持久合并锁。

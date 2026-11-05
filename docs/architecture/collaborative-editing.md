@@ -1,6 +1,6 @@
 # 插件编辑器与共享草稿
 
-版本：collaborative-editing-4，2026-11-04。状态：试用版已实现；[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 记录决定，[验收](../handoff/collaborative-editing-verification.md) 区分真实进程、浏览器和未执行项目。
+版本：collaborative-editing-5，2026-11-05。状态：试用版已实现；[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 记录决定，[验收](../handoff/collaborative-editing-verification.md) 区分真实进程、浏览器和未执行项目。
 
 ## 边界与目录
 
@@ -15,22 +15,22 @@
 | core/content-management/use-draft-editor | 创建、保存/发布命令、权限策略、冲突与共享草稿衔接 |
 | 后端 content/collaboration | 私有票据、鉴权、文档校验、持久更新、在线状态、截点提交；由 content.router_init 装配 |
 
-当前两种格式共用原始源码底稿与本地双视图，正文通过整篇保存提交。CodeMirror、Tiptap 和统一安全渲染按 ADR0044 分责。没有加载用户上传的 JS，没有另建编辑器上传通道或独立发布流程。增加新的持久块格式仍须后端契约与渲染策略先支持。
+当前两种格式共用原始源码Y.Text及源码/可视化投影，正文实时提交；显式保存/发布建立精确截点。光标、离线分支和独立版本页按[ADR0061](../decisions/0061-cursors-offline-branches-and-version-merges.md)实施，旧整篇保存阶段已被替代。没有加载用户上传的 JS，没有另建编辑器上传通道或独立发布流程。增加新的持久块格式仍须后端契约与渲染策略先支持。
 
 ## 一篇草稿一个文档
 
 同一稳定草稿 ID 只在服务器事务内从现有 JSON 初始化一次，生成 epoch。每个浏览器建立自己的 Yjs 客户端，不能从 HTTP JSON 反复播种。
 
 - meta：title/excerpt/seo_title/seo_description 为 Y.Text；settings 为 Y.Map，保存路径、分类、标签、封面、显示时间、置顶、评论开关等。
-- blocks：稳定块 ID → Y.Map(type/content/deleted)，content 为 Y.Text。HTML 保留旧 rich:Y.XmlFragment 及 rich_base 用于兼容，新前端通过正式保存提交精确 content，并在后端同事务重建派生片段。
+- blocks：稳定块 ID → Y.Map(type/content/deleted)，content 为 Y.Text。现代source_first文档不再维护可写rich片段；旧文档转换时保留初始基线、归档epoch后重建原始源文，旧队列转恢复分支。
 - order：Y.Array 块 ID 列表；投影去重，跳过墓碑。排序不重建文本；删除保留源文，撤销可恢复。并发排序采用 CRDT 的确定性合并，不承诺任意多人移动都等于各人的局部顺序。
-- 密码、visibility、opens_at、发布状态、账号、权限不在 CRDT，也不写入本地正文缓存。分类/标签首版为字段级最后写入，共享元文本按 CRDT 合并，正文通过保存时的版本/块哈希校验处理并发。
+- 密码、visibility、opens_at、发布状态、账号、权限不在 CRDT，也不写入本地正文缓存。分类/标签首版为字段级最后写入，共享元文本和正文通过CRDT合并；源码投影无法安全定位的重叠进入人工分支。
 
-共享属性和结构撤销只追踪本人 Y.Doc 事务。当前正文编辑面的撤销历史分开，跨视图统一撤销为后续事项。跨编辑器连续文字选区、富文本 HTML 转换和拖拽另做。撤销历史不承诺跨刷新保留。
+正文、共享属性和结构撤销只追踪本人Y.Doc事务，两种视图共用宿主历史。源码和HTML/Markdown视觉投影支持块内成员光标与选区，点击定位；跨块连续选区另做。撤销历史不承诺跨刷新保留。
 
 ## 连接、持久化与恢复
 
-浏览器直连配置的 FastAPI。/v1 Cookie 不会自动发送到 /ws，故先以 Cookie+CSRF 调用 POST /v1/admin/content/collaboration/ticket，取得 45 秒、一次有效的票据；票据只在 socket 首帧发送，不能放 URL。实际 WS 是 /ws/v1/collab/{draft_id}，协议 collab-1，先校验精确 Origin，再验证票据、账号、会话与草稿。当前沿用 admin 编辑权限，未交付细粒度作者 ACL。
+浏览器直连配置的 FastAPI。/v1 Cookie 不会自动发送到 /ws，故先以 Cookie+CSRF 调用 POST /v1/admin/content/collaboration/ticket，取得 45 秒、一次有效的票据；票据只在 socket 首帧发送，不能放 URL。实际 WS 是 /ws/v1/collab/{draft_id}，新客户端契约collaboration 2.0.0，先校验精确 Origin，再验证票据、账号、会话与草稿。当前沿用 admin 编辑权限，未交付细粒度作者 ACL。
 
 握手携带 State Vector；服务器给出权威差量和 committed_seq。浏览器先原子保存本地状态+稳定 update_id 的 outbox，再发送。服务器复核权限、内容规则和媒体，按文档连续分配序号，将二进制状态、增量、哈希/操作者回执同事务提交后才 ACK。同 ID 同哈希/操作者重放返回原序号，其他内容拒绝。缺少前置结构或删除依赖的更新不能确认，避免 Yrs 重编码时丢失悬空数据。
 
@@ -38,7 +38,7 @@ Redis 的 collab:{draft_id}:updates 只唤醒 PostgreSQL 补齐；丢通知、�
 
 已实现常量上限：更新 1MiB、编码状态 4MiB、128 个可见块/512 个保留块、单块 100000/正文合计 200000 字符；沿用公开快照 8MiB 上限。每账号/文档写入为 160 次/10s，每账号合计 320 次/10s；这些是试用默认值，尚无后台配置或容量承诺。
 
-IndexedDB 以 后端地址+已验证账号 ID+草稿 ID 隔离。读/写事务合并所有标签页的 Yjs 状态、outbox 和 ACK 去重记录，不能最后写入覆盖别的窗口；BroadcastChannel 仅通知重新读取已提交的本机记录，缺少此 API 时由重连/重新打开恢复。ACK 后才能移除待确认项，缓存 loaded/synced 不代表服务器已存。浏览器存储失败明确提示导出，不冒充持久保存。
+IndexedDB以后端地址+已验证账号ID+草稿ID隔离，活动队列再按页面会话隔离，复制新窗口不会共享客户端身份。独立分支另库存储并在同一作用域列出。读/写事务合并所有标签页的 Yjs 状态、outbox 和 ACK 去重记录，不能最后写入覆盖别的窗口；BroadcastChannel 仅通知重新读取已提交的本机记录，缺少此 API 时由重连/重新打开恢复。ACK 后才能移除待确认项，缓存 loaded/synced 不代表服务器已存。浏览器存储失败明确提示导出，不冒充持久保存。
 
 失去权限后拒绝上传、关闭 socket；当前已授权页面的内存副本可导出。后台会话检查失败时不保留后台操作，只展示本地恢复面板；需要旧已验证账号和同一路径匹配，不能让缓存身份授权新页面。冷启动且后端不可用时不会绕过认证开放编辑器。JSON 导出剔除文章密码，并包含 removed_blocks，避免正在编辑的块被远端移除后无法找回源文。
 
@@ -52,9 +52,9 @@ POST /v1/admin/content/collaboration/commit 接受 epoch、确认过的序号、
 
 ## 明确后续
 
-当前状态是检查点，但保留初始状态、全部持久日志/回执和本机 ACK 记录，没有自动 GC/历史压缩删除。老截点重建成本随日志增长，未做长时间/大文档/大房间压测。完整审核工作流、代码页面协同、细粒度 ACL、跨块选区、显式冲突分支恢复、导出文件自动导入都未交付。原始 WordPress 文章不恢复来填充测试。
+当前状态是检查点，但保留初始状态、全部持久日志/回执和本机 ACK 记录，没有自动 GC/历史压缩删除。老截点重建成本随日志增长，未做长时间/大文档/大房间压测。完整审核工作流、代码页面协同、细粒度 ACL、跨块选区、导出文件自动导入都未交付；显式离线分支恢复、版本比较/合并已按ADR0061交付。原始 WordPress 文章不恢复来填充测试。
 
-## 旧版结构化 HTML 与源码事务兼容
+## 历史阶段：旧版结构化 HTML 与源码事务兼容
 
 以下描述旧版客户端的兼容协议，新前端正文采用 ADR0044 的原始源码与整篇保存。HTML片段保存段落、文字格式、列表、表格、图片说明/对齐与稳定字体引用。schema1.1增加sources帧及rich_versions；原collab-1传输、稳定更新ID、PG提交后ACK和精确保存截点不变。旧草稿首次取得新票据时在行锁内补齐缺失片段，保留原epoch与日志。
 
@@ -76,3 +76,7 @@ source_leases以文档/块记录generation、客户端、会话哈希和60秒租
 block_sources 在历史截点和最新文档上分别检查块 ID、类型和原文 SHA256。精确源码、兼容富文本、协同更新、媒体引用、修订及回执同事务提交。失败回滚和双 API 幂等重试见本轮 P0，保存成功经原 WS 序列传播。
 
 插件复用宿主回调，上传共用 UploadQueue/mediaLibraryAdapter。临时占位仅在本页出现，后端通过正文校验拒绝未完成占位。恢复、格式限制及逐组件验收见[本轮记录](../handoff/source-first-editor-verification.md)。
+
+## 当前版本页与合并
+
+[版本指南](../development/draft-versions.md)记录独立页、人工冲突处理、自动保存结果、最新版本保护和暂停/超时恢复。PG合并租约覆盖全部写入口；旧epoch及迟到输入不能绕过，晚到IME保留本地分支。正式发布与合并工作草稿分离。具体真实验收见[本轮记录](../handoff/cursor-versions-verification.md)。
