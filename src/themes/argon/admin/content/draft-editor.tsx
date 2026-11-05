@@ -58,6 +58,7 @@ export function DraftEditor({
   const [destination, setDestination] = useState(`/admin/content/${type.id}`);
   const [leaving, setLeaving] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [navigationError, setNavigationError] = useState("");
   const surface = useRef<HTMLDivElement>(null);
   const saveFocus = useRef<HTMLElement | null>(null);
   const [focusRequest, setFocusRequest] = useState(0);
@@ -77,11 +78,7 @@ export function DraftEditor({
     editor.uncertain ||
     leaving ||
     archived ||
-    Boolean(
-      id &&
-      (!editor.collaboration?.ready ||
-        editor.collaboration.phase === "stopped"),
-    );
+    Boolean(id && !editor.session?.canEdit);
   const navigate = (href: string) => {
     setDestination(href);
     setLeaving(true);
@@ -98,19 +95,22 @@ export function DraftEditor({
   }, [leaving, destination, router]);
   const requestLeave = (href: string) => {
     if (editor.busy || leaving) return;
-    if (editor.dirty || editor.uncertain) {
+    if (editor.unsaved || editor.uncertain) {
       setDestination(href);
       setConfirm("close");
     } else navigate(href);
   };
   useEditorNavigation(
-    editor.dirty || editor.uncertain,
+    editor.unsaved || editor.uncertain,
     editor.busy || leaving,
     requestLeave,
   );
-  const persist = async (action: "save" | "publish" | "withdraw" = "save") => {
+  const persist = async (
+    action: "save" | "publish" | "withdraw" = "save",
+    note = "",
+  ) => {
     if (uploading && action !== "withdraw") return null;
-    const result = await editor.save(action);
+    const result = await editor.save(action, note);
     if (result && !id)
       router.replace(`/admin/content/${type.id}/${result.id}/edit`);
     return result;
@@ -127,20 +127,20 @@ export function DraftEditor({
     editor.conflict ||
     archived ||
     !Fields ||
-    Boolean(id && (!editor.detail || editor.collaboration?.phase !== "ready"));
+    Boolean(
+      id &&
+      (!editor.detail ||
+        editor.collaboration?.phase !== "ready" ||
+        editor.collaboration.mode !== "shared" ||
+        editor.collaboration.merge),
+    );
   useSceneShortcuts([
     {
       key: "s",
       shift: "any",
       run: () => {
         // An uncertain operation could have been a publication: only the explicit retry may replay it.
-        if (
-          saveDisabled ||
-          confirm !== null ||
-          editor.uncertain ||
-          (editor.detail && !editor.dirty)
-        )
-          return;
+        if (saveDisabled || confirm !== null || editor.uncertain) return;
         saveFocus.current =
           document.activeElement instanceof HTMLElement
             ? document.activeElement
@@ -274,7 +274,35 @@ export function DraftEditor({
           localChanges={editor.stagedBlocks.length > 0}
           recoveryContent={editor.recoveryContent}
           disabled={Boolean(blocked || dragging)}
+          onLocate={(peer) => {
+            setMode("edit");
+            setSection("body");
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => editor.session?.locatePeer(peer)),
+            );
+          }}
+          onVersions={() => {
+            if (!id || !editor.session) return;
+            const href = `/admin/content/${type.id}/${id}/versions`;
+            if (editor.privateUnsaved || editor.uncertain) requestLeave(href);
+            else
+              void editor.session
+                .prepareNavigation()
+                .then(() => navigate(href))
+                .catch((cause: unknown) =>
+                  setNavigationError(
+                    cause instanceof Error
+                      ? cause.message
+                      : "无法保存草稿，请导出后继续。",
+                  ),
+                );
+          }}
         />
+        {navigationError && (
+          <p className="admin-draft-message" role="alert">
+            {navigationError}
+          </p>
+        )}
         <div className={styles.mobileTabs} aria-label="编辑区域">
           <Button
             aria-pressed={section === "body"}
@@ -298,14 +326,18 @@ export function DraftEditor({
                 ? "读取最新内容？"
                 : editor.uncertain
                   ? "离开编辑页面？"
-                  : "放弃尚未保存的修改？"
+                  : editor.collaboration?.branchId
+                    ? "保留本地草稿并离开？"
+                    : "离开编辑页面？"
           }
           description={
             confirm === "withdraw"
               ? "前台将不再展示这份内容，草稿与历史记录会保留。"
               : editor.uncertain
                 ? "上次保存结果尚未确认。离开后请检查列表中的保存状态。"
-                : "当前未保存的输入将被放弃。"
+                : editor.collaboration?.branchId && editor.collaboration.local
+                  ? "本地草稿保存在此浏览器，之后可从版本管理继续编辑。"
+                  : "尚未确认的输入会保留为本机恢复草稿，请在返回后检查同步状态。"
           }
           icon={confirm === "withdraw" ? "eye-off" : "undo"}
           confirmLabel={
@@ -387,6 +419,7 @@ export function DraftEditor({
                         />
                       ) : Fields ? (
                         <Fields
+                          session={editor.session}
                           type={type}
                           value={editor.fields}
                           onChange={editor.setFields}

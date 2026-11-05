@@ -31,6 +31,7 @@ export type Code2 = number;
 export type Msg2 = string;
 export type Released = true;
 export type Id3 = string;
+export type SourceFirst = boolean;
 export type Success3 = boolean;
 export type Code3 = number;
 export type Msg3 = string;
@@ -38,13 +39,14 @@ export type Ticket = string;
 export type DraftId = string;
 export type Epoch = string;
 export type WsPath = string;
-export type Protocol = "collab-1";
+export type Protocol = "collab-1" | "collab-2";
 export type Id4 = string;
 export type OperationId2 = string;
 export type ExpectedRevision = number;
 export type Epoch1 = string;
 export type CommittedSeq1 = number;
 export type Action = "save" | "publish" | "withdraw";
+export type Note = string;
 export type Id5 = string;
 export type Type = "markdown" | "html";
 export type BaseHash = string;
@@ -119,7 +121,9 @@ export type Type4 =
   | "error"
   | "revision"
   | "media"
-  | "sources";
+  | "sources"
+  | "control"
+  | "reset";
 export type Epoch3 = string | null;
 export type CommittedSeq3 = number | null;
 export type Payload2 = string | null;
@@ -141,10 +145,132 @@ export type BlockId5 = string;
 export type Generation1 = number;
 export type ClientId2 = number | null;
 export type ExpiresAt1 = string | null;
+export type Id8 = string;
+export type ActorId = string;
+export type Actor = string;
+export type TargetSeq = number;
+export type ExpiresAt2 = string;
 export type Type5 = "auth";
 export type Ticket1 = string;
 export type ClientId3 = number;
 export type StateVector = string;
+export type Id9 = string;
+export type Page = number;
+export type BranchPage = number;
+export type MergePage = number;
+export type Id10 = string;
+export type Revision2 = number;
+export type Success5 = boolean;
+export type Code6 = number;
+export type Msg6 = string;
+export type Revision3 = number;
+export type Actor1 = string;
+export type Action1 = string;
+export type Note1 = string;
+export type CreatedAt1 = string;
+export type Epoch4 = string | null;
+export type CommittedSeq4 = number | null;
+export type Parents = number[];
+export type Current = boolean;
+export type BranchId = string | null;
+export type Versions = VersionItem[];
+export type Id11 = string;
+export type Actor2 = string;
+export type Note2 = string;
+export type BaseRevision = number | null;
+export type BaseEpoch = string | null;
+export type BaseSeq = number | null;
+export type CreatedAt2 = string;
+export type MergedRevision = number | null;
+export type ReviewBlocks = string[];
+export type Branches = BranchItem[];
+export type Total = number;
+export type BranchTotal = number;
+export type Page1 = number;
+export type BranchPage1 = number;
+export type PageSize = number;
+export type Id12 = string;
+export type BranchId1 = string;
+export type OwnerId = string;
+export type Actor3 = string;
+export type Status1 =
+  "active" | "cancelled" | "completed" | "expired" | "discarded";
+export type CreatedAt3 = string;
+export type ExpiresAt3 = string;
+export type Unresolved = number;
+export type ResultRevision = number | null;
+export type Merges = MergeSummary[];
+export type MergeTotal = number;
+export type MergePage1 = number;
+export type Success6 = boolean;
+export type Code7 = number;
+export type Msg7 = string;
+export type Title1 = string;
+export type Excerpt1 = string;
+/**
+ * @minItems 1
+ * @maxItems 128
+ */
+export type Body1 = DraftBlock[];
+export type AccessPassword1 = string | null;
+export type Success7 = boolean;
+export type Code8 = number;
+export type Msg8 = string;
+export type Deleted = true;
+export type Id13 = string;
+export type BranchId2 = string;
+export type Note3 = string;
+export type BaseEpoch1 = string | null;
+export type BaseSeq1 = number | null;
+export type BaseRevision1 = number | null;
+export type BaseBranchId = string | null;
+export type UpdateId2 = string;
+export type Payload3 = string;
+/**
+ * @maxItems 1000
+ */
+export type Updates = BranchUpdate[];
+/**
+ * @maxItems 128
+ */
+export type ReviewBlocks1 = string[];
+export type Id14 = string;
+export type BranchId3 = string;
+export type Success8 = boolean;
+export type Code9 = number;
+export type Msg9 = string;
+export type Id15 = string;
+export type BranchId4 = string;
+export type MergeId = string;
+export type Id16 = string;
+export type MergeId1 = string;
+export type Id17 = string;
+export type MergeId2 = string;
+export type Key = string;
+export type Choice = "local" | "remote" | "base" | "custom";
+/**
+ * @maxItems 1024
+ */
+export type Resolutions = ConflictResolution[];
+export type Success9 = boolean;
+export type Code10 = number;
+export type Msg10 = string;
+export type Id18 = string;
+export type BranchId5 = string;
+export type Status2 =
+  "active" | "cancelled" | "completed" | "expired" | "discarded";
+export type OwnerId1 = string;
+export type Epoch5 = string;
+export type TargetSeq1 = number;
+export type TargetRevision = number;
+export type ExpiresAt4 = string;
+export type Key1 = string;
+export type Path1 = string[];
+export type Kind = "text" | "field" | "block" | "order";
+export type JsonValue = unknown;
+export type Conflicts = MergeConflict[];
+export type Resolved = string[];
+export type ResultRevision1 = number | null;
 
 export interface CollaborationContract {
   source_acquire: SourceAcquire;
@@ -153,7 +279,7 @@ export interface CollaborationContract {
   source_acquired: PublicResponseSourceAcquired;
   source_applied: PublicResponseSourceApplied;
   source_released: PublicResponseSourceReleased;
-  lookup: DraftLookup;
+  lookup: TicketRequest;
   ticket: PublicResponseTicketState;
   commit: CommitDraft;
   committed: PublicResponseCommittedDraft;
@@ -161,6 +287,18 @@ export interface CollaborationContract {
   presence: PresenceInput;
   frame: ServerFrame;
   auth: ClientAuth;
+  version_query: VersionQuery;
+  version_lookup: VersionLookup;
+  version_catalog: PublicResponseVersionCatalog;
+  version_detail: PublicResponseVersionDetail;
+  version_deleted: PublicResponseVersionDeleted;
+  branch_upload: BranchUpload;
+  branch_lookup: BranchLookup;
+  branch_detail: PublicResponseBranchDetail;
+  merge_begin: MergeBegin;
+  merge_lookup: MergeLookup;
+  merge_resolve: MergeResolve;
+  merge_detail: PublicResponseMergeDetail;
 }
 export interface SourceAcquire {
   id: Id;
@@ -213,8 +351,9 @@ export interface PublicResponseSourceReleased {
 export interface SourceReleased {
   released?: Released;
 }
-export interface DraftLookup {
+export interface TicketRequest {
   id: Id3;
+  source_first?: SourceFirst;
 }
 export interface PublicResponseTicketState {
   success?: Success3;
@@ -236,6 +375,7 @@ export interface CommitDraft {
   epoch: Epoch1;
   committed_seq: CommittedSeq1;
   action?: Action;
+  note?: Note;
   block_sources?: BlockSources;
   visibility?: Visibility;
   opens_at?: OpensAt;
@@ -341,6 +481,7 @@ export interface ServerFrame {
   msg?: Msg5;
   media_urls?: MediaUrls1;
   sources?: Sources;
+  merge?: MergeLock | null;
 }
 export interface Peer {
   connection_id: ConnectionId;
@@ -356,9 +497,201 @@ export interface SourceState {
   client_id: ClientId2;
   expires_at: ExpiresAt1;
 }
+export interface MergeLock {
+  id: Id8;
+  actor_id: ActorId;
+  actor: Actor;
+  target_seq: TargetSeq;
+  expires_at: ExpiresAt2;
+}
 export interface ClientAuth {
   type?: Type5;
   ticket: Ticket1;
   client_id: ClientId3;
   state_vector: StateVector;
+}
+export interface VersionQuery {
+  id: Id9;
+  page?: Page;
+  branch_page?: BranchPage;
+  merge_page?: MergePage;
+}
+export interface VersionLookup {
+  id: Id10;
+  revision: Revision2;
+}
+export interface PublicResponseVersionCatalog {
+  success?: Success5;
+  code?: Code6;
+  msg?: Msg6;
+  data: VersionCatalog;
+}
+export interface VersionCatalog {
+  versions: Versions;
+  branches: Branches;
+  total: Total;
+  branch_total: BranchTotal;
+  page: Page1;
+  branch_page: BranchPage1;
+  page_size?: PageSize;
+  lock: MergeLock | null;
+  merges: Merges;
+  merge_total: MergeTotal;
+  merge_page: MergePage1;
+}
+export interface VersionItem {
+  revision: Revision3;
+  actor: Actor1;
+  action: Action1;
+  note: Note1;
+  created_at: CreatedAt1;
+  epoch: Epoch4;
+  committed_seq: CommittedSeq4;
+  parents: Parents;
+  current: Current;
+  branch_id?: BranchId;
+}
+export interface BranchItem {
+  id: Id11;
+  actor: Actor2;
+  note: Note2;
+  base_revision: BaseRevision;
+  base_epoch: BaseEpoch;
+  base_seq: BaseSeq;
+  created_at: CreatedAt2;
+  merged_revision: MergedRevision;
+  review_blocks?: ReviewBlocks;
+}
+export interface MergeSummary {
+  id: Id12;
+  branch_id: BranchId1;
+  owner_id: OwnerId;
+  actor: Actor3;
+  status: Status1;
+  created_at: CreatedAt3;
+  expires_at: ExpiresAt3;
+  unresolved: Unresolved;
+  result_revision: ResultRevision;
+}
+export interface PublicResponseVersionDetail {
+  success?: Success6;
+  code?: Code7;
+  msg?: Msg7;
+  data: VersionDetail;
+}
+export interface VersionDetail {
+  version: VersionItem;
+  fields: DraftFields;
+  media_urls?: MediaUrls2;
+}
+export interface DraftFields {
+  title?: Title1;
+  excerpt?: Excerpt1;
+  body: Body1;
+  settings?: EditorSettings | null;
+  access_password?: AccessPassword1;
+}
+export interface MediaUrls2 {
+  [k: string]: MediaURL;
+}
+export interface PublicResponseVersionDeleted {
+  success?: Success7;
+  code?: Code8;
+  msg?: Msg8;
+  data: VersionDeleted;
+}
+export interface VersionDeleted {
+  deleted?: Deleted;
+}
+export interface BranchUpload {
+  id: Id13;
+  branch_id: BranchId2;
+  note?: Note3;
+  base_epoch?: BaseEpoch1;
+  base_seq?: BaseSeq1;
+  base_revision?: BaseRevision1;
+  base_branch_id?: BaseBranchId;
+  fields: DraftFields;
+  updates?: Updates;
+  review_blocks?: ReviewBlocks1;
+}
+export interface BranchUpdate {
+  update_id: UpdateId2;
+  payload: Payload3;
+}
+export interface BranchLookup {
+  id: Id14;
+  branch_id: BranchId3;
+}
+export interface PublicResponseBranchDetail {
+  success?: Success8;
+  code?: Code9;
+  msg?: Msg9;
+  data: BranchDetail;
+}
+export interface BranchDetail {
+  branch: BranchItem;
+  base: DraftFields;
+  fields: DraftFields;
+  media_urls?: MediaUrls3;
+}
+export interface MediaUrls3 {
+  [k: string]: MediaURL;
+}
+export interface MergeBegin {
+  id: Id15;
+  branch_id: BranchId4;
+  merge_id: MergeId;
+}
+export interface MergeLookup {
+  id: Id16;
+  merge_id: MergeId1;
+}
+export interface MergeResolve {
+  id: Id17;
+  merge_id: MergeId2;
+  resolutions: Resolutions;
+  result?: DraftFields | null;
+}
+export interface ConflictResolution {
+  key: Key;
+  choice: Choice;
+  value?: {
+    [k: string]: unknown;
+  };
+}
+export interface PublicResponseMergeDetail {
+  success?: Success9;
+  code?: Code10;
+  msg?: Msg10;
+  data: MergeDetail;
+}
+export interface MergeDetail {
+  id: Id18;
+  branch_id: BranchId5;
+  status: Status2;
+  owner_id: OwnerId1;
+  epoch: Epoch5;
+  target_seq: TargetSeq1;
+  target_revision: TargetRevision;
+  expires_at: ExpiresAt4;
+  base: DraftFields;
+  local: DraftFields;
+  remote: DraftFields;
+  result: DraftFields;
+  conflicts: Conflicts;
+  resolved: Resolved;
+  result_revision: ResultRevision1;
+  media_urls?: MediaUrls4;
+}
+export interface MergeConflict {
+  key: Key1;
+  path: Path1;
+  kind: Kind;
+  base: JsonValue;
+  local: JsonValue;
+  remote: JsonValue;
+}
+export interface MediaUrls4 {
+  [k: string]: MediaURL;
 }

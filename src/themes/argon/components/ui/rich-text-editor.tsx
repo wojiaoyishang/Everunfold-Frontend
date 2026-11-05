@@ -14,6 +14,9 @@ import {
   type Editor,
 } from "@tiptap/react";
 import { Extension } from "@tiptap/core";
+import * as Y from "yjs";
+import type { SharedSource } from "@/core/collaboration/editor-binding";
+import { visualPresence } from "@/core/editor/visual-presence";
 import { Slice } from "@tiptap/pm/model";
 import { NodeSelection, Plugin, TextSelection } from "@tiptap/pm/state";
 import { richExtensions } from "@/core/editor/rich-extensions";
@@ -43,6 +46,7 @@ import {
 import { patchVisualHtml } from "@/core/editor/patch-visual-html";
 import { EditorStatusBar } from "./editor-status-bar";
 import styles from "./rich-text-editor.module.css";
+import presenceStyles from "./editor-presence.module.css";
 import { revealEditorSelection } from "./reveal-editor-selection";
 
 declare module "@tiptap/core" {
@@ -84,6 +88,7 @@ const ReadonlyGuard = Extension.create<
 });
 
 interface RichTextEditorProps {
+  shared?: SharedSource;
   value: string;
   onChange: (html: string, previous: string) => void;
   label: string;
@@ -106,6 +111,7 @@ function hasLiveEditor(editor: Editor | null): editor is Editor {
 }
 
 export function RichTextEditor({
+  shared,
   value,
   onChange,
   label,
@@ -124,12 +130,16 @@ export function RichTextEditor({
     format === "markdown" ? markdownRichSource : htmlRichSource;
   const mapSelection =
     format === "markdown" ? richMarkdownSelection : richSourceSelection;
-  const latest = useRef({ onChange, media });
+  const latest = useRef({ onChange, media, shared });
   const source = useRef(value);
+  const caret = useRef<{
+    anchor: Y.RelativePosition;
+    head: Y.RelativePosition;
+  } | null>(null);
   const [problem, setProblem] = useState(false);
   useEffect(() => {
-    latest.current = { onChange, media };
-  }, [onChange, media]);
+    latest.current = { onChange, media, shared };
+  }, [onChange, media, shared]);
   const root = useRef<HTMLDivElement>(null);
   const extensions = richExtensions(false, format === "markdown");
   extensions.push(ReadonlyGuard.configure({ disabled }));
@@ -161,6 +171,7 @@ export function RichTextEditor({
     },
     onUpdate: ({ editor, transaction }) => {
       if (!hasLiveEditor(editor)) return;
+      if (transaction.getMeta("everunfoldSource")) return;
       const next =
         format === "markdown"
           ? patchVisualMarkdown(
@@ -200,15 +211,140 @@ export function RichTextEditor({
     }) ?? 0;
   useEffect(() => {
     if (!hasLiveEditor(editor)) return;
-    editor.commands.setReadonlyGuard(disabled);
-    editor?.setEditable(!disabled);
+    const apply = () => {
+      if (hasLiveEditor(editor)) {
+        editor.commands.setReadonlyGuard(disabled);
+        editor.setEditable(!disabled);
+      }
+    };
+    if (disabled && editor.view.composing) {
+      const dom = editor.view.dom,
+        finish = () => queueMicrotask(apply);
+      dom.addEventListener("compositionend", finish, { once: true });
+      dom.addEventListener("blur", finish, { once: true });
+      return () => {
+        dom.removeEventListener("compositionend", finish);
+        dom.removeEventListener("blur", finish);
+      };
+    }
+    apply();
   }, [editor, disabled]);
   useEffect(() => {
     if (hasLiveEditor(editor) && source.current !== value) {
       source.current = value;
-      resetContent(editor, readSource(value));
+      const next = editor.schema.nodeFromJSON(readSource(value));
+      const current = editor.state.doc;
+      const from = current.content.findDiffStart(next.content);
+      if (from !== null) {
+        const end = current.content.findDiffEnd(next.content) ?? {
+          a: current.content.size,
+          b: next.content.size,
+        };
+        const overlap = Math.max(0, from - Math.min(end.a, end.b));
+        let transaction = editor.state.tr
+          .setMeta("everunfoldSource", true)
+          .setMeta("addToHistory", false);
+        try {
+          transaction = transaction.replace(
+            from,
+            end.a + overlap,
+            next.slice(from, end.b + overlap),
+          );
+        } catch {
+          transaction = transaction.replaceWith(
+            0,
+            current.content.size,
+            next.content,
+          );
+        }
+        if (caret.current && shared?.text.doc) {
+          const anchor = Y.createAbsolutePositionFromRelativePosition(
+              caret.current.anchor,
+              shared.text.doc,
+            ),
+            head = Y.createAbsolutePositionFromRelativePosition(
+              caret.current.head,
+              shared.text.doc,
+            );
+          if (anchor?.type === shared.text && head?.type === shared.text) {
+            const mapped = mapSelection(
+              transaction.doc,
+              value,
+              { start: anchor.index, end: head.index },
+              true,
+            );
+            if (mapped)
+              transaction = transaction.setSelection(
+                TextSelection.between(
+                  transaction.doc.resolve(
+                    Math.min(mapped.start, transaction.doc.content.size),
+                  ),
+                  transaction.doc.resolve(
+                    Math.min(mapped.end, transaction.doc.content.size),
+                  ),
+                ),
+              );
+          }
+        }
+        editor.view.dispatch(transaction);
+      }
     }
-  }, [editor, readSource, value]);
+  }, [editor, readSource, value, shared, mapSelection]);
+  useEffect(() => {
+    if (!hasLiveEditor(editor) || !shared) return;
+    const plugin = visualPresence(() => ({
+      shared: latest.current.shared,
+      source: source.current,
+      map: mapSelection,
+    }));
+    editor.registerPlugin(plugin);
+    const capture = () => {
+      if (!hasLiveEditor(editor)) return;
+      const range = mapSelection(editor.state.doc, source.current, {
+        start: editor.state.selection.from,
+        end: editor.state.selection.to,
+      });
+      if (!range) return;
+      caret.current = {
+        anchor: Y.createRelativePositionFromTypeIndex(
+          shared.text,
+          Math.min(range.start, shared.text.length),
+        ),
+        head: Y.createRelativePositionFromTypeIndex(
+          shared.text,
+          Math.min(range.end, shared.text.length),
+        ),
+      };
+      if (editor.isFocused) shared.host.setPresence(shared.blockId, range);
+    };
+    const selection = () => queueMicrotask(capture);
+    const presence = (change: {
+      added: number[];
+      updated: number[];
+      removed: number[];
+    }) => {
+      if (
+        hasLiveEditor(editor) &&
+        [...change.added, ...change.updated, ...change.removed].some(
+          (id) => id !== shared.text.doc?.clientID,
+        )
+      )
+        editor.view.dispatch(
+          editor.state.tr.setMeta("everunfoldPresence", true),
+        );
+    };
+    editor.on("selectionUpdate", selection);
+    editor.on("focus", selection);
+    editor.on("update", selection);
+    shared.awareness.on("change", presence);
+    return () => {
+      editor.off("selectionUpdate", selection);
+      editor.off("focus", selection);
+      editor.off("update", selection);
+      shared.awareness.off("change", presence);
+      if (hasLiveEditor(editor)) editor.unregisterPlugin("everunfoldPresence");
+    };
+  }, [editor, shared, mapSelection]);
   useEffect(() => {
     if (!hasLiveEditor(editor) || !initialSelection) return;
     const frame = requestAnimationFrame(() => {
@@ -319,6 +455,24 @@ export function RichTextEditor({
         if (hasLiveEditor(editor))
           selectSource(editor, source.current, range, mapSelection);
       },
+      reveal: (range) => {
+        if (!hasLiveEditor(editor)) return;
+        const mapped = mapSelection(
+          editor.state.doc,
+          source.current,
+          range,
+          true,
+        );
+        if (mapped)
+          revealEditorSelection(
+            editor.view.dom,
+            () =>
+              hasLiveEditor(editor)
+                ? editor.view.coordsAtPos(mapped.end)
+                : null,
+            false,
+          );
+      },
       insert: (before, after = "") => {
         if (hasLiveEditor(editor) && !disabled)
           editor
@@ -381,7 +535,7 @@ export function RichTextEditor({
   );
   return (
     <div
-      className={styles.root}
+      className={`${styles.root} ${presenceStyles.presence}`}
       ref={root}
       data-disabled={disabled}
       data-editor-local-control

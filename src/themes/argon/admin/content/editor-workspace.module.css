@@ -627,3 +627,9 @@
 .uploadRecovery button {
   color: var(--admin-accent);
 }
+
+.workspace [data-collab-located="true"] {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 4px;
+  border-radius: 8px;
+}

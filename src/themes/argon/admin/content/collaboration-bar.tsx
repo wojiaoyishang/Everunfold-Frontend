@@ -4,6 +4,8 @@ import type {
   CollaborationStatus,
 } from "@/core/collaboration/session";
 import type { DraftFields } from "@/generated/content-admin-contract";
+import type { Peer } from "@/generated/collaboration-contract";
+import { useAdminAccount } from "@/core/admin/account-context";
 import { Button } from "../../components/ui/primitives";
 import { DownloadButton } from "../../components/ui/download-button";
 import { Icon } from "../../components/icon";
@@ -17,6 +19,8 @@ export function CollaborationBar({
   localChanges,
   recoveryContent,
   disabled,
+  onLocate,
+  onVersions,
 }: {
   session: DraftSession | null;
   status: CollaborationStatus | null;
@@ -24,58 +28,82 @@ export function CollaborationBar({
   localChanges: boolean;
   recoveryContent: () => string | undefined;
   disabled: boolean;
+  onLocate: (peer: Peer) => void;
+  onVersions?: () => void;
 }) {
+  const account = useAdminAccount();
   if (!session || !status) return null;
   const connected = status.phase === "ready";
-  const pending = status.pending > 0;
+  const self = status.peers.find(
+    (peer) => peer.client_id === session.doc.clientID,
+  );
+  const peers = status.peers
+    .filter((peer) => peer.client_id !== session.doc.clientID)
+    .sort((a, b) => a.client_id - b.client_id);
   const label =
     status.phase === "stopped"
       ? "同步已停止"
-      : status.phase === "connecting"
-        ? "正在连接协同"
-        : !connected
-          ? status.localSaving
-            ? "离线 · 正在保存到本机"
-            : status.local
-              ? "离线 · 修改仅保存在本机"
-              : "离线 · 请及时导出"
-          : pending
-            ? "正在同步修改"
-            : localChanges
-              ? "正文有未保存修改"
-              : "修改已同步";
+      : status.mode === "local"
+        ? status.localSaving
+          ? "正在保存本地草稿"
+          : status.local
+            ? "草稿已保存到本机"
+            : "本地保存失败"
+        : status.merge
+          ? "合并中 · 最新版只读"
+          : status.mode === "review"
+            ? "本地草稿待合并"
+            : status.mode === "paused"
+              ? "编辑已暂停 · 输入已保留"
+              : status.phase === "connecting"
+                ? "正在连接协同"
+                : !connected
+                  ? "已离线"
+                  : status.pending
+                    ? "正在实时保存"
+                    : localChanges
+                      ? "正在恢复本地正文"
+                      : "已保存到服务器";
   return (
     <section
       className={styles.bar}
       aria-label="草稿协同状态"
       data-phase={status.phase}
+      data-mode={status.mode}
     >
       <div className={styles.state} role="status" aria-live="polite">
-        <Icon
-          name={connected ? (pending ? "refresh" : "cloud-check") : "cloud-off"}
-          className={connected && pending ? "admin-draft-spin" : ""}
-        />
-        <span key={label}>{label}</span>
+        <Icon name={connected ? "cloud-check" : "cloud-off"} />
+        <span>{label}</span>
       </div>
-      {status.peers.length > 0 && (
-        <div
-          className={styles.peers}
-          aria-label={`${status.peers.length} 个在线编辑会话`}
+      <div className={styles.peers} aria-label="编辑成员">
+        <Button
+          className={styles.peer}
+          title="当前页面"
+          disabled={!self?.cursor || status.mode !== "shared"}
+          onClick={() => self && onLocate(self)}
+          style={{ color: self?.color }}
         >
-          {status.peers.map((peer) => (
-            <span
-              key={peer.connection_id}
-              className={styles.peer}
-              title={`${peer.name}${peer.client_id === session.doc.clientID ? "（当前页面）" : ""}`}
-              style={{ color: peer.color }}
-            >
-              <Icon name="user" />
-              {peer.name}
-              {peer.client_id === session.doc.clientID ? " · 我" : ""}
-            </span>
-          ))}
-        </div>
-      )}
+          <Icon name="user" />
+          {account.display_name} · 我
+        </Button>
+        {peers.map((peer) => (
+          <Button
+            key={peer.client_id}
+            className={styles.peer}
+            title={
+              peer.cursor
+                ? `${peer.name} · 定位光标与选区`
+                : `${peer.name} · 尚未选择正文位置`
+            }
+            disabled={!peer.cursor || status.mode !== "shared"}
+            style={{ color: peer.color }}
+            onClick={() => onLocate(peer)}
+          >
+            <Icon name="user" />
+            {peer.name}
+          </Button>
+        ))}
+      </div>
       <div className={styles.actions}>
         <Button
           aria-label="撤销本人上一步编辑"
@@ -93,6 +121,12 @@ export function CollaborationBar({
         >
           <Icon name="redo" />
         </Button>
+        {onVersions && (
+          <Button onClick={onVersions}>
+            <Icon name="clock" />
+            版本
+          </Button>
+        )}
         <DownloadButton
           filename={`draft-${session.id}.json`}
           content={() =>
@@ -108,10 +142,53 @@ export function CollaborationBar({
           导出草稿
         </DownloadButton>
       </div>
-      {status.error && (
-        <p className={styles.error} role="alert">
-          {status.error}
-        </p>
+      {(status.mode !== "shared" || status.error || status.merge) && (
+        <div className={styles.recovery} role="status">
+          <span>
+            {status.merge
+              ? `${status.merge.actor} 正在合并版本，最新版暂时只读。${status.branchId ? " 你的未确认输入已另存为本机草稿，恢复后需要比较并合并。" : ""}`
+              : status.error || "本地草稿已保留，请比较后合并。"}
+            {status.mode !== "shared" &&
+              (status.localSaving
+                ? " 正在保存到本机…"
+                : status.local
+                  ? " 内容保存在此浏览器。"
+                  : " 本地保存失败，请立即导出。")}
+          </span>
+          <div>
+            {status.phase !== "stopped" &&
+              status.phase !== "connecting" &&
+              !connected && (
+                <Button
+                  className="admin-button"
+                  onClick={() => session.reconnect()}
+                >
+                  重新连接
+                </Button>
+              )}
+            {status.phase !== "stopped" && status.mode !== "local" && (
+              <Button
+                className="admin-button"
+                onClick={() => session.continueLocal()}
+              >
+                继续本地编辑
+              </Button>
+            )}
+            {connected && status.mode !== "shared" && (
+              <Button
+                className="admin-button"
+                onClick={() => session.returnToLatest()}
+              >
+                返回最新版
+              </Button>
+            )}
+            {onVersions && status.branchId && (
+              <Button className="admin-button" onClick={onVersions}>
+                比较与合并
+              </Button>
+            )}
+          </div>
+        </div>
       )}
     </section>
   );

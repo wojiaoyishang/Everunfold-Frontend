@@ -45,16 +45,15 @@ import {
   type SourceCommand,
 } from "@/core/editor/source-commands";
 import { sourceSearchHighlights } from "@/core/editor/source-search";
-import { yCollab, yUndoManagerKeymap } from "y-codemirror.next";
-import type * as Y from "yjs";
-import type { Awareness } from "y-protocols/awareness";
+import { collaborativeSource } from "@/core/collaboration/codemirror-binding";
+import type { SharedSource } from "@/core/collaboration/editor-binding";
 import {
   applySourceChanges,
   normalizeSourceLines,
   sourceSplice,
 } from "@/core/editor/source-lines";
-import type { DraftSession } from "@/core/collaboration/session";
 import styles from "./code-editor.module.css";
+import presenceStyles from "./editor-presence.module.css";
 import { useCodeEditorHandle } from "./use-code-editor-handle";
 import { sourceHighlight } from "./source-highlight";
 
@@ -67,6 +66,7 @@ export interface CodeEditorHandle {
   focus: () => void;
   selection: () => SourceSelection;
   select: (selection: SourceSelection) => void;
+  reveal?: (selection: SourceSelection) => void;
   insert: (before: string, after?: string) => void;
   captureInsertion: () => CapturedInsertion;
 }
@@ -93,14 +93,7 @@ export interface SourceShortcut {
   key: string;
   command: SourceCommand;
 }
-export interface SharedSource {
-  text: Y.Text;
-  awareness: Awareness;
-  undo: Y.UndoManager;
-  blockId: string;
-  rich?: Y.XmlFragment;
-  host?: DraftSession;
-}
+export type { SharedSource } from "@/core/collaboration/editor-binding";
 export interface CodeEditorProps {
   value: string;
   onChange: (value: string, previous: string) => void;
@@ -234,11 +227,7 @@ export function CodeEditor({
             "aria-multiline": "true",
             spellcheck: "false",
           }),
-          text && awareness && undo
-            ? yCollab(text, awareness, {
-                undoManager: undo,
-              })
-            : history(),
+          shared ? collaborativeSource(shared, raw) : history(),
           keymap.of([
             {
               key: "Mod-f",
@@ -262,7 +251,37 @@ export function CodeEditor({
             })),
             ...completionKeymap,
             ...closeBracketsKeymap,
-            ...(text ? yUndoManagerKeymap : historyKeymap),
+            ...(text && undo
+              ? [
+                  {
+                    key: "Mod-z",
+                    run: (view: EditorView) => {
+                      if (view.state.readOnly) return false;
+                      if (!undo.canUndo()) return false;
+                      undo.undo();
+                      return true;
+                    },
+                  },
+                  {
+                    key: "Mod-Shift-z",
+                    run: (view: EditorView) => {
+                      if (view.state.readOnly) return false;
+                      if (!undo.canRedo()) return false;
+                      undo.redo();
+                      return true;
+                    },
+                  },
+                  {
+                    key: "Mod-y",
+                    run: (view: EditorView) => {
+                      if (view.state.readOnly) return false;
+                      if (!undo.canRedo()) return false;
+                      undo.redo();
+                      return true;
+                    },
+                  },
+                ]
+              : historyKeymap),
             ...defaultKeymap,
             indentWithTab,
           ]),
@@ -302,7 +321,7 @@ export function CodeEditor({
       view.current = null;
       editor.destroy();
     };
-  }, [text, awareness, undo, blockId, shortcuts]);
+  }, [text, awareness, undo, blockId, shortcuts, shared]);
   useEffect(() => {
     view.current?.dispatch({ effects: syntax.current.reconfigure(language) });
   }, [language, text, awareness, undo, blockId, shortcuts]);
@@ -329,12 +348,25 @@ export function CodeEditor({
     const editor = view.current;
     if (!editor) return;
     editor.contentDOM.setAttribute("aria-label", label);
-    editor.dispatch({
-      effects: editable.current.reconfigure([
-        EditorView.editable.of(!disabled),
-        EditorState.readOnly.of(Boolean(disabled)),
-      ]),
-    });
+    const apply = () =>
+      editor.dispatch({
+        effects: editable.current.reconfigure([
+          EditorView.editable.of(!disabled),
+          EditorState.readOnly.of(Boolean(disabled)),
+        ]),
+      });
+    if (disabled && editor.composing) {
+      const finish = () => queueMicrotask(apply);
+      editor.contentDOM.addEventListener("compositionend", finish, {
+        once: true,
+      });
+      editor.contentDOM.addEventListener("blur", finish, { once: true });
+      return () => {
+        editor.contentDOM.removeEventListener("compositionend", finish);
+        editor.contentDOM.removeEventListener("blur", finish);
+      };
+    }
+    apply();
   }, [disabled, label, language, text, awareness, undo, blockId, shortcuts]);
   useEffect(() => {
     const editor = view.current;
@@ -355,7 +387,7 @@ export function CodeEditor({
   }, [value, text]);
   return (
     <div
-      className={styles.editor}
+      className={`${styles.editor} ${presenceStyles.presence}`}
       ref={host}
       data-disabled={disabled || undefined}
     />

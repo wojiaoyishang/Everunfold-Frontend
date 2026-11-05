@@ -7,7 +7,6 @@ export function EditorActions({
   detail,
   busy,
   uncertain,
-  dirty,
   disabled,
   onSave,
   onWithdraw,
@@ -34,28 +33,31 @@ export function EditorActions({
       )}
       <Button
         className={`admin-button ${!detail || uncertain ? "admin-button-primary" : ""}`}
-        title={uncertain ? "重试上次操作" : "保存草稿 (Ctrl/Cmd+S)"}
+        title={uncertain ? "重试上次操作" : "保存版本 (Ctrl/Cmd+S)"}
         aria-keyshortcuts={
           uncertain
             ? undefined
             : "Control+s Meta+s Control+Shift+s Meta+Shift+s"
         }
-        disabled={disabled || Boolean(!dirty && detail && !uncertain)}
+        disabled={disabled}
         onClick={() => onSave("save")}
       >
         <Icon
           name={busy ? "refresh" : "check"}
           className={busy ? "admin-draft-spin" : ""}
         />
-        {busy ? "正在保存…" : uncertain ? "重试上次操作" : "保存草稿"}
+        {busy
+          ? "正在保存…"
+          : uncertain
+            ? "重试上次操作"
+            : detail
+              ? "保存版本"
+              : "创建草稿"}
       </Button>
       {detail && !uncertain && (
         <Button
           className="admin-button admin-button-primary"
-          disabled={
-            disabled ||
-            (!dirty && detail.published_revision === detail.revision)
-          }
+          disabled={disabled}
           onClick={() => onSave("publish")}
         >
           <Icon name="send" />

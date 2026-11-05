@@ -26,6 +26,8 @@ test("registered admin destinations bypass public snapshots and survive a safe l
   for (const path of [
     "/admin/content/article/new",
     "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/edit",
+    "/admin/content/article/00000000-0000-0000-0000-000000000001/versions",
+    "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/versions",
   ]) {
     assert.equal(isManagementRoute(path), true);
     assert.equal(loginReturnPath(path), path);

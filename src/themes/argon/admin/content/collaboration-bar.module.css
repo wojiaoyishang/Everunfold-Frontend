@@ -19,9 +19,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 0 0 165px;
+  min-height: 28px;
 }
 .state > span {
-  animation: appear 180ms ease both;
 }
 .bar svg {
   width: 15px;
@@ -46,7 +47,7 @@
   padding: 2px 7px;
   background: var(--admin-subtle);
   border-radius: 4px;
-  animation: appear 180ms ease both;
+
   max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -117,4 +118,40 @@
   .state > span {
     animation: none;
   }
+}
+
+.peer {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+}
+.peer:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.peer:not(:disabled):hover {
+  background: var(--admin-border);
+}
+.recovery {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  flex-basis: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--admin-border);
+  border-inline-start: 3px solid var(--admin-accent);
+  background: var(--admin-subtle);
+  border-radius: 5px;
+  line-height: 1.7;
+  color: var(--admin-text);
+}
+.recovery > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }

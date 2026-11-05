@@ -31,7 +31,6 @@ import type {
 } from "@/generated/content-admin-contract";
 import {
   blockSourcePatches,
-  bufferBlockSource,
   readBlockSources,
   withBlockSources,
   type BufferedSources,
@@ -161,7 +160,13 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
           }
           setError("");
           if (response.data.status !== "trash") {
-            owner = new DraftSession(baseUrl, csrfToken, id, account.id);
+            owner = new DraftSession(
+              baseUrl,
+              csrfToken,
+              id,
+              account.id,
+              draftFields(response.data),
+            );
             sessionRef.current = owner;
             setSession(owner);
             const active = owner;
@@ -213,11 +218,25 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
                   /* A failed refresh leaves the original revision guard in place. */
                 });
             };
+            let documentVersion = -1;
             active.onChange = () => {
               if (abort.signal.aborted) return;
               setCollaboration({ ...active.state });
+              if (documentVersion === active.state.documentVersion) return;
+              documentVersion = active.state.documentVersion;
               if (active.state.ready) {
                 const restored = active.project(privateFields.current);
+                if (
+                  Object.keys(sourceRef.current).length &&
+                  active.state.mode === "shared"
+                ) {
+                  active.detachFields(
+                    withBlockSources(restored, sourceRef.current),
+                    "旧编辑器未保存正文",
+                  );
+                  keepSources({});
+                  return;
+                }
                 setFields(restored);
                 confirmSources(active.state.seq);
                 const local = sourceRef.current;
@@ -269,7 +288,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     );
   useEffect(() => {
     if (
-      !dirty &&
+      !(detail ? hasPrivateDraftChanges(displayed, detail) : dirty) &&
       !uncertain &&
       !busy &&
       !collaboration?.pending &&
@@ -287,8 +306,13 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     busy,
     collaboration?.pending,
     collaboration?.sourceStaged,
+    displayed,
+    detail,
   ]);
-  const save = async (action: "save" | "publish" | "withdraw" = "save") => {
+  const save = async (
+    action: "save" | "publish" | "withdraw" = "save",
+    note = "",
+  ) => {
     if (inFlight.current || preparing.current || conflict) return null;
     const invalid = validateDraft(displayed, type);
     if (invalid) {
@@ -340,6 +364,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
               committed_seq: committed,
               block_sources,
               action,
+              note,
               visibility: fields.settings?.visibility ?? "public",
               opens_at: fields.settings?.opens_at ?? null,
               access_password: fields.access_password ?? null,
@@ -469,9 +494,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     const block = shared.body.find(({ id }) => id === blockId);
     if (!block) return;
     if (active?.state.ready) {
-      keepSources(
-        bufferBlockSource(sourceRef.current, block, content, previous),
-      );
+      active.setSource(blockId, content, previous);
       recover(active, shared);
     } else {
       privateFields.current = {
@@ -494,6 +517,16 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
     loading,
     busy,
     dirty,
+    unsaved: detail
+      ? Boolean(
+          collaboration?.pending ||
+          collaboration?.mode !== "shared" ||
+          hasPrivateDraftChanges(displayed, detail),
+        )
+      : dirty,
+    privateUnsaved: Boolean(
+      detail && hasPrivateDraftChanges(displayed, detail),
+    ),
     error: error || storageError,
     notice,
     conflict,
@@ -541,29 +574,13 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
         return;
       const active = sessionRef.current;
       if (active?.state.ready) {
-        const shared = active.project(privateFields.current);
-        // The visible form includes local source. Strip it from structural and
-        // metadata updates so a reorder or title edit cannot transmit typing.
-        const prior = new Map(shared.body.map((block) => [block.id, block]));
-        const wanted = new Set(next.body.map((block) => block.id));
-        const retained = { ...sourceRef.current };
-        for (const key of Object.keys(retained))
-          if (prior.has(key) && !wanted.has(key))
-            retained[key] = { ...retained[key], locallyRemoved: true };
-        keepSources(retained);
-        next = {
-          ...next,
-          body: next.body.map((block) => ({
-            ...block,
-            content: prior.get(block.id)?.content ?? block.content,
-          })),
-        };
+        if (!active.canEdit && active.state.mode === "shared") return;
         if (
-          JSON.stringify(shared.body.map((b) => [b.id, b.type])) !==
+          JSON.stringify(fields.body.map((b) => [b.id, b.type])) !==
           JSON.stringify(next.body.map((b) => [b.id, b.type]))
         )
           active.undo.stopCapturing();
-        active.setFields(next, shared);
+        active.setFields(next, fields);
         privateFields.current = next;
         const current = active.project(next);
         setFields(current);

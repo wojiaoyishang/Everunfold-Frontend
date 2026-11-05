@@ -56,7 +56,18 @@ export function validateDraft(
   return "";
 }
 export function draftError(error: unknown): string {
+  if (error instanceof Error && !(error instanceof RequestError))
+    return error.message;
   if (error instanceof RequestError) {
+    if (error.code === 40980)
+      return "正在合并版本，最新版暂时只读。输入已保留，请从草稿分支恢复。";
+    if (error.code === 40981) return "无法确认共同基线，请保留或导出本地草稿。";
+    if (error.code === 40982) return "当前最新版不能删除。";
+    if (error.code === 40983)
+      return "草稿编号已用于其他内容，请保留本地草稿并重新比较。";
+    if (error.code === 40984)
+      return "合并编辑权已过期，结果已保留，请重新比较最新版。";
+    if (error.code === 40985) return "请先处理全部合并冲突。";
     if (error.status === 401 || error.status === 403)
       return "登录状态或权限已变化，请重新登录后再操作。";
     if (error.code === 40951 || error.code === 40976)

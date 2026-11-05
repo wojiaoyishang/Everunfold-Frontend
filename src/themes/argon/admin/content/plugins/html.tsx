@@ -29,6 +29,7 @@ export default function HtmlEditor(props: BlockEditorProps) {
     () => ({
       focus: () => active.current?.focus(),
       select: (range) => active.current?.select(range),
+      reveal: (range) => active.current?.reveal?.(range),
       selection: () => active.current?.selection() ?? { start: 0, end: 0 },
       insert: (before, after) => active.current?.insert(before, after),
       captureInsertion: () => active.current?.captureInsertion() ?? (() => {}),
@@ -56,6 +57,7 @@ export default function HtmlEditor(props: BlockEditorProps) {
         )}
       {mode === "visual" ? (
         <RichTextEditor
+          shared={props.shared}
           value={props.value}
           label={props.label}
           disabled={props.disabled}

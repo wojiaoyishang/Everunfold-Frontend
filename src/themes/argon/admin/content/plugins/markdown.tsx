@@ -141,6 +141,7 @@ export default function MarkdownEditor(props: BlockEditorProps) {
     focus: () => active()?.focus(),
     selection: () => active()?.selection() ?? { start: 0, end: 0 },
     select: (range) => active()?.select(range),
+    reveal: (range) => active()?.reveal?.(range),
     insert: (before, after) => active()?.insert(before, after),
     captureInsertion: () => active()?.captureInsertion() ?? (() => {}),
   }));
@@ -227,6 +228,7 @@ export default function MarkdownEditor(props: BlockEditorProps) {
         >
           {mode !== "write" && (
             <RichTextEditor
+              shared={props.shared}
               format="markdown"
               value={props.value}
               onChange={props.onChange}

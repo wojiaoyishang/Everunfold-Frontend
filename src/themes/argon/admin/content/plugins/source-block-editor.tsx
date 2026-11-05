@@ -10,6 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Extension } from "@codemirror/state";
+import type { SharedSource } from "@/core/collaboration/editor-binding";
 import type { UploadEntry } from "@/core/media/upload-queue";
 import type { MediaItem } from "@/generated/settings-contract";
 import type { MediaURL } from "@/generated/content-admin-contract";
@@ -33,6 +34,7 @@ import { featureSource } from "@/core/editor/content-feature-source";
 export type { SourceAction } from "./source-toolbar";
 
 export interface BlockEditorProps {
+  shared?: SharedSource;
   value: string;
   onChange: (value: string, previous: string) => void;
   label: string;
@@ -101,6 +103,7 @@ export function SourceBlockEditor({
     () => ({
       focus: () => input.current?.focus(),
       select: (selection) => input.current?.select(selection),
+      reveal: (selection) => input.current?.reveal?.(selection),
       selection: () => input.current?.selection() ?? { start: 0, end: 0 },
       insert: (before, after) => input.current?.insert(before, after),
       captureInsertion: () => input.current?.captureInsertion() ?? (() => {}),
@@ -175,6 +178,7 @@ export function SourceBlockEditor({
         onReplace={(all) => input.current?.replace(all)}
       />
       <CodeEditor
+        shared={props.shared}
         value={props.value}
         onChange={props.onChange}
         disabled={props.disabled}

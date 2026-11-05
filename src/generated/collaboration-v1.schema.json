@@ -36,6 +36,264 @@
       "title": "BlockSourcePatch",
       "type": "object"
     },
+    "BranchDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "branch": {
+          "$ref": "#/$defs/BranchItem"
+        },
+        "base": {
+          "$ref": "#/$defs/DraftFields"
+        },
+        "fields": {
+          "$ref": "#/$defs/DraftFields"
+        },
+        "media_urls": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MediaURL"
+          },
+          "title": "Media Urls",
+          "type": "object"
+        }
+      },
+      "required": [
+        "branch",
+        "base",
+        "fields"
+      ],
+      "title": "BranchDetail",
+      "type": "object"
+    },
+    "BranchItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "actor": {
+          "title": "Actor",
+          "type": "string"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        },
+        "base_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Base Revision"
+        },
+        "base_epoch": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Base Epoch"
+        },
+        "base_seq": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Base Seq"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "merged_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Merged Revision"
+        },
+        "review_blocks": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Review Blocks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "actor",
+        "note",
+        "base_revision",
+        "base_epoch",
+        "base_seq",
+        "created_at",
+        "merged_revision"
+      ],
+      "title": "BranchItem",
+      "type": "object"
+    },
+    "BranchLookup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "branch_id": {
+          "format": "uuid",
+          "title": "Branch Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "branch_id"
+      ],
+      "title": "BranchLookup",
+      "type": "object"
+    },
+    "BranchUpdate": {
+      "additionalProperties": false,
+      "properties": {
+        "update_id": {
+          "format": "uuid",
+          "title": "Update Id",
+          "type": "string"
+        },
+        "payload": {
+          "maxLength": 1400000,
+          "title": "Payload",
+          "type": "string"
+        }
+      },
+      "required": [
+        "update_id",
+        "payload"
+      ],
+      "title": "BranchUpdate",
+      "type": "object"
+    },
+    "BranchUpload": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "branch_id": {
+          "format": "uuid",
+          "title": "Branch Id",
+          "type": "string"
+        },
+        "note": {
+          "default": "离线草稿",
+          "maxLength": 200,
+          "title": "Note",
+          "type": "string"
+        },
+        "base_epoch": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Epoch"
+        },
+        "base_seq": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Seq"
+        },
+        "base_revision": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Revision"
+        },
+        "base_branch_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Base Branch Id"
+        },
+        "fields": {
+          "$ref": "#/$defs/DraftFields"
+        },
+        "updates": {
+          "items": {
+            "$ref": "#/$defs/BranchUpdate"
+          },
+          "maxItems": 1000,
+          "title": "Updates",
+          "type": "array"
+        },
+        "review_blocks": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "maxItems": 128,
+          "title": "Review Blocks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "branch_id",
+        "fields"
+      ],
+      "title": "BranchUpload",
+      "type": "object"
+    },
     "ClientAuth": {
       "additionalProperties": false,
       "properties": {
@@ -152,6 +410,12 @@
           "title": "Action",
           "type": "string"
         },
+        "note": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Note",
+          "type": "string"
+        },
         "block_sources": {
           "items": {
             "$ref": "#/$defs/BlockSourcePatch"
@@ -223,6 +487,35 @@
         "committed_seq"
       ],
       "title": "CommittedDraft",
+      "type": "object"
+    },
+    "ConflictResolution": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "choice": {
+          "enum": [
+            "local",
+            "remote",
+            "base",
+            "custom"
+          ],
+          "title": "Choice",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        }
+      },
+      "required": [
+        "key",
+        "choice"
+      ],
+      "title": "ConflictResolution",
       "type": "object"
     },
     "Cursor": {
@@ -407,19 +700,60 @@
       "title": "DraftDetail",
       "type": "object"
     },
-    "DraftLookup": {
+    "DraftFields": {
       "additionalProperties": false,
       "properties": {
-        "id": {
-          "format": "uuid",
-          "title": "Id",
+        "title": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Title",
           "type": "string"
+        },
+        "excerpt": {
+          "default": "",
+          "maxLength": 1000,
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "body": {
+          "items": {
+            "$ref": "#/$defs/DraftBlock"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "title": "Body",
+          "type": "array"
+        },
+        "settings": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/EditorSettings"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "access_password": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Access Password"
         }
       },
       "required": [
-        "id"
+        "body"
       ],
-      "title": "DraftLookup",
+      "title": "DraftFields",
       "type": "object"
     },
     "EditorSettings": {
@@ -569,6 +903,7 @@
       "title": "FontInfo",
       "type": "object"
     },
+    "JsonValue": {},
     "MediaURL": {
       "additionalProperties": false,
       "properties": {
@@ -597,6 +932,362 @@
         "original"
       ],
       "title": "MediaURL",
+      "type": "object"
+    },
+    "MergeBegin": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "branch_id": {
+          "format": "uuid",
+          "title": "Branch Id",
+          "type": "string"
+        },
+        "merge_id": {
+          "format": "uuid",
+          "title": "Merge Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "branch_id",
+        "merge_id"
+      ],
+      "title": "MergeBegin",
+      "type": "object"
+    },
+    "MergeConflict": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "path": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "text",
+            "field",
+            "block",
+            "order"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "base": {
+          "$ref": "#/$defs/JsonValue"
+        },
+        "local": {
+          "$ref": "#/$defs/JsonValue"
+        },
+        "remote": {
+          "$ref": "#/$defs/JsonValue"
+        }
+      },
+      "required": [
+        "key",
+        "path",
+        "kind",
+        "base",
+        "local",
+        "remote"
+      ],
+      "title": "MergeConflict",
+      "type": "object"
+    },
+    "MergeDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "branch_id": {
+          "format": "uuid",
+          "title": "Branch Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "cancelled",
+            "completed",
+            "expired",
+            "discarded"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "owner_id": {
+          "format": "uuid",
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "epoch": {
+          "format": "uuid",
+          "title": "Epoch",
+          "type": "string"
+        },
+        "target_seq": {
+          "title": "Target Seq",
+          "type": "integer"
+        },
+        "target_revision": {
+          "title": "Target Revision",
+          "type": "integer"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "base": {
+          "$ref": "#/$defs/DraftFields"
+        },
+        "local": {
+          "$ref": "#/$defs/DraftFields"
+        },
+        "remote": {
+          "$ref": "#/$defs/DraftFields"
+        },
+        "result": {
+          "$ref": "#/$defs/DraftFields"
+        },
+        "conflicts": {
+          "items": {
+            "$ref": "#/$defs/MergeConflict"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "resolved": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Resolved",
+          "type": "array"
+        },
+        "result_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Revision"
+        },
+        "media_urls": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MediaURL"
+          },
+          "title": "Media Urls",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "branch_id",
+        "status",
+        "owner_id",
+        "epoch",
+        "target_seq",
+        "target_revision",
+        "expires_at",
+        "base",
+        "local",
+        "remote",
+        "result",
+        "conflicts",
+        "resolved",
+        "result_revision"
+      ],
+      "title": "MergeDetail",
+      "type": "object"
+    },
+    "MergeLock": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "actor_id": {
+          "format": "uuid",
+          "title": "Actor Id",
+          "type": "string"
+        },
+        "actor": {
+          "title": "Actor",
+          "type": "string"
+        },
+        "target_seq": {
+          "title": "Target Seq",
+          "type": "integer"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "actor_id",
+        "actor",
+        "target_seq",
+        "expires_at"
+      ],
+      "title": "MergeLock",
+      "type": "object"
+    },
+    "MergeLookup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "merge_id": {
+          "format": "uuid",
+          "title": "Merge Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "merge_id"
+      ],
+      "title": "MergeLookup",
+      "type": "object"
+    },
+    "MergeResolve": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "merge_id": {
+          "format": "uuid",
+          "title": "Merge Id",
+          "type": "string"
+        },
+        "resolutions": {
+          "items": {
+            "$ref": "#/$defs/ConflictResolution"
+          },
+          "maxItems": 1024,
+          "title": "Resolutions",
+          "type": "array"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DraftFields"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "merge_id",
+        "resolutions"
+      ],
+      "title": "MergeResolve",
+      "type": "object"
+    },
+    "MergeSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "branch_id": {
+          "format": "uuid",
+          "title": "Branch Id",
+          "type": "string"
+        },
+        "owner_id": {
+          "format": "uuid",
+          "title": "Owner Id",
+          "type": "string"
+        },
+        "actor": {
+          "title": "Actor",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "active",
+            "cancelled",
+            "completed",
+            "expired",
+            "discarded"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "expires_at": {
+          "format": "date-time",
+          "title": "Expires At",
+          "type": "string"
+        },
+        "unresolved": {
+          "title": "Unresolved",
+          "type": "integer"
+        },
+        "result_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Revision"
+        }
+      },
+      "required": [
+        "id",
+        "branch_id",
+        "owner_id",
+        "actor",
+        "status",
+        "created_at",
+        "expires_at",
+        "unresolved",
+        "result_revision"
+      ],
+      "title": "MergeSummary",
       "type": "object"
     },
     "Peer": {
@@ -692,6 +1383,34 @@
       "title": "PresenceInput",
       "type": "object"
     },
+    "PublicResponse_BranchDetail_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/BranchDetail"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[BranchDetail]",
+      "type": "object"
+    },
     "PublicResponse_CommittedDraft_": {
       "additionalProperties": false,
       "properties": {
@@ -718,6 +1437,34 @@
         "data"
       ],
       "title": "PublicResponse[CommittedDraft]",
+      "type": "object"
+    },
+    "PublicResponse_MergeDetail_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/MergeDetail"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[MergeDetail]",
       "type": "object"
     },
     "PublicResponse_SourceAcquired_": {
@@ -832,6 +1579,90 @@
       "title": "PublicResponse[TicketState]",
       "type": "object"
     },
+    "PublicResponse_VersionCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/VersionCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[VersionCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_VersionDeleted_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/VersionDeleted"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[VersionDeleted]",
+      "type": "object"
+    },
+    "PublicResponse_VersionDetail_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/VersionDetail"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[VersionDetail]",
+      "type": "object"
+    },
     "ServerFrame": {
       "additionalProperties": false,
       "properties": {
@@ -844,7 +1675,9 @@
             "error",
             "revision",
             "media",
-            "sources"
+            "sources",
+            "control",
+            "reset"
           ],
           "title": "Type",
           "type": "string"
@@ -979,6 +1812,17 @@
           ],
           "default": null,
           "title": "Sources"
+        },
+        "merge": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MergeLock"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -1207,6 +2051,26 @@
       "title": "SourceState",
       "type": "object"
     },
+    "TicketRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "source_first": {
+          "default": false,
+          "title": "Source First",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "TicketRequest",
+      "type": "object"
+    },
     "TicketState": {
       "additionalProperties": false,
       "properties": {
@@ -1229,8 +2093,11 @@
           "type": "string"
         },
         "protocol": {
-          "const": "collab-1",
           "default": "collab-1",
+          "enum": [
+            "collab-1",
+            "collab-2"
+          ],
           "title": "Protocol",
           "type": "string"
         }
@@ -1242,6 +2109,265 @@
         "ws_path"
       ],
       "title": "TicketState",
+      "type": "object"
+    },
+    "VersionCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "versions": {
+          "items": {
+            "$ref": "#/$defs/VersionItem"
+          },
+          "title": "Versions",
+          "type": "array"
+        },
+        "branches": {
+          "items": {
+            "$ref": "#/$defs/BranchItem"
+          },
+          "title": "Branches",
+          "type": "array"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "branch_total": {
+          "title": "Branch Total",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "branch_page": {
+          "title": "Branch Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 20,
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "lock": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/MergeLock"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "merges": {
+          "items": {
+            "$ref": "#/$defs/MergeSummary"
+          },
+          "title": "Merges",
+          "type": "array"
+        },
+        "merge_total": {
+          "title": "Merge Total",
+          "type": "integer"
+        },
+        "merge_page": {
+          "title": "Merge Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "versions",
+        "branches",
+        "total",
+        "branch_total",
+        "page",
+        "branch_page",
+        "lock",
+        "merges",
+        "merge_total",
+        "merge_page"
+      ],
+      "title": "VersionCatalog",
+      "type": "object"
+    },
+    "VersionDeleted": {
+      "additionalProperties": false,
+      "properties": {
+        "deleted": {
+          "const": true,
+          "default": true,
+          "title": "Deleted",
+          "type": "boolean"
+        }
+      },
+      "title": "VersionDeleted",
+      "type": "object"
+    },
+    "VersionDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "$ref": "#/$defs/VersionItem"
+        },
+        "fields": {
+          "$ref": "#/$defs/DraftFields"
+        },
+        "media_urls": {
+          "additionalProperties": {
+            "$ref": "#/$defs/MediaURL"
+          },
+          "title": "Media Urls",
+          "type": "object"
+        }
+      },
+      "required": [
+        "version",
+        "fields"
+      ],
+      "title": "VersionDetail",
+      "type": "object"
+    },
+    "VersionItem": {
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "actor": {
+          "title": "Actor",
+          "type": "string"
+        },
+        "action": {
+          "title": "Action",
+          "type": "string"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "epoch": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Epoch"
+        },
+        "committed_seq": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Committed Seq"
+        },
+        "parents": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Parents",
+          "type": "array"
+        },
+        "current": {
+          "title": "Current",
+          "type": "boolean"
+        },
+        "branch_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Branch Id"
+        }
+      },
+      "required": [
+        "revision",
+        "actor",
+        "action",
+        "note",
+        "created_at",
+        "epoch",
+        "committed_seq",
+        "parents",
+        "current"
+      ],
+      "title": "VersionItem",
+      "type": "object"
+    },
+    "VersionLookup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "revision"
+      ],
+      "title": "VersionLookup",
+      "type": "object"
+    },
+    "VersionQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "branch_page": {
+          "default": 1,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Branch Page",
+          "type": "integer"
+        },
+        "merge_page": {
+          "default": 1,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Merge Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "VersionQuery",
       "type": "object"
     }
   },
@@ -1266,7 +2392,7 @@
       "$ref": "#/$defs/PublicResponse_SourceReleased_"
     },
     "lookup": {
-      "$ref": "#/$defs/DraftLookup"
+      "$ref": "#/$defs/TicketRequest"
     },
     "ticket": {
       "$ref": "#/$defs/PublicResponse_TicketState_"
@@ -1288,6 +2414,42 @@
     },
     "auth": {
       "$ref": "#/$defs/ClientAuth"
+    },
+    "version_query": {
+      "$ref": "#/$defs/VersionQuery"
+    },
+    "version_lookup": {
+      "$ref": "#/$defs/VersionLookup"
+    },
+    "version_catalog": {
+      "$ref": "#/$defs/PublicResponse_VersionCatalog_"
+    },
+    "version_detail": {
+      "$ref": "#/$defs/PublicResponse_VersionDetail_"
+    },
+    "version_deleted": {
+      "$ref": "#/$defs/PublicResponse_VersionDeleted_"
+    },
+    "branch_upload": {
+      "$ref": "#/$defs/BranchUpload"
+    },
+    "branch_lookup": {
+      "$ref": "#/$defs/BranchLookup"
+    },
+    "branch_detail": {
+      "$ref": "#/$defs/PublicResponse_BranchDetail_"
+    },
+    "merge_begin": {
+      "$ref": "#/$defs/MergeBegin"
+    },
+    "merge_lookup": {
+      "$ref": "#/$defs/MergeLookup"
+    },
+    "merge_resolve": {
+      "$ref": "#/$defs/MergeResolve"
+    },
+    "merge_detail": {
+      "$ref": "#/$defs/PublicResponse_MergeDetail_"
     }
   },
   "required": [
@@ -1304,12 +2466,24 @@
     "update",
     "presence",
     "frame",
-    "auth"
+    "auth",
+    "version_query",
+    "version_lookup",
+    "version_catalog",
+    "version_detail",
+    "version_deleted",
+    "branch_upload",
+    "branch_lookup",
+    "branch_detail",
+    "merge_begin",
+    "merge_lookup",
+    "merge_resolve",
+    "merge_detail"
   ],
   "title": "CollaborationContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.2.0",
+  "x-everunfold-contract-version": "2.0.0",
   "x-everunfold-operations": [
     {
       "name": "acquireHtmlSource",
@@ -1352,6 +2526,97 @@
       "method": "POST",
       "input": "commit",
       "response": "committed"
+    },
+    {
+      "name": "listDraftVersions",
+      "path": "/v1/admin/content/versions/list",
+      "method": "POST",
+      "input": "version_query",
+      "response": "version_catalog"
+    },
+    {
+      "name": "readDraftVersion",
+      "path": "/v1/admin/content/versions/read",
+      "method": "POST",
+      "input": "version_lookup",
+      "response": "version_detail"
+    },
+    {
+      "name": "deleteDraftVersion",
+      "path": "/v1/admin/content/versions/delete",
+      "method": "POST",
+      "input": "version_lookup",
+      "response": "version_deleted"
+    },
+    {
+      "name": "uploadDraftBranch",
+      "path": "/v1/admin/content/versions/branch/upload",
+      "method": "POST",
+      "input": "branch_upload",
+      "response": "branch_detail"
+    },
+    {
+      "name": "readDraftBranch",
+      "path": "/v1/admin/content/versions/branch/read",
+      "method": "POST",
+      "input": "branch_lookup",
+      "response": "branch_detail"
+    },
+    {
+      "name": "deleteDraftBranch",
+      "path": "/v1/admin/content/versions/branch/delete",
+      "method": "POST",
+      "input": "branch_lookup",
+      "response": "version_deleted"
+    },
+    {
+      "name": "beginDraftMerge",
+      "path": "/v1/admin/content/versions/merge/begin",
+      "method": "POST",
+      "input": "merge_begin",
+      "response": "merge_detail"
+    },
+    {
+      "name": "readDraftMerge",
+      "path": "/v1/admin/content/versions/merge/read",
+      "method": "POST",
+      "input": "merge_lookup",
+      "response": "merge_detail"
+    },
+    {
+      "name": "resolveDraftMerge",
+      "path": "/v1/admin/content/versions/merge/resolve",
+      "method": "POST",
+      "input": "merge_resolve",
+      "response": "merge_detail"
+    },
+    {
+      "name": "renewDraftMerge",
+      "path": "/v1/admin/content/versions/merge/renew",
+      "method": "POST",
+      "input": "merge_lookup",
+      "response": "merge_detail"
+    },
+    {
+      "name": "cancelDraftMerge",
+      "path": "/v1/admin/content/versions/merge/cancel",
+      "method": "POST",
+      "input": "merge_lookup",
+      "response": "merge_detail"
+    },
+    {
+      "name": "finishDraftMerge",
+      "path": "/v1/admin/content/versions/merge/finish",
+      "method": "POST",
+      "input": "merge_lookup",
+      "response": "merge_detail"
+    },
+    {
+      "name": "deleteDraftMerge",
+      "path": "/v1/admin/content/versions/merge/delete",
+      "method": "POST",
+      "input": "merge_lookup",
+      "response": "merge_detail"
     }
   ]
 }

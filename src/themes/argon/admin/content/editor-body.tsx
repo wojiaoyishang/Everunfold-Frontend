@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type {
   ContentTypeDefinition,
   DraftFields,
@@ -21,7 +21,9 @@ import type {
 } from "../../components/ui/code-editor";
 import type { MediaURL } from "@/generated/content-admin-contract";
 import styles from "./editor-workspace.module.css";
+import type { DraftSession } from "@/core/collaboration/session";
 export interface EditorProps {
+  session?: DraftSession | null;
   type: ContentTypeDefinition;
   value: DraftFields;
   onChange: (value: DraftFields) => void;
@@ -34,6 +36,7 @@ export interface EditorProps {
   locked: (id: string) => boolean;
 }
 export function EditorBody({
+  session,
   type,
   value,
   onChange,
@@ -58,6 +61,22 @@ export function EditorBody({
   const composer = useBlockComposer();
   const [announcement, setAnnouncement] = useState("");
   const toast = useToast();
+  useEffect(() => {
+    if (!session) return;
+    return session.registerLocator((range) => {
+      const input = inputs.current.get(range.blockId);
+      const block = document.querySelector<HTMLElement>(
+        `[data-block-id="${CSS.escape(range.blockId)}"]`,
+      );
+      if (!input || !block) return false;
+      block.scrollIntoView({ block: "center", behavior: "instant" });
+      requestAnimationFrame(() => input.reveal?.(range));
+      block.dataset.collabLocated = "true";
+      setTimeout(() => delete block.dataset.collabLocated, 1600);
+      setAnnouncement("已定位到协作者的光标，当前插入点已保留。");
+      return true;
+    });
+  }, [session]);
   const insertCaptured = (insert: CapturedInsertion, source: string) => {
     if (insert(source) !== false) return true;
     toast.show({
@@ -124,6 +143,7 @@ export function EditorBody({
             {(modeControls) => (
               <>
                 <RegisteredBlockEditor
+                  shared={session?.binding(block.id)}
                   modeControls={modeControls}
                   format={block.type ?? "markdown"}
                   editorRef={(node) => {

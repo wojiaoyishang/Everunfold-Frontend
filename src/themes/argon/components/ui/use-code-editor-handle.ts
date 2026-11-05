@@ -1,6 +1,6 @@
 "use client";
 import { useImperativeHandle, type Ref, type RefObject } from "react";
-import type { EditorView } from "@codemirror/view";
+import { EditorView } from "@codemirror/view";
 import { indentMore, indentLess, isolateHistory } from "@codemirror/commands";
 import {
   findNext,
@@ -36,14 +36,8 @@ export function useCodeEditorHandle(
         const size = editor.state.doc.length;
         editor.dispatch({
           selection: {
-            anchor: Math.min(
-              text ? start : normalizedSourceOffset(raw.current, start),
-              size,
-            ),
-            head: Math.min(
-              text ? end : normalizedSourceOffset(raw.current, end),
-              size,
-            ),
+            anchor: Math.min(normalizedSourceOffset(raw.current, start), size),
+            head: Math.min(normalizedSourceOffset(raw.current, end), size),
           },
           scrollIntoView: true,
         });
@@ -56,12 +50,26 @@ export function useCodeEditorHandle(
         const sel = view.current?.state.selection.main;
         const start = sel?.from ?? 0,
           end = sel?.to ?? 0;
-        return text
-          ? { start, end }
-          : {
-              start: rawSourceOffset(raw.current, start),
-              end: rawSourceOffset(raw.current, end),
-            };
+        return {
+          start: rawSourceOffset(raw.current, start),
+          end: rawSourceOffset(raw.current, end),
+        };
+      },
+      reveal: ({ end }) => {
+        const editor = view.current;
+        if (!editor) return;
+        const position = Math.min(
+          normalizedSourceOffset(raw.current, end),
+          editor.state.doc.length,
+        );
+        editor.dispatch({
+          effects: EditorView.scrollIntoView(position, { y: "center" }),
+        });
+        revealEditorSelection(
+          editor.dom,
+          () => editor.coordsAtPos(position),
+          false,
+        );
       },
       run: (command) => {
         const editor = view.current;
@@ -115,10 +123,16 @@ export function useCodeEditorHandle(
         const selection = editor.state.selection.main;
         const base = editor.state.doc.toString();
         const anchor = text
-          ? Y.createRelativePositionFromTypeIndex(text, selection.from)
+          ? Y.createRelativePositionFromTypeIndex(
+              text,
+              rawSourceOffset(raw.current, selection.from),
+            )
           : null;
         const head = text
-          ? Y.createRelativePositionFromTypeIndex(text, selection.to)
+          ? Y.createRelativePositionFromTypeIndex(
+              text,
+              rawSourceOffset(raw.current, selection.to),
+            )
           : null;
         return (value: string) => {
           if (view.current !== editor || latest.current.disabled) return false;
@@ -129,17 +143,23 @@ export function useCodeEditorHandle(
                 end: selection.to,
               });
           if (!text && !rebased) return false;
-          const start =
+          const rawStart =
             anchor && text?.doc
               ? Y.createAbsolutePositionFromRelativePosition(anchor, text.doc)
                   ?.index
               : rebased?.start;
-          const end =
+          const rawEnd =
             head && text?.doc
               ? Y.createAbsolutePositionFromRelativePosition(head, text.doc)
                   ?.index
               : rebased?.end;
-          if (start == null || end == null) return false;
+          if (rawStart == null || rawEnd == null) return false;
+          const start = text
+            ? normalizedSourceOffset(raw.current, rawStart)
+            : rawStart;
+          const end = text
+            ? normalizedSourceOffset(raw.current, rawEnd)
+            : rawEnd;
           editor.dispatch({
             changes: {
               from: Math.min(start, end),

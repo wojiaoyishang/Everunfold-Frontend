@@ -2,10 +2,15 @@
 export function revealEditorSelection(
   root: HTMLElement,
   caret: () => { top: number; bottom: number } | null,
+  requireFocus = true,
 ) {
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
-      if (!root.isConnected || !root.contains(document.activeElement)) return;
+      if (
+        !root.isConnected ||
+        (requireFocus && !root.contains(document.activeElement))
+      )
+        return;
       const rect = caret();
       if (!rect) return;
       const shell = root.closest(".admin-shell");

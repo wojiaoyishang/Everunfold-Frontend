@@ -6,6 +6,12 @@ export interface LocalDocument {
   state: Uint8Array;
   pending: ClientUpdate[];
   acknowledged?: Record<string, number>;
+  confirmed?: Uint8Array;
+  seq?: number;
+  mode?: "shared" | "paused" | "local" | "review";
+  branchId?: string;
+  unconfirmed?: ClientUpdate[];
+  writtenAt?: number;
 }
 
 /** Executed inside the IDB read/write transaction, so concurrent tabs never replace one another. */
@@ -22,6 +28,7 @@ export function mergeLocalDocuments(
     ]),
   );
   return {
+    ...((prior?.writtenAt ?? 0) > (next.writtenAt ?? 0) ? prior : next),
     epoch: next.epoch,
     state: prior ? Y.mergeUpdates([prior.state, next.state]) : next.state,
     pending: [...updates.values()].filter(
@@ -81,6 +88,14 @@ export async function openLocalDocument(key: string) {
     watch: (listener: () => void) => {
       if (channel) channel.onmessage = listener;
     },
+    clear: () =>
+      new Promise<void>((resolve, reject) => {
+        const tx = db.transaction("documents", "readwrite");
+        tx.objectStore("documents").delete(key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = tx.onabort = () =>
+          reject(new Error("无法更新本地草稿基线"));
+      }),
     close: () => {
       channel?.close();
       db.close();
