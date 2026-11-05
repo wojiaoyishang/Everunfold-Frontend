@@ -20,6 +20,7 @@ export function SiteSettingsPage() {
       {site && (
         <>
           <SettingsSection
+            id="settings-profile"
             title="基本资料"
             description="名称与简介会用于站点导航、侧栏及页面信息。"
           >
@@ -70,6 +71,7 @@ export function SiteSettingsPage() {
             />
           </SettingsSection>
           <SettingsSection
+            id="settings-navigation"
             title="导航菜单"
             description="顶栏、侧栏与移动菜单使用同一份内容。每层都可添加子菜单。"
           >
@@ -90,6 +92,7 @@ export function SiteSettingsPage() {
             />
           </SettingsSection>
           <SettingsSection
+            id="settings-seo"
             title="搜索展示"
             description="这些内容会输出在页面的搜索元信息中。"
           >

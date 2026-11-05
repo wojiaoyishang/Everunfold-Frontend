@@ -11,18 +11,26 @@ import {
 import { Switch } from "../../components/ui/switch";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
+import { SettingsLayout } from "./section-navigation";
 
 export function SettingsSection({
+  id,
   title,
   description,
   children,
 }: {
+  id: string;
   title: string;
   description: string;
   children: ReactNode;
 }) {
   return (
-    <section className="admin-settings-section">
+    <section
+      id={id}
+      className="admin-settings-section"
+      data-settings-section={title}
+      tabIndex={-1}
+    >
       <div className="admin-settings-section-heading">
         <h2>{title}</h2>
         <p>{description}</p>
@@ -128,7 +136,7 @@ export function SettingsFrame({
 }) {
   const editor = useSettingsEditor();
   return (
-    <div className="admin-settings-page">
+    <SettingsLayout>
       <AdminPageHeading title={title} description={description} />
       {editor.loading ? (
         <div className="admin-settings-loading" role="status">
@@ -205,6 +213,6 @@ export function SettingsFrame({
           </div>
         </Form>
       )}
-    </div>
+    </SettingsLayout>
   );
 }

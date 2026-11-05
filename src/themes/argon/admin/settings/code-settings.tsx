@@ -67,6 +67,7 @@ export function CodeSettingsSection({
   };
   return (
     <SettingsSection
+      id="settings-code"
       title="代码块"
       description="文章、说说及预览共用这些默认值，单个代码块可以单独覆盖。"
     >

@@ -8,6 +8,7 @@ import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsSection, DeliveryBadge } from "./shared";
+import { SettingsLayout } from "./section-navigation";
 const fields = [
   {
     key: "dynamic_freshness_seconds",
@@ -114,9 +115,10 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
       }));
   };
   return (
-    <div className="admin-settings-page">
+    <SettingsLayout>
       <AdminPageHeading title="系统设置" />
       <SettingsSection
+        id="settings-nodes"
         title="节点策略"
         description="策略由后端保存，节点接收后保留本地副本。后端暂时离线时继续使用上次成功应用的版本。"
       >
@@ -225,6 +227,7 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
         )}
       </SettingsSection>
       <SettingsSection
+        id="settings-delivery"
         title="站点与主题发布"
         description="保存完成表示数据库已提交；节点应用完成表示整份配置已写入该节点。"
       >
@@ -241,6 +244,7 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
         </div>
       </SettingsSection>
       <SettingsSection
+        id="settings-deployment"
         title="部署配置"
         description="这些值属于当前 Next.js 实例，通过服务器配置文件维护。"
       >
@@ -283,6 +287,6 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
           </div>
         </dl>
       </SettingsSection>
-    </div>
+    </SettingsLayout>
   );
 }

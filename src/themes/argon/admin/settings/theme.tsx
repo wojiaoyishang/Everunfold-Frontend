@@ -32,6 +32,7 @@ export function ThemeSettingsPage() {
       {theme && (
         <>
           <SettingsSection
+            id="settings-appearance"
             title="色彩与外观"
             description="站点导航、卡片和交互元素使用同一套主题色。"
           >
@@ -95,6 +96,7 @@ export function ThemeSettingsPage() {
             </div>
           </SettingsSection>
           <SettingsSection
+            id="settings-hero"
             title="站点横幅"
             description="首页上方的标题与副标题。"
           >
@@ -112,6 +114,7 @@ export function ThemeSettingsPage() {
             />
           </SettingsSection>
           <SettingsSection
+            id="settings-fonts"
             title="字体"
             description="设置站点默认字体；文章可以为选中的文字单独指定字体。"
           >
@@ -130,6 +133,7 @@ export function ThemeSettingsPage() {
             onChange={(code) => update({ code })}
           />
           <SettingsSection
+            id="settings-background"
             title="背景"
             description="图片作为静态背景，也用于视频播放前的占位。"
           >

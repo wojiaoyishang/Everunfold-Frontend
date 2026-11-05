@@ -8,6 +8,15 @@
   background: var(--admin-canvas);
   border: 1px solid var(--admin-border);
   border-radius: 8px;
+  /* The admin root already reserves 72px through scroll-padding-top. */
+  scroll-margin-top: 8px;
+}
+.admin-settings-section:focus {
+  outline: none;
+}
+.admin-settings-section:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 3px;
 }
 .admin-settings-section-heading {
   padding: 16px 22px;
