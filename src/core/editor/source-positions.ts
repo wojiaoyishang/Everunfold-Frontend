@@ -1,5 +1,6 @@
 import { Parser } from "htmlparser2";
 import type { Node as RichNode } from "@tiptap/pm/model";
+import { shortcodeSourceRanges } from "./shortcode-source";
 
 export type SourceRange = { start: number; end: number };
 type Unit = SourceRange & { key: string; tag?: string };
@@ -14,6 +15,39 @@ export function textUnits(text: string, start = 0): Unit[] {
 }
 
 export function htmlUnits(source: string): Unit[] {
+  const calls = shortcodeSourceRanges(source);
+  if (calls.length) {
+    const units: Unit[] = [];
+    let at = 0;
+    for (const call of calls) {
+      units.push(
+        ...plainHtmlUnits(source.slice(at, call.from)).map((unit) => ({
+          ...unit,
+          start: unit.start + at,
+          end: unit.end + at,
+        })),
+      );
+      units.push({
+        key: source.slice(call.from, call.to),
+        tag: "shortcode",
+        start: call.from,
+        end: call.to,
+      });
+      at = call.to;
+    }
+    return [
+      ...units,
+      ...plainHtmlUnits(source.slice(at)).map((unit) => ({
+        ...unit,
+        start: unit.start + at,
+        end: unit.end + at,
+      })),
+    ];
+  }
+  return plainHtmlUnits(source);
+}
+
+function plainHtmlUnits(source: string): Unit[] {
   const units: Unit[] = [];
   const parser = new Parser({
     ontext(text) {
@@ -114,6 +148,15 @@ export function transferRange(
 export function richTextUnits(doc: RichNode) {
   const units: Unit[] = [];
   doc.descendants((node, pos) => {
+    if (node.type.name === "nativeShortcode") {
+      units.push({
+        key: String(node.attrs.source),
+        tag: "shortcode",
+        start: pos,
+        end: pos + node.nodeSize,
+      });
+      return false;
+    }
     if (["inlineMath", "blockMath"].includes(node.type.name)) {
       for (const key of String(node.attrs.latex))
         units.push({ key, start: pos, end: pos + node.nodeSize });
@@ -121,9 +164,12 @@ export function richTextUnits(doc: RichNode) {
     }
     if (node.isText)
       for (const unit of textUnits(node.text ?? "", pos)) units.push(unit);
-    const tag = { image: "img", hardBreak: "br", horizontalRule: "hr" }[
-      node.type.name
-    ];
+    const tag = {
+      image: "img",
+      hardBreak: "br",
+      horizontalRule: "hr",
+      localVideo: "video",
+    }[node.type.name];
     if (tag)
       units.push({
         tag,
@@ -145,7 +191,10 @@ export function richSourceSelection(
     return reverse ? { start: 0, end: 1 } : { start: 0, end: source.length };
   const rich = richTextUnits(doc);
   const raw = htmlUnits(source).filter(
-    (unit) => !unit.tag || ["<img>", "<hr>", "<br>"].includes(unit.key),
+    (unit) =>
+      !unit.tag ||
+      unit.tag === "shortcode" ||
+      ["<img>", "<hr>", "<br>", "<video>"].includes(unit.key),
   );
   return reverse
     ? transferRange(raw, rich, range)

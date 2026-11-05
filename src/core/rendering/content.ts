@@ -9,6 +9,7 @@ import type { PublicShortcode } from "@/generated/settings-contract";
 import type { ShortcodeDiagnostic } from "@/core/shortcodes/parser";
 import { fontFamily, referencedFontFaces } from "./fonts";
 import { markdownMath } from "./features/markdown-math";
+import { markdownVideo } from "./features/markdown-video";
 import { inspectContentFeatures } from "./features/content-features";
 import type { ContentFeatures } from "./features/model";
 import { codeHtml, parseCodeInfo } from "./features/code-options";
@@ -22,6 +23,7 @@ export interface TableOfContentsItem {
 
 const markdown = new MarkdownIt({ html: true, linkify: true, breaks: true });
 markdown.use(markdownMath);
+markdown.use(markdownVideo);
 markdown.renderer.rules.fence = (tokens, index, _options, env) => {
   const token = tokens[index],
     info = parseCodeInfo(token.info);
@@ -140,7 +142,7 @@ const options: sanitizeHtml.IOptions = {
     ],
     abbr: ["title"],
     audio: ["src", "controls", "preload"],
-    video: ["src", "poster", "controls", "preload"],
+    video: ["src", "poster", "controls", "preload", "title"],
     source: ["src", "type"],
   },
   allowedClasses: {

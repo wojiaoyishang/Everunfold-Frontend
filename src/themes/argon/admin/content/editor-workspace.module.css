@@ -282,9 +282,21 @@
 }
 .main :global(.admin-draft-editor-scroll) {
   padding: 0;
+  overflow: visible;
 }
 .main :global(.admin-draft-editor-view) {
   padding: 0;
+}
+.main :global(.admin-draft-message) {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  gap: 10px;
+}
+.main :global(.admin-draft-message) > span {
+  min-width: min(180px, 100%);
+}
+.main :global(.admin-draft-message) > button {
+  flex-shrink: 0;
 }
 .main[data-mode="preview"] :global(.admin-draft-preview) {
   padding: 24px;
@@ -325,6 +337,11 @@
   width: 100%;
   padding: 12px;
 }
+.excerpt textarea:focus-visible {
+  outline: none;
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-soft);
+}
 .title input {
   font-size: 20px;
   font-weight: 600;
@@ -340,7 +357,7 @@
 .block {
   border: 1px solid var(--admin-border);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: clip;
   animation: admin-section-enter var(--admin-motion-enter)
     var(--admin-motion-ease) both;
   transition:
@@ -420,8 +437,7 @@
   color: var(--admin-accent);
 }
 .excerpt {
-  border-top: 1px solid var(--admin-border);
-  padding-top: 24px;
+  padding-top: 4px;
 }
 .sidebar {
   display: grid;

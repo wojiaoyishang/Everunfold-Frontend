@@ -68,8 +68,7 @@ export function ShortcodePicker({
     >
       <div className={styles.picker}>
         <p className={styles.hint}>
-          将添加为当前区块后面的新 {format === "html" ? "HTML" : "Markdown"}{" "}
-          区块；正文保留调用源码。
+          插入到当前区块的光标或选区；正文保留调用源码。
         </p>
         {library.error && (
           <p role="alert" className={styles.error}>
@@ -158,7 +157,7 @@ export function ShortcodePicker({
               setClosing(true);
             }}
           >
-            插入为新区块
+            插入到光标位置
           </Button>
         </div>
       </div>

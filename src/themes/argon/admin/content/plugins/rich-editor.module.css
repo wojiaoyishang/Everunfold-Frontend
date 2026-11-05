@@ -236,3 +236,31 @@
   flex-wrap: wrap;
   gap: 2px;
 }
+
+.colorIcon {
+  display: inline-flex;
+  padding-bottom: 2px;
+  border-bottom: 3px solid currentColor;
+}
+.colorSwatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.colorSwatches > button {
+  display: grid;
+  place-items: center;
+  padding: 4px;
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+}
+.colorSwatches > button[aria-pressed="true"] {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 1px;
+}
+.colorSwatches > button > span {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+  border: 1px solid var(--admin-border);
+}

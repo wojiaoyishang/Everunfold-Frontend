@@ -7,7 +7,7 @@ export function EditorMediaDialog({
   onPick,
   onClose,
 }: {
-  kind?: "all" | "image";
+  kind?: "all" | "image" | "video";
   title?: string;
   onPick: (item: MediaItem) => void;
   onClose: () => void;

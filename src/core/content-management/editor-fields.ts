@@ -34,7 +34,10 @@ export function mediaMarkup(
 ) {
   const url = `site://media/${item.id.replace(/^media:/, "")}`;
   const label = item.title || item.label;
-  if (item.kind === "video") return `<video controls src="${url}"></video>`;
+  if (item.kind === "video")
+    return type === "html"
+      ? `<video controls preload="none" src="${url}"></video>`
+      : `![](${url}){type=video}`;
   if (type === "html")
     return item.kind === "image"
       ? `<img src="${url}" alt="${escapeHTML(alt)}">`

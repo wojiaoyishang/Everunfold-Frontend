@@ -12,18 +12,21 @@ import { Icon, type IconName } from "../../../components/icon";
 import styles from "./rich-editor.module.css";
 import { ContentFeatureButtons } from "../../../components/ui/content-feature-dialog";
 import { prepareVisualFeature } from "@/core/editor/visual-feature-insertion";
+import { TextColorButton } from "./text-color-button";
 
 export function RichToolbar({
   editor,
   fonts = [],
   markdown = false,
   onMedia,
+  onShortcode,
   onUpload,
 }: {
   editor: Editor;
   fonts?: FontAsset[];
   markdown?: boolean;
-  onMedia?: (kind: "image" | "all") => void;
+  onMedia?: (kind: "image" | "all" | "video") => void;
+  onShortcode?: () => void;
   onUpload?: (files: File[]) => void;
 }) {
   const state = useEditorState({
@@ -47,6 +50,7 @@ export function RichToolbar({
         : "0",
       font: String(e.getAttributes("textStyle").fontId ?? ""),
       size: String(e.getAttributes("textStyle").fontSize ?? ""),
+      color: String(e.getAttributes("textStyle").color ?? ""),
       alignment: String(
         e.getAttributes("paragraph").textAlign ??
           e.getAttributes("heading").textAlign ??
@@ -182,6 +186,8 @@ export function RichToolbar({
             className={styles.toolButton}
             prepare={(kind) => prepareVisualFeature(editor, kind)}
           />
+          {onShortcode && button("插入短代码", "grid", onShortcode)}
+          {button("插入视频", "video", () => onMedia?.("video"))}
           {button("插入图片", "image", () => onMedia?.("image"))}
           {button("插入媒体或附件", "folder", () => onMedia?.("all"))}
           {onUpload && (
@@ -268,6 +274,13 @@ export function RichToolbar({
             }
           />
           <span className={styles.divider} />
+          <TextColorButton
+            value={state.color}
+            className={styles.toolButton}
+            onApply={(color) =>
+              editor.chain().focus().setMark("textStyle", { color }).run()
+            }
+          />
           {!state.image &&
             button(
               "左对齐",

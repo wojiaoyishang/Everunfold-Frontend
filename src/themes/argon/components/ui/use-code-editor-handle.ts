@@ -15,6 +15,8 @@ import {
 import { sourceCommand } from "@/core/editor/source-commands";
 import * as Y from "yjs";
 import type { SourceEditorHandle } from "./code-editor";
+import { revealEditorSelection } from "./reveal-editor-selection";
+import { capturedSourceRange } from "@/core/editor/captured-source-range";
 /** Imperative commands stay inside the encapsulated source control. */
 export function useCodeEditorHandle(
   ref: Ref<SourceEditorHandle> | undefined,
@@ -46,6 +48,9 @@ export function useCodeEditorHandle(
           scrollIntoView: true,
         });
         editor.focus();
+        revealEditorSelection(editor.dom, () =>
+          editor.coordsAtPos(editor.state.selection.main.head),
+        );
       },
       selection: () => {
         const sel = view.current?.state.selection.main;
@@ -108,6 +113,7 @@ export function useCodeEditorHandle(
         const editor = view.current;
         if (!editor) return () => {};
         const selection = editor.state.selection.main;
+        const base = editor.state.doc.toString();
         const anchor = text
           ? Y.createRelativePositionFromTypeIndex(text, selection.from)
           : null;
@@ -115,27 +121,36 @@ export function useCodeEditorHandle(
           ? Y.createRelativePositionFromTypeIndex(text, selection.to)
           : null;
         return (value: string) => {
-          if (view.current !== editor || latest.current.disabled) return;
+          if (view.current !== editor || latest.current.disabled) return false;
+          const rebased = text
+            ? null
+            : capturedSourceRange(base, editor.state.doc.toString(), {
+                start: selection.from,
+                end: selection.to,
+              });
+          if (!text && !rebased) return false;
           const start =
             anchor && text?.doc
               ? Y.createAbsolutePositionFromRelativePosition(anchor, text.doc)
                   ?.index
-              : selection.from;
+              : rebased?.start;
           const end =
             head && text?.doc
               ? Y.createAbsolutePositionFromRelativePosition(head, text.doc)
                   ?.index
-              : selection.to;
-          if (start == null || end == null) return;
+              : rebased?.end;
+          if (start == null || end == null) return false;
           editor.dispatch({
             changes: {
               from: Math.min(start, end),
               to: Math.max(start, end),
               insert: value,
             },
+            selection: { anchor: Math.min(start, end) + value.length },
             scrollIntoView: true,
           });
           editor.focus();
+          return true;
         };
       },
     }),

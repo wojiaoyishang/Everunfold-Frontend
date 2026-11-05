@@ -5,8 +5,9 @@ import {
   renderMarkdownSource,
 } from "@/core/rendering/content";
 import { markdownUnits } from "./markdown-selection";
-import { renderRichNode, sourceDocument } from "./rich-text";
-import { normalizeVisualDocument } from "./visual-document";
+import { renderRichNode } from "./rich-text";
+import { htmlRichSource } from "./visual-document";
+import { protectVisualShortcodes } from "./shortcode-source";
 import { codeInfo } from "@/core/rendering/features/code-options";
 import {
   richTextUnits,
@@ -20,8 +21,8 @@ const children = (node: Node) =>
   Array.from({ length: node.childCount }, (_, index) => node.child(index));
 
 export function markdownRichSource(source: string) {
-  return normalizeVisualDocument(
-    sourceDocument(renderMarkdownSource(source, true), true),
+  return htmlRichSource(
+    renderMarkdownSource(protectVisualShortcodes(source, true), true),
     true,
   );
 }
@@ -72,6 +73,15 @@ function serialize(node: Node): string {
   const parts = children(node).map(serialize);
   const content = parts.join("");
   switch (node.type.name) {
+    case "nativeShortcode":
+      return String(node.attrs.source);
+    case "localVideo": {
+      const label = String(node.attrs.title ?? "").replace(/[\\\[\]]/g, "\\$&");
+      return (
+        `![${label}](<${String(node.attrs.src).replaceAll(">", "%3E")}>)` +
+        "{type=video}"
+      );
+    }
     case "paragraph":
       if (node.attrs.textAlign && node.attrs.textAlign !== "left")
         return renderRichNode(node.toJSON());

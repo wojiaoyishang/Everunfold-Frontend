@@ -1,6 +1,7 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  video: "M3 5h13v14H3V5Zm13 5 5-3v10l-5-3M7 9l5 3-5 3V9Z",
   formula: "M18 4H7l7 8-7 8h11M7 4H5M7 20H5",
   type: "M4 4h16M12 4v16M8 20h8M4 4v3M20 4v3",
   download: "M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4",

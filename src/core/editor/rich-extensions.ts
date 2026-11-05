@@ -9,6 +9,7 @@ import {
   PreservedHtmlAttributes,
 } from "./preserved-html-extensions";
 import { UPLOAD_SCHEME, uploadPlaceholderImage } from "./upload-placeholders";
+import { localEmbeddedNodes } from "./local-embedded-nodes";
 import {
   localFormulaNodes,
   LocalCodeHighlight,
@@ -126,7 +127,9 @@ export function richExtensions(
     TableKit.configure({ table: { resizable: false } }),
     RichImage.configure({ inline: inlineImages }),
     RawHtml,
-    ...(!shared ? [PreservedHtmlAttributes, ...preservedHtmlNodes] : []),
+    ...(!shared
+      ? [PreservedHtmlAttributes, ...preservedHtmlNodes, ...localEmbeddedNodes]
+      : []),
     ...(!shared
       ? [...localFormulaNodes, LocalCodeHighlight, LocalCodeOptions]
       : []),

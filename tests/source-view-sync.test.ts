@@ -6,7 +6,6 @@ import {
   uploadMarker,
   uploadMarkers,
 } from "../src/core/editor/upload-placeholders";
-import { htmlElementSelection } from "../src/core/editor/html-element-selection";
 import { EditorState } from "@codemirror/state";
 import { getSchema } from "@tiptap/core";
 import { richExtensions } from "../src/core/editor/rich-extensions";
@@ -125,34 +124,18 @@ test("buffered patches use the actual initial editor source even after later sha
   );
 });
 
-test("HTML source selection includes complete tags and sibling elements", () => {
-  const source = "<p>正文 <b>选中</b> 结尾</p>\n<p>下一段</p>";
-  const start = source.indexOf("选中");
-  const inline = htmlElementSelection(source, { start, end: start + 2 });
-  assert.equal(source.slice(inline.start, inline.end), "<b>选中</b>");
-  const paragraph = htmlElementSelection(source, {
-    start: source.indexOf("正文"),
-    end: start + 2,
-  });
-  assert.equal(
-    source.slice(paragraph.start, paragraph.end),
-    "<p>正文 <b>选中</b> 结尾</p>",
-  );
-  const siblings = htmlElementSelection(source, {
-    start,
-    end: source.indexOf("下一段") + 3,
-  });
-  assert.equal(source.slice(siblings.start, siblings.end), source);
-  const caret = htmlElementSelection(source, { start, end: start });
-  assert.deepEqual(caret, inline);
-  const image =
-    '<figure><img src="image.png"><figcaption>说明</figcaption></figure>';
-  const imgAt = image.indexOf("<img");
-  const picked = htmlElementSelection(image, {
-    start: imgAt,
-    end: imgAt + '<img src="image.png">'.length,
-  });
-  assert.equal(image.slice(picked.start, picked.end), '<img src="image.png">');
+test("HTML view changes preserve the exact text caret and selection instead of selecting its wrapper", () => {
+  const source =
+    "<section class='keep'><p>正文 <b>选中文字</b> 结尾</p></section>";
+  const doc = schema.nodeFromJSON(htmlRichSource(source));
+  const start = source.indexOf("中文字");
+  for (const range of [
+    { start, end: start },
+    { start, end: start + 2 },
+  ]) {
+    const mapped = richSourceSelection(doc, source, range, true)!;
+    assert.deepEqual(richSourceSelection(doc, source, mapped), range);
+  }
 });
 
 test("Markdown image alignment is represented in the source paragraph", () => {

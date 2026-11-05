@@ -75,6 +75,10 @@ export function ScrollHeaderActions({
       if (!frame) frame = requestAnimationFrame(update);
     };
     const observer = new ResizeObserver(() => {
+      shell?.style.setProperty(
+        "--admin-header-height",
+        `${header.getBoundingClientRect().height}px`,
+      );
       // A compact header uses a second row; keep the editor's sticky inspector below it.
       const extra = Math.max(
         0,
@@ -99,6 +103,7 @@ export function ScrollHeaderActions({
       // Remove only this page's host; the persistent shell slot is left empty on navigation.
       host.remove();
       shell?.style.removeProperty("--admin-header-dock-height");
+      shell?.style.removeProperty("--admin-header-height");
     };
   }, [container]);
 

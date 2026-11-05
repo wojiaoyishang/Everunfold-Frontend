@@ -11,6 +11,7 @@ import {
   type FeatureInsertion,
 } from "../../../components/ui/content-feature-dialog";
 import type { ContentFeatureKind } from "@/core/editor/content-feature-source";
+import { TextColorButton } from "./text-color-button";
 export interface SourceAction {
   label: string;
   icon: IconName;
@@ -35,6 +36,7 @@ export function SourceToolbar({
   onCommand,
   onIndent,
   onMedia,
+  onShortcode,
   onUpload,
   onFeature,
 }: {
@@ -46,7 +48,8 @@ export function SourceToolbar({
   inserts: readonly SourceAction[];
   onCommand: (command: SourceCommand) => void;
   onIndent: (direction: -1 | 1) => void;
-  onMedia?: (kind: "image" | "all") => void;
+  onMedia?: (kind: "image" | "all" | "video") => void;
+  onShortcode?: () => void;
   onUpload?: (files: File[]) => void;
   onFeature: (kind: ContentFeatureKind) => FeatureInsertion;
 }) {
@@ -83,6 +86,22 @@ export function SourceToolbar({
         }
       />
       <div className={styles.toolGroup}>{buttons(actions)}</div>
+      {format === "html" && (
+        <TextColorButton
+          allowReset={false}
+          className={styles.tool}
+          disabled={disabled}
+          onApply={(color) => {
+            if (color)
+              onCommand({
+                kind: "wrap",
+                before: `<span style="color:${color}">`,
+                after: "</span>",
+                placeholder: "文字",
+              });
+          }}
+        />
+      )}
       <div className={styles.insertGroup} role="group" aria-label="插入">
         {buttons(inserts)}
         <ContentFeatureButtons
@@ -90,6 +109,28 @@ export function SourceToolbar({
           disabled={disabled}
           prepare={onFeature}
         />
+        {onShortcode && (
+          <Button
+            className={styles.tool}
+            title="插入短代码"
+            aria-label="插入短代码"
+            disabled={disabled}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={onShortcode}
+          >
+            <Icon name="grid" />
+          </Button>
+        )}
+        <Button
+          className={styles.tool}
+          title="插入视频"
+          aria-label="插入视频"
+          disabled={disabled}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => onMedia?.("video")}
+        >
+          <Icon name="video" />
+        </Button>
         <Button
           className={styles.tool}
           title="插入图片"

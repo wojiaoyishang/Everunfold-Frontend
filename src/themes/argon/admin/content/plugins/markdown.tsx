@@ -244,6 +244,7 @@ export default function MarkdownEditor(props: BlockEditorProps) {
                   editor={editor}
                   markdown
                   onMedia={props.onMedia}
+                  onShortcode={props.onShortcode}
                   onUpload={props.onUpload}
                 />
               )}

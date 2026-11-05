@@ -60,12 +60,15 @@ import { sourceHighlight } from "./source-highlight";
 
 const externalSource = Annotation.define<boolean>();
 export type SourceSelection = { start: number; end: number };
+export type CapturedInsertion = ((value: string) => boolean | void) & {
+  dispose?: () => void;
+};
 export interface CodeEditorHandle {
   focus: () => void;
   selection: () => SourceSelection;
   select: (selection: SourceSelection) => void;
   insert: (before: string, after?: string) => void;
-  captureInsertion: () => (value: string) => void;
+  captureInsertion: () => CapturedInsertion;
 }
 export interface SourceSearch {
   search: string;

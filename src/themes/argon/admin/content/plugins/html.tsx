@@ -1,7 +1,6 @@
 "use client";
 import { useImperativeHandle, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { htmlElementSelection } from "@/core/editor/html-element-selection";
 import { useFontLibrary } from "@/core/media/font-library";
 import { EditorViewToggle } from "./editor-view-toggle";
 import { RichTextEditor } from "../../../components/ui/rich-text-editor";
@@ -22,11 +21,7 @@ export default function HtmlEditor(props: BlockEditorProps) {
   const changeMode = (next: typeof mode) => {
     if (next === mode) return;
     const selected = active.current?.selection();
-    setSelection(
-      selected && next === "source"
-        ? htmlElementSelection(props.value, selected)
-        : selected,
-    );
+    setSelection(selected);
     setMode(next);
   };
   useImperativeHandle(
@@ -75,6 +70,7 @@ export default function HtmlEditor(props: BlockEditorProps) {
               editor={editor}
               fonts={fonts.items}
               onMedia={props.onMedia}
+              onShortcode={props.onShortcode}
               onUpload={props.onUpload}
             />
           )}

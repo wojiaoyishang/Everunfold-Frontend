@@ -14,7 +14,11 @@ import { useBlockComposer } from "./block-composer";
 import { EditorMediaDialog } from "./editor-media-dialog";
 import { RegisteredBlockEditor } from "./plugins/registry";
 import { ShortcodePicker } from "../shortcodes/picker";
-import type { CodeEditorHandle } from "../../components/ui/code-editor";
+import { useToast } from "../../components/ui/toast/toast-provider";
+import type {
+  CodeEditorHandle,
+  CapturedInsertion,
+} from "../../components/ui/code-editor";
 import type { MediaURL } from "@/generated/content-admin-contract";
 import styles from "./editor-workspace.module.css";
 export interface EditorProps {
@@ -43,13 +47,26 @@ export function EditorBody({
 }: EditorProps) {
   const [mediaTarget, setMediaTarget] = useState<{
     id: string;
-    kind: "all" | "image";
-    insert: (value: string) => void;
+    kind: "all" | "image" | "video";
+    insert: CapturedInsertion;
   } | null>(null);
   const inputs = useRef(new Map<string, CodeEditorHandle>());
-  const [shortcodeTarget, setShortcodeTarget] = useState<string | null>(null);
+  const [shortcodeTarget, setShortcodeTarget] = useState<{
+    id: string;
+    insert: CapturedInsertion;
+  } | null>(null);
   const composer = useBlockComposer();
   const [announcement, setAnnouncement] = useState("");
+  const toast = useToast();
+  const insertCaptured = (insert: CapturedInsertion, source: string) => {
+    if (insert(source) !== false) return true;
+    toast.show({
+      id: "content:insertion",
+      title: "区块内容已变化，请重新选择插入位置。",
+      tone: "info",
+    });
+    return false;
+  };
   return (
     <fieldset
       className={styles.bodyFields}
@@ -68,8 +85,9 @@ export function EditorBody({
         const files = Array.from(event.clipboardData.files).filter((file) =>
           file.type.startsWith("image/"),
         );
+        if (!files.length) return;
         const insert = inputs.current.get(blockId)?.captureInsertion();
-        if (!files.length || !insert) return;
+        if (!insert) return;
         event.preventDefault();
         event.stopPropagation();
         uploads.add(files, blockId, insert);
@@ -81,7 +99,6 @@ export function EditorBody({
             key={block.id}
             block={block}
             index={index}
-            onShortcode={() => setShortcodeTarget(block.id)}
             disabled={locked(block.id)}
             formatDisabled={stagedBlocks.includes(block.id)}
             onFormat={(format) =>
@@ -121,6 +138,14 @@ export function EditorBody({
                   label={`正文块 ${index + 1} 内容`}
                   value={block.content}
                   media={media}
+                  onShortcode={() =>
+                    setShortcodeTarget({
+                      id: block.id,
+                      insert:
+                        inputs.current.get(block.id)?.captureInsertion() ??
+                        (() => {}),
+                    })
+                  }
                   onMedia={(kind) =>
                     setMediaTarget({
                       id: block.id,
@@ -193,41 +218,52 @@ export function EditorBody({
       {mediaTarget && (
         <EditorMediaDialog
           kind={mediaTarget.kind}
-          title={mediaTarget.kind === "image" ? "插入图片" : "插入媒体"}
-          onClose={() => setMediaTarget(null)}
+          title={
+            mediaTarget.kind === "image"
+              ? "插入图片"
+              : mediaTarget.kind === "video"
+                ? "插入视频"
+                : "插入媒体"
+          }
+          onClose={() => {
+            mediaTarget.insert.dispose?.();
+            setMediaTarget(null);
+          }}
           onPick={(item) => {
-            if (disabled) return;
+            if (disabled || locked(mediaTarget.id)) return;
             onMedia(item);
             const target = value.body.find(
               (block) => block.id === mediaTarget.id,
             );
             if (target)
-              mediaTarget.insert(`\n${mediaMarkup(item, target.type)}\n`);
+              insertCaptured(
+                mediaTarget.insert,
+                `\n${mediaMarkup(item, target.type)}\n`,
+              );
           }}
         />
       )}
       {shortcodeTarget && (
         <ShortcodePicker
           format={
-            value.body.find((block) => block.id === shortcodeTarget)?.type ??
+            value.body.find((block) => block.id === shortcodeTarget.id)?.type ??
             "markdown"
           }
           media={media}
           onMedia={onMedia}
-          onClose={() => setShortcodeTarget(null)}
+          onClose={() => {
+            shortcodeTarget.insert.dispose?.();
+            setShortcodeTarget(null);
+          }}
           onPick={(source) => {
-            const index = value.body.findIndex(
-              (block) => block.id === shortcodeTarget,
-            );
-            if (disabled || index < 0) return;
             if (
-              composer.insert(
-                value.body[index].type,
-                value.body[index + 1]?.id ?? null,
-                source,
-              )
+              disabled ||
+              locked(shortcodeTarget.id) ||
+              !value.body.some((block) => block.id === shortcodeTarget.id)
             )
-              setAnnouncement("已插入短代码区块");
+              return;
+            if (insertCaptured(shortcodeTarget.insert, source))
+              setAnnouncement("已在当前区块插入短代码");
           }}
         />
       )}

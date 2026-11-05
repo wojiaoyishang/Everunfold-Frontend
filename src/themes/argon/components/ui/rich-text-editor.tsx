@@ -20,6 +20,7 @@ import { richExtensions } from "@/core/editor/rich-extensions";
 import { sourceDocument, renderRichNode } from "@/core/editor/rich-text";
 import { htmlRichSource } from "@/core/editor/visual-document";
 import { renderContent } from "@/core/rendering/content";
+import { resourceUrl } from "@/core/content/urls";
 import { inspectContentFeatures } from "@/core/rendering/features/content-features";
 import { renderMarkdownSource } from "@/core/rendering/content";
 import { ContentResources } from "../content-resources";
@@ -28,7 +29,11 @@ import type { UploadEntry } from "@/core/media/upload-queue";
 import type { MediaItem } from "@/generated/settings-contract";
 import { UPLOAD_SCHEME } from "@/core/editor/upload-placeholders";
 import type { MediaURL } from "@/generated/content-admin-contract";
-import type { CodeEditorHandle, SourceSelection } from "./code-editor";
+import type {
+  CodeEditorHandle,
+  SourceSelection,
+  CapturedInsertion,
+} from "./code-editor";
 import { richSourceSelection } from "@/core/editor/source-positions";
 import {
   markdownRichSource,
@@ -38,6 +43,7 @@ import {
 import { patchVisualHtml } from "@/core/editor/patch-visual-html";
 import { EditorStatusBar } from "./editor-status-bar";
 import styles from "./rich-text-editor.module.css";
+import { revealEditorSelection } from "./reveal-editor-selection";
 
 declare module "@tiptap/core" {
   interface Commands<ReturnType> {
@@ -240,6 +246,27 @@ export function RichTextEditor({
         const url = latest.current.media[id]?.original;
         if (url && img.getAttribute("src") !== url) img.src = url;
       }
+      for (const video of root.current?.querySelectorAll<HTMLVideoElement>(
+        "video[data-media-source]",
+      ) ?? []) {
+        const virtual = video.dataset.mediaSource ?? "";
+        const src = resourceUrl(
+          virtual.startsWith("site://media/")
+            ? latest.current.media[virtual.slice(13)]?.original
+            : virtual,
+        );
+        if (src && video.getAttribute("src") !== src) video.src = src;
+        else if (!src) video.removeAttribute("src");
+        const poster = video.dataset.mediaPoster;
+        if (poster) {
+          const url = poster.startsWith("site://media/")
+            ? latest.current.media[poster.slice(13)]?.original
+            : /^https?:\/\//.test(poster)
+              ? poster
+              : undefined;
+          if (url && video.getAttribute("poster") !== url) video.poster = url;
+        }
+      }
       for (const raw of root.current?.querySelectorAll<HTMLElement>(
         "div[data-raw-html]",
       ) ?? []) {
@@ -303,17 +330,51 @@ export function RichTextEditor({
       captureInsertion: () => {
         if (!hasLiveEditor(editor)) return () => {};
         const position = editor.state.selection.from;
-        return (html) => {
-          if (!hasLiveEditor(editor) || !editor.isEditable) return;
-          editor
+        let range = { from: position, to: editor.state.selection.to };
+        let valid = true;
+        const track = ({
+          transaction,
+        }: {
+          transaction: import("@tiptap/pm/state").Transaction;
+        }) => {
+          if (transaction.docChanged && transaction.getMeta("everunfoldSource"))
+            valid = false;
+          range = {
+            from: transaction.mapping.map(range.from),
+            to: transaction.mapping.map(range.to, -1),
+          };
+        };
+        editor.on("transaction", track);
+        let disposed = false;
+        const dispose = () => {
+          disposed = true;
+          editor.off("transaction", track);
+        };
+        const insert: CapturedInsertion = (html) => {
+          if (disposed) return false;
+          dispose();
+          if (!valid || !hasLiveEditor(editor) || !editor.isEditable)
+            return false;
+          return editor
             .chain()
             .focus()
             .insertContentAt(
-              Math.min(Math.max(position, 1), editor.state.doc.content.size),
+              {
+                from: Math.min(
+                  Math.max(range.from, 1),
+                  editor.state.doc.content.size,
+                ),
+                to: Math.min(
+                  Math.max(range.to, range.from),
+                  editor.state.doc.content.size,
+                ),
+              },
               readSource(html).content ?? [],
             )
             .run();
         };
+        insert.dispose = dispose;
+        return insert;
       },
     }),
     [editor, disabled, mapSelection, readSource],
@@ -400,4 +461,9 @@ function selectSource(
     );
   }
   editor.view.focus();
+  revealEditorSelection(editor.view.dom, () =>
+    hasLiveEditor(editor)
+      ? editor.view.coordsAtPos(editor.state.selection.head)
+      : null,
+  );
 }

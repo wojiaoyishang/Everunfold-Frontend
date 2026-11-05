@@ -72,6 +72,25 @@ export function sourceDocument(
           throw new Error("保留原始 HTML");
         const tag = node.name,
           props = node.attribs;
+        if (visualFeatures && tag === "span" && props["data-editor-shortcode"])
+          return [
+            {
+              type: "nativeShortcode",
+              attrs: { source: props["data-editor-shortcode"] },
+            },
+          ];
+        if (visualFeatures && tag === "video")
+          return [
+            {
+              type: "localVideo",
+              attrs: {
+                html: DomUtils.getOuterHTML(node),
+                src: props.src ?? "",
+                poster: props.poster ?? null,
+                title: props.title ?? null,
+              },
+            },
+          ];
         if (
           visualFeatures &&
           ["span", "div"].includes(tag) &&
@@ -359,6 +378,8 @@ export function renderRichNode(node: JSONContent): string {
   }
   if (type === "rawHtml" || type === "htmlOpaque")
     return String(attrs.html ?? "");
+  if (type === "nativeShortcode") return String(attrs.source ?? "");
+  if (type === "localVideo") return String(attrs.html ?? "");
   if (type === "inlineMath" || type === "blockMath")
     return formulaHtml(String(attrs.latex ?? ""), type === "blockMath");
   const content = (node.content ?? []).map(renderRichNode).join("");

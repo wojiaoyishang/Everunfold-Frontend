@@ -1,6 +1,7 @@
 import type { JSONContent } from "@tiptap/core";
 import { sourceDocument } from "./rich-text";
 import { preservedHtmlDocument } from "./preserved-html";
+import { protectVisualShortcodes } from "./shortcode-source";
 
 const containers = new Set([
   "doc",
@@ -52,6 +53,8 @@ export function normalizeVisualDocument(
           "inlineMath",
           "htmlInline",
           "htmlOpaque",
+          "nativeShortcode",
+          "localVideo",
         ].includes(child.type ?? "") ||
         (inlineImages && child.type === "image")
       )
@@ -80,6 +83,7 @@ export function normalizeVisualDocument(
 }
 
 export function htmlRichSource(source: string, inlineImages = false) {
+  source = protectVisualShortcodes(source);
   const strict = sourceDocument(source, true);
   return normalizeVisualDocument(
     strict.content?.[0]?.type === "rawHtml"

@@ -1,5 +1,6 @@
 import type { Language } from "@codemirror/language";
 import { htmlUnits, textUnits } from "./source-positions";
+import { shortcodeSourceRanges } from "./shortcode-source";
 
 const skipped = new Set([
   "HeaderMark",
@@ -25,18 +26,21 @@ export function markdownUnits(parser: Language["parser"], source: string) {
   };
   parser.parse(source).iterate({
     enter(node) {
-      const tag = { Image: "img", HardBreak: "br", HorizontalRule: "hr" }[
-        node.name
-      ];
+      if (node.to <= at) return false;
+      const video =
+        node.name === "Image" && source.startsWith("{type=video}", node.to);
+      const tag = video
+        ? "video"
+        : { Image: "img", HardBreak: "br", HorizontalRule: "hr" }[node.name];
       if (tag) {
         copy(node.from);
         parts.push({
           key: "<" + tag + ">",
           tag,
           start: node.from,
-          end: node.to,
+          end: video ? node.to + "{type=video}".length : node.to,
         });
-        at = node.to;
+        at = video ? node.to + "{type=video}".length : node.to;
         return false;
       }
       if (
@@ -60,7 +64,11 @@ export function markdownUnits(parser: Language["parser"], source: string) {
         else
           parts.push(
             ...htmlUnits(text)
-              .filter((unit) => !unit.tag)
+              .filter(
+                (unit) =>
+                  !unit.tag ||
+                  ["shortcode", "video", "img", "br", "hr"].includes(unit.tag),
+              )
               .map((unit) => ({
                 ...unit,
                 start: node.from + unit.start,
@@ -73,5 +81,17 @@ export function markdownUnits(parser: Language["parser"], source: string) {
     },
   });
   copy(source.length);
-  return parts;
+  const calls = shortcodeSourceRanges(source, true);
+  return [
+    ...parts.filter(
+      (unit) =>
+        !calls.some((call) => unit.start < call.to && unit.end > call.from),
+    ),
+    ...calls.map((call) => ({
+      key: source.slice(call.from, call.to),
+      tag: "shortcode",
+      start: call.from,
+      end: call.to,
+    })),
+  ].sort((a, b) => a.start - b.start);
 }
