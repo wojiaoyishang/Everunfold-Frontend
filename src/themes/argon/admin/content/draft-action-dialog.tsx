@@ -1,5 +1,5 @@
 "use client";
-import type { DraftSummary } from "@/generated/content-admin-contract";
+import type { DraftListItem } from "@/generated/content-admin-contract";
 import { useDraftAction } from "@/core/content-management/use-draft-action";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 
@@ -8,7 +8,7 @@ export function DraftActionDialog({
   onClose,
   onDone,
 }: {
-  item: DraftSummary;
+  item: DraftListItem;
   onClose: () => void;
   onDone: () => void;
 }) {

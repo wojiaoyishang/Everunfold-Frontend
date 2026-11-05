@@ -490,7 +490,7 @@
       "properties": {
         "items": {
           "items": {
-            "$ref": "#/$defs/DraftSummary"
+            "$ref": "#/$defs/DraftListItem"
           },
           "title": "Items",
           "type": "array"
@@ -730,6 +730,151 @@
       "title": "DraftFields",
       "type": "object"
     },
+    "DraftListItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type_id": {
+          "title": "Type Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "preview": {
+          "title": "Preview",
+          "type": "string"
+        },
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "trash"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "is_demo": {
+          "title": "Is Demo",
+          "type": "boolean"
+        },
+        "published_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published Revision"
+        },
+        "public_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Public Path"
+        },
+        "published_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published At"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "cover_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cover Url"
+        },
+        "categories": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Categories",
+          "type": "array"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tags",
+          "type": "array"
+        },
+        "comment_count": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Comment Count",
+          "type": "integer"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "type_id",
+        "title",
+        "excerpt",
+        "preview",
+        "author",
+        "revision",
+        "status",
+        "is_demo",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "DraftListItem",
+      "type": "object"
+    },
     "DraftLookup": {
       "additionalProperties": false,
       "properties": {
@@ -848,114 +993,6 @@
         "fields"
       ],
       "title": "DraftSave",
-      "type": "object"
-    },
-    "DraftSummary": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "format": "uuid",
-          "title": "Id",
-          "type": "string"
-        },
-        "type_id": {
-          "title": "Type Id",
-          "type": "string"
-        },
-        "title": {
-          "title": "Title",
-          "type": "string"
-        },
-        "excerpt": {
-          "title": "Excerpt",
-          "type": "string"
-        },
-        "preview": {
-          "title": "Preview",
-          "type": "string"
-        },
-        "author": {
-          "title": "Author",
-          "type": "string"
-        },
-        "revision": {
-          "title": "Revision",
-          "type": "integer"
-        },
-        "status": {
-          "enum": [
-            "draft",
-            "trash"
-          ],
-          "title": "Status",
-          "type": "string"
-        },
-        "is_demo": {
-          "title": "Is Demo",
-          "type": "boolean"
-        },
-        "published_revision": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Published Revision"
-        },
-        "public_path": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Public Path"
-        },
-        "published_at": {
-          "anyOf": [
-            {
-              "format": "date-time",
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Published At"
-        },
-        "created_at": {
-          "format": "date-time",
-          "title": "Created At",
-          "type": "string"
-        },
-        "updated_at": {
-          "format": "date-time",
-          "title": "Updated At",
-          "type": "string"
-        }
-      },
-      "required": [
-        "id",
-        "type_id",
-        "title",
-        "excerpt",
-        "preview",
-        "author",
-        "revision",
-        "status",
-        "is_demo",
-        "created_at",
-        "updated_at"
-      ],
-      "title": "DraftSummary",
       "type": "object"
     },
     "EditorCatalog": {
@@ -1756,7 +1793,7 @@
   "title": "ContentAdminContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.5.0",
+  "x-everunfold-contract-version": "1.6.0",
   "x-everunfold-content-types": [
     {
       "id": "article",

@@ -75,7 +75,12 @@ export type PublicPath = string | null;
 export type PublishedAt = string | null;
 export type CreatedAt = string;
 export type UpdatedAt = string;
-export type Items = DraftSummary[];
+export type CoverUrl = string | null;
+export type Categories1 = string[];
+export type Tags1 = string[];
+export type CommentCount = number;
+export type Pinned1 = boolean;
+export type Items = DraftListItem[];
 export type Total = number;
 export type Page1 = number;
 export type PageSize1 = number;
@@ -156,8 +161,8 @@ export type Navigation = NavigationItem[];
 export type Articles = number;
 export type Pages = number;
 export type Comments = number;
-export type Tags1 = number;
-export type Categories1 = number;
+export type Tags2 = number;
+export type Categories2 = number;
 export type CommentsOpen1 = boolean;
 export type SeoTitle1 = string;
 export type SeoDescription1 = string;
@@ -172,7 +177,7 @@ export type Language = string;
 export type PublishedAt2 = string;
 export type UpdatedAt2 = string;
 export type Author3 = string;
-export type CoverUrl = string | null;
+export type CoverUrl1 = string | null;
 export type ReadingMinutes = number;
 export type WordCount = number;
 export type Id10 = string;
@@ -180,10 +185,10 @@ export type Slug = string;
 export type Name3 = string;
 export type Kind2 = "category" | "tag";
 export type Count1 = number;
-export type Categories2 = TaxonomyDTO[];
-export type Tags2 = TaxonomyDTO[];
-export type CommentCount = number;
-export type Pinned1 = boolean;
+export type Categories3 = TaxonomyDTO[];
+export type Tags3 = TaxonomyDTO[];
+export type CommentCount1 = number;
+export type Pinned2 = boolean;
 export type Id11 = string;
 export type Type1 = "markdown" | "html";
 export type Content2 = string;
@@ -311,7 +316,7 @@ export interface DraftCatalog {
   page: Page1;
   page_size: PageSize1;
 }
-export interface DraftSummary {
+export interface DraftListItem {
   id: Id6;
   type_id: TypeId3;
   title: Title1;
@@ -326,6 +331,11 @@ export interface DraftSummary {
   published_at?: PublishedAt;
   created_at: CreatedAt;
   updated_at: UpdatedAt;
+  cover_url?: CoverUrl;
+  categories?: Categories1;
+  tags?: Tags1;
+  comment_count?: CommentCount;
+  pinned?: Pinned1;
 }
 export interface PublicResponseDraftDetail {
   success?: Success3;
@@ -448,8 +458,8 @@ export interface SiteStats {
   articles: Articles;
   pages: Pages;
   comments: Comments;
-  tags: Tags1;
-  categories: Categories1;
+  tags: Tags2;
+  categories: Categories2;
 }
 export interface ContentDetail {
   comments_open?: CommentsOpen1;
@@ -466,13 +476,13 @@ export interface ContentDetail {
   published_at: PublishedAt2;
   updated_at: UpdatedAt2;
   author: Author3;
-  cover_url: CoverUrl;
+  cover_url: CoverUrl1;
   reading_minutes: ReadingMinutes;
   word_count: WordCount;
-  categories: Categories2;
-  tags: Tags2;
-  comment_count: CommentCount;
-  pinned: Pinned1;
+  categories: Categories3;
+  tags: Tags3;
+  comment_count: CommentCount1;
+  pinned: Pinned2;
   content: Content1;
   media_urls: MediaUrls1;
 }

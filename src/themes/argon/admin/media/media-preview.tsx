@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 /** Shared thumbnail/player. Media originals are never injected as HTML. */
@@ -9,12 +9,14 @@ export function MediaPreview({
   label,
   playable = false,
   deleted = false,
+  fallback,
 }: {
   url: string;
   kind: "image" | "video" | "file";
   deleted?: boolean;
   label: string;
   playable?: boolean;
+  fallback?: ReactNode;
 }) {
   const video = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
@@ -56,10 +58,12 @@ export function MediaPreview({
           <Icon name="play" />
         )
       ) : (
-        <span className="admin-media-preview-missing">
-          <Icon name="image" />
-          {safe ? "暂时无法预览" : "预览"}
-        </span>
+        (fallback ?? (
+          <span className="admin-media-preview-missing">
+            <Icon name="image" />
+            {safe ? "暂时无法预览" : "预览"}
+          </span>
+        ))
       )}
       {kind === "video" && playable && safe && !failed && !deleted && (
         <Button

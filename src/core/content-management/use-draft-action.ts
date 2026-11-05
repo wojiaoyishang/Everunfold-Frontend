@@ -3,10 +3,10 @@ import { randomUUID } from "@/core/browser/crypto";
 import { useRef, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { restoreDraft, trashDraft } from "@/generated/content-admin-client";
-import type { DraftSummary } from "@/generated/content-admin-contract";
+import type { DraftListItem } from "@/generated/content-admin-contract";
 import { draftError, uncertainWrite } from "./draft-state";
 
-export function useDraftAction(item: DraftSummary) {
+export function useDraftAction(item: DraftListItem) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const operationId = useRef<string | null>(null);
   const [error, setError] = useState("");

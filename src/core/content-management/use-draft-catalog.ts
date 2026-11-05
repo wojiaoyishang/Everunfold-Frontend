@@ -15,6 +15,7 @@ import { draftError } from "./draft-state";
 export function useDraftCatalog(type: ContentTypeDefinition) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const [search, setSearch] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
   const [status, setStatus] =
     useState<NonNullable<DraftQuery["status"]>>("all");
   const [page, setPage] = useState(1);
@@ -44,7 +45,13 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
         }
         const response = await queryDrafts(
           baseUrl,
-          { type_id: type.id, search, status, page, page_size: 12 },
+          {
+            type_id: type.id,
+            search: appliedSearch,
+            status,
+            page,
+            page_size: 12,
+          },
           csrfToken,
           { signal: abort.signal },
         );
@@ -68,7 +75,7 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
       clearTimeout(timer);
       abort.abort();
     };
-  }, [baseUrl, csrfToken, type, search, status, page, revision]);
+  }, [baseUrl, csrfToken, type, appliedSearch, status, page, revision]);
   const reset = () => {
     setLoading(true);
     setResult(null);
@@ -80,13 +87,23 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
     error,
     compatible,
     search,
+    appliedSearch,
     status,
     page,
-    setSearch: (value: string) => {
-      setSearch(value);
+    setSearch,
+    submitSearch: () => {
+      setAppliedSearch(search.trim());
+      setPage(1);
+      setLoading(true);
+      setRevision((value) => value + 1);
+    },
+    clearSearch: () => {
+      setSearch("");
+      setAppliedSearch("");
       reset();
     },
     setStatus: (value: NonNullable<DraftQuery["status"]>) => {
+      if (value === status) return;
       setStatus(value);
       reset();
     },
