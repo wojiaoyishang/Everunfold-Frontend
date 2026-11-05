@@ -565,3 +565,17 @@ ADR0055：共享源码标记分色与浅深色变量、围栏按语言加载；�
 | `docs/handoff/remote-address-verification.md` | `348b1976056caf2db9807659e7d42e98001827021d6eb675ed186e9818812afa` |
 | `docs/handoff/container-deployment-verification.md` | `5edde5332d8a52c2a94e80fc4ebcea19702043f82a4d698546710d92f5e3a3d2` |
 | `docs/handoff/feature-lab-article-verification.md` | `59e0816f8ca02c9f2f04fa34f2fc34b3d9d7859a4f45e07cd9ea860e83b4aa50` |
+
+## 2026-11-05 原生短代码与后台样式库提案
+
+用户已确认不做旧兼容、独立样式库、自定义纯HTML/CSS和注册项只读展示。同步shortcodes-design-1、ADR0056、bootstrap-6、前台历史实现的方向说明、索引及2张方案截图；运行功能尚未切换，语法/路由/Schema未冻结。原始基线附件不变。
+
+| 共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `dc1fedea7eb61b6eeb856a41cd5624497ac3e55c28d82f16d86d681b2ab31a2c` |
+| `docs/architecture/shortcodes.md` | `211eea2f8760dfd2e11abfc3731f116562e2f70c343f1a86edceb59037d2abeb` |
+| `docs/decisions/0056-native-shortcode-catalog.md` | `2279e08eba2913c9617b28aeee432d20f8f0b6f053b11a3096b5d0b926182902` |
+| `docs/architecture/constraints.md` | `7af07539403e56010bdd23d291f4845639010677fdc5c9b5dbd03dd60b7f3572` |
+| `docs/architecture/frontend-ui.md` | `67bdda2100be1450b333ca39b15703444ac17e44051151b64a31d7d092852e2a` |
+| `docs/design/shortcode-catalog-proposal.jpg` | `d22df5381873f5ca0d60359ed7c78d834a771ab765d761319cdb08ba1ee95f95` |
+| `docs/design/shortcode-editor-proposal.jpg` | `56a0c20bbd98f7c13d9aa75f09e9115ada5d244ba529aaf8fe4bd4cc2402c414` |

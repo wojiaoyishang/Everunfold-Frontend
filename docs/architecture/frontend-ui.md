@@ -2,6 +2,8 @@
 
 更新：2026-10-31。适用于当前 Next.js App Router 前台；在线 0.1 API/快照保持不变，展示原型另消费后端 0.2.0-preview.1 草案。最新导航检查见 [导航验证](../handoff/frontend-navigation-verification.md)，其余阅读能力见 [说说与阅读工具记录](../handoff/frontend-reader-verification.md)。
 
+2026-11-05方向更新：用户要求去掉旧短代码兼容，改为原生短代码与后台样式库。下文legacy词表是当前代码的历史实现记录，不再作为后续目标；新方案见[短代码设计](shortcodes.md)和[ADR0056](../decisions/0056-native-shortcode-catalog.md)。自定义纯HTML/CSS需经过受控编译与作用域限制，任意脚本仍禁止；本轮只有设计与交互草图，运行代码尚未切换。
+
 ## 目录与职责
 
 ```text

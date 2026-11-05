@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+[原生短代码与后台样式库提案](architecture/shortcodes.md)、[ADR0056](decisions/0056-native-shortcode-catalog.md)：用户已确认不做旧兼容、展示全部样式、允许自定义HTML/CSS及注册项只读；本轮仅完成设计与交互草图，实际功能尚未切换。
+
 [本容器临时连通性验收](handoff/remote-address-verification.md)：登录、媒体、投递和协同WS通过；只记录本次容器测试，不约定长期部署地址。[运行说明4](development/container-deployment.md)保留通用步骤，实际IP与临时URL仅在本地忽略配置中维护。
 
 [Markdown源码高亮](decisions/0055-markdown-source-highlighting.md)及[实页验收](handoff/markdown-source-highlighting-verification.md)：标记分色、浅深色与窄屏、代码围栏按语言加载，211项检查通过。
