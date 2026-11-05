@@ -1,6 +1,6 @@
 # 容器临时测试运行说明
 
-版本：container-deployment-4，2026-11-05（Asia/Shanghai）。本页仅记录当前Docker桌面容器的临时测试过程，端口和目录为该测试环境的运行示例，不约定项目长期部署方式。具体IP与临时公开URL只保留在本地忽略配置和运行记录中。测试按用户要求使用HTTP，服务监听 `0.0.0.0`；决定与兼容边界见 [ADR0053](../decisions/0053-container-http-development.md)。
+版本：container-deployment-5，2026-11-05（Asia/Shanghai）。本页仅记录当前Docker桌面容器的临时测试过程，端口和目录为该测试环境的运行示例，不约定项目长期部署方式。具体IP与临时公开URL只保留在本地忽略配置和运行记录中。测试按用户要求使用HTTP，服务监听 `0.0.0.0`；决定与兼容边界见 [ADR0053](../decisions/0053-container-http-development.md)。
 
 测试中先使用本机回环入口，随后由用户完成宿主机映射，公开API、媒体及canonical同步到本容器临时测试入口。真实登录、7份媒体和协同WS已通过，[本次验收](../handoff/remote-address-verification.md)只记录测试结果；[功能长文验收](../handoff/feature-lab-article-verification.md)中的回环示例保留为历史测试记录。
 
@@ -58,6 +58,18 @@ cd /config/Desktop/workspace/Everunfold/Everunfold-Backend
 ./deploy/container-dev.sh status
 ./deploy/container-dev.sh restart all
 ```
+
+日常重启后的测试入口已经放在工作区根目录，可在任意目录执行：
+
+```bash
+/workspace/start-everunfold.sh
+# 只检查当前状态：
+/workspace/start-everunfold.sh --check
+```
+
+该可执行入口是指向后端`deploy/start-test.sh`的相对软链接，保存在工作区挂载内，实际脚本随Git维护。它复用上面的Supervisor启动方式，不重启已运行服务；用运行目录的文件锁防止同时重复启动，且不把锁传给守护进程。默认等待120秒（`EVERUNFOLD_START_TIMEOUT`可设为1至600），检查六个进程全部RUNNING、3000/3100/8001/3001均监听0.0.0.0，以及API/代理健康与后台页面均返回HTTP200。`--check`只检查当前状态，失败返回非零；失败会显示进程状态和日志目录。
+
+脚本复用既有依赖与忽略的实例配置，仍使用HTTP和用户已配置的宿主机端口映射；不把具体入口或密码写入脚本。重新部署同样目录时，可按后端`deploy/README.md`重建工作区软链接。
 
 Scheduler 使用 SIGINT 退出，以执行租约清理；异常退出后的启动重试窗口覆盖原 15 秒租约过期时间。不得在同一 Redis scope 启动第二套 Scheduler。服务异常退出由 Supervisor 拉起，日志在后端 `var/container/`，有大小和备份数量限制。API、Nginx 关闭访问日志以免把请求参数写入普通访问日志；这不替代后续生产结构化日志与统一脱敏工作。
 

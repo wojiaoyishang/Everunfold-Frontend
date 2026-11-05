@@ -633,3 +633,12 @@ ADR0055：共享源码标记分色与浅深色变量、围栏按语言加载；�
 | `docs/design/preview-label-aligned-desktop.jpg` | `04be102fe723fce17726a03f6d5f5603ee91299ae9e9bd148f053157ecf2c045` |
 | `docs/design/preview-label-aligned-medium.jpg` | `f4db8dc5d1817d71cc3bbbe2b90f4f881876da2b10ca22a7bdd3861823db55a0` |
 | `docs/design/preview-label-aligned-mobile.jpg` | `591a4e8c4b3636822705ceac515df5d188aff88a0da586e2c1cc62c331e803be` |
+
+## 2026-11-05 工作区日常启动入口
+
+container-deployment-5记录工作区可执行入口、既有Supervisor复用、就绪与绑定检查、并发启动保护和本轮热态验证边界。实际公开地址/密码仍不进入交接；后端脚本随仓库维护，工作区软链接按运行指南重建。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/development/container-deployment.md` | `70fdf1537df886be277b8e60bb650257e414d9bb6e4d0ced5dca314e12fedc97` |
+| `docs/handoff/container-deployment-verification.md` | `2796bbc4f19d2e24f156a594266f4d85919a1b4d2d39c4181e8cabc368a999da` |
