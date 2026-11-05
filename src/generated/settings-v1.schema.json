@@ -1244,6 +1244,31 @@
       "title": "PolicyState",
       "type": "object"
     },
+    "PreviewShortcode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id"
+        },
+        "value": {
+          "$ref": "#/$defs/ShortcodeSource"
+        }
+      },
+      "required": [
+        "value"
+      ],
+      "title": "PreviewShortcode",
+      "type": "object"
+    },
     "PublicResponse_FontCatalog_": {
       "additionalProperties": false,
       "properties": {
@@ -1552,6 +1577,90 @@
       "title": "PublicResponse[SettingsState]",
       "type": "object"
     },
+    "PublicResponse_ShortcodeCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/ShortcodeCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[ShortcodeCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_ShortcodeCompilation_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/ShortcodeCompilation"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[ShortcodeCompilation]",
+      "type": "object"
+    },
+    "PublicResponse_ShortcodeItem_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/ShortcodeItem"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[ShortcodeItem]",
+      "type": "object"
+    },
     "PublicSettings": {
       "additionalProperties": false,
       "properties": {
@@ -1567,6 +1676,14 @@
           },
           "title": "Icon Urls",
           "type": "object"
+        },
+        "shortcodes": {
+          "items": {
+            "$ref": "#/$defs/PublicShortcode"
+          },
+          "maxItems": 100,
+          "title": "Shortcodes",
+          "type": "array"
         }
       },
       "required": [
@@ -1574,6 +1691,107 @@
         "theme"
       ],
       "title": "PublicSettings",
+      "type": "object"
+    },
+    "PublicShortcode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "leaf",
+            "container"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ShortcodeParameter"
+          },
+          "title": "Parameters",
+          "type": "array"
+        },
+        "html": {
+          "title": "Html",
+          "type": "string"
+        },
+        "css": {
+          "title": "Css",
+          "type": "string"
+        },
+        "scope": {
+          "pattern": "^ef-sc-[a-f0-9]{32}$",
+          "title": "Scope",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "media_urls": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Media Urls",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "title",
+        "description",
+        "kind",
+        "parameters",
+        "html",
+        "css",
+        "scope",
+        "revision"
+      ],
+      "title": "PublicShortcode",
+      "type": "object"
+    },
+    "RestoreShortcode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "expected_revision",
+        "version"
+      ],
+      "title": "RestoreShortcode",
       "type": "object"
     },
     "SavePolicy": {
@@ -1612,6 +1830,37 @@
         "value"
       ],
       "title": "SaveSettings",
+      "type": "object"
+    },
+    "SaveShortcode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id"
+        },
+        "expected_revision": {
+          "minimum": 0,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "value": {
+          "$ref": "#/$defs/ShortcodeSource"
+        }
+      },
+      "required": [
+        "expected_revision",
+        "value"
+      ],
+      "title": "SaveShortcode",
       "type": "object"
     },
     "SettingsDelivery": {
@@ -1697,6 +1946,255 @@
         "delivery"
       ],
       "title": "SettingsState",
+      "type": "object"
+    },
+    "ShortcodeAction": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "expected_revision"
+      ],
+      "title": "ShortcodeAction",
+      "type": "object"
+    },
+    "ShortcodeCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ShortcodeItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "settings_revision": {
+          "title": "Settings Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "settings_revision"
+      ],
+      "title": "ShortcodeCatalog",
+      "type": "object"
+    },
+    "ShortcodeCompilation": {
+      "additionalProperties": false,
+      "properties": {
+        "compiled": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PublicShortcode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "error": {
+          "title": "Error",
+          "type": "string"
+        }
+      },
+      "required": [
+        "compiled",
+        "error"
+      ],
+      "title": "ShortcodeCompilation",
+      "type": "object"
+    },
+    "ShortcodeItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "backend",
+            "custom"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "editable": {
+          "title": "Editable",
+          "type": "boolean"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "applied_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Applied Revision"
+        },
+        "archived": {
+          "title": "Archived",
+          "type": "boolean"
+        },
+        "source": {
+          "$ref": "#/$defs/ShortcodeSource"
+        },
+        "compiled": {
+          "$ref": "#/$defs/PublicShortcode"
+        },
+        "versions": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Versions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "origin",
+        "editable",
+        "revision",
+        "applied_revision",
+        "archived",
+        "source",
+        "compiled"
+      ],
+      "title": "ShortcodeItem",
+      "type": "object"
+    },
+    "ShortcodeParameter": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z][a-z0-9_]{0,31}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 60,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "type": {
+          "default": "text",
+          "enum": [
+            "text",
+            "url",
+            "select",
+            "number",
+            "boolean"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "default": {
+          "type": "string",
+          "maxLength": 1000,
+          "default": "",
+          "title": "Default"
+        },
+        "required": {
+          "default": false,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 20,
+          "title": "Options",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "label"
+      ],
+      "title": "ShortcodeParameter",
+      "type": "object"
+    },
+    "ShortcodeSource": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[a-z][a-z0-9-]{0,47}(?::[a-z][a-z0-9-]{0,47})?$",
+          "title": "Name",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 300,
+          "title": "Description",
+          "type": "string"
+        },
+        "kind": {
+          "default": "container",
+          "enum": [
+            "leaf",
+            "container"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ShortcodeParameter"
+          },
+          "maxItems": 16,
+          "title": "Parameters",
+          "type": "array"
+        },
+        "html": {
+          "maxLength": 8000,
+          "minLength": 1,
+          "title": "Html",
+          "type": "string"
+        },
+        "css": {
+          "default": "",
+          "maxLength": 8000,
+          "title": "Css",
+          "type": "string"
+        },
+        "example_body": {
+          "default": "这里是正文内容。",
+          "maxLength": 2000,
+          "title": "Example Body",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "title",
+        "html"
+      ],
+      "title": "ShortcodeSource",
       "type": "object"
     },
     "SitePreferences": {
@@ -1869,6 +2367,27 @@
   },
   "additionalProperties": false,
   "properties": {
+    "shortcode_catalog": {
+      "$ref": "#/$defs/PublicResponse_ShortcodeCatalog_"
+    },
+    "shortcode_item": {
+      "$ref": "#/$defs/PublicResponse_ShortcodeItem_"
+    },
+    "shortcode_preview": {
+      "$ref": "#/$defs/PublicResponse_ShortcodeCompilation_"
+    },
+    "save_shortcode": {
+      "$ref": "#/$defs/SaveShortcode"
+    },
+    "shortcode_action": {
+      "$ref": "#/$defs/ShortcodeAction"
+    },
+    "restore_shortcode": {
+      "$ref": "#/$defs/RestoreShortcode"
+    },
+    "preview_shortcode": {
+      "$ref": "#/$defs/PreviewShortcode"
+    },
     "fonts": {
       "$ref": "#/$defs/PublicResponse_FontCatalog_"
     },
@@ -1943,6 +2462,13 @@
     }
   },
   "required": [
+    "shortcode_catalog",
+    "shortcode_item",
+    "shortcode_preview",
+    "save_shortcode",
+    "shortcode_action",
+    "restore_shortcode",
+    "preview_shortcode",
     "fonts",
     "media_removal_intent",
     "media_removal_preview",
@@ -1971,8 +2497,177 @@
   "title": "SettingsContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.8.0",
+  "x-everunfold-contract-version": "1.9.0",
+  "x-everunfold-shortcodes": [
+    {
+      "id": "15184599-2f9b-541f-a81f-439ce0ea0e8f",
+      "origin": "backend",
+      "editable": false,
+      "revision": 1,
+      "applied_revision": 1,
+      "archived": false,
+      "source": {
+        "name": "notice",
+        "title": "提示框",
+        "description": "提示、成功、警告或错误信息。",
+        "kind": "container",
+        "parameters": [
+          {
+            "name": "title",
+            "label": "标题",
+            "type": "text",
+            "default": "提示",
+            "required": false,
+            "options": []
+          },
+          {
+            "name": "type",
+            "label": "类型",
+            "type": "select",
+            "default": "info",
+            "required": false,
+            "options": [
+              "info",
+              "success",
+              "warning",
+              "error"
+            ]
+          }
+        ],
+        "html": "<aside class=\"notice\" data-variant=\"{{type}}\"><strong>{{title}}</strong><div>{{content}}</div></aside>",
+        "css": ".notice{padding:1em 1.25em;border-radius:8px;border-left:4px solid #5b7bcc;background:#5b7bcc14}.notice[data-variant=\"success\"]{border-color:#24966b;background:#24966b14}.notice[data-variant=\"warning\"]{border-color:#c18a18;background:#c18a1814}.notice[data-variant=\"error\"]{border-color:#c95151;background:#c9515114}.notice > strong{display:block;margin-bottom:.4em}.notice p:last-child{margin-bottom:0}",
+        "example_body": "这里是正文内容。"
+      },
+      "compiled": {
+        "id": "15184599-2f9b-541f-a81f-439ce0ea0e8f",
+        "name": "notice",
+        "title": "提示框",
+        "description": "提示、成功、警告或错误信息。",
+        "kind": "container",
+        "parameters": [
+          {
+            "name": "title",
+            "label": "标题",
+            "type": "text",
+            "default": "提示",
+            "required": false,
+            "options": []
+          },
+          {
+            "name": "type",
+            "label": "类型",
+            "type": "select",
+            "default": "info",
+            "required": false,
+            "options": [
+              "info",
+              "success",
+              "warning",
+              "error"
+            ]
+          }
+        ],
+        "html": "<aside class=\"ef-sc-151845992f9b541fa81f439ce0ea0e8f-notice\" data-variant=\"{{type}}\"><strong>{{title}}</strong><div>{{content}}</div></aside>",
+        "css": ".ef-sc-151845992f9b541fa81f439ce0ea0e8f .ef-sc-151845992f9b541fa81f439ce0ea0e8f-notice{padding:1em 1.25em;border-radius:8px;border-left:4px solid #5b7bcc;background:#5b7bcc14;}.ef-sc-151845992f9b541fa81f439ce0ea0e8f .ef-sc-151845992f9b541fa81f439ce0ea0e8f-notice[data-variant=\"success\"]{border-color:#24966b;background:#24966b14;}.ef-sc-151845992f9b541fa81f439ce0ea0e8f .ef-sc-151845992f9b541fa81f439ce0ea0e8f-notice[data-variant=\"warning\"]{border-color:#c18a18;background:#c18a1814;}.ef-sc-151845992f9b541fa81f439ce0ea0e8f .ef-sc-151845992f9b541fa81f439ce0ea0e8f-notice[data-variant=\"error\"]{border-color:#c95151;background:#c9515114;}.ef-sc-151845992f9b541fa81f439ce0ea0e8f .ef-sc-151845992f9b541fa81f439ce0ea0e8f-notice > strong{display:block;margin-bottom:.4em;}.ef-sc-151845992f9b541fa81f439ce0ea0e8f .ef-sc-151845992f9b541fa81f439ce0ea0e8f-notice p:last-child{margin-bottom:0;}",
+        "scope": "ef-sc-151845992f9b541fa81f439ce0ea0e8f",
+        "revision": 1,
+        "media_urls": {}
+      },
+      "versions": []
+    },
+    {
+      "id": "c9df582f-05fa-5804-a01c-d13b9d11b73d",
+      "origin": "backend",
+      "editable": false,
+      "revision": 1,
+      "applied_revision": 1,
+      "archived": false,
+      "source": {
+        "name": "accordion",
+        "title": "折叠内容",
+        "description": "可由读者展开的详细说明。",
+        "kind": "container",
+        "parameters": [
+          {
+            "name": "title",
+            "label": "标题",
+            "type": "text",
+            "default": "展开查看",
+            "required": false,
+            "options": []
+          }
+        ],
+        "html": "<details class=\"accordion\"><summary>{{title}}</summary><div class=\"body\">{{content}}</div></details>",
+        "css": ".accordion{border:1px solid #8885;border-radius:8px;padding:.8em 1em}.accordion > summary{cursor:pointer;font-weight:600}.body{padding-top:.8em}.body p:last-child{margin-bottom:0}",
+        "example_body": "这里是正文内容。"
+      },
+      "compiled": {
+        "id": "c9df582f-05fa-5804-a01c-d13b9d11b73d",
+        "name": "accordion",
+        "title": "折叠内容",
+        "description": "可由读者展开的详细说明。",
+        "kind": "container",
+        "parameters": [
+          {
+            "name": "title",
+            "label": "标题",
+            "type": "text",
+            "default": "展开查看",
+            "required": false,
+            "options": []
+          }
+        ],
+        "html": "<details class=\"ef-sc-c9df582f05fa5804a01cd13b9d11b73d-accordion\"><summary>{{title}}</summary><div class=\"ef-sc-c9df582f05fa5804a01cd13b9d11b73d-body\">{{content}}</div></details>",
+        "css": ".ef-sc-c9df582f05fa5804a01cd13b9d11b73d .ef-sc-c9df582f05fa5804a01cd13b9d11b73d-accordion{border:1px solid #8885;border-radius:8px;padding:.8em 1em;}.ef-sc-c9df582f05fa5804a01cd13b9d11b73d .ef-sc-c9df582f05fa5804a01cd13b9d11b73d-accordion > summary{cursor:pointer;font-weight:600;}.ef-sc-c9df582f05fa5804a01cd13b9d11b73d .ef-sc-c9df582f05fa5804a01cd13b9d11b73d-body{padding-top:.8em;}.ef-sc-c9df582f05fa5804a01cd13b9d11b73d .ef-sc-c9df582f05fa5804a01cd13b9d11b73d-body p:last-child{margin-bottom:0;}",
+        "scope": "ef-sc-c9df582f05fa5804a01cd13b9d11b73d",
+        "revision": 1,
+        "media_urls": {}
+      },
+      "versions": []
+    }
+  ],
   "x-everunfold-operations": [
+    {
+      "name": "readShortcodes",
+      "path": "/v1/admin/shortcodes",
+      "method": "GET",
+      "response": "shortcode_catalog"
+    },
+    {
+      "name": "saveShortcode",
+      "path": "/v1/admin/shortcodes/save",
+      "method": "POST",
+      "input": "save_shortcode",
+      "response": "shortcode_item"
+    },
+    {
+      "name": "previewShortcode",
+      "path": "/v1/admin/shortcodes/preview",
+      "method": "POST",
+      "input": "preview_shortcode",
+      "response": "shortcode_preview"
+    },
+    {
+      "name": "applyShortcode",
+      "path": "/v1/admin/shortcodes/apply",
+      "method": "POST",
+      "input": "shortcode_action",
+      "response": "shortcode_catalog"
+    },
+    {
+      "name": "archiveShortcode",
+      "path": "/v1/admin/shortcodes/archive",
+      "method": "POST",
+      "input": "shortcode_action",
+      "response": "shortcode_catalog"
+    },
+    {
+      "name": "restoreShortcode",
+      "path": "/v1/admin/shortcodes/restore",
+      "method": "POST",
+      "input": "restore_shortcode",
+      "response": "shortcode_item"
+    },
     {
       "name": "queryFonts",
       "path": "/v1/admin/fonts/query",

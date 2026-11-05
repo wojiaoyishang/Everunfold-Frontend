@@ -251,7 +251,7 @@ export function RichTextEditor({
         });
         const safe = rendered.html;
         if (raw.dataset.rendered !== safe) {
-          raw.innerHTML = `<div class="rich-raw-label">自定义 HTML · 在源码模式编辑</div><div>${safe}</div>`;
+          raw.innerHTML = `<div class="rich-raw-label">HTML 节点</div><div>${safe}</div>`;
           raw.dataset.rendered = safe;
           raw.contentEditable = "false";
           if (rendered.features.code || rendered.features.math)
@@ -263,7 +263,7 @@ export function RichTextEditor({
                   raw.isConnected &&
                   raw.dataset.rendered === safe
                 )
-                  raw.innerHTML = `<div class="rich-raw-label">自定义 HTML · 在源码模式编辑</div><div>${html}</div>`;
+                  raw.innerHTML = `<div class="rich-raw-label">HTML 节点</div><div>${html}</div>`;
               })
               .catch(() => {});
         }

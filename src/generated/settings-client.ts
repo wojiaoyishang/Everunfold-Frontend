@@ -4,9 +4,9 @@ import addFormats from "ajv-formats";
 import schema from "./settings-v1.schema.json";
 import type { SettingsContract } from "./settings-contract";
 import {
+  requestJSON,
   postJSON,
   postBinary,
-  requestJSON,
   patchJSON,
   type RequestOptions,
 } from "@/core/http/request";
@@ -18,6 +18,129 @@ ajv.addSchema(
   ),
   "settings",
 );
+
+const readShortcodesValidator = ajv.compile<
+  SettingsContract["shortcode_catalog"]
+>({ $ref: "settings#/properties/shortcode_catalog" });
+export function readShortcodes(baseUrl: string, options: RequestOptions = {}) {
+  return requestJSON(
+    baseUrl,
+    "/v1/admin/shortcodes",
+    {},
+    readShortcodesValidator,
+    { ...options, credentials: "include", headers: { ...options.headers } },
+  );
+}
+
+const saveShortcodeValidator = ajv.compile<SettingsContract["shortcode_item"]>({
+  $ref: "settings#/properties/shortcode_item",
+});
+export function saveShortcode(
+  baseUrl: string,
+  input: SettingsContract["save_shortcode"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/shortcodes/save",
+    input,
+    saveShortcodeValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const previewShortcodeValidator = ajv.compile<
+  SettingsContract["shortcode_preview"]
+>({ $ref: "settings#/properties/shortcode_preview" });
+export function previewShortcode(
+  baseUrl: string,
+  input: SettingsContract["preview_shortcode"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/shortcodes/preview",
+    input,
+    previewShortcodeValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const applyShortcodeValidator = ajv.compile<
+  SettingsContract["shortcode_catalog"]
+>({ $ref: "settings#/properties/shortcode_catalog" });
+export function applyShortcode(
+  baseUrl: string,
+  input: SettingsContract["shortcode_action"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/shortcodes/apply",
+    input,
+    applyShortcodeValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const archiveShortcodeValidator = ajv.compile<
+  SettingsContract["shortcode_catalog"]
+>({ $ref: "settings#/properties/shortcode_catalog" });
+export function archiveShortcode(
+  baseUrl: string,
+  input: SettingsContract["shortcode_action"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/shortcodes/archive",
+    input,
+    archiveShortcodeValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const restoreShortcodeValidator = ajv.compile<
+  SettingsContract["shortcode_item"]
+>({ $ref: "settings#/properties/shortcode_item" });
+export function restoreShortcode(
+  baseUrl: string,
+  input: SettingsContract["restore_shortcode"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/shortcodes/restore",
+    input,
+    restoreShortcodeValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
 
 const queryFontsValidator = ajv.compile<SettingsContract["fonts"]>({
   $ref: "settings#/properties/fonts",

@@ -19,6 +19,7 @@ export function BlockHeader({
   handle,
   controlsRef,
   formatDisabled,
+  onShortcode,
 }: {
   block: DraftBlock;
   index: number;
@@ -29,6 +30,7 @@ export function BlockHeader({
   onDelete: () => void;
   controlsRef: Ref<HTMLDivElement>;
   formatDisabled: boolean;
+  onShortcode?: () => void;
   handle?: ComponentProps<typeof Button>;
 }) {
   const label = blockEditors.get(block.type ?? "markdown")?.label ?? block.type;
@@ -51,6 +53,17 @@ export function BlockHeader({
         {String(index + 1).padStart(2, "0")}
       </span>
       <div ref={controlsRef} className={styles.modeControls} />
+      {onShortcode && (
+        <Button
+          className={styles.more}
+          aria-label="插入短代码"
+          title="在此区块后插入短代码"
+          disabled={disabled}
+          onClick={onShortcode}
+        >
+          <Icon name="grid" />
+        </Button>
+      )}
       <ActionPopover
         label={`第 ${index + 1} 块操作`}
         disabled={disabled}

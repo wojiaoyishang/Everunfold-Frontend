@@ -6,7 +6,7 @@ import { createServer as createHttpServer } from "node:http";
 import { createServer } from "node:net";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { Parser } from "htmlparser2";
+import { Parser, parseDocument, DomUtils } from "htmlparser2";
 
 export async function verifyAdminRuntime({ workspace, projectRoot }) {
   let backendRequests = 0;
@@ -114,6 +114,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/media",
       "/admin/icons",
       "/admin/fonts",
+      "/admin/shortcodes",
       "/admin/settings",
       "/admin/settings/theme",
       "/admin/settings/system",
@@ -182,6 +183,7 @@ directory = "./var/absent-admin-verification-cache"
     const article = await fetch(base + "/hello.html");
     assert.equal(article.status, 200);
     const html = await article.text();
+    assert.doesNotMatch(html, /data-shortcodes/);
     assert.match(html, /<title>一篇文章 — 本地设置<\/title>/);
     assert.match(html, /name="robots" content="noindex, follow"/);
     const resources = (markup) => {
@@ -202,6 +204,18 @@ directory = "./var/absent-admin-verification-cache"
     const richArticle = await fetch(base + "/second.html");
     assert.equal(richArticle.status, 200);
     const richHtml = await richArticle.text();
+    const richDocument = parseDocument(richHtml);
+    assert.match(DomUtils.textContent(richDocument), /离线原生模板/);
+    assert.ok(
+      DomUtils.findAll(
+        (node) =>
+          node.name === "strong" &&
+          DomUtils.textContent(node) === "离线短代码正文",
+        richDocument.children,
+      ).length,
+    );
+    assert.match(richHtml, /data-shortcodes/);
+    assert.doesNotMatch(richHtml, /{{&lt; custom:offline|ef-shortcode-hole/);
     assert.match(richHtml, /data-typeset="true"/);
     assert.match(richHtml, /<math .*MathML/);
     assert.match(richHtml, /hljs-keyword/);

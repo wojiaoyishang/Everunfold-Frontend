@@ -4,7 +4,9 @@ import { DomUtils, parseDocument } from "htmlparser2";
 
 import type { Content } from "@/core/content/types";
 import { publicHref, resourceUrl } from "@/core/content/urls";
-import { expandPresentationShortcodes } from "./shortcodes";
+import { renderNativeShortcodes } from "./native-shortcodes";
+import type { PublicShortcode } from "@/generated/settings-contract";
+import type { ShortcodeDiagnostic } from "@/core/shortcodes/parser";
 import { fontFamily, referencedFontFaces } from "./fonts";
 import { markdownMath } from "./features/markdown-math";
 import { inspectContentFeatures } from "./features/content-features";
@@ -90,8 +92,25 @@ const options: sanitizeHtml.IOptions = {
     "audio",
     "video",
     "source",
+    "section",
+    "article",
+    "aside",
+    "header",
+    "footer",
+    "small",
+    "time",
   ],
   allowedAttributes: {
+    "*": [
+      "class",
+      "data-variant",
+      "title",
+      "aria-label",
+      "role",
+      "lang",
+      "dir",
+    ],
+    time: ["datetime"],
     p: ["style"],
     figure: ["style"],
     a: ["href", "title", "target", "rel", "id", "class", "aria-label"],
@@ -125,18 +144,12 @@ const options: sanitizeHtml.IOptions = {
     source: ["src", "type"],
   },
   allowedClasses: {
-    a: ["reader-reference"],
-    details: [
-      "legacy-collapse",
-      /^tone-(indigo|green|red|orange|blue|black|grey)$/,
+    "*": [
+      "ef-shortcode",
+      "ef-gallery",
+      /^ef-gallery-[234]$/,
+      /^ef-sc-[a-f0-9]{32}(?:-[a-zA-Z_][a-zA-Z0-9_-]{0,63})?$/,
     ],
-    div: [
-      "legacy-alert",
-      "legacy-collapse-body",
-      /^tone-(indigo|green|red|orange|blue|black|grey)$/,
-    ],
-    strong: ["legacy-alert-title"],
-    span: ["legacy-tooltip", "legacy-reference"],
     code: [/^language-[a-zA-Z0-9_-]+$/, "hljs"],
     pre: [/^language-[a-zA-Z0-9_-]+$/],
   },
@@ -166,23 +179,38 @@ function mappedUrl(value: string, media: Content["media_urls"]): string | null {
 
 export function renderContent(
   content: Pick<Content, "id" | "content" | "media_urls">,
+  shortcodes: readonly PublicShortcode[] = [],
 ): {
   html: string;
   toc: TableOfContentsItem[];
   features: ContentFeatures;
+  diagnostics: ShortcodeDiagnostic[];
 } {
   const toc: TableOfContentsItem[] = [];
   const seenHeadings = new Map<string, number>();
-  const references: string[] = [];
-  const prefix = `reference-${encodeURIComponent(content.id).replace(/%/g, "_")}`;
+  const shortcodeStyles = new Set<string>();
+  const diagnostics: ShortcodeDiagnostic[] = [];
   const html = content.content
     .map((block) => {
-      const expanded = expandPresentationShortcodes(
+      const expanded = renderNativeShortcodes(
         block.content,
         block.type === "markdown",
+        shortcodes,
+        block.type === "markdown" ? renderMarkdownSource : (source) => source,
+        content.media_urls,
       );
-      const raw =
-        block.type === "markdown" ? renderMarkdownSource(expanded) : expanded;
+      const raw = expanded.html;
+      if (expanded.css) shortcodeStyles.add(expanded.css);
+      diagnostics.push(...expanded.diagnostics);
+      const media = {
+        ...Object.fromEntries(
+          Object.entries(expanded.mediaURLs).map(([id, original]) => [
+            id,
+            { original },
+          ]),
+        ),
+        ...content.media_urls,
+      };
       // Permit the storage-only scheme in this intermediate tree, then resolve actual nodes.
       // Code text never participates in URL replacement.
       const clean = sanitizeHtml(raw, {
@@ -212,30 +240,10 @@ export function renderContent(
                 else delete node.attribs.style;
               }
             }
-            // Only generated references may create anchors outside the heading namespace.
+            // Authored links must not impersonate heading or page-control IDs.
             if (node.name === "a") delete node.attribs.id;
-            if (
-              node.name === "span" &&
-              node.attribs.class === "legacy-reference"
-            ) {
-              references.push(node.attribs.title ?? "");
-              const number = references.length;
-              node.name = "a";
-              node.attribs = {
-                class: "reader-reference",
-                id: `${prefix}-source-${number}`,
-                href: `#${prefix}-note-${number}`,
-                title: references[number - 1],
-                "aria-label": `参考资料 ${number}：${references[number - 1]}`,
-              };
-              node.children = parseDocument(`[${number}]`)
-                .children as typeof node.children;
-            }
             if (["img", "audio", "video", "source"].includes(node.name)) {
-              const source = mappedUrl(
-                node.attribs.src ?? "",
-                content.media_urls,
-              );
+              const source = mappedUrl(node.attribs.src ?? "", media);
               if (source) node.attribs.src = source;
               else delete node.attribs.src;
               if (node.name === "img") {
@@ -245,10 +253,7 @@ export function renderContent(
                 node.attribs.controls = "";
                 node.attribs.preload = "none";
                 if (node.attribs.poster) {
-                  const poster = mappedUrl(
-                    node.attribs.poster,
-                    content.media_urls,
-                  );
+                  const poster = mappedUrl(node.attribs.poster, media);
                   if (poster) node.attribs.poster = poster;
                   else delete node.attribs.poster;
                 }
@@ -256,7 +261,7 @@ export function renderContent(
             }
             if (node.name === "a") {
               const href = node.attribs.href?.startsWith("site://media/")
-                ? mappedUrl(node.attribs.href, content.media_urls)
+                ? mappedUrl(node.attribs.href, media)
                 : publicHref(node.attribs.href ?? "");
               if (href) node.attribs.href = href;
               else delete node.attribs.href;
@@ -294,22 +299,16 @@ export function renderContent(
       );
     })
     .join("\n");
-  const escape = (value: string) =>
-    value
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  const notes = references.length
-    ? `<div class="reader-references"><strong>参考资料</strong><ol>${references.map((text, index) => `<li id="${prefix}-note-${index + 1}">${escape(text)} <a href="#${prefix}-source-${index + 1}" aria-label="返回引用 ${index + 1}">返回</a></li>`).join("")}</ol></div>`
-    : "";
   const faces = referencedFontFaces(html, content.media_urls);
   return {
     html:
       (faces ? `<style data-content-fonts>${faces}</style>` : "") +
-      html +
-      notes,
+      (shortcodeStyles.size
+        ? `<style data-shortcodes>${[...shortcodeStyles].join("\n")}</style>`
+        : "") +
+      html,
     toc,
     features: inspectContentFeatures(html),
+    diagnostics,
   };
 }

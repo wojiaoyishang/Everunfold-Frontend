@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { snapshot } from "../../tests/fixtures";
 import { FileSettingsStore } from "../../src/server/settings/store";
 import { FileContentStore } from "../../src/server/content/store";
+import { builtinShortcodes } from "../../src/core/shortcodes/registry";
 const root = await realpath(process.argv[2]);
 const relative = path.relative(await realpath(tmpdir()), root);
 if (
@@ -26,6 +27,12 @@ value.contents[1].content = [
     type: "html",
     content:
       '<div data-math="block" data-latex="E=mc^2">E=mc^2</div><pre><code class="language-javascript">const answer = 42;</code></pre>',
+  },
+  {
+    id: "native-shortcode",
+    type: "markdown",
+    content:
+      '{{< custom:offline title="离线原生模板" >}}\n\n**离线短代码正文**\n\n{{< /custom:offline >}}',
   },
 ];
 value.source_epoch = epoch;
@@ -84,6 +91,20 @@ await store.apply({
       background_video_url: "",
       accent: "#397566",
     },
+    shortcodes: (() => {
+      const source = builtinShortcodes.find((item) => item.name === "notice")!;
+      const scope = "ef-sc-00000000000000000000000000000002";
+      return [
+        {
+          ...source,
+          id: "00000000-0000-0000-0000-000000000002",
+          name: "custom:offline",
+          scope,
+          html: source.html.replaceAll(source.scope, scope),
+          css: source.css.replaceAll(source.scope, scope),
+        },
+      ];
+    })(),
   },
 });
 await store.apply({

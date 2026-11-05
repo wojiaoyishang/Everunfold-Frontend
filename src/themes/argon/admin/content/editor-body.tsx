@@ -13,6 +13,7 @@ import { BlockFrame, BlockPosition } from "./block-frame";
 import { useBlockComposer } from "./block-composer";
 import { EditorMediaDialog } from "./editor-media-dialog";
 import { RegisteredBlockEditor } from "./plugins/registry";
+import { ShortcodePicker } from "../shortcodes/picker";
 import type { CodeEditorHandle } from "../../components/ui/code-editor";
 import type { MediaURL } from "@/generated/content-admin-contract";
 import styles from "./editor-workspace.module.css";
@@ -46,6 +47,7 @@ export function EditorBody({
     insert: (value: string) => void;
   } | null>(null);
   const inputs = useRef(new Map<string, CodeEditorHandle>());
+  const [shortcodeTarget, setShortcodeTarget] = useState<string | null>(null);
   const composer = useBlockComposer();
   const [announcement, setAnnouncement] = useState("");
   return (
@@ -79,6 +81,7 @@ export function EditorBody({
             key={block.id}
             block={block}
             index={index}
+            onShortcode={() => setShortcodeTarget(block.id)}
             disabled={locked(block.id)}
             formatDisabled={stagedBlocks.includes(block.id)}
             onFormat={(format) =>
@@ -200,6 +203,31 @@ export function EditorBody({
             );
             if (target)
               mediaTarget.insert(`\n${mediaMarkup(item, target.type)}\n`);
+          }}
+        />
+      )}
+      {shortcodeTarget && (
+        <ShortcodePicker
+          format={
+            value.body.find((block) => block.id === shortcodeTarget)?.type ??
+            "markdown"
+          }
+          media={media}
+          onMedia={onMedia}
+          onClose={() => setShortcodeTarget(null)}
+          onPick={(source) => {
+            const index = value.body.findIndex(
+              (block) => block.id === shortcodeTarget,
+            );
+            if (disabled || index < 0) return;
+            if (
+              composer.insert(
+                value.body[index].type,
+                value.body[index + 1]?.id ?? null,
+                source,
+              )
+            )
+              setAnnouncement("已插入短代码区块");
           }}
         />
       )}

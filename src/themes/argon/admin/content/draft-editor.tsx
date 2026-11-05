@@ -27,6 +27,7 @@ import { FrontendPreviewButton } from "./frontend-preview-button";
 import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 import { CodePreferencesProvider } from "../../components/code-preferences";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
+import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 
 export function DraftEditor({
   type,
@@ -38,6 +39,7 @@ export function DraftEditor({
   const editor = useDraftEditor(type, id);
   const router = useRouter();
   const resources = useEditorResources();
+  const shortcodes = useAppliedShortcodes();
   const uploads = useInlineImageUploads({
     onTransform: editor.transformBlockContent,
     onMedia: resources.remember,
@@ -378,7 +380,11 @@ export function DraftEditor({
                   (!id || editor.detail) && (
                     <div key={mode} className="admin-draft-editor-view">
                       {mode === "preview" ? (
-                        <DraftPreview fields={editor.fields} media={media} />
+                        <DraftPreview
+                          fields={editor.fields}
+                          media={media}
+                          shortcodes={shortcodes}
+                        />
                       ) : Fields ? (
                         <Fields
                           type={type}
@@ -412,6 +418,7 @@ export function DraftEditor({
                       </Button>
                     </header>
                     <DraftPreview
+                      shortcodes={shortcodes}
                       fields={editor.latest}
                       media={editor.latest.media_urls}
                     />

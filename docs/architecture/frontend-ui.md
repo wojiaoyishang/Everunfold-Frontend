@@ -2,7 +2,7 @@
 
 更新：2026-10-31。适用于当前 Next.js App Router 前台；在线 0.1 API/快照保持不变，展示原型另消费后端 0.2.0-preview.1 草案。最新导航检查见 [导航验证](../handoff/frontend-navigation-verification.md)，其余阅读能力见 [说说与阅读工具记录](../handoff/frontend-reader-verification.md)。
 
-2026-11-05方向更新：用户要求去掉旧短代码兼容，改为原生短代码与后台样式库。下文legacy词表是当前代码的历史实现记录，不再作为后续目标；新方案见[短代码设计](shortcodes.md)和[ADR0056](../decisions/0056-native-shortcode-catalog.md)。自定义纯HTML/CSS需经过受控编译与作用域限制，任意脚本仍禁止；本轮只有设计与交互草图，运行代码尚未切换。
+2026-11-05实现更新：旧兼容解析、legacy样式及旧摘要/引用汇总已经移除；下文词表仅为历史记录。当前采用`{{< … >}}`原生语法，目录、受控HTML/CSS、自定义保存/应用、只读代码注册和文章插入已接通，见[短代码架构](shortcodes.md)、[ADR0057](../decisions/0057-native-shortcode-implementation.md)。HTML源码可进入可视化修改，源文保留和边界见[ADR0058](../decisions/0058-preserved-html-visual-editing.md)。
 
 ## 目录与职责
 
@@ -14,7 +14,7 @@ src/core/
   content/                      后端生成类型、快照校验、展示适配/样例、查询/推荐/元信息
   config/                       仅服务端实例配置
   rendering/                    Server 正文渲染、客户端评论的安全 Markdown 元素树
-    shortcodes.ts               展示语法白名单，不执行旧插件
+    native-shortcodes.ts        原生调用渲染，复用后端编译目录，不执行数据库脚本
   browser/                      动效纯策略/订阅、阻尼滚动、页面/锚点历史位置
   navigation/
     targets.ts                  纯 URL / 手势 / 资源导航策略

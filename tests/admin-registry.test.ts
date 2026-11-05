@@ -53,6 +53,7 @@ test("admin modules compose deterministic groups and entries independently of re
       "core.media",
       "core.icons",
       "core.fonts",
+      "core.shortcodes",
     ],
   );
   assert.equal(first.resolve("/admin/example/detail/")?.id, "example.detail");

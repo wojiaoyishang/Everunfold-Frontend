@@ -4,6 +4,10 @@ import { TableKit } from "@tiptap/extension-table";
 import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Image from "@tiptap/extension-image";
+import {
+  preservedHtmlNodes,
+  PreservedHtmlAttributes,
+} from "./preserved-html-extensions";
 import { UPLOAD_SCHEME, uploadPlaceholderImage } from "./upload-placeholders";
 import {
   localFormulaNodes,
@@ -122,6 +126,7 @@ export function richExtensions(
     TableKit.configure({ table: { resizable: false } }),
     RichImage.configure({ inline: inlineImages }),
     RawHtml,
+    ...(!shared ? [PreservedHtmlAttributes, ...preservedHtmlNodes] : []),
     ...(!shared
       ? [...localFormulaNodes, LocalCodeHighlight, LocalCodeOptions]
       : []),

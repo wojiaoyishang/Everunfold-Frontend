@@ -29,8 +29,11 @@ export function ContentPreview({
   const presentation = useMemo(() => {
     if (!detail) return null;
     const content = previewContent(detail, terms);
-    return { content, rendered: renderContent(content) };
-  }, [detail, terms]);
+    return {
+      content,
+      rendered: renderContent(content, site?.settings?.shortcodes),
+    };
+  }, [detail, terms, site?.settings?.shortcodes]);
   const back = `/admin/content/${type}/${id}/edit`;
   if (!site)
     return (

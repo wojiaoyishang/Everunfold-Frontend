@@ -51,11 +51,13 @@ export function BlockFrame({
   onDelete,
   disabled = false,
   formatDisabled,
+  onShortcode,
 }: {
   block: DraftBlock;
   index: number;
   children: (controls: HTMLElement | null) => ReactNode;
   formatDisabled: boolean;
+  onShortcode?: () => void;
   onFormat: (format: "markdown" | "html") => void;
   onDelete: () => void;
   disabled?: boolean;
@@ -88,6 +90,7 @@ export function BlockFrame({
       >
         <BlockHeader
           controlsRef={setControls}
+          onShortcode={onShortcode}
           formatDisabled={formatDisabled}
           block={block}
           index={index}

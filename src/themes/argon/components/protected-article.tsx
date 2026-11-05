@@ -24,7 +24,10 @@ export function ProtectedArticle({
   const access = useProtectedContent(baseUrl, content.id, content.opens_at);
   const [password, setPassword] = useState("");
   const readable = access.content ?? content;
-  const rendered = useMemo(() => renderContent(readable), [readable]);
+  const rendered = useMemo(
+    () => renderContent(readable, site.settings?.shortcodes),
+    [readable, site.settings?.shortcodes],
+  );
   return (
     <>
       <PagePresentation id={content.id} site={site} toc={rendered.toc} />

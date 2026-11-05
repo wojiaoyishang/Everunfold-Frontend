@@ -1,78 +1,35 @@
 .article-content img[role="button"] {
   cursor: zoom-in;
 }
-.article-content .legacy-collapse {
-  border-left: 3px solid var(--block-tone, var(--accent));
-  padding: 0;
-  overflow: clip;
-  background: var(--surface-soft);
+.ef-shortcode {
+  contain: layout paint !important;
+  isolation: isolate;
+  max-width: 100%;
+  margin-block: 1em;
 }
-.legacy-collapse > summary {
-  padding: 12px 18px;
-  color: var(--block-tone, var(--accent));
-  background: var(--accent-soft);
+.ef-gallery {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-.legacy-collapse-body {
-  padding: 18px 22px;
+.ef-gallery-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.legacy-collapse[open] > .legacy-collapse-body {
-  animation: reading-arrive 240ms var(--motion-ease);
+.ef-gallery-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
-.legacy-collapse-body > :last-child {
-  margin-bottom: 0;
+.ef-gallery figure {
+  margin: 0;
+  min-width: 0;
 }
-.legacy-alert {
-  margin: 24px 0;
-  padding: 18px 22px;
-  border-radius: 5px;
-  border-left: 4px solid var(--block-tone, var(--accent));
-  background: var(--accent-soft);
+.ef-gallery img {
+  width: 100%;
+  height: auto;
 }
-.legacy-alert-title {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--block-tone, var(--accent));
-}
-.legacy-alert > :last-child {
-  margin-bottom: 0;
-}
-.tone-green {
-  --block-tone: #2e9d6a;
-}
-.tone-red {
-  --block-tone: #ce566b;
-}
-.tone-orange {
-  --block-tone: #bd7a28;
-}
-.tone-blue {
-  --block-tone: #428bbb;
-}
-.tone-black,
-.tone-grey {
-  --block-tone: var(--text);
-}
-.legacy-tooltip {
-  position: relative;
-  border-bottom: 1px dashed var(--accent);
-  cursor: help;
-}
-.legacy-tooltip:focus-visible::after,
-.legacy-tooltip:hover::after {
-  content: attr(title);
-  position: absolute;
-  z-index: 2;
-  left: 0;
-  bottom: calc(100% + 8px);
-  width: max-content;
-  max-width: min(240px, 65vw);
-  padding: 7px 12px;
-  border-radius: 5px;
-  background: #30283e;
-  color: #fff;
-  box-shadow: var(--shadow);
-  font: 12px/1.7 sans-serif;
-  animation: reading-arrive 180ms ease;
+@media (max-width: 600px) {
+  .ef-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .image-viewer {
   border: 0;

@@ -579,3 +579,27 @@ ADR0055：共享源码标记分色与浅深色变量、围栏按语言加载；�
 | `docs/architecture/frontend-ui.md` | `67bdda2100be1450b333ca39b15703444ac17e44051151b64a31d7d092852e2a` |
 | `docs/design/shortcode-catalog-proposal.jpg` | `d22df5381873f5ca0d60359ed7c78d834a771ab765d761319cdb08ba1ee95f95` |
 | `docs/design/shortcode-editor-proposal.jpg` | `56a0c20bbd98f7c13d9aa75f09e9115ada5d244ba529aaf8fe4bd4cc2402c414` |
+
+## 2026-11-05 原生短代码与HTML可视化实施
+
+同步shortcodes-2、bootstrap-7、ADR0057/0058、当前索引/验收与实页截图。原生语法按用户样例实施；旧兼容移除，HTML可视化修改保留源文；settings1.9.0、显式0016和对应真实P0已接通。两份原始基线附件及实际容器地址不变，不把本机入口写入共享文档。STATUS仍各仓库独立维护。
+
+| 共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `8a7c4dc932deb892bd840554bced8eb03f4af522713fd6110ffaf12d33c9a6e8` |
+| `docs/architecture/constraints.md` | `98a3342d0112589d37755b10c19efbe4387d547ca35247828b649d2f53bac3e9` |
+| `docs/architecture/frontend-ui.md` | `4339eee716931bf7568a634639132f727dc76238d8d8da47f2d28b9c320a3e0d` |
+| `docs/architecture/shortcodes.md` | `6aed495639254ac7b43daceada8f9dc097c6ad9d96768202dd63426dc65d8956` |
+| `docs/decisions/0056-native-shortcode-catalog.md` | `f9fcaa785c0ec2dde8f2194252bd9ed5652c7ed79f6351fe3ed3252754080f7e` |
+| `docs/decisions/0057-native-shortcode-implementation.md` | `f0ef20340044d0728d6d755c02097c9e819ba525d80d72bbff029e81ec579220` |
+| `docs/decisions/0058-preserved-html-visual-editing.md` | `0625a75f489e98737f5a11cb83b6d61d6c51df4c9adbae1d38ebef4a52694cd1` |
+| `docs/handoff/native-shortcodes-verification.md` | `ae53beebf41fe11418829b90e7d4a246e35806eaca6cb1979a79b23316fe15da` |
+| `docs/design/html-visual-source.jpg` | `479d6fdb723a15d41e169166ae568bed47f5cc159087c99b3f24e42542c0948c` |
+| `docs/design/html-visual-narrow.jpg` | `061dc72c1c0e0dee3f6adbb93ebb8ce2eaab0e156e3218bc7f5001ecdabec8a9` |
+| `docs/design/html-visual-persisted.jpg` | `99e1f348723d6c637ea38540387fb7e7e2270f9518eb1e10f4fb22265e220048` |
+| `docs/design/shortcodes-catalog.jpg` | `d877d9c35e743100f27872eb4f4b97089cf6cf6a15d36d4efcc98832a1b62c3d` |
+| `docs/design/shortcodes-editor.jpg` | `955c0915330b7014a130ddbb43af5909f8e0a983e2aaaab8f28cdaaaa128f7e0` |
+| `docs/design/shortcodes-narrow.jpg` | `d78c83083dc59c678403a21d6180ff97d02167af029cb8031291abbbf2fc8ddb` |
+| `docs/design/shortcodes-dark.jpg` | `c483de8ea96c838b471cb09fa33ed4e3ebf1eda625ae05fe55dea9ecc5e56012` |
+| `docs/design/shortcodes-article-preview.jpg` | `c10cc46dd98a0c0e0e8e193ebf89f2b11d29a8037cd7f50badccead3cd188c93` |
+| `docs/design/shortcodes-picker-narrow.jpg` | `918d22dc0de1d78520ee3d5ed66b40e3bb65e7aacee459d66b607c1763bee7aa` |

@@ -9,6 +9,14 @@ export const builtinAdminModule = {
   ],
   pages: [
     {
+      id: "core.shortcodes",
+      href: "/admin/shortcodes",
+      label: "短代码库",
+      description: "预览和管理原生短代码模板",
+      icon: "extension",
+      menu: { group: "core.workspace", order: 37 },
+    },
+    {
       id: "core.fonts",
       href: "/admin/fonts",
       label: "字体库",

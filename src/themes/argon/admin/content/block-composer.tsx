@@ -21,7 +21,11 @@ type Composer = {
   setTab: (tab: "blocks" | "settings") => void;
   anchor: string | null;
   choose: (before: string | null) => void;
-  insert: (format: DraftBlock["type"], before?: string | null) => boolean;
+  insert: (
+    format: DraftBlock["type"],
+    before?: string | null,
+    content?: string,
+  ) => boolean;
   move: (id: string, before: string | null) => void;
   focus: React.RefObject<string | null>;
   moved: string | null;
@@ -67,11 +71,15 @@ export function BlockComposer({
     if (commandValue.kind === "insert") focus.current = id;
     return true;
   };
-  const insert = (format: DraftBlock["type"], before = anchor) => {
+  const insert = (
+    format: DraftBlock["type"],
+    before = anchor,
+    content = "",
+  ) => {
     if (!blockEditors.get(format ?? "markdown")) return false;
     return finish({
       kind: "insert",
-      block: { id: randomUUID(), type: format, content: "" },
+      block: { id: randomUUID(), type: format, content },
       before,
     });
   };

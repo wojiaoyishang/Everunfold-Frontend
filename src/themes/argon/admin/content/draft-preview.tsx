@@ -2,25 +2,31 @@ import { useMemo } from "react";
 import { renderContent } from "@/core/rendering/content";
 import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
 import { ContentMarkup } from "../../components/content-markup";
+import type { PublicShortcode } from "@/generated/settings-contract";
 
 export function DraftPreview({
   fields,
   media = {},
+  shortcodes = [],
 }: {
   fields: DraftFields;
   media?: Record<string, MediaURL>;
+  shortcodes?: readonly PublicShortcode[];
 }) {
   const rendered = useMemo(
     () =>
-      renderContent({
-        id: "draft-preview",
-        content: fields.body.map((block) => ({
-          ...block,
-          type: block.type ?? "markdown",
-        })),
-        media_urls: media,
-      }),
-    [fields.body, media],
+      renderContent(
+        {
+          id: "draft-preview",
+          content: fields.body.map((block) => ({
+            ...block,
+            type: block.type ?? "markdown",
+          })),
+          media_urls: media,
+        },
+        shortcodes,
+      ),
+    [fields.body, media, shortcodes],
   );
   return (
     <article className="admin-draft-preview">

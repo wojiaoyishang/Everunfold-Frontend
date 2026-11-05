@@ -4,7 +4,7 @@ import type { ReadableContent } from "@/core/content/types";
 import { resourceUrl, taxonomyHref } from "@/core/content/urls";
 import { Icon } from "./icon";
 import { PostMeta } from "./post-meta";
-import { presentationExcerpt } from "@/core/rendering/shortcodes";
+import { shortcodeExcerpt } from "@/core/rendering/native-shortcodes";
 
 export function PostCard({ content }: { content: ReadableContent }) {
   const cover = resourceUrl(content.cover_url);
@@ -40,7 +40,7 @@ export function PostCard({ content }: { content: ReadableContent }) {
       )}
       <div className="post-card-body">
         {!cover && <header>{heading}</header>}
-        <p className="post-excerpt">{presentationExcerpt(content.excerpt)}</p>
+        <p className="post-excerpt">{shortcodeExcerpt(content.excerpt)}</p>
         <div className="post-card-footer">
           <div className="post-tags">
             <Icon name="tag" />

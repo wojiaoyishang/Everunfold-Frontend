@@ -1,5 +1,6 @@
 import type { JSONContent } from "@tiptap/core";
 import { sourceDocument } from "./rich-text";
+import { preservedHtmlDocument } from "./preserved-html";
 
 const containers = new Set([
   "doc",
@@ -11,6 +12,7 @@ const containers = new Set([
   "tableRow",
   "tableHeader",
   "tableCell",
+  "htmlContainer",
 ]);
 
 /** Adapt HTML's inline cell/list content to the visual schema without rewriting its source. */
@@ -27,9 +29,14 @@ export function normalizeVisualDocument(
     );
   if (
     content &&
-    ["listItem", "tableCell", "tableHeader", "blockquote"].includes(
-      node.type ?? "",
-    )
+    [
+      "doc",
+      "htmlContainer",
+      "listItem",
+      "tableCell",
+      "tableHeader",
+      "blockquote",
+    ].includes(node.type ?? "")
   ) {
     const blocks: JSONContent[] = [];
     let inline: JSONContent[] = [];
@@ -39,7 +46,13 @@ export function normalizeVisualDocument(
     };
     for (const child of content) {
       if (
-        ["text", "hardBreak", "inlineMath"].includes(child.type ?? "") ||
+        [
+          "text",
+          "hardBreak",
+          "inlineMath",
+          "htmlInline",
+          "htmlOpaque",
+        ].includes(child.type ?? "") ||
         (inlineImages && child.type === "image")
       )
         inline.push(child);
@@ -53,14 +66,25 @@ export function normalizeVisualDocument(
   }
   if (
     !content?.length &&
-    ["listItem", "tableCell", "tableHeader", "blockquote"].includes(
-      node.type ?? "",
-    )
+    [
+      "doc",
+      "htmlContainer",
+      "listItem",
+      "tableCell",
+      "tableHeader",
+      "blockquote",
+    ].includes(node.type ?? "")
   )
     content = [{ type: "paragraph" }];
   return content ? { ...node, content } : node;
 }
 
 export function htmlRichSource(source: string, inlineImages = false) {
-  return normalizeVisualDocument(sourceDocument(source, true), inlineImages);
+  const strict = sourceDocument(source, true);
+  return normalizeVisualDocument(
+    strict.content?.[0]?.type === "rawHtml"
+      ? preservedHtmlDocument(source)
+      : strict,
+    inlineImages,
+  );
 }

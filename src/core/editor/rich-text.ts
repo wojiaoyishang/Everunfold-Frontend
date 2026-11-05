@@ -287,10 +287,30 @@ export function renderRichNode(node: JSONContent): string {
   if (type === "text") {
     let result = escapeText(node.text);
     for (const mark of [...(node.marks ?? [])]
-      .sort((a, b) => a.type.localeCompare(b.type, "en"))
+      .sort((a, b) =>
+        a.type === b.type
+          ? 0
+          : a.type === "preservedInline"
+            ? -1
+            : b.type === "preservedInline"
+              ? 1
+              : a.type.localeCompare(b.type, "en"),
+      )
       .reverse()) {
       const props = mark.attrs ?? {},
-        attributes: Record<string, unknown> = {};
+        attributes: Record<string, unknown> = { ...props.sourceAttrs };
+      if (mark.type === "preservedInline") {
+        const shells = props.shells as {
+          tag: string;
+          sourceAttrs: Record<string, string>;
+        }[];
+        for (const shell of [...shells].reverse()) {
+          if (!/^[a-z][a-z0-9-]*$/.test(shell.tag))
+            throw new Error("HTML 标签");
+          result = `<${shell.tag}${attrsHtml(shell.sourceAttrs)}>${result}</${shell.tag}>`;
+        }
+        continue;
+      }
       const tag = (
         {
           bold: "strong",
@@ -337,11 +357,17 @@ export function renderRichNode(node: JSONContent): string {
     }
     return result;
   }
-  if (type === "rawHtml") return String(attrs.html ?? "");
+  if (type === "rawHtml" || type === "htmlOpaque")
+    return String(attrs.html ?? "");
   if (type === "inlineMath" || type === "blockMath")
     return formulaHtml(String(attrs.latex ?? ""), type === "blockMath");
   const content = (node.content ?? []).map(renderRichNode).join("");
   if (type === "doc") return content;
+  if (["htmlContainer", "htmlTextblock", "htmlInline"].includes(type)) {
+    const tag = String(attrs.tag ?? "div");
+    if (!/^[a-z][a-z0-9-]*$/.test(tag)) throw new Error("HTML 标签");
+    return `<${tag}${attrsHtml(attrs.sourceAttrs ?? {})}>${content}</${tag}>`;
+  }
   if (type === "codeBlock")
     return Object.keys(
       parseCodeOptions(JSON.stringify(attrs.codeOptions ?? {})),
@@ -357,11 +383,16 @@ export function renderRichNode(node: JSONContent): string {
       ? `h${attrs.level ?? 2}`
       : Object.entries(tags).find(([, v]) => v === type)?.[0];
   if (!tag) throw new Error("未知正文结构");
-  const values: Record<string, unknown> = {};
+  const values: Record<string, unknown> = { ...attrs.sourceAttrs };
   if (attrs.textAlign) {
     if (!["left", "center", "right", "justify"].includes(attrs.textAlign))
       throw new Error("段落对齐");
-    values.style = "text-align:" + attrs.textAlign;
+    values.style = [
+      String(values.style ?? "").replace(/(?:^|;)\s*text-align\s*:[^;]*/gi, ""),
+      "text-align:" + attrs.textAlign,
+    ]
+      .filter(Boolean)
+      .join(";");
   }
   for (const key of [
     "start",

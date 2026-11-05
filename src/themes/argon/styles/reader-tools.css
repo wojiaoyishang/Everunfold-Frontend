@@ -266,22 +266,6 @@
   display: block;
   margin: 20px auto 0;
 }
-.reader-reference {
-  font-size: 0.75em;
-  vertical-align: super;
-  margin: 0 3px;
-}
-.reader-references {
-  border-top: 1px solid var(--line);
-  margin-top: 28px;
-  padding-top: 16px;
-  color: var(--muted);
-  font-size: 13px;
-}
-.reader-references li {
-  scroll-margin-top: 100px;
-  padding: 4px 0;
-}
 @media (max-width: 600px) {
   .enhanced-viewer {
     padding: 12px 8px;
