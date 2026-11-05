@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-7，2026-11-05（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经实现。
+版本：bootstrap-8，2026-11-05（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经实现。
 
 ## 已确认的范围
 
@@ -87,3 +87,9 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 ## 协同试用实施更新（2026-11-02）
 
 Markdown/HTML 编译插件、整篇共享文档、PostgreSQL 持久确认、State Vector 恢复、Redis 通知/临时光标、多标签页 IndexedDB 合并、截点保存/发布与会话失效导出已实施。实际结构及未实现的压缩/GC、细粒度 ACL、富文本/跨块选区见 [协同架构](collaborative-editing.md)；以 [验收](../handoff/collaborative-editing-verification.md) 为检查依据，不能把试用当作完整生产协同。
+
+## 编辑交互与修订同步更新（2026-11-05）
+
+用户确认短代码在工具栏进行区块内插入、Markdown视频使用`![](){type=video}`、HTML支持文字颜色，视图切换定位到当前光标，区块标题在本块范围内吸顶。按[ADR0059](../decisions/0059-editor-inline-insertion-and-sticky-blocks.md)实施；这些是本地源文投影，不扩大共享rich Schema。
+
+[ADR0060](../decisions/0060-collaborative-draft-revision-refresh.md)接入已有修订通知，避免正文已同步但保存仍用旧修订；授权读取更新基线，未保存正文和私有策略改动保持。服务端版本/指纹/租约守卫继续执行，不以强制保存消除真实冲突。

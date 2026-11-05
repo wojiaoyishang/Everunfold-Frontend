@@ -603,3 +603,22 @@ ADR0055：共享源码标记分色与浅深色变量、围栏按语言加载；�
 | `docs/design/shortcodes-dark.jpg` | `c483de8ea96c838b471cb09fa33ed4e3ebf1eda625ae05fe55dea9ecc5e56012` |
 | `docs/design/shortcodes-article-preview.jpg` | `c10cc46dd98a0c0e0e8e193ebf89f2b11d29a8037cd7f50badccead3cd188c93` |
 | `docs/design/shortcodes-picker-narrow.jpg` | `918d22dc0de1d78520ee3d5ed66b40e3bb65e7aacee459d66b607c1763bee7aa` |
+
+## 2026-11-05 区块内编辑工具与保存修订同步
+
+同步shortcodes-3、editor-plugins-14、bootstrap-8、ADR0059/0060、当前索引/验收和5张自建内容截图。短代码区块内插入、视频/文字颜色、光标定位/吸顶，以及修订通知和最低同步截点已实现；沿原源文/授权/媒体与共享Schema，未增加契约字段或迁移。两份原始基线保持，实际设备IP/URL不写入交接；STATUS分别维护。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `2dbc964727c174f87ede1016a908997b6817fe1d35a066ee698f2cfdc6edc55f` |
+| `docs/architecture/constraints.md` | `1d75b27fd211e79f27d6b36f0722415d064111e97917fbd92c2eb0311a2a81b4` |
+| `docs/architecture/shortcodes.md` | `f83c5699513430da7c6332a939a35b44deddf1a5acaa745e46798d899a6b05e1` |
+| `docs/development/editor-plugins.md` | `70f1a6faa60ae5b5660c9e58f582b551ba3136d939125c68112ddc1b95b212d3` |
+| `docs/decisions/0059-editor-inline-insertion-and-sticky-blocks.md` | `097de4384efbcafa3fd0f7004fa4016ea66e42e669a4f02c20b36884a1fef9ca` |
+| `docs/decisions/0060-collaborative-draft-revision-refresh.md` | `ab18b2260fab17503e0ecfdcc7025fb080e00dea4d7f4529b8eab80afa0cca55` |
+| `docs/handoff/editor-inline-tools-verification.md` | `8db02eb6a97e204d5c602c06824c2101c7679c9e963edb8ff414c62de5a47642` |
+| `docs/design/editor-toolbar-desktop.jpg` | `0061f02207dc000d9a64f3a9c4c4ee69141181af5d9b0e0775b98ff95f71ddaa` |
+| `docs/design/editor-color-narrow.jpg` | `01edbc6be2eaea80d0b0f7b0cb08ae27f746a06f1de61f8b486dd77f49d8c7c4` |
+| `docs/design/editor-sticky-narrow.jpg` | `eb06d394867c9a4037ee49be89a9b86b6f920452fd867b896627b0c562f3b990` |
+| `docs/design/editor-color-dark.jpg` | `1ec784e19ad27575e9d842630de31b524f148ae611e886a95e841d4451c8d62c` |
+| `docs/design/editor-conflict-aligned.jpg` | `80c6b9d44366c42850e5ab8a9daaf7e4ca7d866cc78a84775614faf8b9c5a211` |

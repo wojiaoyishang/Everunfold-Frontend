@@ -1,6 +1,6 @@
 # 原生短代码与后台短代码库
 
-版本：shortcodes-2，2026-11-05（Asia/Shanghai）。用户已确认下面的原生语法、去掉旧兼容及自定义HTML可视化编辑。实现决定见[ADR0057](../decisions/0057-native-shortcode-implementation.md)、[HTML编辑决定](../decisions/0058-preserved-html-visual-editing.md)，实际检查与限制见[验收记录](../handoff/native-shortcodes-verification.md)。ADR0056与两张proposal图片仅保留上一轮设计历史。
+版本：shortcodes-3，2026-11-05（Asia/Shanghai）。用户已确认下面的原生语法、去掉旧兼容及自定义HTML可视化编辑。实现决定见[ADR0057](../decisions/0057-native-shortcode-implementation.md)、[HTML编辑决定](../decisions/0058-preserved-html-visual-editing.md)，实际检查与限制见[验收记录](../handoff/native-shortcodes-verification.md)。ADR0056与两张proposal图片仅保留上一轮设计历史。
 
 ## 调用协议
 
@@ -35,7 +35,7 @@
 
 当前注册项：后端notice提示框、accordion折叠内容；前端gallery图片画廊；管理员可创建自定义HTML/CSS模板。画廊样式库无图片时显示明确的样式示例；文章插入时从现有媒体库选择真实图片，调用保留`site://media/UUID`引用。多个图片引用用英文逗号分隔，复用原上传队列、媒体解析和删除保护。
 
-文章/说说每个区块头部都有“插入短代码”。选择项与参数来自同一目录，只提供未归档、已有应用版本的定义；自定义有未应用修改时插入器仍使用其已应用定义。确认后添加到当前区块后面，类型沿用当前Markdown/HTML；这是普通稳定ID正文块，源文保存原生调用，不保存展开DOM，也不创建短代码专用Y.Doc。
+文章/说说的Markdown/HTML工具栏提供“插入短代码”，源码与可视化模式均可用；区块标题栏不再放置该按钮。选择项与参数来自同一目录，只提供未归档、已有应用版本的定义；自定义有未应用修改时插入器仍使用其已应用定义。确认后在当前区块的光标/选区中插入，保持区块ID和数量，源文保存原生调用，不保存展开DOM，也不创建短代码专用Y.Doc。本地可视化用调用原文原子保留分隔符，周围文字继续可编辑；参数和调用正文在源码中修改。见[ADR0059](../decisions/0059-editor-inline-insertion-and-sticky-blocks.md)。
 
 实页截图：[画廊](../design/shortcodes-catalog.jpg)、[模板编辑](../design/shortcodes-editor.jpg)、[窄屏](../design/shortcodes-narrow.jpg)、[深色](../design/shortcodes-dark.jpg)、[文章预览](../design/shortcodes-article-preview.jpg)、[窄屏插入](../design/shortcodes-picker-narrow.jpg)。
 

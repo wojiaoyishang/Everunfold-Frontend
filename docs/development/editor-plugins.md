@@ -1,6 +1,6 @@
 # 编辑器开发与试用
 
-版本：editor-plugins-13，2026-11-04。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
+版本：editor-plugins-14，2026-11-05（Asia/Shanghai）。使用 [协同架构](../architecture/collaborative-editing.md)、[ADR 0037](../decisions/0037-plugin-editors-and-collaborative-drafts.md) 与 [ADR 0038](../decisions/0038-source-editor-interactions-and-shortcuts.md)，不另维护业务 Schema。
 
 当前共享[公式编辑器与全局吐司](formula-editor-and-toasts.md)提供结构化数学输入、LaTeX 源码、模板/键盘及逐文件上传通知。编辑页“正文预览”保留本页检查；“前台预览”读取已保存草稿，有修改/新建时显示“保存并预览”，复用原保存后在独立私有页呈现正式主题，支持刷新/返回。它不会发布内容或写入公开缓存，见[ADR0051](../decisions/0051-private-frontend-content-preview.md)及[验收](../handoff/content-frontend-preview-verification.md)。
 
@@ -8,13 +8,13 @@
 
 代码块窗口复用单栏 CodeMirror、按需语言和共享查找替换；Markdown/HTML共用片段参数、阅读框及theme.code默认值。四个整篇操作按钮按紧凑尺寸显示，详情见[代码块指南](code-blocks.md)和[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)。
 
-1. 后端执行 uv sync --locked，再显式 uv run python init.database.py --config config.toml。迁移 head 为 0015_rich_source_leases，启动服务不会自动迁移。
+1. 后端执行 uv sync --locked，再显式 uv run python init.database.py --config config.toml。迁移 head 为 0016_native_shortcodes，启动服务不会自动迁移。
 2. 本地后端：uv run uvicorn app.entrypoints.api:create_app --factory --host 127.0.0.1 --port 8001 --no-proxy-headers --ws-max-size 1500000。部署需支持 WS 升级并配置实际前端 Origin；不使用查询参数 Token。
 3. 前端 npm ci --ignore-scripts、npm run dev，保留 3000。动态加载两种编辑器；新建内容先保存一次取得稳定 ID，再进入共享草稿。
 4. 本轮新增库/协议后，旧开发标签页手动刷新一次。系统没有添加循环刷新或自动硬跳转。
 5. 同一文章打开两页，分别输入 Markdown/HTML，保存前各自保留正文。保存后另一页接收共享结果，自己的未保存输入继续保留。同块旧基线再次保存应提示冲突。在线状态和共享属性/结构仍使用 Y.Doc。
 6. 正文在已授权页面内按标签页暂存，保存需要后端可用并确认共享截点。sessionStorage 支持同一标签页重载恢复，JSON 导出保留正文和已移除块。原 IndexedDB 更新/outbox 的故障验收仍用于共享属性及结构。
-7. 保存草稿产生完整修订；发布才影响前台。另一编辑者改了已保存修订时仍通过 expected_revision 拦截，查看最新版本只合并业务策略，不用旧 JSON 替换 Y.Doc。
+7. 保存草稿产生完整修订；发布才影响前台。编辑页接收修订通知后授权重读，单调刷新保存基线，继续投影当前Y.Doc并保留本地正文；私有访问设置的本地修改仍须人工对照，同块源文指纹冲突仍拦截。见[ADR0060](../decisions/0060-collaborative-draft-revision-refresh.md)。
 
 本机留有未发布的「协同编辑试用」，ID 94b76ebe-94f8-4f72-ac87-c9f14234abd8；链接 /admin/content/article/94b76ebe-94f8-4f72-ac87-c9f14234abd8/edit。它是可删除的开发草稿，不是初始化固定数据，也不写入 seed 或前台。
 
@@ -80,3 +80,11 @@ Markdown 和 HTML 均以原始字符串为底稿，切换视图直接同步本�
 编辑面以本地或doc.guid+blockId绑定为生命周期边界；不要仅用useEditor依赖变化销毁旧引擎，再让同轮其他效果/快捷句柄访问它。除isDestroyed外必须确认extensionManager仍有效，延迟插入需重新检查。销毁与重挂不能销毁宿主UndoManager，也不能重置Y.Doc。
 
 新增编辑引擎时用真实结构编辑验证其Yjs辅助数据；当前只额外接受已严格校验的__tiptap_position_migrations:item命名空间，不能让插件向任意根写业务/权限数据。兼容问题不得以删除缓存或ACK未提交更新处理。具体边界和回归见[ADR0043](../decisions/0043-rich-editor-lifetime-and-position-history.md)及[验收](../handoff/editor-lifecycle-fix-verification.md)。
+
+## 区块内插入与视图定位（2026-11-05）
+
+- 短代码按钮位于两种格式的源码/可视化工具栏，替换当前选区或在光标处插入，不新增区块。可视化中的调用原子保留完整源文；已应用定义/参数/预览复用原短代码库。
+- 视频按钮筛选视频媒体。Markdown保存`![](site://media/UUID){type=video}`（URL也可用尖括号包围），HTML保存video标签；两种可视化均可插入、显示播放器，私有预览和正式阅读沿同一解析。代码示例和转义不触发视频。
+- HTML文字颜色支持常用色、自定义六位十六进制与可视化恢复默认；源码入口包裹所选文字。颜色保留在HTML源文和安全阅读样式中。
+- HTML切换保留文本光标/选区，新高度稳定后即时定位并避让导航/区块栏。标题栏在本块范围内固定，距实测导航底部8px；窄屏考虑预览操作第二行。跨视图撤销仍分开。
+- 保存/协同仍用原block_sources、截点、源文指纹和租约；本地短代码/视频节点不加入共享Schema。具体决定见[ADR0059](../decisions/0059-editor-inline-insertion-and-sticky-blocks.md)，检查见[验收](../handoff/editor-inline-tools-verification.md)。

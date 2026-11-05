@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+[编辑器工具栏、视频、HTML颜色和滚动定位](decisions/0059-editor-inline-insertion-and-sticky-blocks.md)、[保存修订同步修复](decisions/0060-collaborative-draft-revision-refresh.md)及[本轮验收](handoff/editor-inline-tools-verification.md)：短代码在当前区块插入，视频使用原生Markdown扩展，切换保留光标，标题栏避让导航吸顶；接入协同修订通知并保留真实冲突守卫。
+
 [原生短代码与后台短代码库](architecture/shortcodes.md)、[ADR0057](decisions/0057-native-shortcode-implementation.md)及[验收](handoff/native-shortcodes-verification.md)：采用`{{< … >}}`原生调用，已移除旧兼容，支持真实模板草稿/应用、代码注册项只读与文章插入。[ADR0058](decisions/0058-preserved-html-visual-editing.md)记录源码HTML的可视化修改与源文保留。
 
 [本容器临时连通性验收](handoff/remote-address-verification.md)：登录、媒体、投递和协同WS通过；只记录本次容器测试，不约定长期部署地址。[运行说明4](development/container-deployment.md)保留通用步骤，实际IP与临时URL仅在本地忽略配置中维护。
