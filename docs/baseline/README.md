@@ -722,3 +722,24 @@ multilingual-design-1及ADR0065记录本轮首批zh-CN/en选择、旧约定和�
 | `docs/README.md` | `19212bbe4ab3838d58b467d6fe6b502f465b05108b02a5307869eeaf02cbf6ce` |
 | `docs/architecture/multilingual-content.md` | `dc4f3cfd5d4f23c707052cd7f8e3f2d3b40eb0acd59fea7084178775ceed6a3e` |
 | `docs/decisions/0065-multilingual-content-entry-design.md` | `341095d5489fa16fe4a0b58ca92d13a259ddac46421c8a9adda6c708ba6586ec` |
+
+## 可配置多语言、原文合并列表与选择器（2026-11-06）
+
+ADR0066替代0065历史提案，multilingual-runtime-2、content-management-7、settings-runtime-9与bootstrap-10记录语言目录、默认/中文前缀、标志、独立译文/原文一行入口、公开语言和真实验收。下列当前摘要替代相关旧记录；原始附件不变，STATUS分别维护，不写实际设备地址或凭据。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `66430a37b14e1ef21509954f7b1ed1737a43c2a76616fa9af30c02d5b0be0714` |
+| `docs/architecture/constraints.md` | `f7d13d4ec62e975f29fa028dc31269d4ba6831b66a6ffe58c7c7840d479eeeb0` |
+| `docs/architecture/multilingual-content.md` | `da3377d9366b3360d16293d8d3bf08fab9589f5f9626c8cc7a3a06c4649cb908` |
+| `docs/development/content-management.md` | `0db41c9c5b48df35ddaf9eb284fc25051970fa2ba6566e1fa381361c5af1e72d` |
+| `docs/development/settings.md` | `c20d7133e9e90c0825be1de262886ec925900e02f6c571d3526774872ab1729f` |
+| `docs/decisions/0065-multilingual-content-entry-design.md` | `7e2793cffee7aa5e545d79a27b345a989ae003b55cac5bf019c7fc1c290b80d5` |
+| `docs/decisions/0066-configurable-languages-and-grouped-translations.md` | `f841a8a54f4bd6dd00b0f264c9af1df45aed69b0f88fe7ceefb88e02ba4af0f7` |
+| `docs/handoff/multilingual-verification.md` | `2f862e25e215d54d1b51ecd43af9cf6e77e3a105c0eb0f9aae1238f9e92f2eff` |
+| `docs/design/multilingual-settings-desktop.png` | `4aa4c48f2ad3866c881e4fb69694a49c8ac34135f1ebe857fa4a25a8255cdfd6` |
+| `docs/design/multilingual-settings-700.png` | `5fe31f0645b768d794c0a709420adf06a0abd3b5c87342010ef6650ac0d0248b` |
+| `docs/design/multilingual-flags.png` | `c2295e3ce8e2b0b45bd521c49ee515bd04475f631c9165e2cc0e2519efc689f6` |
+| `docs/design/multilingual-presets.png` | `62bc257de6db50c814473f9045e33943a17ef0acfb82a77c3a6fda7d72817ae4` |
+| `docs/design/multilingual-custom-320.png` | `ce3f7d9ac703625c68e105316212fcefa108faddc6e7ce14b4d96bf53c1b5455` |
+| `docs/design/multilingual-editor.png` | `51c444668125ffa05d5022612f5470888e790e10e74357b31ee3fbc9dfdc4d58` |

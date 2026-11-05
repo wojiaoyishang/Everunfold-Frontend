@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+[可配置多语言与原文合并列表](architecture/multilingual-content.md)、[ADR0066](decisions/0066-configurable-languages-and-grouped-translations.md)及[实际验收](handoff/multilingual-verification.md)：文章/说说独立译文与原文共用一行入口，语言数量可扩展；设置支持默认语言、中文前缀、国旗搜索/自定义及备选/自定义语言。内容语言与程序界面包分离，初始中英文不构成语言上限。
+
 [顶部版本选择与HTML可视化差异](decisions/0062-revision-pairs-and-html-visual-diff.md)、[操作指南](development/draft-versions.md)及[本轮验收](handoff/version-revision-layout-verification.md)：编辑页式顶部双选、左右区块/行内高亮、HTML默认可视化和逐块切换。
 
 [版本对比与离线恢复](development/draft-versions.md)记录最新使用方式；[ADR0061](decisions/0061-cursors-offline-branches-and-version-merges.md)替代旧的正文整篇显式保存阶段，[验收](handoff/cursor-versions-verification.md)记录双窗口、输入法、真实多进程及独立版本页。
@@ -165,4 +167,4 @@
 
 最新设置交付：[桌面分区导航](decisions/0064-desktop-settings-section-navigation.md)、[运行指南](development/settings.md)与[实页验收](handoff/settings-section-navigation-verification.md)：站点/主题/系统设置共用右侧目录、锚点及滚动高亮。
 
-当前设计阶段：[多语言内容与界面入口](architecture/multilingual-content.md)及[ADR0065](decisions/0065-multilingual-content-entry-design.md)：首批简体中文/英文已选择，已复盘独立语言ID、发布与界面语言边界；入口、路径取舍、数据/接口和验收仍是待实施方案，不是多语言功能交付。
+最新多语言交付：[内容与设置指南](architecture/multilingual-content.md)、[ADR0066](decisions/0066-configurable-languages-and-grouped-translations.md)及[验收](handoff/multilingual-verification.md)已替代[ADR0065历史提案](decisions/0065-multilingual-content-entry-design.md)。语言数量可扩展，默认/中文前缀和标志可配置，译文与原文合并列表，前后台切换及独立发布已接通；程序包与内容语言仍分开管理。

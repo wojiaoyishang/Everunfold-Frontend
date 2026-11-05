@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-8，2026-11-05。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md) 与 [ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-9，2026-11-06。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -8,13 +8,15 @@
 
 | 页面 | 已实现 |
 | --- | --- |
-| `/admin/settings` | 站点名称、简介、作者、头像地址、公告；递归导航结构树/父级调整/排序/删除，复用图标库选择；SEO 描述、标题模板、允许索引 |
+| `/admin/settings` | 站点名称、简介、作者、头像地址、公告；语言目录/默认语言/标志/前缀/界面回退；递归导航结构树/父级调整/排序/删除，复用图标库选择；SEO 描述、标题模板、允许索引 |
 | `/admin/icons` | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用 |
 | `/admin/media` | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取 |
 | `/admin/settings/theme` | 默认主题色/显示模式、首页横幅文字、背景图片/视频地址、默认播放；代码深浅配色、行号/折行/折叠、字号/行高/tab-size、代码字体与实际阅读框预览 |
 | `/admin/settings/system` | 按稳定节点 ID 保存动态请求刷新间隔、超时、重试间隔、批处理窗口；查看期望/确认版本、重新同步；部署来源脱敏展示 |
 
-settings契约1.8.0新增theme.code，仍使用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库。旧设置JSON补默认值，无SQL迁移。代码字体只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL；沿既有可靠投递及媒体引用保护处理CDN改址。参数和加载规则见[代码指南](code-blocks.md)。
+当前settings契约1.10.0新增site.language_catalog，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON补默认值，目录字段无需SQL迁移。历史1.8.0的theme.code继续保留，代码字体只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL；沿既有可靠投递及媒体引用保护处理CDN改址。参数和加载规则见[代码指南](code-blocks.md)。
+
+语言分区支持默认语言和中文前缀修改；标志小按钮打开可搜索国旗/自定义标志弹窗，“添加语言”分备选和自定义。只有默认语言可留空前缀，更换默认值不批量修改已有文章地址。已有本语言程序包显示“本语言界面”，只有缺包项选择界面回退。被内容使用的语言不可删除，可禁用；新增语言不自动翻译正文。完整约束见[多语言指南](../architecture/multilingual-content.md)，更改后仍需点击“保存更改”并等待节点确认。
 
 头像/背景图片/背景视频均可从媒体库上传或选择，也可手填地址。小缩略图与输入框同行，点击查看大图/视频；选择后按稳定媒体 ID保存，服务端派生地址，手动改地址会解除关联。见 [媒体指南](media-library.md) 和 [菜单与图标指南](menu-icons.md)。公告分为可选标题和内容（原 notice 字段），保存并同步后显示在首页内容列表上方。无标题时显示内容；超过一行或标题下有正文时可点击「展开更多」原位展开，保留动画并可收起。两项都清空隐藏公告，当前不使用首次弹窗或导航栏公告入口。讨论/注册/邮件/媒体提供器及高级 SEO 尚未实现；正式站点地址仍由 `PUBLIC_SITE_URL` 部署配置确定。标题模板保留一个 `%s` 文章标题，可用 `%site%` 站点名；不允许索引生成页面 robots noindex，后台始终 private/no-store/noindex。
 
@@ -32,7 +34,7 @@ settings契约1.8.0新增theme.code，仍使用PATCH /v1/admin/settings及expect
 | GET/PATCH `/v1/admin/frontend-nodes/{node_id}/cache-policy` | 读取/以 expected_revision 保存该节点策略 |
 | POST `/v1/admin/frontend-nodes/{node_id}/sync` | 重发当前版本；若派生媒体 URL 变化则发布新的公共设置修订 |
 
-公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以 settings 1.6.0 生成契约为准。公共 value 包含 site/theme 与后端派生的 icon_urls；客户端映射不作为保存事实源。Node 内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
+公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以settings1.10.0生成契约为准；被内容使用的语言移除为42292，导航路径冲突为42294。公共value包含site/theme与后端派生的icon_urls；客户端映射不作为保存事实源。Node内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
 
 ## 初次启动与配置
 
