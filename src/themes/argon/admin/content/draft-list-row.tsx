@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type {
   ContentTypeDefinition,
   DraftListItem,
@@ -9,6 +11,7 @@ import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
 import { MediaPreview } from "../media/media-preview";
 import styles from "./draft-list.module.css";
+import { TranslationMenu } from "./translation-menu";
 
 const dateLabel = (value: string) =>
   new Intl.DateTimeFormat("zh-CN", {
@@ -23,7 +26,9 @@ const dateLabel = (value: string) =>
 function Terms({ label, values }: { label: string; values: string[] }) {
   return (
     <div role="cell" className={styles.terms} title={values.join("、")}>
-      <span className={styles.mobileLabel}>{label}</span>
+      <span className={styles.mobileLabel}>
+        <UiText text={label} />
+      </span>
       <span>{values.join("、") || "—"}</span>
     </div>
   );
@@ -71,24 +76,51 @@ export function DraftListRow({
               href={`/admin/content/${type.id}/${item.id}/edit`}
               showPending
             >
-              {item.title || item.preview.slice(0, 60) || "未命名说说"}
+              {item.title || item.preview.slice(0, 60) || (
+                <UiText text="未命名说说" />
+              )}
             </RouteLink>
-            {item.pinned && <span className={styles.badge}>置顶</span>}
-            {item.is_demo && <span className={styles.badge}>示例</span>}
+            {item.pinned && (
+              <span className={styles.badge}>
+                <UiText text="置顶" />
+              </span>
+            )}
+            {item.is_demo && (
+              <span className={styles.badge}>
+                <UiText text="示例" />
+              </span>
+            )}
+            {item.translations?.length ? (
+              <TranslationMenu
+                members={item.translations}
+                type={type.id}
+                current={item.id}
+                original={item.id}
+                disabled={disabled}
+              />
+            ) : null}
           </div>
           <p className={styles.excerpt}>
             {item.excerpt ||
               (item.title ? item.preview : "") ||
-              (type.supports_excerpt ? "还没有填写摘要" : "记录此刻")}
+              (type.supports_excerpt ? (
+                <UiText text="还没有填写摘要" />
+              ) : (
+                <UiText text="记录此刻" />
+              ))}
           </p>
           {item.published_revision &&
             item.published_revision < item.revision && (
-              <small className={styles.unpublished}>有未发布修改</small>
+              <small className={styles.unpublished}>
+                <UiText text="有未发布修改" />
+              </small>
             )}
         </div>
       </div>
       <div role="cell" className={styles.author}>
-        <span className={styles.mobileLabel}>作者</span>
+        <span className={styles.mobileLabel}>
+          <UiText text="作者" />
+        </span>
         {item.author}
       </div>
       <Terms label="分类" values={item.categories ?? []} />
@@ -103,7 +135,9 @@ export function DraftListRow({
         <span>{item.comment_count ?? 0}</span>
       </div>
       <div role="cell" className={styles.date}>
-        <span>{status}</span>
+        <span>
+          <UiText text={status} />
+        </span>
         <time dateTime={date}>{dateLabel(date)}</time>
       </div>
       <div role="cell" className={styles.actions}>
@@ -113,7 +147,7 @@ export function DraftListRow({
             href={`/admin/content/${type.id}/${item.id}/edit`}
             showPending
           >
-            编辑
+            <UiText text="编辑" />
           </RouteLink>
         )}
         <Button

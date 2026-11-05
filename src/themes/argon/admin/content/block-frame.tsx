@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useRef, useState, type ReactNode } from "react";
 import type { DraftBlock } from "@/generated/content-admin-contract";
 import {
@@ -33,7 +35,13 @@ export function BlockPosition({
       data-over={over}
     >
       <span className={styles.dropLine} aria-hidden="true">
-        <span>{source?.kind === "palette" ? "添加区块" : "移到这里"}</span>
+        <span>
+          {source?.kind === "palette" ? (
+            <UiText text="添加区块" />
+          ) : (
+            <UiText text="移到这里" />
+          )}
+        </span>
       </span>
       <BlockLibraryPicker
         before={before}

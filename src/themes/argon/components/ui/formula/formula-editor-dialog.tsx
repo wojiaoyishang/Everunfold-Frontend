@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   formulaGroups,
@@ -253,7 +255,11 @@ export default function FormulaEditorDialog({
                   />
                 </Button>
               ))}
-              {!templates.length && <p>没有匹配的符号</p>}
+              {!templates.length && (
+                <p>
+                  <UiText text="没有匹配的符号" />
+                </p>
+              )}
             </div>
           </div>
           <div className={styles.workspace} data-source={showSource}>
@@ -265,7 +271,9 @@ export default function FormulaEditorDialog({
               }}
             >
               <div className={styles.paneHeading}>
-                <span>可视化</span>
+                <span>
+                  <UiText text="可视化" />
+                </span>
                 <div className={styles.history}>
                   <Button
                     title="撤销公式编辑"
@@ -299,7 +307,7 @@ export default function FormulaEditorDialog({
               />
               {!valid && (
                 <p className={styles.hint}>
-                  源码尚未完成，可视化保留上次有效结果。
+                  <UiText text="源码尚未完成，可视化保留上次有效结果。" />
                 </p>
               )}
               {/\\begin\{(?:[pbvBV]?matrix|cases|aligned|array)\}/.test(
@@ -338,14 +346,16 @@ export default function FormulaEditorDialog({
                 }}
               >
                 <div className={styles.paneHeading}>
-                  <span>LaTeX 源码</span>
+                  <span>
+                    <UiText text="LaTeX 源码" />
+                  </span>
                   <Button
                     title="定位另一视图中的选区"
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={locate}
                   >
                     <Icon name="search" />
-                    定位选区
+                    <UiText text="定位选区" />
                   </Button>
                 </div>
                 <CodeEditor
@@ -367,7 +377,10 @@ export default function FormulaEditorDialog({
             </span>
             {showSource && (
               <span>
-                行 {status.line}，列 {status.column}
+                <UiText text="行" />
+                {status.line}
+                <UiText text="，列" />
+                {status.column}
                 {status.selected ? ` · 已选 ${status.selected} 字符` : ""}
               </span>
             )}
@@ -384,9 +397,11 @@ export default function FormulaEditorDialog({
           )}
         </div>
         <footer className={styles.footer}>
-          <span>Ctrl / ⌘ + Enter 插入</span>
+          <span>
+            <UiText text="Ctrl / ⌘ + Enter 插入" />
+          </span>
           <Button className="admin-button" onClick={() => setClosing(true)}>
-            取消
+            <UiText text="取消" />
           </Button>
           <Button
             className="admin-button admin-button-primary"
@@ -394,7 +409,11 @@ export default function FormulaEditorDialog({
             disabled={!source.trim() || !valid}
           >
             <Icon name="check" />
-            {insertion.initial?.source ? "确认公式" : "插入公式"}
+            {insertion.initial?.source ? (
+              <UiText text="确认公式" />
+            ) : (
+              <UiText text="插入公式" />
+            )}
           </Button>
         </footer>
       </Form>

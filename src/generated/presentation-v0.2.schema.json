@@ -29,6 +29,94 @@
       "title": "ContentBlock",
       "type": "object"
     },
+    "ContentTranslation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "language": {
+          "title": "Language",
+          "type": "string"
+        },
+        "path": {
+          "pattern": "^/",
+          "title": "Path",
+          "type": "string"
+        },
+        "access": {
+          "default": "public",
+          "enum": [
+            "public",
+            "password",
+            "scheduled"
+          ],
+          "title": "Access",
+          "type": "string"
+        },
+        "is_original": {
+          "default": false,
+          "title": "Is Original",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "language",
+        "path"
+      ],
+      "title": "ContentTranslation",
+      "type": "object"
+    },
+    "FontInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "family": {
+          "title": "Family",
+          "type": "string"
+        },
+        "style": {
+          "enum": [
+            "normal",
+            "italic"
+          ],
+          "title": "Style",
+          "type": "string"
+        },
+        "weight_min": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Min",
+          "type": "integer"
+        },
+        "weight_max": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Weight Max",
+          "type": "integer"
+        },
+        "format": {
+          "enum": [
+            "woff2",
+            "woff",
+            "truetype",
+            "opentype"
+          ],
+          "title": "Format",
+          "type": "string"
+        }
+      },
+      "required": [
+        "family",
+        "style",
+        "weight_min",
+        "weight_max",
+        "format"
+      ],
+      "title": "FontInfo",
+      "type": "object"
+    },
     "MediaURL": {
       "additionalProperties": false,
       "properties": {
@@ -40,6 +128,17 @@
           "default": "",
           "title": "Webp",
           "type": "string"
+        },
+        "font": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FontInfo"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -120,6 +219,25 @@
     "language": {
       "title": "Language",
       "type": "string"
+    },
+    "translation_group_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Translation Group Id"
+    },
+    "translations": {
+      "items": {
+        "$ref": "#/$defs/ContentTranslation"
+      },
+      "title": "Translations",
+      "type": "array"
     },
     "published_at": {
       "format": "date-time",

@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { TextLink } from "../../components/ui/primitives";
 import styles from "./section-navigation.module.css";
@@ -88,7 +90,9 @@ export function SettingsLayout({ children }: { children: ReactNode }) {
       <div className={styles.main}>{children}</div>
       {sections.length > 1 && (
         <nav className={styles.navigation} aria-label="设置分区导航">
-          <strong>快速导航</strong>
+          <strong>
+            <UiText text="快速导航" />
+          </strong>
           {sections.map((section) => (
             <TextLink
               key={section.id}

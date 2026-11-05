@@ -1,4 +1,4 @@
-import { readPublicSnapshot } from "@/core/content/snapshot";
+import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { pageNumber } from "@/core/content/query";
 import { Feed } from "@/themes/argon/components/feed";
 export const metadata = { title: "说说", robots: { index: false } };

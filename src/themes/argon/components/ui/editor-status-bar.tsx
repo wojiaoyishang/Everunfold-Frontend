@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
 import styles from "./editor-status-bar.module.css";
@@ -20,7 +22,9 @@ export function EditorStatusBar({
     <div className={styles.bar}>
       <span className={styles.position}>{children}</span>
       <div className={styles.actions}>
-        <small>{count.toLocaleString()} 字符</small>
+        <small>
+          {count.toLocaleString()} <UiText text="字符" />
+        </small>
         {actions}
       </div>
     </div>

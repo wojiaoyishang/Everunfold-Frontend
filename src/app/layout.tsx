@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { headers } from "next/headers";
+import { LocaleProvider } from "@/core/i18n/provider";
+import { localeOf } from "@/core/i18n/locale";
 
 import "./globals.css";
 import "@/themes/argon/shared.css";
@@ -11,12 +14,16 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "Everunfold" };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
+  const request = await headers();
+  const locale = localeOf(request.get("x-everunfold-locale"));
+  const privateUI = request.get("x-everunfold-management") === "true";
   return (
     <html
-      lang="zh-CN"
+      lang={locale}
+      data-ui-locale={locale}
       data-motion="full"
       data-scroll-behavior="smooth"
       suppressHydrationWarning
@@ -26,7 +33,9 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: initializeMotion }} />
       </head>
       <body>
-        <ToastProvider>{children}</ToastProvider>
+        <LocaleProvider initial={locale} privateUI={privateUI}>
+          <ToastProvider>{children}</ToastProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import {
   useEffect,
   useImperativeHandle,
@@ -286,9 +288,11 @@ export function FormulaField({
       <div className={styles.mathfield} ref={host} data-state={state}>
         {state !== "ready" && (
           <p role="status">
-            {state === "loading"
-              ? "正在准备公式编辑器…"
-              : "可视化编辑器未能加载，可继续编辑 LaTeX 源码。"}
+            {state === "loading" ? (
+              <UiText text="正在准备公式编辑器…" />
+            ) : (
+              <UiText text="可视化编辑器未能加载，可继续编辑 LaTeX 源码。" />
+            )}
           </p>
         )}
       </div>

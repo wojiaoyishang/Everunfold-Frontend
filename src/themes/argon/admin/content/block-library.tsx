@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "../../components/ui/primitives";
 import { ActionPopover } from "../../components/ui/action-popover";
@@ -26,11 +28,15 @@ export function BlockLibrary({
   return (
     <div className={styles.library}>
       <div className={styles.libraryHeading}>
-        <strong>区块库</strong>
+        <strong>
+          <UiText text="区块库" />
+        </strong>
         <span>
-          {target < 0
-            ? "请重新选择位置"
-            : `插入到${insertionBefore === null ? "末尾" : `第 ${target + 1} 块之前`}`}
+          {target < 0 ? (
+            <UiText text="请重新选择位置" />
+          ) : (
+            `插入到${insertionBefore === null ? "末尾" : `第 ${target + 1} 块之前`}`
+          )}
         </span>
       </div>
       <div className={styles.cards}>
@@ -45,7 +51,9 @@ export function BlockLibrary({
         ))}
       </div>
       {!compact && (
-        <p className={styles.libraryHelp}>拖到正文插入线，或点击添加。</p>
+        <p className={styles.libraryHelp}>
+          <UiText text="拖到正文插入线，或点击添加。" />
+        </p>
       )}
     </div>
   );
@@ -103,7 +111,9 @@ function LibraryChoice({
         <Icon name={plugin.format === "html" ? "code" : "book"} />
       </span>
       <strong>{plugin.label}</strong>
-      <small>{plugin.description}</small>
+      <small>
+        <UiText text={plugin.description ?? ""} />
+      </small>
       <Icon name="plus" />
     </Button>
   );
@@ -167,12 +177,12 @@ export function ComposerSidebar({
             {tab === "blocks" ? (
               <>
                 <Icon name="grid" />
-                区块
+                <UiText text="区块" />
               </>
             ) : (
               <>
                 <Icon name="settings" />
-                内容设置
+                <UiText text="内容设置" />
               </>
             )}
           </Button>
@@ -228,7 +238,7 @@ export function BlockLibraryPicker({
         triggerContent={
           <>
             <Icon name="plus" />
-            {label === "在此处插入区块" ? null : label}
+            {label === "在此处插入区块" ? null : <UiText text={label} />}
           </>
         }
       >

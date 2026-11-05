@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { randomUUID } from "@/core/browser/crypto";
 import { Button, TextLink } from "@/themes/argon/components/ui/primitives";
 
@@ -119,10 +121,10 @@ export function CommentSection({
           <div>
             <h2 id="comments-title">
               <Icon name="comment" />
-              篝火旁的声音
+              <UiText text="篝火旁的声音" />
             </h2>
             <p>
-              {comments.length} 条历史留言
+              {comments.length} <UiText text="条历史留言" />
               {examples && open ? ` · ${exampleComments.length} 条示例` : ""}
               {local.length ? ` · ${local.length} 条本页留言` : ""}
             </p>
@@ -145,15 +147,17 @@ export function CommentSection({
               }}
             >
               <Icon name="edit" />
-              写留言
+              <UiText text="写留言" />
             </TextLink>
           )}
         </header>
         {open ? (
           <div className="comments-demo-note">
             <span>
-              <span className="preview-badge">效果预览</span>
-              历史留言保留原文，示例人物与对话均为虚构。
+              <span className="preview-badge">
+                <UiText text="效果预览" />
+              </span>
+              <UiText text="历史留言保留原文，示例人物与对话均为虚构。" />
             </span>
             <Button
               type="button"
@@ -163,11 +167,17 @@ export function CommentSection({
                 setRequestedPage(1);
               }}
             >
-              {examples ? "隐藏示例" : "显示示例"}
+              {examples ? (
+                <UiText text="隐藏示例" />
+              ) : (
+                <UiText text="显示示例" />
+              )}
             </Button>
           </div>
         ) : (
-          <p className="comments-demo-note">评论已关闭，已有留言仍可阅读。</p>
+          <p className="comments-demo-note">
+            <UiText text="评论已关闭，已有留言仍可阅读。" />
+          </p>
         )}
         <div className="comment-view-options" aria-label="留言浏览方式">
           <Button
@@ -179,7 +189,7 @@ export function CommentSection({
               setTarget(null);
             }}
           >
-            分页阅读
+            <UiText text="分页阅读" />
           </Button>
           <Button
             type="button"
@@ -190,7 +200,7 @@ export function CommentSection({
               setTarget(null);
             }}
           >
-            连续阅读
+            <UiText text="连续阅读" />
           </Button>
         </div>
         <ol className="comment-list">
@@ -225,7 +235,9 @@ export function CommentSection({
         {!shown.length && (
           <div className="comment-empty">
             <Icon name="campfire" />
-            <p>这里还很安静，等你来添一束光。</p>
+            <p>
+              <UiText text="这里还很安静，等你来添一束光。" />
+            </p>
           </div>
         )}
         {continuous && page < pages && (
@@ -237,7 +249,8 @@ export function CommentSection({
               setTarget(null);
             }}
           >
-            再看看更多留言 · {entries.length - shown.length} 条
+            <UiText text="再看看更多留言 ·" />
+            {entries.length - shown.length} <UiText text="条" />
           </Button>
         )}
         {!continuous && pages > 1 && (
@@ -250,10 +263,11 @@ export function CommentSection({
                 setTarget({ id: "comments" });
               }}
             >
-              上一页
+              <UiText text="上一页" />
             </Button>
             <span>
-              第 {page} / {pages} 页
+              <UiText text="第" />
+              {page} / {pages} <UiText text="页" />
             </span>
             <Button
               type="button"
@@ -263,7 +277,7 @@ export function CommentSection({
                 setTarget({ id: "comments" });
               }}
             >
-              下一页
+              <UiText text="下一页" />
             </Button>
           </nav>
         )}

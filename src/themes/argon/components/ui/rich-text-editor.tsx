@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import {
   useEffect,
   useImperativeHandle,
@@ -557,7 +559,7 @@ export function RichTextEditor({
       {afterToolbar}
       {problem && (
         <p className={styles.sourceWarning} role="alert">
-          这次排版无法保留现有源码，请在源码视图中修改。
+          <UiText text="这次排版无法保留现有源码，请在源码视图中修改。" />
         </p>
       )}
       <EditorContent

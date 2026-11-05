@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import type { ReadableContent } from "@/core/content/types";
 import { displayDate } from "@/core/content/query";
 import { taxonomyHref } from "@/core/content/urls";
@@ -33,12 +34,16 @@ export function PostMeta({
       {locked ? (
         <span>
           <Icon name={content.opens_at ? "clock" : "lock"} />
-          {content.opens_at ? "定时开放" : "密码保护"}
+          {content.opens_at ? (
+            <UiText text="定时开放" />
+          ) : (
+            <UiText text="密码保护" />
+          )}
         </span>
       ) : article ? (
         <span>
           <Icon name="book" />
-          {content.word_count.toLocaleString("zh-CN")} 字
+          {content.word_count.toLocaleString("zh-CN")} <UiText text="字" />
         </span>
       ) : (
         content.categories.slice(0, 2).map((category) => (
@@ -51,7 +56,7 @@ export function PostMeta({
       {!locked && (
         <span>
           <Icon name="clock" />
-          {content.reading_minutes} 分钟
+          {content.reading_minutes} <UiText text="分钟" />
         </span>
       )}
       {interactive &&

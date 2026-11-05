@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useId, useRef, useState } from "react";
 import type { ContentFeatureValue } from "@/core/editor/content-feature-source";
 import {
@@ -92,7 +94,7 @@ export default function CodeEditorDialog({
           onClick={() => setExpanded(!expanded)}
         >
           <Icon name="settings" />
-          显示选项
+          <UiText text="显示选项" />
         </Button>
       }
     >
@@ -154,8 +156,11 @@ export default function CodeEditorDialog({
           <div>
             <div className={styles.options} id={id + "-options"}>
               <label>
-                <span>行号</span>
+                <span>
+                  <UiText text="行号" />
+                </span>
                 <Select
+                  programOptions
                   label="代码行号"
                   name={id + "-numbers"}
                   value={options.numbers ?? "inherit"}
@@ -173,7 +178,9 @@ export default function CodeEditorDialog({
                 />
               </label>
               <label>
-                <span>起始行号</span>
+                <span>
+                  <UiText text="起始行号" />
+                </span>
                 <TextField
                   type="number"
                   min={1}
@@ -190,7 +197,9 @@ export default function CodeEditorDialog({
                 />
               </label>
               <label className={styles.marks}>
-                <span>重点行</span>
+                <span>
+                  <UiText text="重点行" />
+                </span>
                 <TextField
                   aria-invalid={!validCodeMarks(options.mark ?? "")}
                   placeholder="如 3,5-8"
@@ -200,8 +209,11 @@ export default function CodeEditorDialog({
                 />
               </label>
               <label>
-                <span>自动换行</span>
+                <span>
+                  <UiText text="自动换行" />
+                </span>
                 <Select
+                  programOptions
                   label="代码显示换行"
                   name={id + "-wrap"}
                   value={options.wrap ?? "inherit"}
@@ -218,7 +230,9 @@ export default function CodeEditorDialog({
                 />
               </label>
               <label>
-                <span>折叠行数</span>
+                <span>
+                  <UiText text="折叠行数" />
+                </span>
                 <TextField
                   type="number"
                   min={0}
@@ -235,7 +249,9 @@ export default function CodeEditorDialog({
                 />
               </label>
               {!validCodeMarks(options.mark ?? "") && (
-                <small role="alert">重点行请填写行号或范围，如 3,5-8。</small>
+                <small role="alert">
+                  <UiText text="重点行请填写行号或范围，如 3,5-8。" />
+                </small>
               )}
             </div>
           </div>
@@ -295,13 +311,18 @@ export default function CodeEditorDialog({
             </>
           }
         >
-          行 {status.line}，列 {status.column}
+          <UiText text="行" />
+          {status.line}
+          <UiText text="，列" />
+          {status.column}
           {status.selected ? ` · 已选 ${status.selected}` : ""}
         </EditorStatusBar>
         <footer className={styles.footer}>
-          <small>Ctrl / ⌘ + Enter 插入</small>
+          <small>
+            <UiText text="Ctrl / ⌘ + Enter 插入" />
+          </small>
           <Button className="admin-button" onClick={() => setClosing(true)}>
-            取消
+            <UiText text="取消" />
           </Button>
           <Button
             className="admin-button admin-button-primary"
@@ -309,7 +330,7 @@ export default function CodeEditorDialog({
             disabled={invalid || closing}
           >
             <Icon name="check" />
-            插入代码
+            <UiText text="插入代码" />
           </Button>
         </footer>
       </Form>

@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useId, useState } from "react";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Modal } from "../../components/ui/modal";
@@ -65,7 +67,7 @@ export function SettingsMediaField({
           aria-label={`为${label}选择媒体`}
         >
           <Icon name="image" />
-          媒体库
+          <UiText text="媒体库" />
         </Button>
         {value && (
           <Button
@@ -81,7 +83,11 @@ export function SettingsMediaField({
       {hint && (
         <small>
           {hint}
-          {mediaId && <span className="admin-media-bound">已关联媒体库</span>}
+          {mediaId && (
+            <span className="admin-media-bound">
+              <UiText text="已关联媒体库" />
+            </span>
+          )}
         </small>
       )}
       {open && (

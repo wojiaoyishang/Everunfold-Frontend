@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import Image from "next/image";
 import { AppLink as Link } from "./navigation-link";
 import type { ReadableContent } from "@/core/content/types";
@@ -14,7 +15,9 @@ export function PostCard({ content }: { content: ReadableContent }) {
         {content.pinned && (
           <span className="pinned-badge" title="置顶文章">
             <Icon name="pin" />
-            <span>置顶</span>
+            <span>
+              <UiText text="置顶" />
+            </span>
           </span>
         )}
         <h2 className="post-title">{content.title}</h2>
@@ -51,7 +54,7 @@ export function PostCard({ content }: { content: ReadableContent }) {
             ))}
           </div>
           <span className="read-more" aria-hidden="true">
-            阅读全文
+            <UiText text="阅读全文" />
             <Icon name="arrow" />
           </span>
         </div>

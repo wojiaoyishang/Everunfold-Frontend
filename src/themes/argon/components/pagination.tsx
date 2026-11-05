@@ -6,10 +6,12 @@ function href(
   current: number,
   query?: string,
   type?: string,
+  languages?: string,
 ) {
   const parameters = new URLSearchParams();
   if (query) parameters.set("q", query);
   if (type) parameters.set("type", type);
+  if (languages) parameters.set("languages", languages);
   if (current > 1) parameters.set("page", String(current));
   const search = parameters.toString();
   return `${pathname}${search ? `?${search}` : ""}`;
@@ -21,12 +23,14 @@ export function Pagination({
   pathname,
   query,
   type,
+  languages,
 }: {
   page: number;
   pages: number;
   pathname: string;
   query?: string;
   type?: string;
+  languages?: string;
 }) {
   if (pages <= 1 && page === 1) return null;
   const visible = [...new Set([1, page - 1, page, page + 1, pages])]
@@ -35,7 +39,10 @@ export function Pagination({
   return (
     <nav className="pagination" aria-label="文章分页">
       {page > 1 && (
-        <Link href={href(pathname, page - 1, query, type)} aria-label="上一页">
+        <Link
+          href={href(pathname, page - 1, query, type, languages)}
+          aria-label="上一页"
+        >
           <Icon name="chevron-left" />
         </Link>
       )}
@@ -45,7 +52,7 @@ export function Pagination({
             <span className="pagination-ellipsis">…</span>
           )}
           <Link
-            href={href(pathname, number, query, type)}
+            href={href(pathname, number, query, type, languages)}
             className={number === page ? "current" : undefined}
             aria-current={number === page ? "page" : undefined}
           >
@@ -54,7 +61,10 @@ export function Pagination({
         </span>
       ))}
       {page < pages && (
-        <Link href={href(pathname, page + 1, query, type)} aria-label="下一页">
+        <Link
+          href={href(pathname, page + 1, query, type, languages)}
+          aria-label="下一页"
+        >
           <Icon name="chevron" />
         </Link>
       )}

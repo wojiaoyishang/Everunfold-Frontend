@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import {
   Button,
   TextField,
@@ -160,7 +162,7 @@ export function Sidebar({
                   aria-selected={tab === "toc"}
                   onClick={() => setTab("toc")}
                 >
-                  文章目录
+                  <UiText text="文章目录" />
                 </Button>
               )}
               <Button
@@ -170,7 +172,7 @@ export function Sidebar({
                 aria-selected={tab === "overview"}
                 onClick={() => setTab("overview")}
               >
-                站点概览
+                <UiText text="站点概览" />
               </Button>
             </div>
           )}
@@ -225,15 +227,21 @@ export function Sidebar({
               <div className="site-stats">
                 <Link href="/archives">
                   <strong>{site.stats.articles}</strong>
-                  <span>文章</span>
+                  <span>
+                    <UiText text="文章" />
+                  </span>
                 </Link>
                 <Link href="/categories">
                   <strong>{site.stats.categories}</strong>
-                  <span>分类</span>
+                  <span>
+                    <UiText text="分类" />
+                  </span>
                 </Link>
                 <Link href="/tags">
                   <strong>{site.stats.tags}</strong>
-                  <span>标签</span>
+                  <span>
+                    <UiText text="标签" />
+                  </span>
                 </Link>
               </div>
               <div className="profile-links">

@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import { useFontPreviews } from "@/core/media/font-preview";
 import { useFontLibrary } from "@/core/media/font-library";
@@ -40,7 +42,10 @@ export function FontLibraryPage({
             onFiles={library.upload}
           />
           <span className="admin-upload-hint">
-            WOFF2 / WOFF / TTF / OTF<small>支持多选 · 单文件 20 MB 内</small>
+            WOFF2 / WOFF / TTF / OTF
+            <small>
+              <UiText text="支持多选 · 单文件 20 MB 内" />
+            </small>
           </span>
         </div>
       </div>
@@ -52,20 +57,24 @@ export function FontLibraryPage({
         onSelect={onSelect}
       />
       <div className={styles.previewBar}>
-        <label htmlFor="font-sample">预览文字</label>
+        <label htmlFor="font-sample">
+          <UiText text="预览文字" />
+        </label>
         <TextField
           id="font-sample"
           value={sample}
           maxLength={240}
           onChange={(e) => setSample(e.target.value)}
         />
-        <span>{library.total} 款字体</span>
+        <span>
+          {library.total} <UiText text="款字体" />
+        </span>
       </div>
       {library.error && (
         <div className="admin-library-feedback" role="alert">
           {library.error}
           <Button className="admin-button" onClick={library.retry}>
-            重试
+            <UiText text="重试" />
           </Button>
         </div>
       )}
@@ -83,11 +92,16 @@ export function FontLibraryPage({
               className={styles.sample}
               style={{ fontFamily: `"${font.css_family}", sans-serif` }}
             >
-              {sample || "Aa 字体预览"}
+              {sample || <UiText text="Aa 字体预览" />}
             </div>
             <footer>
               <span>
-                {font.info.style === "italic" ? "斜体" : "常规"} ·{" "}
+                {font.info.style === "italic" ? (
+                  <UiText text="斜体" />
+                ) : (
+                  <UiText text="常规" />
+                )}{" "}
+                ·{" "}
                 {font.info.weight_min === font.info.weight_max
                   ? font.info.weight_min
                   : `${font.info.weight_min}–${font.info.weight_max}`}{" "}
@@ -103,7 +117,7 @@ export function FontLibraryPage({
                 onClick={() => (onSelect ? onSelect(font) : setSelected(font))}
               >
                 <Icon name={onSelect ? "check" : "settings"} />
-                {onSelect ? "使用字体" : "资料"}
+                {onSelect ? <UiText text="使用字体" /> : <UiText text="资料" />}
               </Button>
             </footer>
           </article>
@@ -112,8 +126,16 @@ export function FontLibraryPage({
       {!library.loading && !library.error && !library.items.length && (
         <div className={styles.empty}>
           <Icon name="type" />
-          <strong>{library.query ? "没有找到字体" : "还没有上传字体"}</strong>
-          <span>上传后可在编辑器中选择。</span>
+          <strong>
+            {library.query ? (
+              <UiText text="没有找到字体" />
+            ) : (
+              <UiText text="还没有上传字体" />
+            )}
+          </strong>
+          <span>
+            <UiText text="上传后可在编辑器中选择。" />
+          </span>
         </div>
       )}
       {library.total > 60 && (
@@ -123,7 +145,7 @@ export function FontLibraryPage({
             disabled={library.page === 1}
             onClick={() => library.setPage(library.page - 1)}
           >
-            上一页
+            <UiText text="上一页" />
           </Button>
           <span>
             {library.page} / {Math.ceil(library.total / 60)}
@@ -133,7 +155,7 @@ export function FontLibraryPage({
             disabled={library.page * 60 >= library.total}
             onClick={() => library.setPage(library.page + 1)}
           >
-            下一页
+            <UiText text="下一页" />
           </Button>
         </div>
       )}

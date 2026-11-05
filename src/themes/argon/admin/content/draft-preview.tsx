@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import { useMemo } from "react";
 import { renderContent } from "@/core/rendering/content";
 import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
@@ -37,7 +38,9 @@ export function DraftPreview({
       {fields.body.some((block) => block.content.trim()) ? (
         <ContentMarkup html={rendered.html} features={rendered.features} />
       ) : (
-        <p className="admin-draft-empty">写一点正文后，就能在这里预览。</p>
+        <p className="admin-draft-empty">
+          <UiText text="写一点正文后，就能在这里预览。" />
+        </p>
       )}
     </article>
   );

@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import { useMediaLibrary } from "@/core/media/media-library";
 import type { MediaItem, MediaQuery } from "@/generated/settings-contract";
@@ -49,6 +51,7 @@ export function MediaBrowser({
         <div className="admin-library-toolbar">
           {pickerTab && kind === "all" && (
             <Select
+              programOptions
               name="media-picker-kind"
               label="按类型筛选"
               value={filter}
@@ -79,7 +82,10 @@ export function MediaBrowser({
                 onFiles={(files) => library.upload(files)}
               />
               <span className="admin-upload-hint">
-                支持多选 · 单文件 128 MB 内<small>图片 20 MB · SVG 1 MB</small>
+                <UiText text="支持多选 · 单文件 128 MB 内" />
+                <small>
+                  <UiText text="图片 20 MB · SVG 1 MB" />
+                </small>
               </span>
             </div>
           )}
@@ -116,7 +122,7 @@ export function MediaBrowser({
                 library.setPage(1);
               }}
             >
-              回收站
+              <UiText text="回收站" />
             </Button>
           )}
         </div>
@@ -129,7 +135,7 @@ export function MediaBrowser({
               className="admin-button"
               onClick={() => void library.retry()}
             >
-              重试
+              <UiText text="重试" />
             </Button>
           )}
         </div>
@@ -146,7 +152,11 @@ export function MediaBrowser({
         <>
           <div className="admin-media-library-summary">
             <span>
-              {library.loading ? "正在读取…" : `共 ${library.total} 个文件`}
+              {library.loading ? (
+                <UiText text="正在读取…" />
+              ) : (
+                `共 ${library.total} 个文件`
+              )}
             </span>
             <div aria-label="媒体展示方式">
               <Button
@@ -193,15 +203,19 @@ export function MediaBrowser({
                   {item.title || item.label}
                 </span>
                 <span className="admin-media-tile-meta">
-                  {item.deleted
-                    ? item.purge_pending
-                      ? "待清理"
-                      : "已删除"
-                    : item.kind === "image"
-                      ? "图片"
-                      : item.kind === "video"
-                        ? "视频"
-                        : "文件"}{" "}
+                  {item.deleted ? (
+                    item.purge_pending ? (
+                      <UiText text="待清理" />
+                    ) : (
+                      <UiText text="已删除" />
+                    )
+                  ) : item.kind === "image" ? (
+                    <UiText text="图片" />
+                  ) : item.kind === "video" ? (
+                    <UiText text="视频" />
+                  ) : (
+                    <UiText text="文件" />
+                  )}{" "}
                   · {formatBytes(item.size)}
                 </span>
                 {(value ?? selected?.id) === item.id && (
@@ -212,13 +226,15 @@ export function MediaBrowser({
           </div>
           {!items.length && (
             <p className="admin-library-empty">
-              {library.loading
-                ? "正在读取媒体…"
-                : library.query
-                  ? "没有匹配的文件"
-                  : trash
-                    ? "回收站是空的"
-                    : "还没有这类文件"}
+              {library.loading ? (
+                <UiText text="正在读取媒体…" />
+              ) : library.query ? (
+                <UiText text="没有匹配的文件" />
+              ) : trash ? (
+                <UiText text="回收站是空的" />
+              ) : (
+                <UiText text="还没有这类文件" />
+              )}
             </p>
           )}
           {library.total > 60 && (
@@ -228,15 +244,18 @@ export function MediaBrowser({
                 disabled={library.page === 1}
                 onClick={() => library.setPage(library.page - 1)}
               >
-                上一页
+                <UiText text="上一页" />
               </Button>
-              <span>第 {library.page} 页</span>
+              <span>
+                <UiText text="第" />
+                {library.page} <UiText text="页" />
+              </span>
               <Button
                 className="admin-button"
                 disabled={library.page * 60 >= library.total}
                 onClick={() => library.setPage(library.page + 1)}
               >
-                下一页
+                <UiText text="下一页" />
               </Button>
             </div>
           )}

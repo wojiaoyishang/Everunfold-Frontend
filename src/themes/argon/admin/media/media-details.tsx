@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useRef, useState } from "react";
 import { useMediaAttachment } from "@/core/media/media-attachment";
 import { formatBytes } from "@/core/media/image-editor";
@@ -85,7 +87,7 @@ export function MediaDetailsDialog({
               disabled={busy || loading}
               onClick={() => attempt(attachment.reload)}
             >
-              重新读取
+              <UiText text="重新读取" />
             </Button>
           )}
         </div>
@@ -155,7 +157,7 @@ export function MediaDetailsDialog({
                     onClick={() => setEditing(true)}
                   >
                     <Icon name="crop" />
-                    编辑图片
+                    <UiText text="编辑图片" />
                   </Button>
                 )}
                 {!info.deleted && (
@@ -166,65 +168,83 @@ export function MediaDetailsDialog({
                     rel="noopener noreferrer"
                   >
                     <Icon name="external" />
-                    {info.kind === "file" ? "下载文件" : "查看原文件"}
+                    {info.kind === "file" ? (
+                      <UiText text="下载文件" />
+                    ) : (
+                      <UiText text="查看原文件" />
+                    )}
                   </TextLink>
                 )}
               </div>
               {detail?.source_id && (
                 <p className="admin-media-source">
                   <Icon name="copy" />
-                  由原图编辑生成，原文件已保留。
+                  <UiText text="由原图编辑生成，原文件已保留。" />
                 </p>
               )}
             </section>
             <section className="admin-media-detail-info" aria-label="附件资料">
               <div className="admin-media-file-heading">
                 <span className="admin-badge">
-                  {info.kind === "video"
-                    ? "视频"
-                    : info.kind === "image"
-                      ? "图片"
-                      : "文件"}
+                  {info.kind === "video" ? (
+                    <UiText text="视频" />
+                  ) : info.kind === "image" ? (
+                    <UiText text="图片" />
+                  ) : (
+                    <UiText text="文件" />
+                  )}
                 </span>
                 <strong>{info.label}</strong>
               </div>
               <dl className="admin-media-facts">
                 <div>
-                  <dt>文件类型</dt>
+                  <dt>
+                    <UiText text="文件类型" />
+                  </dt>
                   <dd>{info.mime}</dd>
                 </div>
                 <div>
-                  <dt>文件大小</dt>
+                  <dt>
+                    <UiText text="文件大小" />
+                  </dt>
                   <dd>{formatBytes(info.size)}</dd>
                 </div>
                 {detail?.width && detail.height && (
                   <div>
-                    <dt>尺寸</dt>
+                    <dt>
+                      <UiText text="尺寸" />
+                    </dt>
                     <dd>
                       {detail.width} × {detail.height} px
                     </dd>
                   </div>
                 )}
                 <div>
-                  <dt>上传时间</dt>
+                  <dt>
+                    <UiText text="上传时间" />
+                  </dt>
                   <dd>
                     {new Date(info.created_at).toLocaleDateString("zh-CN")}
                   </dd>
                 </div>
                 {detail && (
                   <div>
-                    <dt>上传者</dt>
+                    <dt>
+                      <UiText text="上传者" />
+                    </dt>
                     <dd>{detail.uploader}</dd>
                   </div>
                 )}
               </dl>
               {loading ? (
-                <p role="status">正在读取附件资料…</p>
+                <p role="status">
+                  <UiText text="正在读取附件资料…" />
+                </p>
               ) : (
                 draft && (
                   <div className="admin-media-metadata-fields">
                     <label className="admin-media-label">
-                      标题
+                      <UiText text="标题" />
                       <TextField
                         value={draft.title ?? ""}
                         maxLength={160}
@@ -240,7 +260,7 @@ export function MediaDetailsDialog({
                     </label>
                     {info.kind === "image" && (
                       <label className="admin-media-label">
-                        替代文本
+                        <UiText text="替代文本" />
                         <TextField
                           aria-label="替代文本"
                           value={draft.alt_text ?? ""}
@@ -254,12 +274,16 @@ export function MediaDetailsDialog({
                           }
                         />
                         <small>
-                          描述图片内容，帮助读屏用户理解；装饰图片可留空。
+                          <UiText text="描述图片内容，帮助读屏用户理解；装饰图片可留空。" />
                         </small>
                       </label>
                     )}
                     <label className="admin-media-label">
-                      {info.kind === "image" ? "图片说明" : "说明"}
+                      {info.kind === "image" ? (
+                        <UiText text="图片说明" />
+                      ) : (
+                        <UiText text="说明" />
+                      )}
                       <TextArea
                         rows={2}
                         value={draft.caption ?? ""}
@@ -274,7 +298,7 @@ export function MediaDetailsDialog({
                       />
                     </label>
                     <label className="admin-media-label">
-                      描述
+                      <UiText text="描述" />
                       <TextArea
                         rows={3}
                         value={draft.description ?? ""}
@@ -292,7 +316,7 @@ export function MediaDetailsDialog({
                 )
               )}
               <label className="admin-media-label admin-media-url">
-                文件地址
+                <UiText text="文件地址" />
                 <div>
                   <TextField
                     readOnly
@@ -332,11 +356,14 @@ export function MediaDetailsDialog({
             )}
             <div className="admin-media-dialog-save">
               <span role="status">
-                {attachment.busy
-                  ? "正在保存…"
-                  : attachment.dirty
-                    ? "有未保存的修改"
-                    : notice || (info.deleted ? "此文件已放入回收站" : "")}
+                {attachment.busy ? (
+                  <UiText text="正在保存…" />
+                ) : attachment.dirty ? (
+                  <UiText text="有未保存的修改" />
+                ) : (
+                  notice ||
+                  (info.deleted ? <UiText text="此文件已放入回收站" /> : "")
+                )}
               </span>
               <Button
                 className="admin-button admin-button-primary"
@@ -347,7 +374,7 @@ export function MediaDetailsDialog({
                 }}
               >
                 <Icon name="check" />
-                保存资料
+                <UiText text="保存资料" />
               </Button>
             </div>
           </div>

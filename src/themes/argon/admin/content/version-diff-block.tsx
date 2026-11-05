@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId, useMemo, useRef, useState } from "react";
 import type { MediaURL } from "@/generated/content-admin-contract";
 import type { PublicShortcode } from "@/generated/settings-contract";
@@ -98,7 +100,9 @@ export function VersionDiffBlock({
           onClick={() => setExpanded(!expanded)}
         >
           <Icon name={expanded ? "chevron-down" : "chevron"} />
-          <strong>{format === "html" ? "HTML" : "Markdown"} 区块</strong>
+          <strong>
+            {format === "html" ? "HTML" : "Markdown"} <UiText text="区块" />
+          </strong>
           <span>
             {position(beforeIndex)} → {position(afterIndex)}
           </span>
@@ -113,13 +117,13 @@ export function VersionDiffBlock({
             aria-pressed={mode === "visual"}
             onClick={() => chooseMode("visual")}
           >
-            可视化
+            <UiText text="可视化" />
           </Button>
           <Button
             aria-pressed={mode === "source"}
             onClick={() => chooseMode("source")}
           >
-            源码
+            <UiText text="源码" />
           </Button>
         </div>
       </header>
@@ -154,7 +158,11 @@ export function VersionDiffBlock({
                     </div>
                   ) : (
                     <p className={styles.empty}>
-                      {side === 0 ? "此版本没有该区块" : "该区块已移除"}
+                      {side === 0 ? (
+                        <UiText text="此版本没有该区块" />
+                      ) : (
+                        <UiText text="该区块已移除" />
+                      )}
                     </p>
                   )}
                 </div>

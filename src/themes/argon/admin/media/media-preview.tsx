@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useRef, useState, type ReactNode } from "react";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
@@ -28,9 +30,11 @@ export function MediaPreview({
         <span className="admin-media-file-placeholder">
           <Icon name={deleted ? "archive" : "book"} />
           <span>
-            {deleted
-              ? "已放入回收站"
-              : label.split(".").pop()?.toUpperCase().slice(0, 12) || "FILE"}
+            {deleted ? (
+              <UiText text="已放入回收站" />
+            ) : (
+              label.split(".").pop()?.toUpperCase().slice(0, 12) || "FILE"
+            )}
           </span>
         </span>
       ) : safe && !failed ? (
@@ -61,7 +65,7 @@ export function MediaPreview({
         (fallback ?? (
           <span className="admin-media-preview-missing">
             <Icon name="image" />
-            {safe ? "暂时无法预览" : "预览"}
+            {safe ? <UiText text="暂时无法预览" /> : <UiText text="预览" />}
           </span>
         ))
       )}
@@ -75,7 +79,9 @@ export function MediaPreview({
           }}
         >
           <Icon name={playing ? "pause" : "play"} />
-          <span>{playing ? "暂停" : "静音预览"}</span>
+          <span>
+            {playing ? <UiText text="暂停" /> : <UiText text="静音预览" />}
+          </span>
         </Button>
       )}
     </div>

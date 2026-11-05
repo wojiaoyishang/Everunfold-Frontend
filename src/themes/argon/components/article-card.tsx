@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import { AppLink as Link } from "./navigation-link";
 import type { Content } from "@/core/content/types";
 import type { ContentFeatures } from "@/core/rendering/features/model";
@@ -20,7 +21,7 @@ export function ArticleCard({
   interactive?: boolean;
 }) {
   return (
-    <article className="surface article-card">
+    <article className="surface article-card" lang={content.language}>
       <ArticleHeader
         content={content}
         interactive={interactive}
@@ -44,7 +45,7 @@ export function ArticleCard({
             ))}
           </div>
           <p>
-            最后更新于{" "}
+            <UiText text="最后更新于" />{" "}
             <time dateTime={content.updated_at}>
               {displayDate(content.updated_at)}
             </time>

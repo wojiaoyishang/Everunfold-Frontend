@@ -161,6 +161,25 @@
           "title": "Language",
           "type": "string"
         },
+        "translation_group_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Translation Group Id"
+        },
+        "translations": {
+          "items": {
+            "$ref": "#/$defs/ContentTranslation"
+          },
+          "title": "Translations",
+          "type": "array"
+        },
         "published_at": {
           "format": "date-time",
           "title": "Published At",
@@ -302,6 +321,46 @@
         "delivery"
       ],
       "title": "ContentSyncState",
+      "type": "object"
+    },
+    "ContentTranslation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "language": {
+          "title": "Language",
+          "type": "string"
+        },
+        "path": {
+          "pattern": "^/",
+          "title": "Path",
+          "type": "string"
+        },
+        "access": {
+          "default": "public",
+          "enum": [
+            "public",
+            "password",
+            "scheduled"
+          ],
+          "title": "Access",
+          "type": "string"
+        },
+        "is_original": {
+          "default": false,
+          "title": "Is Original",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "language",
+        "path"
+      ],
+      "title": "ContentTranslation",
       "type": "object"
     },
     "ContentTypeCatalog": {
@@ -533,6 +592,15 @@
         },
         "fields": {
           "$ref": "#/$defs/DraftFields"
+        },
+        "language": {
+          "default": "zh-CN",
+          "enum": [
+            "zh-CN",
+            "en"
+          ],
+          "title": "Language",
+          "type": "string"
         }
       },
       "required": [
@@ -633,6 +701,24 @@
           "format": "date-time",
           "title": "Updated At",
           "type": "string"
+        },
+        "language": {
+          "default": "zh-CN",
+          "title": "Language",
+          "type": "string"
+        },
+        "translation_group_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Translation Group Id"
         },
         "body": {
           "items": {
@@ -821,6 +907,24 @@
           "title": "Updated At",
           "type": "string"
         },
+        "language": {
+          "default": "zh-CN",
+          "title": "Language",
+          "type": "string"
+        },
+        "translation_group_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Translation Group Id"
+        },
         "cover_url": {
           "anyOf": [
             {
@@ -857,6 +961,18 @@
           "default": false,
           "title": "Pinned",
           "type": "boolean"
+        },
+        "translations": {
+          "items": {
+            "$ref": "#/$defs/TranslationMember"
+          },
+          "title": "Translations",
+          "type": "array"
+        },
+        "group_revision": {
+          "default": 1,
+          "title": "Group Revision",
+          "type": "integer"
         }
       },
       "required": [
@@ -956,6 +1072,27 @@
           "minimum": 1,
           "title": "Page Size",
           "type": "integer"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "enum": [
+                "zh-CN",
+                "en"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Language"
+        },
+        "grouped": {
+          "default": true,
+          "title": "Grouped",
+          "type": "boolean"
         }
       },
       "required": [
@@ -1509,17 +1646,46 @@
       "title": "PublicResponse[EditorCatalog]",
       "type": "object"
     },
+    "PublicResponse_TranslationCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/TranslationCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[TranslationCatalog]",
+      "type": "object"
+    },
     "PublicSnapshot": {
       "additionalProperties": false,
       "properties": {
         "schema_version": {
-          "default": "0.5.0",
+          "default": "0.6.0",
           "enum": [
             "0.1.0",
             "0.2.0",
             "0.3.0",
             "0.4.0",
-            "0.5.0"
+            "0.5.0",
+            "0.6.0"
           ],
           "title": "Schema Version",
           "type": "string"
@@ -1731,6 +1897,322 @@
       ],
       "title": "TaxonomyDTO",
       "type": "object"
+    },
+    "TranslationCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "source_id": {
+          "format": "uuid",
+          "title": "Source Id",
+          "type": "string"
+        },
+        "type_id": {
+          "title": "Type Id",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "members": {
+          "items": {
+            "$ref": "#/$defs/TranslationMember"
+          },
+          "title": "Members",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "source_id",
+        "type_id",
+        "revision",
+        "members"
+      ],
+      "title": "TranslationCatalog",
+      "type": "object"
+    },
+    "TranslationCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "language": {
+          "enum": [
+            "zh-CN",
+            "en"
+          ],
+          "title": "Language",
+          "type": "string"
+        },
+        "copy_source": {
+          "default": false,
+          "title": "Copy Source",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "operation_id",
+        "expected_revision",
+        "language"
+      ],
+      "title": "TranslationCreate",
+      "type": "object"
+    },
+    "TranslationGroupMutation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "members": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "maxProperties": 32,
+          "minProperties": 1,
+          "propertyNames": {
+            "format": "uuid"
+          },
+          "title": "Members",
+          "type": "object"
+        }
+      },
+      "required": [
+        "id",
+        "operation_id",
+        "expected_revision",
+        "members"
+      ],
+      "title": "TranslationGroupMutation",
+      "type": "object"
+    },
+    "TranslationLink": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "target_id": {
+          "format": "uuid",
+          "title": "Target Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "operation_id",
+        "expected_revision",
+        "target_id"
+      ],
+      "title": "TranslationLink",
+      "type": "object"
+    },
+    "TranslationMember": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type_id": {
+          "title": "Type Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "excerpt": {
+          "title": "Excerpt",
+          "type": "string"
+        },
+        "preview": {
+          "title": "Preview",
+          "type": "string"
+        },
+        "author": {
+          "title": "Author",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "draft",
+            "trash"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "is_demo": {
+          "title": "Is Demo",
+          "type": "boolean"
+        },
+        "published_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published Revision"
+        },
+        "public_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Public Path"
+        },
+        "published_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Published At"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "language": {
+          "default": "zh-CN",
+          "title": "Language",
+          "type": "string"
+        },
+        "translation_group_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Translation Group Id"
+        },
+        "is_original": {
+          "title": "Is Original",
+          "type": "boolean"
+        },
+        "needs_review": {
+          "default": false,
+          "title": "Needs Review",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "type_id",
+        "title",
+        "excerpt",
+        "preview",
+        "author",
+        "revision",
+        "status",
+        "is_demo",
+        "created_at",
+        "updated_at",
+        "is_original"
+      ],
+      "title": "TranslationMember",
+      "type": "object"
+    },
+    "TranslationMutation": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "operation_id",
+        "expected_revision"
+      ],
+      "title": "TranslationMutation",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -1773,6 +2255,21 @@
     },
     "delivery": {
       "$ref": "#/$defs/ContentDelivery"
+    },
+    "translation_catalog": {
+      "$ref": "#/$defs/PublicResponse_TranslationCatalog_"
+    },
+    "translation_create": {
+      "$ref": "#/$defs/TranslationCreate"
+    },
+    "translation_link": {
+      "$ref": "#/$defs/TranslationLink"
+    },
+    "translation_mutation": {
+      "$ref": "#/$defs/TranslationMutation"
+    },
+    "translation_group_mutation": {
+      "$ref": "#/$defs/TranslationGroupMutation"
     }
   },
   "required": [
@@ -1788,12 +2285,17 @@
     "detail",
     "types",
     "sync_state",
-    "delivery"
+    "delivery",
+    "translation_catalog",
+    "translation_create",
+    "translation_link",
+    "translation_mutation",
+    "translation_group_mutation"
   ],
   "title": "ContentAdminContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.6.0",
+  "x-everunfold-contract-version": "1.7.0",
   "x-everunfold-content-types": [
     {
       "id": "article",
@@ -1926,6 +2428,55 @@
       "method": "POST",
       "input": "mutation",
       "response": "detail"
+    },
+    {
+      "name": "readTranslations",
+      "path": "/v1/admin/content/translations/query",
+      "method": "POST",
+      "input": "lookup",
+      "response": "translation_catalog"
+    },
+    {
+      "name": "createTranslation",
+      "path": "/v1/admin/content/translations/create",
+      "method": "POST",
+      "input": "translation_create",
+      "response": "translation_catalog"
+    },
+    {
+      "name": "linkTranslation",
+      "path": "/v1/admin/content/translations/link",
+      "method": "POST",
+      "input": "translation_link",
+      "response": "translation_catalog"
+    },
+    {
+      "name": "unlinkTranslation",
+      "path": "/v1/admin/content/translations/unlink",
+      "method": "POST",
+      "input": "translation_mutation",
+      "response": "translation_catalog"
+    },
+    {
+      "name": "reviewTranslation",
+      "path": "/v1/admin/content/translations/review",
+      "method": "POST",
+      "input": "translation_mutation",
+      "response": "translation_catalog"
+    },
+    {
+      "name": "trashTranslationGroup",
+      "path": "/v1/admin/content/translations/trash",
+      "method": "POST",
+      "input": "translation_group_mutation",
+      "response": "translation_catalog"
+    },
+    {
+      "name": "restoreTranslationGroup",
+      "path": "/v1/admin/content/translations/restore",
+      "method": "POST",
+      "input": "translation_group_mutation",
+      "response": "translation_catalog"
     }
   ]
 }

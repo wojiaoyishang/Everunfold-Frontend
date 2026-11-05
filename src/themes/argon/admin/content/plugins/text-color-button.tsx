@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import { ActionPopover } from "../../../components/ui/action-popover";
 import { Button, Form, TextField } from "../../../components/ui/primitives";
@@ -67,7 +69,7 @@ function ColorForm({
       }}
     >
       <label>
-        文字颜色
+        <UiText text="文字颜色" />
         <TextField
           aria-label="文字颜色值"
           value={color}
@@ -102,11 +104,15 @@ function ColorForm({
           </Button>
         ))}
       </div>
-      {!valid && <p role="alert">请输入 # 加六位十六进制颜色。</p>}
+      {!valid && (
+        <p role="alert">
+          <UiText text="请输入 # 加六位十六进制颜色。" />
+        </p>
+      )}
       <div>
         {allowReset && (
           <Button className="admin-button" onClick={() => apply(null)}>
-            默认颜色
+            <UiText text="默认颜色" />
           </Button>
         )}
         <Button
@@ -114,7 +120,7 @@ function ColorForm({
           className="admin-button admin-button-primary"
           disabled={!valid}
         >
-          应用颜色
+          <UiText text="应用颜色" />
         </Button>
       </div>
     </Form>

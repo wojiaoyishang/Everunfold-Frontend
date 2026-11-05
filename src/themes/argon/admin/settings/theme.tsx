@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useSettingsEditor } from "@/core/settings/editor";
 import {
   SettingsFrame,
@@ -37,7 +39,9 @@ export function ThemeSettingsPage() {
             description="站点导航、卡片和交互元素使用同一套主题色。"
           >
             <div className="admin-settings-field">
-              <label>默认主题色</label>
+              <label>
+                <UiText text="默认主题色" />
+              </label>
               <div className="admin-theme-colors">
                 {palette.map((color) => (
                   <Button
@@ -60,8 +64,11 @@ export function ThemeSettingsPage() {
               </div>
             </div>
             <div className="admin-settings-field">
-              <label>默认显示模式</label>
+              <label>
+                <UiText text="默认显示模式" />
+              </label>
               <Select
+                programOptions
                 name="theme-mode"
                 label="默认显示模式"
                 options={[
@@ -92,7 +99,9 @@ export function ThemeSettingsPage() {
                 <span />
                 <span />
               </section>
-              <p>主题颜色预览</p>
+              <p>
+                <UiText text="主题颜色预览" />
+              </p>
             </div>
           </SettingsSection>
           <SettingsSection
@@ -119,13 +128,17 @@ export function ThemeSettingsPage() {
             description="设置站点默认字体；文章可以为选中的文字单独指定字体。"
           >
             <div className="admin-settings-field">
-              <label>默认字体</label>
+              <label>
+                <UiText text="默认字体" />
+              </label>
               <FontField
                 value={theme.font_media_id ?? ""}
                 fonts={fonts.items}
                 onChange={(font_media_id) => update({ font_media_id })}
               />
-              <small>仅在页面实际使用时加载，下载期间保留系统字体。</small>
+              <small>
+                <UiText text="仅在页面实际使用时加载，下载期间保留系统字体。" />
+              </small>
             </div>
           </SettingsSection>
           <CodeSettingsSection

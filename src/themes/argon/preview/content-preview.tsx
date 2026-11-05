@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useMemo } from "react";
 import type { Site, Taxonomy } from "@/core/content/types";
 import { previewContent } from "@/core/content-management/preview";
@@ -39,10 +41,14 @@ export function ContentPreview({
     return (
       <main className="admin-root admin-access" data-surface="admin">
         <section className="admin-access-card">
-          <h1>前台样式暂不可用</h1>
-          <p>站点公开配置尚未就绪，请返回编辑页，稍后重新打开预览。</p>
+          <h1>
+            <UiText text="前台样式暂不可用" />
+          </h1>
+          <p>
+            <UiText text="站点公开配置尚未就绪，请返回编辑页，稍后重新打开预览。" />
+          </p>
           <RouteLink className="admin-button" href={back}>
-            返回编辑
+            <UiText text="返回编辑" />
           </RouteLink>
         </section>
       </main>
@@ -53,13 +59,17 @@ export function ContentPreview({
         <div className={styles.label}>
           <Icon name="eye" />
           <div className={styles.details}>
-            <strong>前台预览</strong>
+            <strong>
+              <UiText text="前台预览" />
+            </strong>
             <span>
-              {detail
-                ? `草稿 · 修订 ${detail.revision}`
-                : error
-                  ? "读取失败"
-                  : "正在读取草稿"}
+              {detail ? (
+                `草稿 · 修订 ${detail.revision}`
+              ) : error ? (
+                <UiText text="读取失败" />
+              ) : (
+                <UiText text="正在读取草稿" />
+              )}
             </span>
           </div>
         </div>
@@ -70,24 +80,26 @@ export function ContentPreview({
             onClick={retry}
           >
             <Icon name="refresh" />
-            刷新预览
+            <UiText text="刷新预览" />
           </Button>
           <RouteLink className={styles.button} href={back}>
             <Icon name="edit" />
-            返回编辑
+            <UiText text="返回编辑" />
           </RouteLink>
         </div>
       </section>
       <p className={styles.notice}>
-        仅有编辑权限的用户可查看；预览不会发布内容，也不提交浏览、点赞或评论。
+        <UiText text="仅有编辑权限的用户可查看；预览不会发布内容，也不提交浏览、点赞或评论。" />
       </p>
       {error ? (
         <section className={`surface ${styles.state}`} role="alert">
           <Icon name="cloud-off" />
-          <h1>无法预览这份内容</h1>
+          <h1>
+            <UiText text="无法预览这份内容" />
+          </h1>
           <p>{error}</p>
           <Button className={styles.button} onClick={retry}>
-            重新读取
+            <UiText text="重新读取" />
           </Button>
         </section>
       ) : presentation ? (
@@ -122,7 +134,9 @@ export function ContentPreview({
           aria-busy="true"
         >
           <Icon name="refresh" className={styles.loading} />
-          <p>正在读取已保存的草稿…</p>
+          <p>
+            <UiText text="正在读取已保存的草稿…" />
+          </p>
         </section>
       )}
     </BlogShell>

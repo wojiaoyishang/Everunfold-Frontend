@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect } from "react";
@@ -18,7 +20,9 @@ export function HomeFeedSettings({
 }) {
   return (
     <fieldset>
-      <legend>首页内容</legend>
+      <legend>
+        <UiText text="首页内容" />
+      </legend>
       <div className="setting-options">
         {(
           [
@@ -37,7 +41,9 @@ export function HomeFeedSettings({
           </Button>
         ))}
       </div>
-      <p className="setting-hint">记住首页浏览偏好，不影响搜索和说说归档</p>
+      <p className="setting-hint">
+        <UiText text="记住首页浏览偏好，不影响搜索和说说归档" />
+      </p>
     </fieldset>
   );
 }

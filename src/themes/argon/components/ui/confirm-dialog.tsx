@@ -1,4 +1,5 @@
 "use client";
+import { useT, UiText } from "@/core/i18n/provider";
 import {
   useId,
   useRef,
@@ -62,6 +63,13 @@ function ConfirmDialogSurface({
   onConfirm,
   onConfirmed,
 }: Omit<ConfirmDialogProps, "open">) {
+  const t = useT();
+  title = t(title);
+  confirmLabel = t(confirmLabel);
+  cancelLabel = t(cancelLabel);
+  busyLabel = t(busyLabel);
+  if (typeof description === "string")
+    description = <UiText text={description} />;
   const dialog = useRef<HTMLDialogElement>(null);
   const cancel = useRef<HTMLButtonElement>(null);
   const inFlight = useRef(false);

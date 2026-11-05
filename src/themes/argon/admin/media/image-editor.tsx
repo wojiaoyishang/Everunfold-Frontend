@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import type {
   ImageRecipe,
@@ -51,7 +53,7 @@ export function MediaImageEditor({
       <div className="admin-image-tools">
         <Button className="admin-button" disabled={busy} onClick={onBack}>
           <Icon name="arrow-left" />
-          附件详情
+          <UiText text="附件详情" />
         </Button>
         <div className="admin-image-toolgroup" aria-label="图片操作">
           <Button
@@ -68,7 +70,7 @@ export function MediaImageEditor({
             }
           >
             <Icon name="rotate" />
-            旋转
+            <UiText text="旋转" />
           </Button>
           <Button
             className="admin-icon-button"
@@ -105,7 +107,7 @@ export function MediaImageEditor({
             }
           >
             <Icon name="crop" />
-            裁剪
+            <UiText text="裁剪" />
           </Button>
         </div>
         <div className="admin-image-toolgroup">
@@ -132,7 +134,7 @@ export function MediaImageEditor({
             disabled={busy || cursor === 0}
             onClick={() => commit(emptyRecipe)}
           >
-            重置
+            <UiText text="重置" />
           </Button>
         </div>
       </div>
@@ -152,14 +154,21 @@ export function MediaImageEditor({
           />
         </div>
         <aside className="admin-image-options">
-          <h3>编辑图片</h3>
+          <h3>
+            <UiText text="编辑图片" />
+          </h3>
           <p>
-            原图 {source.width} × {source.height} px
+            <UiText text="原图" />
+            {source.width} × {source.height} px
           </p>
           {crop ? (
             <>
-              <h4>裁剪区域</h4>
-              <p>在图片上拖动选择区域，或输入像素值。</p>
+              <h4>
+                <UiText text="裁剪区域" />
+              </h4>
+              <p>
+                <UiText text="在图片上拖动选择区域，或输入像素值。" />
+              </p>
               <div className="admin-image-presets">
                 {[
                   [1, 1],
@@ -220,12 +229,14 @@ export function MediaImageEditor({
             </>
           ) : (
             <p className="admin-image-hint">
-              可旋转、翻转图片，或开启裁剪选择区域。
+              <UiText text="可旋转、翻转图片，或开启裁剪选择区域。" />
             </p>
           )}
-          <h4>输出尺寸</h4>
+          <h4>
+            <UiText text="输出尺寸" />
+          </h4>
           <label className="admin-media-label">
-            宽度（px）
+            <UiText text="宽度（px）" />
             <TextField
               type="number"
               min={1}
@@ -246,14 +257,18 @@ export function MediaImageEditor({
             />
           </label>
           <p>
-            等比缩放 · {output.width} × {output.height} px
+            <UiText text="等比缩放 ·" />
+            {output.width} × {output.height} px
           </p>
-          <p>编辑后另存一份，原图与现有文章中的图片保持不变。</p>
+          <p>
+            <UiText text="编辑后另存一份，原图与现有文章中的图片保持不变。" />
+          </p>
         </aside>
       </div>
       <div className="admin-media-dialog-footer">
         <span>
-          输出：{output.width} × {output.height} px
+          <UiText text="输出：" />
+          {output.width} × {output.height} px
         </span>
         <Button
           className="admin-button admin-button-primary"
@@ -263,7 +278,7 @@ export function MediaImageEditor({
           onClick={() => onSave(recipe)}
         >
           <Icon name="check" />
-          {busy ? "正在处理…" : "另存为新图片"}
+          {busy ? <UiText text="正在处理…" /> : <UiText text="另存为新图片" />}
         </Button>
       </div>
     </div>

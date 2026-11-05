@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import type {
   ContentTypeDefinition,
@@ -16,18 +18,20 @@ export function EditorTitle({
   detail,
   onChange,
   disabled,
+  language = "zh-CN",
 }: {
   type: ContentTypeDefinition;
   fields: DraftFields;
   detail: DraftDetail | null;
   onChange: (fields: DraftFields) => void;
   disabled: boolean;
+  language?: "zh-CN" | "en";
 }) {
   const [editing, setEditing] = useState(false);
   const path =
     fields.settings?.path ||
     detail?.public_path ||
-    titlePath(fields.title ?? "");
+    (language === "en" ? "/en" : "") + titlePath(fields.title ?? "");
   const [input, setInput] = useState("");
   const updatePath = () => {
     onChange({
@@ -40,7 +44,8 @@ export function EditorTitle({
     <div className={styles.editorTitle}>
       <label>
         <span className="sr-only">
-          标题{!type.title_required ? "（可选）" : ""}
+          <UiText text="标题" />
+          {!type.title_required ? <UiText text="（可选）" /> : ""}
         </span>
         <TextField
           value={fields.title ?? ""}
@@ -55,7 +60,9 @@ export function EditorTitle({
         />
       </label>
       <div className={styles.permalink}>
-        <span>固定链接：</span>
+        <span>
+          <UiText text="固定链接：" />
+        </span>
         {editing ? (
           <div className={styles.permalinkEdit}>
             <TextField
@@ -78,19 +85,19 @@ export function EditorTitle({
               disabled={disabled}
               onClick={updatePath}
             >
-              确定
+              <UiText text="确定" />
             </Button>
             <Button
               className={styles.textButton}
               onClick={() => setEditing(false)}
             >
-              取消
+              <UiText text="取消" />
             </Button>
           </div>
         ) : (
           <>
             <span className={styles.permalinkValue}>
-              {path || "填写标题后自动生成"}
+              {path || <UiText text="填写标题后自动生成" />}
             </span>
             <Button
               className={styles.textButton}
@@ -101,7 +108,7 @@ export function EditorTitle({
                 setEditing(true);
               }}
             >
-              <Icon name="edit" /> 编辑
+              <Icon name="edit" /> <UiText text="编辑" />
             </Button>
           </>
         )}

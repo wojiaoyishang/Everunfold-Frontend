@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId, useState } from "react";
 import type { CachePolicy } from "@/generated/settings-contract";
 import { useFrontendNodes } from "@/core/settings/nodes";
@@ -74,7 +76,8 @@ function PolicyField({
         <span>{field.unit}</span>
       </div>
       <small id={`${id}-hint`}>
-        {field.hint} 范围 {field.min}–{field.max}。
+        {field.hint} <UiText text="范围" />
+        {field.min}–{field.max}。
       </small>
     </div>
   );
@@ -123,9 +126,13 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
         description="策略由后端保存，节点接收后保留本地副本。后端暂时离线时继续使用上次成功应用的版本。"
       >
         {editor.loading ? (
-          <p role="status">正在读取节点…</p>
+          <p role="status">
+            <UiText text="正在读取节点…" />
+          </p>
         ) : !node ? (
-          <p>尚未配置前端节点，请先在后端部署配置中登记节点。</p>
+          <p>
+            <UiText text="尚未配置前端节点，请先在后端部署配置中登记节点。" />
+          </p>
         ) : (
           <>
             <Select
@@ -142,8 +149,9 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
               <div>
                 <strong>{node.node_id}</strong>
                 <span>
-                  期望版本 {node.revision} · 已应用{" "}
-                  {node.delivery.applied_revision ?? "尚无"}
+                  <UiText text="期望版本" />
+                  {node.revision} <UiText text="· 已应用" />{" "}
+                  {node.delivery.applied_revision ?? <UiText text="尚无" />}
                 </span>
               </div>
               <DeliveryBadge value={node.delivery} />
@@ -173,7 +181,7 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
                 </fieldset>
                 {!valid && (
                   <p className="admin-settings-message is-error" role="alert">
-                    请输入有效范围内的整数。
+                    <UiText text="请输入有效范围内的整数。" />
                   </p>
                 )}
                 <div className="admin-settings-inline-actions">
@@ -183,7 +191,11 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
                     disabled={Boolean(editor.busy) || !dirty || !valid}
                   >
                     <Icon name="check" />
-                    {editor.busy === node.node_id ? "正在处理" : "保存节点策略"}
+                    {editor.busy === node.node_id ? (
+                      <UiText text="正在处理" />
+                    ) : (
+                      <UiText text="保存节点策略" />
+                    )}
                   </Button>
                   <Button
                     className="admin-button"
@@ -195,14 +207,14 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
                     }
                   >
                     <Icon name="refresh" />
-                    重新同步
+                    <UiText text="重新同步" />
                   </Button>
                   <Button
                     className="admin-text-action"
                     disabled={Boolean(editor.busy)}
                     onClick={() => void editor.refresh()}
                   >
-                    检查状态
+                    <UiText text="检查状态" />
                   </Button>
                 </div>
               </Form>
@@ -216,7 +228,7 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
               className="admin-button"
               onClick={() => void editor.refresh(true)}
             >
-              放弃修改并重新读取
+              <UiText text="放弃修改并重新读取" />
             </Button>
           </div>
         )}
@@ -236,11 +248,16 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
             <div key={item.node_id}>
               <span>{item.node_id}</span>
               <span>
-                版本 {item.applied_revision ?? "—"} / {item.desired_revision}
+                <UiText text="版本" />
+                {item.applied_revision ?? "—"} / {item.desired_revision}
               </span>
               <DeliveryBadge value={item} />
             </div>
-          )) ?? <p>尚未取得发布状态。</p>}
+          )) ?? (
+            <p>
+              <UiText text="尚未取得发布状态。" />
+            </p>
+          )}
         </div>
       </SettingsSection>
       <SettingsSection
@@ -250,40 +267,70 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
       >
         <dl className="admin-runtime-list">
           <div>
-            <dt>当前节点</dt>
+            <dt>
+              <UiText text="当前节点" />
+            </dt>
             <dd>{runtime.nodeId}</dd>
           </div>
           <div>
-            <dt>公开站点地址</dt>
-            <dd>{runtime.publicSiteUrl ?? "未配置"}</dd>
+            <dt>
+              <UiText text="公开站点地址" />
+            </dt>
+            <dd>{runtime.publicSiteUrl ?? <UiText text="未配置" />}</dd>
           </div>
           <div>
-            <dt>后端地址</dt>
+            <dt>
+              <UiText text="后端地址" />
+            </dt>
             <dd>{runtime.backendBaseUrl}</dd>
           </div>
           <div>
-            <dt>设置副本</dt>
+            <dt>
+              <UiText text="设置副本" />
+            </dt>
             <dd>{runtime.settingsDirectory}</dd>
           </div>
           <div>
-            <dt>公开快照目录</dt>
+            <dt>
+              <UiText text="公开快照目录" />
+            </dt>
             <dd>{runtime.snapshotDirectory}</dd>
           </div>
           <div>
-            <dt>公开快照有效期</dt>
-            <dd>无时间过期，按发布版本更新</dd>
+            <dt>
+              <UiText text="公开快照有效期" />
+            </dt>
+            <dd>
+              <UiText text="无时间过期，按发布版本更新" />
+            </dd>
           </div>
           <div>
-            <dt>页面生成</dt>
-            <dd>从本地公开快照按请求渲染</dd>
+            <dt>
+              <UiText text="页面生成" />
+            </dt>
+            <dd>
+              <UiText text="从本地公开快照按请求渲染" />
+            </dd>
           </div>
           <div>
-            <dt>私有账号数据</dt>
-            <dd>不进入共享缓存</dd>
+            <dt>
+              <UiText text="私有账号数据" />
+            </dt>
+            <dd>
+              <UiText text="不进入共享缓存" />
+            </dd>
           </div>
           <div>
-            <dt>配置来源绑定</dt>
-            <dd>{runtime.receiverConfigured ? "已配置" : "待配置"}</dd>
+            <dt>
+              <UiText text="配置来源绑定" />
+            </dt>
+            <dd>
+              {runtime.receiverConfigured ? (
+                <UiText text="已配置" />
+              ) : (
+                <UiText text="待配置" />
+              )}
+            </dd>
           </div>
         </dl>
       </SettingsSection>

@@ -1,6 +1,7 @@
 /** Real isolated Next/FastAPI processes; never removes or mutates the user's public cache. */
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { once } from "node:events";
 import { cp, mkdir, readFile, writeFile, access } from "node:fs/promises";
 import path from "node:path";
@@ -58,7 +59,23 @@ export async function verifyReaderRuntime({
     projectRoot,
     config.cache?.directory ?? "var/public-snapshots",
   );
-  const original = await readFile(path.join(originalCache, "current.json"));
+  const { stdout } = await promisify(execFile)(
+    process.execPath,
+    ["--import", "tsx", "tools/fixtures/content-snapshot.mts"],
+    {
+      cwd: projectRoot,
+      env: {
+        ...process.env,
+        NODE_ENV: "test",
+        CONFIG_FILE: path.join(projectRoot, "config.toml"),
+      },
+      maxBuffer: 16 * 1024 * 1024,
+    },
+  );
+  const managed = JSON.parse(stdout);
+  const original = managed
+    ? Buffer.from(JSON.stringify(managed))
+    : await readFile(path.join(originalCache, "current.json"));
   const snapshot = JSON.parse(original.toString("utf8"));
   const content =
     snapshot.contents.find(

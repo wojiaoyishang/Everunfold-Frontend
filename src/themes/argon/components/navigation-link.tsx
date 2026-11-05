@@ -8,6 +8,9 @@ import { useRouteState } from "./route-state";
 import { useNavigation } from "./navigation-state";
 import { navigateToAnchor } from "@/core/browser/scroll-restoration";
 import { isManagementLink } from "@/core/auth/routes";
+import { useLocale } from "@/core/i18n/provider";
+import { localizeHref, localeOf, localePath } from "@/core/i18n/locale";
+import { normalizePath } from "@/core/content/urls";
 
 type AppLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
   href: string;
@@ -16,7 +19,7 @@ type AppLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
 
 /** Keep Next's prefetching and browser gestures, sharing only the pending transition. */
 export function AppLink({
-  href,
+  href: sourceHref,
   replace,
   scroll,
   onNavigate,
@@ -24,7 +27,21 @@ export function AppLink({
   expectedContent,
   ...props
 }: AppLinkProps) {
-  const { navigate } = useRouteState();
+  const { navigate, site } = useRouteState();
+  const { locale, preferred } = useLocale();
+  const originalHref = sourceHref;
+  const publicContent = site.contentTranslations?.[
+    normalizePath(new URL(originalHref, "http://locale.invalid").pathname)
+  ]?.find((item) => item.language === preferred);
+  const href = site.contentLocales?.[
+    normalizePath(new URL(sourceHref, "http://locale.invalid").pathname)
+  ]
+    ? (publicContent?.path ?? sourceHref)
+    : localizeHref(sourceHref, preferred);
+  const contentLocale =
+    site.contentLocales?.[
+      normalizePath(new URL(href, "http://locale.invalid").pathname)
+    ] ?? localePath(new URL(href, "http://locale.invalid").pathname);
   return (
     <Link
       {...props}
@@ -64,6 +81,16 @@ export function AppLink({
           },
         });
         if (canceled) return;
+        if (isManagementLink(href)) {
+          event.preventDefault();
+          window.location.assign(href);
+          return;
+        }
+        if (contentLocale && localeOf(contentLocale) !== locale) {
+          event.preventDefault();
+          window.location.assign(href);
+          return;
+        }
         const destination = clientNavigationHref(window.location.href, href);
         if (!destination) return;
         event.preventDefault();
@@ -84,6 +111,7 @@ export function SearchForm({
   onSearch?: () => void;
 }) {
   const { navigate } = useRouteState();
+  const { locale } = useLocale();
   const { setOpen } = useNavigation();
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     if (event.defaultPrevented) return;
@@ -93,14 +121,23 @@ export function SearchForm({
     event.preventDefault();
     setOpen(false);
     onSearch?.();
-    const url = new URL(searchHref(value), window.location.origin);
+    const url = new URL(
+      localizeHref(searchHref(value), locale),
+      window.location.origin,
+    );
     const type = values.get("type");
     if (type === "article" || type === "shuoshuo" || type === "page")
       url.searchParams.set("type", type);
+    if (values.get("languages") === "all")
+      url.searchParams.set("languages", "all");
     navigate(`${url.pathname}${url.search}`);
   }
   return (
-    <Form action="/search" className={className} onSubmit={onSubmit}>
+    <Form
+      action={localizeHref("/search", locale)}
+      className={className}
+      onSubmit={onSubmit}
+    >
       {children}
     </Form>
   );

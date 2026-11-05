@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button } from "@/themes/argon/components/ui/primitives";
 import { Checkbox } from "@/themes/argon/components/ui/checkbox";
 
@@ -18,7 +20,9 @@ export function AppearanceSettings() {
   return (
     <>
       <fieldset>
-        <legend>外观</legend>
+        <legend>
+          <UiText text="外观" />
+        </legend>
         <div className="setting-options">
           {(
             [
@@ -43,10 +47,12 @@ export function AppearanceSettings() {
           checked={value.amoled}
           onChange={(event) => setAppearance({ amoled: event.target.checked })}
         />
-        深色时使用纯黑背景
+        <UiText text="深色时使用纯黑背景" />
       </label>
       <fieldset>
-        <legend>主题色</legend>
+        <legend>
+          <UiText text="主题色" />
+        </legend>
         <div className="accent-options">
           {colors.map(([accent, label]) => (
             <Button
@@ -66,7 +72,9 @@ export function AppearanceSettings() {
             onChange={(accent) => setAppearance({ accent })}
           />
         </div>
-        <p className="setting-hint">文字颜色会适配深浅背景，保持清晰</p>
+        <p className="setting-hint">
+          <UiText text="文字颜色会适配深浅背景，保持清晰" />
+        </p>
       </fieldset>
     </>
   );

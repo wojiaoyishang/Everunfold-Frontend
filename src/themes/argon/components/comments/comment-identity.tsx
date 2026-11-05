@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import { Button, TextField } from "@/themes/argon/components/ui/primitives";
 import { Icon } from "../icon";
 import { TransitionPanel } from "../transition-panel";
@@ -24,7 +25,8 @@ export function CommentIdentity({
       {" "}
       <div className="composer-identity">
         <label htmlFor={`${prefix}-author`}>
-          昵称 <span aria-hidden="true">*</span>
+          <UiText text="昵称" />
+          <span aria-hidden="true">*</span>
           <TextField
             id={`${prefix}-author`}
             name="author"
@@ -57,7 +59,7 @@ export function CommentIdentity({
           aria-controls={`${prefix}-extra-panel`}
           onClick={() => setExtra(!extra)}
         >
-          邮箱与网站（选填）
+          <UiText text="邮箱与网站（选填）" />
           <Icon name="chevron" />
         </Button>
       </div>
@@ -69,7 +71,7 @@ export function CommentIdentity({
       >
         <div className="composer-extra-fields">
           <label htmlFor={`${prefix}-email`}>
-            邮箱（不会公开）
+            <UiText text="邮箱（不会公开）" />
             <TextField
               id={`${prefix}-email`}
               name="email"
@@ -95,7 +97,7 @@ export function CommentIdentity({
             )}
           </label>
           <label htmlFor={`${prefix}-website`}>
-            个人网站
+            <UiText text="个人网站" />
             <TextField
               id={`${prefix}-website`}
               name="website"

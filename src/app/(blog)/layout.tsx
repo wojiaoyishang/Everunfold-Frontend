@@ -1,7 +1,7 @@
 import "@/themes/argon/argon.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { readPublicSnapshot } from "@/core/content/snapshot";
+import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { readConfiguration } from "@/core/config/server";
 import { BlogShell } from "@/themes/argon/components/shell";
 

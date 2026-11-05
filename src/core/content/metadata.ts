@@ -24,7 +24,25 @@ export function contentMetadata(
     title,
     description,
     ...(siteUrl ? { metadataBase: new URL(siteUrl) } : {}),
-    ...(url ? { alternates: { canonical: url } } : {}),
+    ...(url
+      ? {
+          alternates: {
+            canonical: url,
+            ...(content.access === "public"
+              ? {
+                  languages: Object.fromEntries(
+                    (content.translations ?? [])
+                      .filter((item) => item.access === "public")
+                      .map((item) => [
+                        item.language,
+                        new URL(item.path, siteUrl).href,
+                      ]),
+                  ),
+                }
+              : {}),
+          },
+        }
+      : {}),
     ...(example || content.access !== "public"
       ? { robots: { index: false } }
       : {}),

@@ -1,4 +1,7 @@
 "use client";
+import { useT } from "@/core/i18n/provider";
+import { UiText } from "@/core/i18n/provider";
+
 import {
   useId,
   useLayoutEffect,
@@ -13,13 +16,14 @@ import { useAnchoredPopover } from "./use-anchored-popover";
 
 export function Select({
   name,
-  label,
-  options,
+  label: sourceLabel,
+  options: sourceOptions,
   defaultValue,
   value,
   onValueChange,
   disabled = false,
   className,
+  programOptions = false,
 }: {
   name: string;
   label: string;
@@ -29,7 +33,13 @@ export function Select({
   onValueChange?: (value: string) => void;
   disabled?: boolean;
   className?: string;
+  programOptions?: boolean;
 }) {
+  const t = useT();
+  const label = t(sourceLabel);
+  const options = programOptions
+    ? sourceOptions.map((item) => ({ ...item, label: t(item.label) }))
+    : sourceOptions;
   const id = useId();
   const {
     trigger,
@@ -148,7 +158,7 @@ export function Select({
         onClick={() => setActive(selectedIndex)}
         onKeyDown={keyDown}
       >
-        <span>{options[selectedIndex]?.label ?? "请选择"}</span>
+        <span>{options[selectedIndex]?.label ?? <UiText text="请选择" />}</span>
         <Icon name="chevron" />
       </Button>
       <Popover

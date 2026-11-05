@@ -11,10 +11,17 @@ export function AdminPageHeading({
   return (
     <header className="admin-page-heading">
       <div>
-        <h1>{title}</h1>
-        {description && <p>{description}</p>}
+        <h1>
+          <UiText text={title} />
+        </h1>
+        {description && (
+          <p>
+            <UiText text={description} />
+          </p>
+        )}
       </div>
       {action}
     </header>
   );
 }
+import { UiText } from "@/core/i18n/provider";

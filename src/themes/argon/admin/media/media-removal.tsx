@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useState } from "react";
 import type {
   MediaDetails,
@@ -64,7 +66,7 @@ export function MediaRemovalControls({
             onClick={() => void apply("restore")}
           >
             <Icon name="refresh" />
-            恢复文件
+            <UiText text="恢复文件" />
           </Button>
         )}
         <Button
@@ -78,11 +80,13 @@ export function MediaRemovalControls({
             setConfirm(true);
           }}
         >
-          {detail.purge_pending
-            ? "重试删除文件"
-            : detail.deleted
-              ? "永久删除"
-              : "删除文件"}
+          {detail.purge_pending ? (
+            <UiText text="重试删除文件" />
+          ) : detail.deleted ? (
+            <UiText text="永久删除" />
+          ) : (
+            <UiText text="删除文件" />
+          )}
         </Button>
       </div>
       <ConfirmDialog
@@ -105,7 +109,7 @@ export function MediaRemovalControls({
               disabled={removal.busy}
               onClick={() => setAttempt((value) => value + 1)}
             >
-              重新读取
+              <UiText text="重新读取" />
             </Button>
           ) : undefined
         }
@@ -117,7 +121,7 @@ export function MediaRemovalControls({
               disabled={removal.busy || resuming}
               onChange={(e) => setOriginal(e.target.checked)}
             />
-            删除实际文件
+            <UiText text="删除实际文件" />
           </label>
           <label>
             <Checkbox
@@ -125,7 +129,7 @@ export function MediaRemovalControls({
               disabled={removal.busy || resuming || !original}
               onChange={(e) => setSafe(e.target.checked)}
             />
-            安全删除
+            <UiText text="安全删除" />
           </label>
         </div>
         <p className="admin-media-removal-scope" role="status">

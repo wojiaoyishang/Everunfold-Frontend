@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { randomUUID } from "@/core/browser/crypto";
 import {
   createContext,
@@ -117,7 +119,9 @@ export function BlockComposer({
           <div className={styles.ghost}>
             <Icon name="grip" />
             <strong>{item.label}</strong>
-            <span>放到插入线处</span>
+            <span>
+              <UiText text="放到插入线处" />
+            </span>
           </div>
         )}
       >

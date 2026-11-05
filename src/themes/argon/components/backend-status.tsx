@@ -1,4 +1,5 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
 
 import { useId } from "react";
 import { readerPhase, readerProgress } from "@/core/reader/state";
@@ -69,22 +70,28 @@ export function BackendStatus() {
             <Icon name={presentation.icon} />
           </span>
           <div>
-            <strong id={`${id}-title`}>动态数据状态</strong>
+            <strong id={`${id}-title`}>
+              <UiText text="动态数据状态" />
+            </strong>
             <p role="status">{presentation.text}</p>
             {progress.total > 0 && <p>{progressText}</p>}
           </div>
         </div>
         {["partial", "unavailable", "offline"].includes(phase) && (
-          <p className="backend-status-reading">已加载的页面仍可正常阅读。</p>
+          <p className="backend-status-reading">
+            <UiText text="已加载的页面仍可正常阅读。" />
+          </p>
         )}
         <DynamicStatusExtensions />
         <div className="backend-status-footer">
           <span className="backend-status-time">
-            {snapshot.completedAt !== null
-              ? `更新于 ${new Date(snapshot.completedAt).toLocaleTimeString("zh-CN", { hour12: false })}`
-              : loading
-                ? "正在连接…"
-                : "尚无更新记录"}
+            {snapshot.completedAt !== null ? (
+              `更新于 ${new Date(snapshot.completedAt).toLocaleTimeString("zh-CN", { hour12: false })}`
+            ) : loading ? (
+              <UiText text="正在连接…" />
+            ) : (
+              <UiText text="尚无更新记录" />
+            )}
           </span>
           <Button
             className="backend-status-refresh"
@@ -96,7 +103,7 @@ export function BackendStatus() {
             onClick={() => store.refresh()}
           >
             <Icon name="refresh" />
-            {loading ? "正在更新" : "重新检查"}
+            {loading ? <UiText text="正在更新" /> : <UiText text="重新检查" />}
           </Button>
         </div>
       </Popover>

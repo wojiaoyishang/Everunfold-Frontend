@@ -1,0 +1,27 @@
+import type { MetadataRoute } from "next";
+import { readPublicSnapshot } from "@/core/content/snapshot";
+import { readConfiguration } from "@/core/config/server";
+
+export const dynamic = "force-dynamic";
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const site = readConfiguration().publicSiteUrl;
+  if (!site) return [];
+  const snapshot = await readPublicSnapshot();
+  if (snapshot.site.settings?.site.allow_indexing === false) return [];
+  return snapshot.contents
+    .filter((item) => (item.access ?? "public") === "public")
+    .map((item) => ({
+      url: new URL(item.path, site).href,
+      lastModified: item.updated_at,
+      alternates: {
+        languages: Object.fromEntries(
+          (item.translations ?? [])
+            .filter((member) => member.access === "public")
+            .map((member) => [
+              member.language,
+              new URL(member.path, site).href,
+            ]),
+        ),
+      },
+    }));
+}

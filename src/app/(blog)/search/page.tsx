@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { readPublicSnapshot } from "@/core/content/snapshot";
+import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { pageNumber } from "@/core/content/query";
 import { feedType } from "@/core/content/presentation";
 import { SearchResults } from "@/themes/argon/components/search-results";
@@ -24,6 +24,7 @@ export default async function SearchPage({
       query={query}
       type={feedType(params.type)}
       page={pageNumber(params.page)}
+      allLanguages={params.languages === "all"}
     />
   );
 }

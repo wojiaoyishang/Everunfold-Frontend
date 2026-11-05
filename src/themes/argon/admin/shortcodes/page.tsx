@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useCallback, useState } from "react";
 import { useShortcodeLibrary } from "@/core/shortcodes/use-library";
 import type { CatalogItem } from "@/core/shortcodes/registry";
@@ -47,7 +49,7 @@ export function ShortcodeLibraryPage() {
             onClick={() => choose("new")}
           >
             <Icon name="plus" />
-            新建短代码
+            <UiText text="新建短代码" />
           </Button>
         }
       />
@@ -60,6 +62,7 @@ export function ShortcodeLibraryPage() {
           onChange={(event) => setQuery(event.target.value)}
         />
         <Select
+          programOptions
           name="shortcode-origin"
           label="短代码来源"
           value={filter}
@@ -77,7 +80,7 @@ export function ShortcodeLibraryPage() {
           disabled={library.loading || dirty}
           onClick={() => void library.reload()}
         >
-          重新读取
+          <UiText text="重新读取" />
         </Button>
       </div>
       {library.error && (
@@ -87,7 +90,7 @@ export function ShortcodeLibraryPage() {
       )}
       {library.loading && !library.items.length && (
         <p role="status" className={styles.hint}>
-          正在读取短代码…
+          <UiText text="正在读取短代码…" />
         </p>
       )}
       {selected && (
@@ -112,7 +115,7 @@ export function ShortcodeLibraryPage() {
               <h2>{item.source.title}</h2>
               <span className={styles.badge}>
                 {origins[item.origin]}
-                {!item.editable ? " · 只读" : ""}
+                {!item.editable ? <UiText text=" · 只读" /> : ""}
               </span>
             </div>
             <div className={styles.cardBody}>
@@ -123,29 +126,43 @@ export function ShortcodeLibraryPage() {
                 definitions={library.settings?.value.shortcodes}
                 body={item.source.example_body}
               />
-              <p>{item.source.description || "自定义 HTML / CSS 模板"}</p>
+              <p>
+                {item.source.description || (
+                  <UiText text="自定义 HTML / CSS 模板" />
+                )}
+              </p>
             </div>
             <div className={styles.cardFooter}>
               <span className={styles.hint}>
-                {item.archived
-                  ? "已归档"
-                  : item.applied_revision
-                    ? `已应用 ${item.applied_revision}${item.revision !== item.applied_revision ? " · 有草稿修改" : ""}`
-                    : "尚未应用"}
+                {item.archived ? (
+                  <UiText text="已归档" />
+                ) : item.applied_revision ? (
+                  `已应用 ${item.applied_revision}${item.revision !== item.applied_revision ? " · 有草稿修改" : ""}`
+                ) : (
+                  <UiText text="尚未应用" />
+                )}
               </span>
               <Button className="admin-button" onClick={() => choose(item)}>
-                {item.editable ? "编辑模板" : "查看样式"}
+                {item.editable ? (
+                  <UiText text="编辑模板" />
+                ) : (
+                  <UiText text="查看样式" />
+                )}
               </Button>
             </div>
           </article>
         ))}
       </div>
       {!library.loading && !items.length && !library.error && (
-        <p className={styles.notice}>没有符合条件的短代码。</p>
+        <p className={styles.notice}>
+          <UiText text="没有符合条件的短代码。" />
+        </p>
       )}
       {library.settings && (
         <div className={styles.actions} aria-label="短代码前台同步状态">
-          <span className={styles.hint}>前台同步</span>
+          <span className={styles.hint}>
+            <UiText text="前台同步" />
+          </span>
           {library.settings.delivery.map((node) => (
             <span key={node.node_id} className={styles.actions}>
               <span className={styles.hint}>{node.node_id}</span>

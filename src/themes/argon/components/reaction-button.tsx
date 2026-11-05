@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useState } from "react";
@@ -31,8 +33,10 @@ export function ReactionButton({
       }}
     >
       <Icon name="heart" />
-      {count + Number(liked) || "喜欢"}
-      <span className="sr-only">（互动预览）</span>
+      {count + Number(liked) || <UiText text="喜欢" />}
+      <span className="sr-only">
+        <UiText text="（互动预览）" />
+      </span>
     </Button>
   );
 }

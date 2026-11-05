@@ -1,8 +1,13 @@
 import type { Content, PublicSnapshot } from "./types";
+import { languageContents } from "@/core/i18n/snapshot";
+import { localeOf } from "@/core/i18n/locale";
 
 /** Chronological neighbors, independent of pinned status and the current feed filter. */
 export function articleNeighbors(snapshot: PublicSnapshot, current: Content) {
-  const articles = snapshot.contents
+  const articles = languageContents(
+    snapshot.contents,
+    localeOf(current.language),
+  )
     .filter((entry) => entry.kind === "article")
     .sort(
       (a, b) =>
@@ -30,8 +35,13 @@ export function relatedArticles(
   const score = (entry: Content) =>
     entry.tags.filter((term) => tags.has(term.id)).length * 3 +
     entry.categories.filter((term) => categories.has(term.id)).length;
-  return snapshot.contents
-    .filter((entry) => entry.kind === "article" && entry.id !== current.id)
+  return languageContents(snapshot.contents, localeOf(current.language))
+    .filter(
+      (entry) =>
+        entry.kind === "article" &&
+        (entry.translation_group_id ?? entry.id) !==
+          (current.translation_group_id ?? current.id),
+    )
     .map((entry) => ({ entry, score: score(entry) }))
     .sort(
       (a, b) =>

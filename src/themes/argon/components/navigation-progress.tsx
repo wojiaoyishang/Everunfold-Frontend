@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useRef, type CSSProperties } from "react";
 import type { NavigationFailure } from "@/core/navigation/document";
 import { NAVIGATION_FAILURE_HOLD_MS } from "@/core/navigation/transaction";
@@ -73,9 +75,11 @@ export function NavigationProgress() {
             {failed ? "(╥﹏╥)" : "(ง •̀_•́)ง"}
           </span>
           <span>
-            {failed
-              ? failureText[feedback.failure ?? "network"]
-              : "正在努力加载，再等一下…"}
+            {failed ? (
+              failureText[feedback.failure ?? "network"]
+            ) : (
+              <UiText text="正在努力加载，再等一下…" />
+            )}
           </span>
         </div>
       </div>
@@ -84,13 +88,17 @@ export function NavigationProgress() {
         role={failed ? "alert" : "status"}
         aria-live={failed ? "assertive" : "polite"}
       >
-        {failed
-          ? `${failureText[feedback.failure ?? "network"]}。提示将自动收起，可再次点击原链接。`
-          : pending
-            ? feedback.phase === "slow"
-              ? "正在努力加载，当前页面可以继续阅读。"
-              : "正在加载下一页…"
-            : ""}
+        {failed ? (
+          `${failureText[feedback.failure ?? "network"]}。提示将自动收起，可再次点击原链接。`
+        ) : pending ? (
+          feedback.phase === "slow" ? (
+            <UiText text="正在努力加载，当前页面可以继续阅读。" />
+          ) : (
+            <UiText text="正在加载下一页…" />
+          )
+        ) : (
+          ""
+        )}
       </span>
     </div>
   );

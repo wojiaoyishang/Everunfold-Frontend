@@ -1,4 +1,5 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
 
 import { useEffect } from "react";
 import { useReaderData, useStatusSlot } from "./reader-data";
@@ -20,15 +21,21 @@ function ReaderPreviewControls() {
   return (
     <div className="backend-demo-controls">
       <div className="backend-demo-heading">
-        <span className="preview-badge">联调演示</span>
+        <span className="preview-badge">
+          <UiText text="联调演示" />
+        </span>
         <span className="backend-demo-identity" role="status">
-          {identity
-            ? identity.persona === "member"
-              ? "演示读者 · 已登录"
-              : "演示访客 · 未登录"
-            : loading
-              ? "正在检查演示身份"
-              : "演示身份尚未确认"}
+          {identity ? (
+            identity.persona === "member" ? (
+              <UiText text="演示读者 · 已登录" />
+            ) : (
+              <UiText text="演示访客 · 未登录" />
+            )
+          ) : loading ? (
+            <UiText text="正在检查演示身份" />
+          ) : (
+            <UiText text="演示身份尚未确认" />
+          )}
         </span>
       </div>
       <div
@@ -41,17 +48,19 @@ function ReaderPreviewControls() {
           disabled={loading || snapshot.offline}
           onClick={() => store.selectPersona("guest")}
         >
-          演示访客
+          <UiText text="演示访客" />
         </Button>
         <Button
           aria-pressed={identity?.persona === "member"}
           disabled={loading || snapshot.offline}
           onClick={() => store.selectPersona("member")}
         >
-          演示读者
+          <UiText text="演示读者" />
         </Button>
       </div>
-      <p className="backend-demo-note">模拟身份与浏览量，不产生真实记录。</p>
+      <p className="backend-demo-note">
+        <UiText text="模拟身份与浏览量，不产生真实记录。" />
+      </p>
     </div>
   );
 }

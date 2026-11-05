@@ -13,6 +13,7 @@ export function SearchContentType({
 }) {
   return (
     <Select
+      programOptions
       name="type"
       label="搜索内容类型"
       options={searchTypes}

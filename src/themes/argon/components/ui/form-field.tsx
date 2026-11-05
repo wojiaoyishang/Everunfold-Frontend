@@ -17,7 +17,9 @@ export function FormField({
 }) {
   return (
     <div className="ui-form-field" data-invalid={invalid || undefined}>
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id}>
+        <UiText text={label} />
+      </label>
       <div className="ui-field-control" data-leading-icon={Boolean(icon)}>
         {icon && (
           <span className="ui-field-icon">
@@ -29,3 +31,4 @@ export function FormField({
     </div>
   );
 }
+import { UiText } from "@/core/i18n/provider";

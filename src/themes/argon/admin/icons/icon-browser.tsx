@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import { useIconLibrary } from "@/core/media/icon-library";
 import { builtinIconNames, Icon } from "../../components/icon";
@@ -116,7 +118,10 @@ export function IconBrowser({
             }}
           />
           <span className="admin-upload-hint">
-            SVG / PNG / WebP<small>支持多选 · 单文件 1 MB 内</small>
+            SVG / PNG / WebP
+            <small>
+              <UiText text="支持多选 · 单文件 1 MB 内" />
+            </small>
           </span>
         </div>
       </div>
@@ -147,7 +152,7 @@ export function IconBrowser({
               className="admin-button"
               onClick={() => void library.retry()}
             >
-              重试
+              <UiText text="重试" />
             </Button>
           )}
         </div>
@@ -183,11 +188,13 @@ export function IconBrowser({
       </div>
       {items.length === 0 && (
         <p className="admin-library-empty">
-          {library.loading && source === "uploaded"
-            ? "正在读取图标…"
-            : library.query
-              ? "没有匹配的图标"
-              : "上传一个图标，即可在菜单中使用"}
+          {library.loading && source === "uploaded" ? (
+            <UiText text="正在读取图标…" />
+          ) : library.query ? (
+            <UiText text="没有匹配的图标" />
+          ) : (
+            <UiText text="上传一个图标，即可在菜单中使用" />
+          )}
         </p>
       )}
       {source === "uploaded" && library.total > 60 && (
@@ -197,15 +204,18 @@ export function IconBrowser({
             disabled={library.page === 1}
             onClick={() => library.setPage(library.page - 1)}
           >
-            上一页
+            <UiText text="上一页" />
           </Button>
-          <span>第 {library.page} 页</span>
+          <span>
+            <UiText text="第" />
+            {library.page} <UiText text="页" />
+          </span>
           <Button
             className="admin-button"
             disabled={library.page * 60 >= library.total}
             onClick={() => library.setPage(library.page + 1)}
           >
-            下一页
+            <UiText text="下一页" />
           </Button>
         </div>
       )}

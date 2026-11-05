@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button, Popover } from "@/themes/argon/components/ui/primitives";
 import { RangeField } from "@/themes/argon/components/ui/range-field";
 
@@ -99,7 +101,9 @@ export function ReadingSettings() {
       >
         <div className="settings-content">
           <header>
-            <h2 id="reading-settings-title">阅读设置</h2>
+            <h2 id="reading-settings-title">
+              <UiText text="阅读设置" />
+            </h2>
             <Button
               type="button"
               className="icon-button"
@@ -116,7 +120,9 @@ export function ReadingSettings() {
             onChange={homeFeed.setValue}
           />
           <fieldset>
-            <legend>全站动效</legend>
+            <legend>
+              <UiText text="全站动效" />
+            </legend>
             <div className="setting-options">
               {(
                 [
@@ -136,12 +142,14 @@ export function ReadingSettings() {
               ))}
             </div>
             <p className="setting-hint">
-              控制滚动惯性和界面动画，背景可单独设置
+              <UiText text="控制滚动惯性和界面动画，背景可单独设置" />
             </p>
           </fieldset>
           <div className="setting-playback">
             <div>
-              <span id={`${panelId}-background`}>动态背景</span>
+              <span id={`${panelId}-background`}>
+                <UiText text="动态背景" />
+              </span>
               <p className="setting-hint">{playback.description}</p>
             </div>
             <Switch
@@ -156,11 +164,13 @@ export function ReadingSettings() {
               className="settings-reset"
               onClick={() => playback.setEnabled(true)}
             >
-              重试背景播放
+              <UiText text="重试背景播放" />
             </Button>
           )}
           <fieldset>
-            <legend>字体</legend>
+            <legend>
+              <UiText text="字体" />
+            </legend>
             <div className="setting-options">
               <Button
                 type="button"
@@ -179,7 +189,8 @@ export function ReadingSettings() {
             </div>
           </fieldset>
           <label className="setting-range">
-            字号 <output>{settings.size} px</output>
+            <UiText text="字号" />
+            <output>{settings.size} px</output>
             <RangeField
               aria-label="正文字号"
               min="14"
@@ -190,26 +201,30 @@ export function ReadingSettings() {
             />
           </label>
           <fieldset>
-            <legend>阴影</legend>
+            <legend>
+              <UiText text="阴影" />
+            </legend>
             <div className="setting-options">
               <Button
                 type="button"
                 aria-pressed={!settings.shadow}
                 onClick={() => update({ shadow: false })}
               >
-                浅阴影
+                <UiText text="浅阴影" />
               </Button>
               <Button
                 type="button"
                 aria-pressed={settings.shadow}
                 onClick={() => update({ shadow: true })}
               >
-                深阴影
+                <UiText text="深阴影" />
               </Button>
             </div>
           </fieldset>
           <fieldset>
-            <legend>滤镜</legend>
+            <legend>
+              <UiText text="滤镜" />
+            </legend>
             <div className="setting-options">
               {[
                 ["none", "关闭"],
@@ -229,7 +244,8 @@ export function ReadingSettings() {
             </div>
           </fieldset>
           <label className="setting-range">
-            圆角 <output>{settings.radius} px</output>
+            <UiText text="圆角" />
+            <output>{settings.radius} px</output>
             <RangeField
               aria-label="卡片圆角"
               min="0"
@@ -251,9 +267,11 @@ export function ReadingSettings() {
               homeFeed.setValue("all");
             }}
           >
-            恢复默认
+            <UiText text="恢复默认" />
           </Button>
-          <p className="settings-persistence">偏好自动保存在当前浏览器</p>
+          <p className="settings-persistence">
+            <UiText text="偏好自动保存在当前浏览器" />
+          </p>
         </div>
       </Popover>
     </>

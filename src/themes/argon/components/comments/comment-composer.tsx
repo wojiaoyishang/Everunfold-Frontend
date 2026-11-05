@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button, Form } from "@/themes/argon/components/ui/primitives";
 
 import {
@@ -112,8 +114,12 @@ export function CommentComposer({
           <Icon name="edit" />
         </span>
         <div>
-          <h2 id={`${prefix}-title`}>围坐篝火，聊上几句</h2>
-          <p>一句问候、一点共鸣，都值得被留下。</p>
+          <h2 id={`${prefix}-title`}>
+            <UiText text="围坐篝火，聊上几句" />
+          </h2>
+          <p>
+            <UiText text="一句问候、一点共鸣，都值得被留下。" />
+          </p>
         </div>
       </header>
       <TransitionPanel
@@ -125,7 +131,8 @@ export function CommentComposer({
         <div className="composer-reply">
           <div>
             <strong id={`${prefix}-reply-title`}>
-              正在回复 @{reply?.author}
+              <UiText text="正在回复 @" />
+              {reply?.author}
             </strong>
             <p>{reply?.body.slice(0, 90)}</p>
           </div>
@@ -159,19 +166,21 @@ export function CommentComposer({
         />
         <div className="composer-submit-row">
           <p>
-            <span className="preview-badge">互动演示</span>
-            留言只显示在本页，不会发布；刷新后清除。
+            <span className="preview-badge">
+              <UiText text="互动演示" />
+            </span>
+            <UiText text="留言只显示在本页，不会发布；刷新后清除。" />
           </p>
           <Button className="primary-button" type="submit" disabled={!hydrated}>
             <Icon name="send" />
-            添加到本页
+            <UiText text="添加到本页" />
           </Button>
         </div>
         <p className="composer-status" role="status">
           {notice}
         </p>
         <noscript>
-          请启用 JavaScript 后体验评论交互；历史留言仍可阅读。
+          <UiText text="请启用 JavaScript 后体验评论交互；历史留言仍可阅读。" />
         </noscript>
       </Form>
     </section>

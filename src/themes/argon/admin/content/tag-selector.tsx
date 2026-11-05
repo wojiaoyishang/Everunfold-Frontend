@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import type { EditorTerm } from "@/generated/content-admin-contract";
 import { tagFontSize } from "@/core/content-management/taxonomy-options";
@@ -33,13 +35,15 @@ export function TagSelector({
         onChange={onChange}
         disabled={disabled}
       />
-      <small>多个标签请用逗号分开。</small>
+      <small>
+        <UiText text="多个标签请用逗号分开。" />
+      </small>
       <Button
         className={styles.textButton}
         aria-expanded={open}
         onClick={() => setOpen(!open)}
       >
-        从常用标签中选择
+        <UiText text="从常用标签中选择" />
       </Button>
       <div className={styles.panelReveal} data-open={open} inert={!open}>
         <div>
@@ -61,7 +65,11 @@ export function TagSelector({
                 {term.name}
               </Button>
             ))}
-            {!tags.length && <small>发布内容后，常用标签会显示在这里。</small>}
+            {!tags.length && (
+              <small>
+                <UiText text="发布内容后，常用标签会显示在这里。" />
+              </small>
+            )}
           </div>
         </div>
       </div>

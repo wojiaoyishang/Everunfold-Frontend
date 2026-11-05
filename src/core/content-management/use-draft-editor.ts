@@ -49,7 +49,11 @@ type Write =
   | { action: "create"; input: DraftCreate }
   | { action: "save" | "publish"; input: DraftSave }
   | { action: "withdraw"; input: DraftMutation };
-export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
+export function useDraftEditor(
+  type: ContentTypeDefinition,
+  id: string | null,
+  language: "zh-CN" | "en" = "zh-CN",
+) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const account = useAdminAccount();
   const sessionRef = useRef<DraftSession | null>(null);
@@ -325,6 +329,7 @@ export function useDraftEditor(type: ContentTypeDefinition, id: string | null) {
           action: "create",
           input: {
             type_id: type.id,
+            language,
             operation_id: randomUUID(),
             fields: displayed,
           },

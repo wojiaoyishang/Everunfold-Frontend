@@ -75,6 +75,8 @@ export type PublicPath = string | null;
 export type PublishedAt = string | null;
 export type CreatedAt = string;
 export type UpdatedAt = string;
+export type Language = string;
+export type TranslationGroupId = string | null;
 export type Id7 = string;
 export type Type1 = "markdown" | "html";
 export type Content1 = string;
@@ -412,6 +414,8 @@ export interface DraftDetail {
   published_at?: PublishedAt;
   created_at: CreatedAt;
   updated_at: UpdatedAt;
+  language?: Language;
+  translation_group_id?: TranslationGroupId;
   body: Body;
   settings?: EditorSettings;
   media_urls?: MediaUrls;

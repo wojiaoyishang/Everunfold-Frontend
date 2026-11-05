@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type {
   DraftVersioning,
   VersionSelection,
@@ -66,7 +68,7 @@ export function VersionCatalog({
           disabled={working || page <= 1}
           onClick={() => onChange(page - 1)}
         >
-          上一页
+          <UiText text="上一页" />
         </Button>
         <span>
           {page} / {Math.ceil(total / 20)}
@@ -76,7 +78,7 @@ export function VersionCatalog({
           disabled={working || page * 20 >= total}
           onClick={() => onChange(page + 1)}
         >
-          下一页
+          <UiText text="下一页" />
         </Button>
       </div>
     );
@@ -119,7 +121,9 @@ export function VersionCatalog({
                 <strong>
                   V{item.revision}
                   {item.current && (
-                    <span className={styles.badge}>最新检查点</span>
+                    <span className={styles.badge}>
+                      <UiText text="最新检查点" />
+                    </span>
                   )}
                 </strong>
                 <span>
@@ -132,8 +136,9 @@ export function VersionCatalog({
                 </small>
                 {(item.parents.length > 0 || item.branch_id) && (
                   <small>
-                    来源 {item.parents.map((p) => `V${p}`).join("、")}
-                    {item.branch_id ? " + 草稿分支" : ""}
+                    <UiText text="来源" />
+                    {item.parents.map((p) => `V${p}`).join("、")}
+                    {item.branch_id ? <UiText text=" + 草稿分支" /> : ""}
                   </small>
                 )}
               </Button>
@@ -148,11 +153,15 @@ export function VersionCatalog({
                   })
                 }
               >
-                删除
+                <UiText text="删除" />
               </Button>
             </div>
           ))}
-          {!catalog && <p role="status">正在读取历史版本…</p>}
+          {!catalog && (
+            <p role="status">
+              <UiText text="正在读取历史版本…" />
+            </p>
+          )}
           {pager(pages.page, catalog?.total ?? 0, (page) =>
             setPages({ ...pages, page }),
           )}
@@ -160,9 +169,13 @@ export function VersionCatalog({
       )}
       {tab === "branch" && (
         <section aria-label="草稿分支列表">
-          <h3>本机草稿</h3>
+          <h3>
+            <UiText text="本机草稿" />
+          </h3>
           {!versioning.local.length && (
-            <p className={styles.empty}>此浏览器暂无独立草稿。</p>
+            <p className={styles.empty}>
+              <UiText text="此浏览器暂无独立草稿。" />
+            </p>
           )}
           {versioning.local.map((item) => (
             <div
@@ -176,13 +189,19 @@ export function VersionCatalog({
                 disabled={working || locked}
                 onClick={() => choose("local", item.id)}
               >
-                <strong>{item.payload.note || "本地草稿"}</strong>
-                <span>{item.payload.fields.title || "未命名文章"}</span>
+                <strong>
+                  {item.payload.note || <UiText text="本地草稿" />}
+                </strong>
+                <span>
+                  {item.payload.fields.title || <UiText text="未命名文章" />}
+                </span>
                 <small>{date(new Date(item.updatedAt).toISOString())}</small>
                 <small>
-                  {item.submitted
-                    ? "已送出副本，本机仍保留"
-                    : "仅保存在此浏览器"}
+                  {item.submitted ? (
+                    <UiText text="已送出副本，本机仍保留" />
+                  ) : (
+                    <UiText text="仅保存在此浏览器" />
+                  )}
                 </small>
               </Button>
               <Button
@@ -196,13 +215,17 @@ export function VersionCatalog({
                   })
                 }
               >
-                删除
+                <UiText text="删除" />
               </Button>
             </div>
           ))}
-          <h3>服务器草稿分支</h3>
+          <h3>
+            <UiText text="服务器草稿分支" />
+          </h3>
           {!catalog?.branches.length && (
-            <p className={styles.empty}>暂无已送到服务器的分支。</p>
+            <p className={styles.empty}>
+              <UiText text="暂无已送到服务器的分支。" />
+            </p>
           )}
           {catalog?.branches.map((item) => (
             <div
@@ -216,14 +239,16 @@ export function VersionCatalog({
                 disabled={working || locked}
                 onClick={() => choose("branch", item.id)}
               >
-                <strong>{item.note || "草稿分支"}</strong>
+                <strong>{item.note || <UiText text="草稿分支" />}</strong>
                 <small>
                   {item.actor} · {date(item.created_at)}
                 </small>
                 <small>
-                  {item.merged_revision
-                    ? `已合并到 V${item.merged_revision}`
-                    : "待合并"}
+                  {item.merged_revision ? (
+                    `已合并到 V${item.merged_revision}`
+                  ) : (
+                    <UiText text="待合并" />
+                  )}
                   {item.base_revision ? ` · 基于 V${item.base_revision}` : ""}
                 </small>
               </Button>
@@ -238,7 +263,7 @@ export function VersionCatalog({
                   })
                 }
               >
-                删除
+                <UiText text="删除" />
               </Button>
             </div>
           ))}
@@ -250,7 +275,9 @@ export function VersionCatalog({
       {tab === "merge" && (
         <section aria-label="合并记录列表">
           {!catalog?.merges.length && (
-            <p className={styles.empty}>暂无合并记录。</p>
+            <p className={styles.empty}>
+              <UiText text="暂无合并记录。" />
+            </p>
           )}
           {catalog?.merges.map((item) => (
             <div
@@ -274,9 +301,11 @@ export function VersionCatalog({
                   {item.actor} · {date(item.created_at)}
                 </small>
                 <small>
-                  {item.unresolved
-                    ? `${item.unresolved} 项冲突待处理`
-                    : "冲突已处理"}
+                  {item.unresolved ? (
+                    `${item.unresolved} 项冲突待处理`
+                  ) : (
+                    <UiText text="冲突已处理" />
+                  )}
                 </small>
               </Button>
               <Button
@@ -295,7 +324,7 @@ export function VersionCatalog({
                   })
                 }
               >
-                删除
+                <UiText text="删除" />
               </Button>
             </div>
           ))}

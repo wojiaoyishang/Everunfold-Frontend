@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId, useState } from "react";
 import {
   calendarDays,
@@ -216,7 +218,9 @@ export function DateTimeField({
         </div>
         <div className={styles.time}>
           <Icon name="clock" />
-          <span>时间</span>
+          <span>
+            <UiText text="时间" />
+          </span>
           <Select
             name={`${id}-hour`}
             label="小时"
@@ -243,7 +247,7 @@ export function DateTimeField({
         </div>
         <footer className={styles.footer}>
           <Button disabled={disabled} onClick={() => initialize(new Date())}>
-            现在
+            <UiText text="现在" />
           </Button>
           <Button
             disabled={disabled}
@@ -252,7 +256,7 @@ export function DateTimeField({
               close();
             }}
           >
-            清空
+            <UiText text="清空" />
           </Button>
           <Button
             disabled={disabled}
@@ -262,7 +266,7 @@ export function DateTimeField({
               close();
             }}
           >
-            确定
+            <UiText text="确定" />
           </Button>
         </footer>
       </Popover>

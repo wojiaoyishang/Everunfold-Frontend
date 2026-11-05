@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ContentTypeDefinition } from "@/generated/content-admin-contract";
@@ -28,6 +30,8 @@ import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 import { CodePreferencesProvider } from "../../components/code-preferences";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
+import { EditorLanguages } from "./editor-languages";
+import type { Locale } from "@/core/i18n/locale";
 
 export function DraftEditor({
   type,
@@ -36,7 +40,8 @@ export function DraftEditor({
   type: ContentTypeDefinition;
   id: string | null;
 }) {
-  const editor = useDraftEditor(type, id);
+  const [language, setLanguage] = useState<Locale>("zh-CN");
+  const editor = useDraftEditor(type, id, language);
   const router = useRouter();
   const resources = useEditorResources();
   const shortcodes = useAppliedShortcodes();
@@ -200,7 +205,9 @@ export function DraftEditor({
             onClick={() => requestLeave(`/admin/content/${type.id}`)}
           >
             <Icon name="arrow-left" />
-            返回{type.label}列表
+            <UiText text="返回" />
+            <UiText text={type.label} />
+            <UiText text="列表" />
           </Button>
           <div className={styles.headerActions}>
             <ScrollHeaderActions className={styles.previewActions}>
@@ -215,7 +222,11 @@ export function DraftEditor({
                 }}
               >
                 <Icon name={mode === "preview" ? "edit" : "eye"} />
-                {mode === "preview" ? "返回编辑" : "正文预览"}
+                {mode === "preview" ? (
+                  <UiText text="返回编辑" />
+                ) : (
+                  <UiText text="正文预览" />
+                )}
               </Button>
               <FrontendPreviewButton
                 needsSave={editor.dirty || !editor.detail}
@@ -235,7 +246,7 @@ export function DraftEditor({
                     rel="noopener noreferrer"
                   >
                     <Icon name="external" />
-                    查看前台
+                    <UiText text="查看前台" />
                   </RouteLink>
                 )}
             </ScrollHeaderActions>
@@ -253,7 +264,7 @@ export function DraftEditor({
               className={notice ? "admin-draft-saved" : styles.visuallyHidden}
               key={notice || "idle"}
             >
-              {notice || (editor.dirty ? "有未保存的修改" : "")}
+              {notice || (editor.dirty ? <UiText text="有未保存的修改" /> : "")}
             </span>
           </div>
         </div>
@@ -264,8 +275,42 @@ export function DraftEditor({
           type={type}
           fields={editor.fields}
           detail={editor.detail}
+          language={language}
           onChange={editor.setFields}
           disabled={Boolean(blocked || (id && !editor.detail))}
+        />
+        <EditorLanguages
+          key={id ?? "new"}
+          id={id}
+          contentRevision={editor.detail?.revision}
+          type={type.id}
+          language={language}
+          onLanguage={setLanguage}
+          disabled={Boolean(editor.busy || leaving || uploading)}
+          onNavigate={(href) => {
+            if (
+              href === `/admin/content/${type.id}/${id}/edit#content-languages`
+            ) {
+              location.hash = "content-languages";
+              return;
+            }
+            if (editor.privateUnsaved || editor.uncertain) {
+              requestLeave(href);
+              return;
+            }
+            if (editor.session)
+              void editor.session
+                .prepareNavigation()
+                .then(() => navigate(href))
+                .catch((cause: unknown) =>
+                  setNavigationError(
+                    cause instanceof Error
+                      ? cause.message
+                      : "请先保存本地草稿。",
+                  ),
+                );
+            else requestLeave(href);
+          }}
         />
         <CollaborationBar
           session={editor.session}
@@ -308,13 +353,13 @@ export function DraftEditor({
             aria-pressed={section === "body"}
             onClick={() => setSection("body")}
           >
-            正文
+            <UiText text="正文" />
           </Button>
           <Button
             aria-pressed={section === "settings"}
             onClick={() => setSection("settings")}
           >
-            内容设置
+            <UiText text="内容设置" />
           </Button>
         </div>
         <ConfirmDialog
@@ -379,7 +424,7 @@ export function DraftEditor({
               >
                 {archived && (
                   <p className="admin-draft-message">
-                    这份内容已在回收站，请返回列表恢复后再编辑。
+                    <UiText text="这份内容已在回收站，请返回列表恢复后再编辑。" />
                   </p>
                 )}
                 {editor.error && (
@@ -390,7 +435,7 @@ export function DraftEditor({
                         className="admin-button"
                         onClick={editor.retryRead}
                       >
-                        重新读取
+                        <UiText text="重新读取" />
                       </Button>
                     )}
                     {editor.conflict && (
@@ -399,14 +444,14 @@ export function DraftEditor({
                         disabled={editor.busy}
                         onClick={() => void editor.readLatest()}
                       >
-                        查看最新内容
+                        <UiText text="查看最新内容" />
                       </Button>
                     )}
                   </div>
                 )}
                 {editor.loading ? (
                   <div className="admin-draft-empty" role="status">
-                    正在读取内容…
+                    <UiText text="正在读取内容…" />
                   </div>
                 ) : (
                   (!id || editor.detail) && (
@@ -434,7 +479,9 @@ export function DraftEditor({
                           }
                         />
                       ) : (
-                        <p>此类型的编辑器暂不可用，内容仍会保留。</p>
+                        <p>
+                          <UiText text="此类型的编辑器暂不可用，内容仍会保留。" />
+                        </p>
                       )}
                     </div>
                   )
@@ -442,12 +489,14 @@ export function DraftEditor({
                 {editor.latest && (
                   <section className="admin-draft-conflict">
                     <header>
-                      <strong>服务器上的最新内容</strong>
+                      <strong>
+                        <UiText text="服务器上的最新内容" />
+                      </strong>
                       <Button
                         className="admin-button"
                         onClick={() => setConfirm("reload")}
                       >
-                        使用这个版本
+                        <UiText text="使用这个版本" />
                       </Button>
                     </header>
                     <DraftPreview

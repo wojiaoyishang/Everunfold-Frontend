@@ -1,4 +1,5 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
 import { useId, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Dialog, Button } from "./primitives";
@@ -57,7 +58,9 @@ export function Modal({
       }}
     >
       <div className="admin-library-modal-heading">
-        <h2 id={titleId}>{title}</h2>
+        <h2 id={titleId}>
+          <UiText text={title} />
+        </h2>
         {headerActions}
         <Button
           className="admin-icon-button"

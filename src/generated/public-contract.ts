@@ -1,6 +1,7 @@
 /* Generated from the backend public contract. Do not edit by hand. */
 
-export type SchemaVersion = "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0";
+export type SchemaVersion =
+  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0";
 export type Original = string;
 export type Webp = string;
 export type Family = string;
@@ -8,9 +9,16 @@ export type Style = "normal" | "italic";
 export type WeightMin = number;
 export type WeightMax = number;
 export type Format = "woff2" | "woff" | "truetype" | "opentype";
+export type TranslationGroupId = string | null;
+export type Id = string;
+export type Language = string;
+export type Path = string;
+export type Access = "public" | "password" | "scheduled";
+export type IsOriginal = boolean;
+export type Translations = ContentTranslation[];
 
 /**
- * 公开阅读快照 0.5；按内容引用提供字体描述，兼容已有快照。
+ * 公开阅读快照 0.6；真实已发布语言关联与字体描述，兼容已有快照。
  */
 export interface PublicSnapshot {
   schema_version: SchemaVersion;
@@ -76,6 +84,8 @@ export interface ContentDetail {
   seo_description?: string;
   access?: "public" | "password" | "scheduled";
   opens_at?: string | null;
+  translation_group_id?: TranslationGroupId;
+  translations?: Translations;
 }
 export interface Taxonomy {
   id: string;
@@ -95,6 +105,13 @@ export interface FontInfo {
   weight_min: WeightMin;
   weight_max: WeightMax;
   format: Format;
+}
+export interface ContentTranslation {
+  id: Id;
+  language: Language;
+  path: Path;
+  access?: Access;
+  is_original?: IsOriginal;
 }
 export interface PublicComment {
   id: string;

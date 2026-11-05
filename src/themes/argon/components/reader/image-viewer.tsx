@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button, Dialog } from "@/themes/argon/components/ui/primitives";
 
 import Image from "next/image";
@@ -115,7 +117,7 @@ export function ImageViewer({
         </Button>
         {items.length > 1 && (
           <Button aria-pressed={thumbs} onClick={() => setThumbs(!thumbs)}>
-            缩略图
+            <UiText text="缩略图" />
           </Button>
         )}
         <Button aria-label="关闭图片" onClick={dismiss}>
@@ -163,12 +165,14 @@ export function ImageViewer({
       >
         {loading && !failed && (
           <span className="viewer-loading" role="status">
-            图片正在展开…
+            <UiText text="图片正在展开…" />
           </span>
         )}
         {failed ? (
           <div className="viewer-error" role="alert">
-            <p>这张图片暂时没有加载出来。</p>
+            <p>
+              <UiText text="这张图片暂时没有加载出来。" />
+            </p>
             <Button
               onClick={() => {
                 setFailed(false);
@@ -176,7 +180,7 @@ export function ImageViewer({
                 setAttempt(attempt + 1);
               }}
             >
-              重新加载
+              <UiText text="重新加载" />
             </Button>
           </div>
         ) : (

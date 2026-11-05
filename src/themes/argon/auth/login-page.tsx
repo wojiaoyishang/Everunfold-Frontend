@@ -1,4 +1,5 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { loginDestination } from "@/core/auth/routes";
@@ -152,7 +153,9 @@ export function LoginPage({
             className="management-primary login-submit"
             disabled={busy || !username.trim() || !password}
           >
-            <span aria-live="polite">{busy ? "正在登录" : "登录"}</span>
+            <span aria-live="polite">
+              {busy ? <UiText text="正在登录" /> : <UiText text="登录" />}
+            </span>
             <Icon
               name={busy ? "refresh" : "arrow"}
               className={busy ? "management-spinning" : undefined}
@@ -161,7 +164,9 @@ export function LoginPage({
         </Form>
       )}
       <noscript>
-        <p>请启用 JavaScript 后登录。</p>
+        <p>
+          <UiText text="请启用 JavaScript 后登录。" />
+        </p>
       </noscript>
     </ManagementEntry>
   );

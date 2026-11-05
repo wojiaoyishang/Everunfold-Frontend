@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId, useState } from "react";
 import type { MediaItem, MediaQuery } from "@/generated/settings-contract";
 import { Modal } from "../../components/ui/modal";
@@ -72,7 +74,11 @@ export function MediaPickerDialog({
                   [next]?.focus();
               }}
             >
-              {key === "upload" ? "上传文件" : "媒体库"}
+              {key === "upload" ? (
+                <UiText text="上传文件" />
+              ) : (
+                <UiText text="媒体库" />
+              )}
             </Button>
           ))}
         </div>
@@ -97,7 +103,9 @@ export function MediaPickerDialog({
             ) : (
               <div className={styles.empty}>
                 <Icon name="image" />
-                <span>选择文件后查看资料</span>
+                <span>
+                  <UiText text="选择文件后查看资料" />
+                </span>
               </div>
             )}
           </aside>
@@ -106,14 +114,16 @@ export function MediaPickerDialog({
           <div className={styles.selection} role="status">
             <Icon name={selected ? "check" : "image"} />
             <span>
-              {selected
-                ? `已选择：${selected.title || selected.label}`
-                : "尚未选择文件"}
+              {selected ? (
+                `已选择：${selected.title || selected.label}`
+              ) : (
+                <UiText text="尚未选择文件" />
+              )}
             </span>
           </div>
           <div>
             <Button className="admin-button" onClick={() => setClosing(true)}>
-              取消
+              <UiText text="取消" />
             </Button>
             <Button
               className="admin-button admin-button-primary"

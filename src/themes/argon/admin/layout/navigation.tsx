@@ -34,7 +34,9 @@ export function AdminNavigation({
         );
         return (
           <div className="admin-nav-group" key={group.id}>
-            <span className="admin-nav-label">{group.label}</span>
+            <span className="admin-nav-label">
+              <UiText text={group.label} />
+            </span>
             <div
               className="admin-nav-items"
               data-active={activeIndex >= 0}
@@ -57,7 +59,9 @@ export function AdminNavigation({
                   onClick={onNavigate}
                 >
                   <Icon name={navigationIcons[item.icon]} />
-                  <span className="admin-nav-text">{item.label}</span>
+                  <span className="admin-nav-text">
+                    <UiText text={item.label} />
+                  </span>
                 </RouteLink>
               ))}
             </div>
@@ -67,3 +71,4 @@ export function AdminNavigation({
     </nav>
   );
 }
+import { UiText } from "@/core/i18n/provider";

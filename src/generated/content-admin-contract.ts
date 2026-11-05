@@ -21,6 +21,8 @@ export type Search = string;
 export type Status = "all" | "draft" | "published" | "trash";
 export type Page = number;
 export type PageSize = number;
+export type Language = ("zh-CN" | "en") | null;
+export type Grouped = boolean;
 export type Id2 = string;
 export type OperationId = string;
 export type TypeId2 = string;
@@ -52,6 +54,7 @@ export type SeoDescription = string;
 export type Visibility = "public" | "password";
 export type OpensAt = string | null;
 export type AccessPassword = string | null;
+export type Language1 = "zh-CN" | "en";
 export type Id4 = string;
 export type OperationId1 = string;
 export type ExpectedRevision = number;
@@ -75,18 +78,13 @@ export type PublicPath = string | null;
 export type PublishedAt = string | null;
 export type CreatedAt = string;
 export type UpdatedAt = string;
+export type Language2 = string;
+export type TranslationGroupId = string | null;
 export type CoverUrl = string | null;
 export type Categories1 = string[];
 export type Tags1 = string[];
 export type CommentCount = number;
 export type Pinned1 = boolean;
-export type Items = DraftListItem[];
-export type Total = number;
-export type Page1 = number;
-export type PageSize1 = number;
-export type Success3 = boolean;
-export type Code3 = number;
-export type Msg3 = string;
 export type Id7 = string;
 export type TypeId4 = string;
 export type Title2 = string;
@@ -101,6 +99,35 @@ export type PublicPath1 = string | null;
 export type PublishedAt1 = string | null;
 export type CreatedAt1 = string;
 export type UpdatedAt1 = string;
+export type Language3 = string;
+export type TranslationGroupId1 = string | null;
+export type IsOriginal = boolean;
+export type NeedsReview = boolean;
+export type Translations = TranslationMember[];
+export type GroupRevision = number;
+export type Items = DraftListItem[];
+export type Total = number;
+export type Page1 = number;
+export type PageSize1 = number;
+export type Success3 = boolean;
+export type Code3 = number;
+export type Msg3 = string;
+export type Id8 = string;
+export type TypeId5 = string;
+export type Title3 = string;
+export type Excerpt3 = string;
+export type Preview2 = string;
+export type Author2 = string;
+export type Revision2 = number;
+export type Status3 = "draft" | "trash";
+export type IsDemo2 = boolean;
+export type PublishedRevision2 = number | null;
+export type PublicPath2 = string | null;
+export type PublishedAt2 = string | null;
+export type CreatedAt2 = string;
+export type UpdatedAt2 = string;
+export type Language4 = string;
+export type TranslationGroupId2 = string | null;
 export type Body1 = DraftBlock[];
 export type Original = string;
 export type Webp = string;
@@ -113,7 +140,7 @@ export type HasPassword = boolean;
 export type Success4 = boolean;
 export type Code4 = number;
 export type Msg4 = string;
-export type Id8 = string;
+export type Id9 = string;
 export type Owner = string;
 export type Label = string;
 export type Description = string;
@@ -128,12 +155,12 @@ export type Success5 = boolean;
 export type Code5 = number;
 export type Msg5 = string;
 export type SourceEpoch = string;
-export type Revision2 = number;
+export type Revision3 = number;
 export type NodeId = string;
 export type Enabled = boolean;
 export type DesiredRevision = number;
 export type AppliedRevision = number | null;
-export type Status3 = "not_configured" | "pending" | "applied" | "failed";
+export type Status4 = "not_configured" | "pending" | "applied" | "failed";
 export type AppliedAt = string | null;
 export type Error = string | null;
 export type Delivery = DeliveryState[];
@@ -141,14 +168,15 @@ export type Protocol = "content-1";
 export type NodeId1 = string;
 export type SourceEpoch1 = string;
 export type Resource = "public-content";
-export type Revision3 = number;
-export type SchemaVersion = "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0";
+export type Revision4 = number;
+export type SchemaVersion =
+  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0";
 export type SourceEpoch2 = string;
 export type Generation = number;
 export type ExportedAt = string;
 export type Name2 = string;
 export type Description1 = string;
-export type Author2 = string;
+export type Author3 = string;
 export type AvatarUrl = string | null;
 export type HeroUrl = string | null;
 export type HeroTitle = string;
@@ -168,19 +196,26 @@ export type SeoTitle1 = string;
 export type SeoDescription1 = string;
 export type Access = "public" | "password" | "scheduled";
 export type OpensAt1 = string | null;
-export type Id9 = string;
+export type Id10 = string;
 export type Kind1 = "article" | "shuoshuo" | "page";
-export type Title3 = string;
+export type Title4 = string;
 export type Path1 = string;
-export type Excerpt3 = string;
-export type Language = string;
-export type PublishedAt2 = string;
-export type UpdatedAt2 = string;
-export type Author3 = string;
+export type Excerpt4 = string;
+export type Language5 = string;
+export type TranslationGroupId3 = string | null;
+export type Id11 = string;
+export type Language6 = string;
+export type Path2 = string;
+export type Access1 = "public" | "password" | "scheduled";
+export type IsOriginal1 = boolean;
+export type Translations1 = ContentTranslation[];
+export type PublishedAt3 = string;
+export type UpdatedAt3 = string;
+export type Author4 = string;
 export type CoverUrl1 = string | null;
 export type ReadingMinutes = number;
 export type WordCount = number;
-export type Id10 = string;
+export type Id12 = string;
 export type Slug = string;
 export type Name3 = string;
 export type Kind2 = "category" | "tag";
@@ -189,21 +224,44 @@ export type Categories3 = TaxonomyDTO[];
 export type Tags3 = TaxonomyDTO[];
 export type CommentCount1 = number;
 export type Pinned2 = boolean;
-export type Id11 = string;
+export type Id13 = string;
 export type Type1 = "markdown" | "html";
 export type Content2 = string;
 export type Content1 = ContentBlock[];
 export type Contents = ContentDetail[];
-export type Id12 = string;
+export type Id14 = string;
 export type ParentId2 = string | null;
-export type Author4 = string;
+export type Author5 = string;
 /**
  * 纯文本，按文本展示，不再作为 HTML 解析
  */
 export type Content3 = string;
-export type CreatedAt2 = string;
+export type CreatedAt3 = string;
 export type ReplyTo = string | null;
 export type Taxonomies = TaxonomyDTO[];
+export type Success6 = boolean;
+export type Code6 = number;
+export type Msg6 = string;
+export type Id15 = string;
+export type SourceId = string;
+export type TypeId6 = string;
+export type Revision5 = number;
+export type Members = TranslationMember[];
+export type Id16 = string;
+export type OperationId3 = string;
+export type ExpectedRevision2 = number;
+export type Language7 = "zh-CN" | "en";
+export type CopySource = boolean;
+export type Id17 = string;
+export type OperationId4 = string;
+export type ExpectedRevision3 = number;
+export type TargetId = string;
+export type Id18 = string;
+export type OperationId5 = string;
+export type ExpectedRevision4 = number;
+export type Id19 = string;
+export type OperationId6 = string;
+export type ExpectedRevision5 = number;
 
 export interface ContentAdminContract {
   actions: PublicResponseContentActions;
@@ -219,6 +277,11 @@ export interface ContentAdminContract {
   types: PublicResponseContentTypeCatalog;
   sync_state: PublicResponseContentSyncState;
   delivery: ContentDelivery;
+  translation_catalog: PublicResponseTranslationCatalog;
+  translation_create: TranslationCreate;
+  translation_link: TranslationLink;
+  translation_mutation: TranslationMutation;
+  translation_group_mutation: TranslationGroupMutation;
 }
 export interface PublicResponseContentActions {
   success?: Success;
@@ -259,6 +322,8 @@ export interface DraftQuery {
   status?: Status;
   page?: Page;
   page_size?: PageSize;
+  language?: Language;
+  grouped?: Grouped;
 }
 export interface DraftLookup {
   id: Id2;
@@ -267,6 +332,7 @@ export interface DraftCreate {
   operation_id: OperationId;
   type_id: TypeId2;
   fields: DraftFields;
+  language?: Language1;
 }
 export interface DraftFields {
   title?: Title;
@@ -331,19 +397,17 @@ export interface DraftListItem {
   published_at?: PublishedAt;
   created_at: CreatedAt;
   updated_at: UpdatedAt;
+  language?: Language2;
+  translation_group_id?: TranslationGroupId;
   cover_url?: CoverUrl;
   categories?: Categories1;
   tags?: Tags1;
   comment_count?: CommentCount;
   pinned?: Pinned1;
+  translations?: Translations;
+  group_revision?: GroupRevision;
 }
-export interface PublicResponseDraftDetail {
-  success?: Success3;
-  code?: Code3;
-  msg?: Msg3;
-  data: DraftDetail;
-}
-export interface DraftDetail {
+export interface TranslationMember {
   id: Id7;
   type_id: TypeId4;
   title: Title2;
@@ -358,6 +422,34 @@ export interface DraftDetail {
   published_at?: PublishedAt1;
   created_at: CreatedAt1;
   updated_at: UpdatedAt1;
+  language?: Language3;
+  translation_group_id?: TranslationGroupId1;
+  is_original: IsOriginal;
+  needs_review?: NeedsReview;
+}
+export interface PublicResponseDraftDetail {
+  success?: Success3;
+  code?: Code3;
+  msg?: Msg3;
+  data: DraftDetail;
+}
+export interface DraftDetail {
+  id: Id8;
+  type_id: TypeId5;
+  title: Title3;
+  excerpt: Excerpt3;
+  preview: Preview2;
+  author: Author2;
+  revision: Revision2;
+  status: Status3;
+  is_demo: IsDemo2;
+  published_revision?: PublishedRevision2;
+  public_path?: PublicPath2;
+  published_at?: PublishedAt2;
+  created_at: CreatedAt2;
+  updated_at: UpdatedAt2;
+  language?: Language4;
+  translation_group_id?: TranslationGroupId2;
   body: Body1;
   settings?: EditorSettings;
   media_urls?: MediaUrls;
@@ -388,7 +480,7 @@ export interface ContentTypeCatalog {
   items: Items1;
 }
 export interface ContentTypeDefinition {
-  id: Id8;
+  id: Id9;
   owner: Owner;
   label: Label;
   description: Description;
@@ -407,7 +499,7 @@ export interface PublicResponseContentSyncState {
 }
 export interface ContentSyncState {
   source_epoch: SourceEpoch;
-  revision: Revision2;
+  revision: Revision3;
   delivery: Delivery;
 }
 export interface DeliveryState {
@@ -415,7 +507,7 @@ export interface DeliveryState {
   enabled: Enabled;
   desired_revision: DesiredRevision;
   applied_revision: AppliedRevision;
-  status: Status3;
+  status: Status4;
   applied_at: AppliedAt;
   error: Error;
 }
@@ -424,7 +516,7 @@ export interface ContentDelivery {
   node_id: NodeId1;
   source_epoch: SourceEpoch1;
   resource?: Resource;
-  revision: Revision3;
+  revision: Revision4;
   value: PublicSnapshot;
 }
 export interface PublicSnapshot {
@@ -440,7 +532,7 @@ export interface PublicSnapshot {
 export interface SiteDTO {
   name: Name2;
   description: Description1;
-  author: Author2;
+  author: Author3;
   avatar_url: AvatarUrl;
   hero_url: HeroUrl;
   hero_title: HeroTitle;
@@ -467,15 +559,17 @@ export interface ContentDetail {
   seo_description?: SeoDescription1;
   access?: Access;
   opens_at?: OpensAt1;
-  id: Id9;
+  id: Id10;
   kind: Kind1;
-  title: Title3;
+  title: Title4;
   path: Path1;
-  excerpt: Excerpt3;
-  language: Language;
-  published_at: PublishedAt2;
-  updated_at: UpdatedAt2;
-  author: Author3;
+  excerpt: Excerpt4;
+  language: Language5;
+  translation_group_id?: TranslationGroupId3;
+  translations?: Translations1;
+  published_at: PublishedAt3;
+  updated_at: UpdatedAt3;
+  author: Author4;
   cover_url: CoverUrl1;
   reading_minutes: ReadingMinutes;
   word_count: WordCount;
@@ -486,15 +580,22 @@ export interface ContentDetail {
   content: Content1;
   media_urls: MediaUrls1;
 }
+export interface ContentTranslation {
+  id: Id11;
+  language: Language6;
+  path: Path2;
+  access?: Access1;
+  is_original?: IsOriginal1;
+}
 export interface TaxonomyDTO {
-  id: Id10;
+  id: Id12;
   slug: Slug;
   name: Name3;
   kind: Kind2;
   count: Count1;
 }
 export interface ContentBlock {
-  id: Id11;
+  id: Id13;
   type: Type1;
   content: Content2;
 }
@@ -505,10 +606,50 @@ export interface Comments1 {
   [k: string]: PublicComment[];
 }
 export interface PublicComment {
-  id: Id12;
+  id: Id14;
   parent_id: ParentId2;
-  author: Author4;
+  author: Author5;
   content: Content3;
-  created_at: CreatedAt2;
+  created_at: CreatedAt3;
   reply_to?: ReplyTo;
+}
+export interface PublicResponseTranslationCatalog {
+  success?: Success6;
+  code?: Code6;
+  msg?: Msg6;
+  data: TranslationCatalog;
+}
+export interface TranslationCatalog {
+  id: Id15;
+  source_id: SourceId;
+  type_id: TypeId6;
+  revision: Revision5;
+  members: Members;
+}
+export interface TranslationCreate {
+  id: Id16;
+  operation_id: OperationId3;
+  expected_revision: ExpectedRevision2;
+  language: Language7;
+  copy_source?: CopySource;
+}
+export interface TranslationLink {
+  id: Id17;
+  operation_id: OperationId4;
+  expected_revision: ExpectedRevision3;
+  target_id: TargetId;
+}
+export interface TranslationMutation {
+  id: Id18;
+  operation_id: OperationId5;
+  expected_revision: ExpectedRevision4;
+}
+export interface TranslationGroupMutation {
+  id: Id19;
+  operation_id: OperationId6;
+  expected_revision: ExpectedRevision5;
+  members: Members1;
+}
+export interface Members1 {
+  [k: string]: number;
 }

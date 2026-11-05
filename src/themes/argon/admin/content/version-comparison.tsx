@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useMemo, useState } from "react";
 import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
 import type { PublicShortcode } from "@/generated/settings-contract";
@@ -80,16 +82,26 @@ export function VersionComparison({
           aria-pressed={showAll}
           onClick={() => setShowAll(!showAll)}
         >
-          {showAll ? "只看修改" : "显示完整正文"}
+          {showAll ? (
+            <UiText text="只看修改" />
+          ) : (
+            <UiText text="显示完整正文" />
+          )}
         </Button>
         <span className={styles.legend}>
-          <span data-version-change="removed">− 删除</span>
-          <span data-version-change="added">+ 新增</span>
+          <span data-version-change="removed">
+            <UiText text="− 删除" />
+          </span>
+          <span data-version-change="added">
+            <UiText text="+ 新增" />
+          </span>
         </span>
       </div>
       {(showAll || before.title !== after.title) && (
         <section className={styles.diffField}>
-          <h3>标题</h3>
+          <h3>
+            <UiText text="标题" />
+          </h3>
           <TextDifference
             before={before.title ?? ""}
             after={after.title ?? ""}
@@ -98,7 +110,9 @@ export function VersionComparison({
       )}
       {(showAll || before.excerpt !== after.excerpt) && (
         <section className={styles.diffField}>
-          <h3>摘要</h3>
+          <h3>
+            <UiText text="摘要" />
+          </h3>
           <TextDifference
             before={before.excerpt ?? ""}
             after={after.excerpt ?? ""}
@@ -106,7 +120,7 @@ export function VersionComparison({
         </section>
       )}
       <p className={styles.diffCount}>
-        {changed} 个区块有变化
+        {changed} <UiText text="个区块有变化" />
         {!showAll && blocks.length > changed
           ? ` · 已折叠 ${blocks.length - changed} 个未改区块`
           : ""}
@@ -137,7 +151,12 @@ export function VersionComparison({
             aria-expanded={showSettings}
             onClick={() => setShowSettings(!showSettings)}
           >
-            内容设置有变化{showSettings ? " · 收起" : " · 展开"}
+            <UiText text="内容设置有变化" />
+            {showSettings ? (
+              <UiText text=" · 收起" />
+            ) : (
+              <UiText text=" · 展开" />
+            )}
           </Button>
           {showSettings && (
             <CodeDiff
@@ -154,7 +173,9 @@ export function VersionComparison({
         before.title === after.title &&
         before.excerpt === after.excerpt &&
         oldSettings === newSettings && (
-          <p className={styles.empty}>两个版本内容相同。</p>
+          <p className={styles.empty}>
+            <UiText text="两个版本内容相同。" />
+          </p>
         )}
     </section>
   );

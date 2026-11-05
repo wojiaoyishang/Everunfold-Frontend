@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId, useState } from "react";
 import { Button, TextField } from "./primitives";
 import { Icon } from "../icon";
@@ -82,7 +84,11 @@ export function TokenField({
           onClick={() => add(input)}
         >
           <Icon name="plus" />
-          {compactLabel && <span>添加</span>}
+          {compactLabel && (
+            <span>
+              <UiText text="添加" />
+            </span>
+          )}
         </Button>
       </div>
       <div className={styles.suggestions}>

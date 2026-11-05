@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useState } from "react";
 import { Button } from "../ui/primitives";
 import { Icon } from "../icon";
@@ -42,11 +44,13 @@ export function CodeTools({
         <Icon name={result === "copied" ? "check" : "copy"} />
       </Button>
       <span className="content-code-result" role="status">
-        {result === "error"
-          ? "请选中代码手动复制"
-          : result === "copied"
-            ? "已复制"
-            : ""}
+        {result === "error" ? (
+          <UiText text="请选中代码手动复制" />
+        ) : result === "copied" ? (
+          <UiText text="已复制" />
+        ) : (
+          ""
+        )}
       </span>
     </div>
   );
@@ -69,7 +73,9 @@ export function CodeFoldControl({
       aria-controls={contentId}
       onClick={onToggle}
     >
-      <span>{expanded ? "收起代码" : "展开代码"}</span>
+      <span>
+        {expanded ? <UiText text="收起代码" /> : <UiText text="展开代码" />}
+      </span>
       <Icon name={expanded ? "chevron-up" : "chevron-down"} />
     </Button>
   );

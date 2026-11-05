@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
@@ -49,7 +51,7 @@ export function CollapsibleContent({
           aria-expanded={expanded}
           onClick={() => setExpanded(!expanded)}
         >
-          {expanded ? "收起长内容" : "展开全文"}
+          {expanded ? <UiText text="收起长内容" /> : <UiText text="展开全文" />}
           <Icon name={expanded ? "up" : "down"} />
         </Button>
       )}

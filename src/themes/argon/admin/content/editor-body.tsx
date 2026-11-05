@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useRef, useState } from "react";
 import type {
   ContentTypeDefinition,
@@ -191,7 +193,9 @@ export function EditorBody({
                             .some((entry) => entry.id === marker.id),
                       ) && (
                         <div className={styles.uploadRecovery} role="status">
-                          <span>图片上传已中断，请重新粘贴或选择图片。</span>
+                          <span>
+                            <UiText text="图片上传已中断，请重新粘贴或选择图片。" />
+                          </span>
                           <Button
                             onClick={() =>
                               uploadMarkers(block.content).forEach((marker) =>
@@ -199,7 +203,7 @@ export function EditorBody({
                               )
                             }
                           >
-                            移除上传占位
+                            <UiText text="移除上传占位" />
                           </Button>
                         </div>
                       )}
@@ -219,7 +223,10 @@ export function EditorBody({
       {type.supports_excerpt && (
         <label className={`admin-field ${styles.excerpt}`}>
           <span>
-            摘要 <small>（可选）</small>
+            <UiText text="摘要" />
+            <small>
+              <UiText text="（可选）" />
+            </small>
           </span>
           <TextArea
             value={value.excerpt ?? ""}

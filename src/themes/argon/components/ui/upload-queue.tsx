@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type { UploadEntry } from "@/core/media/upload-queue";
 import { Button } from "./primitives";
 import { Icon } from "../icon";
@@ -22,7 +24,7 @@ export function UploadQueueView<T extends { reused?: boolean }>({
     <section className="admin-upload-queue" aria-label="上传队列">
       <div className="admin-upload-queue-heading">
         <span>
-          上传文件{" "}
+          <UiText text="上传文件" />{" "}
           <small>
             {complete} / {items.length}
           </small>
@@ -31,7 +33,7 @@ export function UploadQueueView<T extends { reused?: boolean }>({
           ["done", "failed", "cancelled"].includes(item.state),
         ) && (
           <Button className="admin-upload-text-button" onClick={onClear}>
-            清除已结束
+            <UiText text="清除已结束" />
           </Button>
         )}
       </div>
@@ -102,7 +104,7 @@ export function UploadQueueView<T extends { reused?: boolean }>({
                   className="admin-upload-text-button"
                   onClick={() => onSelect(item.result!)}
                 >
-                  选择
+                  <UiText text="选择" />
                 </Button>
               ) : (
                 item.retryable && (
@@ -110,7 +112,7 @@ export function UploadQueueView<T extends { reused?: boolean }>({
                     className="admin-upload-text-button"
                     onClick={() => onRetry(item.id)}
                   >
-                    重试
+                    <UiText text="重试" />
                   </Button>
                 )
               )}

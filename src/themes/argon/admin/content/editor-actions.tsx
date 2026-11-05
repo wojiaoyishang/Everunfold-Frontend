@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type { DraftDetail } from "@/generated/content-admin-contract";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
@@ -28,7 +30,7 @@ export function EditorActions({
           onClick={onWithdraw}
         >
           <Icon name="eye-off" />
-          撤回
+          <UiText text="撤回" />
         </Button>
       )}
       <Button
@@ -46,13 +48,15 @@ export function EditorActions({
           name={busy ? "refresh" : "check"}
           className={busy ? "admin-draft-spin" : ""}
         />
-        {busy
-          ? "正在保存…"
-          : uncertain
-            ? "重试上次操作"
-            : detail
-              ? "保存版本"
-              : "创建草稿"}
+        {busy ? (
+          <UiText text="正在保存…" />
+        ) : uncertain ? (
+          <UiText text="重试上次操作" />
+        ) : detail ? (
+          <UiText text="保存版本" />
+        ) : (
+          <UiText text="创建草稿" />
+        )}
       </Button>
       {detail && !uncertain && (
         <Button
@@ -61,7 +65,11 @@ export function EditorActions({
           onClick={() => onSave("publish")}
         >
           <Icon name="send" />
-          {detail.published_revision ? "更新发布" : "发布"}
+          {detail.published_revision ? (
+            <UiText text="更新发布" />
+          ) : (
+            <UiText text="发布" />
+          )}
         </Button>
       )}
     </>

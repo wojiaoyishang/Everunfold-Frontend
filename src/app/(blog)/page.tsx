@@ -1,4 +1,4 @@
-import { readPublicSnapshot } from "@/core/content/snapshot";
+import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { pageNumber } from "@/core/content/query";
 import { feedType } from "@/core/content/presentation";
 import { Feed } from "@/themes/argon/components/feed";

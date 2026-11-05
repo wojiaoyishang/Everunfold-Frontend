@@ -660,6 +660,24 @@
           "title": "Updated At",
           "type": "string"
         },
+        "language": {
+          "default": "zh-CN",
+          "title": "Language",
+          "type": "string"
+        },
+        "translation_group_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Translation Group Id"
+        },
         "body": {
           "items": {
             "$ref": "#/$defs/DraftBlock"

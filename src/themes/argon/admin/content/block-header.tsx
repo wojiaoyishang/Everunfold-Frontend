@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type { ComponentProps, ReactNode, Ref } from "react";
 import type { DraftBlock } from "@/generated/content-admin-contract";
 import { Icon } from "../../components/icon";
@@ -68,7 +70,7 @@ export function BlockHeader({
               }}
               icon="up"
             >
-              向上移动
+              <UiText text="向上移动" />
             </MenuAction>
             <MenuAction
               disabled={index === total - 1}
@@ -78,7 +80,7 @@ export function BlockHeader({
               }}
               icon="down"
             >
-              向下移动
+              <UiText text="向下移动" />
             </MenuAction>
             <MenuAction
               disabled={index === 0}
@@ -88,7 +90,7 @@ export function BlockHeader({
               }}
               icon="up"
             >
-              移到开头
+              <UiText text="移到开头" />
             </MenuAction>
             <MenuAction
               disabled={index === total - 1}
@@ -98,7 +100,7 @@ export function BlockHeader({
               }}
               icon="down"
             >
-              移到末尾
+              <UiText text="移到末尾" />
             </MenuAction>
             <div className={styles.menuDivider} />
             {blockEditors.entries
@@ -113,7 +115,8 @@ export function BlockHeader({
                     onFormat(p.format);
                   }}
                 >
-                  切换为 {p.label}
+                  <UiText text="切换为" />
+                  {p.label}
                 </MenuAction>
               ))}
             <div className={styles.menuDivider} />
@@ -129,7 +132,7 @@ export function BlockHeader({
               }}
             >
               <Icon name="trash" />
-              删除区块
+              <UiText text="删除区块" />
             </ConfirmPopover>
           </>
         )}

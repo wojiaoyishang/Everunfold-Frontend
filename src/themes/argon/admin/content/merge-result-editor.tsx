@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useRef, useState } from "react";
 import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
 import type { MediaItem } from "@/generated/settings-contract";
@@ -96,7 +98,9 @@ export function MergeResultEditor({
   return (
     <div className={styles.resultEditor}>
       <label className="admin-field">
-        <span>标题</span>
+        <span>
+          <UiText text="标题" />
+        </span>
         <TextField
           value={fields.title ?? ""}
           maxLength={200}
@@ -125,7 +129,9 @@ export function MergeResultEditor({
         />
       ))}
       <label className="admin-field">
-        <span>摘要</span>
+        <span>
+          <UiText text="摘要" />
+        </span>
         <TextArea
           value={fields.excerpt ?? ""}
           maxLength={1000}

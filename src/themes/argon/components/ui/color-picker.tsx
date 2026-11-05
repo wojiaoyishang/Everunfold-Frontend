@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId, useState } from "react";
 import { Button, Popover, TextField } from "./primitives";
 import { RangeField } from "./range-field";
@@ -42,7 +44,7 @@ export function ColorPicker({
         onClick={() => setDraft(null)}
       >
         <span style={{ backgroundColor: value }} aria-hidden="true" />
-        自选
+        <UiText text="自选" />
       </Button>
       <Popover
         ref={panel}
@@ -54,10 +56,14 @@ export function ColorPicker({
         role="dialog"
         aria-labelledby={`${id}-title`}
       >
-        <strong id={`${id}-title`}>调一杯自己的颜色</strong>
+        <strong id={`${id}-title`}>
+          <UiText text="调一杯自己的颜色" />
+        </strong>
         <label className="ui-color-hex">
           <span style={{ backgroundColor: value }} aria-hidden="true" />
-          <span className="sr-only">十六进制主题色</span>
+          <span className="sr-only">
+            <UiText text="十六进制主题色" />
+          </span>
           <TextField
             aria-label="十六进制主题色"
             value={draft ?? value}
@@ -74,7 +80,7 @@ export function ColorPicker({
         </label>
         {!valid && (
           <p id={`${id}-error`} className="form-error">
-            请输入 # 加六位十六进制颜色。
+            <UiText text="请输入 # 加六位十六进制颜色。" />
           </p>
         )}
         {(["红", "绿", "蓝"] as const).map((label, index) => (
@@ -100,7 +106,7 @@ export function ColorPicker({
           </label>
         ))}
         <Button className="ui-color-done" onClick={close}>
-          完成
+          <UiText text="完成" />
         </Button>
       </Popover>
     </span>

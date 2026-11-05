@@ -1,0 +1,215 @@
+.bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: -8px;
+  margin-bottom: 18px;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.bar > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.bar > span > :global(.icon) {
+  width: 16px;
+  height: 16px;
+}
+.reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows var(--admin-motion-layout),
+    opacity var(--admin-motion-fast);
+}
+.reveal[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.reveal > div {
+  overflow: hidden;
+  min-height: 0;
+}
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: 4px 7px;
+  min-height: 28px;
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+  background: var(--admin-canvas);
+  color: var(--admin-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.trigger > :global(.icon) {
+  width: 15px;
+  height: 15px;
+}
+.trigger:hover,
+.manage:hover {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.trigger:active {
+  transform: translateY(1px);
+}
+.trigger,
+.manage {
+  transition:
+    background var(--admin-motion-fast),
+    color var(--admin-motion-fast),
+    transform var(--admin-motion-fast);
+}
+.popover {
+  padding: 0;
+}
+.menu {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+.menu > strong {
+  font-size: 12px;
+  margin: 0 8px 4px;
+  color: var(--admin-text);
+}
+.member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 8px;
+  border-radius: 4px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--admin-text);
+}
+.member small {
+  font-size: 11px;
+  color: var(--admin-muted);
+}
+.member[aria-current],
+.member:hover {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+}
+.manage {
+  background: transparent;
+  color: var(--admin-accent);
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 4px;
+}
+.menu > .manage {
+  border-top: 1px solid var(--admin-border);
+  margin-top: 5px;
+  padding-top: 10px;
+}
+.panel {
+  margin: 0 0 20px;
+  padding: 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+  scroll-margin-top: 8px;
+}
+.panel h2 {
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.rows {
+  display: grid;
+  gap: 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--admin-border);
+  font-size: 12px;
+}
+.row > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+.row small,
+.hint {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.create {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+.create :global(.admin-button) {
+  font-size: 12px;
+  padding: 7px 10px;
+  min-height: 34px;
+}
+.create label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--admin-muted);
+}
+.picker {
+  padding: 18px;
+  display: grid;
+  gap: 14px;
+}
+.picker :global(.ui-input) {
+  padding: 9px 11px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  min-width: 0;
+}
+.candidate {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--admin-border);
+}
+.candidate > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.create :global(.ui-select-trigger),
+.bar :global(.ui-select-trigger) {
+  min-width: 125px;
+  font-size: 12px;
+}
+@media (max-width: 640px) {
+  .panel {
+    padding: 14px;
+  }
+  .row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .create {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .bar {
+    margin-top: 0;
+  }
+}

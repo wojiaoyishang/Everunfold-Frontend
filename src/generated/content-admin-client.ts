@@ -297,3 +297,157 @@ export function restoreDraft(
     },
   );
 }
+
+const readTranslationsValidator = ajv.compile<
+  ContentAdminContract["translation_catalog"]
+>({ $ref: "content-admin#/properties/translation_catalog" });
+export function readTranslations(
+  baseUrl: string,
+  input: ContentAdminContract["lookup"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/translations/query",
+    input,
+    readTranslationsValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const createTranslationValidator = ajv.compile<
+  ContentAdminContract["translation_catalog"]
+>({ $ref: "content-admin#/properties/translation_catalog" });
+export function createTranslation(
+  baseUrl: string,
+  input: ContentAdminContract["translation_create"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/translations/create",
+    input,
+    createTranslationValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const linkTranslationValidator = ajv.compile<
+  ContentAdminContract["translation_catalog"]
+>({ $ref: "content-admin#/properties/translation_catalog" });
+export function linkTranslation(
+  baseUrl: string,
+  input: ContentAdminContract["translation_link"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/translations/link",
+    input,
+    linkTranslationValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const unlinkTranslationValidator = ajv.compile<
+  ContentAdminContract["translation_catalog"]
+>({ $ref: "content-admin#/properties/translation_catalog" });
+export function unlinkTranslation(
+  baseUrl: string,
+  input: ContentAdminContract["translation_mutation"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/translations/unlink",
+    input,
+    unlinkTranslationValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const reviewTranslationValidator = ajv.compile<
+  ContentAdminContract["translation_catalog"]
+>({ $ref: "content-admin#/properties/translation_catalog" });
+export function reviewTranslation(
+  baseUrl: string,
+  input: ContentAdminContract["translation_mutation"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/translations/review",
+    input,
+    reviewTranslationValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const trashTranslationGroupValidator = ajv.compile<
+  ContentAdminContract["translation_catalog"]
+>({ $ref: "content-admin#/properties/translation_catalog" });
+export function trashTranslationGroup(
+  baseUrl: string,
+  input: ContentAdminContract["translation_group_mutation"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/translations/trash",
+    input,
+    trashTranslationGroupValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const restoreTranslationGroupValidator = ajv.compile<
+  ContentAdminContract["translation_catalog"]
+>({ $ref: "content-admin#/properties/translation_catalog" });
+export function restoreTranslationGroup(
+  baseUrl: string,
+  input: ContentAdminContract["translation_group_mutation"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/translations/restore",
+    input,
+    restoreTranslationGroupValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}

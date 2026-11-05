@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import type { MediaItem } from "@/generated/settings-contract";
 import type { MediaURL } from "@/generated/content-admin-contract";
@@ -68,7 +70,7 @@ export function ShortcodePicker({
     >
       <div className={styles.picker}>
         <p className={styles.hint}>
-          插入到当前区块的光标或选区；正文保留调用源码。
+          <UiText text="插入到当前区块的光标或选区；正文保留调用源码。" />
         </p>
         {library.error && (
           <p role="alert" className={styles.error}>
@@ -77,12 +79,14 @@ export function ShortcodePicker({
               className="admin-button"
               onClick={() => void library.reload()}
             >
-              重试
+              <UiText text="重试" />
             </Button>
           </p>
         )}
         {library.loading && !items.length && (
-          <p role="status">正在读取短代码…</p>
+          <p role="status">
+            <UiText text="正在读取短代码…" />
+          </p>
         )}
         {selected && (
           <>
@@ -112,12 +116,15 @@ export function ShortcodePicker({
                 }
                 onClick={() => setImages(true)}
               >
-                从媒体库添加图片
+                <UiText text="从媒体库添加图片" />
               </Button>
             )}
             {selected.kind === "container" && (
               <label className={styles.field}>
-                <span>正文（{format === "html" ? "HTML" : "Markdown"}）</span>
+                <span>
+                  <UiText text="正文（" />
+                  {format === "html" ? "HTML" : "Markdown"}）
+                </span>
                 <TextArea
                   rows={4}
                   maxLength={20000}
@@ -135,14 +142,16 @@ export function ShortcodePicker({
               media={media}
             />
             <label className={styles.field}>
-              <span>调用源码</span>
+              <span>
+                <UiText text="调用源码" />
+              </span>
               <TextArea readOnly value={call} className={styles.invocation} />
             </label>
           </>
         )}
         <div className={styles.actions}>
           <Button className="admin-button" onClick={() => setClosing(true)}>
-            取消
+            <UiText text="取消" />
           </Button>
           <Button
             className="admin-button admin-button-primary"
@@ -157,7 +166,7 @@ export function ShortcodePicker({
               setClosing(true);
             }}
           >
-            插入到光标位置
+            <UiText text="插入到光标位置" />
           </Button>
         </div>
       </div>

@@ -16,6 +16,7 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
+  const [language, setLanguage] = useState<"all" | "zh-CN" | "en">("all");
   const [status, setStatus] =
     useState<NonNullable<DraftQuery["status"]>>("all");
   const [page, setPage] = useState(1);
@@ -51,6 +52,7 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
             status,
             page,
             page_size: 12,
+            language: language === "all" ? null : language,
           },
           csrfToken,
           { signal: abort.signal },
@@ -75,7 +77,16 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
       clearTimeout(timer);
       abort.abort();
     };
-  }, [baseUrl, csrfToken, type, appliedSearch, status, page, revision]);
+  }, [
+    baseUrl,
+    csrfToken,
+    type,
+    appliedSearch,
+    status,
+    page,
+    revision,
+    language,
+  ]);
   const reset = () => {
     setLoading(true);
     setResult(null);
@@ -88,6 +99,12 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
     compatible,
     search,
     appliedSearch,
+    language,
+    setLanguage: (value: "all" | "zh-CN" | "en") => {
+      if (value === language) return;
+      setLanguage(value);
+      reset();
+    },
     status,
     page,
     setSearch,

@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useRef, useState } from "react";
 import type {
   ShortcodeItem,
@@ -156,26 +158,35 @@ export function ShortcodeEditor({
     >
       <div className={styles.editorHeading}>
         <div>
-          <h2>{item ? source.title : "新建短代码"}</h2>
+          <h2>{item ? source.title : <UiText text="新建短代码" />}</h2>
           <p>
-            {writable
-              ? `自定义模板${item ? ` · 草稿 ${item.revision}${item.applied_revision ? ` · 已应用 ${item.applied_revision}` : " · 尚未应用"}` : ""}`
-              : "代码注册 · 只读展示"}
+            {writable ? (
+              `自定义模板${item ? ` · 草稿 ${item.revision}${item.applied_revision ? ` · 已应用 ${item.applied_revision}` : " · 尚未应用"}` : ""}`
+            ) : (
+              <UiText text="代码注册 · 只读展示" />
+            )}
           </p>
         </div>
         <Button className="admin-button" disabled={busy} onClick={onClose}>
-          关闭详情
+          <UiText text="关闭详情" />
         </Button>
       </div>
       {!writable && (
         <p className={styles.notice}>
-          此短代码由{item?.origin === "frontend" ? "前端" : "后端"}
-          代码注册，可试填参数、查看样式和调用方式。定义由项目代码维护。
+          <UiText text="此短代码由" />
+          {item?.origin === "frontend" ? (
+            <UiText text="前端" />
+          ) : (
+            <UiText text="后端" />
+          )}
+          <UiText text="代码注册，可试填参数、查看样式和调用方式。定义由项目代码维护。" />
         </p>
       )}
       <div className={styles.fields}>
         <label className={styles.field}>
-          <span>名称</span>
+          <span>
+            <UiText text="名称" />
+          </span>
           <TextField
             aria-label="短代码名称"
             value={source.title}
@@ -185,7 +196,9 @@ export function ShortcodeEditor({
           />
         </label>
         <label className={styles.field}>
-          <span>调用名称（创建后固定）</span>
+          <span>
+            <UiText text="调用名称（创建后固定）" />
+          </span>
           <TextField
             aria-label="短代码调用名称"
             value={source.name}
@@ -195,7 +208,9 @@ export function ShortcodeEditor({
           />
         </label>
         <label className={styles.field}>
-          <span>说明</span>
+          <span>
+            <UiText text="说明" />
+          </span>
           <TextField
             value={source.description ?? ""}
             maxLength={300}
@@ -204,6 +219,7 @@ export function ShortcodeEditor({
           />
         </label>
         <Select
+          programOptions
           name="shortcode-kind"
           label="调用类型"
           value={source.kind ?? "container"}
@@ -254,14 +270,14 @@ export function ShortcodeEditor({
                     aria-pressed={!visual}
                     onClick={() => setVisual(false)}
                   >
-                    源码
+                    <UiText text="源码" />
                   </Button>
                   <Button
                     className={styles.tab}
                     aria-pressed={visual}
                     onClick={() => setVisual(true)}
                   >
-                    可视化
+                    <UiText text="可视化" />
                   </Button>
                 </div>
               )}
@@ -289,15 +305,19 @@ export function ShortcodeEditor({
                 )}
               </div>
               <p className={styles.hint}>
-                {tab === "html"
-                  ? "HTML 与可视化修改同一份模板。容器保留一个 {{ content }} 正文插槽。"
-                  : "CSS 自动限定在此短代码内。用 & 表示外层；不支持脚本、外部资源、全局规则和悬浮定位。"}
+                {tab === "html" ? (
+                  <UiText text="HTML 与可视化修改同一份模板。容器保留一个 {{ content }} 正文插槽。" />
+                ) : (
+                  <UiText text="CSS 自动限定在此短代码内。用 & 表示外层；不支持脚本、外部资源、全局规则和悬浮定位。" />
+                )}
               </p>
             </>
           )}
         </div>
         <aside className={styles.inspector} aria-label="短代码预览">
-          <strong>样式预览</strong>
+          <strong>
+            <UiText text="样式预览" />
+          </strong>
           <ShortcodeValues
             parameters={source.parameters ?? []}
             values={values}
@@ -305,7 +325,9 @@ export function ShortcodeEditor({
           />
           {source.kind !== "leaf" && (
             <label className={styles.field}>
-              <span>示例正文</span>
+              <span>
+                <UiText text="示例正文" />
+              </span>
               <TextArea
                 rows={3}
                 value={values.__body ?? source.example_body ?? ""}
@@ -323,7 +345,7 @@ export function ShortcodeEditor({
           )}
           {compilation.pending && writable && (
             <p className={styles.hint} role="status">
-              正在更新预览…
+              <UiText text="正在更新预览…" />
             </p>
           )}
           {compilation.error && writable && (
@@ -340,7 +362,9 @@ export function ShortcodeEditor({
                 values={values}
               />
               <label className={styles.field}>
-                <span>调用源码</span>
+                <span>
+                  <UiText text="调用源码" />
+                </span>
                 <TextArea
                   className={styles.invocation}
                   readOnly
@@ -372,7 +396,7 @@ export function ShortcodeEditor({
             disabled={busy || !compiled || (!dirty && Boolean(item))}
             onClick={() => void save()}
           >
-            {busy ? "处理中…" : "保存草稿"}
+            {busy ? <UiText text="处理中…" /> : <UiText text="保存草稿" />}
           </Button>
           {item && (
             <>
@@ -381,14 +405,18 @@ export function ShortcodeEditor({
                 disabled={busy || dirty || !compiled}
                 onClick={() => setConfirmation("apply")}
               >
-                {item.archived ? "重新应用" : "应用模板"}
+                {item.archived ? (
+                  <UiText text="重新应用" />
+                ) : (
+                  <UiText text="应用模板" />
+                )}
               </Button>
               <Button
                 className="admin-button"
                 disabled={busy || dirty || item.archived}
                 onClick={() => setConfirmation("archive")}
               >
-                归档
+                <UiText text="归档" />
               </Button>
             </>
           )}
@@ -409,11 +437,15 @@ export function ShortcodeEditor({
                 disabled={busy || dirty || !version}
                 onClick={() => setConfirmation("restore")}
               >
-                恢复为草稿
+                <UiText text="恢复为草稿" />
               </Button>
             </>
           )}
-          {dirty && <span className={styles.hint}>有未保存的修改</span>}
+          {dirty && (
+            <span className={styles.hint}>
+              <UiText text="有未保存的修改" />
+            </span>
+          )}
         </div>
       )}
       <ConfirmDialog

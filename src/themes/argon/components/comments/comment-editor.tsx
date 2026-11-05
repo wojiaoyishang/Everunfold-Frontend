@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button, TextArea } from "@/themes/argon/components/ui/primitives";
 import { Checkbox } from "@/themes/argon/components/ui/checkbox";
 
@@ -76,7 +78,7 @@ export function CommentEditor({
               onClick={() => setPreview(false)}
             >
               <Icon name="edit" />
-              编辑
+              <UiText text="编辑" />
             </Button>
             <Button
               id={`${prefix}-preview-tab`}
@@ -90,7 +92,7 @@ export function CommentEditor({
               }}
             >
               <Icon name="eye" />
-              预览
+              <UiText text="预览" />
             </Button>
           </div>
           {!preview && (
@@ -203,7 +205,9 @@ export function CommentEditor({
             {draft.body.trim() ? (
               <CommentBody body={draft.body} formatted={draft.formatted} />
             ) : (
-              <p className="preview-empty">还没有写下文字，回到编辑试试吧。</p>
+              <p className="preview-empty">
+                <UiText text="还没有写下文字，回到编辑试试吧。" />
+              </p>
             )}
           </div>
         </TransitionPanel>
@@ -213,10 +217,10 @@ export function CommentEditor({
               checked={draft.formatted}
               onChange={(event) => update({ formatted: event.target.checked })}
             />
-            文字格式
+            <UiText text="文字格式" />
           </label>
           <span id={`${prefix}-format-help`}>
-            支持 Markdown 链接、列表、代码、引用和图片
+            <UiText text="支持 Markdown 链接、列表、代码、引用和图片" />
           </span>
           <output aria-label="留言字数">
             {draft.body.length} / {COMMENT_MAX_LENGTH}

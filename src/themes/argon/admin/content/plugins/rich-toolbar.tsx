@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import { useEditorState, type Editor } from "@tiptap/react";
 import type { FontAsset } from "@/generated/settings-contract";
@@ -214,7 +216,9 @@ export function RichToolbar({
             role="group"
             aria-label="图片快速对齐"
           >
-            <span>图片</span>
+            <span>
+              <UiText text="图片" />
+            </span>
             {(
               [
                 ["left", "图片居左", "align-left"],
@@ -318,7 +322,7 @@ export function RichToolbar({
               triggerContent={
                 <>
                   <Icon name="image" />
-                  图片
+                  <UiText text="图片" />
                 </>
               }
             >
@@ -338,7 +342,7 @@ export function RichToolbar({
               triggerContent={
                 <>
                   <Icon name="table" />
-                  表格
+                  <UiText text="表格" />
                 </>
               }
             >
@@ -413,10 +417,14 @@ function LinkForm({ editor, close }: { editor: Editor; close: () => void }) {
     >
       <header className={styles.linkHeading}>
         <Icon name="link" />
-        <strong>{current ? "编辑链接" : "插入链接"}</strong>
+        <strong>
+          {current ? <UiText text="编辑链接" /> : <UiText text="插入链接" />}
+        </strong>
       </header>
       <label>
-        <span>链接地址</span>
+        <span>
+          <UiText text="链接地址" />
+        </span>
         <TextField
           aria-label="链接地址"
           value={url}
@@ -436,15 +444,15 @@ function LinkForm({ editor, close }: { editor: Editor; close: () => void }) {
               close();
             }}
           >
-            移除链接
+            <UiText text="移除链接" />
           </Button>
         )}
         <div className={styles.linkSubmit}>
           <Button className="admin-button" onClick={close}>
-            取消
+            <UiText text="取消" />
           </Button>
           <Button type="submit" className="admin-button admin-button-primary">
-            应用
+            <UiText text="应用" />
           </Button>
         </div>
       </div>
@@ -476,7 +484,7 @@ function ImageForm({ editor, close }: { editor: Editor; close: () => void }) {
       }}
     >
       <label>
-        替代文本
+        <UiText text="替代文本" />
         <TextField
           value={alt}
           maxLength={1000}
@@ -484,7 +492,7 @@ function ImageForm({ editor, close }: { editor: Editor; close: () => void }) {
         />
       </label>
       <label>
-        图片说明
+        <UiText text="图片说明" />
         <TextField
           value={caption}
           maxLength={2000}
@@ -492,7 +500,7 @@ function ImageForm({ editor, close }: { editor: Editor; close: () => void }) {
         />
       </label>
       <label>
-        宽度（px）
+        <UiText text="宽度（px）" />
         <TextField
           type="number"
           min={40}
@@ -502,6 +510,7 @@ function ImageForm({ editor, close }: { editor: Editor; close: () => void }) {
         />
       </label>
       <Select
+        programOptions
         name="image-alignment"
         label="图片对齐"
         options={[
@@ -514,7 +523,7 @@ function ImageForm({ editor, close }: { editor: Editor; close: () => void }) {
         onValueChange={setAlignment}
       />
       <Button type="submit" className="admin-button admin-button-primary">
-        应用
+        <UiText text="应用" />
       </Button>
     </Form>
   );

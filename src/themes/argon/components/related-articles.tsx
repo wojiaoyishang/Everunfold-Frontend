@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import type { Content, PublicSnapshot } from "@/core/content/types";
 import { relatedArticles } from "@/core/content/related";
 import { AppLink } from "./navigation-link";
@@ -20,7 +21,7 @@ export function RelatedArticles({
     >
       <h2 id="related-title">
         <Icon name="book" />
-        推荐文章
+        <UiText text="推荐文章" />
       </h2>
       <HorizontalRail className="related-track" aria-label="推荐文章列表">
         {items.map((entry) => (

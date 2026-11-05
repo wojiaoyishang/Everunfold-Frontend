@@ -11,6 +11,7 @@ import { HeaderNavigation } from "./header-navigation";
 import { SearchDialog } from "./search-dialog";
 import { NavigationProgress } from "./navigation-progress";
 import { BackendStatus } from "./backend-status";
+import { PublicLanguage } from "./language-switcher";
 
 export function SiteHeader({ site }: { site: Site }) {
   const header = useRef<HTMLElement>(null);
@@ -57,6 +58,7 @@ export function SiteHeader({ site }: { site: Site }) {
         </Link>
         <HeaderNavigation site={site} />
         <div className="header-actions">
+          <PublicLanguage />
           <BackendStatus />
           <SearchDialog />
         </div>

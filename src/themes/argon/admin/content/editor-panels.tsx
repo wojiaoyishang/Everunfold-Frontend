@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId, useState, type ComponentType, type ReactNode } from "react";
 import type {
   ContentTypeDefinition,
@@ -74,18 +76,28 @@ function PublicationPanel({ settings, update, detail, disabled }: PanelProps) {
     <Panel title="发布设置">
       <dl className={styles.publicationInfo}>
         <div>
-          <dt>状态</dt>
+          <dt>
+            <UiText text="状态" />
+          </dt>
           <dd>
-            {detail?.published_revision ? "已发布 · 可继续编辑草稿" : "草稿"}
+            {detail?.published_revision ? (
+              <UiText text="已发布 · 可继续编辑草稿" />
+            ) : (
+              <UiText text="草稿" />
+            )}
           </dd>
         </div>
         <div>
-          <dt>作者</dt>
-          <dd>{detail?.author || "当前登录用户"}</dd>
+          <dt>
+            <UiText text="作者" />
+          </dt>
+          <dd>{detail?.author || <UiText text="当前登录用户" />}</dd>
         </div>
       </dl>
       <div className="admin-field">
-        <span>显示时间</span>
+        <span>
+          <UiText text="显示时间" />
+        </span>
         <DateTimeField
           label="显示时间"
           value={settings.display_published_at}
@@ -94,10 +106,14 @@ function PublicationPanel({ settings, update, detail, disabled }: PanelProps) {
             update({ display_published_at })
           }
         />
-        <small>留空保留原时间；新内容使用发布时间。</small>
+        <small>
+          <UiText text="留空保留原时间；新内容使用发布时间。" />
+        </small>
       </div>
       <div className={styles.switchRow}>
-        <span>首页置顶</span>
+        <span>
+          <UiText text="首页置顶" />
+        </span>
         <Switch
           aria-label="首页置顶"
           checked={settings.pinned ?? false}
@@ -119,6 +135,7 @@ function AccessPanel({
   return (
     <Panel title="访问权限">
       <Select
+        programOptions
         name="content-visibility"
         label="文章可见性"
         disabled={disabled}
@@ -146,7 +163,9 @@ function AccessPanel({
         <div>
           <div className={styles.accessFields}>
             <label className="admin-field">
-              <span>文章密码</span>
+              <span>
+                <UiText text="文章密码" />
+              </span>
               <PasswordField
                 aria-label="文章密码"
                 autoComplete="new-password"
@@ -164,7 +183,7 @@ function AccessPanel({
               />
             </label>
             <small>
-              读者输入密码后才能阅读正文。文中的媒体文件仍使用公开链接。
+              <UiText text="读者输入密码后才能阅读正文。文中的媒体文件仍使用公开链接。" />
             </small>
           </div>
         </div>
@@ -177,7 +196,9 @@ function OpeningPanel({ settings, update, disabled }: PanelProps) {
   return (
     <Panel title="定时开放" initialOpen={Boolean(settings.opens_at)}>
       <div className="admin-field">
-        <span>自动开放时间</span>
+        <span>
+          <UiText text="自动开放时间" />
+        </span>
         <DateTimeField
           label="自动开放时间"
           value={settings.opens_at}
@@ -186,9 +207,11 @@ function OpeningPanel({ settings, update, disabled }: PanelProps) {
         />
       </div>
       <small>
-        {enabled
-          ? "开放前可凭文章密码提前访问，到点后自动公开。按当前设备时区填写；留空则一直需要密码。"
-          : "先将文章可见性设为密码保护，再设置开放时间。"}
+        {enabled ? (
+          <UiText text="开放前可凭文章密码提前访问，到点后自动公开。按当前设备时区填写；留空则一直需要密码。" />
+        ) : (
+          <UiText text="先将文章可见性设为密码保护，再设置开放时间。" />
+        )}
       </small>
     </Panel>
   );
@@ -218,9 +241,11 @@ function CoverPanel({
           <>
             <Icon name="image" />
             <span>
-              {settings.cover_media_id
-                ? "封面暂不可预览 · 重新选择"
-                : "从媒体库选择"}
+              {settings.cover_media_id ? (
+                <UiText text="封面暂不可预览 · 重新选择" />
+              ) : (
+                <UiText text="从媒体库选择" />
+              )}
             </span>
           </>
         )}
@@ -231,7 +256,7 @@ function CoverPanel({
           disabled={disabled}
           onClick={() => update({ cover_media_id: null })}
         >
-          <Icon name="trash" /> 移除封面
+          <Icon name="trash" /> <UiText text="移除封面" />
         </Button>
       )}
       {picker && (
@@ -283,7 +308,9 @@ function DiscussionPanel({ settings, update, disabled }: PanelProps) {
   return (
     <Panel title="讨论" initialOpen={false}>
       <div className={styles.switchRow}>
-        <span>允许评论</span>
+        <span>
+          <UiText text="允许评论" />
+        </span>
         <Switch
           aria-label="允许评论"
           checked={settings.comments_open ?? true}
@@ -291,7 +318,9 @@ function DiscussionPanel({ settings, update, disabled }: PanelProps) {
           onCheckedChange={(comments_open) => update({ comments_open })}
         />
       </div>
-      <small>关闭后保留已有留言，隐藏回复与写留言入口。</small>
+      <small>
+        <UiText text="关闭后保留已有留言，隐藏回复与写留言入口。" />
+      </small>
     </Panel>
   );
 }
@@ -299,7 +328,9 @@ function SeoPanel({ settings, update, fields, disabled }: PanelProps) {
   return (
     <Panel title="搜索展示" initialOpen={false}>
       <label className="admin-field">
-        <span>搜索标题</span>
+        <span>
+          <UiText text="搜索标题" />
+        </span>
         <TextField
           disabled={disabled}
           value={settings.seo_title ?? ""}
@@ -309,7 +340,9 @@ function SeoPanel({ settings, update, fields, disabled }: PanelProps) {
         />
       </label>
       <label className="admin-field">
-        <span>搜索描述</span>
+        <span>
+          <UiText text="搜索描述" />
+        </span>
         <TextArea
           disabled={disabled}
           rows={4}
@@ -319,7 +352,9 @@ function SeoPanel({ settings, update, fields, disabled }: PanelProps) {
           onChange={(event) => update({ seo_description: event.target.value })}
         />
       </label>
-      <small>同时用于页面元信息和分享卡片；实际搜索结果由搜索引擎决定。</small>
+      <small>
+        <UiText text="同时用于页面元信息和分享卡片；实际搜索结果由搜索引擎决定。" />
+      </small>
     </Panel>
   );
 }

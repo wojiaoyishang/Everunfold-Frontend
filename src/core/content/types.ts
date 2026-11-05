@@ -5,6 +5,12 @@ import type {
   PublicSettings,
 } from "@/generated/settings-contract";
 export type Site = StoredSnapshot["site"] & {
+  locale?: "zh-CN" | "en";
+  contentLocales?: Record<string, string>;
+  contentTranslations?: Record<
+    string,
+    NonNullable<StoredSnapshot["contents"][number]["translations"]>
+  >;
   settings?: PublicSettings;
   settingsRevision?: number;
   cachePolicy?: CachePolicy;

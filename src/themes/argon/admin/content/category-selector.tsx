@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import type { EditorTerm } from "@/generated/content-admin-contract";
 import { categoryTree } from "@/core/content-management/taxonomy-options";
@@ -67,13 +69,13 @@ export function CategorySelector({
     <div className={styles.categorySelector}>
       <div className={styles.smallTabs} aria-label="分类列表范围">
         <Button aria-pressed={tab === "all"} onClick={() => setTab("all")}>
-          所有分类
+          <UiText text="所有分类" />
         </Button>
         <Button
           aria-pressed={tab === "popular"}
           onClick={() => setTab("popular")}
         >
-          最多使用
+          <UiText text="最多使用" />
         </Button>
       </div>
       <div className={styles.categoryList}>
@@ -98,9 +100,11 @@ export function CategorySelector({
         ))}
         {!rows.length && (
           <p>
-            {tab === "all"
-              ? "还没有分类，可以添加一个。"
-              : "发布内容后，常用分类会显示在这里。"}
+            {tab === "all" ? (
+              <UiText text="还没有分类，可以添加一个。" />
+            ) : (
+              <UiText text="发布内容后，常用分类会显示在这里。" />
+            )}
           </p>
         )}
       </div>
@@ -110,7 +114,7 @@ export function CategorySelector({
         disabled={disabled || busy}
         onClick={() => setAdding(!adding)}
       >
-        <Icon name="plus" /> 添加分类
+        <Icon name="plus" /> <UiText text="添加分类" />
       </Button>
       <div className={styles.panelReveal} data-open={adding} inert={!adding}>
         <div>
@@ -153,7 +157,11 @@ export function CategorySelector({
                 name={busy ? "refresh" : "plus"}
                 className={busy ? "admin-draft-spin" : ""}
               />
-              {busy ? "正在添加…" : "添加新分类"}
+              {busy ? (
+                <UiText text="正在添加…" />
+              ) : (
+                <UiText text="添加新分类" />
+              )}
             </Button>
           </div>
         </div>

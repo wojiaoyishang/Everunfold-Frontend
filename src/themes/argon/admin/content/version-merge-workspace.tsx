@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import type { DraftVersioning } from "@/core/content-management/use-draft-versions";
 import type { MediaURL } from "@/generated/content-admin-contract";
@@ -43,15 +45,24 @@ export function VersionMergeWorkspace({
       <header>
         <div>
           <h2>
-            {mergeStates[current.status]} · 目标 V{current.target_revision}
+            {mergeStates[current.status]} <UiText text="· 目标 V" />
+            {current.target_revision}
           </h2>
           <p>
-            {active
-              ? "最新版已锁定，下方编辑的是独立合并草稿。"
-              : "合并结果已保留。"}
+            {active ? (
+              <UiText text="最新版已锁定，下方编辑的是独立合并草稿。" />
+            ) : (
+              <UiText text="合并结果已保留。" />
+            )}
           </p>
         </div>
-        <span>{unresolved ? `${unresolved} 项冲突待处理` : "冲突已处理"}</span>
+        <span>
+          {unresolved ? (
+            `${unresolved} 项冲突待处理`
+          ) : (
+            <UiText text="冲突已处理" />
+          )}
+        </span>
       </header>
       <div className={styles.actions}>
         <Button
@@ -61,7 +72,7 @@ export function VersionMergeWorkspace({
             setComparison(comparison === "inputs" ? null : "inputs")
           }
         >
-          比较线上与分支
+          <UiText text="比较线上与分支" />
         </Button>
         <Button
           className="admin-button"
@@ -70,7 +81,7 @@ export function VersionMergeWorkspace({
             setComparison(comparison === "result" ? null : "result")
           }
         >
-          查看合并结果差异
+          <UiText text="查看合并结果差异" />
         </Button>
       </div>
       {comparison && (
@@ -93,24 +104,28 @@ export function VersionMergeWorkspace({
         />
       ))}
       <div className={styles.resultHeading}>
-        <h3>合并结果</h3>
+        <h3>
+          <UiText text="合并结果" />
+        </h3>
         <span role="status">
-          {versioning.saving
-            ? "正在保存到服务器…"
-            : !versioning.localSaved
-              ? "正在保存到本机…"
-              : versioning.error
-                ? "请检查保存状态"
-                : versioning.serverSaved
-                  ? "合并草稿已保存到服务器"
-                  : "已保存到本机，等待同步"}
+          {versioning.saving ? (
+            <UiText text="正在保存到服务器…" />
+          ) : !versioning.localSaved ? (
+            <UiText text="正在保存到本机…" />
+          ) : versioning.error ? (
+            <UiText text="请检查保存状态" />
+          ) : versioning.serverSaved ? (
+            <UiText text="合并草稿已保存到服务器" />
+          ) : (
+            <UiText text="已保存到本机，等待同步" />
+          )}
         </span>
         <Button
           className="admin-button"
           aria-pressed={preview}
           onClick={() => setPreview(!preview)}
         >
-          {preview ? "编辑结果" : "预览结果"}
+          {preview ? <UiText text="编辑结果" /> : <UiText text="预览结果" />}
         </Button>
       </div>
       {preview ? (
@@ -132,14 +147,14 @@ export function VersionMergeWorkspace({
               disabled={working || !versioning.canResolve}
               onClick={() => void versioning.cancel()}
             >
-              暂停合并并解锁
+              <UiText text="暂停合并并解锁" />
             </Button>
             <Button
               className="admin-button admin-button-primary"
               disabled={working || !versioning.canResolve || unresolved > 0}
               onClick={() => void versioning.finish()}
             >
-              完成合并
+              <UiText text="完成合并" />
             </Button>
           </>
         ) : (
@@ -149,7 +164,7 @@ export function VersionMergeWorkspace({
               disabled={working}
               onClick={onResume}
             >
-              重新比较最新版并继续
+              <UiText text="重新比较最新版并继续" />
             </Button>
           )
         )}
@@ -157,7 +172,7 @@ export function VersionMergeWorkspace({
           filename={`merge-${current.id}.json`}
           content={() => serializeDraftExport(result)}
         >
-          导出合并结果
+          <UiText text="导出合并结果" />
         </DownloadButton>
       </div>
     </section>

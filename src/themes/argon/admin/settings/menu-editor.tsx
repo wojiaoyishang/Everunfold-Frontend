@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { randomUUID } from "@/core/browser/crypto";
 import { useState, type CSSProperties } from "react";
 import type { MenuItem } from "@/generated/settings-contract";
@@ -70,14 +72,16 @@ export function MenuEditor({
   return (
     <div className="admin-menu-editor">
       <div className="admin-menu-toolbar">
-        <span>{entries.length} 个菜单项</span>
+        <span>
+          {entries.length} <UiText text="个菜单项" />
+        </span>
         <Button
           className="admin-button"
           disabled={entries.length >= 256}
           onClick={() => add(null)}
         >
           <Icon name="plus" />
-          添加顶级菜单
+          <UiText text="添加顶级菜单" />
         </Button>
       </div>
       <div className="admin-menu-workbench">
@@ -122,22 +126,32 @@ export function MenuEditor({
                     name={entry.item.icon}
                     url={iconUrls[entry.item.icon ?? ""]}
                   />
-                  <span>{entry.item.label || "未命名"}</span>
-                  {entry.depth > 3 && <small>{entry.depth + 1}级</small>}
+                  <span>{entry.item.label || <UiText text="未命名" />}</span>
+                  {entry.depth > 3 && (
+                    <small>
+                      {entry.depth + 1}
+                      <UiText text="级" />
+                    </small>
+                  )}
                 </Button>
               </div>
             ))}
           {!entries.length && (
             <p className="admin-library-empty">
-              还没有菜单，添加一个开始编辑。
+              <UiText text="还没有菜单，添加一个开始编辑。" />
             </p>
           )}
         </div>
         {item && selected && (
           <div className="admin-menu-detail" key={item.id}>
             <div className="admin-menu-detail-heading">
-              <strong>编辑菜单</strong>
-              <span>第 {selected.depth + 1} 层</span>
+              <strong>
+                <UiText text="编辑菜单" />
+              </strong>
+              <span>
+                <UiText text="第" />
+                {selected.depth + 1} <UiText text="层" />
+              </span>
             </div>
             <SettingsText
               label="菜单名称"
@@ -152,7 +166,9 @@ export function MenuEditor({
               onChange={(href) => patch({ href })}
             />
             <div className="admin-settings-field">
-              <span>所属菜单</span>
+              <span>
+                <UiText text="所属菜单" />
+              </span>
               <Select
                 label="所属菜单"
                 name="menu-parent"
@@ -174,13 +190,17 @@ export function MenuEditor({
               />
             </div>
             <div className="admin-settings-field">
-              <span>图标</span>
+              <span>
+                <UiText text="图标" />
+              </span>
               <Button
                 className="admin-menu-icon-choice"
                 onClick={() => setPicker(true)}
               >
                 <LibraryIcon name={item.icon} url={iconUrls[item.icon ?? ""]} />
-                <span>从图标库选择</span>
+                <span>
+                  <UiText text="从图标库选择" />
+                </span>
                 <Icon name="chevron" />
               </Button>
             </div>
@@ -191,7 +211,7 @@ export function MenuEditor({
                 onClick={() => add(item.id)}
               >
                 <Icon name="plus" />
-                添加子菜单
+                <UiText text="添加子菜单" />
               </Button>
               <span className="admin-menu-order">
                 <Button
@@ -218,11 +238,16 @@ export function MenuEditor({
                   setSelection(selected.parentId);
                 }}
               >
-                移除{item.children?.length ? "分支" : "菜单"}
+                <UiText text="移除" />
+                {item.children?.length ? (
+                  <UiText text="分支" />
+                ) : (
+                  <UiText text="菜单" />
+                )}
               </Button>
             </div>
             <p className="admin-settings-hint">
-              每一层都可继续添加子菜单。修改所属菜单时，整个分支会一起移动。保存前可撤销更改。
+              <UiText text="每一层都可继续添加子菜单。修改所属菜单时，整个分支会一起移动。保存前可撤销更改。" />
             </p>
           </div>
         )}

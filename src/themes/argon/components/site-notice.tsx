@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import "./site-notice.css";
 import {
   useId,
@@ -74,7 +76,9 @@ export function SiteNotice({
           aria-controls={id}
           onClick={() => setOpened(expanded ? null : identity)}
         >
-          <span>{expanded ? "收起" : "展开更多"}</span>
+          <span>
+            {expanded ? <UiText text="收起" /> : <UiText text="展开更多" />}
+          </span>
           <Icon name="chevron" />
         </Button>
       )}

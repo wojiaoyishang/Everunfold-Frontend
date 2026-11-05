@@ -1,4 +1,5 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useRouter } from "next/navigation";
@@ -41,9 +42,15 @@ export function LoginSuccess({
       <span className="login-success-icon">
         <Icon name="check" />
       </span>
-      <h2>登录成功</h2>
+      <h2>
+        <UiText text="登录成功" />
+      </h2>
       <p>
-        {destination.startsWith("/admin") ? "正在进入后台" : "正在返回站点"}
+        {destination.startsWith("/admin") ? (
+          <UiText text="正在进入后台" />
+        ) : (
+          <UiText text="正在返回站点" />
+        )}
       </p>
     </div>
   );

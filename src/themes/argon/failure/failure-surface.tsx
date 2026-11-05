@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import type { CSSProperties } from "react";
 import {
   failurePage,
@@ -36,19 +37,23 @@ export function FailureSurface({
               </span>
             </div>
             <p className="failure-eyebrow">
-              {status === 404 ? "地址未找到" : "暂时无法访问"}
+              {status === 404 ? (
+                <UiText text="地址未找到" />
+              ) : (
+                <UiText text="暂时无法访问" />
+              )}
             </p>
             <h1>{page.title}</h1>
             <p className="failure-description">{page.description}</p>
             <div className="failure-actions">
               <TextLink href="/" className="failure-primary">
                 <Icon name="home" />
-                返回首页
+                <UiText text="返回首页" />
               </TextLink>
               {status !== 404 && (
                 <Button data-retry hidden>
                   <Icon name="refresh" />
-                  重试
+                  <UiText text="重试" />
                 </Button>
               )}
             </div>
@@ -59,13 +64,21 @@ export function FailureSurface({
                 <Icon name="flask" />
               </span>
               <div>
-                <h2>翻牌配对</h2>
-                <p>休息一下，试试你的记忆力</p>
+                <h2>
+                  <UiText text="翻牌配对" />
+                </h2>
+                <p>
+                  <UiText text="休息一下，试试你的记忆力" />
+                </p>
               </div>
             </div>
             <div className="failure-game-meta">
-              <span>4 组图案</span>
-              <span data-game-score>尚未开始</span>
+              <span>
+                <UiText text="4 组图案" />
+              </span>
+              <span data-game-score>
+                <UiText text="尚未开始" />
+              </span>
             </div>
             <div className="failure-cards">
               <CelebrationFireworks />
@@ -106,15 +119,17 @@ export function FailureSurface({
               role="status"
               aria-live="polite"
             >
-              找出 4 组相同图案，不计时。
+              <UiText text="找出 4 组相同图案，不计时。" />
             </p>
             <Button className="failure-start" data-restart disabled>
               <Icon name="play" />
-              <span>开始配对</span>
+              <span>
+                <UiText text="开始配对" />
+              </span>
             </Button>
             <noscript>
               <p className="failure-game-note">
-                启用 JavaScript 后可玩配对；返回首页不受影响。
+                <UiText text="启用 JavaScript 后可玩配对；返回首页不受影响。" />
               </p>
             </noscript>
           </section>

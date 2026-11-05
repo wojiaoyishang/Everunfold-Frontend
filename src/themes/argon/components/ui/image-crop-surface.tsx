@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useRef, useState, type PointerEvent } from "react";
 import type { CropRect } from "@/generated/settings-contract";
 import { clampCrop, type ImageSize } from "@/core/media/image-editor";
@@ -56,7 +58,12 @@ export function ImageCropSurface({
       size,
     );
   };
-  if (failed) return <p role="status">图片预览暂时不可用，请关闭后重试。</p>;
+  if (failed)
+    return (
+      <p role="status">
+        <UiText text="图片预览暂时不可用，请关闭后重试。" />
+      </p>
+    );
   return (
     <svg
       className={`admin-crop-surface${crop && !disabled ? " is-cropping" : ""}`}

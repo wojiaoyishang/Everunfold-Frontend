@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import type { FeedEntry } from "@/core/content/presentation";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import { ContentMarkup } from "./content-markup";
@@ -9,6 +10,7 @@ import { ReactionButton } from "./reaction-button";
 import { Icon } from "./icon";
 import { ViewMetric } from "./reader-data";
 import { ContentEditLink } from "./content-edit-link";
+import { ContentLanguages } from "./language-switcher";
 
 export function ShuoshuoCardView({
   entry,
@@ -33,6 +35,7 @@ export function ShuoshuoCardView({
   );
   return (
     <article
+      lang={content.language}
       className={`surface shuoshuo-card ${detail ? "shuoshuo-detail" : ""}`}
     >
       <header className="shuoshuo-meta">
@@ -43,9 +46,16 @@ export function ShuoshuoCardView({
           <strong>{content.author}</strong>
           <RelativeTime value={content.published_at} />
         </div>
-        <span className="content-kind">说说</span>
-        {example && <span className="preview-badge">示例</span>}
+        <span className="content-kind">
+          <UiText text="说说" />
+        </span>
+        {example && (
+          <span className="preview-badge">
+            <UiText text="示例" />
+          </span>
+        )}
       </header>
+      <ContentLanguages content={content} />
       {content.title &&
         (detail ? (
           <h1>{content.title}</h1>
@@ -72,10 +82,12 @@ export function ShuoshuoCardView({
               expectedContent={!detail}
             >
               <Icon name="comment" />
-              {content.comment_count || "聊两句"}
+              {content.comment_count || <UiText text="聊两句" />}
             </Link>
           ) : (
-            <span>评论已关闭</span>
+            <span>
+              <UiText text="评论已关闭" />
+            </span>
           )}
           {!detail && (
             <Link

@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import { Button, TextField } from "@/themes/argon/components/ui/primitives";
 import type { PublicSnapshot } from "@/core/content/types";
 import { queryFeed, type FeedType } from "@/core/content/presentation";
@@ -8,26 +9,35 @@ import { ContentCard } from "./feed";
 import { Pagination } from "./pagination";
 import { EmptyState } from "./empty-state";
 import { Icon } from "./icon";
+import { SearchLanguages } from "./search-languages";
 
 export function SearchResults({
   snapshot,
   query,
   type,
   page,
+  allLanguages = false,
 }: {
   snapshot: PublicSnapshot;
   query: string;
   type: FeedType;
   page: number;
+  allLanguages?: boolean;
 }) {
-  const result = queryFeed(snapshot, { query, type, page, includePages: true });
+  const result = queryFeed(snapshot, {
+    query,
+    type,
+    page,
+    includePages: true,
+    allLanguages,
+  });
   return (
     <>
       <PagePresentation site={snapshot.site} />
       <section className="surface search-card">
         <h1>
           <Icon name="search" />
-          站内搜索
+          <UiText text="站内搜索" />
         </h1>
         <SearchForm className="search-form">
           <TextField
@@ -39,14 +49,20 @@ export function SearchResults({
             autoFocus
           />
           <SearchContentType key={type} defaultValue={type} />
+          <SearchLanguages key={String(allLanguages)} all={allLanguages} />
           <Button className="primary-button" type="submit">
-            搜索
+            <UiText text="搜索" />
           </Button>
         </SearchForm>
         <p>
-          {query
-            ? `“${query}” 找到 ${result.total} 条内容`
-            : "在这里，寻找某一段故事。"}
+          {query ? (
+            <UiText
+              text="“{query}” 找到 {count} 条内容"
+              values={{ query, count: result.total }}
+            />
+          ) : (
+            <UiText text="在这里，寻找某一段故事。" />
+          )}
         </p>
       </section>
       {query && (
@@ -69,6 +85,7 @@ export function SearchResults({
             pathname="/search"
             query={query}
             type={type}
+            languages={allLanguages ? "all" : undefined}
           />
         </>
       )}

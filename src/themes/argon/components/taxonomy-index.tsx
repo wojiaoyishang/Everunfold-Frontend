@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import { AppLink as Link } from "./navigation-link";
 import type { PublicSnapshot, Taxonomy } from "@/core/content/types";
 import { taxonomyHref } from "@/core/content/urls";
@@ -22,8 +23,14 @@ export function TaxonomyIndex({
         <div>
           <h1>{title}</h1>
           <p>
-            共 {terms.length} 个{kind === "category" ? "分类" : "标签"}
-            ，找到你感兴趣的内容。
+            <UiText text="共" />
+            {terms.length} <UiText text="个" />
+            {kind === "category" ? (
+              <UiText text="分类" />
+            ) : (
+              <UiText text="标签" />
+            )}
+            <UiText text="，找到你感兴趣的内容。" />
           </p>
         </div>
       </header>
@@ -39,7 +46,15 @@ export function TaxonomyIndex({
           </Link>
         ))}
         {!terms.length && (
-          <p>暂时还没有{kind === "category" ? "分类" : "标签"}。</p>
+          <p>
+            <UiText text="暂时还没有" />
+            {kind === "category" ? (
+              <UiText text="分类" />
+            ) : (
+              <UiText text="标签" />
+            )}
+            。
+          </p>
         )}
       </section>
     </>

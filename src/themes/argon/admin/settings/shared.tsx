@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId, type ReactNode } from "react";
 import { useSettingsEditor } from "@/core/settings/editor";
 import type { DeliveryState } from "@/generated/settings-contract";
@@ -32,8 +34,12 @@ export function SettingsSection({
       tabIndex={-1}
     >
       <div className="admin-settings-section-heading">
-        <h2>{title}</h2>
-        <p>{description}</p>
+        <h2>
+          <UiText text={title} />
+        </h2>
+        <p>
+          <UiText text={description} />
+        </p>
       </div>
       <div className="admin-settings-fields">{children}</div>
     </section>
@@ -69,13 +75,15 @@ export function SettingsText({
   };
   return (
     <div className="admin-settings-field">
-      <label htmlFor={id}>{label}</label>
-      {multiline ? (
-        <TextArea {...props} rows={3} />
-      ) : (
-        <TextField {...props} />
-      )}{" "}
-      {hint && <small id={`${id}-hint`}>{hint}</small>}
+      <label htmlFor={id}>
+        <UiText text={label} />
+      </label>
+      {multiline ? <TextArea {...props} rows={3} /> : <TextField {...props} />}{" "}
+      {hint && (
+        <small id={`${id}-hint`}>
+          <UiText text={hint} />
+        </small>
+      )}
     </div>
   );
 }
@@ -94,8 +102,12 @@ export function SettingsToggle({
   return (
     <div className="admin-settings-toggle">
       <div>
-        <label id={id}>{label}</label>
-        <small>{hint}</small>
+        <label id={id}>
+          <UiText text={label} />
+        </label>
+        <small>
+          <UiText text={hint} />
+        </small>
       </div>
       <Switch checked={value} onCheckedChange={onChange} aria-labelledby={id} />
     </div>
@@ -121,7 +133,7 @@ export function DeliveryBadge({ value }: { value: DeliveryState }) {
               : "cloud"
         }
       />
-      {statusLabels[value.status]}
+      <UiText text={statusLabels[value.status]} />
     </span>
   );
 }
@@ -140,13 +152,13 @@ export function SettingsFrame({
       <AdminPageHeading title={title} description={description} />
       {editor.loading ? (
         <div className="admin-settings-loading" role="status">
-          正在读取设置…
+          <UiText text="正在读取设置…" />
         </div>
       ) : !editor.draft ? (
         <div className="admin-settings-message" role="alert">
           {editor.error}
           <Button className="admin-button" onClick={() => void editor.reload()}>
-            重新读取
+            <UiText text="重新读取" />
           </Button>
         </div>
       ) : (
@@ -167,7 +179,7 @@ export function SettingsFrame({
                 className="admin-button"
                 onClick={() => void editor.reload()}
               >
-                放弃本地修改并载入服务器版本
+                <UiText text="放弃本地修改并载入服务器版本" />
               </Button>
             </div>
           )}
@@ -179,9 +191,11 @@ export function SettingsFrame({
           <div className="admin-settings-savebar">
             <div>
               <span>
-                {editor.dirty
-                  ? "有尚未保存的修改"
-                  : `已读取版本 ${editor.saved?.revision ?? ""}`}
+                {editor.dirty ? (
+                  <UiText text="有尚未保存的修改" />
+                ) : (
+                  `已读取版本 ${editor.saved?.revision ?? ""}`
+                )}
               </span>
               <div className="admin-settings-delivery">
                 {editor.saved?.delivery
@@ -199,7 +213,7 @@ export function SettingsFrame({
                 disabled={editor.busy || !editor.dirty}
                 onClick={editor.reset}
               >
-                撤销修改
+                <UiText text="撤销修改" />
               </Button>
               <Button
                 className="admin-button admin-button-primary"
@@ -207,7 +221,11 @@ export function SettingsFrame({
                 disabled={editor.busy || !editor.dirty}
               >
                 <Icon name={editor.busy ? "refresh" : "check"} />
-                {editor.busy ? "正在保存" : "保存更改"}
+                {editor.busy ? (
+                  <UiText text="正在保存" />
+                ) : (
+                  <UiText text="保存更改" />
+                )}
               </Button>
             </div>
           </div>

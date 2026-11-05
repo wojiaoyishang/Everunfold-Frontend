@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import type { FeedEntry } from "@/core/content/presentation";
 import type { PublicSnapshot } from "@/core/content/types";
 import { renderContentForReader } from "@/core/rendering/render-content-server";
@@ -29,7 +30,7 @@ export function ShuoshuoDetail({
       <PagePresentation site={snapshot.site} id={entry.content.id} />
       {entry.example && (
         <p className="preview-notice">
-          说说效果预览 · 以下内容为虚构样例，正式内容将在后续导入。
+          <UiText text="说说效果预览 · 以下内容为虚构样例，正式内容将在后续导入。" />
         </p>
       )}
       <ShuoshuoCard entry={entry} detail />

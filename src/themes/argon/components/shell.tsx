@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { TextLink } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, type CSSProperties, type ReactNode } from "react";
@@ -92,7 +94,7 @@ function ShellFrame({ children }: { children: ReactNode }) {
         >
           <HomeFeedPreference />
           <TextLink className="skip-link" href="#main-content">
-            跳到正文
+            <UiText text="跳到正文" />
           </TextLink>
           <SiteHeader site={site} />
           <section className="hero" aria-label="站点横幅">

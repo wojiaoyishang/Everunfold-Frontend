@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import type { PublicSnapshot } from "@/core/content/types";
 import {
   queryFeed,
@@ -43,8 +44,12 @@ export function Feed({
         <header className="surface page-heading">
           <Icon name="leaf" />
           <div>
-            <h1>说说</h1>
-            <p>把日常的光，收进简短的句子里。</p>
+            <h1>
+              <UiText text="说说" />
+            </h1>
+            <p>
+              <UiText text="把日常的光，收进简短的句子里。" />
+            </p>
           </div>
         </header>
       )}

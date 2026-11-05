@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type { DraftListItem } from "@/generated/content-admin-contract";
 import { useDraftAction } from "@/core/content-management/use-draft-action";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
@@ -24,12 +26,24 @@ export function DraftActionDialog({
       description={
         <>
           <strong>
-            {item.title || item.preview.slice(0, 45) || "未命名说说"}
+            {item.title || item.preview.slice(0, 45) || (
+              <UiText text="未命名说说" />
+            )}
           </strong>
           <p>
-            {restoring
-              ? "恢复后可以继续编辑。"
-              : "内容会移入回收站，并从前台撤下，之后可以恢复。"}
+            {(item.translations?.length ?? 0) > 1 ? (
+              <UiText
+                text="此操作包含全部 {count} 个语言版本。"
+                values={{ count: item.translations!.length }}
+              />
+            ) : (
+              ""
+            )}
+            {restoring ? (
+              <UiText text="恢复后可以继续编辑。" />
+            ) : (
+              <UiText text="内容会移入回收站，并从前台撤下，之后可以恢复。" />
+            )}
           </p>
         </>
       }

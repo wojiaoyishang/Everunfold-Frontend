@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import type {
   ConflictResolution,
@@ -28,36 +30,44 @@ export function MergeConflictCard({
     <section className={styles.conflict} data-resolved={resolved}>
       <header>
         <strong>
-          {conflict.kind === "order"
-            ? "区块顺序"
-            : conflict.kind === "block"
-              ? "区块删除或格式变化"
-              : "内容同时修改"}
+          {conflict.kind === "order" ? (
+            <UiText text="区块顺序" />
+          ) : conflict.kind === "block" ? (
+            <UiText text="区块删除或格式变化" />
+          ) : (
+            <UiText text="内容同时修改" />
+          )}
         </strong>
-        <span>{resolved ? "已处理" : "待处理"}</span>
+        <span>
+          {resolved ? <UiText text="已处理" /> : <UiText text="待处理" />}
+        </span>
       </header>
       <p className={styles.path}>{conflict.path.join(" / ")}</p>
       <div className={styles.comparison}>
         <section>
-          <strong>线上版本</strong>
+          <strong>
+            <UiText text="线上版本" />
+          </strong>
           <pre>{printable(conflict.remote)}</pre>
           <Button
             className="admin-button"
             disabled={disabled}
             onClick={() => onResolve({ key: conflict.key, choice: "remote" })}
           >
-            采用线上
+            <UiText text="采用线上" />
           </Button>
         </section>
         <section>
-          <strong>草稿分支</strong>
+          <strong>
+            <UiText text="草稿分支" />
+          </strong>
           <pre>{printable(conflict.local)}</pre>
           <Button
             className="admin-button"
             disabled={disabled}
             onClick={() => onResolve({ key: conflict.key, choice: "local" })}
           >
-            采用草稿
+            <UiText text="采用草稿" />
           </Button>
         </section>
       </div>
@@ -67,14 +77,14 @@ export function MergeConflictCard({
           aria-expanded={showBase}
           onClick={() => setShowBase(!showBase)}
         >
-          共同基线
+          <UiText text="共同基线" />
         </Button>
         <Button
           className="admin-button"
           aria-expanded={editing}
           onClick={() => setEditing(!editing)}
         >
-          自行修改
+          <UiText text="自行修改" />
         </Button>
       </div>
       {showBase && (
@@ -84,7 +94,7 @@ export function MergeConflictCard({
         <div className={styles.manual}>
           <label className="admin-field">
             <span>
-              手动合并内容
+              <UiText text="手动合并内容" />
               {typeof conflict.local === "string" ||
               typeof conflict.remote === "string"
                 ? ""
@@ -120,7 +130,7 @@ export function MergeConflictCard({
               }
             }}
           >
-            保存这项决策
+            <UiText text="保存这项决策" />
           </Button>
         </div>
       )}

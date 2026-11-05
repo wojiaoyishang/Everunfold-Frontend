@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useState } from "react";
 import type {
   ContentTypeDefinition,
@@ -13,6 +15,7 @@ import { ContentSync } from "./content-sync";
 import { DraftActionDialog } from "./draft-action-dialog";
 import { DraftListRow } from "./draft-list-row";
 import styles from "./draft-list.module.css";
+import { Select } from "../../components/ui/select";
 
 export function DraftList({ type }: { type: ContentTypeDefinition }) {
   const catalog = useDraftCatalog(type);
@@ -31,7 +34,8 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
             showPending
           >
             <Icon name="plus" />
-            新建{type.label}
+            <UiText text="新建" />
+            <UiText text={type.label} />
           </RouteLink>
         }
       />
@@ -53,7 +57,7 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
                 aria-pressed={catalog.status === value}
                 onClick={() => catalog.setStatus(value)}
               >
-                {label}
+                <UiText text={label} />
               </Button>
             ))}
             <Button
@@ -61,7 +65,7 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
               onClick={() => catalog.setStatus("trash")}
             >
               <Icon name="trash" />
-              回收站
+              <UiText text="回收站" />
             </Button>
           </div>
           <Form
@@ -72,6 +76,20 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
               catalog.submitSearch();
             }}
           >
+            <Select
+              programOptions
+              name="content-list-language"
+              label="内容语言筛选"
+              value={catalog.language}
+              options={[
+                { value: "all", label: "全部语言" },
+                { value: "zh-CN", label: "简体中文" },
+                { value: "en", label: "English" },
+              ]}
+              onValueChange={(value) =>
+                catalog.setLanguage(value as "all" | "zh-CN" | "en")
+              }
+            />
             <TextField
               type="search"
               aria-label={`搜索${type.label}`}
@@ -81,7 +99,7 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
               onChange={(event) => catalog.setSearch(event.target.value)}
             />
             <Button type="submit" className="admin-button">
-              搜索
+              <UiText text="搜索" />
             </Button>
             <Button
               className="admin-icon-button"
@@ -101,7 +119,7 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
           <div className="admin-draft-message" role="alert">
             <span>{catalog.error}</span>
             <Button className="admin-button" onClick={catalog.refresh}>
-              重试
+              <UiText text="重试" />
             </Button>
           </div>
         )}
@@ -118,24 +136,34 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
           {!data ? (
             <div className="admin-draft-empty" role="status">
               <Icon name={catalog.error ? "cloud-off" : "edit"} />
-              <p>{catalog.loading ? "正在读取内容…" : "暂时无法读取内容"}</p>
+              <p>
+                {catalog.loading ? (
+                  <UiText text="正在读取内容…" />
+                ) : (
+                  <UiText text="暂时无法读取内容" />
+                )}
+              </p>
             </div>
           ) : data.items.length === 0 ? (
             <div className="admin-draft-empty">
               <Icon name={trash ? "trash" : "edit"} />
               <h2>
-                {catalog.appliedSearch
-                  ? "没有找到相关内容"
-                  : trash
-                    ? "回收站是空的"
-                    : `还没有${type.label}草稿`}
+                {catalog.appliedSearch ? (
+                  <UiText text="没有找到相关内容" />
+                ) : trash ? (
+                  <UiText text="回收站是空的" />
+                ) : (
+                  `还没有${type.label}草稿`
+                )}
               </h2>
               <p>
-                {catalog.appliedSearch
-                  ? "试试其他关键词。"
-                  : trash
-                    ? "删除的内容会保留在这里。"
-                    : "写下第一段文字，从这里开始。"}
+                {catalog.appliedSearch ? (
+                  <UiText text="试试其他关键词。" />
+                ) : trash ? (
+                  <UiText text="删除的内容会保留在这里。" />
+                ) : (
+                  <UiText text="写下第一段文字，从这里开始。" />
+                )}
               </p>
             </div>
           ) : (
@@ -149,7 +177,7 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
                 {["标题", "作者", "分类", "标签", "评论", "日期", "操作"].map(
                   (label) => (
                     <span role="columnheader" key={label}>
-                      {label}
+                      <UiText text={label} />
                     </span>
                   ),
                 )}
@@ -169,11 +197,13 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
         </div>
         <footer className="admin-draft-list-footer">
           <span className={styles.footerLabel} role="status">
-            {catalog.loading
-              ? "正在读取…"
-              : data
-                ? `${data.total} 份${trash ? "已回收内容" : "内容"}`
-                : ""}
+            {catalog.loading ? (
+              <UiText text="正在读取…" />
+            ) : data ? (
+              `${data.total} 份${trash ? "已回收内容" : "内容"}`
+            ) : (
+              ""
+            )}
             {catalog.appliedSearch && (
               <>
                 {" "}
@@ -182,7 +212,7 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
                   className={styles.clearSearch}
                   onClick={catalog.clearSearch}
                 >
-                  清除搜索
+                  <UiText text="清除搜索" />
                 </Button>
               </>
             )}

@@ -1,5 +1,6 @@
 import type { Content, PublicSnapshot, Taxonomy } from "./types";
 import { normalizePath } from "./urls";
+import { languageContents } from "@/core/i18n/snapshot";
 
 export interface ContentFilter {
   query?: string;
@@ -14,7 +15,10 @@ export function queryContents(
   filter: ContentFilter = {},
 ) {
   const query = filter.query?.trim().slice(0, 160).toLocaleLowerCase();
-  const all = snapshot.contents
+  const all = languageContents(
+    snapshot.contents,
+    snapshot.site.locale ?? "zh-CN",
+  )
     .filter((item) => {
       if (item.kind !== "article") return false;
       if (
@@ -87,8 +91,12 @@ export function pageNumber(value: string | string[] | undefined): number {
     : 1;
 }
 
-export function displayDate(value: string, detailed = false): string {
-  return new Intl.DateTimeFormat("zh-CN", {
+export function displayDate(
+  value: string,
+  detailed = false,
+  locale = "zh-CN",
+): string {
+  return new Intl.DateTimeFormat(locale, {
     timeZone: "Asia/Shanghai",
     year: "numeric",
     month: "2-digit",

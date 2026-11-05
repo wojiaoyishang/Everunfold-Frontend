@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type {
   DraftSession,
   CollaborationStatus,
@@ -73,7 +75,9 @@ export function CollaborationBar({
     >
       <div className={styles.state} role="status" aria-live="polite">
         <Icon name={connected ? "cloud-check" : "cloud-off"} />
-        <span>{label}</span>
+        <span>
+          <UiText text={label} />
+        </span>
       </div>
       <div className={styles.peers} aria-label="编辑成员">
         <Button
@@ -84,7 +88,7 @@ export function CollaborationBar({
           style={{ color: self?.color }}
         >
           <Icon name="user" />
-          {account.display_name} · 我
+          {account.display_name} <UiText text="· 我" />
         </Button>
         {peers.map((peer) => (
           <Button
@@ -124,7 +128,7 @@ export function CollaborationBar({
         {onVersions && (
           <Button onClick={onVersions}>
             <Icon name="clock" />
-            版本
+            <UiText text="版本" />
           </Button>
         )}
         <DownloadButton
@@ -139,7 +143,7 @@ export function CollaborationBar({
           }
         >
           <Icon name="down" />
-          导出草稿
+          <UiText text="导出草稿" />
         </DownloadButton>
       </div>
       {(status.mode !== "shared" || status.error || status.merge) && (
@@ -147,13 +151,17 @@ export function CollaborationBar({
           <span>
             {status.merge
               ? `${status.merge.actor} 正在合并版本，最新版暂时只读。${status.branchId ? " 你的未确认输入已另存为本机草稿，恢复后需要比较并合并。" : ""}`
-              : status.error || "本地草稿已保留，请比较后合并。"}
+              : status.error || (
+                  <UiText text="本地草稿已保留，请比较后合并。" />
+                )}
             {status.mode !== "shared" &&
-              (status.localSaving
-                ? " 正在保存到本机…"
-                : status.local
-                  ? " 内容保存在此浏览器。"
-                  : " 本地保存失败，请立即导出。")}
+              (status.localSaving ? (
+                <UiText text=" 正在保存到本机…" />
+              ) : status.local ? (
+                <UiText text=" 内容保存在此浏览器。" />
+              ) : (
+                <UiText text=" 本地保存失败，请立即导出。" />
+              ))}
           </span>
           <div>
             {status.phase !== "stopped" &&
@@ -163,7 +171,7 @@ export function CollaborationBar({
                   className="admin-button"
                   onClick={() => session.reconnect()}
                 >
-                  重新连接
+                  <UiText text="重新连接" />
                 </Button>
               )}
             {status.phase !== "stopped" && status.mode !== "local" && (
@@ -171,7 +179,7 @@ export function CollaborationBar({
                 className="admin-button"
                 onClick={() => session.continueLocal()}
               >
-                继续本地编辑
+                <UiText text="继续本地编辑" />
               </Button>
             )}
             {connected && status.mode !== "shared" && (
@@ -179,12 +187,12 @@ export function CollaborationBar({
                 className="admin-button"
                 onClick={() => session.returnToLatest()}
               >
-                返回最新版
+                <UiText text="返回最新版" />
               </Button>
             )}
             {onVersions && status.branchId && (
               <Button className="admin-button" onClick={onVersions}>
-                比较与合并
+                <UiText text="比较与合并" />
               </Button>
             )}
           </div>

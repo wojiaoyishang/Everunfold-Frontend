@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useRef } from "react";
 import { Button, TextField } from "./primitives";
 import { Icon } from "../icon";
@@ -127,27 +129,31 @@ export function SourceSearchPanel({
               disabled={disabled || !status.matches}
               onClick={() => onReplace()}
             >
-              替换
+              <UiText text="替换" />
             </Button>
             <Button
               className={styles.searchAction}
               disabled={disabled || !status.matches}
               onClick={() => onReplace(true)}
             >
-              全部替换
+              <UiText text="全部替换" />
             </Button>
           </div>
           <span className={styles.matchCount} role="status">
-            {query.search
-              ? status.matches
-                ? (status.currentMatch
-                    ? "第 " + status.currentMatch + " 项 · "
-                    : "") +
-                  status.matches +
-                  (status.limited ? "+" : "") +
-                  " 个匹配"
-                : "未找到匹配内容"
-              : "在当前区块中查找 · Enter 下一项，Shift+Enter 上一项"}
+            {query.search ? (
+              status.matches ? (
+                (status.currentMatch
+                  ? "第 " + status.currentMatch + " 项 · "
+                  : "") +
+                status.matches +
+                (status.limited ? "+" : "") +
+                " 个匹配"
+              ) : (
+                <UiText text="未找到匹配内容" />
+              )
+            ) : (
+              <UiText text="在当前区块中查找 · Enter 下一项，Shift+Enter 上一项" />
+            )}
           </span>
         </div>
       </div>

@@ -1,7 +1,9 @@
+import { UiText } from "@/core/i18n/provider";
 import type { ReactNode, Ref } from "react";
 import { Icon } from "../components/icon";
 import { TextLink } from "../components/ui/primitives";
 import { ManagementScene } from "./management-scene";
+import { InterfaceLanguage } from "../components/language-switcher";
 
 type ManagementEntryProps = {
   panel: {
@@ -28,9 +30,10 @@ export function ManagementEntry({
             <Icon name="leaf" />
             Everunfold
           </span>
+          <InterfaceLanguage className="icon-button" />
           <TextLink href="/" className="login-back">
             <Icon name="arrow-left" />
-            返回站点
+            <UiText text="返回站点" />
           </TextLink>
         </header>
         <section
@@ -41,8 +44,12 @@ export function ManagementEntry({
             {panel.kicker && (
               <span className="management-kicker">{panel.kicker}</span>
             )}
-            <h1 id="management-panel-title">{panel.title}</h1>
-            <p>{panel.description}</p>
+            <h1 id="management-panel-title">
+              <UiText text={panel.title} />
+            </h1>
+            <p>
+              <UiText text={panel.description} />
+            </p>
           </div>
           <div className="login-panel-content">{children}</div>
         </section>

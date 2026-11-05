@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import {
   useEffect,
   useId,
@@ -107,7 +109,7 @@ export function ConfirmPopover({
         {description && <p id={`${id}-description`}>{description}</p>}
         <div className={styles.actions}>
           <Button ref={cancel} disabled={closing} onClick={close}>
-            取消
+            <UiText text="取消" />
           </Button>
           <Button
             className={styles.remove}
@@ -115,7 +117,7 @@ export function ConfirmPopover({
             onClick={confirm}
           >
             <Icon name="trash" />
-            删除
+            <UiText text="删除" />
           </Button>
         </div>
       </Popover>

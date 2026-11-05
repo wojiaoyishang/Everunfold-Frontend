@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useCallback, useEffect } from "react";
 import { contentEditHref, readEditAction } from "@/core/content/edit-action";
 import type { RequestOptions } from "@/core/http/request";
@@ -36,7 +38,7 @@ export function ContentEditLink({ contentId }: { contentId: string }) {
   return href ? (
     <RouteLink href={href} className={styles.link} aria-label="编辑这份内容">
       <Icon name="edit" />
-      编辑
+      <UiText text="编辑" />
     </RouteLink>
   ) : null;
 }

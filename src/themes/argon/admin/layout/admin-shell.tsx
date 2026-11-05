@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { AuthUser } from "@/generated/auth-contract";
@@ -11,6 +13,7 @@ import { RouteLink } from "../../components/ui/route-link";
 import { AdminAppearance } from "../components/preferences";
 import { AdminNavigation } from "./navigation";
 import { AdminMobileNavigation } from "./mobile-navigation";
+import { InterfaceLanguage } from "../../components/language-switcher";
 
 export function AdminShell({
   user,
@@ -40,7 +43,7 @@ export function AdminShell({
       data-collapsed={preferences.sidebarCollapsed}
     >
       <RouteLink href="#admin-main" className="admin-skip-link">
-        跳至主要内容
+        <UiText text="跳至主要内容" />
       </RouteLink>
       <aside className="admin-sidebar">
         <RouteLink
@@ -74,17 +77,22 @@ export function AdminShell({
               <Icon name="sidebar" />
             </Button>
             <AdminMobileNavigation pathname={pathname} />
-            <span className="admin-breadcrumb-root">工作空间</span>
+            <span className="admin-breadcrumb-root">
+              <UiText text="工作空间" />
+            </span>
             <Icon name="chevron" />
             <span className="admin-breadcrumb-current" key={pathname}>
-              {destination?.label ?? "后台"}
+              <UiText text={destination?.label ?? "后台"} />
             </span>
           </div>
           <div className="admin-header-dock" data-admin-header-dock />
           <nav className="admin-header-actions" aria-label="工作空间操作">
+            <InterfaceLanguage />
             <RouteLink href="/" className="admin-site-link" title="访问站点">
               <Icon name="external" />
-              <span>访问站点</span>
+              <span>
+                <UiText text="访问站点" />
+              </span>
             </RouteLink>
             <AdminAppearance
               preferences={preferences}

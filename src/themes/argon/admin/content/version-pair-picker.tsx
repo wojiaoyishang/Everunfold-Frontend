@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import type {
   VersionDetail,
   VersionItem,
@@ -51,7 +53,13 @@ export function VersionPairPicker({
     onChange: (value: string) => void,
   ) => (
     <div className={styles.pairField}>
-      <span>{side === "before" ? "基础版本 · 左侧" : "对比版本 · 右侧"}</span>
+      <span>
+        {side === "before" ? (
+          <UiText text="基础版本 · 左侧" />
+        ) : (
+          <UiText text="对比版本 · 右侧" />
+        )}
+      </span>
       <Select
         name={`revision-${side}`}
         label={side === "before" ? "基础版本" : "对比版本"}
@@ -61,11 +69,13 @@ export function VersionPairPicker({
         disabled={disabled}
       />
       <small>
-        {value === "head"
-          ? "跟随线上已保存的最新内容"
-          : detail
-            ? `${detail.version.actor} · ${date(detail.version.created_at)}`
-            : `V${value} · 版本快照`}
+        {value === "head" ? (
+          <UiText text="跟随线上已保存的最新内容" />
+        ) : detail ? (
+          `${detail.version.actor} · ${date(detail.version.created_at)}`
+        ) : (
+          `V${value} · 版本快照`
+        )}
       </small>
     </div>
   );
@@ -79,7 +89,9 @@ export function VersionPairPicker({
         onClick={onSwap}
       >
         <span aria-hidden="true">⇄</span>
-        <span>交换</span>
+        <span>
+          <UiText text="交换" />
+        </span>
       </Button>
       {field("after", after, afterDetail, onAfter)}
     </section>

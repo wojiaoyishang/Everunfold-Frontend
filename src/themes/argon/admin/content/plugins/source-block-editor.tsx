@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import {
   useCallback,
   useEffect,
@@ -205,7 +207,9 @@ export function SourceBlockEditor({
               onClick={() => setWrapLines(!wrapLines)}
             >
               <Icon name="wrap" />
-              <span>换行</span>
+              <span>
+                <UiText text="换行" />
+              </span>
             </Button>
             <Button
               className={styles.statusButton}
@@ -216,13 +220,18 @@ export function SourceBlockEditor({
               onClick={searchOpen ? closeSearch : openSearch}
             >
               <Icon name="search" />
-              <span>查找</span>
+              <span>
+                <UiText text="查找" />
+              </span>
             </Button>
           </>
         }
       >
         <span>
-          行 {status.line}，列 {status.column}
+          <UiText text="行" />
+          {status.line}
+          <UiText text="，列" />
+          {status.column}
           {status.selected ? " · 已选 " + status.selected + " 字符" : ""}
         </span>
       </EditorStatusBar>

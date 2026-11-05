@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import { Button, TextLink } from "@/themes/argon/components/ui/primitives";
 import type { MouseEvent } from "react";
 import { RelativeTime } from "../relative-time";
@@ -77,14 +78,18 @@ export function CommentItem({
             <strong>{entry.author}</strong>
           )}
           {entry.host && (
-            <span className="comment-badge host-badge">博主演示</span>
+            <span className="comment-badge host-badge">
+              <UiText text="博主演示" />
+            </span>
           )}
           <span className={`comment-badge origin-${entry.origin}`}>
-            {entry.origin === "history"
-              ? "历史留言"
-              : entry.origin === "example"
-                ? "示例"
-                : "仅本页"}
+            {entry.origin === "history" ? (
+              <UiText text="历史留言" />
+            ) : entry.origin === "example" ? (
+              <UiText text="示例" />
+            ) : (
+              <UiText text="仅本页" />
+            )}
           </span>
           <span className="comment-floor">#{floor}</span>
         </div>
@@ -94,7 +99,7 @@ export function CommentItem({
         {(entry.replyTo || parent) && (
           <p className="comment-reply-to">
             <Icon name="reply" />
-            回复{" "}
+            <UiText text="回复" />{" "}
             {parentPage ? (
               <TextLink
                 href={`${path}?comments_page=${parentPage}#comment-${encodeURIComponent(entry.parentId!)}`}
@@ -121,7 +126,7 @@ export function CommentItem({
               aria-label={`回复 ${entry.author}`}
             >
               <Icon name="reply" />
-              回复
+              <UiText text="回复" />
             </Button>
           )}
           <Button
@@ -141,7 +146,13 @@ export function CommentItem({
             <span className={liking ? "ui-spinner" : undefined}>
               <Icon name={liking ? "refresh" : "heart"} />
             </span>
-            {liking ? "提交中" : liked ? "已赞同" : "赞同"}
+            {liking ? (
+              <UiText text="提交中" />
+            ) : liked ? (
+              <UiText text="已赞同" />
+            ) : (
+              <UiText text="赞同" />
+            )}
             {likeCount !== undefined && likeCount > 0 && (
               <span>{likeCount}</span>
             )}

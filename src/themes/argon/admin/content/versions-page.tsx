@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type {
@@ -65,13 +67,15 @@ export function DraftVersionsPage({
         />
       ) : (
         <div className={styles.page}>
-          <h1>版本修订</h1>
+          <h1>
+            <UiText text="版本修订" />
+          </h1>
           <p role={editor.error ? "alert" : "status"}>
-            {editor.error || "正在读取文章…"}
+            {editor.error || <UiText text="正在读取文章…" />}
           </p>
           {editor.error && (
             <Button className="admin-button" onClick={editor.retryRead}>
-              重新读取
+              <UiText text="重新读取" />
             </Button>
           )}
         </div>
@@ -272,10 +276,14 @@ function VersionsWorkspace({
             onClick={() => leave(editorUrl)}
           >
             <Icon name="arrow-left" />
-            返回编辑
+            <UiText text="返回编辑" />
           </Button>
-          <p className={styles.revisionContext}>{type.label} / 版本修订</p>
-          <h1>{session.confirmedFields?.title || "未命名文章"}</h1>
+          <p className={styles.revisionContext}>
+            {type.label} <UiText text="/ 版本修订" />
+          </p>
+          <h1>
+            {session.confirmedFields?.title || <UiText text="未命名文章" />}
+          </h1>
         </div>
         <div className={styles.savePoint}>
           <TextField
@@ -302,7 +310,7 @@ function VersionsWorkspace({
                 .finally(() => setCheckpointing(false));
             }}
           >
-            保存版本
+            <UiText text="保存版本" />
           </Button>
         </div>
       </header>
@@ -318,7 +326,7 @@ function VersionsWorkspace({
               navigationError}
           </span>
           <Button className="admin-button" onClick={versioning.retryRead}>
-            重新读取
+            <UiText text="重新读取" />
           </Button>
         </div>
       )}
@@ -363,9 +371,11 @@ function VersionsWorkspace({
             aria-expanded={catalogOpen}
             onClick={() => setCatalogOpen(!catalogOpen)}
           >
-            {catalogOpen
-              ? "收起版本记录"
-              : `版本记录${versioning.catalog ? ` · ${versioning.catalog.total}` : ""}`}
+            {catalogOpen ? (
+              <UiText text="收起版本记录" />
+            ) : (
+              `版本记录${versioning.catalog ? ` · ${versioning.catalog.total}` : ""}`
+            )}
           </Button>
         )}
       </div>
@@ -412,7 +422,9 @@ function VersionsWorkspace({
         ) : selectedInTab && view && before && after ? (
           <>
             <div className={styles.selectionHeading}>
-              <h2>区块差异</h2>
+              <h2>
+                <UiText text="区块差异" />
+              </h2>
               <div className={styles.actions}>
                 <Button
                   className="admin-button"
@@ -425,7 +437,11 @@ function VersionsWorkspace({
                     void navigate(editorUrl);
                   }}
                 >
-                  {headSelected ? "编辑最新版" : "从此继续编辑"}
+                  {headSelected ? (
+                    <UiText text="编辑最新版" />
+                  ) : (
+                    <UiText text="从此继续编辑" />
+                  )}
                 </Button>
                 {(branch || local) && (
                   <Button
@@ -439,7 +455,7 @@ function VersionsWorkspace({
                       )
                     }
                   >
-                    开始合并
+                    <UiText text="开始合并" />
                   </Button>
                 )}
                 <DownloadButton
@@ -448,7 +464,7 @@ function VersionsWorkspace({
                     serializeDraftExport(view, local?.removedBlocks)
                   }
                 >
-                  导出草稿
+                  <UiText text="导出草稿" />
                 </DownloadButton>
               </div>
             </div>
@@ -468,8 +484,16 @@ function VersionsWorkspace({
         ) : (
           <div className={styles.emptyView}>
             <Icon name="book" />
-            <h2>{working ? "正在读取版本…" : "选择一个版本开始比较"}</h2>
-            <p>选择历史版本、独立草稿或合并记录。</p>
+            <h2>
+              {working ? (
+                <UiText text="正在读取版本…" />
+              ) : (
+                <UiText text="选择一个版本开始比较" />
+              )}
+            </h2>
+            <p>
+              <UiText text="选择历史版本、独立草稿或合并记录。" />
+            </p>
           </div>
         )}
       </section>

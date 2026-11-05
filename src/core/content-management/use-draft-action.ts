@@ -2,7 +2,12 @@
 import { randomUUID } from "@/core/browser/crypto";
 import { useRef, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { restoreDraft, trashDraft } from "@/generated/content-admin-client";
+import {
+  restoreDraft,
+  trashDraft,
+  restoreTranslationGroup,
+  trashTranslationGroup,
+} from "@/generated/content-admin-client";
 import type { DraftListItem } from "@/generated/content-admin-contract";
 import { draftError, uncertainWrite } from "./draft-state";
 
@@ -16,16 +21,34 @@ export function useDraftAction(item: DraftListItem) {
       operationId.current ??= randomUUID();
       setError("");
       try {
-        const action = item.status === "trash" ? restoreDraft : trashDraft;
-        await action(
-          baseUrl,
-          {
-            id: item.id,
-            expected_revision: item.revision,
-            operation_id: operationId.current,
-          },
-          csrfToken,
-        );
+        if (item.translations?.length) {
+          await (
+            item.status === "trash"
+              ? restoreTranslationGroup
+              : trashTranslationGroup
+          )(
+            baseUrl,
+            {
+              id: item.id,
+              expected_revision: item.group_revision ?? 1,
+              operation_id: operationId.current,
+              members: Object.fromEntries(
+                item.translations.map((member) => [member.id, member.revision]),
+              ),
+            },
+            csrfToken,
+          );
+        } else {
+          await (item.status === "trash" ? restoreDraft : trashDraft)(
+            baseUrl,
+            {
+              id: item.id,
+              expected_revision: item.revision,
+              operation_id: operationId.current,
+            },
+            csrfToken,
+          );
+        }
         return true;
       } catch (reason) {
         setError(

@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button } from "@/themes/argon/components/ui/primitives";
 
 import Image from "next/image";
@@ -95,7 +97,9 @@ export function EmotionPicker({
         ))}
       </div>
       {group === "flower" && (
-        <small>花！· 原主题贴纸，来源 k4yt3x/flowerhd</small>
+        <small>
+          <UiText text="花！· 原主题贴纸，来源 k4yt3x/flowerhd" />
+        </small>
       )}
     </div>
   );

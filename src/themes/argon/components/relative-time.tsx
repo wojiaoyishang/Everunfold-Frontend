@@ -2,21 +2,23 @@
 import { useEffect, useState } from "react";
 import { displayDate } from "@/core/content/query";
 import { relativeTime } from "@/core/browser/relative-time";
+import { useLocale } from "@/core/i18n/provider";
 
 export function RelativeTime({ value }: { value: string }) {
+  const { locale } = useLocale();
   const [label, setLabel] = useState("");
   useEffect(() => {
-    const update = () => setLabel(relativeTime(value, Date.now()));
+    const update = () => setLabel(relativeTime(value, Date.now(), locale));
     const frame = requestAnimationFrame(update);
     const timer = setInterval(update, 60_000);
     return () => {
       cancelAnimationFrame(frame);
       clearInterval(timer);
     };
-  }, [value]);
+  }, [value, locale]);
   return (
-    <time dateTime={value} title={displayDate(value, true)}>
-      {label || displayDate(value, true)}
+    <time dateTime={value} title={displayDate(value, true, locale)}>
+      {label || displayDate(value, true, locale)}
     </time>
   );
 }

@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import type { Content, PublicSnapshot } from "@/core/content/types";
 import { articleNeighbors } from "@/core/content/related";
 import { AppLink } from "./navigation-link";
@@ -16,9 +17,15 @@ function NeighborCard({
   if (!content) {
     return (
       <div className={`${className} neighbor-empty`}>
-        <small>{label}</small>
+        <small>
+          <UiText text={label} />
+        </small>
         <span>
-          {direction === "previous" ? "已经是最早一篇" : "已经是最新一篇"}
+          {direction === "previous" ? (
+            <UiText text="已经是最早一篇" />
+          ) : (
+            <UiText text="已经是最新一篇" />
+          )}
         </span>
       </div>
     );
@@ -36,7 +43,7 @@ function NeighborCard({
       />
       <small>
         <Icon name="arrow" />
-        {label}
+        <UiText text={label} />
       </small>
       <span className="neighbor-title">{content.title}</span>
     </AppLink>

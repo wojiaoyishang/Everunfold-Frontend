@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useEffect, useRef, useState } from "react";
 import type { DraftDetail } from "@/generated/content-admin-contract";
 import { contentPreviewPath } from "@/core/content-management/preview";
@@ -70,7 +72,13 @@ export function FrontendPreviewButton({
         name={pending ? "refresh" : "external"}
         className={pending ? "admin-spinning" : undefined}
       />
-      {pending ? "正在准备预览" : needsSave ? "保存并预览" : "前台预览"}
+      {pending ? (
+        <UiText text="正在准备预览" />
+      ) : needsSave ? (
+        <UiText text="保存并预览" />
+      ) : (
+        <UiText text="前台预览" />
+      )}
     </Button>
   );
 }

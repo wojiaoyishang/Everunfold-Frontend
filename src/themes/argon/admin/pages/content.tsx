@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import { registeredContentTypes } from "@/core/content-management/registry";
 import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
@@ -17,7 +18,7 @@ export function AdminContent() {
             <Icon name={type.icon === "leaf" ? "leaf" : "book"} />
             <h2>{type.label}</h2>
             <span>
-              打开草稿列表
+              <UiText text="打开草稿列表" />
               <Icon name="arrow" />
             </span>
           </RouteLink>
@@ -27,10 +28,14 @@ export function AdminContent() {
           href="/admin/pages"
         >
           <Icon name="copy" />
-          <h2>页面</h2>
-          <p>查看由代码提供的独立页面。</p>
+          <h2>
+            <UiText text="页面" />
+          </h2>
+          <p>
+            <UiText text="查看由代码提供的独立页面。" />
+          </p>
           <span>
-            打开页面目录
+            <UiText text="打开页面目录" />
             <Icon name="arrow" />
           </span>
         </RouteLink>

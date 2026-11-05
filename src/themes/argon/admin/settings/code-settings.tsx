@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId } from "react";
 import type { CodePreferences } from "@/generated/settings-contract";
 import { useFontLibrary } from "@/core/media/font-library";
@@ -73,8 +75,11 @@ export function CodeSettingsSection({
     >
       <div className={styles.grid}>
         <label>
-          <span>浅色配色</span>
+          <span>
+            <UiText text="浅色配色" />
+          </span>
           <Select
+            programOptions
             name={id + "light"}
             label="代码块浅色配色"
             value={value.light_scheme ?? "paper"}
@@ -88,8 +93,11 @@ export function CodeSettingsSection({
           />
         </label>
         <label>
-          <span>深色配色</span>
+          <span>
+            <UiText text="深色配色" />
+          </span>
           <Select
+            programOptions
             name={id + "dark"}
             label="代码块深色配色"
             value={value.dark_scheme ?? "slate"}
@@ -125,7 +133,9 @@ export function CodeSettingsSection({
         )}
       </div>
       <div className="admin-settings-field">
-        <label>代码字体</label>
+        <label>
+          <UiText text="代码字体" />
+        </label>
         <FontField
           value={value.font_media_id ?? ""}
           fonts={fonts.items}
@@ -139,7 +149,7 @@ export function CodeSettingsSection({
           }
         />
         <small>
-          默认使用系统等宽字体。自定义字体仅在正文含有代码块时声明，使用时加载。
+          <UiText text="默认使用系统等宽字体。自定义字体仅在正文含有代码块时声明，使用时加载。" />
         </small>
       </div>
       <SettingsToggle

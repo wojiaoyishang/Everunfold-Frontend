@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import type { ReactNode } from "react";
 import { Icon, type IconName } from "../../components/icon";
 export function PreparationState({
@@ -16,7 +17,9 @@ export function PreparationState({
       </span>
       <h2>{title}</h2>
       <p>{children}</p>
-      <span className="admin-badge">准备中</span>
+      <span className="admin-badge">
+        <UiText text="准备中" />
+      </span>
     </div>
   );
 }

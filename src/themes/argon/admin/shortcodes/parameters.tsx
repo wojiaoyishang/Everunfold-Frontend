@@ -1,3 +1,4 @@
+import { UiText } from "@/core/i18n/provider";
 import type { ShortcodeParameter } from "@/generated/settings-contract";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
@@ -22,8 +23,10 @@ export function ShortcodeParameters({
   return (
     <div className={styles.parameters}>
       <p className={styles.hint}>
-        模板用 {"{{ 参数名 }}"} 插入文字，容器正文用 {"{{ content }}"}。链接的
-        href 插槽使用 URL 参数。
+        <UiText text="模板用" />
+        {<UiText text="{{ 参数名 }}" />} <UiText text="插入文字，容器正文用" />
+        {"{{ content }}"}
+        <UiText text="。链接的 href 插槽使用 URL 参数。" />
       </p>
       {value.map((parameter, index) => (
         <section
@@ -32,7 +35,10 @@ export function ShortcodeParameters({
           aria-label={`参数 ${index + 1}`}
         >
           <div className={styles.parameterHeading}>
-            <strong>参数 {index + 1}</strong>
+            <strong>
+              <UiText text="参数" />
+              {index + 1}
+            </strong>
             {!disabled && (
               <ConfirmPopover
                 label={`移除参数 ${index + 1}`}
@@ -48,7 +54,9 @@ export function ShortcodeParameters({
           </div>
           <div className={styles.fields}>
             <label className={styles.field}>
-              <span>参数名</span>
+              <span>
+                <UiText text="参数名" />
+              </span>
               <TextField
                 value={parameter.name}
                 disabled={disabled}
@@ -59,7 +67,9 @@ export function ShortcodeParameters({
               />
             </label>
             <label className={styles.field}>
-              <span>显示名称</span>
+              <span>
+                <UiText text="显示名称" />
+              </span>
               <TextField
                 value={parameter.label}
                 disabled={disabled}
@@ -70,6 +80,7 @@ export function ShortcodeParameters({
               />
             </label>
             <Select
+              programOptions
               name={`parameter-${index}-type`}
               label={`参数 ${index + 1} 类型`}
               value={parameter.type ?? "text"}
@@ -97,7 +108,9 @@ export function ShortcodeParameters({
               }
             />
             <label className={styles.field}>
-              <span>默认值</span>
+              <span>
+                <UiText text="默认值" />
+              </span>
               <TextField
                 value={parameter.default ?? ""}
                 disabled={disabled}
@@ -109,7 +122,9 @@ export function ShortcodeParameters({
             </label>
             {parameter.type === "select" && (
               <label className={styles.field}>
-                <span>选项（用 | 分隔）</span>
+                <span>
+                  <UiText text="选项（用 | 分隔）" />
+                </span>
                 <TextField
                   value={(parameter.options ?? []).join("|")}
                   disabled={disabled}
@@ -128,7 +143,7 @@ export function ShortcodeParameters({
                 update(index, { required: event.target.checked })
               }
             />
-            必填
+            <UiText text="必填" />
           </label>
         </section>
       ))}
@@ -151,7 +166,7 @@ export function ShortcodeParameters({
           }
         >
           <Icon name="plus" />
-          添加参数
+          <UiText text="添加参数" />
         </Button>
       )}
     </div>

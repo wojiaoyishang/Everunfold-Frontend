@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useId } from "react";
 import type { AdminPreferences } from "@/core/admin/preferences";
 import { Icon } from "../../components/icon";
@@ -47,7 +49,9 @@ export function AdminAppearance({
         onKeyDown={onPanelKeyDown}
       >
         <header>
-          <h2 id={`${id}-title`}>后台外观</h2>
+          <h2 id={`${id}-title`}>
+            <UiText text="后台外观" />
+          </h2>
           <Button
             className="admin-icon-button"
             aria-label="关闭外观设置"
@@ -57,8 +61,11 @@ export function AdminAppearance({
           </Button>
         </header>
         <div className="admin-preference-field">
-          <span>颜色模式</span>
+          <span>
+            <UiText text="颜色模式" />
+          </span>
           <Select
+            programOptions
             name="admin-mode"
             label="后台颜色模式"
             value={preferences.mode}
@@ -73,8 +80,11 @@ export function AdminAppearance({
           />
         </div>
         <div className="admin-preference-field">
-          <span>内容间距</span>
+          <span>
+            <UiText text="内容间距" />
+          </span>
           <Select
+            programOptions
             name="admin-density"
             label="后台内容间距"
             value={preferences.density}
@@ -88,8 +98,11 @@ export function AdminAppearance({
           />
         </div>
         <div className="admin-preference-field">
-          <span>界面动效</span>
+          <span>
+            <UiText text="界面动效" />
+          </span>
           <Select
+            programOptions
             name="admin-motion"
             label="后台界面动效"
             value={preferences.motion}
@@ -103,7 +116,9 @@ export function AdminAppearance({
             ]}
           />
         </div>
-        <p>仅调整后台，在此浏览器中记住。</p>
+        <p>
+          <UiText text="仅调整后台，在此浏览器中记住。" />
+        </p>
       </Popover>
     </>
   );

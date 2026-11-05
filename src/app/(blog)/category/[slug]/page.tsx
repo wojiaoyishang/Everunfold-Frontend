@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { readPublicSnapshot } from "@/core/content/snapshot";
+import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { pageNumber, resolveTaxonomy } from "@/core/content/query";
 import { taxonomyHref } from "@/core/content/urls";
 import { ArticleList } from "@/themes/argon/components/article-list";

@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useMemo, useState } from "react";
 import type { Content, Site } from "@/core/content/types";
 import { useProtectedContent } from "@/core/content/use-protected-content";
@@ -49,22 +51,26 @@ export function ProtectedArticle({
               <Icon name="lock" />
             </span>
             <h2>
-              {content.opens_at ? "这篇内容尚未开放" : "这篇内容需要密码"}
+              {content.opens_at ? (
+                <UiText text="这篇内容尚未开放" />
+              ) : (
+                <UiText text="这篇内容需要密码" />
+              )}
             </h2>
             <p>
               {content.opens_at ? (
                 <>
-                  开放时间：
+                  <UiText text="开放时间：" />
                   <time dateTime={content.opens_at}>
                     {new Date(content.opens_at).toLocaleString("zh-CN", {
                       timeZone: "Asia/Shanghai",
                       hour12: false,
                     })}
                   </time>
-                  （北京时间）。在此之前，也可以输入密码阅读。
+                  <UiText text="（北京时间）。在此之前，也可以输入密码阅读。" />
                 </>
               ) : (
-                "输入作者提供的文章密码，继续阅读正文。"
+                <UiText text="输入作者提供的文章密码，继续阅读正文。" />
               )}
             </p>
             <Form
@@ -86,7 +92,11 @@ export function ProtectedArticle({
               />
               <Button type="submit" disabled={access.pending || !password}>
                 <Icon name={access.pending ? "refresh" : "lock"} />
-                {access.pending ? "正在验证…" : "解锁阅读"}
+                {access.pending ? (
+                  <UiText text="正在验证…" />
+                ) : (
+                  <UiText text="解锁阅读" />
+                )}
               </Button>
             </Form>
             {content.opens_at && (
@@ -95,7 +105,7 @@ export function ProtectedArticle({
                 disabled={access.pending}
                 onClick={() => void access.load()}
               >
-                <Icon name="refresh" /> 检查开放状态
+                <Icon name="refresh" /> <UiText text="检查开放状态" />
               </Button>
             )}
             {access.error && (

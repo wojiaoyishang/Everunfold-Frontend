@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { readPublicSnapshot } from "@/core/content/snapshot";
+import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { pageNumber, resolveContent } from "@/core/content/query";
 import { Article } from "@/themes/argon/components/article";
 import { resolvePresentation } from "@/core/content/presentation";

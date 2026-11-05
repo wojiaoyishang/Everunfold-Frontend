@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { Button } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
@@ -125,7 +127,8 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
         <div className="media-failures" role="status">
           {failed.map((index) => (
             <p key={index}>
-              第 {index + 1} 张图片暂时无法加载。{" "}
+              <UiText text="第" />
+              {index + 1} <UiText text="张图片暂时无法加载。" />{" "}
               <Button
                 onClick={() => {
                   const image = imageElements.current[index];
@@ -137,7 +140,7 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
                   }
                 }}
               >
-                重试
+                <UiText text="重试" />
               </Button>
             </p>
           ))}

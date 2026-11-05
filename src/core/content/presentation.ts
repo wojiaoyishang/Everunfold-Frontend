@@ -1,6 +1,7 @@
 import type { ContentPresentation } from "@/generated/presentation-contract";
 import type { Content, PublicSnapshot } from "./types";
 import { normalizePath } from "./urls";
+import { languageContents } from "@/core/i18n/snapshot";
 
 export type { ContentPresentation };
 export type ContentType = ContentPresentation["type"];
@@ -26,16 +27,22 @@ export function presentLegacyContent({
 }
 
 export function publicFeed(snapshot: PublicSnapshot): FeedEntry[] {
-  return snapshot.contents.map((content) => ({
+  return languageContents(
+    snapshot.contents,
+    snapshot.site.locale ?? "zh-CN",
+  ).map((content) => ({
     content: presentLegacyContent(content),
     example: false,
   }));
 }
 
 export function resolvePresentation(snapshot: PublicSnapshot, path: string) {
-  return publicFeed(snapshot).find(
-    ({ content }) => normalizePath(content.path) === normalizePath(path),
-  );
+  return snapshot.contents
+    .map((content) => ({
+      content: presentLegacyContent(content),
+      example: false,
+    }))
+    .find(({ content }) => normalizePath(content.path) === normalizePath(path));
 }
 
 export function feedType(value: unknown): FeedType {
@@ -52,29 +59,43 @@ export function queryFeed(
     page?: number;
     pageSize?: number;
     includePages?: boolean;
+    allLanguages?: boolean;
   } = {},
 ) {
   const query = options.query?.trim().slice(0, 160).toLocaleLowerCase();
-  const items = publicFeed(snapshot)
-    .filter(({ content }) => {
-      if (
-        options.type &&
-        options.type !== "all" &&
-        content.type !== options.type
-      )
-        return false;
-      if (!options.includePages && content.type === "page") return false;
-      const text = [
-        content.title,
-        content.excerpt,
-        ...content.content.map((block) => block.content),
-        ...content.tags.map((tag) => tag.name),
-        ...content.categories.map((category) => category.name),
-      ]
-        .join(" ")
-        .toLocaleLowerCase();
-      return !query || text.includes(query);
-    })
+  const locale = snapshot.site.locale ?? "zh-CN";
+  const candidates = (
+    query
+      ? snapshot.contents
+          .filter((item) => options.allLanguages || item.language === locale)
+          .map((content) => ({
+            content: presentLegacyContent(content),
+            example: false,
+          }))
+      : publicFeed(snapshot)
+  ).filter(({ content }) => {
+    if (options.type && options.type !== "all" && content.type !== options.type)
+      return false;
+    if (!options.includePages && content.type === "page") return false;
+    const text = [
+      content.title,
+      content.excerpt,
+      ...content.content.map((block) => block.content),
+      ...content.tags.map((tag) => tag.name),
+      ...content.categories.map((category) => category.name),
+    ]
+      .join(" ")
+      .toLocaleLowerCase();
+    return !query || text.includes(query);
+  });
+  const chosen = new Set(
+    languageContents(
+      candidates.map((item) => ({ ...item.content, kind: item.content.type })),
+      locale,
+    ).map((item) => item.id),
+  );
+  const items = candidates
+    .filter((item) => chosen.has(item.content.id))
     .sort(
       (a, b) =>
         Number(b.content.pinned) - Number(a.content.pinned) ||

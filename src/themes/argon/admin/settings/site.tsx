@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useSettingsEditor } from "@/core/settings/editor";
 import {
   SettingsFrame,
@@ -112,16 +114,18 @@ export function SiteSettingsPage() {
               onChange={(seo_description) => update({ seo_description })}
             />
             <div className="admin-seo-preview">
-              <small>搜索展示预览</small>
+              <small>
+                <UiText text="搜索展示预览" />
+              </small>
               <strong>
                 {(site.title_template ?? "%s · %site%")
                   .replaceAll("%site%", site.name)
                   .replace("%s", "文章标题")}
               </strong>
               <p>
-                {site.seo_description ||
-                  site.description ||
-                  "在这里填写站点简介，让读者了解你的站点。"}
+                {site.seo_description || site.description || (
+                  <UiText text="在这里填写站点简介，让读者了解你的站点。" />
+                )}
               </p>
             </div>
             <SettingsToggle

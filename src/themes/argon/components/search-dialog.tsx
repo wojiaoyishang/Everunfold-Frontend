@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import {
   Button,
   TextField,
@@ -10,6 +12,7 @@ import { useModalDialog } from "../hooks/use-modal-dialog";
 import { SearchContentType } from "./search-content-type";
 import { SearchForm } from "./navigation-link";
 import { Icon } from "./icon";
+import { SearchLanguages } from "./search-languages";
 export function SearchDialog() {
   const { dialog, open, close } = useModalDialog();
   const id = useId();
@@ -45,7 +48,9 @@ export function SearchDialog() {
         <header>
           <div>
             <span className="search-eyebrow">AROUND THE CAMPFIRE</span>
-            <h2 id={`${id}-title`}>寻找一段故事</h2>
+            <h2 id={`${id}-title`}>
+              <UiText text="寻找一段故事" />
+            </h2>
           </div>
           <Button className="icon-button" aria-label="关闭搜索" onClick={close}>
             <Icon name="close" />
@@ -53,7 +58,9 @@ export function SearchDialog() {
         </header>
         <SearchForm className="search-dialog-form" onSearch={close}>
           <label>
-            <span className="sr-only">搜索关键词</span>
+            <span className="sr-only">
+              <UiText text="搜索关键词" />
+            </span>
             <Icon name="search" />
             <TextField
               name="q"
@@ -64,12 +71,16 @@ export function SearchDialog() {
           </label>
           <div>
             <SearchContentType />
+            <SearchLanguages />
             <Button className="primary-button" type="submit">
-              开始寻找 <Icon name="arrow" />
+              <UiText text="开始寻找" />
+              <Icon name="arrow" />
             </Button>
           </div>
         </SearchForm>
-        <p>按 Enter 搜索 · Esc 回到阅读</p>
+        <p>
+          <UiText text="按 Enter 搜索 · Esc 回到阅读" />
+        </p>
       </Dialog>
     </>
   );

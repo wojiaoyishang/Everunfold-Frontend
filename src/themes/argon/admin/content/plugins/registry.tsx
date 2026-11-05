@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import dynamic from "next/dynamic";
 import type { ComponentType } from "react";
 import { createBlockEditorRegistry } from "@/core/editor/registry";
@@ -30,7 +32,12 @@ export function RegisteredBlockEditor({
   ...props
 }: BlockEditorProps & { format: string }) {
   const plugin = blockEditors.get(format);
-  if (!plugin) return <p role="alert">此块的编辑器未注册，原内容已保留。</p>;
+  if (!plugin)
+    return (
+      <p role="alert">
+        <UiText text="此块的编辑器未注册，原内容已保留。" />
+      </p>
+    );
   const Adapter = plugin.adapter;
   return <Adapter {...props} />;
 }

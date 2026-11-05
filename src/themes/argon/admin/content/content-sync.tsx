@@ -1,4 +1,6 @@
 "use client";
+import { UiText } from "@/core/i18n/provider";
+
 import { useContentSync } from "@/core/content-management/use-content-sync";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
@@ -48,12 +50,16 @@ export function ContentSync({
         />
       </span>
       <div className={styles.copy} role="status">
-        <strong className={styles.title}>{label}</strong>
+        <strong className={styles.title}>
+          <UiText text={label} />
+        </strong>
         <p>
           {sync.error ||
-            (applied
-              ? "已发布内容已应用到前台。"
-              : "内容已保存在后端，同步完成后会更新前台。")}
+            (applied ? (
+              <UiText text="已发布内容已应用到前台。" />
+            ) : (
+              <UiText text="内容已保存在后端，同步完成后会更新前台。" />
+            ))}
         </p>
       </div>
       <Button
@@ -62,7 +68,7 @@ export function ContentSync({
         onClick={() => void sync.retry()}
       >
         <Icon name="refresh" className={sync.busy ? "admin-draft-spin" : ""} />
-        {sync.busy ? "正在重试…" : "重新同步"}
+        {sync.busy ? <UiText text="正在重试…" /> : <UiText text="重新同步" />}
       </Button>
     </section>
   );
