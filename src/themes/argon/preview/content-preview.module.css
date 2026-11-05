@@ -14,13 +14,26 @@
   gap: 8px;
 }
 .label {
-  flex-wrap: wrap;
+  min-width: 0;
   font-size: 13px;
+  line-height: 20px;
 }
 .label > svg {
+  flex-shrink: 0;
   color: var(--accent);
 }
-.label > span {
+.details {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  min-width: 0;
+}
+.details > strong,
+.details > span {
+  white-space: nowrap;
+}
+.details > span {
   color: var(--muted);
   font-size: 12px;
 }

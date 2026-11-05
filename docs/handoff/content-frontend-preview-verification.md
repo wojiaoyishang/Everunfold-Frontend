@@ -24,3 +24,13 @@
 原09049c74草稿恢复并保存、未发布；新da5776ee回收，临时保存的历史修订保留。原用户文章、WordPress和备份未改。视口覆盖恢复，3000/8001保留，仅本地提交。代码注册页面仍按原管理边界，本次预览针对文章/说说；不包括无需保存的实时跨窗口镜像、分享预览令牌、完整评论/推荐演练。
 
 截图：[桌面](../design/content-frontend-preview-desktop.jpg)、[手机](../design/content-frontend-preview-mobile.jpg)、[代码公式](../design/content-frontend-preview-features.jpg)、[说说](../design/content-shuoshuo-preview.jpg)。
+
+## 2026-11-05 预览信息对齐补充
+
+按用户标注修正预览栏左侧的眼睛图标、标题和草稿修订信息：文字归入同一组，统一20px行高并按基线对齐，图标相对文字组独立居中且不被压缩。标题与状态保持完整文字单元，需要换行时从文字组左缘排列；既有字号层级、按钮和预览读取流程保持。
+
+实际内置浏览器检查1280px桌面、670px近标注尺寸、320px窄屏。桌面/670px信息和按钮同行居中；320px标题/修订保持整齐，操作按钮另起一行，scrollWidth=308、视口320，无整页横向溢出。键盘从“刷新预览”Tab到“返回编辑”正常，临时视口已恢复，预览标签保留。本轮没有保存/发布正文或修改后端。
+
+针对修改组件的ESLint、Prettier与完整TypeScript/Next类型生成通过；本轮为局部排版调整，未重复224项业务回归、生产隔离构建或后端P0，也没有新增仅复述CSS的测试。
+
+截图：[桌面](../design/preview-label-aligned-desktop.jpg)、[接近标注尺寸](../design/preview-label-aligned-medium.jpg)、[320px](../design/preview-label-aligned-mobile.jpg)。

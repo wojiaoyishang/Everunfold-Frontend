@@ -52,14 +52,16 @@ export function ContentPreview({
       <section className={`surface ${styles.bar}`} aria-label="前台预览操作">
         <div className={styles.label}>
           <Icon name="eye" />
-          <strong>前台预览</strong>
-          <span>
-            {detail
-              ? `草稿 · 修订 ${detail.revision}`
-              : error
-                ? "读取失败"
-                : "正在读取草稿"}
-          </span>
+          <div className={styles.details}>
+            <strong>前台预览</strong>
+            <span>
+              {detail
+                ? `草稿 · 修订 ${detail.revision}`
+                : error
+                  ? "读取失败"
+                  : "正在读取草稿"}
+            </span>
+          </div>
         </div>
         <div className={styles.actions}>
           <Button

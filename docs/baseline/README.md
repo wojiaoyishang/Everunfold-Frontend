@@ -622,3 +622,14 @@ ADR0055：共享源码标记分色与浅深色变量、围栏按语言加载；�
 | `docs/design/editor-sticky-narrow.jpg` | `eb06d394867c9a4037ee49be89a9b86b6f920452fd867b896627b0c562f3b990` |
 | `docs/design/editor-color-dark.jpg` | `1ec784e19ad27575e9d842630de31b524f148ae611e886a95e841d4451c8d62c` |
 | `docs/design/editor-conflict-aligned.jpg` | `80c6b9d44366c42850e5ab8a9daaf7e4ca7d866cc78a84775614faf8b9c5a211` |
+
+## 2026-11-05 前台预览信息对齐
+
+同步现有前台预览验收的排版补充和3张自建测试文章截图。仅调整图标/文字分组与基线，未改变预览授权、读写边界或文章内容；实际设备入口不写入交接，STATUS各自维护。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/handoff/content-frontend-preview-verification.md` | `6bee0b3b521d0af153a214b833278695caceb6a265cccd3fff16e720054b6fd9` |
+| `docs/design/preview-label-aligned-desktop.jpg` | `04be102fe723fce17726a03f6d5f5603ee91299ae9e9bd148f053157ecf2c045` |
+| `docs/design/preview-label-aligned-medium.jpg` | `f4db8dc5d1817d71cc3bbbe2b90f4f881876da2b10ca22a7bdd3861823db55a0` |
+| `docs/design/preview-label-aligned-mobile.jpg` | `591a4e8c4b3636822705ceac515df5d188aff88a0da586e2c1cc62c331e803be` |
