@@ -14,10 +14,16 @@ export function CodeDiff({
   before,
   after,
   format = "text",
+  beforeLabel = "修改前",
+  afterLabel = "修改后",
+  compact = true,
 }: {
   before: string;
   after: string;
   format?: string;
+  beforeLabel?: string;
+  afterLabel?: string;
+  compact?: boolean;
 }) {
   const host = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -37,13 +43,22 @@ export function CodeDiff({
     ];
     const view = new MergeView({
       parent: host.current,
-      a: { doc: before, extensions: extensions("修改前源码") },
-      b: { doc: after, extensions: extensions("修改后源码") },
-      collapseUnchanged: { margin: 3, minSize: 8 },
+      a: { doc: before, extensions: extensions(`${beforeLabel}源码`) },
+      b: { doc: after, extensions: extensions(`${afterLabel}源码`) },
+      ...(compact ? { collapseUnchanged: { margin: 3, minSize: 8 } } : {}),
       diffConfig: { scanLimit: 5000, timeout: 50 },
       gutter: true,
     });
+    for (const [editor, label] of [
+      [view.a, beforeLabel],
+      [view.b, afterLabel],
+    ] as const) {
+      const heading = document.createElement("div");
+      heading.className = styles.sideHeading;
+      heading.textContent = label;
+      editor.dom.parentElement?.prepend(heading);
+    }
     return () => view.destroy();
-  }, [before, after, format]);
+  }, [before, after, format, beforeLabel, afterLabel, compact]);
   return <div ref={host} className={styles.diff} />;
 }

@@ -5,6 +5,18 @@ import {
   highlightRenderedDiff,
   textDiff,
 } from "../src/core/editor/version-diff";
+import { swapRevisionPair } from "../src/core/content-management/revision-pair";
+
+test("swapping reads the latest live-head address and preserves both sides across refresh", () => {
+  const address = new URLSearchParams("view=version&selected=1&compare=2");
+  // A picker has already changed native history, before the previous render's handler updates.
+  address.set("compare", "head");
+  const swapped = swapRevisionPair(address);
+  assert.equal(swapped.get("selected"), "head");
+  assert.equal(swapped.get("compare"), "1");
+  assert.equal(swapRevisionPair(swapped).toString(), address.toString());
+  assert.equal(address.get("selected"), "1");
+});
 
 const block = (id: string, content = id) => ({
   id,
@@ -61,4 +73,16 @@ test("text diff offsets refer to original CRLF and emoji source", () => {
       after.slice(change.fromB, change.toB) +
       result.slice(change.toA);
   assert.equal(result, after);
+});
+
+test("appending HTML paragraphs leaves identical siblings and whitespace unmarked", () => {
+  const unchanged = "<p><strong>保留的文字</strong>，保持原有格式。</p>";
+  const before = `<h2>提示卡片</h2>\n<p>旧版本使用简短的说明文字。</p>\n${unchanged}\n`;
+  const after = `<h2>提示卡片</h2>\n<p>新版本加入更清楚的说明文字。</p>\n${unchanged}\n<p>新增强调内容。</p>\n`;
+  const [left, right] = highlightRenderedDiff(before, after);
+  assert.ok(left.includes(unchanged));
+  assert.ok(right.includes(unchanged));
+  assert.match(left, /data-version-change="removed"/);
+  assert.match(right, /data-version-change="added"/);
+  assert.doesNotMatch(left + right, /<mark[^>]+>\s*<\/mark>/);
 });

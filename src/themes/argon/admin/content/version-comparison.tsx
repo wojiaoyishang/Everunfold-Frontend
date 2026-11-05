@@ -2,16 +2,11 @@
 import { useMemo, useState } from "react";
 import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
 import type { PublicShortcode } from "@/generated/settings-contract";
-import {
-  compareBlocks,
-  highlightRenderedDiff,
-  textDiff,
-} from "@/core/editor/version-diff";
-import { renderContent } from "@/core/rendering/content";
+import { compareBlocks, textDiff } from "@/core/editor/version-diff";
 import { privateDraftFields } from "@/core/collaboration/branches";
-import { ContentMarkup } from "../../components/content-markup";
 import { Button } from "../../components/ui/primitives";
 import { CodeDiff } from "../../components/ui/code-diff";
+import { VersionDiffBlock } from "./version-diff-block";
 import styles from "./versions.module.css";
 
 function TextDifference({ before, after }: { before: string; after: string }) {
@@ -60,32 +55,11 @@ export function VersionComparison({
   media: Record<string, MediaURL>;
   shortcodes: readonly PublicShortcode[];
 }) {
-  const [mode, setMode] = useState<"visual" | "source">("visual");
   const [showAll, setShowAll] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const blocks = useMemo(
     () => compareBlocks(before.body, after.body),
     [before.body, after.body],
-  );
-  const rendered = useMemo(
-    () =>
-      blocks.map((pair) => {
-        const sides = [pair.before, pair.after].map((block, side) =>
-          renderContent(
-            {
-              id: `version-${side}-${pair.id}`,
-              content: block
-                ? [{ ...block, type: block.type ?? "markdown" }]
-                : [],
-              media_urls: media,
-            },
-            shortcodes,
-          ),
-        );
-        const markup = highlightRenderedDiff(sides[0].html, sides[1].html);
-        return sides.map((render, side) => ({ ...render, html: markup[side] }));
-      }),
-    [blocks, media, shortcodes],
   );
   const changed = blocks.filter((block) => block.changed).length;
   const oldSettings = JSON.stringify(
@@ -101,20 +75,6 @@ export function VersionComparison({
   return (
     <section className={styles.diffWorkspace} aria-label="版本差异">
       <div className={styles.diffToolbar}>
-        <div className={styles.tabs} role="group" aria-label="差异显示方式">
-          <Button
-            aria-pressed={mode === "visual"}
-            onClick={() => setMode("visual")}
-          >
-            可视化对比
-          </Button>
-          <Button
-            aria-pressed={mode === "source"}
-            onClick={() => setMode("source")}
-          >
-            源码对比
-          </Button>
-        </div>
         <Button
           className="admin-button"
           aria-pressed={showAll}
@@ -126,10 +86,6 @@ export function VersionComparison({
           <span data-version-change="removed">− 删除</span>
           <span data-version-change="added">+ 新增</span>
         </span>
-      </div>
-      <div className={styles.columnLabels}>
-        <strong>{beforeLabel}</strong>
-        <strong>{afterLabel}</strong>
       </div>
       {(showAll || before.title !== after.title) && (
         <section className={styles.diffField}>
@@ -155,77 +111,23 @@ export function VersionComparison({
           ? ` · 已折叠 ${blocks.length - changed} 个未改区块`
           : ""}
       </p>
-      {blocks.map((pair, index) =>
+      {blocks.map((pair) =>
         !showAll && !pair.changed ? null : (
-          <section
-            key={pair.id}
-            className={styles.diffBlock}
-            data-block-change={
-              !pair.before
-                ? "added"
-                : !pair.after
-                  ? "removed"
-                  : pair.changed
-                    ? "changed"
-                    : "same"
+          <VersionDiffBlock
+            key={`${pair.id}:${pair.after?.type ?? pair.before?.type ?? "markdown"}`}
+            pair={pair}
+            showAll={showAll}
+            beforeLabel={beforeLabel}
+            afterLabel={afterLabel}
+            beforeIndex={
+              before.body.findIndex((block) => block.id === pair.id) + 1
             }
-          >
-            <header>
-              <strong>
-                {(pair.after?.type ?? pair.before?.type) === "html"
-                  ? "HTML"
-                  : "Markdown"}{" "}
-                · {String(index + 1).padStart(2, "0")}
-              </strong>
-              <span>
-                {!pair.before
-                  ? "新增区块"
-                  : !pair.after
-                    ? "删除区块"
-                    : [
-                        pair.moved && "顺序变化",
-                        pair.before.type !== pair.after.type && "格式变化",
-                        pair.before.content !== pair.after.content &&
-                          "内容修改",
-                      ]
-                        .filter(Boolean)
-                        .join(" · ") || "未修改"}
-              </span>
-            </header>
-            {mode === "source" ? (
-              <CodeDiff
-                before={pair.before?.content ?? ""}
-                after={pair.after?.content ?? ""}
-                format={pair.after?.type ?? pair.before?.type ?? "markdown"}
-              />
-            ) : (
-              <div className={styles.comparison}>
-                {rendered[index].map((render, side) => (
-                  <div
-                    key={side}
-                    className={styles.renderedSide}
-                    aria-label={side === 0 ? beforeLabel : afterLabel}
-                  >
-                    <small className={styles.mobileLabel}>
-                      {side === 0 ? beforeLabel : afterLabel}
-                    </small>
-                    {(side === 0 ? pair.before : pair.after) ? (
-                      <div className="admin-draft-preview">
-                        <ContentMarkup
-                          html={render.html}
-                          features={render.features}
-                        />
-                      </div>
-                    ) : (
-                      <p className={styles.empty}>
-                        {side === 0 ? "此版本没有该区块" : "该区块已移除"}
-                      </p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
+            afterIndex={
+              after.body.findIndex((block) => block.id === pair.id) + 1
+            }
+            media={media}
+            shortcodes={shortcodes}
+          />
         ),
       )}
       {oldSettings !== newSettings && (
@@ -241,6 +143,9 @@ export function VersionComparison({
             <CodeDiff
               before={oldSettings ?? "{}"}
               after={newSettings ?? "{}"}
+              beforeLabel={beforeLabel}
+              afterLabel={afterLabel}
+              compact={!showAll}
             />
           )}
         </section>

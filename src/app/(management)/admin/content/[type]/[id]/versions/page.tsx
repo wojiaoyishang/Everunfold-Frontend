@@ -4,7 +4,7 @@ import { contentType } from "@/core/content-management/registry";
 import { DraftVersionsPage } from "@/themes/argon/admin/content/versions-page";
 
 export const metadata = {
-  title: "版本对比与合并",
+  title: "版本修订",
   robots: { index: false, follow: false, nocache: true },
 };
 export default async function VersionsPage({

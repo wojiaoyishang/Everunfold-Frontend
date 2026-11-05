@@ -37,6 +37,7 @@ export function VersionCatalog({
   working,
   locked,
   onDelete,
+  hideTabs = false,
 }: {
   versioning: DraftVersioning;
   selection: VersionSelection | null;
@@ -46,6 +47,7 @@ export function VersionCatalog({
   working: boolean;
   locked: boolean;
   onDelete: (value: VersionDeletion) => void;
+  hideTabs?: boolean;
 }) {
   const { catalog, pages, setPages } = versioning;
   const selected = (kind: VersionSelection["kind"], id: string) =>
@@ -80,24 +82,26 @@ export function VersionCatalog({
     );
   return (
     <aside className={styles.catalog} aria-label="版本目录">
-      <div className={styles.tabs} role="group" aria-label="版本分类">
-        {(
-          [
-            ["version", "历史版本"],
-            ["branch", "草稿分支"],
-            ["merge", "合并记录"],
-          ] as const
-        ).map(([key, label]) => (
-          <Button
-            key={key}
-            aria-pressed={tab === key}
-            disabled={working || locked}
-            onClick={() => setTab(key)}
-          >
-            {label}
-          </Button>
-        ))}
-      </div>
+      {!hideTabs && (
+        <div className={styles.tabs} role="group" aria-label="版本分类">
+          {(
+            [
+              ["version", "历史版本"],
+              ["branch", "草稿分支"],
+              ["merge", "合并记录"],
+            ] as const
+          ).map(([key, label]) => (
+            <Button
+              key={key}
+              aria-pressed={tab === key}
+              disabled={working || locked}
+              onClick={() => setTab(key)}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+      )}
       {tab === "version" && (
         <section aria-label="历史版本列表">
           {catalog?.versions.map((item) => (

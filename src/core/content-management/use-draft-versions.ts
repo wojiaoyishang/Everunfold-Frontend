@@ -37,6 +37,7 @@ import {
 } from "@/generated/collaboration-client";
 import { draftError } from "./draft-state";
 import { RequestError } from "@/core/http/request";
+import { useVersionTarget } from "./use-version-target";
 import {
   renewedMerge,
   resumedDecisions,
@@ -53,13 +54,15 @@ export type DraftVersioning = ReturnType<typeof useDraftVersions>;
 export function useDraftVersions(
   session: DraftSession,
   selection?: VersionSelection | null,
+  targetRevision: number | null = null,
 ) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const account = useAdminAccount();
   const [catalog, setCatalog] = useState<VersionCatalog | null>(null);
   const [local, setLocal] = useState<LocalBranch[]>([]);
   const [version, setVersion] = useState<VersionDetail | null>(null);
-  const [target, setTarget] = useState<VersionDetail | null>(null);
+  const target = useVersionTarget(session.id, targetRevision);
+  const [lookupAttempt, retryLookup] = useState(0);
   const [branch, setBranch] = useState<BranchDetail | null>(null);
   const [merge, setMerge] = useState<MergeDetail | null>(null);
   const [result, setResult] = useState<DraftFields | null>(null);
@@ -264,11 +267,14 @@ export function useDraftVersions(
     csrfToken,
     session.id,
   ]);
-  const selectionKey = selection ? `${selection.kind}:${selection.id}` : "";
+  const selectionKey = selection
+    ? `${selection.kind}:${selection.id}:${lookupAttempt}`
+    : "";
   useEffect(() => {
     if (loadedSelection.current === selectionKey || working.current) return;
     loadedSelection.current = selectionKey;
     if (!selection || selection.kind === "local") return;
+    if (selection.kind === "version" && selection.id === "head") return;
     if (selection.kind === "merge" && mergeRef.current?.id === selection.id)
       return;
     void run(async () => {
@@ -345,7 +351,9 @@ export function useDraftVersions(
     catalog,
     local,
     version,
-    target,
+    target: target.detail,
+    targetLoading: target.loading,
+    targetError: target.error,
     branch,
     merge,
     result,
@@ -361,19 +369,11 @@ export function useDraftVersions(
     canResolve: Boolean(
       merge?.status === "active" && merge.owner_id === account.id,
     ),
-    showTarget: (revision: number | null) =>
-      run(async () => {
-        if (revision === null) setTarget(null);
-        else {
-          const { data } = await readDraftVersion(
-            baseUrl,
-            { ...lookup, revision },
-            csrfToken,
-          );
-          setTarget(data);
-        }
-        return true;
-      }),
+    retryRead: () => {
+      retryLookup((value) => value + 1);
+      target.retry();
+      void refresh();
+    },
     fromVersion: (item: VersionDetail) => {
       session.detachFields(item.fields, `从 V${item.version.revision} 继续`, {
         base_revision: item.version.revision,

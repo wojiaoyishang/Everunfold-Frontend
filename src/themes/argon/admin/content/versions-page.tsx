@@ -16,8 +16,11 @@ import { useEditorResources } from "@/core/content-management/use-editor-resourc
 import { useEditorNavigation } from "@/core/content-management/use-editor-navigation";
 import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { serializeDraftExport } from "@/core/collaboration/export";
+import {
+  revisionReference,
+  swapRevisionPair,
+} from "@/core/content-management/revision-pair";
 import { Button, TextField } from "../../components/ui/primitives";
-import { Select } from "../../components/ui/select";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { DownloadButton } from "../../components/ui/download-button";
 import { CodePreferencesProvider } from "../../components/code-preferences";
@@ -29,6 +32,7 @@ import {
 } from "./version-catalog";
 import { VersionComparison } from "./version-comparison";
 import { VersionMergeWorkspace } from "./version-merge-workspace";
+import { VersionPairPicker } from "./version-pair-picker";
 import styles from "./versions.module.css";
 
 export function DraftVersionsPage({
@@ -60,7 +64,7 @@ export function DraftVersionsPage({
         />
       ) : (
         <div className={styles.page}>
-          <h1>版本对比与合并</h1>
+          <h1>版本修订</h1>
           <p role={editor.error ? "alert" : "status"}>
             {editor.error || "正在读取文章…"}
           </p>
@@ -98,14 +102,20 @@ function VersionsWorkspace({
     selectedId && ["version", "branch", "local", "merge"].includes(kind ?? "")
       ? { kind: kind as VersionSelection["kind"], id: selectedId }
       : null;
-  const versioning = useDraftVersions(session, selection);
-  const [tab, setTab] = useState<VersionTab>(
-    kind === "merge"
+  const targetValue = revisionReference(search.get("compare"));
+  const versioning = useDraftVersions(
+    session,
+    selection,
+    targetValue === "head" ? null : Number(targetValue),
+  );
+  const [browsingTab, setTab] = useState<VersionTab | null>(null);
+  const tab =
+    browsingTab ??
+    (kind === "merge"
       ? "merge"
       : kind === "branch" || kind === "local"
         ? "branch"
-        : "version",
-  );
+        : "version");
   const [note, setNote] = useState("");
   const [checkpointing, setCheckpointing] = useState(false);
   const [deletion, setDeletion] = useState<VersionDeletion | null>(null);
@@ -113,21 +123,22 @@ function VersionsWorkspace({
   const [navigationError, setNavigationError] = useState("");
   const [catalogOpen, setCatalogOpen] = useState(false);
   const comparisonRoot = useRef<HTMLElement>(null);
-  const working = versioning.busy || versioning.saving || checkpointing;
+  const working =
+    versioning.busy ||
+    versioning.saving ||
+    versioning.targetLoading ||
+    checkpointing;
   const active = versioning.merge?.status === "active";
   const editorUrl = `/admin/content/${type.id}/${session.id}/edit`;
-  const select = (value: VersionSelection, replace = false) => {
+  const select = (value: VersionSelection) => {
     const url = new URL(location.href);
     url.searchParams.set("view", value.kind);
     url.searchParams.set("selected", value.id);
-    window.history[replace ? "replaceState" : "pushState"](
-      null,
-      "",
-      `${url.pathname}${url.search}`,
-    );
-    setTab(value.kind === "local" ? "branch" : value.kind);
+    if (value.kind !== "version") url.searchParams.delete("compare");
+    window.history.pushState(null, "", `${url.pathname}${url.search}`);
+    setTab(null);
     setCatalogOpen(false);
-    if (!replace)
+    if (value.kind !== "version")
       requestAnimationFrame(() =>
         comparisonRoot.current?.scrollIntoView({
           block: "start",
@@ -137,20 +148,19 @@ function VersionsWorkspace({
   };
   useEffect(() => {
     if (selection || !versioning.catalog) return;
+    const item =
+      versioning.catalog.versions[1] ?? versioning.catalog.versions[0];
     const value: VersionSelection | undefined = session.currentBranch
       ? { kind: "local", id: session.currentBranch.id }
-      : versioning.catalog.versions[0]
-        ? {
-            kind: "version",
-            id: String(versioning.catalog.versions[0].revision),
-          }
+      : item
+        ? { kind: "version", id: String(item.revision) }
         : undefined;
     if (!value) return;
     const url = new URL(location.href);
     url.searchParams.set("view", value.kind);
     url.searchParams.set("selected", value.id);
     window.history.replaceState(null, "", `${url.pathname}${url.search}`);
-    // Set a default once; catalog polling never changes an explicit selection.
+    // Only choose a default before the URL has an explicit selection.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kind, selectedId, versioning.catalog]);
   const navigate = async (href: string) => {
@@ -199,19 +209,49 @@ function VersionsWorkspace({
     versioning.branch?.branch.id === selection.id
       ? versioning.branch
       : null;
-  const view = history?.fields ?? branch?.fields ?? local?.payload.fields;
-  const current = versioning.target?.fields ?? session.confirmedFields;
-  const before = history ? view : current;
-  const after = history ? current : view;
+  const headSelected = selection?.kind === "version" && selection.id === "head";
+  const view =
+    history?.fields ??
+    branch?.fields ??
+    local?.payload.fields ??
+    (headSelected ? session.confirmedFields : undefined);
+  const current =
+    targetValue === "head"
+      ? session.confirmedFields
+      : versioning.target?.fields;
+  const before = selection?.kind === "version" ? view : current;
+  const after = selection?.kind === "version" ? current : view;
   const selectedMerge =
     active ||
-    (selection?.kind === "merge" && selection.id === versioning.merge?.id);
+    (tab === "merge" &&
+      selection?.kind === "merge" &&
+      selection.id === versioning.merge?.id);
   const selectedLabel = history
-    ? `历史草稿 V${history.version.revision}`
-    : branch?.branch.note || local?.payload.note || "草稿分支";
-  const targetLabel = versioning.target
-    ? `V${versioning.target.version.revision}`
-    : "线上最新版（实时）";
+    ? `V${history.version.revision}`
+    : headSelected
+      ? "最新版 · 实时草稿"
+      : branch?.branch.note || local?.payload.note || "草稿分支";
+  const targetLabel =
+    targetValue === "head" ? "最新版 · 实时草稿" : `V${targetValue}`;
+  const selectTarget = (value: string) => {
+    const url = new URL(location.href);
+    if (url.searchParams.get("view") !== "version") {
+      url.searchParams.set("view", "version");
+      url.searchParams.set("selected", "head");
+      setTab(null);
+    }
+    url.searchParams.set("compare", value);
+    window.history.pushState(null, "", `${url.pathname}${url.search}`);
+  };
+  const swapVersions = () => {
+    const url = new URL(location.href);
+    url.search = swapRevisionPair(url.searchParams).toString();
+    window.history.pushState(null, "", `${url.pathname}${url.search}`);
+    setTab(null);
+  };
+  const selectedInTab =
+    (tab === "version" && selection?.kind === "version") ||
+    (tab === "branch" && (branch || local));
   const resolvedMedia = {
     ...media,
     ...history?.media_urls,
@@ -231,8 +271,8 @@ function VersionsWorkspace({
             <Icon name="arrow-left" />
             返回编辑
           </Button>
-          <h1>版本对比与合并</h1>
-          <p>{session.confirmedFields?.title || "未命名文章"}</p>
+          <p className={styles.revisionContext}>{type.label} / 版本修订</p>
+          <h1>{session.confirmedFields?.title || "未命名文章"}</h1>
         </div>
         <div className={styles.savePoint}>
           <TextField
@@ -263,14 +303,19 @@ function VersionsWorkspace({
           </Button>
         </div>
       </header>
-      {(versioning.error || saveError || navigationError) && (
+      {(versioning.error ||
+        versioning.targetError ||
+        saveError ||
+        navigationError) && (
         <div className={styles.warning} role="alert">
-          <span>{versioning.error || saveError || navigationError}</span>
-          <Button
-            className="admin-button"
-            onClick={() => void versioning.refresh()}
-          >
-            刷新状态
+          <span>
+            {versioning.error ||
+              versioning.targetError ||
+              saveError ||
+              navigationError}
+          </span>
+          <Button className="admin-button" onClick={versioning.retryRead}>
+            重新读取
           </Button>
         </div>
       )}
@@ -279,14 +324,62 @@ function VersionsWorkspace({
           {versioning.notice}
         </p>
       )}
-      <Button
-        className={`admin-button ${styles.mobileCatalogToggle}`}
-        aria-expanded={catalogOpen}
-        onClick={() => setCatalogOpen(!catalogOpen)}
-      >
-        {catalogOpen ? "收起版本目录" : "选择其他版本或草稿"}
-      </Button>
-      <div className={styles.pageLayout} data-catalog-open={catalogOpen}>
+      <div className={styles.workflowBar}>
+        <div className={styles.tabs} role="group" aria-label="版本区域">
+          {(
+            [
+              ["version", "版本修订"],
+              ["branch", "草稿分支"],
+              ["merge", "合并记录"],
+            ] as const
+          ).map(([key, label]) => (
+            <Button
+              key={key}
+              disabled={working || Boolean(active)}
+              aria-pressed={tab === key}
+              onClick={() => {
+                if (key === "version" && selection?.kind !== "version") {
+                  const initial =
+                    versioning.catalog?.versions[1] ??
+                    versioning.catalog?.versions[0];
+                  select({
+                    kind: "version",
+                    id: initial ? String(initial.revision) : "head",
+                  });
+                } else setTab(key);
+              }}
+            >
+              {label}
+            </Button>
+          ))}
+        </div>
+        {tab === "version" && (
+          <Button
+            className="admin-button"
+            disabled={working || Boolean(active)}
+            aria-expanded={catalogOpen}
+            onClick={() => setCatalogOpen(!catalogOpen)}
+          >
+            {catalogOpen
+              ? "收起版本记录"
+              : `版本记录${versioning.catalog ? ` · ${versioning.catalog.total}` : ""}`}
+          </Button>
+        )}
+      </div>
+      {tab === "version" && !active && (
+        <VersionPairPicker
+          versions={versioning.catalog?.versions ?? []}
+          before={selection?.kind === "version" ? selection.id : "head"}
+          after={targetValue}
+          beforeDetail={history}
+          afterDetail={versioning.target}
+          disabled={versioning.saving || checkpointing || Boolean(active)}
+          onBefore={(id) => select({ kind: "version", id })}
+          onAfter={selectTarget}
+          onSwap={swapVersions}
+        />
+      )}
+      {(catalogOpen || (tab !== "version" && !active)) && (
         <VersionCatalog
           versioning={versioning}
           selection={selection}
@@ -296,107 +389,86 @@ function VersionsWorkspace({
           working={working}
           locked={Boolean(active)}
           onDelete={setDeletion}
+          hideTabs
         />
-        <section
-          ref={comparisonRoot}
-          className={styles.main}
-          aria-label="版本详情与比较"
-          aria-busy={working}
-        >
-          {selectedMerge ? (
-            <VersionMergeWorkspace
-              versioning={versioning}
-              media={resolvedMedia}
-              shortcodes={shortcodes}
-              onResume={() => void startMerge(versioning.resumeResult())}
-            />
-          ) : view && before && after ? (
-            <>
-              <div className={styles.selectionHeading}>
-                <h2>{selectedLabel}</h2>
-                <div className={styles.actions}>
+      )}
+      <section
+        ref={comparisonRoot}
+        className={styles.main}
+        aria-label="版本详情与比较"
+        aria-busy={working}
+      >
+        {selectedMerge ? (
+          <VersionMergeWorkspace
+            versioning={versioning}
+            media={resolvedMedia}
+            shortcodes={shortcodes}
+            onResume={() => void startMerge(versioning.resumeResult())}
+          />
+        ) : selectedInTab && view && before && after ? (
+          <>
+            <div className={styles.selectionHeading}>
+              <h2>区块差异</h2>
+              <div className={styles.actions}>
+                <Button
+                  className="admin-button"
+                  disabled={working || Boolean(session.state.merge)}
+                  onClick={() => {
+                    if (history) versioning.fromVersion(history);
+                    else if (branch) versioning.editBranch(branch);
+                    else if (local) versioning.editLocal(local);
+                    else if (headSelected) session.returnToLatest();
+                    void navigate(editorUrl);
+                  }}
+                >
+                  {headSelected ? "编辑最新版" : "从此继续编辑"}
+                </Button>
+                {(branch || local) && (
                   <Button
-                    className="admin-button"
+                    className="admin-button admin-button-primary"
                     disabled={working || Boolean(session.state.merge)}
-                    onClick={() => {
-                      if (history) versioning.fromVersion(history);
-                      else if (branch) versioning.editBranch(branch);
-                      else if (local) versioning.editLocal(local);
-                      void navigate(editorUrl);
-                    }}
-                  >
-                    从此继续编辑
-                  </Button>
-                  {(branch || local) && (
-                    <Button
-                      className="admin-button admin-button-primary"
-                      disabled={working || Boolean(session.state.merge)}
-                      onClick={() =>
-                        void startMerge(
-                          local
-                            ? versioning.startLocalMerge(local)
-                            : versioning.startBranchMerge(branch!.branch.id),
-                        )
-                      }
-                    >
-                      开始合并
-                    </Button>
-                  )}
-                  <DownloadButton
-                    filename={`draft-${selection?.id}.json`}
-                    content={() =>
-                      serializeDraftExport(view, local?.removedBlocks)
+                    onClick={() =>
+                      void startMerge(
+                        local
+                          ? versioning.startLocalMerge(local)
+                          : versioning.startBranchMerge(branch!.branch.id),
+                      )
                     }
                   >
-                    导出草稿
-                  </DownloadButton>
-                </div>
-              </div>
-              <div className={styles.target}>
-                <span>比较对象</span>
-                <Select
-                  name="compare-target"
-                  label="比较对象"
-                  value={
-                    versioning.target
-                      ? String(versioning.target.version.revision)
-                      : "head"
+                    开始合并
+                  </Button>
+                )}
+                <DownloadButton
+                  filename={`draft-${selection?.id}.json`}
+                  content={() =>
+                    serializeDraftExport(view, local?.removedBlocks)
                   }
-                  onValueChange={(value) =>
-                    void versioning.showTarget(
-                      value === "head" ? null : Number(value),
-                    )
-                  }
-                  disabled={working}
-                  options={[
-                    { value: "head", label: "线上最新版（实时）" },
-                    ...(versioning.catalog?.versions ?? []).map((entry) => ({
-                      value: String(entry.revision),
-                      label: `V${entry.revision}${entry.current ? " · 最新检查点" : ""}`,
-                    })),
-                  ]}
-                />
+                >
+                  导出草稿
+                </DownloadButton>
               </div>
-              <VersionComparison
-                before={before}
-                after={after}
-                beforeLabel={history ? selectedLabel : targetLabel}
-                afterLabel={history ? targetLabel : selectedLabel}
-                media={resolvedMedia}
-                shortcodes={shortcodes}
-              />
-            </>
-          ) : (
-            <div className={styles.emptyView}>
-              <Icon name="book" />
-              <h2>
-                {versioning.busy ? "正在读取版本…" : "选择一个版本开始比较"}
-              </h2>
-              <p>选择历史版本、独立草稿或合并记录。</p>
             </div>
-          )}
-        </section>
-      </div>
+            <VersionComparison
+              before={before}
+              after={after}
+              beforeLabel={
+                selection?.kind === "version" ? selectedLabel : targetLabel
+              }
+              afterLabel={
+                selection?.kind === "version" ? targetLabel : selectedLabel
+              }
+              media={resolvedMedia}
+              shortcodes={shortcodes}
+            />
+          </>
+        ) : (
+          <div className={styles.emptyView}>
+            <Icon name="book" />
+            <h2>{working ? "正在读取版本…" : "选择一个版本开始比较"}</h2>
+            <p>选择历史版本、独立草稿或合并记录。</p>
+          </div>
+        )}
+      </section>
       <ConfirmDialog
         open={deletion !== null}
         title={`删除${deletion?.label ?? "草稿"}？`}

@@ -11,6 +11,16 @@
 .diff :global(.cm-mergeViewEditor) {
   min-width: 0;
 }
+.diff :global(.cm-mergeViewEditor) + :global(.cm-mergeViewEditor) {
+  border-inline-start: 1px solid var(--admin-border);
+}
+.sideHeading {
+  padding: 9px 12px;
+  color: var(--admin-muted);
+  background: var(--admin-subtle);
+  border-bottom: 1px solid var(--admin-border);
+  font: 500 11px/1.6 var(--font-sans, sans-serif);
+}
 .diff :global(.cm-scroller) {
   overflow: visible;
   font-family: var(--font-mono, monospace);
@@ -24,19 +34,43 @@
   color: var(--admin-muted);
   border-color: var(--admin-border);
 }
+.diff :global(.cm-mergeView .cm-changeGutter) {
+  width: 18px;
+  min-width: 18px;
+}
+.diff :global(.cm-mergeView .cm-merge-a .cm-changedLine),
 .diff :global(.cm-deletedChunk),
 .diff :global(.cm-deletedLine) {
   background: color-mix(in srgb, var(--admin-danger) 8%, transparent);
 }
+.diff :global(.cm-mergeView .cm-merge-b .cm-changedLine),
 .diff :global(.cm-insertedChunk),
 .diff :global(.cm-insertedLine) {
   background: color-mix(in srgb, var(--admin-positive) 8%, transparent);
 }
+.diff :global(.cm-mergeView .cm-merge-a .cm-changedText),
 .diff :global(.cm-deletedText) {
   background: color-mix(in srgb, var(--admin-danger) 20%, transparent);
+  text-decoration: none;
 }
+.diff :global(.cm-mergeView .cm-merge-b .cm-changedText),
 .diff :global(.cm-insertedText) {
   background: color-mix(in srgb, var(--admin-positive) 20%, transparent);
+  text-decoration: none;
+}
+.diff :global(.cm-mergeView .cm-changeGutter .cm-changedLineGutter) {
+  background: transparent;
+  width: 16px;
+  text-align: center;
+  font-weight: 600;
+}
+.diff :global(.cm-merge-a .cm-changedLineGutter)::before {
+  content: "−";
+  color: var(--admin-danger);
+}
+.diff :global(.cm-merge-b .cm-changedLineGutter)::before {
+  content: "+";
+  color: var(--admin-positive);
 }
 .diff :global(.cm-mergeSpacer) {
   background: var(--admin-subtle);
@@ -52,6 +86,10 @@
   }
   .diff :global(.cm-mergeViewEditor) {
     width: 100%;
+  }
+  .diff :global(.cm-mergeViewEditor) + :global(.cm-mergeViewEditor) {
+    border-inline-start: 0;
+    border-top: 1px solid var(--admin-border);
   }
   .diff :global(.cm-mergeSpacer) {
     display: none;

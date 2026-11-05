@@ -90,10 +90,47 @@ const escape = (value: string) =>
     (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!,
   );
 
+function unchangedText(docs: ReturnType<typeof parseDocument>[]) {
+  const tags = new Set([
+    "p",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "li",
+    "td",
+    "th",
+    "figcaption",
+  ]);
+  const candidates = docs.map((document) =>
+    DomUtils.findAll((node) => tags.has(node.name), document.children).filter(
+      (node) =>
+        !DomUtils.findOne((child) => tags.has(child.name), node.children),
+    ),
+  );
+  const right = new Map<string, (typeof candidates)[number]>();
+  for (const node of candidates[1]) {
+    const key = DomUtils.getOuterHTML(node, { encodeEntities: "utf8" });
+    right.set(key, [...(right.get(key) ?? []), node]);
+  }
+  const preserved = [new Set<Node>(), new Set<Node>()];
+  for (const node of candidates[0]) {
+    const key = DomUtils.getOuterHTML(node, { encodeEntities: "utf8" });
+    const match = right.get(key)?.shift();
+    if (!match) continue;
+    for (const text of textNodes(node.children)) preserved[0].add(text);
+    for (const text of textNodes(match.children)) preserved[1].add(text);
+  }
+  return preserved;
+}
+
 /** Decorate already sanitized display HTML; never write the derived marks to source. */
 export function highlightRenderedDiff(before: string, after: string) {
   const docs = [parseDocument(before), parseDocument(after)];
   const nodes = docs.map((document) => textNodes(document.children));
+  const preserved = unchangedText(docs);
   const changes = textDiff(
     ...(nodes.map((list) => list.map((n) => n.data).join("")) as [
       string,
@@ -105,6 +142,7 @@ export function highlightRenderedDiff(before: string, after: string) {
     for (const node of nodes[side]) {
       const start = offset,
         end = (offset += node.data.length);
+      if (preserved[side].has(node) || !node.data.trim()) continue;
       const ranges = changes
         .map((change) => [
           side === 0 ? change.fromA : change.fromB,
