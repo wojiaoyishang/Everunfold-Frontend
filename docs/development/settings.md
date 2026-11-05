@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-7，2026-11-04。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md) 与 [ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-8，2026-11-05。实现决定见 [ADR 0024](../decisions/0024-versioned-settings-delivery.md) 与 [ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -77,3 +77,9 @@ settings.directory/
 后端执行 Ruff、mypy、pytest；真实数据库/多进程用例需 `RUN_DATABASE_TESTS=1`，并有显式 `config.test.local.toml` 指向 `everunfold_test`、PostgreSQL/Redis 和配套前端依赖。该用例创建/销毁自己命名的临时数据库，两个 API、独立 Worker/Scheduler、Node 接收器互相验证，不访问原 WordPress。
 
 前端 `npm run check` 与 `npm run verify:admin`。后者在临时复制目录构建真实生产 Next，验证匿名后台壳、后端不可用/无缓存、有完整设置副本、SEO 与损坏版本行为；不会替换运行中的 `.next`。结果见 [验证记录](../handoff/settings-verification.md)。
+
+## 桌面分区导航（2026-11-05）
+
+站点、主题、系统三个设置页在1200px及以上提供右侧“快速导航”，点击跳到相应分区，滚动时高亮当前项。目录按页面实际分区生成；主题包含代码块。较窄屏幕隐藏目录，保留原表单。保存/撤销栏位于左侧正文列，目录不会遮挡设置。
+
+链接使用稳定hash，可复制带分区的地址、刷新及前进后退，键盘Enter可定位并把焦点移到目标。导航不会保存设置或清空未保存输入；离开页面继续沿原有修改保护。新增分区需在SettingsSection提供唯一且稳定的id。具体展示、顶栏留白和页底短分区处理见[ADR0064](../decisions/0064-desktop-settings-section-navigation.md)，实页范围见[验收](../handoff/settings-section-navigation-verification.md)。

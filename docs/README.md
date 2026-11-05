@@ -162,3 +162,5 @@
 最新交付：[光标、离线分支与独立版本页](decisions/0061-cursors-offline-branches-and-version-merges.md)、[操作指南](development/draft-versions.md)及[真实验收](handoff/cursor-versions-verification.md)：正文实时保存、块内成员选区、独立可视化/源码差异、版本保护与持久合并锁。
 
 最新界面交付：[紧凑内容列表与编辑工具](decisions/0063-compact-content-lists-and-editor-tools.md)、[操作指南](development/content-management.md)及[实际验收](handoff/content-list-tools-verification.md)：封面缩略图、作者/分类/标签/评论/日期、明确搜索，以及链接弹层和统一短代码入口。
+
+最新设置交付：[桌面分区导航](decisions/0064-desktop-settings-section-navigation.md)、[运行指南](development/settings.md)与[实页验收](handoff/settings-section-navigation-verification.md)：站点/主题/系统设置共用右侧目录、锚点及滚动高亮。

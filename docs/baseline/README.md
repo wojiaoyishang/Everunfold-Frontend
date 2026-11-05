@@ -697,3 +697,18 @@ content-admin1.6.0来自后端已提交d42cb8b；content-management-6、editor-p
 | `docs/design/content-list-compact-dark.png` | `870fcecf05b45bf64a28e719a4c5e90bad406a2472b5b9292a226f6e44eb6b6e` |
 | `docs/design/editor-link-tools-desktop.png` | `6d0bfa2b79ac7cb32d1dae7e35821666b647e45e59bbf2c2188d158b50bf3d00` |
 | `docs/design/editor-link-tools-narrow.png` | `c6e6cf6ed59f1143cb1ae01289f1c2a2cba897c225d9329139f3f2d2f9d768a8` |
+
+## 桌面设置分区导航（2026-11-05）
+
+ADR0064、settings-runtime-8与实际验收记录右侧目录、原生锚点、滚动高亮及页底短分区焦点。以下当前哈希替代相关旧记录，STATUS分别维护；不写实际设备地址。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `8e675d7441cd35cd2687f1e146ea8da198866c7a2725ba71bf75e4badad88f61` |
+| `docs/development/settings.md` | `9851f316c950dd44011c1b456ab644f635b33a9443ff37e2f25e365e78f30bd7` |
+| `docs/decisions/0064-desktop-settings-section-navigation.md` | `4833438f5800834152e1c9f5363bc590294d0406a584c12f33ecd3a60d95c79f` |
+| `docs/handoff/settings-section-navigation-verification.md` | `b59593b1d75db9f173e70c744473797d2f627031cfdb9a4337a1c085de3e43fa` |
+| `docs/design/settings-navigation-desktop.png` | `94685c429086aed791e8fde80e2273c885b60964240d1b3b6c5257e5eb33b992` |
+| `docs/design/settings-navigation-code.png` | `6339eada8dff658e18d6d4acb8211f8d50f3ff3ad652c28903946d5be25bec9a` |
+| `docs/design/settings-navigation-dark.png` | `67472a5ea3444c9a9435cb9bdf0e8d0f97536267148cd2cdc2a5dd7a47a2329e` |
+| `docs/design/settings-navigation-narrow.png` | `6619a284fa1d99805fe4875ef1072d2061cd16db511b6bfff682a281b89b38c8` |
