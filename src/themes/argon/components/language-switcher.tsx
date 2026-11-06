@@ -39,7 +39,7 @@ export function InterfaceLanguage({
       label={t("界面语言")}
       className={className}
       panelClassName={styles.menu}
-      triggerContent={<LanguageGlyph code={locale} />}
+      triggerContent={<Icon name="languages" />}
     >
       {(close) => (
         <>
@@ -161,6 +161,7 @@ export function ContentLanguages({
           aria-current={item.id === content.id ? "page" : undefined}
         >
           <LanguageLabel code={item.language} />
+          {item.id === content.id && <Icon name="check" />}
           {item.access !== "public" && <Icon name="lock" />}
         </TextLink>
       ))}
