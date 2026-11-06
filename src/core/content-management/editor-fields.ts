@@ -1,5 +1,5 @@
-import type { DraftBlock } from "@/generated/content-admin-contract";
-import type { MediaItem } from "@/generated/settings-contract";
+import type { DraftBlock } from "@/core/contracts/content-admin";
+import type { MediaItem } from "@/core/contracts/settings";
 
 export function titlePath(title: string): string {
   const slug = title

@@ -2,8 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Site } from "@/core/content/types";
-import type { PublicManagedPage } from "@/generated/pages-contract";
-import { readManagedPage } from "@/generated/pages-client";
+import type { PublicManagedPage } from "@/core/contracts/pages";
+import { readManagedPage } from "@/core/contracts/pages";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { checkedPreviewPage } from "@/core/pages/preview-validation";
 import { pagesFailure } from "@/core/pages/failure";
@@ -30,10 +30,6 @@ export function ManagedPagePreview({
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
   const { setStamp, rendered } = usePreviewReceipt(id);
-  useEffect(() => {
-    if (page?.source === "registered" && hasPageImplementation(page))
-      rendered();
-  }, [page, rendered]);
   useEffect(() => {
     const controller = new AbortController();
     let received = false;

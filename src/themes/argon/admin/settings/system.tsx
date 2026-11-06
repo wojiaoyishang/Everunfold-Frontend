@@ -2,7 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useId, useState } from "react";
-import type { CachePolicy } from "@/generated/settings-contract";
+import type { CachePolicy } from "@/core/contracts/settings";
 import { useFrontendNodes } from "@/core/settings/nodes";
 import { useSettingsEditor } from "@/core/settings/editor";
 import { Button, Form, TextField } from "../../components/ui/primitives";

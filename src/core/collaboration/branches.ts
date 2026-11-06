@@ -1,6 +1,6 @@
 import { randomUUID } from "@/core/browser/crypto";
-import type { BranchUpload } from "@/generated/collaboration-contract";
-import type { DraftFields } from "@/generated/content-admin-contract";
+import type { BranchUpload } from "@/core/contracts/collaboration";
+import type { DraftFields } from "@/core/contracts/content-admin";
 
 export type LocalBranch = {
   id: string;

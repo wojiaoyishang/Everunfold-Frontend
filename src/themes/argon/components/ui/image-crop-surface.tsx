@@ -2,7 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useRef, useState, type PointerEvent } from "react";
-import type { CropRect } from "@/generated/settings-contract";
+import type { CropRect } from "@/core/contracts/settings";
 import { clampCrop, type ImageSize } from "@/core/media/image-editor";
 /** Encapsulated pointer interaction; exact numeric fields provide the keyboard equivalent. */
 export function ImageCropSurface({

@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import type { PublicShortcode } from "@/generated/settings-contract";
-import type { MediaURL } from "@/generated/content-admin-contract";
+import type { PublicShortcode } from "@/core/contracts/settings";
+import type { MediaURL } from "@/core/contracts/content-admin";
 import { renderContent } from "@/core/rendering/content";
 import { shortcodeCall } from "@/core/shortcodes/parser";
 import { previewShortcodeDefinitions } from "@/core/shortcodes/registry";
@@ -39,17 +39,10 @@ export function ShortcodePreview({
           media_urls: media,
         },
         previewShortcodeDefinitions(definition, definitions),
+        { shortcodePreview: true },
       ),
     [definition, values, body, format, media, definitions],
   );
-  if (definition.name === "gallery" && !values.id)
-    return (
-      <div className={styles.gallerySample} aria-label="图片画廊样式示例">
-        <span />
-        <span />
-        <span />
-      </div>
-    );
   return (
     <div className={styles.preview} data-compact={compact}>
       <ContentMarkup

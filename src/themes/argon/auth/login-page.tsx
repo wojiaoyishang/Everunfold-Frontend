@@ -6,7 +6,7 @@ import { loginDestination } from "@/core/auth/routes";
 import { useSession } from "@/core/auth/use-session";
 import { authFailureMessage, checkedSession } from "@/core/auth/session";
 import { RequestError } from "@/core/http/request";
-import { login } from "@/generated/auth-client";
+import { login } from "@/core/contracts/auth";
 import { Icon } from "../components/icon";
 import { Button, Form, TextField } from "../components/ui/primitives";
 import { FormField } from "../components/ui/form-field";

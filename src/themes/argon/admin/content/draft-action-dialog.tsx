@@ -1,7 +1,7 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import type { DraftListItem } from "@/generated/content-admin-contract";
+import type { DraftListItem } from "@/core/contracts/content-admin";
 import { useDraftAction } from "@/core/content-management/use-draft-action";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 

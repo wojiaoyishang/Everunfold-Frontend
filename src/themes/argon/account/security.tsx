@@ -1,15 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import type {
-  AccountProfile,
-  SessionList,
-} from "@/generated/accounts-contract";
-import type { AuthSessionState } from "@/generated/auth-contract";
+import type { AccountProfile, SessionList } from "@/core/contracts/accounts";
+import type { AuthSessionState } from "@/core/contracts/auth";
 import {
   changeAccountPassword,
   readAccountSessions,
   revokeAccountSession,
-} from "@/generated/accounts-client";
+} from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
 import { UiText, useLocale } from "@/core/i18n/provider";

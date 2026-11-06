@@ -1,8 +1,8 @@
 import type {
   ConflictResolution,
   MergeDetail,
-} from "@/generated/collaboration-contract";
-import type { DraftFields } from "@/generated/content-admin-contract";
+} from "@/core/contracts/collaboration";
+import type { DraftFields } from "@/core/contracts/content-admin";
 
 /** A delayed lease response cannot replace newer conflict decisions or a completed result. */
 export function renewedMerge(current: MergeDetail | null, lease: MergeDetail) {

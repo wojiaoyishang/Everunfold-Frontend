@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { DraftBlock } from "@/generated/content-admin-contract";
+import type { DraftBlock } from "@/core/contracts/content-admin";
 import type { BlockCommand } from "@/core/editor/block-commands";
 import { DragAndDrop, type DragItem } from "../../components/ui/drag-and-drop";
 import { Icon } from "../../components/icon";

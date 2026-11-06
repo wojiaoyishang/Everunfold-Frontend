@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { DraftDetail } from "@/generated/content-admin-contract";
+import type { DraftDetail } from "@/core/contracts/content-admin";
 import { contentPreviewPath } from "@/core/content-management/preview";
 import { useToast } from "../../components/ui/toast/toast-provider";
 import { PreviewAction } from "../components/preview-action";

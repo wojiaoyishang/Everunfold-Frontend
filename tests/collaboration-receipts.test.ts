@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { commitCollaborationDraft } from "../src/generated/collaboration-client";
-import type { CollaborationContract } from "../src/generated/collaboration-contract";
+import { commitCollaborationDraft } from "@/core/contracts/collaboration";
+import type { CollaborationContract } from "@/core/contracts/collaboration";
 
 const id = "00000000-0000-4000-8000-000000000001";
 const owner = "00000000-0000-4000-8000-000000000002";

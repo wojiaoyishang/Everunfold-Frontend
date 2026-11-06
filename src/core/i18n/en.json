@@ -1314,5 +1314,22 @@
   "预览更新未完成，请重试。": "The preview update did not complete. Please retry.",
   "JavaScript 默认关闭，仅在独立页面沙箱内运行。": "JavaScript is off by default and runs only in the isolated page sandbox.",
   "JavaScript 已启用，脚本可以改变页面交互或触发跳转。请只使用可信代码。": "JavaScript is enabled. Scripts can change page interactions or navigate away. Use trusted code only.",
-  "这些限制会影响所有用户的头像上传。保存前请核对大小、上传次数和保留数量。": "These limits affect avatar uploads for all users. Review the size, upload frequency and image count before saving."
+  "这些限制会影响所有用户的头像上传。保存前请核对大小、上传次数和保留数量。": "These limits affect avatar uploads for all users. Review the size, upload frequency and image count before saving.",
+  "页面配置编辑方式": "Page configuration editor",
+  "表单": "Form",
+  "JSON 配置": "JSON configuration",
+  "支持任意 JSON 键值、嵌套对象和数组。配置会随页面应用后公开；表单未展示的字段也会保留。": "Supports any JSON keys, nested objects and arrays. Configuration becomes public when applied; fields absent from the form are retained.",
+  "页面配置须为 JSON 对象。": "Page configuration must be a JSON object.",
+  "页面配置最多支持 32 层嵌套。": "Page configuration supports up to 32 nesting levels.",
+  "页面配置中的数字必须为有限值。": "Numbers in page configuration must be finite.",
+  "页面配置不能超过 256 KiB。": "Page configuration cannot exceed 256 KiB.",
+  "JSON 格式无效，请检查引号、逗号和括号。": "Invalid JSON. Check quotes, commas and brackets.",
+  "组件暂不可用": "Component unavailable",
+  "正在加载组件…": "Loading component…",
+  "添加条目": "Add item",
+  "条目": "Item",
+  "上移条目": "Move item up",
+  "下移条目": "Move item down",
+  "移除条目": "Remove item",
+  "移除此条目？": "Remove this item?"
 }

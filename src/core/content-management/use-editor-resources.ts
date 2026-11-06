@@ -4,11 +4,11 @@ import { useAdminRequest } from "@/core/admin/account-context";
 import {
   readEditorOptions,
   createContentCategory,
-} from "@/generated/content-admin-client";
-import type { EditorTerm, MediaURL } from "@/generated/content-admin-contract";
-import type { MediaItem } from "@/generated/settings-contract";
-import type { CodePreferences } from "@/generated/settings-contract";
-import { readSettings } from "@/generated/settings-client";
+} from "@/core/contracts/content-admin";
+import type { EditorTerm, MediaURL } from "@/core/contracts/content-admin";
+import type { MediaItem } from "@/core/contracts/settings";
+import type { CodePreferences } from "@/core/contracts/settings";
+import { readSettings } from "@/core/contracts/settings";
 
 export function useEditorResources() {
   const { baseUrl, csrfToken } = useAdminRequest();

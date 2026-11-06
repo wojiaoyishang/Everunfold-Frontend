@@ -1,4 +1,4 @@
-import type { EditorTerm } from "@/generated/content-admin-contract";
+import type { EditorTerm } from "@/core/contracts/content-admin";
 export function categoryTree(terms: EditorTerm[]) {
   const categories = terms.filter((term) => term.kind === "category");
   const ids = new Set(categories.map((term) => term.id));

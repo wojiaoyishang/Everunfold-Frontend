@@ -5,12 +5,12 @@ import type {
   UserPreset,
   UserPresetCatalog,
   UserPresetFields,
-} from "@/generated/accounts-contract";
+} from "@/core/contracts/accounts";
 import {
   createUserPreset,
   removeUserPreset,
   saveUserPreset,
-} from "@/generated/accounts-client";
+} from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { useAccountAction } from "@/core/accounts/use-action";
 import { UiText } from "@/core/i18n/provider";

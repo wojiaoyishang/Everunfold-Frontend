@@ -2,7 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useId } from "react";
-import type { CodePreferences } from "@/generated/settings-contract";
+import type { CodePreferences } from "@/core/contracts/settings";
 import { useFontLibrary } from "@/core/media/font-library";
 import { renderContent } from "@/core/rendering/content";
 import { codeHtml } from "@/core/rendering/features/code-options";

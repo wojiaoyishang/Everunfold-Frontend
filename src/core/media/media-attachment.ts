@@ -3,13 +3,13 @@ import { randomUUID } from "@/core/browser/crypto";
 import { useEffect, useRef, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { RequestError } from "@/core/http/request";
-import { readMedia, updateMedia, editMedia } from "@/generated/settings-client";
+import { readMedia, updateMedia, editMedia } from "@/core/contracts/settings";
 import type {
   ImageRecipe,
   MediaDetails,
   MediaEdit,
   MediaMetadata,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
 /** Details and writes stay in the request layer; themes only render their state. */
 export function useMediaAttachment(id: string) {
   const { baseUrl, csrfToken } = useAdminRequest();

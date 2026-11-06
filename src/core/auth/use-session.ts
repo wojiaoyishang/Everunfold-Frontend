@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { AuthSessionState } from "@/generated/auth-contract";
-import { readAdminSession, readAuthSession } from "@/generated/auth-client";
+import type { AuthSessionState } from "@/core/contracts/auth";
+import { readAdminSession, readAuthSession } from "@/core/contracts/auth";
 import { createSessionCheck, type SessionView } from "./session-check";
 
 /** Component-owned identity: never shared with public reader snapshots or persisted. */

@@ -1,4 +1,4 @@
-import type { ReaderPreviewContract } from "@/generated/reader-preview-contract";
+import type { ReaderPreviewContract } from "@/core/contracts/reader-preview";
 import { RequestError } from "@/core/http/request";
 
 export type Identity = ReaderPreviewContract["identity"]["data"];

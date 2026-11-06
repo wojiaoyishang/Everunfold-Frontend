@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import schema from "../src/generated/presentation-v0.2.schema.json";
+import schema from "@/core/contracts/presentation-v0.2-schema";
 import {
   publicFeed,
   queryFeed,

@@ -7,7 +7,7 @@ import type {
   ProfileFields,
   AvatarCatalog,
   UserPreset,
-} from "@/generated/accounts-contract";
+} from "@/core/contracts/accounts";
 import {
   createAccountUser,
   readAccountPermissions,
@@ -15,7 +15,7 @@ import {
   readUserAvatars,
   saveAccountUser,
   readUserPresets,
-} from "@/generated/accounts-client";
+} from "@/core/contracts/accounts";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
 import { UiText } from "@/core/i18n/provider";

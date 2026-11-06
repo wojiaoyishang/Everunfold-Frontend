@@ -6,7 +6,7 @@ import type {
   ShortcodeItem,
   ShortcodeSource,
   PublicShortcode,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
 import { useShortcodeActions } from "@/core/shortcodes/use-actions";
 import {
   shortcodeFailure,

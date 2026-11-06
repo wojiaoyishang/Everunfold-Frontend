@@ -6,12 +6,12 @@ import type {
   ManagedPageItem,
   PageValue,
   PublicManagedPage,
-} from "@/generated/pages-contract";
+} from "@/core/contracts/pages";
 import {
   readManagedPage,
   saveManagedPage,
   removeManagedPage,
-} from "@/generated/pages-client";
+} from "@/core/contracts/pages";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { useAccountAction } from "@/core/accounts/use-action";
@@ -32,7 +32,10 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { AccountField } from "../../account/fields";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { AdminPageHeading } from "../components/page-heading";
-import { PageOptionsEditor } from "./options";
+import { PageConfigurationEditor } from "./configuration";
+import { pluginRegistry } from "@/core/plugins/registry";
+import { readSettingsModel } from "@/core/forms/schema";
+import { parsePageConfiguration } from "@/core/pages/configuration";
 import styles from "./pages.module.css";
 import { Select } from "../../components/ui/select";
 import { PageLanguages } from "./languages";
@@ -64,6 +67,12 @@ export function ManagedPageEditor({ id }: { id?: string }) {
   const [language, setLanguage] = useState(catalog.default_code);
   const [saved, setSaved] = useState<ManagedPageItem | null>(null);
   const [value, setValue] = useState<PageValue>(blank);
+  const [optionsSource, setOptionsSource] = useState<string | null>(null);
+  const optionsError = useMemo(
+    () =>
+      optionsSource === null ? "" : parsePageConfiguration(optionsSource).error,
+    [optionsSource],
+  );
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"html" | "css" | "javascript">("html");
   const [confirm, setConfirm] = useState<"remove" | null>(null);
@@ -75,6 +84,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
   const publish = write && can(actor, "pages:publish");
   const dirty =
     JSON.stringify(value) !== JSON.stringify(saved?.value ?? blank) ||
+    Boolean(optionsError) ||
     (!saved && language !== catalog.default_code);
   useEffect(() => {
     const controller = new AbortController();
@@ -84,6 +94,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
           if (!controller.signal.aborted) {
             setSaved(response.data);
             setValue(response.data.value);
+            setOptionsSource(null);
             if (response.data.language) setLanguage(response.data.language);
             setError("");
           }
@@ -93,8 +104,12 @@ export function ManagedPageEditor({ id }: { id?: string }) {
         });
     return () => controller.abort();
   }, [baseUrl, id]);
-  const save = (apply: boolean) =>
-    action.run(
+  const save = async (apply: boolean) => {
+    if (optionsError) {
+      action.setMessage(optionsError);
+      return false;
+    }
+    return action.run(
       async (signal) => {
         const input = {
           id: saved?.id ?? previewId,
@@ -115,12 +130,14 @@ export function ManagedPageEditor({ id }: { id?: string }) {
         if (!signal.aborted) {
           setSaved(response.data);
           setValue(response.data.value);
+          setOptionsSource(null);
           setError("");
           if (!id) router.replace("/admin/pages/" + response.data.id);
         }
       },
       apply ? "页面已应用，公开入口将在前端同步后更新。" : "页面草稿已保存。",
     );
+  };
   const source = saved?.source ?? "custom";
   const previewPage = useMemo<PublicManagedPage>(
     () => ({
@@ -176,7 +193,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
             icon="sidebar"
             label="实时预览"
             description="在独立窗口中查看页面并编辑"
-            disabled={!write || action.busy}
+            disabled={!write || action.busy || Boolean(optionsError)}
             onClick={() => void openLive()}
           />
           <PreviewAction
@@ -198,7 +215,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                     }
                   }}
                   className="admin-button"
-                  disabled={action.busy || !dirty}
+                  disabled={action.busy || !dirty || Boolean(optionsError)}
                 >
                   <Icon name="save" />
                   <UiText text="保存草稿" />
@@ -217,6 +234,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                     className="admin-button admin-button-primary"
                     disabled={
                       action.busy ||
+                      Boolean(optionsError) ||
                       (source === "registered" &&
                         value.enabled &&
                         !saved?.available)
@@ -366,12 +384,35 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                         </p>
                       </header>
                       {saved?.registration ? (
-                        <PageOptionsEditor
-                          fields={saved.registration.fields ?? []}
+                        <PageConfigurationEditor
+                          model={readSettingsModel(
+                            Object.keys(
+                              saved.registration.settings_schema ?? {},
+                            ).length
+                              ? saved.registration.settings_schema
+                              : pluginRegistry.pages.find(
+                                  (page) =>
+                                    page.registration.id ===
+                                    saved.implementation_id,
+                                )?.settingsModel,
+                          )}
                           value={value.options ?? {}}
-                          onChange={(options) =>
-                            setValue({ ...value, options })
+                          source={
+                            optionsSource ??
+                            JSON.stringify(value.options ?? {}, null, 2)
                           }
+                          error={optionsError}
+                          disabled={!write || action.busy}
+                          onChange={(options) => {
+                            setOptionsSource(null);
+                            setValue({ ...value, options });
+                          }}
+                          onSourceChange={(text) => {
+                            setOptionsSource(text);
+                            const parsed = parsePageConfiguration(text);
+                            if (parsed.value)
+                              setValue({ ...value, options: parsed.value });
+                          }}
                         />
                       ) : (
                         <p>

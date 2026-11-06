@@ -12,7 +12,7 @@ import {
   removedBlocks,
 } from "../src/core/collaboration/document";
 import { createBlockEditorRegistry } from "../src/core/editor/registry";
-import type { DraftFields } from "../src/generated/content-admin-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
 import { readServerFrame } from "../src/core/collaboration/wire";
 import { serializeDraftExport } from "../src/core/collaboration/export";
 import {

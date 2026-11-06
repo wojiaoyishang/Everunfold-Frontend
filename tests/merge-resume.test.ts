@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { MergeDetail } from "../src/generated/collaboration-contract";
+import type { MergeDetail } from "@/core/contracts/collaboration";
 import {
   renewedMerge,
   resumedDecisions,

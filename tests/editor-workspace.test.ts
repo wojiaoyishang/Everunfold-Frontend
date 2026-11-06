@@ -12,7 +12,7 @@ import {
 } from "../src/core/content-management/taxonomy-options";
 import { titlePath } from "../src/core/content-management/editor-fields";
 import { parsePublicSnapshot } from "../src/core/content/validation";
-import { readProtectedContent } from "../src/generated/content-access-client";
+import { readProtectedContent } from "@/core/contracts/content-access";
 import {
   contentEditHref,
   readEditAction,

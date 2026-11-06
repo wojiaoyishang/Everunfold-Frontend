@@ -14,8 +14,8 @@ import {
 import type { Extension } from "@codemirror/state";
 import type { SharedSource } from "@/core/collaboration/editor-binding";
 import type { UploadEntry } from "@/core/media/upload-queue";
-import type { MediaItem } from "@/generated/settings-contract";
-import type { MediaURL } from "@/generated/content-admin-contract";
+import type { MediaItem } from "@/core/contracts/settings";
+import type { MediaURL } from "@/core/contracts/content-admin";
 import { EditorStatusBar } from "../../../components/ui/editor-status-bar";
 import { Button } from "../../../components/ui/primitives";
 import { Icon } from "../../../components/icon";

@@ -1,16 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
-import type {
-  KeyList,
-  KeyOptions,
-  KeyState,
-} from "@/generated/accounts-contract";
+import type { KeyList, KeyOptions, KeyState } from "@/core/contracts/accounts";
 import {
   createApiKey,
   readApiKeyOptions,
   readApiKeys,
   revokeApiKey,
-} from "@/generated/accounts-client";
+} from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
 import { UiText, useLocale } from "@/core/i18n/provider";

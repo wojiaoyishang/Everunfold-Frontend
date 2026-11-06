@@ -3,10 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { randomUUID } from "@/core/browser/crypto";
 import { useState, type CSSProperties } from "react";
-import type {
-  MenuItem,
-  NavigationReference,
-} from "@/generated/settings-contract";
+import type { MenuItem, NavigationReference } from "@/core/contracts/settings";
 import {
   flattenMenu,
   updateMenu,

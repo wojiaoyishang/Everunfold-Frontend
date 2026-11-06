@@ -8,7 +8,7 @@ export default defineConfig([
   ...nextTypeScript,
   prettier,
   {
-    files: ["src/app/**/*.tsx", "src/themes/**/*.tsx"],
+    files: ["src/app/**/*.tsx", "src/themes/**/*.tsx", "src/plugins/**/*.tsx"],
     ignores: ["src/themes/argon/components/ui/**"],
     rules: {
       "no-restricted-syntax": [
@@ -29,6 +29,7 @@ export default defineConfig([
   },
   globalIgnores([
     ".next/**",
+    "cache/**",
     "out/**",
     "coverage/**",
     "var/**",

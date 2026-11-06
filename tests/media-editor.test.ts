@@ -8,7 +8,7 @@ import {
   orientedSize,
   outputSize,
 } from "../src/core/media/image-editor";
-import type { ImageRecipe, Rotation } from "../src/generated/settings-contract";
+import type { ImageRecipe, Rotation } from "@/core/contracts/settings";
 
 function point(
   size: { width: number; height: number },

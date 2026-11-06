@@ -1,8 +1,5 @@
 "use client";
-import type {
-  UserPreset,
-  UserPresetStamp,
-} from "@/generated/accounts-contract";
+import type { UserPreset, UserPresetStamp } from "@/core/contracts/accounts";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Select } from "../../components/ui/select";
 import { Button } from "../../components/ui/primitives";

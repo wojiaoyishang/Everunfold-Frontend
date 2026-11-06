@@ -19,8 +19,8 @@ import {
 import type { SharedSource } from "../src/core/collaboration/editor-binding";
 import type { LocalBranch } from "../src/core/collaboration/branches";
 import { privateDraftFields } from "../src/core/collaboration/branches";
-import type { DraftFields } from "../src/generated/content-admin-contract";
-import type { ServerFrame } from "../src/generated/collaboration-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
+import type { ServerFrame } from "@/core/contracts/collaboration";
 import { normalizeSourceLines } from "../src/core/editor/source-lines";
 import { readServerFrame } from "../src/core/collaboration/wire";
 import { pageIdentity } from "../src/core/collaboration/page-identity";

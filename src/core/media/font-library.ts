@@ -1,7 +1,7 @@
 "use client";
 import { randomUUID } from "@/core/browser/crypto";
-import { queryFonts, uploadMedia } from "@/generated/settings-client";
-import type { FontAsset } from "@/generated/settings-contract";
+import { queryFonts, uploadMedia } from "@/core/contracts/settings";
+import type { FontAsset } from "@/core/contracts/settings";
 import {
   useAssetLibrary,
   InvalidUpload,

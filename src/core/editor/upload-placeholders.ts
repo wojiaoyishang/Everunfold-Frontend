@@ -1,5 +1,5 @@
 import { parseDocument } from "htmlparser2";
-import type { DraftBlock } from "@/generated/content-admin-contract";
+import type { DraftBlock } from "@/core/contracts/content-admin";
 
 export const UPLOAD_SCHEME = "everunfold-upload://";
 const escape = (value: string) =>

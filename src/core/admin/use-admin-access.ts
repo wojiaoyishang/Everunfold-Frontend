@@ -12,7 +12,7 @@ import { useSession } from "@/core/auth/use-session";
 import { authFailureMessage, checkedSession } from "@/core/auth/session";
 import { loginReturnPath } from "@/core/auth/routes";
 import { RequestError } from "@/core/http/request";
-import { logout } from "@/generated/auth-client";
+import { logout } from "@/core/contracts/auth";
 
 /** One authenticated session owner for the persistent private workspace. */
 export function useAdminAccess(baseUrl: string) {

@@ -1,4 +1,4 @@
-import type { DraftBlock } from "@/generated/content-admin-contract";
+import type { DraftBlock } from "@/core/contracts/content-admin";
 
 export type BlockCommand =
   | { kind: "insert"; block: DraftBlock; before: string | null }

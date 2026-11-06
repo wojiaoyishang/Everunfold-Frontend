@@ -9,7 +9,7 @@ test("a newer shared revision can advance with ordinary edits while private acce
     await import("../src/core/content-management/draft-revision");
   const saved = {
     settings: { visibility: "public", opens_at: null },
-  } as import("../src/generated/content-admin-contract").DraftDetail;
+  } as import("@/core/contracts/content-admin").DraftDetail;
   assert.equal(
     hasPrivateDraftChanges({ title: "新标题", body: [], settings: {} }, saved),
     false,
@@ -51,7 +51,7 @@ test("a revision arriving before its source update cannot release the real sessi
   );
   // Deliver transport frames through the actual decoder/receiver; no socket or IDB is opened.
   const receive = (
-    frame: import("../src/generated/collaboration-contract").ServerFrame,
+    frame: import("@/core/contracts/collaboration").ServerFrame,
   ) =>
     (session as unknown as { receive: (value: typeof frame) => void }).receive(
       readServerFrame(JSON.stringify(frame)),

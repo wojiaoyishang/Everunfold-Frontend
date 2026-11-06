@@ -1,6 +1,6 @@
 "use client";
 import { useId, useState } from "react";
-import type { FontAsset } from "@/generated/settings-contract";
+import type { FontAsset } from "@/core/contracts/settings";
 import { Select } from "../../components/ui/select";
 import { Modal } from "../../components/ui/modal";
 import { FontLibraryPage } from "./page";

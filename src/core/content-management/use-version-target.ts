@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { readDraftVersion } from "@/generated/collaboration-client";
-import type { VersionDetail } from "@/generated/collaboration-contract";
+import { readDraftVersion } from "@/core/contracts/collaboration";
+import type { VersionDetail } from "@/core/contracts/collaboration";
 import { draftError } from "./draft-state";
 
 /** Each side is addressed by its URL; an obsolete response cannot change the current comparison. */

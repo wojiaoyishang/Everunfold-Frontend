@@ -7,11 +7,11 @@ import {
   previewMediaRemoval,
   removeMedia,
   restoreMedia,
-} from "@/generated/settings-client";
+} from "@/core/contracts/settings";
 import type {
   MediaDetails,
   MediaRemovalPreview,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
 
 function removalError(failure: unknown) {
   const code = failure instanceof RequestError ? failure.code : undefined;

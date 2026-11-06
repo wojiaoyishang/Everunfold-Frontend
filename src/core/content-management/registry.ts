@@ -1,5 +1,5 @@
-import definitions from "@/generated/content-types.json";
-import type { ContentTypeDefinition } from "@/generated/content-admin-contract";
+import definitions from "@/core/contracts/content-types";
+import type { ContentTypeDefinition } from "@/core/contracts/content-admin";
 import type { AdminModuleRegistration } from "@/core/admin/registry";
 
 /** Build-time backend metadata; editor implementations are trusted frontend registrations. */

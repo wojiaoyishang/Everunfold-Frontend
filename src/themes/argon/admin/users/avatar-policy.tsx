@@ -1,13 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
-import {
-  readAvatarPolicy,
-  saveAvatarPolicy,
-} from "@/generated/accounts-client";
+import { readAvatarPolicy, saveAvatarPolicy } from "@/core/contracts/accounts";
 import type {
   AvatarLimits,
   AvatarPolicyState,
-} from "@/generated/accounts-contract";
+} from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
 import { UiText } from "@/core/i18n/provider";

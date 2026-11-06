@@ -8,7 +8,7 @@ import type { Locale } from "@/core/i18n/locale";
 import { useLanguageCatalog } from "@/core/i18n/provider";
 import { languageName } from "@/core/i18n/catalog";
 import { LanguageLabel } from "../../components/language-label";
-import type { TranslationMember } from "@/generated/content-admin-contract";
+import type { TranslationMember } from "@/core/contracts/content-admin";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";

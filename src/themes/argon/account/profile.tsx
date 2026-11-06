@@ -1,13 +1,10 @@
 "use client";
 import { useState } from "react";
-import type {
-  AccountProfile,
-  ProfileFields,
-} from "@/generated/accounts-contract";
+import type { AccountProfile, ProfileFields } from "@/core/contracts/accounts";
 import {
   readAccountProfile,
   saveAccountProfile,
-} from "@/generated/accounts-client";
+} from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { useAccountAction } from "@/core/accounts/use-action";
 import {

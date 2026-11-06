@@ -3,8 +3,8 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
 import type { DraftVersioning } from "@/core/content-management/use-draft-versions";
-import type { MediaURL } from "@/generated/content-admin-contract";
-import type { MediaItem, PublicShortcode } from "@/generated/settings-contract";
+import type { MediaURL } from "@/core/contracts/content-admin";
+import type { MediaItem, PublicShortcode } from "@/core/contracts/settings";
 import { serializeDraftExport } from "@/core/collaboration/export";
 import { Button } from "../../components/ui/primitives";
 import { DownloadButton } from "../../components/ui/download-button";

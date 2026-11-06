@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-16，2026-11-06（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
+版本：bootstrap-17，2026-11-07（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
 
 ## 已确认的范围
 
@@ -36,7 +36,7 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 - 后端 `frontends.<node_id>` 绑定地址、投递 `enabled`、双向 Token 环境变量引用；根级 `FRONTEND_NODE_ID` 标识前端。更换域名不改变身份，`enabled` 不授予或撤销入站权限。
 - 前端连接、来源限制与双向 Token 引用统一位于仅服务端 `[backend]`，不另设 `[internal_auth]`，不整体公开给浏览器。实际密钥从受控环境解析，不保存于任务载荷。
 - Redis 项目主键来自后端 `[project].key`，示例保留 `lovepikachu`；scope 非空时生成 `{project.key}:{scope}:`。业务 Key、频道及 Celery 适配前缀集中派生，不因项目改名擅改运行命名空间。
-- 后端发布版本化 OpenAPI 与 WS/事件 Schema，前端从指定产物生成并锁定类型和客户端，不手工另建业务字段定义。
+- 后端发布版本化 OpenAPI 与 WS/事件 Schema，前端从精确提交/SHA锁文件恢复类型和客户端，不手工另建业务字段定义。按2026-11-07用户要求，生成物写入被Git忽略的cache/contracts与cache/build，删除src/generated；稳定core/contracts模块隔离访问。原var公开副本不迁移。
 - 业务 JSON 外壳为 `success/code/msg/data`，`code` 是整数，`data=None` 可省略，使用真实 HTTP 状态。文件、流、WS、204/304 等例外；`msg` 只供本地化展示。
 
 ## 身份与安全
@@ -101,3 +101,7 @@ Markdown/HTML 编译插件、整篇共享文档、PostgreSQL 持久确认、Stat
 用户确认离线冻结个人基线、在线继续；正式合并固定并锁住该文章最新版，迟到输入保留分支。旧历史可软删除，最新版受保护。正文实时保存、块内共享光标/选区、本人撤销、回执核对、三方合并及独立可视化/源码对比页已按[ADR0061](../decisions/0061-cursors-offline-branches-and-version-merges.md)实现，取代旧的显式整篇正文保存阶段。PG继续是事实来源，Redis仅临时通知；真实范围见[验收](../handoff/cursor-versions-verification.md)。
 
 2026-11-06后续：自定义页面语言组、注册页代码语言路径、保留应用源文的目录启停、稳定ID资源菜单与实时预览渲染回执见ADR0074。浏览器内导航/返回使用主题确认；直接关页/强制刷新不能替换为站内弹窗。现有媒体/元数据、权限及可靠事务边界不变。
+
+## 统一插件与主题（2026-11-07）
+
+按ADR0077，页面和短代码均由src/plugins内的可信插件贡献，固定路径自动发现插件与主题。设置模型只声明组件名/配置，主题hook提供具名控件实现，未知组件占位并保留数据；权限/事务/持久回执仍由宿主负责。配置与模型可运行时下发，新组件源码需重新构建。数据拉取/通知接口先形成规范，真实后端资源沿既有鉴权/契约/Outbox接入，不提供未授权的万能数据代理。

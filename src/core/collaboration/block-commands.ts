@@ -1,5 +1,5 @@
 import * as Y from "yjs";
-import type { DraftFields } from "@/generated/content-admin-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
 import { commandBody, type BlockCommand } from "@/core/editor/block-commands";
 import {
   LOCAL,

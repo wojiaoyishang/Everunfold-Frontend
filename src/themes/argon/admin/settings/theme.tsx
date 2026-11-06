@@ -13,7 +13,7 @@ import { Select } from "../../components/ui/select";
 import { ColorPicker } from "../../components/ui/color-picker";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
-import type { ThemePreferences } from "@/generated/settings-contract";
+import type { ThemePreferences } from "@/core/contracts/settings";
 import { useFontLibrary } from "@/core/media/font-library";
 import { FontField } from "../fonts/font-field";
 import { CodeSettingsSection } from "./code-settings";

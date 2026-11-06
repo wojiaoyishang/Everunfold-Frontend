@@ -3,7 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
 import { useEditorState, type Editor } from "@tiptap/react";
-import type { FontAsset } from "@/generated/settings-contract";
+import type { FontAsset } from "@/core/contracts/settings";
 import { loadFont } from "@/core/media/font-preview";
 import { FontField } from "../../fonts/font-field";
 import { Button, TextField, Form } from "../../../components/ui/primitives";

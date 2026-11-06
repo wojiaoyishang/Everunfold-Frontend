@@ -3,7 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { ContentTypeDefinition } from "@/generated/content-admin-contract";
+import type { ContentTypeDefinition } from "@/core/contracts/content-admin";
 import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
 import { requestEmbeddedLeave } from "@/core/preview/bridge";
 import { editorPreviewContent } from "@/core/preview/content";

@@ -4,11 +4,11 @@ import type {
   PermissionCatalog,
   UserPreset,
   UserPresetCatalog,
-} from "@/generated/accounts-contract";
+} from "@/core/contracts/accounts";
 import {
   readAccountPermissions,
   readUserPresets,
-} from "@/generated/accounts-client";
+} from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure } from "@/core/accounts/use-action";
 import { UiText, useT } from "@/core/i18n/provider";

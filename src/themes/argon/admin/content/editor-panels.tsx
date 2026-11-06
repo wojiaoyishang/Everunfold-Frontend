@@ -9,8 +9,8 @@ import type {
   EditorSettings,
   EditorTerm,
   MediaURL,
-} from "@/generated/content-admin-contract";
-import type { MediaItem } from "@/generated/settings-contract";
+} from "@/core/contracts/content-admin";
+import type { MediaItem } from "@/core/contracts/settings";
 import { Button, TextArea, TextField } from "../../components/ui/primitives";
 import { DateTimeField } from "../../components/ui/date-time-field";
 import { Select } from "../../components/ui/select";

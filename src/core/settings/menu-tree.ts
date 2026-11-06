@@ -1,4 +1,4 @@
-import type { MenuItem } from "@/generated/settings-contract";
+import type { MenuItem } from "@/core/contracts/settings";
 export interface MenuEntry {
   item: MenuItem;
   parentId: string | null;

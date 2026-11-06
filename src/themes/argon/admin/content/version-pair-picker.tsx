@@ -4,7 +4,7 @@ import { UiText } from "@/core/i18n/provider";
 import type {
   VersionDetail,
   VersionItem,
-} from "@/generated/collaboration-contract";
+} from "@/core/contracts/collaboration";
 import { Button } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import styles from "./versions.module.css";

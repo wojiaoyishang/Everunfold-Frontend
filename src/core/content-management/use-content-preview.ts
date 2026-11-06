@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { readDraft } from "@/generated/content-admin-client";
-import type { DraftDetail } from "@/generated/content-admin-contract";
+import { readDraft } from "@/core/contracts/content-admin";
+import type { DraftDetail } from "@/core/contracts/content-admin";
 import { draftError } from "./draft-state";
 
 /** Authorized, mounted-page state only. No public snapshots, recovery cache, or write requests. */

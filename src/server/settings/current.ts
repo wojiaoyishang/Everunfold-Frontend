@@ -2,10 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { readConfiguration } from "../../core/config/server";
 import { FileSettingsStore } from "./store";
-import type {
-  CachePolicy,
-  PublicSettings,
-} from "../../generated/settings-contract";
+import type { CachePolicy, PublicSettings } from "@/core/contracts/settings";
 
 /** No backend fetch and no time TTL: read the last complete locally applied revision. */
 export const readAppliedSettings = cache(async () => {

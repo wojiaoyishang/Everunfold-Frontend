@@ -9,7 +9,7 @@ import {
 } from "../src/core/settings/menu-tree";
 import { siteNavigation } from "../src/themes/argon/navigation";
 import { snapshot } from "./fixtures";
-import type { MenuItem } from "../src/generated/settings-contract";
+import type { MenuItem } from "@/core/contracts/settings";
 const node = (id: string, children: MenuItem[] = []): MenuItem => ({
   id,
   label: id,

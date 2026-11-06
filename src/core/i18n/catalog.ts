@@ -1,8 +1,8 @@
-import regions from "@/generated/language-regions.json";
+import regions from "@/core/contracts/language-regions";
 import type {
   LanguageCatalog as StoredCatalog,
   LanguageDefinition,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
 
 export type Language = Required<LanguageDefinition>;
 export type LanguageCatalog = Omit<Required<StoredCatalog>, "languages"> & {

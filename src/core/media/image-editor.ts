@@ -2,7 +2,7 @@ import type {
   CropRect,
   ImageRecipe,
   Rotation,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
 export type ImageSize = { width: number; height: number };
 export const emptyRecipe: ImageRecipe = {
   rotation: 0,

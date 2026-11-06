@@ -1,15 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import {
-  queryDrafts,
-  readContentTypes,
-} from "@/generated/content-admin-client";
+import { queryDrafts, readContentTypes } from "@/core/contracts/content-admin";
 import type {
   ContentTypeDefinition,
   DraftCatalog,
   DraftQuery,
-} from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
 import { draftError } from "./draft-state";
 
 export function useDraftCatalog(type: ContentTypeDefinition) {

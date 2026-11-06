@@ -1,6 +1,6 @@
 import { diff } from "@codemirror/merge";
 import { DomUtils, parseDocument } from "htmlparser2";
-import type { DraftFields } from "@/generated/content-admin-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
 
 type Block = DraftFields["body"][number];
 export type ComparedBlock = {

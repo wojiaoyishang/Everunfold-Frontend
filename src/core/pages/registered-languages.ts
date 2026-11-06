@@ -1,4 +1,4 @@
-import type { PublicManagedPage } from "@/generated/pages-contract";
+import type { PublicManagedPage } from "@/core/contracts/pages";
 import type { LanguageCatalog } from "@/core/i18n/catalog";
 import type { Content } from "@/core/content/types";
 import { localizedPageImplementations } from "./registry";

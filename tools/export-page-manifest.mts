@@ -1,10 +1,8 @@
-import { mkdir, writeFile } from "node:fs/promises";
-import { pageManifest } from "../src/core/pages/registry";
-await mkdir(new URL("../registrations/", import.meta.url), { recursive: true });
-await writeFile(
-  new URL("../registrations/pages-v1.json", import.meta.url),
-  JSON.stringify(pageManifest, null, 2) + "\n",
+/** Print trusted declarations to stdout; no intermediate registrations directory. */
+import { fileURLToPath } from "node:url";
+import { readExtensionCatalog } from "./extensions/catalog";
+
+const { manifest } = await readExtensionCatalog(
+  fileURLToPath(new URL("../", import.meta.url)),
 );
-console.log(
-  `Exported ${pageManifest.pages.length} trusted page registrations.`,
-);
+process.stdout.write(JSON.stringify(manifest, null, 2) + "\n");

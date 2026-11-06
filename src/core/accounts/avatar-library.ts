@@ -3,13 +3,13 @@ import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import {
   readAccountAvatars,
   uploadAccountAvatar,
-} from "@/generated/accounts-client";
+} from "@/core/contracts/accounts";
 import type {
   AvatarCatalog,
   AvatarItem,
   AvatarUpload,
   AvatarPolicyState,
-} from "@/generated/accounts-contract";
+} from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { UploadQueue, InvalidUpload } from "@/core/media/upload-queue";
 import { randomUUID } from "@/core/browser/crypto";

@@ -39,3 +39,6 @@ public/uploads/wordpress/
 !.vscode/settings.json
 .DS_Store
 Thumbs.db
+
+# Reproducible local contract/build artifacts; no runtime state is moved here
+/cache/

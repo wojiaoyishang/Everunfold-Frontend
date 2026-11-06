@@ -7,6 +7,7 @@ import { createServer } from "node:net";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Parser, parseDocument, DomUtils } from "htmlparser2";
+import { verifyExtensionFixture } from "./fixtures/extensions.mjs";
 
 export async function verifyAdminRuntime({ workspace, projectRoot }) {
   let backendRequests = 0;
@@ -187,7 +188,14 @@ directory = "./var/absent-admin-verification-cache"
     await new Promise((resolve, reject) => {
       const fixture = spawn(
         process.execPath,
-        ["--import", "tsx", "tools/fixtures/settings-snapshot.mts", workspace],
+        [
+          "--import",
+          "tsx",
+          "--import",
+          "./tools/extensions/node.mjs",
+          "tools/fixtures/settings-snapshot.mts",
+          workspace,
+        ],
         { cwd: projectRoot, stdio: "inherit", windowsHide: true },
       );
       fixture.once("error", reject);
@@ -200,6 +208,11 @@ directory = "./var/absent-admin-verification-cache"
     const body = await home.text();
     assert.ok(body.includes("离线主题标题") && body.includes("同步导航"));
     assert.ok(body.includes("离线公告标题") && body.includes("离线公告正文"));
+    try {
+      await verifyExtensionFixture(base);
+    } catch (error) {
+      throw new Error("Extension runtime failed: " + logs, { cause: error });
+    }
     const article = await fetch(base + "/hello.html");
     assert.equal(article.status, 200);
     const html = await article.text();
@@ -283,6 +296,8 @@ directory = "./var/absent-admin-verification-cache"
         [
           "--import",
           "tsx",
+          "--import",
+          "./tools/extensions/node.mjs",
           "tools/fixtures/settings-snapshot.mts",
           workspace,
           "languages",
@@ -362,6 +377,8 @@ directory = "./var/absent-admin-verification-cache"
         [
           "--import",
           "tsx",
+          "--import",
+          "./tools/extensions/node.mjs",
           "tools/fixtures/settings-snapshot.mts",
           workspace,
           "withdraw",

@@ -1,5 +1,5 @@
 import flags from "./data/flags.json";
-import regions from "@/generated/language-regions.json";
+import regions from "@/core/contracts/language-regions";
 import { defaultFlag, type Language } from "./catalog";
 import { localeOf, nativeMessageLocale, type MessageLocale } from "./locale";
 import { searchText } from "./search";

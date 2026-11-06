@@ -1,4 +1,4 @@
-import type { DraftDetail } from "@/generated/content-admin-contract";
+import type { DraftDetail } from "@/core/contracts/content-admin";
 import type { Content, Taxonomy } from "@/core/content/types";
 
 const previewRoute =

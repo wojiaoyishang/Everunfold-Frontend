@@ -3,7 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useMediaAttachment } from "@/core/media/media-attachment";
 import { formatBytes } from "@/core/media/image-editor";
-import type { MediaItem } from "@/generated/settings-contract";
+import type { MediaItem } from "@/core/contracts/settings";
 import { Button, TextField } from "../../components/ui/primitives";
 import { MediaPreview } from "./media-preview";
 import styles from "./media-picker.module.css";

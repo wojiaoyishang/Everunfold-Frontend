@@ -1,0 +1,82 @@
+{
+  "version": 1,
+  "contracts": {
+    "accounts-v1.schema.json": {
+      "schema_version": "1.5.0",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/accounts-v1.schema.json",
+      "source_commit": "87692a44870d2b316d8df5e2d7b2f84aa7de3698",
+      "sha256": "f58625face4f7a7017bb6ac52f767cb12c78fc55f171ee34e04a9715daa5f71d"
+    },
+    "auth-v0.1.schema.json": {
+      "schema_version": "0.2.0",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/auth-v0.1.schema.json",
+      "source_commit": "f14c6bec892c19c64599315565b9633ed96dcf2c",
+      "sha256": "9534aa10c2cb8189c130d325a2df4c53d15cf0a84f59e00c5041ef55d6881f81"
+    },
+    "collaboration-v1.schema.json": {
+      "schema_version": "2.2.0",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/collaboration-v1.schema.json",
+      "source_commit": "79b968d5cddbe429172ae1b01cbb89630be32a3d",
+      "sha256": "a123132b23b4f8b5210a323060fe4d6e1fc336c0fe8eca396cc42760fefcf0ea"
+    },
+    "comment-likes-v0.1.schema.json": {
+      "schema_version": "0.1.0",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/comment-likes-v0.1.schema.json",
+      "source_commit": "75471b1b659455dbbfe4344fdedde258b57c35ee",
+      "sha256": "0e86b2f72e2acb788f6b4faa71b49ac63c52802c05958a69054665137887d018"
+    },
+    "content-access-v1.schema.json": {
+      "schema_version": "1.1.0",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/content-access-v1.schema.json",
+      "source_commit": "544a5c30f70756a1e57661f05e254ae87d49f089",
+      "sha256": "7a2d7f38ccecaa925f7a2f24bd55efc3098e48aa737949db3463a7456313e638"
+    },
+    "content-admin-v1.schema.json": {
+      "schema_version": "1.12.0",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/content-admin-v1.schema.json",
+      "source_commit": "85b3bac052912aa25de7c7d473c21fdd56c8b9e1",
+      "sha256": "5b55a1df0cac299f50e340f181a124ec63b1ab73a3eaf9c75e41a7b202a90166"
+    },
+    "pages-v1.schema.json": {
+      "schema_version": "1.5.0",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/pages-v1.schema.json",
+      "source_commit": "0e9ca683e94454f9d63eb9f2de2bbf94a543d083",
+      "sha256": "d47e3553ba7eeaf5cceda80798b1b6e30935c33837a4fb37bf67640ed40b2d8c"
+    },
+    "presentation-v0.2.schema.json": {
+      "schema_version": "0.2.0-preview.1",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/presentation-v0.2.schema.json",
+      "source_commit": "72cae65a06d018ce5d0c4d7e544ed1fe70f6dc92",
+      "sha256": "3c490a93eb9baf76db6df3b3cb5438fb732db41d8191a797a3ce8de8f9e770f5"
+    },
+    "public-v0.1.schema.json": {
+      "schema_version": "0.8.0",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/public-v0.1.schema.json",
+      "source_commit": "c0d55691456080d3be9df4ca6cff05842009a967",
+      "sha256": "1f0e46d4fb41382af4977120a307a0e42f943059ac1e9c4603ebc4075243f085"
+    },
+    "reader-preview-v0.1.schema.json": {
+      "schema_version": "0.1.0-preview.1",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/reader-preview-v0.1.schema.json",
+      "source_commit": "38ff7226fcdb373d436d191718c8585811ac00c8",
+      "sha256": "9324386a70b1d3f1b657939864683926ce9dc692061499d696506bb6aaf37e7c"
+    },
+    "settings-v1.schema.json": {
+      "schema_version": "1.11.1",
+      "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
+      "source_path": "contracts/settings-v1.schema.json",
+      "source_commit": "ba9bc4aba83813789ec988e8eb3d34a8ca7d1c76",
+      "sha256": "66da8aca0bd7e96c598dd80dbe40466678ae3ffb7c4bc9840f4e3c9fa85a6b28"
+    }
+  }
+}

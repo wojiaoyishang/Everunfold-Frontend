@@ -3,7 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useId, type ReactNode } from "react";
 import { useSettingsEditor } from "@/core/settings/editor";
-import type { DeliveryState } from "@/generated/settings-contract";
+import type { DeliveryState } from "@/core/contracts/settings";
 import {
   Button,
   Form,

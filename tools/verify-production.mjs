@@ -4,6 +4,7 @@ import { cp, mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { installExtensionFixture } from "./fixtures/extensions.mjs";
 
 const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -14,6 +15,19 @@ const workspace = await mkdtemp(path.join(temporaryRoot, "everunfold-build-"));
 const modules = path.join(workspace, "node_modules");
 
 try {
+  await new Promise((resolve, reject) => {
+    const child = spawn(
+      process.execPath,
+      ["--import", "tsx", "tools/check-extensions.mts", "--check"],
+      { cwd: projectRoot, stdio: "inherit", windowsHide: true },
+    );
+    child.once("error", reject);
+    child.once("exit", (code) =>
+      code === 0
+        ? resolve()
+        : reject(new Error("Extension artifact check failed")),
+    );
+  });
   // Fail before building if theme markup/styles and the standalone HTTP fallback diverge.
   await new Promise((resolve, reject) => {
     const child = spawn(
@@ -34,6 +48,8 @@ try {
   });
   for (const name of [
     "src",
+    "cache/contracts",
+    "cache/build",
     "package.json",
     "package-lock.json",
     "tsconfig.json",
@@ -43,6 +59,8 @@ try {
       recursive: true,
     });
   }
+  if (process.argv.includes("--admin"))
+    await installExtensionFixture(workspace);
   await cp(
     path.join(projectRoot, "public/reference"),
     path.join(workspace, "public/reference"),

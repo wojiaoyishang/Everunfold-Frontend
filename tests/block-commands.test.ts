@@ -10,7 +10,7 @@ import {
   projectDocument,
   REMOTE,
 } from "../src/core/collaboration/document";
-import type { DraftFields } from "../src/generated/content-admin-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
 
 function setup(): DraftFields {
   return {

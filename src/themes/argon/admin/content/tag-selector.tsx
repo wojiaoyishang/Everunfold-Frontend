@@ -2,7 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
-import type { EditorTerm } from "@/generated/content-admin-contract";
+import type { EditorTerm } from "@/core/contracts/content-admin";
 import { tagFontSize } from "@/core/content-management/taxonomy-options";
 import { TokenField } from "../../components/ui/token-field";
 import { Button } from "../../components/ui/primitives";

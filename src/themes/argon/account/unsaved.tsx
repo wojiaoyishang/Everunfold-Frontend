@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useEditorNavigation } from "@/core/content-management/use-editor-navigation";
 import { ConfirmDialog } from "../components/ui/confirm-dialog";
 import { isEmbeddedEditor } from "@/core/preview/bridge";
@@ -12,11 +12,14 @@ export function UnsavedAccountChanges({
   busy: boolean;
 }) {
   const [destination, setDestination] = useState("");
+  const confirmedLeave = useRef(false);
   const request = useCallback((href: string) => setDestination(href), []);
   useEditorNavigation(dirty, busy, request);
   useEffect(() => {
     if ((!dirty && !busy) || isEmbeddedEditor()) return;
-    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    const warn = (event: BeforeUnloadEvent) => {
+      if (!confirmedLeave.current) event.preventDefault();
+    };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty, busy]);
@@ -28,7 +31,10 @@ export function UnsavedAccountChanges({
       confirmLabel="放弃修改并离开"
       onCancel={() => setDestination("")}
       onConfirm={() => true}
-      onConfirmed={() => location.assign(destination)}
+      onConfirmed={() => {
+        confirmedLeave.current = true;
+        location.assign(destination);
+      }}
     />
   );
 }

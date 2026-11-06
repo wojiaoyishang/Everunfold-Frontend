@@ -7,8 +7,8 @@ import {
   trashDraft,
   restoreTranslationGroup,
   trashTranslationGroup,
-} from "@/generated/content-admin-client";
-import type { DraftListItem } from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
+import type { DraftListItem } from "@/core/contracts/content-admin";
 import { draftError, uncertainWrite } from "./draft-state";
 
 export function useDraftAction(item: DraftListItem) {

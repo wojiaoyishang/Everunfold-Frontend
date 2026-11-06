@@ -1,7 +1,7 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import type { DraftDetail } from "@/generated/content-admin-contract";
+import type { DraftDetail } from "@/core/contracts/content-admin";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { useAdminAccount } from "@/core/admin/account-context";

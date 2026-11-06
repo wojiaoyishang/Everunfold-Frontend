@@ -1,65 +1,35 @@
-import registrations from "@/generated/shortcode-builtins.json";
-import type {
-  PublicShortcode,
-  ShortcodeItem,
-} from "@/generated/settings-contract";
+import registrations from "@/core/contracts/shortcode-builtins";
+import { pluginRegistry } from "@/core/plugins/registry";
+import type { PublicShortcode, ShortcodeItem } from "@/core/contracts/settings";
 
 export type CatalogItem = Omit<ShortcodeItem, "origin"> & {
   origin: "backend" | "frontend" | "custom";
 };
-const gallery: PublicShortcode = {
-  id: "8f403f7d-3b04-4d30-b848-c818c4ae91d3",
-  name: "gallery",
-  title: "图片画廊",
-  description: "按媒体引用展示图片；多个 site://media/ID 用英文逗号分隔。",
-  kind: "leaf",
-  revision: 1,
-  parameters: [
-    {
-      name: "id",
-      label: "图片媒体 ID",
-      type: "text",
-      default: "",
-      required: true,
-    },
-    {
-      name: "columns",
-      label: "列数",
-      type: "select",
-      default: "3",
-      options: ["2", "3", "4"],
-    },
-  ],
-  html: "",
-  css: "",
-  scope: "ef-sc-8f403f7d3b044d30b848c818c4ae91d3",
-};
 /** Trusted frontend registrations share the catalog, but expose no write capability. */
-export const frontendShortcodes: readonly CatalogItem[] = [
-  {
-    id: gallery.id,
+export const frontendShortcodes: readonly CatalogItem[] =
+  pluginRegistry.shortcodes.map(({ definition, pluginId }) => ({
+    id: definition.id,
     origin: "frontend",
     editable: false,
-    revision: 1,
-    applied_revision: 1,
+    revision: definition.revision,
+    applied_revision: definition.revision,
     archived: false,
     source: {
-      name: gallery.name,
-      title: gallery.title,
-      description: gallery.description,
-      kind: gallery.kind,
-      parameters: gallery.parameters,
-      html: "由前端图片画廊渲染器生成",
-      css: "由主题的图片画廊样式提供",
+      name: definition.name,
+      title: definition.title,
+      description: definition.description,
+      kind: definition.kind,
+      parameters: definition.parameters,
+      html: definition.html || `由插件 ${pluginId} 的渲染器生成`,
+      css: definition.css,
       example_body: "",
     },
-    compiled: gallery,
+    compiled: definition,
     versions: [],
-  },
-];
+  }));
 export const builtinShortcodes: readonly PublicShortcode[] = [
   ...registrations.map((item) => item.compiled as PublicShortcode),
-  gallery,
+  ...pluginRegistry.shortcodes.map((item) => item.definition),
 ];
 
 export function shortcodeDefinitions(custom: readonly PublicShortcode[] = []) {

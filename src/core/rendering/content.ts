@@ -5,7 +5,7 @@ import { DomUtils, parseDocument } from "htmlparser2";
 import type { Content } from "@/core/content/types";
 import { publicHref, resourceUrl } from "@/core/content/urls";
 import { renderNativeShortcodes } from "./native-shortcodes";
-import type { PublicShortcode } from "@/generated/settings-contract";
+import type { PublicShortcode } from "@/core/contracts/settings";
 import type { ShortcodeDiagnostic } from "@/core/shortcodes/parser";
 import { fontFamily, referencedFontFaces } from "./fonts";
 import { markdownMath } from "./features/markdown-math";
@@ -14,6 +14,7 @@ import { inspectContentFeatures } from "./features/content-features";
 import type { ContentFeatures } from "./features/model";
 import { codeHtml, parseCodeInfo } from "./features/code-options";
 import { frameCodeHtml } from "./features/code-frame";
+import { pluginRegistry } from "@/core/plugins/registry";
 
 export interface TableOfContentsItem {
   id: string;
@@ -148,8 +149,7 @@ const options: sanitizeHtml.IOptions = {
   allowedClasses: {
     "*": [
       "ef-shortcode",
-      "ef-gallery",
-      /^ef-gallery-[234]$/,
+      ...pluginRegistry.classNames,
       /^ef-sc-[a-f0-9]{32}(?:-[a-zA-Z_][a-zA-Z0-9_-]{0,63})?$/,
     ],
     code: [/^language-[a-zA-Z0-9_-]+$/, "hljs"],
@@ -182,6 +182,7 @@ function mappedUrl(value: string, media: Content["media_urls"]): string | null {
 export function renderContent(
   content: Pick<Content, "id" | "content" | "media_urls">,
   shortcodes: readonly PublicShortcode[] = [],
+  rendering: { shortcodePreview?: boolean } = {},
 ): {
   html: string;
   toc: TableOfContentsItem[];
@@ -200,6 +201,7 @@ export function renderContent(
         shortcodes,
         block.type === "markdown" ? renderMarkdownSource : (source) => source,
         content.media_urls,
+        rendering.shortcodePreview,
       );
       const raw = expanded.html;
       if (expanded.css) shortcodeStyles.add(expanded.css);

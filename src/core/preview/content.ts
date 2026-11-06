@@ -1,12 +1,12 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import schema from "@/generated/public-v0.1.schema.json";
+import schema from "@/core/contracts/public-v0.1-schema";
 import type { Content } from "@/core/content/types";
 import type {
   DraftDetail,
   DraftFields,
   MediaURL,
-} from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
 import { previewContent } from "@/core/content-management/preview";
 const ajv = new Ajv({ strict: true });
 addFormats(ajv);

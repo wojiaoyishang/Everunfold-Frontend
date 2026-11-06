@@ -4,12 +4,12 @@ import type {
   AccountProfile,
   KeyList,
   KeyState,
-} from "@/generated/accounts-contract";
+} from "@/core/contracts/accounts";
 import {
   readUserApiKeys,
   resetAccountUserPassword,
   revokeUserApiKey,
-} from "@/generated/accounts-client";
+} from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
 import { UiText, useLocale } from "@/core/i18n/provider";

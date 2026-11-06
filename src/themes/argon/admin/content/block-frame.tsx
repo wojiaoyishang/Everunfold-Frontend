@@ -2,7 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useRef, useState, type ReactNode } from "react";
-import type { DraftBlock } from "@/generated/content-admin-contract";
+import type { DraftBlock } from "@/core/contracts/content-admin";
 import {
   useDragItem,
   useDropPosition,

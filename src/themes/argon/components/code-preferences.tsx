@@ -5,7 +5,7 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import type { CodePreferences } from "@/generated/settings-contract";
+import type { CodePreferences } from "@/core/contracts/settings";
 import { fontFace, fontFamily } from "@/core/rendering/fonts";
 
 const CodeContext = createContext<CodePreferences>({});

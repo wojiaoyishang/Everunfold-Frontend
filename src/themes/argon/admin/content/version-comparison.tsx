@@ -2,8 +2,8 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useMemo, useState } from "react";
-import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
-import type { PublicShortcode } from "@/generated/settings-contract";
+import type { DraftFields, MediaURL } from "@/core/contracts/content-admin";
+import type { PublicShortcode } from "@/core/contracts/settings";
 import { compareBlocks, textDiff } from "@/core/editor/version-diff";
 import { privateDraftFields } from "@/core/collaboration/branches";
 import { Button } from "../../components/ui/primitives";

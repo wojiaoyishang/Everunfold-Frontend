@@ -9,11 +9,14 @@
   },
   "packageManager": "npm@10.9.2",
   "scripts": {
+    "extensions:check": "tsx tools/check-extensions.mts",
+    "pages:manifest": "tsx tools/export-page-manifest.mts",
+    "pages:register": "tsx tools/register-pages.mts",
     "failure:generate": "tsx tools/generate-failure-pages.mts",
     "failure:check": "tsx tools/generate-failure-pages.mts --check",
     "features:assets": "node tools/content-feature-assets.mjs",
-    "predev": "npm run failure:generate && npm run features:assets",
-    "prebuild": "npm run failure:generate && npm run features:assets",
+    "predev": "npm run prepare:local",
+    "prebuild": "npm run prepare:local",
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build",
     "verify:production": "node tools/verify-production.mjs",
@@ -25,11 +28,13 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write src tests tools .github next.config.ts eslint.config.mjs package.json tsconfig.json .prettierrc.json",
     "format:check": "prettier --check src tests tools .github next.config.ts eslint.config.mjs package.json tsconfig.json .prettierrc.json",
-    "check": "npm run failure:check && npm run lint && npm run typecheck && npm run format:check && npm run test",
+    "check": "npm run prepare:local && npm run failure:check && npm run lint && npm run typecheck && npm run format:check && npm run test",
     "contract:sync": "node tools/sync-contract.mjs",
-    "test": "tsx --test tests/*.test.ts",
+    "test": "node --import tsx --import ./tools/extensions/node.mjs --test tests/*.test.ts",
     "verify:http": "node tools/verify-public-http.mjs",
-    "settings:receiver": "tsx tools/settings-receiver.mts"
+    "settings:receiver": "tsx tools/settings-receiver.mts",
+    "contracts:prepare": "node tools/prepare-contracts.mjs",
+    "prepare:local": "npm run contracts:prepare && npm run failure:generate && npm run features:assets && npm run extensions:check"
   },
   "dependencies": {
     "@codemirror/autocomplete": "6.20.4",

@@ -4,7 +4,7 @@ import type {
   ManagedPageItem,
   ManagedPageSummary,
   PageTranslationMember,
-} from "@/generated/pages-contract";
+} from "@/core/contracts/pages";
 import {
   createPageTranslation,
   linkPageTranslation,
@@ -12,7 +12,7 @@ import {
   reviewPageTranslation,
   removeManagedPage,
   readManagedPages,
-} from "@/generated/pages-client";
+} from "@/core/contracts/pages";
 import { useAdminRequest, useAdminAccount } from "@/core/admin/account-context";
 import { useAccountAction } from "@/core/accounts/use-action";
 import { can } from "@/core/accounts/permissions";

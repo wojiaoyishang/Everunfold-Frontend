@@ -9,7 +9,7 @@ export default function PageSourceEditor({
   onChange,
   disabled,
 }: {
-  kind: "html" | "css" | "javascript";
+  kind: "html" | "css" | "javascript" | "json";
   value: string;
   onChange: (value: string) => void;
   disabled: boolean;
@@ -17,7 +17,12 @@ export default function PageSourceEditor({
   const [language, setLanguage] = useState<Extension>([]);
   useEffect(() => {
     let active = true;
-    const name = { html: "HTML", css: "CSS", javascript: "JavaScript" }[kind];
+    const name = {
+      html: "HTML",
+      css: "CSS",
+      javascript: "JavaScript",
+      json: "JSON",
+    }[kind];
     void languages
       .find((item) => item.name === name)
       ?.load()
@@ -30,7 +35,11 @@ export default function PageSourceEditor({
   }, [kind]);
   return (
     <CodeEditor
-      label={{ html: "HTML", css: "CSS", javascript: "JavaScript" }[kind]}
+      label={
+        { html: "HTML", css: "CSS", javascript: "JavaScript", json: "JSON" }[
+          kind
+        ]
+      }
       value={value}
       onChange={onChange}
       language={language}

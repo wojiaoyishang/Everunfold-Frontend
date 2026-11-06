@@ -1,4 +1,4 @@
-import type { AuthSessionState } from "@/generated/auth-contract";
+import type { AuthSessionState } from "@/core/contracts/auth";
 import { RequestError } from "@/core/http/request";
 import { checkedSession } from "./session";
 

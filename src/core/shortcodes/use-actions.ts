@@ -5,11 +5,8 @@ import {
   applyShortcode,
   archiveShortcode,
   restoreShortcode,
-} from "@/generated/settings-client";
-import type {
-  ShortcodeItem,
-  ShortcodeSource,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
+import type { ShortcodeItem, ShortcodeSource } from "@/core/contracts/settings";
 
 type Identity = Pick<ShortcodeItem, "id" | "revision">;
 const action = (item: Identity) => ({

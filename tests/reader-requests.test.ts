@@ -4,7 +4,7 @@ import { RequestError } from "../src/core/http/request";
 import {
   readPreviewIdentity,
   readPreviewMetrics,
-} from "../src/generated/reader-preview-client";
+} from "@/core/contracts/reader-preview";
 import { ReaderStore } from "../src/core/reader/store";
 import { readerPhase, type Identity } from "../src/core/reader/state";
 

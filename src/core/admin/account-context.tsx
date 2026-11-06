@@ -1,6 +1,6 @@
 "use client";
 import { createContext, useContext } from "react";
-import type { AuthUser } from "@/generated/auth-contract";
+import type { AuthUser } from "@/core/contracts/auth";
 export const AdminAccountContext = createContext<AuthUser | null>(null);
 export function useAdminAccount() {
   const user = useContext(AdminAccountContext);

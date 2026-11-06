@@ -7,8 +7,8 @@ import {
   DraftSession,
   type CollaborationStatus,
 } from "@/core/collaboration/session";
-import { commitCollaborationDraft } from "@/generated/collaboration-client";
-import type { CommitDraft } from "@/generated/collaboration-contract";
+import { commitCollaborationDraft } from "@/core/contracts/collaboration";
+import type { CommitDraft } from "@/core/contracts/collaboration";
 import {
   rememberRecovery,
   recoveryForPage,
@@ -22,7 +22,7 @@ import {
   withdrawDraft,
   scheduleDraft,
   cancelDraftSchedule,
-} from "@/generated/content-admin-client";
+} from "@/core/contracts/content-admin";
 import type {
   ContentTypeDefinition,
   DraftDetail,
@@ -31,7 +31,7 @@ import type {
   DraftSave,
   DraftMutation,
   DraftSchedule,
-} from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
 import {
   blockSourcePatches,
   readBlockSources,

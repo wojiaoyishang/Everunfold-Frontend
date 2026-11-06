@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
-import type { AvatarItem } from "@/generated/accounts-contract";
+import type { AvatarItem } from "@/core/contracts/accounts";
 import { useAvatarLibrary } from "@/core/accounts/avatar-library";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { removeAccountAvatar } from "@/generated/accounts-client";
+import { removeAccountAvatar } from "@/core/contracts/accounts";
 import { useAccountAction } from "@/core/accounts/use-action";
 import { UiText, useT } from "@/core/i18n/provider";
 import { formatBytes } from "@/core/media/image-editor";

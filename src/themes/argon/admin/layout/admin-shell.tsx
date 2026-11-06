@@ -3,7 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import type { AuthUser } from "@/generated/auth-contract";
+import type { AuthUser } from "@/core/contracts/auth";
 import type { AdminPreferences } from "@/core/admin/preferences";
 import { adminDestination } from "@/core/admin/navigation";
 import { isLivePreviewPath } from "@/core/preview/routes";

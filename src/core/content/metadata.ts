@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import type { ContentPresentation } from "@/generated/presentation-contract";
+import type { ContentPresentation } from "@/core/contracts/presentation";
 import { resourceUrl } from "./urls";
 export function contentMetadata(
   content: ContentPresentation,

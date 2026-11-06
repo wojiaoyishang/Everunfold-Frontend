@@ -6,8 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type {
   ContentTypeDefinition,
   MediaURL,
-} from "@/generated/content-admin-contract";
-import type { MediaItem, PublicShortcode } from "@/generated/settings-contract";
+} from "@/core/contracts/content-admin";
+import type { MediaItem, PublicShortcode } from "@/core/contracts/settings";
 import type { DraftSession } from "@/core/collaboration/session";
 import { useDraftEditor } from "@/core/content-management/use-draft-editor";
 import {

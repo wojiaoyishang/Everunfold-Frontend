@@ -16,8 +16,8 @@ import {
   logout,
   readAuthSession,
   readAdminSession,
-} from "../src/generated/auth-client";
-import type { AuthSessionState } from "../src/generated/auth-contract";
+} from "@/core/contracts/auth";
+import type { AuthSessionState } from "@/core/contracts/auth";
 import { PasswordField } from "../src/themes/argon/components/ui/password-field";
 
 const user = {

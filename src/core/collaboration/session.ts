@@ -7,7 +7,7 @@ import {
   removeAwarenessStates,
 } from "y-protocols/awareness";
 import * as encoding from "lib0/encoding";
-import type { DraftFields } from "@/generated/content-admin-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
 import type {
   ClientUpdate,
   Peer,
@@ -16,8 +16,8 @@ import type {
   MediaURL,
   MergeLock,
   BranchUpload,
-} from "@/generated/collaboration-contract";
-import { createCollaborationTicket } from "@/generated/collaboration-client";
+} from "@/core/contracts/collaboration";
+import { createCollaborationTicket } from "@/core/contracts/collaboration";
 import { RequestError } from "@/core/http/request";
 import {
   applyFields,

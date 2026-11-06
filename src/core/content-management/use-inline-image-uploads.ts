@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import type { DraftBlock } from "@/generated/content-admin-contract";
-import type { MediaItem } from "@/generated/settings-contract";
+import type { DraftBlock } from "@/core/contracts/content-admin";
+import type { MediaItem } from "@/core/contracts/settings";
 import { UploadQueue } from "@/core/media/upload-queue";
 import {
   mediaLibraryAdapter,

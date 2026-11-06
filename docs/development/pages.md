@@ -1,6 +1,6 @@
 # 页面管理与实时预览指南
 
-版本：pages-runtime-5，2026-11-06。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
+版本：pages-runtime-6，2026-11-07。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
 
 ## 管理页面
 
@@ -26,19 +26,20 @@ JavaScript仅在独立沙箱内运行；启用后显示脚本提示，维护启�
 
 ## 登记新的可信组件
 
-1. 在可信前端仓库声明`PageRegistration`，在`src/core/pages/registry.ts`装配实现版本，并在主题渲染层显式选择组件。不能填写任意模块路径。
-2. 运行`npx tsx tools/export-page-manifest.mts`，审阅`registrations/pages-v1.json`；提交组件和清单。
-3. 后端显式迁移到`0026_page_languages`；针对每个配置的启用节点安装清单：
+1. 在`src/plugins/<插件>/plugin.ts`的同步setup调用`pages.register`，页面配置、schema、渲染和样式保留在同一插件目录。主题/插件具名组件在`components.tsx`导出；固定目录原生自动发现，不编辑中央列表，不生成组件文件。详见[插件开发指南](frontend-plugins.md)。
+2. 页面模型用开放组件名，后台通过主题hook渲染；未知组件显示占位，配置保留并可用JSON继续编辑。`fields`仅为旧表单描述，新的`settings_schema`与`defaults`由pages1.5支持，任意JSON配置不按字段白名单裁剪。保存是完整对象替换；首次登记使用默认值，重新登记不覆盖已保存数据。
+3. 开发/构建运行`npm run prepare:local`；Git只保存源码与`contracts.lock.json`，契约类型/客户端/Schema在忽略的`cache/contracts`恢复。不存在`src/generated`或`registrations`目录。运行副本仍位于var，未迁移。
+4. 显式登记（在前端根目录执行，后端环境与配置需已准备好）：
 
 ```sh
-uv run --locked python -m tools.register_frontend_pages \
-  --config config.toml --node-id web-main \
-  --manifest /path/to/Everunfold-Frontend/registrations/pages-v1.json
+npm run pages:manifest
+npm run pages:register -- --node-id web-main
 ```
 
-4. 各启用节点部署匹配实现/清单后，在后台填配置并应用。清单缺失/不同不能启用；旧数据保留。首次默认路径冲突会生成安全缺省路径，管理员可再改。
+`pages:manifest`只向stdout输出JSON，供审阅；`pages:register`直接通过stdin调用相邻后端的安装器。可指定`--backend`、`--config`、`--python`。逐个启用节点登记一致清单后再应用；开发启动和构建不自动写数据库。后端也保留`--manifest -`，无需中间目录。
 
-仅部署命令能登记后端验证Schema。浏览器创建清单、在线安装插件、自动选项迁移不在本轮范围。声明公开选项时不要放私有内部数据。
+表单与JSON修改同一options对象，未知键和嵌套值保留。无效JSON保留输入并阻止保存/应用，预览维持最后有效值；项目内离开使用主题确认。配置可含嵌套对象、数组、null、布尔与有限数字，最多32层/256KiB，整页仍512KiB。配置和页面源码只在显式应用后影响公开副本；内部元数据不公开。
+
 
 ## 内部元数据接口
 

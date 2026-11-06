@@ -1,7 +1,4 @@
-import type {
-  DraftBlock,
-  DraftFields,
-} from "@/generated/content-admin-contract";
+import type { DraftBlock, DraftFields } from "@/core/contracts/content-admin";
 export function serializeDraftExport(
   fields: DraftFields,
   removedBlocks: DraftBlock[] = [],

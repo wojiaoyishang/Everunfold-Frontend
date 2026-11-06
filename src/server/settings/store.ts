@@ -4,8 +4,8 @@ import { jsonDigest, publishImmutableJson } from "../storage/immutable-json";
 import path from "node:path";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import schema from "../../generated/settings-v1.schema.json";
-import type { SettingsDelivery } from "../../generated/settings-contract";
+import schema from "@/core/contracts/settings-v1-schema";
+import type { SettingsDelivery } from "@/core/contracts/settings";
 
 const ajv = new Ajv({ strict: true });
 addFormats(ajv);

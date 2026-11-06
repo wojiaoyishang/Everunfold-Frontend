@@ -1,7 +1,7 @@
 import {
   readPreviewIdentity,
   readPreviewMetrics,
-} from "@/generated/reader-preview-client";
+} from "@/core/contracts/reader-preview";
 import { RequestError, type RequestOptions } from "@/core/http/request";
 import { RequestTasks } from "./tasks";
 import {

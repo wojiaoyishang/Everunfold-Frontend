@@ -1,6 +1,6 @@
 "use client";
 import { useEffect } from "react";
-import type { FontAsset } from "@/generated/settings-contract";
+import type { FontAsset } from "@/core/contracts/settings";
 const loaded = new Map<string, Promise<void>>();
 /** Only requested catalog fonts load; a failed file can be retried after a fresh query. */
 export function loadFont(font: FontAsset) {

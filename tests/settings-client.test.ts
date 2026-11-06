@@ -7,8 +7,8 @@ import {
   saveSettings,
   saveCachePolicy,
   retrySettingsSync,
-} from "../src/generated/settings-client";
-import type { PublicSettings } from "../src/generated/settings-contract";
+} from "@/core/contracts/settings";
+import type { PublicSettings } from "@/core/contracts/settings";
 import { RequestError } from "../src/core/http/request";
 import { siteNavigation } from "../src/themes/argon/navigation";
 import { snapshot } from "./fixtures";

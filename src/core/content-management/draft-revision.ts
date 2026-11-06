@@ -1,7 +1,4 @@
-import type {
-  DraftDetail,
-  DraftFields,
-} from "@/generated/content-admin-contract";
+import type { DraftDetail, DraftFields } from "@/core/contracts/content-admin";
 
 /** Access policy and password are private form state, outside the shared document. */
 export function hasPrivateDraftChanges(local: DraftFields, saved: DraftDetail) {

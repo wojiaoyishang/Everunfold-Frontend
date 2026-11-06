@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 import test from "node:test";
-import type { PublicManagedPage } from "../src/generated/pages-contract";
+import type { PublicManagedPage } from "@/core/contracts/pages";
 import {
   pageDocument,
   pageResizeScript,
@@ -63,9 +63,10 @@ test("page documents isolate source and enforce script opt-in, including injecte
 test("frontend page declarations are reproducibly exported and implementation versions are explicit", async () => {
   assert.deepEqual(
     JSON.parse(
-      await readFile(
-        new URL("../registrations/pages-v1.json", import.meta.url),
-        "utf8",
+      execFileSync(
+        process.execPath,
+        ["--import", "tsx", "tools/export-page-manifest.mts"],
+        { encoding: "utf8" },
       ),
     ),
     pageManifest,

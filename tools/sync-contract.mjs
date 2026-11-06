@@ -1,7 +1,8 @@
+import { writeArtifact } from "./write-artifact.mjs";
 import { generateSettingsClient } from "./settings-contract-client.mjs";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { compile } from "json-schema-to-typescript";
@@ -11,17 +12,82 @@ const projectRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
 );
-const sourcePath = process.argv[2];
-if (!sourcePath) {
+const locked = process.argv[2] === "--locked";
+const lockPath = path.join(projectRoot, "contracts.lock.json");
+const lock = JSON.parse(await readFile(lockPath, "utf8"));
+const sourcePath = locked ? process.argv[3] : process.argv[2];
+if (!sourcePath)
   throw new Error(
-    "Usage: npm run contract:sync -- <backend/contracts/public-v0.1.schema.json>",
+    "Usage: contract:sync <backend contract file>, or --locked <filename>",
   );
+const pin = locked ? lock.contracts[sourcePath] : null;
+const backendRoot = locked
+  ? path.resolve(
+      process.env.EVERUNFOLD_BACKEND_PATH ??
+        path.join(projectRoot, "../Everunfold-Backend"),
+    )
+  : path.dirname(path.dirname(path.resolve(sourcePath)));
+const relativeSource = locked
+  ? pin?.source_path
+  : path.relative(backendRoot, path.resolve(sourcePath)).replaceAll("\\", "/");
+if (
+  !relativeSource ||
+  !/^contracts\/[a-zA-Z0-9_.-]+\.json$/.test(relativeSource)
+)
+  throw new Error("Invalid contract source path.");
+const absoluteSource = path.join(backendRoot, relativeSource);
+let source, commit;
+if (locked) {
+  if (
+    !/^[a-f0-9]{40}$/.test(pin.source_commit) ||
+    !/^[a-f0-9]{64}$/.test(pin.sha256)
+  )
+    throw new Error("Invalid contract lock.");
+  commit = pin.source_commit;
+  try {
+    source = execFileSync("git", ["show", `${commit}:${relativeSource}`], {
+      cwd: backendRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+  } catch {
+    source = await readFile(
+      path.join(projectRoot, "cache/contracts", path.basename(relativeSource)),
+      "utf8",
+    ).catch(() => null);
+    if (
+      !source ||
+      createHash("sha256")
+        .update(source.replaceAll("\r\n", "\n"))
+        .digest("hex") !== pin.sha256
+    ) {
+      const url = `https://raw.githubusercontent.com/wojiaoyishang/Everunfold-Backend/${commit}/${relativeSource}`;
+      const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!response.ok)
+        throw new Error(
+          "Pinned contract unavailable. Set EVERUNFOLD_BACKEND_PATH to a checkout containing the locked commit.",
+        );
+      source = await response.text();
+    }
+  }
+  source = source.replaceAll("\r\n", "\n");
+  if (createHash("sha256").update(source).digest("hex") !== pin.sha256)
+    throw new Error("Pinned contract SHA256 mismatch.");
+} else {
+  source = (await readFile(absoluteSource, "utf8")).replaceAll("\r\n", "\n");
+  const committed = execFileSync("git", ["show", `HEAD:${relativeSource}`], {
+    cwd: backendRoot,
+    encoding: "utf8",
+  }).replaceAll("\r\n", "\n");
+  if (committed !== source)
+    throw new Error(
+      "Commit the authoritative backend contract before synchronizing it.",
+    );
+  commit = execFileSync("git", ["rev-parse", "HEAD"], {
+    cwd: backendRoot,
+    encoding: "utf8",
+  }).trim();
 }
-const absoluteSource = path.resolve(sourcePath);
-const source = (await readFile(absoluteSource, "utf8")).replaceAll(
-  "\r\n",
-  "\n",
-);
 const schema = JSON.parse(source);
 const presentation =
   path.basename(absoluteSource) === "presentation-v0.2.schema.json";
@@ -81,30 +147,9 @@ const outputName = pages
                   : presentation
                     ? "presentation-contract"
                     : "public-contract";
-const backendRoot = path.dirname(path.dirname(absoluteSource));
-const relativeSource = path
-  .relative(backendRoot, absoluteSource)
-  .replaceAll("\\", "/");
-const committedSource = execFileSync(
-  "git",
-  ["show", `HEAD:${relativeSource}`],
-  {
-    cwd: backendRoot,
-    encoding: "utf8",
-  },
-);
-if (
-  committedSource.replaceAll("\r\n", "\n") !== source.replaceAll("\r\n", "\n")
-) {
-  throw new Error(
-    "Commit the authoritative backend contract before synchronizing it.",
-  );
-}
-const commit = execFileSync("git", ["rev-parse", "HEAD"], {
-  cwd: backendRoot,
-  encoding: "utf8",
-}).trim();
-const output = path.join(projectRoot, "src/generated");
+const output = process.env.EVERUNFOLD_CONTRACT_OUTPUT
+  ? path.resolve(process.env.EVERUNFOLD_CONTRACT_OUTPUT)
+  : path.join(projectRoot, "cache/contracts");
 await mkdir(output, { recursive: true });
 const types = await compile(schema, rootName, {
   bannerComment:
@@ -122,15 +167,15 @@ const types = await compile(schema, rootName, {
   style: { singleQuote: false, semi: true, printWidth: 100 },
 });
 const typesPath = path.join(output, `${outputName}.ts`);
-await writeFile(
+await writeArtifact(
   typesPath,
   await format(types, {
     ...(await resolveConfig(typesPath)),
     filepath: typesPath,
   }),
 );
-await writeFile(path.join(output, path.basename(absoluteSource)), source);
-await writeFile(
+await writeArtifact(path.join(output, path.basename(absoluteSource)), source);
+await writeArtifact(
   path.join(
     output,
     pages
@@ -191,7 +236,7 @@ export function ${op.name}(baseUrl: string, query: ReaderPreviewContract[${JSON.
 }`,
     )
     .join("\n");
-  await writeFile(
+  await writeArtifact(
     path.join(output, "reader-preview-client.ts"),
     `/* Generated from backend operation metadata. Do not edit by hand. */
 import Ajv from "ajv";
@@ -229,7 +274,7 @@ export function ${op.name}(baseUrl: string, ${op.method === "PUT" ? "commentId: 
 }`,
     )
     .join("\n");
-  await writeFile(
+  await writeArtifact(
     path.join(output, "comment-likes-client.ts"),
     `/* Generated from backend operation metadata. Do not edit by hand. */
 import Ajv from "ajv";
@@ -271,7 +316,7 @@ export function ${op.name}(baseUrl: string, ${op.input ? `input: AuthContract[${
 }`,
     )
     .join("\n");
-  await writeFile(
+  await writeArtifact(
     path.join(output, "auth-client.ts"),
     `/* Generated from backend operation metadata. Do not edit by hand. */
 import Ajv from "ajv";
@@ -289,14 +334,14 @@ console.log(`Generated contract from backend ${commit.slice(0, 7)}`);
 
 if (settings) {
   await generateSettingsClient(schema, output);
-  await writeFile(
+  await writeArtifact(
     path.join(output, "language-regions.json"),
     await format(
       JSON.stringify(schema["x-everunfold-language-regions"] ?? {}),
       { parser: "json" },
     ),
   );
-  await writeFile(
+  await writeArtifact(
     path.join(output, "shortcode-builtins.json"),
     await format(JSON.stringify(schema["x-everunfold-shortcodes"] ?? []), {
       parser: "json",
@@ -327,7 +372,7 @@ if (contentAdmin) {
     stem: "content-admin",
     schemaFile: path.basename(absoluteSource),
   });
-  await writeFile(
+  await writeArtifact(
     path.join(output, "content-types.json"),
     await format(JSON.stringify(schema["x-everunfold-content-types"]), {
       parser: "json",
@@ -341,3 +386,14 @@ if (pages)
     stem: "pages",
     schemaFile: path.basename(absoluteSource),
   });
+
+if (!locked) {
+  lock.contracts[path.basename(relativeSource)] = {
+    schema_version: schema["x-everunfold-contract-version"] ?? "0.1.0",
+    source_repository: "https://github.com/wojiaoyishang/Everunfold-Backend",
+    source_path: relativeSource,
+    source_commit: commit,
+    sha256: createHash("sha256").update(source).digest("hex"),
+  };
+  await writeArtifact(lockPath, JSON.stringify(lock, null, 2) + "\n");
+}

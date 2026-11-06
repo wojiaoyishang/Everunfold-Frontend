@@ -62,7 +62,13 @@ export async function verifyReaderRuntime({
   async function readSourceSnapshot() {
     const { stdout } = await promisify(execFile)(
       process.execPath,
-      ["--import", "tsx", "tools/fixtures/content-snapshot.mts"],
+      [
+        "--import",
+        "tsx",
+        "--import",
+        "./tools/extensions/node.mjs",
+        "tools/fixtures/content-snapshot.mts",
+      ],
       {
         cwd: projectRoot,
         env: {

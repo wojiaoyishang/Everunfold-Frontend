@@ -1,5 +1,5 @@
 "use client";
-import type { PageTranslationCatalog } from "@/generated/pages-contract";
+import type { PageTranslationCatalog } from "@/core/contracts/pages";
 import { UiText, useT } from "@/core/i18n/provider";
 import { LanguageLabel } from "../../components/language-label";
 import { ActionPopover } from "../../components/ui/action-popover";

@@ -248,7 +248,7 @@ test("HTTP error code remains usable without depending on localized text", async
 
 test("generated deletion clients validate the backend envelope for preview and result", async () => {
   const { previewMediaRemoval, removeMedia } =
-    await import("../src/generated/settings-client");
+    await import("@/core/contracts/settings");
   const plan = {
     id: "media:00000000-0000-4000-8000-000000000001",
     token: "a".repeat(64),

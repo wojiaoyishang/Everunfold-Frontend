@@ -12,14 +12,14 @@ import {
   type LocalBranch,
   branchTimestamp,
 } from "@/core/collaboration/branches";
-import type { DraftFields } from "@/generated/content-admin-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
 import type {
   BranchDetail,
   ConflictResolution,
   MergeDetail,
   VersionCatalog,
   VersionDetail,
-} from "@/generated/collaboration-contract";
+} from "@/core/contracts/collaboration";
 import {
   beginDraftMerge,
   cancelDraftMerge,
@@ -34,7 +34,7 @@ import {
   renewDraftMerge,
   resolveDraftMerge,
   uploadDraftBranch,
-} from "@/generated/collaboration-client";
+} from "@/core/contracts/collaboration";
 import { draftError } from "./draft-state";
 import { RequestError } from "@/core/http/request";
 import { useVersionTarget } from "./use-version-target";

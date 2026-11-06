@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import type { PageValue } from "@/generated/pages-contract";
+import type { PageValue } from "@/core/contracts/pages";
 import { pageDocument, pageRenderId } from "@/core/pages/document";
 import styles from "./pages.module.css";
 

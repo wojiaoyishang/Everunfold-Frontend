@@ -1,4 +1,4 @@
-import type { PageValue } from "@/generated/pages-contract";
+import type { PageValue } from "@/core/contracts/pages";
 import { digest } from "lib0/hash/sha256";
 export function pageRenderId(
   frame: string,

@@ -1,4 +1,4 @@
-import type { ContentPresentation } from "@/generated/presentation-contract";
+import type { ContentPresentation } from "@/core/contracts/presentation";
 
 export type HomeFeedType =
   Extract<ContentPresentation["type"], "article" | "shuoshuo"> | "all";

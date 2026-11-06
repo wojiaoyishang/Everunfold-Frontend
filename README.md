@@ -70,9 +70,9 @@ CI 使用相同的检查与构建命令。
 | `src/app/` | 薄 App Router 路由、错误/空/加载状态 |
 | `src/core/` | 服务端配置、快照验证、公开查询与安全渲染 |
 | `src/themes/argon/` | 可复用主题组件和样式；不混入数据库访问 |
-| `src/custom_pages/` | 预留代码定义的自定义页面 |
-| `src/plugins/` | 预留随构建部署的可信扩展 |
-| `src/generated/` | 后端快照契约生成类型、Schema 与来源提交/哈希 |
+| `src/plugins/` | 自动发现的可信插件；页面、短代码、模型、组件与样式 |
+| `src/core/contracts/` | 稳定业务契约访问模块；不负责UI注册 |
+| `cache/contracts/`、`cache/build/` | 忽略的契约/构建产物，按contracts.lock.json恢复 |
 | `deploy/`、`tests/` | 预留部署资料与测试 |
 | `docs/` | 基线、规范、决策和交接 |
 
@@ -102,3 +102,5 @@ CI 使用相同的检查与构建命令。
 文章与说说独立入口、示例草稿和开发边界见 [内容管理](docs/development/content-management.md)，当前新增内容保存为私有草稿，不会自动出现在公开首页。
 
 最新编辑器提供顶置标题、根级固定链接、混合 Markdown/HTML 多块、分类标签/封面/SEO/评论设置、文章密码与定时开放；日期控件和后台面板已统一，逐组件浏览器检查为开发约定。版本与结果见 [编辑工作台验收](docs/handoff/editor-workspace-verification.md)。
+
+插件、主题与设置模型开发见[指南](docs/development/frontend-plugins.md)。`npm run prepare:local`恢复锁定契约/构建产物并检查插件；开发与构建会自动执行。`npm run pages:register -- --node-id web-main`显式登记插件页面，无registrations目录；原运行副本保留在var。

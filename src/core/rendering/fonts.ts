@@ -1,4 +1,4 @@
-import type { MediaURL } from "@/generated/content-admin-contract";
+import type { MediaURL } from "@/core/contracts/content-admin";
 import { resourceUrl } from "@/core/content/urls";
 
 const identity = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;

@@ -2,7 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import type { ComponentProps, ReactNode, Ref } from "react";
-import type { DraftBlock } from "@/generated/content-admin-contract";
+import type { DraftBlock } from "@/core/contracts/content-admin";
 import { Icon } from "../../components/icon";
 import { Button } from "../../components/ui/primitives";
 import { ActionPopover } from "../../components/ui/action-popover";

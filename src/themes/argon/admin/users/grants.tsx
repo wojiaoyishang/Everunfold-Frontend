@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import type { PermissionCatalog } from "@/generated/accounts-contract";
+import type { PermissionCatalog } from "@/core/contracts/accounts";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { UiText } from "@/core/i18n/provider";
 import { Select } from "../../components/ui/select";

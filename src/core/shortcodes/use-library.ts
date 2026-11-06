@@ -5,12 +5,12 @@ import {
   readSettings,
   readShortcodes,
   previewShortcode,
-} from "@/generated/settings-client";
+} from "@/core/contracts/settings";
 import type {
   PublicShortcode,
   SettingsState,
   ShortcodeSource,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
 import { RequestError } from "@/core/http/request";
 import { frontendShortcodes, type CatalogItem } from "./registry";
 import { useAdminAccount } from "@/core/admin/account-context";

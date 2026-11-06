@@ -10,12 +10,12 @@ import {
   unlinkTranslation,
   restoreDraft,
   trashDraft,
-} from "@/generated/content-admin-client";
+} from "@/core/contracts/content-admin";
 import type {
   TranslationCatalog,
   TranslationMutation,
   TranslationMember,
-} from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
 import type { Locale } from "@/core/i18n/locale";
 import { draftError, uncertainWrite } from "./draft-state";
 import { RequestError } from "@/core/http/request";

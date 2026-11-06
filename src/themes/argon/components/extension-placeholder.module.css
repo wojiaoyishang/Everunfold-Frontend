@@ -1,0 +1,17 @@
+.placeholder {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px;
+  border: 1px dashed var(--admin-border, var(--line));
+  border-radius: 8px;
+  color: var(--admin-muted, var(--muted));
+  background: var(--admin-subtle, var(--surface));
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.placeholder code {
+  font-size: 12px;
+}

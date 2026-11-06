@@ -2,7 +2,7 @@
 import type {
   ApplicationScope,
   PermissionDefinition,
-} from "@/generated/accounts-contract";
+} from "@/core/contracts/accounts";
 import { UiText } from "@/core/i18n/provider";
 import { Button } from "../../components/ui/primitives";
 import { Switch } from "../../components/ui/switch";

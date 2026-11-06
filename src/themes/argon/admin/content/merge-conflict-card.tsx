@@ -5,7 +5,7 @@ import { useState } from "react";
 import type {
   ConflictResolution,
   MergeConflict,
-} from "@/generated/collaboration-contract";
+} from "@/core/contracts/collaboration";
 import { Button, TextArea } from "../../components/ui/primitives";
 import styles from "./versions.module.css";
 const printable = (value: unknown) =>

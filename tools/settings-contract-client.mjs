@@ -1,4 +1,5 @@
-import { writeFile } from "node:fs/promises";
+import { writeArtifact } from "./write-artifact.mjs";
+
 import path from "node:path";
 import { format, resolveConfig } from "prettier";
 
@@ -85,7 +86,7 @@ addFormats(ajv);
 ajv.addSchema(Object.fromEntries(Object.entries(schema).filter(([key]) => !key.startsWith("x-"))), "${stem}");
 ${methods}
 `;
-  await writeFile(
+  await writeArtifact(
     target,
     await format(source, {
       ...(await resolveConfig(target)),

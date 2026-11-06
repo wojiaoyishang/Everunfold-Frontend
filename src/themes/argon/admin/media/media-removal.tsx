@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type {
   MediaDetails,
   MediaRemovalPreview,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
 import { useMediaRemoval } from "@/core/media/media-removal";
 import { Button } from "../../components/ui/primitives";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";

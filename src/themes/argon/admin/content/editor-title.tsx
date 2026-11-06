@@ -7,7 +7,7 @@ import type {
   ContentTypeDefinition,
   DraftFields,
   DraftDetail,
-} from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
 import { titlePath } from "@/core/content-management/editor-fields";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";

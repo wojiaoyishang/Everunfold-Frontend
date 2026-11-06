@@ -8,11 +8,8 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import type {
-  PublicSettings,
-  SettingsState,
-} from "@/generated/settings-contract";
-import { readSettings, saveSettings } from "@/generated/settings-client";
+import type { PublicSettings, SettingsState } from "@/core/contracts/settings";
+import { readSettings, saveSettings } from "@/core/contracts/settings";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { RequestError } from "@/core/http/request";
 

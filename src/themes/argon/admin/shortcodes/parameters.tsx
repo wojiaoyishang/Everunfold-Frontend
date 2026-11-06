@@ -1,5 +1,5 @@
 import { UiText } from "@/core/i18n/provider";
-import type { ShortcodeParameter } from "@/generated/settings-contract";
+import type { ShortcodeParameter } from "@/core/contracts/settings";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import { Checkbox } from "../../components/ui/checkbox";

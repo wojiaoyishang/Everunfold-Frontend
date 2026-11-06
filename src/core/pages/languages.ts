@@ -1,5 +1,5 @@
 import type { PublicSnapshot, Content } from "@/core/content/types";
-import type { PublicManagedPage } from "@/generated/pages-contract";
+import type { PublicManagedPage } from "@/core/contracts/pages";
 
 /** Only published authored siblings participate; registered components own their language behavior. */
 export function pageLanguages(

@@ -11,7 +11,7 @@ import {
   loginReturnPath,
 } from "../src/core/auth/routes";
 import { clientNavigationHref } from "../src/core/navigation/targets";
-import type { AuthUser } from "../src/generated/auth-contract";
+import type { AuthUser } from "@/core/contracts/auth";
 import { checkedSession } from "../src/core/auth/session";
 
 const user: AuthUser = {

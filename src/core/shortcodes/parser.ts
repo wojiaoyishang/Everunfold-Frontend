@@ -1,5 +1,5 @@
 import MarkdownIt from "markdown-it";
-import type { PublicShortcode } from "@/generated/settings-contract";
+import type { PublicShortcode } from "@/core/contracts/settings";
 
 export type ShortcodeNode = {
   from: number;

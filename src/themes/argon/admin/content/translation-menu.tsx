@@ -1,7 +1,7 @@
 "use client";
 import { UiText, useT } from "@/core/i18n/provider";
 
-import type { TranslationMember } from "@/generated/content-admin-contract";
+import type { TranslationMember } from "@/core/contracts/content-admin";
 
 import { LanguageLabel } from "../../components/language-label";
 import { ActionPopover } from "../../components/ui/action-popover";

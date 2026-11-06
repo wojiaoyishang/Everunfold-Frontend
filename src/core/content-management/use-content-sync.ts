@@ -4,8 +4,8 @@ import { useAdminRequest } from "@/core/admin/account-context";
 import {
   readContentSync,
   retryContentSync,
-} from "@/generated/content-admin-client";
-import type { ContentSyncState } from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
+import type { ContentSyncState } from "@/core/contracts/content-admin";
 import { draftError } from "./draft-state";
 
 export function useContentSync(refreshKey: number | string) {

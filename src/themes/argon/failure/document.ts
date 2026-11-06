@@ -1,5 +1,5 @@
 import { failurePage } from "@/core/navigation/failure-page";
-import generated from "@/generated/failure-pages.json";
+import generated from "@/core/build/failure-pages";
 
 /** Self-contained HTML: still usable with no snapshot, JavaScript, chunks or remote assets. */
 export function failureDocument(status: 404 | 503) {

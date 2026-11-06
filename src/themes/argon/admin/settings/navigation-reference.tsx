@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import type {
   NavigationReference,
   NavigationResource,
-} from "@/generated/settings-contract";
-import { queryNavigationResources } from "@/generated/settings-client";
+} from "@/core/contracts/settings";
+import { queryNavigationResources } from "@/core/contracts/settings";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure } from "@/core/accounts/use-action";
 import { UiText } from "@/core/i18n/provider";

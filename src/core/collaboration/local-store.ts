@@ -1,4 +1,4 @@
-import type { ClientUpdate } from "@/generated/collaboration-contract";
+import type { ClientUpdate } from "@/core/contracts/collaboration";
 import * as Y from "yjs";
 
 export interface LocalDocument {

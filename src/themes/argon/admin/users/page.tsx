@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { readAccountUsers } from "@/generated/accounts-client";
-import type { AccountUserList } from "@/generated/accounts-contract";
+import { readAccountUsers } from "@/core/contracts/accounts";
+import type { AccountUserList } from "@/core/contracts/accounts";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure } from "@/core/accounts/use-action";
 import { UiText, useLocale } from "@/core/i18n/provider";

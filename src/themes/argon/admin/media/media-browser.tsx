@@ -3,7 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
 import { useMediaLibrary } from "@/core/media/media-library";
-import type { MediaItem, MediaQuery } from "@/generated/settings-contract";
+import type { MediaItem, MediaQuery } from "@/core/contracts/settings";
 import { Button, TextField } from "../../components/ui/primitives";
 import { UploadQueueView } from "../../components/ui/upload-queue";
 import { FilePicker } from "../../components/ui/file-picker";

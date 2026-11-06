@@ -1,5 +1,5 @@
-import { readContentActions } from "@/generated/content-admin-client";
-import type { ContentEditAction } from "@/generated/content-admin-contract";
+import { readContentActions } from "@/core/contracts/content-admin";
+import type { ContentEditAction } from "@/core/contracts/content-admin";
 import { RequestError, type RequestOptions } from "@/core/http/request";
 import { contentType } from "@/core/content-management/registry";
 

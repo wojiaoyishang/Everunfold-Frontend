@@ -4,7 +4,7 @@ import { UiText } from "@/core/i18n/provider";
 import { useRef, useState } from "react";
 import { useMediaAttachment } from "@/core/media/media-attachment";
 import { formatBytes } from "@/core/media/image-editor";
-import type { MediaDetails, MediaItem } from "@/generated/settings-contract";
+import type { MediaDetails, MediaItem } from "@/core/contracts/settings";
 import {
   Button,
   TextArea,

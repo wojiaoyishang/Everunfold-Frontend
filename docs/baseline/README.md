@@ -935,3 +935,24 @@ ADR0074、pages-runtime-4、settings-runtime-10、multilingual-runtime-5、regis
 | `docs/development/pages.md` | `243e69bc2c738d8a5fc2c10264eb81ec8ff4c20582bb3b423733b59d4f3609a6` |
 | `docs/development/accounts.md` | `4679c6db821a2e5a89b4ba96f8b6d7fafcf881aa2915612b2efaa75b08cb7ccf` |
 | `docs/handoff/admin-warnings-navigation-verification.md` | `108f4cd3a2a66a61382cdfafea9fb1bba5858d44a55e5ac08ab2aead8c96fde0` |
+
+## 统一插件/主题与生成物隔离（2026-11-07）
+
+用户最新要求由ADR0077覆盖ADR0076的分散目录与提交生成物决定。当前bootstrap17、development18、pages-runtime6、registered-pages-runtime5、shortcodes4、frontend-extensions5；新增运行/插件/数据规范及验收。STATUS分别维护，原始基线与旧验收不改。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `f1c32f57d7e27518f184d96e715a0587476f6393a92f6a34b1e9ad8199d2e9ec` |
+| `docs/architecture/constraints.md` | `270daa5427d04b3cccffc493b594b331f7cf7c77579bb48283a604e03b2237a9` |
+| `docs/architecture/frontend-extensions.md` | `be26dab27e49bccd6f38dc6be517ee20b485196a18699f2967bb1e95bf5d5a66` |
+| `docs/architecture/frontend-plugin-runtime.md` | `5b9bba08ef6db922f3c9d154a945be5e73b4b1b9c68179c7fc716111dbf046d6` |
+| `docs/architecture/frontend-ui.md` | `2a4c87c5abc115999fded73592d68caa0cc053425711df8cae4e746585bade00` |
+| `docs/architecture/registered-pages.md` | `72f6552e193f422033d506ac1c881cff9ab818d0fbe822bc40fbc6d170b578da` |
+| `docs/architecture/shortcodes.md` | `1e3cfcc66d7e023fbe338897b4085e60599f06a553ef362ea4d4917da422179f` |
+| `docs/decisions/0076-directory-pages-plugin-shortcodes-and-open-configuration.md` | `902b01e197296cb4aaa636b0feb7c3b774d961222aded8ab175035937cba8541` |
+| `docs/decisions/0077-unified-plugin-theme-schema-and-artifact-boundaries.md` | `aa513da0d29de5bfff2d5d26f032fb853e6d4a8c991eea1a2e5a155fe29cd305` |
+| `docs/development/frontend-plugins.md` | `2c75a571a7be955abcd7cf026b8dd5c87205ef518058749f2229fa025c2f2eb2` |
+| `docs/development/pages.md` | `a801c2603cc534b3809fda6a4f1dadec4479b97ca57682363edb2acf682a717e` |
+| `docs/development/plugin-data-protocol.md` | `22049e14ec71a48a6c7392794033bebc2d14105f3793daf58bee197eddeb285e` |
+| `docs/development/protocol.md` | `983d504423702ad080a134a1aa2cd8c9418250865d31cc4537c7f5d5f4bea648` |
+| `docs/handoff/plugin-runtime-verification.md` | `b389614e383d19a8cf6aab5ce2aa7885933002fbc4877e0ddfac40e13ad6ece6` |

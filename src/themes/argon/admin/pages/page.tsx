@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import type { ManagedPageSummary } from "@/generated/pages-contract";
-import { readManagedPages, removeManagedPage } from "@/generated/pages-client";
+import type { ManagedPageSummary } from "@/core/contracts/pages";
+import { readManagedPages, removeManagedPage } from "@/core/contracts/pages";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { useAccountAction } from "@/core/accounts/use-action";

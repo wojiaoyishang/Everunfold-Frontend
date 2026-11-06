@@ -9,7 +9,7 @@ import { adminPreferencesKey } from "@/core/admin/preferences";
 import { useAdminPreferences } from "@/core/admin/use-admin-preferences";
 import { AdminAccessState } from "@/themes/argon/admin/components/access-state";
 import { AdminShell } from "@/themes/argon/admin/layout/admin-shell";
-import type { AuthUser } from "@/generated/auth-contract";
+import type { AuthUser } from "@/core/contracts/auth";
 import { LocalDraftRecovery } from "@/themes/argon/admin/content/local-recovery";
 
 export function AdminWorkspace({

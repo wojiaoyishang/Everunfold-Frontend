@@ -2,10 +2,11 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
-import type { MediaItem } from "@/generated/settings-contract";
-import type { MediaURL } from "@/generated/content-admin-contract";
+import type { MediaItem } from "@/core/contracts/settings";
+import type { MediaURL } from "@/core/contracts/content-admin";
 import { useShortcodeLibrary } from "@/core/shortcodes/use-library";
 import { shortcodeCall } from "@/core/shortcodes/parser";
+import { pluginRegistry } from "@/core/plugins/registry";
 import { renderContent } from "@/core/rendering/content";
 import { Button, TextArea } from "../../components/ui/primitives";
 import { Modal } from "../../components/ui/modal";
@@ -48,6 +49,9 @@ export function ShortcodePicker({
     )
     .filter((item) => item !== undefined);
   const selected = items.find((item) => item.id === chosen) ?? items[0];
+  const mediaPicker = selected
+    ? pluginRegistry.shortcode(selected)?.mediaPicker
+    : undefined;
   const call = selected ? shortcodeCall(selected, values, body) : "";
   const rendered = renderContent(
     {
@@ -108,15 +112,17 @@ export function ShortcodePicker({
               values={values}
               onChange={setValues}
             />
-            {selected.name === "gallery" && (
+            {mediaPicker && (
               <Button
                 className="admin-button"
                 disabled={
-                  (values.id ?? "").split(",").filter(Boolean).length >= 20
+                  (values[mediaPicker.parameter] ?? "")
+                    .split(",")
+                    .filter(Boolean).length >= mediaPicker.limit
                 }
                 onClick={() => setImages(true)}
               >
-                <UiText text="从媒体库添加图片" />
+                <UiText text={mediaPicker.buttonLabel} />
               </Button>
             )}
             {selected.kind === "container" && (
@@ -170,17 +176,22 @@ export function ShortcodePicker({
           </Button>
         </div>
       </div>
-      {images && (
+      {images && mediaPicker && (
         <EditorMediaDialog
-          kind="image"
-          title="选择画廊图片"
+          kind={mediaPicker.kind}
+          title={mediaPicker.title}
           onClose={() => setImages(false)}
           onPick={(item) => {
             onMedia(item);
             const reference = "site://media/" + item.id.replace(/^media:/, "");
             setValues((current) => ({
               ...current,
-              id: [current.id, reference].filter(Boolean).join(","),
+              [mediaPicker.parameter]: [
+                current[mediaPicker.parameter],
+                reference,
+              ]
+                .filter(Boolean)
+                .join(","),
             }));
           }}
         />

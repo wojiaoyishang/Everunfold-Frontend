@@ -1,6 +1,6 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import publicSchema from "@/generated/public-v0.1.schema.json";
+import publicSchema from "@/core/contracts/public-v0.1-schema";
 import type { PublicSnapshot } from "./types";
 import { normalizePath } from "./urls";
 

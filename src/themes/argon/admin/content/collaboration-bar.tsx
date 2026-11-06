@@ -5,8 +5,8 @@ import type {
   DraftSession,
   CollaborationStatus,
 } from "@/core/collaboration/session";
-import type { DraftFields } from "@/generated/content-admin-contract";
-import type { Peer } from "@/generated/collaboration-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
+import type { Peer } from "@/core/contracts/collaboration";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { Button } from "../../components/ui/primitives";
 import { DownloadButton } from "../../components/ui/download-button";

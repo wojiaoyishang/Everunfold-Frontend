@@ -1,4 +1,4 @@
-import type { AuthUser } from "@/generated/auth-contract";
+import type { AuthUser } from "@/core/contracts/auth";
 
 export function canAccessAdmin(user: AuthUser | null | undefined): boolean {
   return (

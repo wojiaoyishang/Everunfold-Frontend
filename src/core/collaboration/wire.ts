@@ -1,7 +1,7 @@
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import schema from "@/generated/collaboration-v1.schema.json";
-import type { ServerFrame } from "@/generated/collaboration-contract";
+import schema from "@/core/contracts/collaboration-v1-schema";
+import type { ServerFrame } from "@/core/contracts/collaboration";
 const ajv = new Ajv({ strict: true });
 addFormats(ajv);
 ajv.addSchema(

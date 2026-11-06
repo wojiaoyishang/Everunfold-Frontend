@@ -192,3 +192,7 @@
 本轮交付：[页面多语言、自动关联菜单与预览更新](decisions/0074-page-languages-linked-navigation-and-live-preview.md)、[页面指南4](development/pages.md)、[设置指南10](development/settings.md)与[验收](handoff/page-languages-preview-verification.md)：语言组/独立启用、代码注册页语言路径、稳定ID菜单、主题离开与渲染回执、人物弹窗、启停去重及语言计数对齐。
 
 最新调整：[脚本/头像限制提示与侧栏高亮](decisions/0075-admin-page-script-and-avatar-policy-warnings.md)：这两个入口去掉密码输入、保留权限，移动/桌面行高与选中背景统一；验收见[本轮记录](handoff/admin-warnings-navigation-verification.md)。
+
+当前交付：[统一插件与主题运行规范](architecture/frontend-plugin-runtime.md)、[插件/模型控件开发](development/frontend-plugins.md)、[数据拉取与Callback接口](development/plugin-data-protocol.md)及[ADR0077](decisions/0077-unified-plugin-theme-schema-and-artifact-boundaries.md)：页面/短代码由插件贡献，原生目录发现主题/插件，具名控件与占位、开放JSON、精确锁文件与忽略产物。
+
+本轮完整检查与部署边界见[统一插件验收](handoff/plugin-runtime-verification.md)。

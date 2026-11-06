@@ -6,12 +6,12 @@ import {
   renewHtmlSource,
   releaseHtmlSource,
   applyHtmlSource,
-} from "@/generated/collaboration-client";
+} from "@/core/contracts/collaboration";
 import type {
   SourceAcquired,
   SourceApply,
   SourceState,
-} from "@/generated/collaboration-contract";
+} from "@/core/contracts/collaboration";
 import { RequestError } from "@/core/http/request";
 
 interface SourceHost {

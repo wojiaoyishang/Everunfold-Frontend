@@ -3,8 +3,8 @@ import { open, readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
-import schema from "../../generated/content-admin-v1.schema.json";
-import type { ContentDelivery } from "../../generated/content-admin-contract";
+import schema from "@/core/contracts/content-admin-v1-schema";
+import type { ContentDelivery } from "@/core/contracts/content-admin";
 import { parsePublicSnapshot } from "../../core/content/validation";
 import { jsonDigest, publishImmutableJson } from "../storage/immutable-json";
 

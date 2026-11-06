@@ -1,6 +1,6 @@
-import type { PublicManagedPage } from "@/generated/pages-contract";
+import type { PublicManagedPage } from "@/core/contracts/pages";
 import { hasPageImplementation } from "@/core/pages/registry";
-import { PeoplePage } from "./people";
+import { RegisteredPageView } from "@/core/pages/registered-view";
 import { PageFrame } from "./frame";
 import styles from "./pages.module.css";
 import { ContentLanguages } from "../components/content-languages";
@@ -31,7 +31,7 @@ export function ManagedPageView({
       {page.source === "custom" ? (
         <PageFrame value={page} onReady={onReady} />
       ) : (
-        <PeoplePage options={page.options} />
+        <RegisteredPageView page={page} onReady={onReady} />
       )}
     </article>
   );

@@ -1,12 +1,12 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import type { CachePolicy, PolicyState } from "@/generated/settings-contract";
+import type { CachePolicy, PolicyState } from "@/core/contracts/settings";
 import {
   readFrontendNodes,
   saveCachePolicy,
   retrySettingsSync,
-} from "@/generated/settings-client";
+} from "@/core/contracts/settings";
 import { settingsFailure } from "./editor";
 
 export function useFrontendNodes() {

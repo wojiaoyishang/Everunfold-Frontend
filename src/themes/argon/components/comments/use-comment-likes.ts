@@ -6,8 +6,8 @@ import { RequestError, type RequestOptions } from "@/core/http/request";
 import {
   readCommentLikes,
   setCommentLike,
-} from "@/generated/comment-likes-client";
-import type { CommentLikesContract } from "@/generated/comment-likes-contract";
+} from "@/core/contracts/comment-likes";
+import type { CommentLikesContract } from "@/core/contracts/comment-likes";
 import { usePageRequest, useReaderData } from "../reader-data";
 import { useFeedback } from "../ui/feedback";
 

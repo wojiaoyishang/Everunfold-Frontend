@@ -1,4 +1,4 @@
-import type { ContentPresentation } from "@/generated/presentation-contract";
+import type { ContentPresentation } from "@/core/contracts/presentation";
 import type { Content, PublicSnapshot } from "./types";
 import { normalizePath } from "./urls";
 import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";

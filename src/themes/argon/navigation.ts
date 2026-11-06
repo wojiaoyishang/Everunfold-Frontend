@@ -1,6 +1,6 @@
 import type { Site } from "@/core/content/types";
 import { normalizePath, publicHref } from "@/core/content/urls";
-import type { MenuItem } from "@/generated/settings-contract";
+import type { MenuItem } from "@/core/contracts/settings";
 
 export interface NavigationItem {
   id?: string;

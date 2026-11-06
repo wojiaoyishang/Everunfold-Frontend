@@ -10,7 +10,7 @@ import { UploadQueueView } from "../../components/ui/upload-queue";
 import { MediaDetailsDialog } from "../media/media-details";
 import { AdminPageHeading } from "../components/page-heading";
 import { formatBytes } from "@/core/media/image-editor";
-import type { FontAsset } from "@/generated/settings-contract";
+import type { FontAsset } from "@/core/contracts/settings";
 import { Icon } from "../../components/icon";
 import styles from "./fonts.module.css";
 import { can } from "@/core/accounts/permissions";

@@ -8,10 +8,10 @@ import {
   AdminAccountContext,
   AdminRequestContext,
 } from "@/core/admin/account-context";
-import { readAccountProfile } from "@/generated/accounts-client";
-import { logout } from "@/generated/auth-client";
-import type { AuthSessionState } from "@/generated/auth-contract";
-import type { AccountProfile } from "@/generated/accounts-contract";
+import { readAccountProfile } from "@/core/contracts/accounts";
+import { logout } from "@/core/contracts/auth";
+import type { AuthSessionState } from "@/core/contracts/auth";
+import type { AccountProfile } from "@/core/contracts/accounts";
 import { AdminLanguageCatalog } from "@/core/i18n/admin-languages";
 import { adminPreferencesKey } from "@/core/admin/preferences";
 import { useAdminPreferences } from "@/core/admin/use-admin-preferences";

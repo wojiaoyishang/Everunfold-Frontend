@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { readAccountLanguages } from "@/generated/accounts-client";
+import { readAccountLanguages } from "@/core/contracts/accounts";
 import { initialCatalog, normalizeCatalog } from "./catalog";
 import { LanguageCatalogProvider } from "./provider";
 

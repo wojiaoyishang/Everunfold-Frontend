@@ -4,7 +4,7 @@ import { UiText, useT } from "@/core/i18n/provider";
 import type {
   ContentTypeDefinition,
   DraftListItem,
-} from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
 import { resourceUrl } from "@/core/content/urls";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";

@@ -1,6 +1,6 @@
 "use client";
 import { useId } from "react";
-import type { PermissionDefinition } from "@/generated/accounts-contract";
+import type { PermissionDefinition } from "@/core/contracts/accounts";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Checkbox } from "../components/ui/checkbox";
 import { Select } from "../components/ui/select";

@@ -7,7 +7,7 @@ import {
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
-import type { CodePreferences } from "@/generated/settings-contract";
+import type { CodePreferences } from "@/core/contracts/settings";
 import { CodeFoldControl, CodeTools } from "../components/reader/code-tools";
 function AttachedTools({
   block,

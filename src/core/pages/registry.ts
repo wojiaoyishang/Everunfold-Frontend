@@ -1,18 +1,13 @@
-import type {
-  PageManifest,
-  PublicManagedPage,
-} from "@/generated/pages-contract";
-import { peopleDefinition } from "./people-definition";
+import type { PageManifest, PublicManagedPage } from "@/core/contracts/pages";
+import { pluginRegistry } from "@/core/plugins/registry";
+import { collectCustomPages } from "./registration";
 
 /** Component identities are deployed code; database data cannot import a module or URL. */
-export const pageManifest: PageManifest = {
-  protocol: "pages-1",
-  pages: [peopleDefinition],
-};
+const registered = collectCustomPages(pluginRegistry.pages);
+export const pageManifest: PageManifest = registered.manifest;
 /** A trusted implementation explicitly opts into shared options with locale-aware program UI. */
-export const localizedPageImplementations: ReadonlySet<string> = new Set([
-  "core.people",
-]);
+export const localizedPageImplementations: ReadonlySet<string> =
+  registered.localized;
 export function hasPageImplementation(
   page: Pick<
     PublicManagedPage,

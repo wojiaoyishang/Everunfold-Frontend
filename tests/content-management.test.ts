@@ -16,12 +16,9 @@ import {
   validatePublicationTime,
 } from "../src/core/content-management/draft-state";
 import { RequestError } from "../src/core/http/request";
-import {
-  createDraft,
-  queryDrafts,
-} from "../src/generated/content-admin-client";
+import { createDraft, queryDrafts } from "@/core/contracts/content-admin";
 import { DraftPreview } from "../src/themes/argon/admin/content/draft-preview";
-import type { DraftDetail } from "../src/generated/content-admin-contract";
+import type { DraftDetail } from "@/core/contracts/content-admin";
 import {
   moveBlock,
   parseEditorDate,

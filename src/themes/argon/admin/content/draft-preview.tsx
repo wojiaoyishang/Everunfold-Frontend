@@ -1,9 +1,9 @@
 import { UiText } from "@/core/i18n/provider";
 import { useMemo } from "react";
 import { renderContent } from "@/core/rendering/content";
-import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
+import type { DraftFields, MediaURL } from "@/core/contracts/content-admin";
 import { ContentMarkup } from "../../components/content-markup";
-import type { PublicShortcode } from "@/generated/settings-contract";
+import type { PublicShortcode } from "@/core/contracts/settings";
 
 export function DraftPreview({
   fields,

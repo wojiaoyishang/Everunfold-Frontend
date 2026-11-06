@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import type {
   ContentTypeDefinition,
   DraftFields,
-} from "@/generated/content-admin-contract";
-import type { MediaItem } from "@/generated/settings-contract";
+} from "@/core/contracts/content-admin";
+import type { MediaItem } from "@/core/contracts/settings";
 import type { InlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
 import { uploadMarkers } from "@/core/editor/upload-placeholders";
 import { mediaMarkup } from "@/core/content-management/editor-fields";
@@ -21,7 +21,7 @@ import type {
   CodeEditorHandle,
   CapturedInsertion,
 } from "../../components/ui/code-editor";
-import type { MediaURL } from "@/generated/content-admin-contract";
+import type { MediaURL } from "@/core/contracts/content-admin";
 import styles from "./editor-workspace.module.css";
 import type { DraftSession } from "@/core/collaboration/session";
 export interface EditorProps {

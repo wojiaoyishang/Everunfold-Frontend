@@ -117,7 +117,7 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 
 详见 [ADR 0016](../decisions/0016-anchored-popovers-and-failure-pages.md)。共享 anchored popover 的触发按钮在水合前禁用；每次打开重新测量，`data-positioned` 写入之前不显示，避免原生弹出先于 React 定位。仍支持打开期间观察尺寸与滚动，关闭动画不丢坐标。
 
-`themes/argon/failure/` 统一状态展示、样式和四组翻牌配对；`FailureView` 用于 Next 的局部/根错误边界，`document` 用于 Proxy 独立 404/503。前者消费同一组件/游戏，后者消费 `tools/generate-failure-pages.mts` 构建时生成的 `src/generated/failure-pages.json`，不能在 Proxy 运行时导入 React 服务端渲染器。此 JSON 是展示产物，不是业务契约。修改主题源码后运行 `npm run failure:generate`；启动开发/生产构建自动生成，`npm run check` 与独立构建拒绝过期产物。
+`themes/argon/failure/` 统一状态展示、样式和四组翻牌配对；`FailureView` 用于 Next 的局部/根错误边界，`document` 用于 Proxy 独立 404/503。前者消费同一组件/游戏，后者消费 `tools/generate-failure-pages.mts` 构建时生成的 `cache/build/failure-pages.json`，不能在 Proxy 运行时导入 React 服务端渲染器。此 JSON 是展示产物，不是业务契约。修改主题源码后运行 `npm run failure:generate`；启动开发/生产构建自动生成，`npm run check` 与独立构建拒绝过期产物。
 
 独立 404/503 的核心说明与样式不依赖脚本、快照或远程资产；游戏只在本地内存运行。Next 意外渲染错误依赖框架客户端错误边界接管，不声称具有同等的无脚本可用性。原有导航准备/超时/旧页保留及撤回内容禁回退规则不变。
 
@@ -138,3 +138,7 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 `core/admin` 负责认证协调、导航登记和外观偏好；路由适配器组合主题壳，展示留在 `themes/argon/admin/{layout,components,pages,styles}`。`RouteLink` 封装 Next.js 私有代码路由导航，弹层/表单控件复用 UI 封装。`shared.css` 留基础层，博客样式只在 blog 布局导入；根配色/滤镜/字号/动效规则显式排除 admin，后台 token 与偏好独立。内容和媒体只有准备页，下一步按后端契约逐项接业务，详见 [运行指南](../development/admin-workspace.md) 与 [验证](../handoff/admin-workspace-verification.md)。
 
 后台补充见 [ADR 0022](../decisions/0022-admin-navigation-and-motion.md) 与 [导航注册](admin-navigation.md)：`core/admin/registry` 确定性组装可信模块元信息，主题复用同一目录生成桌面/移动菜单；实际 Next 页面适配器仍显式提供。`RouteLink` 可显示真实 pending，后台分段入场/侧栏/选中项/抽屉动效独立保存在 `admin/styles/motion.css`。后台外观新增轻量/系统/减少动态偏好，默认轻量，不继承 public 的 `data-motion`。后端挂钩仅设计，尚无远程菜单接口或插件加载器。
+
+## 插件控件与产物隔离（2026-11-07）
+
+页面/短代码均由可信插件提供，组件模块原生自动发现，不从自动生成文件选择界面。设置使用core/forms的声明模型与渲染宿主，Argon/forms实现标准控件，插件可声明新组件名；缺失时显示主题占位。core/contracts是业务契约访问边界，类型/客户端在忽略的cache中恢复。详见ADR0077和[插件指南](../development/frontend-plugins.md)。

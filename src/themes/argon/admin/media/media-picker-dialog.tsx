@@ -2,7 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useId, useState } from "react";
-import type { MediaItem, MediaQuery } from "@/generated/settings-contract";
+import type { MediaItem, MediaQuery } from "@/core/contracts/settings";
 import { Modal } from "../../components/ui/modal";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";

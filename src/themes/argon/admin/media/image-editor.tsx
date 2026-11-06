@@ -6,7 +6,7 @@ import type {
   ImageRecipe,
   MediaDetails,
   Rotation,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
 import {
   centeredCrop,
   clampCrop,

@@ -1,5 +1,5 @@
 "use client";
-import type { MediaItem } from "@/generated/settings-contract";
+import type { MediaItem } from "@/core/contracts/settings";
 import { MediaPickerDialog } from "../media/media-picker-dialog";
 export function EditorMediaDialog({
   kind = "all",

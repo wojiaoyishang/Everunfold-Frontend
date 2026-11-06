@@ -1,6 +1,6 @@
 # 页面管理、注册与缓存边界
 
-版本：registered-pages-runtime-4，2026-11-06。状态：按用户本轮授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施。
+版本：registered-pages-runtime-5，2026-11-07。状态：按用户本轮授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施。
 
 ## 两种来源
 
@@ -8,13 +8,13 @@
 
 自定义页面允许HTML、CSS和可选JavaScript，页面与脚本各自默认关闭。HTML/CSS/脚本仅放进无`allow-same-origin`的独立iframe，不能成为本站顶层脚本。CSP默认只允许固定哈希的测高脚本，作者脚本与HTML事件关闭；开启后仅允许iframe内联脚本，仍禁止脚本的fetch/WebSocket连接、外部脚本、嵌套框架、对象、表单提交和base改写。启用或修改启用脚本的持久页面要求管理员Session；按2026-11-07最新要求改为醒目提示，不再要求再次输入密码（ADR0075）。普通文章、HTML区块及短代码继续使用原有过滤边界。
 
-注册页由可信前端实现交互；后台仅改标题、路径、说明、收录、启用状态及明确声明的选项，不提供源码编辑。`src/core/pages/registry.ts`装配固定组件身份，不从数据库或远程URL导入模块。`core.people`首期提供姓名云/卡片、人物分组、搜索、头像、点击寄语及排序；没有友链卡片、访客留言写入或真实旧站人员导入。
+注册页由可信前端实现交互；后台仅改标题、路径、说明、收录、启用状态及明确声明的选项，不提供源码编辑。页面由`src/plugins/*/plugin.ts`的setup注册，原生目录发现装配可信身份；渲染组件和模型留在所属插件目录，不从数据库或远程URL导入模块。`core.people`首期提供姓名云/卡片、人物分组、搜索、头像、点击寄语及排序；没有友链卡片、访客留言写入或真实旧站人员导入。
 
 ## 可信清单和部署
 
-权威字段来自后端pages契约中的`PageManifest`/`PageRegistration`/`PageOption`：稳定命名空间ID、实现版本、缺省标题/路径/说明，以及有边界的text、textarea、url、boolean、select、list控件。列表只允许标量子字段；字段/人物数量和长度受限，未知选项拒绝，不接受任意JSON Schema或执行模板。
+权威字段来自后端pages契约中的`PageManifest`/`PageRegistration`/`PageOption`：稳定命名空间ID、实现版本、缺省标题/路径/说明、defaults与开放settings_schema。表单模型使用具名组件，由主题/插件实现，未知组件占位；配置允许任意JSON键值，字段模型不作为存储白名单。旧fields继续可读，新的控件类型不需要扩充后端枚举；配置仍有传输/深度上限，不接受可执行模板函数。
 
-前端通过`tools/export-page-manifest.mts`产生可审阅的`registrations/pages-v1.json`，管理员部署时用后端`tools.register_frontend_pages`显式安装到稳定节点ID。浏览器没有登记清单的接口。初次登记建立停用配置；路径已被内容占用时选安全缺省路径，不抢占原地址。重新部署保留已有内容，卸载登记保留数据。
+前端`pages:manifest`仅向stdout导出声明，`pages:register`将其直接送后端安装器stdin并显式安装到稳定节点ID；没有中间registrations目录。浏览器没有登记清单的接口。初次登记建立停用配置；路径已被内容占用时选安全缺省路径，不抢占原地址。重新部署保留已有内容，卸载登记保留数据。
 
 启用节点必须拥有一致清单，缺失/版本不同可保存草稿但不能启用；已停用或移除配置的节点不参与可用性判断。公开节点只渲染自己已编译的实现版本，缺失实现返回503，不装载远程代码。更新选项Schema时由部署者评审并迁移旧值，本轮没有自动Schema升级器。
 
@@ -34,7 +34,7 @@
 
 页面路径与内容、系统路由、语言入口互斥，校验与内容发布共用引用事务锁。中文和其他Unicode路径由后端规范化。改址不新增历史别名。通用索引开关与全站收录共同决定robots和sitemap，注册不自动插入菜单。
 
-`pages:read`、`pages:write`、`pages:publish`分别控制读取、草稿/元数据修改、应用/停用/回收恢复；它们可配置到成员预设，但不允许API Key调用管理接口。应用脚本另需基础管理员角色和密码。前端隐藏按钮仅作展示，后端始终鉴权。
+`pages:read`、`pages:write`、`pages:publish`分别控制读取、草稿/元数据修改、应用/停用/回收恢复；它们可配置到成员预设，但不允许API Key调用管理接口。应用脚本另需基础管理员角色和警告提示，不再重复输入密码（ADR0075）。前端隐藏按钮仅作展示，后端始终鉴权。
 
 ## 独立实时预览
 
@@ -42,13 +42,16 @@
 
 右侧是实际前台布局；源码页再嵌套不透明沙箱，复杂内容不进入后台布局。左右只向精确来源、当前ID、拥有的窗口发送临时展示投影，接收前校验契约；文章密码被剔除。保存按钮沿原编辑会话执行，不再创建第二套Y.Doc或绕过离线/合并锁。文章/说说实时保存不改变；页面仍显式保存、应用。预览不发布、不写阅读互动。
 
-## 尚未实施的菜单资源选择器
+## 稳定资源菜单
 
-菜单目前仍手填href。后续可增加带权限的文章/内容页/已启用注册页资源选择器，保存稳定类型+ID并解析路径；不为链接预览泄露草稿或私有选项。本轮没有交付该选择器、通用可视化搭建器、运行时插件安装或在线代码编辑注册组件。
-
+菜单已按ADR0074支持文章/说说/页面稳定ID关联，跟随已应用地址与阅读语言；撤回后隐藏目标。没有通用可视化搭建器或在线安装执行模块。
 
 ## 本轮补充
 
 0026新增页面语言组和主库applied_snapshot：published为空表示停用，applied_snapshot保留可重新启用的内容，data仍保存工作稿。三者职责分开，不从公开文件重建工作稿。原停用页面如果没有可恢复应用源文，首次启用必须明确应用草稿。页面启用、语言关联及资源改址复用参考锁/设置行锁和原完整Release/可靠投递事务。
 
 仅custom页面参加语言组，语言来自动态站点目录。目录按source_id聚合，成员独立应用；回收/恢复会维护有效入口。registered页面多语言由可信代码显式决定，现有实现提供语言路径，共用选项和程序字典，不能被浏览器改为普通译文组。私有内部元数据始终按原独立接口读取，不随复制或语言分组公开。
+
+## 插件与数据边界补充（2026-11-07）
+
+人物页面与画廊已移入统一插件目录；主题与插件均可提供新控件，详见[运行规范](frontend-plugin-runtime.md)、[开发指南](../development/frontend-plugins.md)与[数据接口](../development/plugin-data-protocol.md)。可选展示控件缺失显示占位；整个页面实现缺失或版本不匹配仍按原规则503。配置/模型可同步更新，新的可信组件代码仍需构建。

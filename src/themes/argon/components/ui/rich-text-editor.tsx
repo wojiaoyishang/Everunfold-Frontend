@@ -31,9 +31,9 @@ import { renderMarkdownSource } from "@/core/rendering/content";
 import { ContentResources } from "../content-resources";
 import { referencedFontFaces } from "@/core/rendering/fonts";
 import type { UploadEntry } from "@/core/media/upload-queue";
-import type { MediaItem } from "@/generated/settings-contract";
+import type { MediaItem } from "@/core/contracts/settings";
 import { UPLOAD_SCHEME } from "@/core/editor/upload-placeholders";
-import type { MediaURL } from "@/generated/content-admin-contract";
+import type { MediaURL } from "@/core/contracts/content-admin";
 import type {
   CodeEditorHandle,
   SourceSelection,

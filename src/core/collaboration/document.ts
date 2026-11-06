@@ -1,5 +1,5 @@
 import * as Y from "yjs";
-import type { DraftFields } from "@/generated/content-admin-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
 import { richFields, richHtml } from "@/core/editor/rich-text";
 
 export const LOCAL = Symbol("editor-local");

@@ -1,9 +1,6 @@
-import type { PublicSnapshot as StoredSnapshot } from "@/generated/public-contract";
+import type { PublicSnapshot as StoredSnapshot } from "@/core/contracts/public";
 
-import type {
-  CachePolicy,
-  PublicSettings,
-} from "@/generated/settings-contract";
+import type { CachePolicy, PublicSettings } from "@/core/contracts/settings";
 export type Site = StoredSnapshot["site"] & {
   locale?: string;
   contentLocales?: Record<string, string>;

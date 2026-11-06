@@ -4,7 +4,7 @@ import type {
   DraftDetail,
   DraftFields,
   ContentTypeDefinition,
-} from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
 import { RequestError } from "@/core/http/request";
 
 export function draftFields(detail?: DraftDetail | null): DraftFields {

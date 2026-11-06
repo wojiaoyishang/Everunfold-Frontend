@@ -1,7 +1,4 @@
-import type {
-  DraftBlock,
-  DraftFields,
-} from "@/generated/content-admin-contract";
+import type { DraftBlock, DraftFields } from "@/core/contracts/content-admin";
 import { serializeDraftExport } from "./export";
 
 export interface LocalRecovery {

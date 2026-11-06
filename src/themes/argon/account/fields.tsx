@@ -1,6 +1,6 @@
 "use client";
 import { useId } from "react";
-import type { ProfileFields } from "@/generated/accounts-contract";
+import type { ProfileFields } from "@/core/contracts/accounts";
 import { UiText, useLanguageCatalog } from "@/core/i18n/provider";
 import { TextArea, TextField } from "../components/ui/primitives";
 import { PasswordField } from "../components/ui/password-field";

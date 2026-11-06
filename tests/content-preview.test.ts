@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { DraftDetail } from "../src/generated/content-admin-contract";
+import type { DraftDetail } from "@/core/contracts/content-admin";
 import {
   contentPreviewPath,
   isContentPreviewPath,

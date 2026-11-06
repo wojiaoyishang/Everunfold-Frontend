@@ -2,8 +2,8 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useId, useMemo, useRef, useState } from "react";
-import type { MediaURL } from "@/generated/content-admin-contract";
-import type { PublicShortcode } from "@/generated/settings-contract";
+import type { MediaURL } from "@/core/contracts/content-admin";
+import type { PublicShortcode } from "@/core/contracts/settings";
 import type { ComparedBlock } from "@/core/editor/version-diff";
 import { highlightRenderedDiff } from "@/core/editor/version-diff";
 import { renderContent } from "@/core/rendering/content";

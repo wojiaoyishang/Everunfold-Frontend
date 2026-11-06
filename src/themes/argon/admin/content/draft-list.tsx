@@ -6,7 +6,7 @@ import { useLanguageCatalog, useT } from "@/core/i18n/provider";
 import type {
   ContentTypeDefinition,
   DraftListItem,
-} from "@/generated/content-admin-contract";
+} from "@/core/contracts/content-admin";
 import { useDraftCatalog } from "@/core/content-management/use-draft-catalog";
 import { Button, Form, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";

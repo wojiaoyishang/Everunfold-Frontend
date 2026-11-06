@@ -16,10 +16,7 @@ import {
 } from "../src/core/collaboration/document";
 import { renderContent } from "../src/core/rendering/content";
 import { referencedFontFaces } from "../src/core/rendering/fonts";
-import type {
-  DraftFields,
-  MediaURL,
-} from "../src/generated/content-admin-contract";
+import type { DraftFields, MediaURL } from "@/core/contracts/content-admin";
 
 test("opening supported HTML preserves semantic output when ProseMirror adds default attributes", () => {
   const schema = getSchema(richExtensions(true));

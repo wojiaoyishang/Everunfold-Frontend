@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import type { PublicManagedPage } from "@/generated/pages-contract";
+import type { PublicManagedPage } from "@/core/contracts/pages";
 import { managedPagePreviewPath } from "./preview";
 /** Unsaved page previews use exact owned windows and never persist draft source in a URL or browser store. */
 export function usePagePreview(page: PublicManagedPage) {

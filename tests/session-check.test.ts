@@ -5,8 +5,8 @@ import {
   type SessionView,
 } from "../src/core/auth/session-check";
 import { RequestError } from "../src/core/http/request";
-import { readAdminSession } from "../src/generated/auth-client";
-import type { AuthSessionState } from "../src/generated/auth-contract";
+import { readAdminSession } from "@/core/contracts/auth";
+import type { AuthSessionState } from "@/core/contracts/auth";
 
 const admin: AuthSessionState = {
   authenticated: true,

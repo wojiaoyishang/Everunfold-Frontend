@@ -1,11 +1,11 @@
 "use client";
 import { randomUUID } from "@/core/browser/crypto";
-import { queryMedia, uploadMedia } from "@/generated/settings-client";
+import { queryMedia, uploadMedia } from "@/core/contracts/settings";
 import type {
   MediaItem,
   MediaQuery,
   MediaUpload,
-} from "@/generated/settings-contract";
+} from "@/core/contracts/settings";
 import {
   useAssetLibrary,
   InvalidUpload,

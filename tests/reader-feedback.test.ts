@@ -5,7 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
   readCommentLikes,
   setCommentLike,
-} from "../src/generated/comment-likes-client";
+} from "@/core/contracts/comment-likes";
 import { RequestError } from "../src/core/http/request";
 import {
   emptyReaderSnapshot,

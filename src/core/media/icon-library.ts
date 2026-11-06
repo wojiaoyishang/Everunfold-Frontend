@@ -1,7 +1,7 @@
 "use client";
 import { randomUUID } from "@/core/browser/crypto";
-import { queryIcons, uploadMedia } from "@/generated/settings-client";
-import type { IconAsset } from "@/generated/settings-contract";
+import { queryIcons, uploadMedia } from "@/core/contracts/settings";
+import type { IconAsset } from "@/core/contracts/settings";
 import {
   useAssetLibrary,
   InvalidUpload,

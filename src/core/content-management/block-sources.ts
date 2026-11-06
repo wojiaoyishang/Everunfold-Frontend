@@ -1,5 +1,5 @@
-import type { DraftFields } from "@/generated/content-admin-contract";
-import type { BlockSourcePatch } from "@/generated/collaboration-contract";
+import type { DraftFields } from "@/core/contracts/content-admin";
+import type { BlockSourcePatch } from "@/core/contracts/collaboration";
 import { sha256Hex } from "@/core/browser/crypto";
 
 type Block = DraftFields["body"][number];

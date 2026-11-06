@@ -2,8 +2,8 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useRef, useState } from "react";
-import type { DraftFields, MediaURL } from "@/generated/content-admin-contract";
-import type { MediaItem } from "@/generated/settings-contract";
+import type { DraftFields, MediaURL } from "@/core/contracts/content-admin";
+import type { MediaItem } from "@/core/contracts/settings";
 import { TextArea, TextField } from "../../components/ui/primitives";
 import { RegisteredBlockEditor } from "./plugins/registry";
 import { ShortcodePicker } from "../shortcodes/picker";

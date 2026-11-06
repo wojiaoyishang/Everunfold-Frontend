@@ -2,7 +2,7 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
-import type { EditorTerm } from "@/generated/content-admin-contract";
+import type { EditorTerm } from "@/core/contracts/content-admin";
 import { categoryTree } from "@/core/content-management/taxonomy-options";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Checkbox } from "../../components/ui/checkbox";

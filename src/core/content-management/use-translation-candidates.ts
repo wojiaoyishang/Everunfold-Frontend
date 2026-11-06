@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { queryDrafts } from "@/generated/content-admin-client";
-import type { DraftListItem } from "@/generated/content-admin-contract";
+import { queryDrafts } from "@/core/contracts/content-admin";
+import type { DraftListItem } from "@/core/contracts/content-admin";
 import type { Locale } from "@/core/i18n/locale";
 import { draftError } from "./draft-state";
 

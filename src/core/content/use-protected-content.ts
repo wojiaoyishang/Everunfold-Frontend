@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { readProtectedContent } from "@/generated/content-access-client";
-import type { ContentDetail } from "@/generated/content-access-contract";
+import { readProtectedContent } from "@/core/contracts/content-access";
+import type { ContentDetail } from "@/core/contracts/content-access";
 import { RequestError } from "@/core/http/request";
 
 /** Restricted data lives only in this mounted page; never register it in shared reader caches. */
