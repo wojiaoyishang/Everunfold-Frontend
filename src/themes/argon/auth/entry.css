@@ -300,9 +300,10 @@ html[data-motion="full"]
 .login-submit .icon {
   transition: transform 180ms ease;
 }
-/* Keyboard input can begin before the entrance has completed. */
-.login-card:focus-within,
-.login-card:focus-within :is(.login-panel-heading, .login-panel-content) {
+/* Keep the entrance settled when focus later moves into a popover or outside the card. */
+.login-card[data-entry-settled="true"],
+.login-card[data-entry-settled="true"]
+  :is(.login-panel-heading, .login-panel-content) {
   animation: none !important;
 }
 @keyframes entry-assemble {
