@@ -38,6 +38,35 @@
   height: 20px;
   color: var(--accent);
 }
+.login-entry-actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 12px;
+}
+.login-language-button {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--entry-secondary);
+  transition:
+    color 180ms ease,
+    background-color 180ms ease;
+}
+.login-language-button:hover,
+.login-language-button[aria-expanded="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.login-language-button > .icon {
+  width: 17px;
+  height: 17px;
+}
 .login-back {
   display: inline-flex;
   align-items: center;
@@ -330,6 +359,9 @@ html[data-motion="full"]
   .login-back {
     gap: 4px;
     font-size: 11px;
+  }
+  .login-entry-actions {
+    gap: 8px;
   }
   .login-panel {
     padding: 30px 22px;

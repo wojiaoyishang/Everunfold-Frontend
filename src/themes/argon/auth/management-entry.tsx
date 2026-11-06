@@ -30,11 +30,13 @@ export function ManagementEntry({
             <Icon name="leaf" />
             Everunfold
           </span>
-          <InterfaceLanguage className="icon-button" />
-          <TextLink href="/" className="login-back">
-            <Icon name="arrow-left" />
-            <UiText text="返回站点" />
-          </TextLink>
+          <div className="login-entry-actions">
+            <TextLink href="/" className="login-back">
+              <Icon name="arrow-left" />
+              <UiText text="返回站点" />
+            </TextLink>
+            <InterfaceLanguage className="login-language-button" />
+          </div>
         </header>
         <section
           className="login-panel"
