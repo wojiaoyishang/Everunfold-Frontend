@@ -1,6 +1,6 @@
 # 文章与说说管理
 
-版本：content-management-7，2026-11-06。当前：文章/说说、多块协同实时保存、版本/离线合并、发布同步、密码访问、定时开放及多语言关联。基础决定为 ADR0030–0035，最新多语言规则见[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)及[当前指南](../architecture/multilingual-content.md)。历史验收不替代[本轮检查](../handoff/multilingual-verification.md)。
+版本：content-management-8，2026-11-06。当前：文章/说说、多块协同实时保存、版本/离线合并、发布同步、密码访问、定时开放及多语言关联。基础决定为 ADR0030–0035，最新多语言规则见[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)及[当前指南](../architecture/multilingual-content.md)。历史验收不替代[本轮检查](../handoff/multilingual-verification.md)。
 
 ## 数据范围
 
@@ -91,3 +91,7 @@ uv run pytest -q --tb=short
 每组只显示原文一行，译文编辑入口在标题旁语言菜单中。筛选某语言、搜索译文也返回原文行，分组后计数/分页；编辑页“管理语言与译文”可新建、复制、关联、解除、核对及单独回收恢复。列表回收/恢复作用于整组，确认时显示版本数量。
 
 语言目录来自站点设置，不把中英文写成允许列表；未选择新建语言时由后端当前默认值决定。每个译文拥有独立ID、实时协同文档、历史、发布与访问策略，原文更新只提示核对。合并锁/版本冲突/幂等仍由后端检查。详细入口、前台搜索和SEO边界见[多语言指南](../architecture/multilingual-content.md)。
+
+## 独立实时预览（2026-11-06）
+
+文章、说说与页面共享独立“实时预览”窗口：左侧编辑、右侧前台，顶部右侧原保存/发布、左侧完整编辑器，提供设备视图与拖动分界线。沿原协同/离线/合并守卫，不新增整篇写入或重复Y.Doc；见[页面指南](pages.md)。

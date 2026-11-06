@@ -1,5 +1,7 @@
 # Everunfold Frontend
 
+页面支持HTML/CSS/可选隔离JavaScript与注册人物分组/寄语；页面、文章、说说共用独立实时预览，左编辑右前台、三设备视图、可拖动分界线及顶部原保存操作。私有元数据与公开页面设置分开，见[指南](docs/development/pages.md)和[验收](docs/handoff/pages-live-preview-verification.md)。
+
 新 Docker 设备运行方式见[容器开发部署指南](docs/development/container-deployment.md)：当前本地联调通过 `http://127.0.0.1:3000` 访问，监听仍为 `0.0.0.0`；Nginx 统一转发页面、API 和 WebSocket，Next 开发进程在 3100。当前状态以最新交接为准。
 
 当前功能联调仅展示新后台发布的测试文章/说说；旧 WordPress 试导入内容已撤回。开发工具与恢复边界见 [内容管理指南](docs/development/content-management.md)。

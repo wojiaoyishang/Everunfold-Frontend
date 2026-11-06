@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[页面管理与独立实时预览](development/pages.md)、[架构与私有元数据](architecture/registered-pages.md)、[ADR0072](decisions/0072-managed-pages-and-people-messages.md)及[验收](handoff/pages-live-preview-verification.md)：自定义HTML/CSS/可选隔离JS、注册人物分组/寄语、页面私有元数据，以及页面/文章/说说共用的左编辑右预览、三设备视图、拖动分隔和顶部原保存控件。
+
 [可配置用户身份预设](decisions/0071-user-permission-presets.md)、[操作指南](development/accounts.md)及[验收](handoff/user-presets-verification.md)：用户管理新增“身份预设”入口，初始编辑/审稿人可增删改，在用户创建/编辑时应用；变更模板不自动覆盖既有用户权限。头像限制密码标签统一为“当前管理员密码”。
 
 [云端账号入口与头像就绪动效](decisions/0070-header-account-entry-and-avatar-readiness.md)及[实页验收](handoff/header-account-entry-verification.md)：账号中心移入右上角云端面板，头像加载后先打钩再显现；后台统一为“应用程序接入”。

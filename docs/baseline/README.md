@@ -855,3 +855,19 @@ ADR0071、accounts-runtime-6与bootstrap12记录管理员维护预设、用户�
 | `docs/development/accounts.md` | `39e3d3a4fc31db132524a1e9718cc71f4ca8b9d4a46b14fb9a089c96288110c5` |
 | `docs/decisions/0071-user-permission-presets.md` | `6a6df7ee9a3a66120ce4883263edfb0294e7f6ba1a1679d336c07206643c7427` |
 | `docs/handoff/user-presets-verification.md` | `37690b0b407b2e896a51deea9b7617cf1d9860781803fd5c691ea91c950f7413` |
+
+## 页面管理与独立实时预览交付（2026-11-06）
+
+ADR0072、registered-pages-runtime-2、pages-runtime-1、development17与bootstrap13记录本轮用户授权：独立源码沙箱、可信人物页、私有元数据及页面/文章/说说独立实时预览。当前共同摘要如下，替代相应旧摘要；原始基线不变，STATUS分别维护，实际设备IP、凭据和用户头像不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `dd25235688f705797f31d974de23b676c7327dcd4456284ff45cdca74e77693b` |
+| `docs/architecture/constraints.md` | `e39b9e4483a3949b80e34df01e75ba091e3002f86e82ff6e37adda8ed33878c0` |
+| `docs/architecture/frontend-extensions.md` | `dcde06c5fbd956e570978363b89a5f85df98589e0ddf0dc59b19de96506fca90` |
+| `docs/architecture/registered-pages.md` | `150ec6af3020e3057c4a8bd1166dc7b10ff0d5b6d00df6ed182e9fd1f241e5ed` |
+| `docs/decisions/0072-managed-pages-and-people-messages.md` | `90ca6d0d5a671228d6ad219ec3e5b5e3938ca339bd43145e568565507a409628` |
+| `docs/development/content-management.md` | `562db6c35d8d9c6e47b3b6a578c7809b277d1bd559d812832183f7b549a312ca` |
+| `docs/development/protocol.md` | `fa5c0765ba30d178cd88f925652d3b2bade1ef4207e74523d37664bdc70c2b6f` |
+| `docs/development/pages.md` | `b7d6d0744de158355e224004f2bf702cf3d7dce243f8cb58f0f0b5995e179d37` |
+| `docs/handoff/pages-live-preview-verification.md` | `3b0c01fa15afd6b66e5e94af2052f094d8e5b6c2552cf5c3226baa80f0c42a56` |
