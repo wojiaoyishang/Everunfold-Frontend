@@ -1,6 +1,6 @@
 # 页面管理与实时预览指南
 
-版本：pages-runtime-1，2026-11-06。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
+版本：pages-runtime-2，2026-11-06。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
 
 ## 管理页面
 
@@ -13,6 +13,8 @@ JavaScript仅在独立沙箱内运行；开启后每次持久修改需当前管�
 回收自定义页面会停用并保留源码；恢复后仍停用。注册页可停用，通过代码部署维护清单，不能在后台删除登记。界面提示版本冲突时输入保留，可读取服务器版本后核对；不要重放过期版本或覆盖他人修改。
 
 ## 预览入口
+
+普通编辑页将预览、保存、发布/应用放在顶部同一操作组，下滑时一起进入固定导航，上滑后归位；返回页面列表在左侧。文章/说说采用相同规则，键盘焦点和按钮状态保持，见[验收](../handoff/editor-actions-dock-verification.md)。
 
 小图标旁的文字区分“前台预览”和“实时预览”，悬停有用途说明。页面前台预览可展示当前未保存输入；文章/说说沿原保存/ACK准备后预览。
 

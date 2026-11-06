@@ -871,3 +871,14 @@ ADR0072、registered-pages-runtime-2、pages-runtime-1、development17与bootstr
 | `docs/development/protocol.md` | `fa5c0765ba30d178cd88f925652d3b2bade1ef4207e74523d37664bdc70c2b6f` |
 | `docs/development/pages.md` | `b7d6d0744de158355e224004f2bf702cf3d7dce243f8cb58f0f0b5995e179d37` |
 | `docs/handoff/pages-live-preview-verification.md` | `3b0c01fa15afd6b66e5e94af2052f094d8e5b6c2552cf5c3226baa80f0c42a56` |
+
+## 编辑操作组与保存回执修正（2026-11-06）
+
+用户要求文章/说说保存发布与预览同组随滚动进入顶栏，页面也合并操作并将返回列表左置；追加ADR0054、pages-runtime-2及本轮验收。同步修复旧协作HTTP回执Schema缺少已有owner_id字段，保持业务/WS协议。以下为当前共同摘要，替代对应旧摘要；STATUS分别维护，原始基线不变，设备IP/凭据和用户图片不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `878e3aa0bc0cd8dff47c5ccd39d1f3e94fb3a2c3b42487ba11f60090328826b5` |
+| `docs/decisions/0054-scroll-editor-preview-actions.md` | `0758dac2d24fc881d2070ba6415abd676c92d28f258beb5c3b56f60528315657` |
+| `docs/development/pages.md` | `9f550b5bd7055bc18352538a73259cef8c5738c82e891faf80a8a09ae16d572d` |
+| `docs/handoff/editor-actions-dock-verification.md` | `c0666d08461028fd7220e4708d69faaf0d8b2bea00b8ac80cf25b7be89f18627` |
