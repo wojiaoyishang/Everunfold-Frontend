@@ -743,3 +743,11 @@ ADR0066替代0065历史提案，multilingual-runtime-2、content-management-7、
 | `docs/design/multilingual-presets.png` | `62bc257de6db50c814473f9045e33943a17ef0acfb82a77c3a6fda7d72817ae4` |
 | `docs/design/multilingual-custom-320.png` | `ce3f7d9ac703625c68e105316212fcefa108faddc6e7ce14b4d96bf53c1b5455` |
 | `docs/design/multilingual-editor.png` | `51c444668125ffa05d5022612f5470888e790e10e74357b31ee3fbc9dfdc4d58` |
+
+## 语言入口视觉微调（2026-11-06）
+
+仅补充前端语言图标/选中样式的实际验收，不变更原始附件或契约。以下为当前公共验收摘要，STATUS分别维护。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/handoff/multilingual-verification.md` | `d895d621c8d81b762fd61ab1ee88549645a52bee50a50ed6bf63db75ea875b1b` |
