@@ -423,3 +423,37 @@
 .admin-mobile-drawer .admin-nav-label {
   display: none;
 }
+
+.admin-embedded-editor {
+  padding: 16px;
+  min-width: 0;
+  min-height: 100dvh;
+}
+body:has(.admin-embedded-editor) .admin-editor-preview-action,
+.admin-embedded-editor .admin-editor-preview-action,
+.admin-embedded-editor [data-preview-controls],
+.admin-embedded-editor .admin-editor-back > .admin-button,
+.admin-embedded-editor .account-heading-actions > a[href="/admin/pages"] {
+  display: none;
+}
+.admin-embedded-editor .admin-page-heading {
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.admin-embedded-editor .admin-page-heading h1 {
+  font-size: 20px;
+}
+.admin-embedded-editor .account-heading-actions {
+  gap: 6px;
+}
+.admin-embedded-editor .account-heading-actions > .admin-button {
+  font-size: 12px;
+  padding: 6px 8px;
+}
+.admin-embedded-editor .account-card {
+  padding: 16px;
+}
+.admin-embedded-editor .admin-editor-back {
+  gap: 6px;
+}

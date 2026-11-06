@@ -4,6 +4,8 @@ import { UiText } from "@/core/i18n/provider";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ContentTypeDefinition } from "@/generated/content-admin-contract";
+import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
+import { editorPreviewContent } from "@/core/preview/content";
 import { useDraftEditor } from "@/core/content-management/use-draft-editor";
 import { useEditorNavigation } from "@/core/content-management/use-editor-navigation";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
@@ -27,6 +29,7 @@ import { ContentSync } from "./content-sync";
 import { afterDialogMotion } from "../../hooks/dialog-motion";
 import { CollaborationBar } from "./collaboration-bar";
 import { InlineUploadToasts } from "./inline-upload-toasts";
+import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
 import { FrontendPreviewButton } from "./frontend-preview-button";
 import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 import { CodePreferencesProvider } from "../../components/code-preferences";
@@ -60,6 +63,15 @@ export function DraftEditor({
     ...resources.media,
     ...editor.session?.mediaUrls,
   };
+  const liveContent = editor.detail
+    ? editorPreviewContent(editor.detail, editor.fields, media)
+    : null;
+  useEmbeddedPreviewPublisher(
+    id,
+    liveContent
+      ? { type: "everunfold:content-preview", content: liveContent }
+      : null,
+  );
   const [section, setSection] = useState<"body" | "settings">("body");
   const [mode, setMode] = useState<"edit" | "preview">("edit");
   const [confirm, setConfirm] = useState<
@@ -262,6 +274,16 @@ export function DraftEditor({
                     : persist("save")
                 }
               />
+              <FrontendPreviewButton
+                mode="live"
+                needsSave={editor.dirty || !editor.detail}
+                disabled={Boolean(saveDisabled || editor.uncertain)}
+                prepare={() =>
+                  !editor.dirty && editor.detail
+                    ? Promise.resolve(editor.detail)
+                    : persist("save")
+                }
+              />
               {editor.detail?.published_revision &&
                 editor.detail.public_path && (
                   <RouteLink
@@ -275,15 +297,17 @@ export function DraftEditor({
                   </RouteLink>
                 )}
             </ScrollHeaderActions>
-            <EditorActions
-              detail={editor.detail}
-              busy={editor.busy}
-              uncertain={editor.uncertain}
-              dirty={editor.dirty}
-              disabled={saveDisabled}
-              onSave={(action) => void save(action)}
-              onWithdraw={() => setConfirm("withdraw")}
-            />
+            <EmbeddedEditorActions>
+              <EditorActions
+                detail={editor.detail}
+                busy={editor.busy}
+                uncertain={editor.uncertain}
+                dirty={editor.dirty}
+                disabled={saveDisabled}
+                onSave={(action) => void save(action)}
+                onWithdraw={() => setConfirm("withdraw")}
+              />
+            </EmbeddedEditorActions>
             <span
               role="status"
               className={notice ? "admin-draft-saved" : styles.visuallyHidden}

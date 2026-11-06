@@ -1,0 +1,20 @@
+.action:global(.admin-button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 5px 9px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--admin-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.action:global(.admin-button) svg {
+  width: 15px;
+  height: 15px;
+}
+.action:global(.admin-button):hover:not(:disabled) {
+  color: var(--admin-accent);
+  background: var(--admin-subtle);
+}

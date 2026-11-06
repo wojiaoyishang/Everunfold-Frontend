@@ -74,6 +74,45 @@ if (multilingual) {
   english.translations = translations;
   value.contents.push(english);
 }
+value.pages = [
+  {
+    id: "00000000-0000-4000-8000-000000000081",
+    source: "custom",
+    title: "自定义页面样例",
+    path: "/custom-page",
+    enabled: true,
+    revision: 1,
+    html: "<h2>Isolated source fixture</h2>",
+    css: "h2{color:teal}",
+    javascript: "document.body.dataset.fixture='ran'",
+    javascript_enabled: false,
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000082",
+    source: "registered",
+    title: "人物页面样例",
+    path: "/people-page",
+    enabled: true,
+    revision: 1,
+    implementation_id: "core.people",
+    implementation_version: "1.0.0",
+    options: {
+      people: [
+        { name: "Fixture Person", group: "Sample", message: "Fixture message" },
+      ],
+    },
+  },
+  {
+    id: "00000000-0000-4000-8000-000000000083",
+    source: "registered",
+    title: "缺失实现",
+    path: "/unavailable-page",
+    enabled: true,
+    revision: 1,
+    implementation_id: "removed.people",
+    implementation_version: "1.0.0",
+  },
+];
 value.source_epoch = epoch;
 const cache = path.join(root, "var/absent-admin-verification-cache");
 await mkdir(cache, { recursive: true });
@@ -82,6 +121,7 @@ const contentStore = new FileContentStore(cache, "admin-verification", epoch);
 const withdrawing = process.argv[3] === "withdraw";
 value.generation = withdrawing ? 4 : multilingual ? 3 : 2;
 if (withdrawing) {
+  value.pages = [];
   value.contents = [];
   value.comments = {};
 }

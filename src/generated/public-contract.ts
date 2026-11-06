@@ -1,7 +1,7 @@
 /* Generated from the backend public contract. Do not edit by hand. */
 
 export type SchemaVersion =
-  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0";
+  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0" | "0.7.0";
 export type Original = string;
 export type Webp = string;
 export type Family = string;
@@ -16,9 +16,24 @@ export type Path = string;
 export type Access = "public" | "password" | "scheduled";
 export type IsOriginal = boolean;
 export type Translations = ContentTranslation[];
+export type Title = string;
+export type Path1 = string;
+export type Description = string;
+export type AllowIndexing = boolean;
+export type Enabled = true;
+export type Html = string;
+export type Css = string;
+export type Javascript = string;
+export type JavascriptEnabled = boolean;
+export type JsonValue = unknown;
+export type Id1 = string;
+export type Source = "custom" | "registered";
+export type ImplementationId = string | null;
+export type ImplementationVersion = string | null;
+export type Revision = number;
 
 /**
- * 公开阅读快照 0.6；真实已发布语言关联与字体描述，兼容已有快照。
+ * 公开阅读快照 0.7；加入已应用的独立页面，兼容已有快照。
  */
 export interface PublicSnapshot {
   schema_version: SchemaVersion;
@@ -31,6 +46,7 @@ export interface PublicSnapshot {
     [k: string]: PublicComment[];
   };
   taxonomies: Taxonomy[];
+  pages?: PublicManagedPage[];
 }
 export interface Site {
   name: string;
@@ -123,4 +139,24 @@ export interface PublicComment {
   content: string;
   created_at: string;
   reply_to?: string | null;
+}
+export interface PublicManagedPage {
+  title: Title;
+  path: Path1;
+  description?: Description;
+  allow_indexing?: AllowIndexing;
+  enabled?: Enabled;
+  html?: Html;
+  css?: Css;
+  javascript?: Javascript;
+  javascript_enabled?: JavascriptEnabled;
+  options?: Options;
+  id: Id1;
+  source: Source;
+  implementation_id?: ImplementationId;
+  implementation_version?: ImplementationVersion;
+  revision: Revision;
+}
+export interface Options {
+  [k: string]: JsonValue;
 }

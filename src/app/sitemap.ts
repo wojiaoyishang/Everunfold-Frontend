@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!site) return [];
   const snapshot = await readPublicSnapshot();
   if (snapshot.site.settings?.site.allow_indexing === false) return [];
-  return snapshot.contents
+  const content = snapshot.contents
     .filter((item) => (item.access ?? "public") === "public")
     .map((item) => ({
       url: new URL(item.path, site).href,
@@ -24,4 +24,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ),
       },
     }));
+  return [
+    ...content,
+    ...(snapshot.pages ?? [])
+      .filter((page) => page.allow_indexing !== false)
+      .map((page) => ({ url: new URL(page.path, site).href })),
+  ];
 }

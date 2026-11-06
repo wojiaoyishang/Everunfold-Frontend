@@ -1,5 +1,7 @@
 import type { PublicSnapshot } from "./types";
 import { resolveContent } from "./query";
+import { resolveManagedPage } from "@/core/pages/resolve";
+import { hasPageImplementation } from "@/core/pages/registry";
 import { normalizePath } from "./urls";
 
 export const publicCodePaths = new Set([
@@ -18,6 +20,12 @@ export function hasPublicRoute(
   requestedPath: string,
 ): boolean {
   const path = normalizePath(requestedPath);
+  const managed = resolveManagedPage(snapshot, path);
+  if (managed) {
+    if (!hasPageImplementation(managed))
+      throw new Error("Unavailable registered page implementation");
+    return true;
+  }
   if (publicCodePaths.has(path)) return true;
   const taxonomy = /^\/(category|tag)\/([^/]+)$/.exec(
     requestedPath.replace(/\/$/, ""),

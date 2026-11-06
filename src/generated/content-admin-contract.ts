@@ -187,7 +187,7 @@ export type SourceEpoch1 = string;
 export type Resource = "public-content";
 export type Revision4 = number;
 export type SchemaVersion =
-  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0";
+  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0" | "0.7.0";
 export type SourceEpoch2 = string;
 export type Generation = number;
 export type ExportedAt = string;
@@ -256,27 +256,43 @@ export type Content3 = string;
 export type CreatedAt3 = string;
 export type ReplyTo = string | null;
 export type Taxonomies = TaxonomyDTO[];
+export type Title5 = string;
+export type Path3 = string;
+export type Description2 = string;
+export type AllowIndexing = boolean;
+export type Enabled2 = true;
+export type Html = string;
+export type Css = string;
+export type Javascript = string;
+export type JavascriptEnabled = boolean;
+export type JsonValue = unknown;
+export type Id15 = string;
+export type Source = "custom" | "registered";
+export type ImplementationId = string | null;
+export type ImplementationVersion = string | null;
+export type Revision5 = number;
+export type Pages1 = PublicManagedPage[];
 export type Success7 = boolean;
 export type Code8 = number;
 export type Msg7 = string;
-export type Id15 = string;
+export type Id16 = string;
 export type SourceId = string;
 export type TypeId6 = string;
-export type Revision5 = number;
+export type Revision6 = number;
 export type Members = TranslationMember[];
-export type Id16 = string;
+export type Id17 = string;
 export type OperationId3 = string;
 export type ExpectedRevision2 = number;
 export type Language7 = string;
 export type CopySource = boolean;
-export type Id17 = string;
+export type Id18 = string;
 export type OperationId4 = string;
 export type ExpectedRevision3 = number;
 export type TargetId = string;
-export type Id18 = string;
+export type Id19 = string;
 export type OperationId5 = string;
 export type ExpectedRevision4 = number;
-export type Id19 = string;
+export type Id20 = string;
 export type OperationId6 = string;
 export type ExpectedRevision5 = number;
 
@@ -567,6 +583,7 @@ export interface PublicSnapshot {
   contents: Contents;
   comments: Comments1;
   taxonomies: Taxonomies;
+  pages?: Pages1;
 }
 export interface SiteDTO {
   name: Name3;
@@ -652,6 +669,26 @@ export interface PublicComment {
   created_at: CreatedAt3;
   reply_to?: ReplyTo;
 }
+export interface PublicManagedPage {
+  title: Title5;
+  path: Path3;
+  description?: Description2;
+  allow_indexing?: AllowIndexing;
+  enabled?: Enabled2;
+  html?: Html;
+  css?: Css;
+  javascript?: Javascript;
+  javascript_enabled?: JavascriptEnabled;
+  options?: Options;
+  id: Id15;
+  source: Source;
+  implementation_id?: ImplementationId;
+  implementation_version?: ImplementationVersion;
+  revision: Revision5;
+}
+export interface Options {
+  [k: string]: JsonValue;
+}
 export interface PublicResponseTranslationCatalog {
   success?: Success7;
   code?: Code8;
@@ -659,32 +696,32 @@ export interface PublicResponseTranslationCatalog {
   data: TranslationCatalog;
 }
 export interface TranslationCatalog {
-  id: Id15;
+  id: Id16;
   source_id: SourceId;
   type_id: TypeId6;
-  revision: Revision5;
+  revision: Revision6;
   members: Members;
 }
 export interface TranslationCreate {
-  id: Id16;
+  id: Id17;
   operation_id: OperationId3;
   expected_revision: ExpectedRevision2;
   language: Language7;
   copy_source?: CopySource;
 }
 export interface TranslationLink {
-  id: Id17;
+  id: Id18;
   operation_id: OperationId4;
   expected_revision: ExpectedRevision3;
   target_id: TargetId;
 }
 export interface TranslationMutation {
-  id: Id18;
+  id: Id19;
   operation_id: OperationId5;
   expected_revision: ExpectedRevision4;
 }
 export interface TranslationGroupMutation {
-  id: Id19;
+  id: Id20;
   operation_id: OperationId6;
   expected_revision: ExpectedRevision5;
   members: Members1;

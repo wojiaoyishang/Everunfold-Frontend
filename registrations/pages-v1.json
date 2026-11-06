@@ -1,0 +1,79 @@
+{
+  "protocol": "pages-1",
+  "pages": [
+    {
+      "id": "core.people",
+      "version": "1.0.0",
+      "title": "一路有你",
+      "path": "/links",
+      "description": "记录同行的人，珍藏沿途的寄语。",
+      "fields": [
+        {
+          "key": "intro",
+          "label": "页面介绍",
+          "kind": "textarea",
+          "default": "有些相遇，让旅途有了温度。点开一个名字，读一段留给彼此的话。",
+          "max_length": 2000
+        },
+        {
+          "key": "search_enabled",
+          "label": "显示人物搜索",
+          "kind": "boolean",
+          "default": true
+        },
+        {
+          "key": "layout",
+          "label": "人物布局",
+          "kind": "select",
+          "default": "cloud",
+          "choices": [
+            "cloud",
+            "cards"
+          ],
+          "choice_labels": {
+            "cloud": "姓名云",
+            "cards": "人物卡片"
+          }
+        },
+        {
+          "key": "people",
+          "label": "人物",
+          "kind": "list",
+          "default": [],
+          "max_items": 300,
+          "fields": [
+            {
+              "key": "name",
+              "label": "姓名",
+              "kind": "text",
+              "default": "",
+              "max_length": 80,
+              "min_length": 1
+            },
+            {
+              "key": "group",
+              "label": "分组",
+              "kind": "text",
+              "default": "同行者",
+              "max_length": 80
+            },
+            {
+              "key": "avatar_url",
+              "label": "头像地址",
+              "kind": "url",
+              "default": "",
+              "max_length": 2048
+            },
+            {
+              "key": "message",
+              "label": "寄语",
+              "kind": "textarea",
+              "default": "",
+              "max_length": 5000
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

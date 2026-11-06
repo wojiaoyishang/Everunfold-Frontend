@@ -6,6 +6,7 @@ const paths = {
   video: "M3 5h13v14H3V5Zm13 5 5-3v10l-5-3M7 9l5 3-5 3V9Z",
   formula: "M18 4H7l7 8-7 8h11M7 4H5M7 20H5",
   type: "M4 4h16M12 4v16M8 20h8M4 4v3M20 4v3",
+  save: "M4 3h13l4 4v14H3V3h1ZM7 3v6h10V3M7 21v-8h10v8",
   download: "M12 3v12m-5-5 5 5 5-5M4 17v4h16v-4",
   underline: "M6 3v7a6 6 0 0 0 12 0V3M4 21h16",
   "align-left": "M3 5h18M3 10h12M3 15h18M3 20h12",
@@ -43,6 +44,11 @@ const paths = {
   grid: "M3 3h7v7H3V3ZM14 3h7v7h-7V3ZM3 14h7v7H3v-7ZM14 14h7v7h-7v-7Z",
   image: "M4 4h16v16H4V4ZM4 16l5-5 5 5 3-3 3 3M15 8h.01",
   upload: "M12 16V3m-5 5 5-5 5 5M4 16v5h16v-5",
+  desktop: "M3 4h18v13H3V4ZM12 17v4M8 21h8",
+  tablet:
+    "M6 2h12a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1ZM11 19h2",
+  phone:
+    "M8 2h8a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1ZM11 19h2",
   sidebar: "M3 4h18v16H3V4ZM9 4v16",
 
   lock: "M6 10h12v11H6V10ZM8 10V6a4 4 0 0 1 8 0v4M12 14v3",

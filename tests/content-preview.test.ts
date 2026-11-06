@@ -7,6 +7,10 @@ import {
   previewContent,
 } from "../src/core/content-management/preview";
 import { isManagementRoute, loginReturnPath } from "../src/core/auth/routes";
+import {
+  checkedLiveContent,
+  editorPreviewContent,
+} from "../src/core/preview/content";
 import { renderContent } from "../src/core/rendering/content";
 
 const id = "00000000-0000-4000-8000-000000000001";
@@ -99,4 +103,28 @@ test("draft preview reuses safe content rendering and conditional feature detect
   assert.doesNotMatch(result.html, /<script|alert\(1\)/);
   assert.match(result.html, /https:\/\/files.example\/cover.png/);
   assert.equal(source.published_revision, null);
+});
+
+test("embedded live content uses the current draft projection without sending its password", () => {
+  const source = draft();
+  const fields = {
+    title: "即时标题",
+    body: [{ id, type: "markdown" as const, content: "即时正文" }],
+    settings: source.settings,
+    access_password: "private-do-not-forward",
+  };
+  const content = editorPreviewContent(source, fields, source.media_urls ?? {});
+  assert.equal(content.title, "即时标题");
+  assert.equal(content.content[0].content, "即时正文");
+  assert.doesNotMatch(
+    JSON.stringify(content),
+    /private-do-not-forward|access_password/,
+  );
+  assert.ok(checkedLiveContent(content, "article", id));
+  assert.equal(checkedLiveContent(content, "shuoshuo", id), null);
+  assert.equal(checkedLiveContent(content, "article", mediaId), null);
+  assert.equal(
+    checkedLiveContent({ ...content, author: undefined }, "article", id),
+    null,
+  );
 });

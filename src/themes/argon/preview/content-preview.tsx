@@ -1,8 +1,9 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import { useMemo } from "react";
-import type { Site, Taxonomy } from "@/core/content/types";
+import { useEffect, useMemo, useState } from "react";
+import type { Content, Site, Taxonomy } from "@/core/content/types";
+import { checkedLiveContent } from "@/core/preview/content";
 import { previewContent } from "@/core/content-management/preview";
 import { useContentPreview } from "@/core/content-management/use-content-preview";
 import { presentLegacyContent } from "@/core/content/presentation";
@@ -28,14 +29,34 @@ export function ContentPreview({
   terms: Taxonomy[];
 }) {
   const { detail, error, baseUrl, retry } = useContentPreview(type, id);
+  const [liveContent, setLiveContent] = useState<Content | null>(null);
+  useEffect(() => {
+    if (window.parent === window) return;
+    const receive = (event: MessageEvent) => {
+      if (
+        event.origin !== window.location.origin ||
+        event.source !== window.parent ||
+        event.data?.type !== "everunfold:content-preview"
+      )
+        return;
+      const value = checkedLiveContent(event.data.content, type, id);
+      if (value) setLiveContent(value);
+    };
+    window.addEventListener("message", receive);
+    window.parent.postMessage(
+      { type: "everunfold:content-preview-ready", id },
+      window.location.origin,
+    );
+    return () => window.removeEventListener("message", receive);
+  }, [type, id]);
   const presentation = useMemo(() => {
     if (!detail) return null;
-    const content = previewContent(detail, terms);
+    const content = liveContent ?? previewContent(detail, terms);
     return {
       content,
       rendered: renderContent(content, site?.settings?.shortcodes),
     };
-  }, [detail, terms, site?.settings?.shortcodes]);
+  }, [detail, liveContent, terms, site?.settings?.shortcodes]);
   const back = `/admin/content/${type}/${id}/edit`;
   if (!site)
     return (
@@ -82,7 +103,19 @@ export function ContentPreview({
             <Icon name="refresh" />
             <UiText text="刷新预览" />
           </Button>
-          <RouteLink className={styles.button} href={back}>
+          <RouteLink
+            className={styles.button}
+            href={back}
+            onClick={(event) => {
+              if (window.parent !== window) {
+                event.preventDefault();
+                window.parent.postMessage(
+                  { type: "everunfold:focus-editor", id },
+                  window.location.origin,
+                );
+              }
+            }}
+          >
             <Icon name="edit" />
             <UiText text="返回编辑" />
           </RouteLink>

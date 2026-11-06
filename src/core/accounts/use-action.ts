@@ -33,7 +33,9 @@ export function accountFailure(error: unknown): string {
 }
 
 /** One in-flight command; an unchanged failed request retains its idempotency ID. */
-export function useAccountAction() {
+export function useAccountAction(
+  failure: (error: unknown) => string = accountFailure,
+) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const running = useRef<AbortController | null>(null);
@@ -61,7 +63,7 @@ export function useAccountAction() {
       setMessage(success);
       return true;
     } catch (error) {
-      if (!controller.signal.aborted) setMessage(accountFailure(error));
+      if (!controller.signal.aborted) setMessage(failure(error));
       return false;
     } finally {
       if (running.current === controller) running.current = null;

@@ -1,18 +1,19 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
 
 import { useEffect, useRef, useState } from "react";
 import type { DraftDetail } from "@/generated/content-admin-contract";
 import { contentPreviewPath } from "@/core/content-management/preview";
 import { useToast } from "../../components/ui/toast/toast-provider";
-import { Button } from "../../components/ui/primitives";
-import { Icon } from "../../components/icon";
+import { PreviewAction } from "../components/preview-action";
+import { livePreviewPath } from "@/core/preview/routes";
 
 export function FrontendPreviewButton({
   needsSave,
   disabled,
   prepare,
+  mode = "preview",
 }: {
+  mode?: "preview" | "live";
   needsSave: boolean;
   disabled: boolean;
   prepare: () => Promise<DraftDetail | null>;
@@ -48,7 +49,12 @@ export function FrontendPreviewButton({
         popup.close();
         return;
       }
-      popup.location.replace(contentPreviewPath(draft.type_id, draft.id));
+      popup.location.replace(
+        mode === "live" &&
+          (draft.type_id === "article" || draft.type_id === "shuoshuo")
+          ? livePreviewPath(draft.type_id, draft.id)
+          : contentPreviewPath(draft.type_id, draft.id),
+      );
     } catch {
       popup.close();
       toast.show({
@@ -62,23 +68,23 @@ export function FrontendPreviewButton({
     }
   };
   return (
-    <Button
-      className="admin-button admin-editor-preview-action"
+    <PreviewAction
+      icon={pending ? "refresh" : mode === "live" ? "sidebar" : "external"}
+      label={
+        pending
+          ? "正在准备预览"
+          : mode === "live"
+            ? "实时预览"
+            : needsSave
+              ? "保存并预览"
+              : "前台预览"
+      }
+      description={
+        mode === "live" ? "在独立窗口中查看页面并编辑" : "在新窗口查看前台预览"
+      }
       disabled={disabled || pending}
       aria-busy={pending}
       onClick={() => void open()}
-    >
-      <Icon
-        name={pending ? "refresh" : "external"}
-        className={pending ? "admin-spinning" : undefined}
-      />
-      {pending ? (
-        <UiText text="正在准备预览" />
-      ) : needsSave ? (
-        <UiText text="保存并预览" />
-      ) : (
-        <UiText text="前台预览" />
-      )}
-    </Button>
+    />
   );
 }

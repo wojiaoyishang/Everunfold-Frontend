@@ -1,0 +1,835 @@
+{
+  "$defs": {
+    "JsonValue": {},
+    "ManagedPageCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/ManagedPageSummary"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "ManagedPageCatalog",
+      "type": "object"
+    },
+    "ManagedPageItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "custom",
+            "registered"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "implementation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Implementation Id"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "applied_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Applied Revision"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "value": {
+          "$ref": "#/$defs/PageValue"
+        },
+        "registration": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PageRegistration"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        },
+        "archived": {
+          "title": "Archived",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "implementation_id",
+        "revision",
+        "applied_revision",
+        "enabled",
+        "value",
+        "registration",
+        "available",
+        "updated_at",
+        "archived"
+      ],
+      "title": "ManagedPageItem",
+      "type": "object"
+    },
+    "ManagedPageSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "custom",
+            "registered"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "implementation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Implementation Id"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "applied_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Applied Revision"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "archived": {
+          "title": "Archived",
+          "type": "boolean"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "source",
+        "implementation_id",
+        "title",
+        "path",
+        "description",
+        "revision",
+        "applied_revision",
+        "enabled",
+        "available",
+        "archived",
+        "updated_at"
+      ],
+      "title": "ManagedPageSummary",
+      "type": "object"
+    },
+    "PageManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "protocol": {
+          "const": "pages-1",
+          "default": "pages-1",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/PageRegistration"
+          },
+          "maxItems": 100,
+          "title": "Pages",
+          "type": "array"
+        }
+      },
+      "required": [
+        "pages"
+      ],
+      "title": "PageManifest",
+      "type": "object"
+    },
+    "PageMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "page_id": {
+          "format": "uuid",
+          "title": "Page Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "value": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Value",
+          "type": "object"
+        }
+      },
+      "required": [
+        "page_id",
+        "revision"
+      ],
+      "title": "PageMetadata",
+      "type": "object"
+    },
+    "PageOption": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "pattern": "^[a-z][a-z0-9_]{0,47}$",
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "text",
+            "textarea",
+            "url",
+            "boolean",
+            "select",
+            "list"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "default": {
+          "$ref": "#/$defs/JsonValue"
+        },
+        "min_length": {
+          "default": 0,
+          "maximum": 10000,
+          "minimum": 0,
+          "title": "Min Length",
+          "type": "integer"
+        },
+        "choice_labels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Choice Labels",
+          "type": "object"
+        },
+        "max_length": {
+          "default": 200,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Max Length",
+          "type": "integer"
+        },
+        "max_items": {
+          "default": 100,
+          "maximum": 300,
+          "minimum": 1,
+          "title": "Max Items",
+          "type": "integer"
+        },
+        "choices": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Choices",
+          "type": "array"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/PageOption"
+          },
+          "maxItems": 20,
+          "title": "Fields",
+          "type": "array"
+        }
+      },
+      "required": [
+        "key",
+        "label",
+        "kind"
+      ],
+      "title": "PageOption",
+      "type": "object"
+    },
+    "PageRegistration": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_-]*\\.[a-z][a-z0-9_.-]{0,63}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "title": "Version",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 500,
+          "minLength": 2,
+          "title": "Path",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/PageOption"
+          },
+          "maxItems": 30,
+          "title": "Fields",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "title",
+        "path"
+      ],
+      "title": "PageRegistration",
+      "type": "object"
+    },
+    "PageValue": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 500,
+          "minLength": 2,
+          "title": "Path",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "allow_indexing": {
+          "default": true,
+          "title": "Allow Indexing",
+          "type": "boolean"
+        },
+        "enabled": {
+          "default": false,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "html": {
+          "default": "",
+          "maxLength": 200000,
+          "title": "Html",
+          "type": "string"
+        },
+        "css": {
+          "default": "",
+          "maxLength": 100000,
+          "title": "Css",
+          "type": "string"
+        },
+        "javascript": {
+          "default": "",
+          "maxLength": 100000,
+          "title": "Javascript",
+          "type": "string"
+        },
+        "javascript_enabled": {
+          "default": false,
+          "title": "Javascript Enabled",
+          "type": "boolean"
+        },
+        "options": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Options",
+          "type": "object"
+        }
+      },
+      "required": [
+        "title",
+        "path"
+      ],
+      "title": "PageValue",
+      "type": "object"
+    },
+    "PublicManagedPage": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 500,
+          "minLength": 2,
+          "title": "Path",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "allow_indexing": {
+          "default": true,
+          "title": "Allow Indexing",
+          "type": "boolean"
+        },
+        "enabled": {
+          "const": true,
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "html": {
+          "default": "",
+          "maxLength": 200000,
+          "title": "Html",
+          "type": "string"
+        },
+        "css": {
+          "default": "",
+          "maxLength": 100000,
+          "title": "Css",
+          "type": "string"
+        },
+        "javascript": {
+          "default": "",
+          "maxLength": 100000,
+          "title": "Javascript",
+          "type": "string"
+        },
+        "javascript_enabled": {
+          "default": false,
+          "title": "Javascript Enabled",
+          "type": "boolean"
+        },
+        "options": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Options",
+          "type": "object"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "custom",
+            "registered"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "implementation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implementation Id"
+        },
+        "implementation_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implementation Version"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "title",
+        "path",
+        "id",
+        "source",
+        "revision"
+      ],
+      "title": "PublicManagedPage",
+      "type": "object"
+    },
+    "PublicResponse_ManagedPageCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/ManagedPageCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[ManagedPageCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_ManagedPageItem_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/ManagedPageItem"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[ManagedPageItem]",
+      "type": "object"
+    },
+    "PublicResponse_PageMetadata_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/PageMetadata"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[PageMetadata]",
+      "type": "object"
+    },
+    "RemoveManagedPage": {
+      "additionalProperties": false,
+      "properties": {
+        "restore": {
+          "default": false,
+          "title": "Restore",
+          "type": "boolean"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "expected_revision",
+        "operation_id"
+      ],
+      "title": "RemoveManagedPage",
+      "type": "object"
+    },
+    "SaveManagedPage": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 0,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "value": {
+          "$ref": "#/$defs/PageValue"
+        },
+        "apply": {
+          "default": false,
+          "title": "Apply",
+          "type": "boolean"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "current_password": {
+          "default": "",
+          "maxLength": 1024,
+          "title": "Current Password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "expected_revision",
+        "value",
+        "operation_id"
+      ],
+      "title": "SaveManagedPage",
+      "type": "object"
+    },
+    "SavePageMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_revision": {
+          "minimum": 0,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "value": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Value",
+          "type": "object"
+        }
+      },
+      "required": [
+        "expected_revision",
+        "operation_id"
+      ],
+      "title": "SavePageMetadata",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "catalog": {
+      "$ref": "#/$defs/PublicResponse_ManagedPageCatalog_"
+    },
+    "item": {
+      "$ref": "#/$defs/PublicResponse_ManagedPageItem_"
+    },
+    "save": {
+      "$ref": "#/$defs/SaveManagedPage"
+    },
+    "remove": {
+      "$ref": "#/$defs/RemoveManagedPage"
+    },
+    "manifest": {
+      "$ref": "#/$defs/PageManifest"
+    },
+    "public_page": {
+      "$ref": "#/$defs/PublicManagedPage"
+    },
+    "metadata": {
+      "$ref": "#/$defs/PublicResponse_PageMetadata_"
+    },
+    "save_metadata": {
+      "$ref": "#/$defs/SavePageMetadata"
+    }
+  },
+  "required": [
+    "catalog",
+    "item",
+    "save",
+    "remove",
+    "manifest",
+    "public_page",
+    "metadata",
+    "save_metadata"
+  ],
+  "title": "PagesContract",
+  "type": "object",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "x-everunfold-contract-version": "1.1.0",
+  "x-everunfold-operations": [
+    {
+      "name": "readPageMetadata",
+      "path": "/v1/admin/pages/{page_id}/metadata",
+      "method": "GET",
+      "response": "metadata"
+    },
+    {
+      "name": "savePageMetadata",
+      "path": "/v1/admin/pages/{page_id}/metadata",
+      "method": "PATCH",
+      "input": "save_metadata",
+      "response": "metadata"
+    },
+    {
+      "name": "readManagedPage",
+      "path": "/v1/admin/pages/{page_id}",
+      "method": "GET",
+      "response": "item"
+    },
+    {
+      "name": "readManagedPages",
+      "path": "/v1/admin/pages",
+      "method": "GET",
+      "response": "catalog"
+    },
+    {
+      "name": "saveManagedPage",
+      "path": "/v1/admin/pages/save",
+      "method": "POST",
+      "input": "save",
+      "response": "item"
+    },
+    {
+      "name": "removeManagedPage",
+      "path": "/v1/admin/pages/remove",
+      "method": "POST",
+      "input": "remove",
+      "response": "item"
+    }
+  ]
+}

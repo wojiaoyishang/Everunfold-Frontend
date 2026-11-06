@@ -1,3 +1,5 @@
+import { resolveManagedPage } from "@/core/pages/resolve";
+import { ManagedPageView } from "@/themes/argon/pages/view";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
@@ -19,6 +21,24 @@ export async function generateMetadata({
 }: Parameters): Promise<Metadata> {
   const snapshot = await readPublicSnapshot();
   const { contentPath } = await params;
+  const managed = resolveManagedPage(snapshot, `/${contentPath.join("/")}`);
+  if (managed)
+    return {
+      title: managed.title,
+      description: managed.description || undefined,
+      robots: {
+        index:
+          managed.allow_indexing !== false &&
+          snapshot.site.settings?.site.allow_indexing !== false,
+        follow: true,
+      },
+      alternates: readConfiguration().publicSiteUrl
+        ? {
+            canonical: new URL(managed.path, readConfiguration().publicSiteUrl!)
+              .href,
+          }
+        : undefined,
+    };
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
   if (codePath) return codePageMetadata(snapshot, codePath);
   const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
@@ -40,6 +60,8 @@ export default async function ContentPage({
     params,
     searchParams,
   ]);
+  const managed = resolveManagedPage(snapshot, `/${contentPath.join("/")}`);
+  if (managed) return <ManagedPageView page={managed} />;
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
   if (codePath)
     return (

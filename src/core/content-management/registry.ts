@@ -17,7 +17,7 @@ export const contentAdminModule: AdminModuleRegistration = {
       matchesChild: (pathname: string) =>
         pathname === `/admin/content/${type.id}/new` ||
         new RegExp(
-          `^/admin/content/${type.id}/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/(?:edit|preview|versions)$`,
+          `^/admin/content/${type.id}/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/(?:edit|preview|versions|live)$`,
           "i",
         ).test(pathname),
       label: type.label,
@@ -29,7 +29,12 @@ export const contentAdminModule: AdminModuleRegistration = {
       id: "content.pages",
       href: "/admin/pages",
       label: "页面",
-      description: "代码页面目录",
+      description: "自定义与前端注册页面",
+      matchesChild: (path: string) =>
+        path === "/admin/pages/new" ||
+        /^\/admin\/pages\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}(?:\/(?:preview|live))?$/i.test(
+          path,
+        ),
       icon: "content",
       menu: { group: "content.types", order: 90 },
     },

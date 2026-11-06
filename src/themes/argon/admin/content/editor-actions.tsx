@@ -52,7 +52,7 @@ export function EditorActions({
         onClick={() => onSave("save")}
       >
         <Icon
-          name={busy ? "refresh" : "check"}
+          name={busy ? "refresh" : "save"}
           className={busy ? "admin-draft-spin" : ""}
         />
         {busy ? (

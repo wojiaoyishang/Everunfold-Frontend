@@ -119,6 +119,12 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/content/article/00000000-0000-0000-0000-000000000001/versions",
       "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/versions",
       "/admin/pages",
+      "/admin/pages/new",
+      "/admin/pages/00000000-0000-0000-0000-000000000001",
+      "/admin/pages/00000000-0000-0000-0000-000000000001/preview",
+      "/admin/pages/00000000-0000-0000-0000-000000000001/live",
+      "/admin/content/article/00000000-0000-0000-0000-000000000001/live",
+      "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/live",
       "/admin/media",
       "/admin/icons",
       "/admin/fonts",
@@ -215,6 +221,22 @@ directory = "./var/absent-admin-verification-cache"
       [],
       "plain articles must not declare code/math assets",
     );
+    const customPage = await fetch(base + "/custom-page");
+    assert.equal(customPage.status, 200);
+    const customHTML = await customPage.text();
+    assert.match(customHTML, /自定义页面样例/);
+    assert.match(
+      customHTML,
+      /sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"/,
+    );
+    assert.doesNotMatch(customHTML, /allow-same-origin/);
+    const peoplePage = await fetch(base + "/people-page");
+    assert.equal(peoplePage.status, 200);
+    assert.match(await peoplePage.text(), /Fixture Person/);
+    assert.equal((await fetch(base + "/unavailable-page")).status, 503);
+    console.log(
+      "Managed pages: isolated source 200, registered people 200, unavailable implementation 503.",
+    );
     const richArticle = await fetch(base + "/second.html");
     assert.equal(richArticle.status, 200);
     const richHtml = await richArticle.text();
@@ -290,6 +312,11 @@ directory = "./var/absent-admin-verification-cache"
     });
     assert.equal(chinese.status, 200);
     assert.match(await chinese.text(), /<html[^>]*lang="zh-CN"/);
+    assert.equal(
+      (await fetch(base + "/people-page")).status,
+      200,
+      "explicit page paths survive a default language prefix",
+    );
     const english = await fetch(base + "/custom-english.html");
     assert.equal(english.status, 200);
     assert.equal(english.headers.get("content-language"), "en");
@@ -339,6 +366,8 @@ directory = "./var/absent-admin-verification-cache"
       404,
       "withdrawn content must not reappear from the retained legacy snapshot",
     );
+    assert.equal((await fetch(base + "/custom-page")).status, 404);
+    assert.equal((await fetch(base + "/people-page")).status, 404);
     console.log(
       "Managed public releases passed: offline reading 200, withdrawal 404 without restarting Next.js.",
     );

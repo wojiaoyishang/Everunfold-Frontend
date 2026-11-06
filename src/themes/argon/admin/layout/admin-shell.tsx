@@ -1,11 +1,13 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { AuthUser } from "@/generated/auth-contract";
 import type { AdminPreferences } from "@/core/admin/preferences";
 import { adminDestination } from "@/core/admin/navigation";
+import { isLivePreviewPath } from "@/core/preview/routes";
+import { isManagedPagePreviewPath } from "@/core/pages/preview";
 import { isContentPreviewPath } from "@/core/content-management/preview";
 import { Icon } from "../../components/icon";
 import { Button } from "../../components/ui/primitives";
@@ -32,6 +34,23 @@ export function AdminShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const [embedded] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      window.parent !== window &&
+      window.name.startsWith("everunfold-live-editor"),
+  );
+  useEffect(() => {
+    if (embedded)
+      window.parent.postMessage(
+        {
+          type: "everunfold:embedded-location",
+          path: window.location.pathname + window.location.search,
+        },
+        window.location.origin,
+      );
+  }, [embedded, pathname]);
+
   const destination = adminDestination(pathname);
   const name = user.display_name || user.username;
   const capability = adminRoutePermission(pathname);
@@ -39,9 +58,31 @@ export function AdminShell({
     (!capability || can(user, capability)) &&
     (!/\/(?:new|edit)$/.test(pathname) ||
       can(user, "content:write") ||
-      pathname.startsWith("/admin/users"));
+      pathname.startsWith("/admin/users") ||
+      (pathname.startsWith("/admin/pages") && can(user, "pages:write")));
   // Keep the confirmed account/request boundary, while the preview owns the public theme shell.
-  if (allowed && destination && isContentPreviewPath(pathname)) return children;
+  if (
+    allowed &&
+    destination &&
+    (isContentPreviewPath(pathname) ||
+      isManagedPagePreviewPath(pathname) ||
+      isLivePreviewPath(pathname))
+  )
+    return children;
+  if (allowed && destination && embedded)
+    return (
+      <AdminLanguageCatalog>
+        <main
+          className="admin-root admin-embedded-editor"
+          data-surface="admin"
+          data-admin-mode={preferences.mode}
+          data-density="compact"
+          data-admin-motion={preferences.motion}
+        >
+          {children}
+        </main>
+      </AdminLanguageCatalog>
+    );
   return (
     <AdminLanguageCatalog>
       <div

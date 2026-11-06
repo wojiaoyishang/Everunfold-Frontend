@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { hasPublicRoute } from "@/core/content/routes";
+import { resolveManagedPage } from "@/core/pages/resolve";
 import { resolveContent } from "@/core/content/query";
 import { failureDocument } from "@/themes/argon/failure/document";
 import { isManagementRoute } from "@/core/auth/routes";
@@ -42,6 +43,7 @@ export async function proxy(request: NextRequest) {
       snapshot.site.settings?.site.language_catalog,
     );
     const content = resolveContent(snapshot, path);
+    const managed = resolveManagedPage(snapshot, path);
     const locale = content
       ? localeOf(content.language)
       : localePath(path, catalog);
@@ -61,6 +63,7 @@ export async function proxy(request: NextRequest) {
     )!;
     if (
       !content &&
+      !managed &&
       !codePath &&
       defaultLanguage.prefix &&
       hasPublicRoute(snapshot, path)
@@ -71,7 +74,10 @@ export async function proxy(request: NextRequest) {
       redirect.headers.set("Cache-Control", "no-store");
       return redirect;
     }
-    if ((!content && !active) || !hasPublicRoute(snapshot, codePath ?? path)) {
+    if (
+      (!content && !managed && !active) ||
+      !hasPublicRoute(snapshot, codePath ?? path)
+    ) {
       return new NextResponse(failureDocument(404), {
         status: 404,
         headers: {

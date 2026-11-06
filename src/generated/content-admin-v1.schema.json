@@ -1400,6 +1400,7 @@
       "title": "FontInfo",
       "type": "object"
     },
+    "JsonValue": {},
     "LanguageCatalog": {
       "additionalProperties": false,
       "properties": {
@@ -1580,6 +1581,121 @@
         "created_at"
       ],
       "title": "PublicComment",
+      "type": "object"
+    },
+    "PublicManagedPage": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 120,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 500,
+          "minLength": 2,
+          "title": "Path",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "allow_indexing": {
+          "default": true,
+          "title": "Allow Indexing",
+          "type": "boolean"
+        },
+        "enabled": {
+          "const": true,
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "html": {
+          "default": "",
+          "maxLength": 200000,
+          "title": "Html",
+          "type": "string"
+        },
+        "css": {
+          "default": "",
+          "maxLength": 100000,
+          "title": "Css",
+          "type": "string"
+        },
+        "javascript": {
+          "default": "",
+          "maxLength": 100000,
+          "title": "Javascript",
+          "type": "string"
+        },
+        "javascript_enabled": {
+          "default": false,
+          "title": "Javascript Enabled",
+          "type": "boolean"
+        },
+        "options": {
+          "additionalProperties": {
+            "$ref": "#/$defs/JsonValue"
+          },
+          "title": "Options",
+          "type": "object"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "custom",
+            "registered"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "implementation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implementation Id"
+        },
+        "implementation_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implementation Version"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "title",
+        "path",
+        "id",
+        "source",
+        "revision"
+      ],
+      "title": "PublicManagedPage",
       "type": "object"
     },
     "PublicResponse_ContentActions_": {
@@ -1810,14 +1926,15 @@
       "additionalProperties": false,
       "properties": {
         "schema_version": {
-          "default": "0.6.0",
+          "default": "0.7.0",
           "enum": [
             "0.1.0",
             "0.2.0",
             "0.3.0",
             "0.4.0",
             "0.5.0",
-            "0.6.0"
+            "0.6.0",
+            "0.7.0"
           ],
           "title": "Schema Version",
           "type": "string"
@@ -1862,6 +1979,13 @@
             "$ref": "#/$defs/TaxonomyDTO"
           },
           "title": "Taxonomies",
+          "type": "array"
+        },
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/PublicManagedPage"
+          },
+          "title": "Pages",
           "type": "array"
         }
       },
@@ -2442,7 +2566,7 @@
   "title": "ContentAdminContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.9.0",
+  "x-everunfold-contract-version": "1.10.0",
   "x-everunfold-content-types": [
     {
       "id": "article",

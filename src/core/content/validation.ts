@@ -49,6 +49,26 @@ export function parsePublicSnapshot(input: unknown): PublicSnapshot {
     )
   )
     throw new Error("Invalid public content path");
+  const pageIds = new Set<string>();
+  for (const page of input.pages ?? []) {
+    const normalized = normalizePath(page.path);
+    if (
+      !page.path.startsWith("/") ||
+      page.path.startsWith("//") ||
+      /\/{2}|(?:^|\/)\.{1,2}(?:\/|$)/.test(page.path) ||
+      pageIds.has(page.id) ||
+      ids.has(page.id) ||
+      paths.has(normalized) ||
+      /^\/(?:admin|account|login|api|v1|internal|_next|reference|media|archives|article|categories|category|tag|tags|search|ss)(?:\/|$)/i.test(
+        page.path,
+      ) ||
+      normalized !== page.path ||
+      /[\\?#%\u0000-\u001f]/.test(page.path)
+    )
+      throw new Error("Invalid or duplicate managed page path");
+    pageIds.add(page.id);
+    paths.add(normalized);
+  }
   if (Object.keys(input.comments).some((contentId) => !ids.has(contentId)))
     throw new Error("Comments refer to unavailable content");
   return input;
