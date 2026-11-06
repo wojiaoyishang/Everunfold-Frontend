@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/themes/argon/components/ui/primitives";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, type CSSProperties, type ReactNode } from "react";
 import {
   installScrollBehavior,
   scrollToAnchor,
@@ -39,15 +39,6 @@ export function FloatingTools() {
   useEffect(() => installScrollBehavior(navigateToAnchor), []);
   return (
     <div className="floating-tools" role="group" aria-label="阅读工具">
-      <ToolSlot visible={reading.showProgress}>
-        <div
-          className="reading-progress"
-          aria-label={`阅读进度 ${reading.progress}%`}
-          style={{ backgroundSize: `${reading.progress}% 100%` }}
-        >
-          {reading.progress}%
-        </div>
-      </ToolSlot>
       <ToolSlot visible={scroll >= 400}>
         <Button
           className="floating-button back-to-top"
@@ -75,6 +66,21 @@ export function FloatingTools() {
       </ToolSlot>
       <ToolSlot>
         <ReadingSettings />
+      </ToolSlot>
+      <ToolSlot visible={reading.showProgress}>
+        <div
+          className="reading-progress"
+          role="progressbar"
+          aria-label="阅读进度"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={reading.progress}
+          style={
+            { "--reading-progress": `${reading.progress}%` } as CSSProperties
+          }
+        >
+          <span>{reading.progress}%</span>
+        </div>
       </ToolSlot>
     </div>
   );

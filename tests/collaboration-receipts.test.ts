@@ -72,3 +72,37 @@ test("owner support keeps commit receipt UUID and unknown-field validation stric
     );
   }
 });
+
+test("scheduled collaboration receipts accept plan metadata without exposing frozen private payloads", async () => {
+  const value = receipt();
+  Object.assign(value.data.draft, {
+    scheduled_for: "2030-01-01T00:00:00Z",
+    scheduled_revision: 2,
+    schedule_error: null,
+  });
+  const response = await commitCollaborationDraft(
+    "https://api.example.test",
+    {
+      ...input,
+      action: "schedule",
+      scheduled_for: "2030-01-01T00:00:00Z",
+    },
+    "test-csrf",
+    { fetcher: async () => Response.json(value) },
+  );
+  assert.equal(response.data.draft.scheduled_revision, 2);
+  for (const patch of [
+    { scheduled_for: "invalid" },
+    { scheduled_payload: {} },
+  ]) {
+    await assert.rejects(() =>
+      commitCollaborationDraft("https://api.example.test", input, "test-csrf", {
+        fetcher: async () =>
+          Response.json({
+            ...value,
+            data: { ...value.data, draft: { ...value.data.draft, ...patch } },
+          }),
+      }),
+    );
+  }
+});

@@ -1,5 +1,5 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 
 import type {
   ContentTypeDefinition,
@@ -49,6 +49,7 @@ export function DraftListRow({
   disabled: boolean;
   onAction: () => void;
 }) {
+  const t = useT();
   const icon = type.icon === "leaf" ? "leaf" : "book";
   const editable = can(
     useAdminAccount(),
@@ -57,10 +58,22 @@ export function DraftListRow({
   );
   const destination = `/admin/content/${type.id}/${item.id}/${editable ? "edit" : "preview"}`;
   const cover = resourceUrl(item.cover_url);
-  const date = item.published_revision
-    ? (item.published_at ?? item.updated_at)
-    : item.updated_at;
-  const status = trash ? "已回收" : item.published_revision ? "已发布" : "草稿";
+  const date =
+    item.scheduled_for ??
+    (item.published_revision
+      ? (item.published_at ?? item.updated_at)
+      : item.updated_at);
+  const status = trash
+    ? "已回收"
+    : item.scheduled_for
+      ? item.published_revision
+        ? "已发布 · 待定时更新"
+        : "待定时发布"
+      : item.schedule_error
+        ? "定时发布失败"
+        : item.published_revision
+          ? "已发布"
+          : "草稿";
   return (
     <article role="row" className={styles.row}>
       <div role="rowheader" className={styles.titleCell}>
@@ -84,6 +97,18 @@ export function DraftListRow({
                 <UiText text="未命名说说" />
               )}
             </RouteLink>
+            {!trash && item.published_revision && item.public_path ? (
+              <RouteLink
+                className={styles.publicLink}
+                href={item.public_path}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="在前台打开"
+                aria-label={`${t("在前台打开")} ${item.title || t("说说")}`}
+              >
+                <Icon name="external" />
+              </RouteLink>
+            ) : null}
             {item.pinned && (
               <span className={styles.badge}>
                 <UiText text="置顶" />
@@ -102,6 +127,7 @@ export function DraftListRow({
                 original={item.id}
                 disabled={disabled}
                 readOnly={!editable}
+                publicLinks
               />
             ) : null}
           </div>
@@ -148,6 +174,7 @@ export function DraftListRow({
       <div role="cell" className={styles.actions}>
         {!trash && (
           <RouteLink className="admin-button" href={destination} showPending>
+            <Icon name={editable ? "edit" : "eye"} />
             <UiText text={editable ? "编辑" : "查看"} />
           </RouteLink>
         )}

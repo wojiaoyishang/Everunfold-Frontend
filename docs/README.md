@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[定时发布与阅读进度](decisions/0073-scheduled-content-publication.md)、[操作指南](development/content-management.md)及[本轮验收](handoff/scheduled-publication-verification.md)：冻结排期版本、可靠Worker发布及取消，页面移除通用读取按钮、列表前台入口和铅笔、右下阅读进度填充。
+
 [编辑操作组随滚动进入顶栏](handoff/editor-actions-dock-verification.md)：文章/说说保存与发布加入预览组，页面预览/保存合并并将返回列表左置；同步修复已有协作回执拥有者字段遗漏导致的保存误报。
 
 [页面管理与独立实时预览](development/pages.md)、[架构与私有元数据](architecture/registered-pages.md)、[ADR0072](decisions/0072-managed-pages-and-people-messages.md)及[验收](handoff/pages-live-preview-verification.md)：自定义HTML/CSS/可选隔离JS、注册人物分组/寄语、页面私有元数据，以及页面/文章/说说共用的左编辑右预览、三设备视图、拖动分隔和顶部原保存控件。

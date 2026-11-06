@@ -248,6 +248,50 @@ export function publishDraft(
   );
 }
 
+const scheduleDraftValidator = ajv.compile<ContentAdminContract["detail"]>({
+  $ref: "content-admin#/properties/detail",
+});
+export function scheduleDraft(
+  baseUrl: string,
+  input: ContentAdminContract["schedule"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/schedule",
+    input,
+    scheduleDraftValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const cancelDraftScheduleValidator = ajv.compile<
+  ContentAdminContract["detail"]
+>({ $ref: "content-admin#/properties/detail" });
+export function cancelDraftSchedule(
+  baseUrl: string,
+  input: ContentAdminContract["mutation"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/content/cancel-schedule",
+    input,
+    cancelDraftScheduleValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
 const withdrawDraftValidator = ajv.compile<ContentAdminContract["detail"]>({
   $ref: "content-admin#/properties/detail",
 });

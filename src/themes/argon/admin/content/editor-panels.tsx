@@ -22,6 +22,10 @@ import { Icon } from "../../components/icon";
 import { MediaPreview } from "../media/media-preview";
 import { EditorMediaDialog } from "./editor-media-dialog";
 import styles from "./editor-workspace.module.css";
+import {
+  PublicationSchedule,
+  type PublicationScheduleProps,
+} from "./publication-schedule";
 
 function Panel({
   title,
@@ -42,7 +46,7 @@ function Panel({
         aria-controls={id}
         onClick={() => setOpen(!open)}
       >
-        {title}
+        <UiText text={title} />
         <Icon name="chevron" />
       </Button>
       <div
@@ -70,8 +74,15 @@ interface PanelProps {
   onMedia: (item: MediaItem) => void;
   createCategory: CreateCategory;
   updateFields: (patch: Partial<DraftFields>) => void;
+  publication: PublicationScheduleProps;
 }
-function PublicationPanel({ settings, update, detail, disabled }: PanelProps) {
+function PublicationPanel({
+  settings,
+  update,
+  detail,
+  disabled,
+  publication,
+}: PanelProps) {
   return (
     <Panel title="发布设置">
       <dl className={styles.publicationInfo}>
@@ -94,6 +105,7 @@ function PublicationPanel({ settings, update, detail, disabled }: PanelProps) {
           <dd>{detail?.author || <UiText text="当前登录用户" />}</dd>
         </div>
       </dl>
+      <PublicationSchedule detail={detail} {...publication} />
       <div className="admin-field">
         <span>
           <UiText text="显示时间" />

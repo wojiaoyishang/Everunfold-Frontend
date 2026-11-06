@@ -77,7 +77,8 @@ export function draftError(error: unknown): string {
     if (error.code === 40954)
       return "这个访问路径已被其他内容使用，请换一个路径。";
     if (error.code === 42258)
-      return "暂不支持定时发布，请使用当前或过去的显示时间。";
+      return "显示时间不能晚于实际发布时间；延后发布请设置定时发布。";
+    if (error.code === 42257) return "请选择晚于当前时间的定时发布时间。";
     if (error.code === 42259)
       return "请先设置文章密码，再启用密码保护或定时开放。";
     if (error.status === 404) return "没有找到这份内容，请刷新列表。";
@@ -86,6 +87,15 @@ export function draftError(error: unknown): string {
       return "内容未通过校验，请检查正文、路径和内容属性。";
   }
   return "暂时无法连接，请稍后重试。";
+}
+export function validatePublicationTime(
+  value: string | null | undefined,
+): string {
+  if (!value || !Number.isFinite(Date.parse(value)))
+    return "请选择定时发布时间。";
+  if (Date.parse(value) <= Date.now())
+    return "请选择晚于当前时间的定时发布时间。";
+  return "";
 }
 export function uncertainWrite(error: unknown): boolean {
   return (

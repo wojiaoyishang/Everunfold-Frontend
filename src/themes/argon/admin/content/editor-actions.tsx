@@ -14,14 +14,16 @@ export function EditorActions({
   disabled,
   onSave,
   onWithdraw,
+  scheduled = false,
 }: {
   detail: DraftDetail | null;
   busy: boolean;
   uncertain: boolean;
   dirty: boolean;
   disabled: boolean;
-  onSave: (action: "save" | "publish") => void;
+  onSave: (action: "save" | "publish" | "schedule") => void;
   onWithdraw: () => void;
+  scheduled?: boolean;
 }) {
   const publishAllowed = can(
     useAdminAccount(),
@@ -69,10 +71,12 @@ export function EditorActions({
         <Button
           className="admin-button admin-button-primary"
           disabled={disabled}
-          onClick={() => onSave("publish")}
+          onClick={() => onSave(scheduled ? "schedule" : "publish")}
         >
-          <Icon name="send" />
-          {detail.published_revision ? (
+          <Icon name={scheduled ? "clock" : "send"} />
+          {scheduled ? (
+            <UiText text={detail.scheduled_for ? "重新安排发布" : "安排发布"} />
+          ) : detail.published_revision ? (
             <UiText text="更新发布" />
           ) : (
             <UiText text="发布" />

@@ -13,6 +13,7 @@ import {
   draftFields,
   uncertainWrite,
   validateDraft,
+  validatePublicationTime,
 } from "../src/core/content-management/draft-state";
 import { RequestError } from "../src/core/http/request";
 import {
@@ -67,6 +68,21 @@ const detail: DraftDetail = {
     },
   ],
 };
+test("scheduled publication requires a valid future instant, independent of display dates", () => {
+  assert.equal(validatePublicationTime(null), "请选择定时发布时间。");
+  assert.equal(validatePublicationTime("invalid"), "请选择定时发布时间。");
+  assert.equal(
+    validatePublicationTime("2020-01-01T00:00:00Z"),
+    "请选择晚于当前时间的定时发布时间。",
+  );
+  assert.equal(
+    validatePublicationTime(new Date(Date.now() + 3600000).toISOString()),
+    "",
+  );
+  const fields = draftFields(detail);
+  fields.settings = { display_published_at: "2020-01-01T00:00:00Z" };
+  assert.equal(validateDraft(fields, registeredContentTypes[0]), "");
+});
 test("editing preserves stable block identity and registered title requirements", () => {
   const fields = draftFields(detail);
   assert.equal(fields.body[0].id, detail.body[0].id);

@@ -6,7 +6,10 @@ import { useRouter } from "next/navigation";
 import type { ContentTypeDefinition } from "@/generated/content-admin-contract";
 import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
 import { editorPreviewContent } from "@/core/preview/content";
-import { useDraftEditor } from "@/core/content-management/use-draft-editor";
+import {
+  useDraftEditor,
+  type DraftSaveAction,
+} from "@/core/content-management/use-draft-editor";
 import { useEditorNavigation } from "@/core/content-management/use-editor-navigation";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Button } from "../../components/ui/primitives";
@@ -20,6 +23,7 @@ import { useEditorResources } from "@/core/content-management/use-editor-resourc
 import { EditorTitle } from "./editor-title";
 import { EditorActions } from "./editor-actions";
 import { EditorPanels } from "./editor-panels";
+import type { PublicationChoice } from "./publication-schedule";
 import { BlockComposer } from "./block-composer";
 import { ComposerSidebar } from "./block-library";
 import styles from "./editor-workspace.module.css";
@@ -49,6 +53,13 @@ export function DraftEditor({
   const languages = useLanguageCatalog();
   const [language, setLanguage] = useState<Locale>("");
   const editor = useDraftEditor(type, id, language || undefined);
+  const [publication, setPublication] = useState<PublicationChoice | null>(
+    null,
+  );
+  const publicationChoice = publication ?? {
+    enabled: Boolean(editor.detail?.scheduled_for),
+    at: editor.detail?.scheduled_for ?? null,
+  };
   const account = useAdminAccount();
   const router = useRouter();
   const resources = useEditorResources();
@@ -127,17 +138,21 @@ export function DraftEditor({
     editor.busy || leaving,
     requestLeave,
   );
-  const persist = async (
-    action: "save" | "publish" | "withdraw" = "save",
-    note = "",
-  ) => {
-    if (uploading && action !== "withdraw") return null;
-    const result = await editor.save(action, note);
+  const persist = async (action: DraftSaveAction = "save", note = "") => {
+    if (uploading && action !== "withdraw" && action !== "cancel_schedule")
+      return null;
+    const result = await editor.save(
+      action,
+      note,
+      action === "schedule" ? publicationChoice.at : undefined,
+    );
+    if (result && ["schedule", "cancel_schedule", "publish"].includes(action))
+      setPublication(null);
     if (result && !id)
       router.replace(`/admin/content/${type.id}/${result.id}/edit`);
     return result;
   };
-  const save = async (action: "save" | "publish" | "withdraw" = "save") =>
+  const save = async (action: DraftSaveAction = "save") =>
     Boolean(await persist(action));
   const saveDisabled =
     editor.awaitingSources ||
@@ -299,6 +314,7 @@ export function DraftEditor({
               <EmbeddedEditorActions>
                 <EditorActions
                   detail={editor.detail}
+                  scheduled={publicationChoice.enabled}
                   busy={editor.busy}
                   uncertain={editor.uncertain}
                   dirty={editor.dirty}
@@ -572,11 +588,29 @@ export function DraftEditor({
                 createCategory={resources.createCategory}
                 media={media}
                 onMedia={resources.remember}
+                publication={{
+                  choice: publicationChoice,
+                  onChange: setPublication,
+                  onCancel: () => void save("cancel_schedule"),
+                  disabled:
+                    saveDisabled ||
+                    editor.uncertain ||
+                    !can(
+                      account,
+                      "content:publish",
+                      editor.detail?.owner_id ?? null,
+                    ),
+                }}
               />
             </ComposerSidebar>
           </div>
         </BlockComposer>
-        <ContentSync refreshKey={editor.detail?.revision ?? 0} />
+        <ContentSync
+          refreshKey={
+            (editor.detail?.revision ?? 0) *
+            (editor.detail?.scheduled_for ? -1 : 1)
+          }
+        />
       </div>
     </CodePreferencesProvider>
   );

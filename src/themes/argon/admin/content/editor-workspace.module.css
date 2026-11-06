@@ -260,6 +260,62 @@
   gap: 10px;
   padding-top: 16px;
 }
+.scheduleFields {
+  display: grid;
+  gap: 12px;
+}
+.scheduleNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.scheduleNotice > :global(.icon) {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  margin-top: 2px;
+}
+.scheduleNotice > div,
+.scheduleFailure {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  overflow-wrap: anywhere;
+}
+.scheduleNotice time,
+.scheduleNotice small {
+  color: var(--admin-text);
+}
+.cancelSchedule {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  gap: 5px;
+  border: 0;
+  padding: 3px 0;
+  color: var(--admin-accent);
+  background: transparent;
+  font-size: 12px;
+}
+.cancelSchedule:hover:not(:disabled) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.cancelSchedule > :global(.icon) {
+  width: 14px;
+  height: 14px;
+}
+.scheduleFailure {
+  padding: 12px;
+  border-radius: 7px;
+  color: var(--admin-danger);
+  background: color-mix(in srgb, var(--admin-danger) 8%, var(--admin-surface));
+}
 .accessFields :global(.ui-password-field) {
   display: flex;
   width: 100%;

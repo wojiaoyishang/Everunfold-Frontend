@@ -201,12 +201,6 @@
   grid-column: 1 / -1;
 }
 
-.previewTools {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin: 22px 0 0;
-}
 .editorActions > :global(.admin-button) {
   min-height: 32px;
   padding: 5px 10px;

@@ -97,6 +97,34 @@
   font-size: 11px;
   color: var(--admin-muted);
 }
+.memberRow {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+.memberRow .member {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.viewPublished {
+  flex: 0 0 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 4px;
+  color: var(--admin-muted);
+  transition:
+    color var(--admin-motion-fast),
+    background-color var(--admin-motion-fast);
+}
+.viewPublished > :global(.icon) {
+  width: 15px;
+  height: 15px;
+}
+.viewPublished:hover {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
 .member[aria-current],
 .member:hover {
   background: var(--admin-accent-soft);

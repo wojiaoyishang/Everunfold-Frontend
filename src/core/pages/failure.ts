@@ -3,7 +3,7 @@ import { accountFailure } from "@/core/accounts/use-action";
 export function pagesFailure(error: unknown): string {
   if (error instanceof RequestError) {
     if (error.code === 40996)
-      return "页面已在其他地方修改。你的输入已保留，请读取最新版本后核对。";
+      return "页面已在其他地方修改。你的输入已保留，请先复制需要的修改，再刷新页面核对最新版本。";
     if (error.code === 40999)
       return "页面内部元数据已被修改，请读取后重新合并。";
     if (error.status === 413) return "页面数据超出请求大小限制，请缩减后重试。";

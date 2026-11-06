@@ -75,10 +75,14 @@ export type ExpectedRevision = number;
 export type Id5 = string;
 export type OperationId2 = string;
 export type ExpectedRevision1 = number;
+export type ScheduledFor = string;
+export type Id6 = string;
+export type OperationId3 = string;
+export type ExpectedRevision2 = number;
 export type Success3 = boolean;
 export type Code4 = number;
 export type Msg3 = string;
-export type Id6 = string;
+export type Id7 = string;
 export type OwnerId = string | null;
 export type TypeId3 = string;
 export type Title1 = string;
@@ -91,6 +95,9 @@ export type IsDemo = boolean;
 export type PublishedRevision = number | null;
 export type PublicPath = string | null;
 export type PublishedAt = string | null;
+export type ScheduledFor1 = string | null;
+export type ScheduledRevision = number | null;
+export type ScheduleError = string | null;
 export type CreatedAt = string;
 export type UpdatedAt = string;
 export type Language2 = string;
@@ -100,7 +107,7 @@ export type Categories1 = string[];
 export type Tags1 = string[];
 export type CommentCount = number;
 export type Pinned1 = boolean;
-export type Id7 = string;
+export type Id8 = string;
 export type OwnerId1 = string | null;
 export type TypeId4 = string;
 export type Title2 = string;
@@ -113,6 +120,9 @@ export type IsDemo1 = boolean;
 export type PublishedRevision1 = number | null;
 export type PublicPath1 = string | null;
 export type PublishedAt1 = string | null;
+export type ScheduledFor2 = string | null;
+export type ScheduledRevision1 = number | null;
+export type ScheduleError1 = string | null;
 export type CreatedAt1 = string;
 export type UpdatedAt1 = string;
 export type Language3 = string;
@@ -128,7 +138,7 @@ export type PageSize1 = number;
 export type Success4 = boolean;
 export type Code5 = number;
 export type Msg4 = string;
-export type Id8 = string;
+export type Id9 = string;
 export type OwnerId2 = string | null;
 export type TypeId5 = string;
 export type Title3 = string;
@@ -141,6 +151,9 @@ export type IsDemo2 = boolean;
 export type PublishedRevision2 = number | null;
 export type PublicPath2 = string | null;
 export type PublishedAt2 = string | null;
+export type ScheduledFor3 = string | null;
+export type ScheduledRevision2 = number | null;
+export type ScheduleError2 = string | null;
 export type CreatedAt2 = string;
 export type UpdatedAt2 = string;
 export type Language4 = string;
@@ -157,7 +170,7 @@ export type HasPassword = boolean;
 export type Success5 = boolean;
 export type Code6 = number;
 export type Msg5 = string;
-export type Id9 = string;
+export type Id10 = string;
 export type Owner = string;
 export type Label = string;
 export type Description = string;
@@ -213,14 +226,14 @@ export type SeoTitle1 = string;
 export type SeoDescription1 = string;
 export type Access = "public" | "password" | "scheduled";
 export type OpensAt1 = string | null;
-export type Id10 = string;
+export type Id11 = string;
 export type Kind1 = "article" | "shuoshuo" | "page";
 export type Title4 = string;
 export type Path1 = string;
 export type Excerpt4 = string;
 export type Language5 = string;
 export type TranslationGroupId3 = string | null;
-export type Id11 = string;
+export type Id12 = string;
 export type Language6 = string;
 export type Path2 = string;
 export type Access1 = "public" | "password" | "scheduled";
@@ -232,7 +245,7 @@ export type Author4 = string;
 export type CoverUrl1 = string | null;
 export type ReadingMinutes = number;
 export type WordCount = number;
-export type Id12 = string;
+export type Id13 = string;
 export type Slug = string;
 export type Name4 = string;
 export type Kind2 = "category" | "tag";
@@ -241,12 +254,12 @@ export type Categories3 = TaxonomyDTO[];
 export type Tags3 = TaxonomyDTO[];
 export type CommentCount1 = number;
 export type Pinned2 = boolean;
-export type Id13 = string;
+export type Id14 = string;
 export type Type1 = "markdown" | "html";
 export type Content2 = string;
 export type Content1 = ContentBlock[];
 export type Contents = ContentDetail[];
-export type Id14 = string;
+export type Id15 = string;
 export type ParentId2 = string | null;
 export type Author5 = string;
 /**
@@ -266,7 +279,7 @@ export type Css = string;
 export type Javascript = string;
 export type JavascriptEnabled = boolean;
 export type JsonValue = unknown;
-export type Id15 = string;
+export type Id16 = string;
 export type Source = "custom" | "registered";
 export type ImplementationId = string | null;
 export type ImplementationVersion = string | null;
@@ -275,26 +288,26 @@ export type Pages1 = PublicManagedPage[];
 export type Success7 = boolean;
 export type Code8 = number;
 export type Msg7 = string;
-export type Id16 = string;
+export type Id17 = string;
 export type SourceId = string;
 export type TypeId6 = string;
 export type Revision6 = number;
 export type Members = TranslationMember[];
-export type Id17 = string;
-export type OperationId3 = string;
-export type ExpectedRevision2 = number;
-export type Language7 = string;
-export type CopySource = boolean;
 export type Id18 = string;
 export type OperationId4 = string;
 export type ExpectedRevision3 = number;
-export type TargetId = string;
+export type Language7 = string;
+export type CopySource = boolean;
 export type Id19 = string;
 export type OperationId5 = string;
 export type ExpectedRevision4 = number;
+export type TargetId = string;
 export type Id20 = string;
 export type OperationId6 = string;
 export type ExpectedRevision5 = number;
+export type Id21 = string;
+export type OperationId7 = string;
+export type ExpectedRevision6 = number;
 
 export interface ContentAdminContract {
   languages: PublicResponseLanguageCatalog;
@@ -305,6 +318,7 @@ export interface ContentAdminContract {
   lookup: DraftLookup;
   create: DraftCreate;
   save: DraftSave;
+  schedule: DraftSchedule;
   mutation: DraftMutation;
   catalog: PublicResponseDraftCatalog;
   detail: PublicResponseDraftDetail;
@@ -417,10 +431,17 @@ export interface DraftSave {
   expected_revision: ExpectedRevision;
   fields: DraftFields;
 }
-export interface DraftMutation {
+export interface DraftSchedule {
   id: Id5;
   operation_id: OperationId2;
   expected_revision: ExpectedRevision1;
+  fields: DraftFields;
+  scheduled_for: ScheduledFor;
+}
+export interface DraftMutation {
+  id: Id6;
+  operation_id: OperationId3;
+  expected_revision: ExpectedRevision2;
 }
 export interface PublicResponseDraftCatalog {
   success?: Success3;
@@ -435,7 +456,7 @@ export interface DraftCatalog {
   page_size: PageSize1;
 }
 export interface DraftListItem {
-  id: Id6;
+  id: Id7;
   owner_id?: OwnerId;
   type_id: TypeId3;
   title: Title1;
@@ -448,6 +469,9 @@ export interface DraftListItem {
   published_revision?: PublishedRevision;
   public_path?: PublicPath;
   published_at?: PublishedAt;
+  scheduled_for?: ScheduledFor1;
+  scheduled_revision?: ScheduledRevision;
+  schedule_error?: ScheduleError;
   created_at: CreatedAt;
   updated_at: UpdatedAt;
   language?: Language2;
@@ -461,7 +485,7 @@ export interface DraftListItem {
   group_revision?: GroupRevision;
 }
 export interface TranslationMember {
-  id: Id7;
+  id: Id8;
   owner_id?: OwnerId1;
   type_id: TypeId4;
   title: Title2;
@@ -474,6 +498,9 @@ export interface TranslationMember {
   published_revision?: PublishedRevision1;
   public_path?: PublicPath1;
   published_at?: PublishedAt1;
+  scheduled_for?: ScheduledFor2;
+  scheduled_revision?: ScheduledRevision1;
+  schedule_error?: ScheduleError1;
   created_at: CreatedAt1;
   updated_at: UpdatedAt1;
   language?: Language3;
@@ -488,7 +515,7 @@ export interface PublicResponseDraftDetail {
   data: DraftDetail;
 }
 export interface DraftDetail {
-  id: Id8;
+  id: Id9;
   owner_id?: OwnerId2;
   type_id: TypeId5;
   title: Title3;
@@ -501,6 +528,9 @@ export interface DraftDetail {
   published_revision?: PublishedRevision2;
   public_path?: PublicPath2;
   published_at?: PublishedAt2;
+  scheduled_for?: ScheduledFor3;
+  scheduled_revision?: ScheduledRevision2;
+  schedule_error?: ScheduleError2;
   created_at: CreatedAt2;
   updated_at: UpdatedAt2;
   language?: Language4;
@@ -535,7 +565,7 @@ export interface ContentTypeCatalog {
   items: Items1;
 }
 export interface ContentTypeDefinition {
-  id: Id9;
+  id: Id10;
   owner: Owner;
   label: Label;
   description: Description;
@@ -615,7 +645,7 @@ export interface ContentDetail {
   seo_description?: SeoDescription1;
   access?: Access;
   opens_at?: OpensAt1;
-  id: Id10;
+  id: Id11;
   kind: Kind1;
   title: Title4;
   path: Path1;
@@ -637,21 +667,21 @@ export interface ContentDetail {
   media_urls: MediaUrls1;
 }
 export interface ContentTranslation {
-  id: Id11;
+  id: Id12;
   language: Language6;
   path: Path2;
   access?: Access1;
   is_original?: IsOriginal1;
 }
 export interface TaxonomyDTO {
-  id: Id12;
+  id: Id13;
   slug: Slug;
   name: Name4;
   kind: Kind2;
   count: Count1;
 }
 export interface ContentBlock {
-  id: Id13;
+  id: Id14;
   type: Type1;
   content: Content2;
 }
@@ -662,7 +692,7 @@ export interface Comments1 {
   [k: string]: PublicComment[];
 }
 export interface PublicComment {
-  id: Id14;
+  id: Id15;
   parent_id: ParentId2;
   author: Author5;
   content: Content3;
@@ -680,7 +710,7 @@ export interface PublicManagedPage {
   javascript?: Javascript;
   javascript_enabled?: JavascriptEnabled;
   options?: Options;
-  id: Id15;
+  id: Id16;
   source: Source;
   implementation_id?: ImplementationId;
   implementation_version?: ImplementationVersion;
@@ -696,34 +726,34 @@ export interface PublicResponseTranslationCatalog {
   data: TranslationCatalog;
 }
 export interface TranslationCatalog {
-  id: Id16;
+  id: Id17;
   source_id: SourceId;
   type_id: TypeId6;
   revision: Revision6;
   members: Members;
 }
 export interface TranslationCreate {
-  id: Id17;
-  operation_id: OperationId3;
-  expected_revision: ExpectedRevision2;
+  id: Id18;
+  operation_id: OperationId4;
+  expected_revision: ExpectedRevision3;
   language: Language7;
   copy_source?: CopySource;
 }
 export interface TranslationLink {
-  id: Id18;
-  operation_id: OperationId4;
-  expected_revision: ExpectedRevision3;
-  target_id: TargetId;
-}
-export interface TranslationMutation {
   id: Id19;
   operation_id: OperationId5;
   expected_revision: ExpectedRevision4;
+  target_id: TargetId;
 }
-export interface TranslationGroupMutation {
+export interface TranslationMutation {
   id: Id20;
   operation_id: OperationId6;
   expected_revision: ExpectedRevision5;
+}
+export interface TranslationGroupMutation {
+  id: Id21;
+  operation_id: OperationId7;
+  expected_revision: ExpectedRevision6;
   members: Members1;
 }
 export interface Members1 {

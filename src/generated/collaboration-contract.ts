@@ -45,7 +45,9 @@ export type OperationId2 = string;
 export type ExpectedRevision = number;
 export type Epoch1 = string;
 export type CommittedSeq1 = number;
-export type Action = "save" | "publish" | "withdraw";
+export type Action =
+  "save" | "publish" | "withdraw" | "schedule" | "cancel_schedule";
+export type ScheduledFor = string | null;
 export type Note = string;
 export type Id5 = string;
 export type Type = "markdown" | "html";
@@ -74,6 +76,9 @@ export type IsDemo = boolean;
 export type PublishedRevision = number | null;
 export type PublicPath = string | null;
 export type PublishedAt = string | null;
+export type ScheduledFor1 = string | null;
+export type ScheduledRevision = number | null;
+export type ScheduleError = string | null;
 export type CreatedAt = string;
 export type UpdatedAt = string;
 export type Language = string;
@@ -378,6 +383,7 @@ export interface CommitDraft {
   epoch: Epoch1;
   committed_seq: CommittedSeq1;
   action?: Action;
+  scheduled_for?: ScheduledFor;
   note?: Note;
   block_sources?: BlockSources;
   visibility?: Visibility;
@@ -414,6 +420,9 @@ export interface DraftDetail {
   published_revision?: PublishedRevision;
   public_path?: PublicPath;
   published_at?: PublishedAt;
+  scheduled_for?: ScheduledFor1;
+  scheduled_revision?: ScheduledRevision;
+  schedule_error?: ScheduleError;
   created_at: CreatedAt;
   updated_at: UpdatedAt;
   language?: Language;

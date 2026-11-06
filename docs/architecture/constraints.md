@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-13，2026-11-06（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
+版本：bootstrap-14，2026-11-06（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
 
 ## 已确认的范围
 
@@ -65,6 +65,8 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 公开快照无时间 TTL，Next.js 框架缓存是派生层，不随机删除 `.next`。普通刷新可保留仍允许公开的完整旧快照；已收到撤回/转受限则阻止旧正文、更新列表/搜索、保留较新不可见标记，回源失败也不回退旧正文。源站不可达与不存在须区分。
 
 业务变更与可靠 Outbox 在 PostgreSQL 同事务登记；Worker 逐节点投递并保留稳定事件 ID、资源代次、尝试与回执；接收成功不等于落盘/激活/预热完成。计划执行以 `schedule_id + planned_run_at` 唯一标识，已登记工作须恢复，停机未登记的错过计划默认跳过。跨服务不承诺恰好一次外部效果。
+
+2026-11-06新增一次性定时发布：排期时冻结协作检查点，PostgreSQL保存已登记执行的时间、修订与私有快照；Scheduler只投递tick，Worker按事务完成公开投影与可靠Outbox。重复/重启安全，合并期间等待；取消/撤回/回收清除计划，执行时复核原发布人和原Key权限，失败显式提示。此为已登记单次执行的恢复，不是未登记周期漏跑；见[ADR0073](../decisions/0073-scheduled-content-publication.md)。定时开放仍是独立访问策略。
 
 ## v0.14 新增工程提案
 

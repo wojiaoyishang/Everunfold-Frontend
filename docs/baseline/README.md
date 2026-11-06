@@ -882,3 +882,16 @@ ADR0072、registered-pages-runtime-2、pages-runtime-1、development17与bootstr
 | `docs/decisions/0054-scroll-editor-preview-actions.md` | `0758dac2d24fc881d2070ba6415abd676c92d28f258beb5c3b56f60528315657` |
 | `docs/development/pages.md` | `9f550b5bd7055bc18352538a73259cef8c5738c82e891faf80a8a09ae16d572d` |
 | `docs/handoff/editor-actions-dock-verification.md` | `c0666d08461028fd7220e4708d69faaf0d8b2bea00b8ac80cf25b7be89f18627` |
+
+## 定时发布与阅读/列表细节交付（2026-11-06）
+
+ADR0073、content-management-9、pages-runtime-3与bootstrap14记录本轮用户要求及已验证范围：冻结单次排期、Worker可靠发布/取消、页面移除读取按钮、列表前台入口/铅笔及右下背景进度。以下为当前共同摘要，替代对应旧摘要；STATUS分别维护，原始基线不变，实际设备地址、凭据与用户图片不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `69ce51d110808affc20a562859efc7f01f9e6f2bf388ef4d53002060751217e0` |
+| `docs/architecture/constraints.md` | `5a2a146b9faa05d83cb772c2cac3e8dc4cbc73702e8e77d9132ca580d8fd57fc` |
+| `docs/decisions/0073-scheduled-content-publication.md` | `150fa67d123c60445e97a53ea9903b6183af0a2440123604a9797cca5bd72e90` |
+| `docs/development/content-management.md` | `097294b86e00912dd14cae591d78e5747ac547f14abdebdf68311ca1f127f7b7` |
+| `docs/development/pages.md` | `582d3daa8beab17bb298273a1c64ab39d246264058f563c9c75f246c0aad7187` |
+| `docs/handoff/scheduled-publication-verification.md` | `a7d5d2da711ae8722d6ceb0f23ef58122a213f36fb9805e957caf505102616b3` |

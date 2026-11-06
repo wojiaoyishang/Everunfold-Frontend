@@ -62,7 +62,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
   const [error, setError] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"html" | "css" | "javascript">("html");
-  const [confirm, setConfirm] = useState<"reload" | "remove" | null>(null);
+  const [confirm, setConfirm] = useState<"remove" | null>(null);
   const removed = useRef(false);
   const action = useAccountAction(pagesFailure);
   const write =
@@ -70,19 +70,6 @@ export function ManagedPageEditor({ id }: { id?: string }) {
     !(value.javascript_enabled && actor.role !== "admin");
   const publish = write && can(actor, "pages:publish");
   const dirty = JSON.stringify(value) !== JSON.stringify(saved?.value ?? blank);
-  const load = async (signal?: AbortSignal) => {
-    if (!id) return;
-    try {
-      const response = await readManagedPage(baseUrl, id, { signal });
-      if (!signal?.aborted) {
-        setSaved(response.data);
-        setValue(response.data.value);
-        setError("");
-      }
-    } catch (failure) {
-      if (!signal?.aborted) setError(pagesFailure(failure));
-    }
-  };
   useEffect(() => {
     const controller = new AbortController();
     if (id)
@@ -259,15 +246,6 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                 <UiText text="回收站" />
               </span>
             )}
-          </div>
-          <div className={styles.previewTools}>
-            <Button
-              className="admin-button"
-              onClick={() => setConfirm("reload")}
-              disabled={!saved || action.busy}
-            >
-              <UiText text="读取服务器版本" />
-            </Button>
           </div>
           {preview.error && (
             <p role="alert" className={styles.error}>
@@ -456,18 +434,6 @@ export function ManagedPageEditor({ id }: { id?: string }) {
           </div>
         </>
       )}
-      <ConfirmDialog
-        open={confirm === "reload"}
-        title="读取服务器上的页面？"
-        description="当前未保存的输入将被替换。"
-        confirmLabel="读取最新"
-        onCancel={() => setConfirm(null)}
-        onConfirm={() => true}
-        onConfirmed={() => {
-          setConfirm(null);
-          void load();
-        }}
-      />
       <ConfirmDialog
         open={confirm === "remove"}
         title="将页面移到回收站？"

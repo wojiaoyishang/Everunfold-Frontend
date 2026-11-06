@@ -711,6 +711,43 @@
           "default": null,
           "title": "Published At"
         },
+        "scheduled_for": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scheduled For"
+        },
+        "scheduled_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scheduled Revision"
+        },
+        "schedule_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schedule Error"
+        },
         "created_at": {
           "format": "date-time",
           "title": "Created At",
@@ -928,6 +965,43 @@
           ],
           "default": null,
           "title": "Published At"
+        },
+        "scheduled_for": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scheduled For"
+        },
+        "scheduled_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scheduled Revision"
+        },
+        "schedule_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schedule Error"
         },
         "created_at": {
           "format": "date-time",
@@ -1161,6 +1235,43 @@
         "fields"
       ],
       "title": "DraftSave",
+      "type": "object"
+    },
+    "DraftSchedule": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "fields": {
+          "$ref": "#/$defs/DraftFields"
+        },
+        "scheduled_for": {
+          "format": "date-time",
+          "title": "Scheduled For",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "operation_id",
+        "expected_revision",
+        "fields",
+        "scheduled_for"
+      ],
+      "title": "DraftSchedule",
       "type": "object"
     },
     "EditorCatalog": {
@@ -2399,6 +2510,43 @@
           "default": null,
           "title": "Published At"
         },
+        "scheduled_for": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scheduled For"
+        },
+        "scheduled_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scheduled Revision"
+        },
+        "schedule_error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schedule Error"
+        },
         "created_at": {
           "format": "date-time",
           "title": "Created At",
@@ -2508,6 +2656,9 @@
     "save": {
       "$ref": "#/$defs/DraftSave"
     },
+    "schedule": {
+      "$ref": "#/$defs/DraftSchedule"
+    },
     "mutation": {
       "$ref": "#/$defs/DraftMutation"
     },
@@ -2551,6 +2702,7 @@
     "lookup",
     "create",
     "save",
+    "schedule",
     "mutation",
     "catalog",
     "detail",
@@ -2566,7 +2718,7 @@
   "title": "ContentAdminContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.10.0",
+  "x-everunfold-contract-version": "1.11.0",
   "x-everunfold-content-types": [
     {
       "id": "article",
@@ -2683,6 +2835,20 @@
       "path": "/v1/admin/content/publish",
       "method": "POST",
       "input": "save",
+      "response": "detail"
+    },
+    {
+      "name": "scheduleDraft",
+      "path": "/v1/admin/content/schedule",
+      "method": "POST",
+      "input": "schedule",
+      "response": "detail"
+    },
+    {
+      "name": "cancelDraftSchedule",
+      "path": "/v1/admin/content/cancel-schedule",
+      "method": "POST",
+      "input": "mutation",
       "response": "detail"
     },
     {

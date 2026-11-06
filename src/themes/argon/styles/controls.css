@@ -69,15 +69,42 @@
   transform: none;
 }
 .reading-progress {
-  height: 28px;
+  position: relative;
+  height: 30px;
   display: grid;
   place-items: center;
   border-radius: 4px;
-  font-size: 11px;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--accent);
-  background: linear-gradient(var(--accent-soft), var(--accent-soft)) no-repeat
-    var(--surface);
-  transition: background-size 150ms linear;
+  background: var(--surface);
+  box-shadow: 0 2px 5px #20143a18;
+}
+.reading-progress::before,
+.reading-progress::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--reading-progress, 0%);
+  background: color-mix(in srgb, var(--brand-accent) 22%, var(--surface));
+  transition: width 150ms linear;
+}
+.reading-progress::after {
+  top: auto;
+  height: 3px;
+  background: var(--brand-accent);
+}
+.reading-progress > span {
+  position: relative;
+  z-index: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress::before,
+  .reading-progress::after {
+    transition: none;
+  }
 }
 .reading-settings {
   position: fixed;

@@ -8,7 +8,7 @@ export function ManagedPageView({ page }: { page: PublicManagedPage }) {
   if (!hasPageImplementation(page))
     throw new Error("Unavailable registered page implementation");
   return (
-    <article className={styles.page}>
+    <article className={styles.page} data-reading-content="true">
       <header className={styles.heading}>
         <h1>{page.title}</h1>
         {page.description && <p>{page.description}</p>}

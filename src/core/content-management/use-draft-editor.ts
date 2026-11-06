@@ -20,6 +20,8 @@ import {
   saveDraft,
   publishDraft,
   withdrawDraft,
+  scheduleDraft,
+  cancelDraftSchedule,
 } from "@/generated/content-admin-client";
 import type {
   ContentTypeDefinition,
@@ -28,6 +30,7 @@ import type {
   DraftCreate,
   DraftSave,
   DraftMutation,
+  DraftSchedule,
 } from "@/generated/content-admin-contract";
 import {
   blockSourcePatches,
@@ -42,13 +45,18 @@ import {
   draftFields,
   uncertainWrite,
   validateDraft,
+  validatePublicationTime,
 } from "./draft-state";
 
 type Write =
   | { action: "collaboration"; input: CommitDraft }
   | { action: "create"; input: DraftCreate }
   | { action: "save" | "publish"; input: DraftSave }
-  | { action: "withdraw"; input: DraftMutation };
+  | { action: "withdraw"; input: DraftMutation }
+  | { action: "cancel_schedule"; input: DraftMutation }
+  | { action: "schedule"; input: DraftSchedule };
+export type DraftSaveAction =
+  "save" | "publish" | "withdraw" | "schedule" | "cancel_schedule";
 export function useDraftEditor(
   type: ContentTypeDefinition,
   id: string | null,
@@ -301,6 +309,58 @@ export function useDraftEditor(
     writeScope,
   ]);
   const displayed = withBlockSources(fields, sources);
+  useEffect(() => {
+    if (!id || !detail?.scheduled_for) return;
+    const controller = new AbortController();
+    let refreshing = false;
+    const refresh = async () => {
+      if (
+        refreshing ||
+        inFlight.current ||
+        preparing.current ||
+        document.visibilityState === "hidden"
+      )
+        return;
+      refreshing = true;
+      try {
+        const { data } = await readDraft(baseUrl, { id }, csrfToken, {
+          signal: controller.signal,
+        });
+        const prior = currentDetail.current;
+        if (
+          controller.signal.aborted ||
+          !prior ||
+          data.revision < prior.revision ||
+          inFlight.current ||
+          preparing.current
+        )
+          return;
+        // Publication completion is independent of the Y.Doc. Never replace private inputs.
+        const next = {
+          ...prior,
+          published_revision: data.published_revision,
+          published_at: data.published_at,
+          public_path: data.public_path,
+          scheduled_for: data.scheduled_for,
+          scheduled_revision: data.scheduled_revision,
+          schedule_error: data.schedule_error,
+        };
+        currentDetail.current = next;
+        setDetail(next);
+        if (data.revision > prior.revision)
+          sessionRef.current?.onRevision(data.revision);
+      } catch {
+        /* Keep the last confirmed plan; normal editing retains its own connectivity guard. */
+      } finally {
+        refreshing = false;
+      }
+    };
+    const timer = setInterval(() => void refresh(), 3000);
+    return () => {
+      controller.abort();
+      clearInterval(timer);
+    };
+  }, [id, detail?.scheduled_for, baseUrl, csrfToken]);
   const dirty =
     JSON.stringify(displayed) !== baseline ||
     Object.keys(sources).some(
@@ -332,8 +392,9 @@ export function useDraftEditor(
     detail,
   ]);
   const save = async (
-    action: "save" | "publish" | "withdraw" = "save",
+    action: DraftSaveAction = "save",
     note = "",
+    scheduledFor?: string | null,
   ) => {
     if (
       !writeScope ||
@@ -343,7 +404,13 @@ export function useDraftEditor(
       return null;
     }
     if (inFlight.current || preparing.current || conflict) return null;
-    const invalid = validateDraft(displayed, type);
+    const invalid =
+      action === "cancel_schedule"
+        ? ""
+        : action === "schedule"
+          ? validatePublicationTime(scheduledFor) ||
+            validateDraft(displayed, type)
+          : validateDraft(displayed, type);
     if (invalid) {
       setError(invalid);
       return null;
@@ -373,7 +440,7 @@ export function useDraftEditor(
               .body.map((block) => block.id),
           );
           const block_sources =
-            action === "withdraw"
+            action === "withdraw" || action === "cancel_schedule"
               ? []
               : await blockSourcePatches(
                   Object.fromEntries(
@@ -398,6 +465,9 @@ export function useDraftEditor(
               visibility: fields.settings?.visibility ?? "public",
               opens_at: fields.settings?.opens_at ?? null,
               access_password: fields.access_password ?? null,
+              ...(action === "schedule"
+                ? { scheduled_for: scheduledFor! }
+                : {}),
             },
           };
         } catch (reason) {
@@ -416,17 +486,27 @@ export function useDraftEditor(
           expected_revision: detail.revision,
         };
         operation.current =
-          action === "withdraw"
+          action === "withdraw" || action === "cancel_schedule"
             ? { action, input: mutation }
-            : { action, input: { ...mutation, fields: displayed } };
+            : action === "schedule"
+              ? {
+                  action,
+                  input: {
+                    ...mutation,
+                    fields: displayed,
+                    scheduled_for: scheduledFor!,
+                  },
+                }
+              : { action, input: { ...mutation, fields: displayed } };
       }
     }
+    const request = operation.current;
+    if (!request) return null;
     inFlight.current = true;
     setBusy(true);
     setError("");
     setNotice("");
     try {
-      const request = operation.current;
       const response =
         request.action === "collaboration"
           ? await commitCollaborationDraft(
@@ -437,6 +517,7 @@ export function useDraftEditor(
               if (
                 mounted.current &&
                 request.input.action !== "withdraw" &&
+                request.input.action !== "cancel_schedule" &&
                 Object.keys(sourceRef.current).length
               ) {
                 receivedSave.current = {
@@ -450,13 +531,24 @@ export function useDraftEditor(
             })
           : request.action === "create"
             ? await createDraft(baseUrl, request.input, csrfToken)
-            : request.action === "withdraw"
-              ? await withdrawDraft(baseUrl, request.input, csrfToken)
-              : request.action === "publish"
-                ? await publishDraft(baseUrl, request.input, csrfToken)
-                : await saveDraft(baseUrl, request.input, csrfToken);
+            : request.action === "schedule"
+              ? await scheduleDraft(baseUrl, request.input, csrfToken)
+              : request.action === "cancel_schedule"
+                ? await cancelDraftSchedule(baseUrl, request.input, csrfToken)
+                : request.action === "withdraw"
+                  ? await withdrawDraft(baseUrl, request.input, csrfToken)
+                  : request.action === "publish"
+                    ? await publishDraft(baseUrl, request.input, csrfToken)
+                    : await saveDraft(baseUrl, request.input, csrfToken);
       if (mounted.current) {
-        if (request.action === "collaboration" && sessionRef.current) {
+        const completedAction =
+          request.action === "collaboration"
+            ? request.input.action
+            : request.action;
+        if (completedAction === "cancel_schedule") {
+          currentDetail.current = response.data;
+          setDetail(response.data);
+        } else if (request.action === "collaboration" && sessionRef.current) {
           const saved = draftFields(response.data);
           setBaseline(JSON.stringify(saved));
           privateFields.current = saved;
@@ -467,15 +559,15 @@ export function useDraftEditor(
         } else apply(response.data);
         setUncertain(false);
         setNotice(
-          (request.action === "collaboration"
-            ? request.input.action
-            : request.action) === "publish"
-            ? "内容已发布"
-            : (request.action === "collaboration"
-                  ? request.input.action
-                  : request.action) === "withdraw"
-              ? "内容已撤回"
-              : "草稿已保存",
+          completedAction === "schedule"
+            ? "已安排定时发布"
+            : completedAction === "cancel_schedule"
+              ? "已取消定时发布，草稿保留"
+              : completedAction === "publish"
+                ? "内容已发布"
+                : completedAction === "withdraw"
+                  ? "内容已撤回"
+                  : "草稿已保存",
         );
       }
       operation.current = null;

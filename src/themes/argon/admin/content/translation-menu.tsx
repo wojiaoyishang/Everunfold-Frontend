@@ -1,5 +1,5 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 
 import type { TranslationMember } from "@/generated/content-admin-contract";
 
@@ -26,6 +26,7 @@ export function TranslationMenu({
   disabled,
   onNavigate,
   readOnly = false,
+  publicLinks = false,
 }: {
   members: TranslationMember[];
   type: string;
@@ -34,7 +35,9 @@ export function TranslationMenu({
   disabled?: boolean;
   onNavigate?: (href: string) => void;
   readOnly?: boolean;
+  publicLinks?: boolean;
 }) {
+  const t = useT();
   return (
     <ActionPopover
       label="切换编辑语言"
@@ -73,7 +76,7 @@ export function TranslationMenu({
                 </small>
               </>
             );
-            return onNavigate ? (
+            const editorLink = onNavigate ? (
               <Button
                 key={item.id}
                 className={styles.member}
@@ -95,6 +98,28 @@ export function TranslationMenu({
               >
                 {body}
               </RouteLink>
+            );
+            return publicLinks ? (
+              <div key={item.id} className={styles.memberRow}>
+                {editorLink}
+                {item.status !== "trash" &&
+                item.published_revision &&
+                item.public_path ? (
+                  <RouteLink
+                    className={styles.viewPublished}
+                    href={item.public_path}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={t("在前台打开")}
+                    aria-label={`${t("在前台打开")} ${item.language}`}
+                    onClick={close}
+                  >
+                    <Icon name="external" />
+                  </RouteLink>
+                ) : null}
+              </div>
+            ) : (
+              editorLink
             );
           })}
           {!readOnly && (
