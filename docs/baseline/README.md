@@ -779,3 +779,12 @@ ADR0068、multilingual-runtime-4及实际验收记录同源按需字体、270种
 | `docs/handoff/language-flag-font-verification.md` | `4ab72494980869cbdbf7d1997ca0f84a5ed46cdbc0d22ba4b93409ff599cabf2` |
 | `docs/design/language-flag-font-desktop.png` | `69a45c40b3679c33aa0f5290b6989390bca6ea19b466cd68554a02771f248bc8` |
 | `docs/design/language-flag-font-320.png` | `0fd441289acee70de8c1acefcd9d2121fe721e8915ece1ed4e2939d86a5962f2` |
+
+## 账号与双向API Key接入实施起点（2026-11-06）
+
+ADR0069记录用户确认方向与实施顺序，接口细节是待实现设计；不修改原始附件，不冒称账号或Key已交付。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `3275505910b445269ec80d233624d7218d4766bfbde27cbcb03ca595069da1d6` |
+| `docs/decisions/0069-accounts-api-keys-and-signed-callbacks.md` | `995a0d5a6cc3ff83ef9f6fead0e7a66dd0b6074040e2bfd20abd361fd33e6413` |
