@@ -919,3 +919,19 @@ ADR0074、pages-runtime-4、settings-runtime-10、multilingual-runtime-5、regis
 | `docs/development/pages.md` | `d2796c36324a42d3863aefb77d198d1aed582055a6b2128fa451f9b67d305e3d` |
 | `docs/development/settings.md` | `0cc53c0992ef483f623d0e6d27115ef83cdec6ba92e8ecd4677c86cc708640aa` |
 | `docs/handoff/page-languages-preview-verification.md` | `7fb4791c9f306df8d0c97f1b0587c67aff2b4b20da9efbb4e34c3901988f6e20` |
+
+## 脚本与头像限制提示、侧栏高亮（2026-11-07）
+
+用户最新要求由ADR0075覆盖旧密码确认规则。当前pages-runtime-5、accounts-runtime-7、registered-pages-runtime-4与bootstrap16；以下摘要替代同名文件旧摘要。原始基线和历史验收不改，STATUS分别维护。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `59d56b11dde0ec068843e9e1a30f53744268e6a7f50da623079ba595f183d428` |
+| `docs/architecture/constraints.md` | `a04d10d7280830f608c72ac67a830cdf3fd7ec3519d43bf3d2a68de469395bf7` |
+| `docs/architecture/registered-pages.md` | `fc5eb761c348ec4ece49ad8fc9cba192c96829eabfdbc86101db391b99dc8c84` |
+| `docs/decisions/0072-managed-pages-and-people-messages.md` | `fba7c71a18875fd5de38b11fad430ab2e2914b66eb6e8ae150dba5e39a12e43a` |
+| `docs/decisions/0074-page-languages-linked-navigation-and-live-preview.md` | `58bdc120c47f515722b839891a9c4ab046a89da510de00a0a7d2a8278c464dfa` |
+| `docs/decisions/0075-admin-page-script-and-avatar-policy-warnings.md` | `7bf600c4b65751827d1bb6fd59904cd7504094b7406acbfb60c5cf42a303c657` |
+| `docs/development/pages.md` | `243e69bc2c738d8a5fc2c10264eb81ec8ff4c20582bb3b423733b59d4f3609a6` |
+| `docs/development/accounts.md` | `4679c6db821a2e5a89b4ba96f8b6d7fafcf881aa2915612b2efaa75b08cb7ccf` |
+| `docs/handoff/admin-warnings-navigation-verification.md` | `108f4cd3a2a66a61382cdfafea9fb1bba5858d44a55e5ac08ab2aead8c96fde0` |

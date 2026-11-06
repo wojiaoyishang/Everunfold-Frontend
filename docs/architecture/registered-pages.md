@@ -1,12 +1,12 @@
 # 页面管理、注册与缓存边界
 
-版本：registered-pages-runtime-3，2026-11-06。状态：按用户本轮授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施。
+版本：registered-pages-runtime-4，2026-11-06。状态：按用户本轮授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施。
 
 ## 两种来源
 
 `/admin/pages`统一展示自定义源码页与可信前端注册页，支持搜索、状态和回收站。既有内容类型`page`的历史数据保留；本轮不改其历史正文或导入WordPress人员。
 
-自定义页面允许HTML、CSS和可选JavaScript，页面与脚本各自默认关闭。HTML/CSS/脚本仅放进无`allow-same-origin`的独立iframe，不能成为本站顶层脚本。CSP默认只允许固定哈希的测高脚本，作者脚本与HTML事件关闭；开启后仅允许iframe内联脚本，仍禁止脚本的fetch/WebSocket连接、外部脚本、嵌套框架、对象、表单提交和base改写。启用或修改启用脚本的持久页面要求管理员Session和当前密码。普通文章、HTML区块及短代码继续使用原有过滤边界。
+自定义页面允许HTML、CSS和可选JavaScript，页面与脚本各自默认关闭。HTML/CSS/脚本仅放进无`allow-same-origin`的独立iframe，不能成为本站顶层脚本。CSP默认只允许固定哈希的测高脚本，作者脚本与HTML事件关闭；开启后仅允许iframe内联脚本，仍禁止脚本的fetch/WebSocket连接、外部脚本、嵌套框架、对象、表单提交和base改写。启用或修改启用脚本的持久页面要求管理员Session；按2026-11-07最新要求改为醒目提示，不再要求再次输入密码（ADR0075）。普通文章、HTML区块及短代码继续使用原有过滤边界。
 
 注册页由可信前端实现交互；后台仅改标题、路径、说明、收录、启用状态及明确声明的选项，不提供源码编辑。`src/core/pages/registry.ts`装配固定组件身份，不从数据库或远程URL导入模块。`core.people`首期提供姓名云/卡片、人物分组、搜索、头像、点击寄语及排序；没有友链卡片、访客留言写入或真实旧站人员导入。
 

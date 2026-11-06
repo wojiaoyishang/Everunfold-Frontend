@@ -17,7 +17,11 @@ export type Archived = boolean;
 export type UpdatedAt = string;
 export type HasAppliedSnapshot = boolean;
 export type HasUnappliedChanges = boolean;
+/**
+ * Legacy field; always false.
+ */
 export type EnableRequiresPassword = boolean;
+export type AppliedJavascriptEnabled = boolean;
 export type Language = string | null;
 export type TranslationGroupId = string | null;
 export type IsOriginal = boolean;
@@ -83,7 +87,11 @@ export type UpdatedAt1 = string;
 export type Archived2 = boolean;
 export type HasAppliedSnapshot1 = boolean;
 export type HasUnappliedChanges1 = boolean;
+/**
+ * Legacy field; always false.
+ */
 export type EnableRequiresPassword1 = boolean;
+export type AppliedJavascriptEnabled1 = boolean;
 export type Language2 = string | null;
 export type TranslationGroupId1 = string | null;
 export type IsOriginal2 = boolean;
@@ -91,6 +99,9 @@ export type Id5 = string;
 export type ExpectedRevision = number;
 export type Apply = boolean;
 export type OperationId = string;
+/**
+ * Legacy field; ignored.
+ */
 export type CurrentPassword = string;
 export type Language3 = string | null;
 export type Restore = boolean;
@@ -131,6 +142,9 @@ export type ExpectedRevision3 = number;
 export type Enabled5 = boolean;
 export type ApplyDraft = boolean;
 export type OperationId3 = string;
+/**
+ * Legacy field; ignored.
+ */
 export type CurrentPassword1 = string;
 export type Success3 = boolean;
 export type Code3 = number;
@@ -190,6 +204,7 @@ export interface ManagedPageSummary {
   has_applied_snapshot?: HasAppliedSnapshot;
   has_unapplied_changes?: HasUnappliedChanges;
   enable_requires_password?: EnableRequiresPassword;
+  applied_javascript_enabled?: AppliedJavascriptEnabled;
   language?: Language;
   translation_group_id?: TranslationGroupId;
   is_original?: IsOriginal;
@@ -234,6 +249,7 @@ export interface ManagedPageItem {
   has_applied_snapshot?: HasAppliedSnapshot1;
   has_unapplied_changes?: HasUnappliedChanges1;
   enable_requires_password?: EnableRequiresPassword1;
+  applied_javascript_enabled?: AppliedJavascriptEnabled1;
   language?: Language2;
   translation_group_id?: TranslationGroupId1;
   is_original?: IsOriginal2;

@@ -788,8 +788,9 @@
           "$ref": "#/$defs/AvatarLimits"
         },
         "current_password": {
+          "default": "",
+          "description": "Legacy field; ignored for avatar policy updates.",
           "maxLength": 1024,
-          "minLength": 1,
           "title": "Current Password",
           "type": "string"
         }
@@ -797,8 +798,7 @@
       "required": [
         "operation_id",
         "expected_revision",
-        "value",
-        "current_password"
+        "value"
       ],
       "title": "AvatarPolicySave",
       "type": "object"
@@ -2702,7 +2702,7 @@
   "title": "AccountContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.4.0",
+  "x-everunfold-contract-version": "1.5.0",
   "x-everunfold-csrf-header": "X-CSRF-Token",
   "x-everunfold-credentials": "include",
   "x-everunfold-operations": [

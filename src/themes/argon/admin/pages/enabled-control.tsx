@@ -9,7 +9,6 @@ import { pagesFailure } from "@/core/pages/failure";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Switch } from "../../components/ui/switch";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
-import { AccountField } from "../../account/fields";
 import styles from "./pages.module.css";
 
 export function PageEnabledControl({
@@ -24,8 +23,7 @@ export function PageEnabledControl({
   const actor = useAdminAccount(),
     { baseUrl, csrfToken } = useAdminRequest(),
     t = useT();
-  const [confirm, setConfirm] = useState(false),
-    [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState(false);
   const action = useAccountAction(pagesFailure);
   const needsApply = !page.enabled && !page.has_applied_snapshot;
   const run = () =>
@@ -35,7 +33,6 @@ export function PageEnabledControl({
         expected_revision: page.revision,
         enabled: !page.enabled,
         apply_draft: needsApply,
-        current_password: password,
       };
       await setPageEnabled(
         baseUrl,
@@ -58,11 +55,11 @@ export function PageEnabledControl({
             page.archived ||
             !can(actor, "pages:publish") ||
             !can(actor, "pages:write") ||
-            (page.enable_requires_password && actor.role !== "admin") ||
+            (page.applied_javascript_enabled && actor.role !== "admin") ||
             (!page.enabled && !page.available)
           }
           onCheckedChange={() => {
-            if (needsApply || page.enable_requires_password) setConfirm(true);
+            if (needsApply) setConfirm(true);
             else void run();
           }}
         />
@@ -87,29 +84,16 @@ export function PageEnabledControl({
         confirmLabel={
           needsApply ? "应用并启用" : page.enabled ? "停用页面" : "启用页面"
         }
-        confirmDisabled={page.enable_requires_password && !password}
         busy={action.busy}
         error={action.message}
         onCancel={() => {
           setConfirm(false);
-          setPassword("");
         }}
         onConfirm={run}
         onConfirmed={() => {
           setConfirm(false);
-          setPassword("");
         }}
-      >
-        {page.enable_requires_password && (
-          <AccountField
-            label="当前管理员密码"
-            value={password}
-            onChange={setPassword}
-            secret
-            autoComplete="current-password"
-          />
-        )}
-      </ConfirmDialog>
+      />
     </div>
   );
 }

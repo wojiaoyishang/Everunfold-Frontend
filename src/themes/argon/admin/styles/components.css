@@ -229,9 +229,32 @@
     min-height: 44px;
     font-size: 16px;
   }
-  .admin-nav-link {
-    min-height: 44px;
-  }
+}
+.admin-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 0;
+  padding: 12px 14px;
+  border: 1px solid
+    color-mix(in srgb, var(--admin-danger) 25%, var(--admin-border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--admin-danger) 8%, var(--admin-canvas));
+  color: var(--admin-text);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.admin-warning > .icon {
+  flex: 0 0 19px;
+  width: 19px;
+  height: 19px;
+  margin-top: 2px;
+  color: var(--admin-danger);
+}
+.admin-warning > p {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 @media (max-width: 600px) {
   .admin-collection-toolbar {

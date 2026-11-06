@@ -66,6 +66,7 @@ const paths = {
     "M14 3h7v7M21 3l-11 11M10 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5",
   copy: "M8 8h13v13H8V8ZM16 8V3H3v13h5",
   check: "m5 12 4 4L19 6",
+  warning: "m12 3 10 18H2L12 3ZM12 9v5M12 17h.01",
   plus: "M12 4v16M4 12h16",
   minus: "M4 12h16",
   heart:

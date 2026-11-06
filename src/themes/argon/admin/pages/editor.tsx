@@ -36,6 +36,7 @@ import { PageOptionsEditor } from "./options";
 import styles from "./pages.module.css";
 import { Select } from "../../components/ui/select";
 import { PageLanguages } from "./languages";
+import { AdminWarning } from "../components/warning";
 
 const SourceEditor = dynamic(() => import("./source-editor"), { ssr: false });
 const blank: PageValue = {
@@ -64,7 +65,6 @@ export function ManagedPageEditor({ id }: { id?: string }) {
   const [saved, setSaved] = useState<ManagedPageItem | null>(null);
   const [value, setValue] = useState<PageValue>(blank);
   const [error, setError] = useState("");
-  const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"html" | "css" | "javascript">("html");
   const [confirm, setConfirm] = useState<"remove" | null>(null);
   const removed = useRef(false);
@@ -101,7 +101,6 @@ export function ManagedPageEditor({ id }: { id?: string }) {
           expected_revision: saved?.revision ?? 0,
           value,
           apply,
-          current_password: password,
           language:
             saved?.source === "registered"
               ? undefined
@@ -116,7 +115,6 @@ export function ManagedPageEditor({ id }: { id?: string }) {
         if (!signal.aborted) {
           setSaved(response.data);
           setValue(response.data.value);
-          setPassword("");
           setError("");
           if (!id) router.replace("/admin/pages/" + response.data.id);
         }
@@ -433,17 +431,10 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                         />
                       </div>
                       <p className={styles.help}>
-                        <UiText text="JavaScript 默认关闭，只在独立页面沙箱内运行。启用脚本需要管理员确认。" />
+                        <UiText text="JavaScript 默认关闭，仅在独立页面沙箱内运行。" />
                       </p>
                       {value.javascript_enabled && (
-                        <AccountField
-                          label="当前管理员密码"
-                          value={password}
-                          onChange={setPassword}
-                          secret
-                          required
-                          autoComplete="current-password"
-                        />
+                        <AdminWarning text="JavaScript 已启用，脚本可以改变页面交互或触发跳转。请只使用可信代码。" />
                       )}
                     </section>
                   )}

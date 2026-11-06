@@ -15,13 +15,13 @@ import { Modal } from "../../components/ui/modal";
 import { Button, Form } from "../../components/ui/primitives";
 import { AccountField } from "../../account/fields";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
+import { AdminWarning } from "../components/warning";
 
 export function AvatarPolicyEditor({ onClose }: { onClose: () => void }) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const [saved, setSaved] = useState<AvatarPolicyState | null>(null),
     [value, setValue] = useState<AvatarLimits | null>(null);
-  const [password, setPassword] = useState(""),
-    [error, setError] = useState(""),
+  const [error, setError] = useState(""),
     [closing, setClosing] = useState(false),
     [discard, setDiscard] = useState(false);
   const action = useAccountAction();
@@ -75,7 +75,6 @@ export function AvatarPolicyEditor({ onClose }: { onClose: () => void }) {
               const input = {
                 value,
                 expected_revision: saved.revision,
-                current_password: password,
               };
               const response = await saveAvatarPolicy(
                 baseUrl,
@@ -85,7 +84,6 @@ export function AvatarPolicyEditor({ onClose }: { onClose: () => void }) {
               );
               if (!signal.aborted) {
                 setSaved(response.data);
-                setPassword("");
               }
             });
           }}
@@ -93,6 +91,7 @@ export function AvatarPolicyEditor({ onClose }: { onClose: () => void }) {
           <p className="account-policy-help">
             <UiText text="仅影响个人头像上传，不授予媒体库权限。调小限制不会删除已有图片。" />
           </p>
+          <AdminWarning text="这些限制会影响所有用户的头像上传。保存前请核对大小、上传次数和保留数量。" />
           <fieldset className="account-fieldset" disabled={action.busy}>
             <div className="account-form-grid">
               <AccountField
@@ -144,16 +143,6 @@ export function AvatarPolicyEditor({ onClose }: { onClose: () => void }) {
                 min={1}
                 max={1000}
               />
-              <div className="account-wide">
-                <AccountField
-                  label="当前管理员密码"
-                  value={password}
-                  onChange={setPassword}
-                  secret
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
             </div>
             <div className="account-actions">
               <Button

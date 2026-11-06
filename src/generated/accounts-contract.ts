@@ -54,6 +54,9 @@ export type MaxBytes1 = number;
 export type MaxEdge1 = number;
 export type DailyUploads1 = number;
 export type RetainedImages1 = number;
+/**
+ * Legacy field; ignored for avatar policy updates.
+ */
 export type CurrentPassword3 = string;
 export type OperationId4 = string;
 export type AvatarId = string;
@@ -408,7 +411,7 @@ export interface AvatarPolicySave {
   operation_id: OperationId3;
   expected_revision: ExpectedRevision2;
   value: AvatarLimits;
-  current_password: CurrentPassword3;
+  current_password?: CurrentPassword3;
 }
 export interface AvatarLimits {
   max_bytes?: MaxBytes1;
