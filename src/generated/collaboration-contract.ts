@@ -62,6 +62,7 @@ export type Success4 = boolean;
 export type Code4 = number;
 export type Msg4 = string;
 export type Id6 = string;
+export type OwnerId = string | null;
 export type TypeId = string;
 export type Title = string;
 export type Excerpt = string;
@@ -193,7 +194,7 @@ export type BranchPage1 = number;
 export type PageSize = number;
 export type Id12 = string;
 export type BranchId1 = string;
-export type OwnerId = string;
+export type OwnerId1 = string;
 export type Actor3 = string;
 export type Status1 =
   "active" | "cancelled" | "completed" | "expired" | "discarded";
@@ -261,7 +262,7 @@ export type Id18 = string;
 export type BranchId5 = string;
 export type Status2 =
   "active" | "cancelled" | "completed" | "expired" | "discarded";
-export type OwnerId1 = string;
+export type OwnerId2 = string;
 export type Epoch5 = string;
 export type TargetSeq1 = number;
 export type TargetRevision = number;
@@ -401,6 +402,7 @@ export interface CommittedDraft {
 }
 export interface DraftDetail {
   id: Id6;
+  owner_id?: OwnerId;
   type_id: TypeId;
   title: Title;
   excerpt: Excerpt;
@@ -569,7 +571,7 @@ export interface BranchItem {
 export interface MergeSummary {
   id: Id12;
   branch_id: BranchId1;
-  owner_id: OwnerId;
+  owner_id: OwnerId1;
   actor: Actor3;
   status: Status1;
   created_at: CreatedAt3;
@@ -674,7 +676,7 @@ export interface MergeDetail {
   id: Id18;
   branch_id: BranchId5;
   status: Status2;
-  owner_id: OwnerId1;
+  owner_id: OwnerId2;
   epoch: Epoch5;
   target_seq: TargetSeq1;
   target_revision: TargetRevision;

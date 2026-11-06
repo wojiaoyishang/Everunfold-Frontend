@@ -203,15 +203,26 @@
 
 .previewTools {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
-  flex-wrap: wrap;
   margin: 22px 0 0;
 }
-.previewTools > div {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+.editorActions > :global(.admin-button) {
+  min-height: 32px;
+  padding: 5px 10px;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.editorActions > :global(.admin-button) svg {
+  width: 15px;
+  height: 15px;
+}
+@media (max-width: 640px) {
+  .editorActions > :global(.admin-button) {
+    min-height: 36px;
+    padding-inline: 8px;
+  }
 }
 .editorLayout {
   display: grid;

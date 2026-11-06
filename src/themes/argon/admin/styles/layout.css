@@ -457,3 +457,7 @@ body:has(.admin-embedded-editor) .admin-editor-preview-action,
 .admin-embedded-editor .admin-editor-back {
   gap: 6px;
 }
+
+.admin-embedded-editor .admin-page-editor-toolbar {
+  display: none;
+}

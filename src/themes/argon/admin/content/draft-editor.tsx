@@ -296,18 +296,18 @@ export function DraftEditor({
                     <UiText text="查看前台" />
                   </RouteLink>
                 )}
+              <EmbeddedEditorActions>
+                <EditorActions
+                  detail={editor.detail}
+                  busy={editor.busy}
+                  uncertain={editor.uncertain}
+                  dirty={editor.dirty}
+                  disabled={saveDisabled}
+                  onSave={(action) => void save(action)}
+                  onWithdraw={() => setConfirm("withdraw")}
+                />
+              </EmbeddedEditorActions>
             </ScrollHeaderActions>
-            <EmbeddedEditorActions>
-              <EditorActions
-                detail={editor.detail}
-                busy={editor.busy}
-                uncertain={editor.uncertain}
-                dirty={editor.dirty}
-                disabled={saveDisabled}
-                onSave={(action) => void save(action)}
-                onWithdraw={() => setConfirm("withdraw")}
-              />
-            </EmbeddedEditorActions>
             <span
               role="status"
               className={notice ? "admin-draft-saved" : styles.visuallyHidden}

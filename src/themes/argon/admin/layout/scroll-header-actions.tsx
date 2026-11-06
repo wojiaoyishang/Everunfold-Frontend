@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { useT } from "@/core/i18n/provider";
 
 /** Keep one live set of controls while moving its portal host between the page and shell. */
 export function ScrollHeaderActions({
@@ -16,6 +17,7 @@ export function ScrollHeaderActions({
   children: ReactNode;
   className: string;
 }) {
+  const t = useT();
   const home = useRef<HTMLDivElement | null>(null);
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
@@ -114,7 +116,7 @@ export function ScrollHeaderActions({
           <div
             className={`admin-header-dock-controls ${className}`}
             role="group"
-            aria-label="内容预览操作"
+            aria-label={t("编辑操作")}
           >
             {children}
           </div>,

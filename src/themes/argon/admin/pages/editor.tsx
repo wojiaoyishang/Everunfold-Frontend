@@ -19,6 +19,7 @@ import { randomUUID } from "@/core/browser/crypto";
 import { livePreviewPath } from "@/core/preview/routes";
 import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
 import { Icon } from "../../components/icon";
+import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
 import { PreviewAction } from "../components/preview-action";
 import { usePagePreview } from "@/core/pages/use-preview";
@@ -161,62 +162,74 @@ export function ManagedPageEditor({ id }: { id?: string }) {
 
   return (
     <>
-      <AdminPageHeading
-        title={id ? "编辑页面" : "新建自定义页面"}
-        action={
-          <div className="account-heading-actions">
-            <RouteLink href="/admin/pages" className="admin-button">
-              <UiText text="返回页面列表" />
-            </RouteLink>
-            <EmbeddedEditorActions>
-              {write && !saved?.archived && (
-                <>
+      <div className="admin-editor-back admin-page-editor-toolbar">
+        <RouteLink href="/admin/pages" className="admin-button">
+          <Icon name="arrow-left" />
+          <UiText text="返回页面列表" />
+        </RouteLink>
+        <ScrollHeaderActions className={styles.editorActions}>
+          <PreviewAction
+            icon="sidebar"
+            label="实时预览"
+            description="在独立窗口中查看页面并编辑"
+            disabled={!write || action.busy}
+            onClick={() => void openLive()}
+          />
+          <PreviewAction
+            icon="external"
+            label="前台预览"
+            description="在新窗口中预览当前输入"
+            onClick={preview.openWindow}
+          />
+          <EmbeddedEditorActions>
+            {write && !saved?.archived && (
+              <>
+                <Button
+                  type="submit"
+                  form={formId}
+                  onClick={(event) => {
+                    if (event.currentTarget.ownerDocument !== document) {
+                      event.preventDefault();
+                      if (form.current?.reportValidity()) void save(false);
+                    }
+                  }}
+                  className="admin-button"
+                  disabled={action.busy || !dirty}
+                >
+                  <Icon name="save" />
+                  <UiText text="保存草稿" />
+                </Button>
+                {publish && (
                   <Button
                     type="submit"
                     form={formId}
                     onClick={(event) => {
                       if (event.currentTarget.ownerDocument !== document) {
                         event.preventDefault();
-                        if (form.current?.reportValidity()) void save(false);
+                        if (form.current?.reportValidity()) void save(true);
                       }
                     }}
-                    className="admin-button"
-                    disabled={action.busy || !dirty}
+                    data-apply="true"
+                    className="admin-button admin-button-primary"
+                    disabled={
+                      action.busy ||
+                      (source === "registered" &&
+                        value.enabled &&
+                        !saved?.available)
+                    }
                   >
                     <Icon name="save" />
-                    <UiText text="保存草稿" />
+                    <UiText
+                      text={value.enabled ? "保存并应用" : "保存并停用"}
+                    />
                   </Button>
-                  {publish && (
-                    <Button
-                      type="submit"
-                      form={formId}
-                      onClick={(event) => {
-                        if (event.currentTarget.ownerDocument !== document) {
-                          event.preventDefault();
-                          if (form.current?.reportValidity()) void save(true);
-                        }
-                      }}
-                      data-apply="true"
-                      className="admin-button admin-button-primary"
-                      disabled={
-                        action.busy ||
-                        (source === "registered" &&
-                          value.enabled &&
-                          !saved?.available)
-                      }
-                    >
-                      <Icon name="save" />
-                      <UiText
-                        text={value.enabled ? "保存并应用" : "保存并停用"}
-                      />
-                    </Button>
-                  )}
-                </>
-              )}
-            </EmbeddedEditorActions>
-          </div>
-        }
-      />
+                )}
+              </>
+            )}
+          </EmbeddedEditorActions>
+        </ScrollHeaderActions>
+      </div>
+      <AdminPageHeading title={id ? "编辑页面" : "新建自定义页面"} />
       {error && (
         <p role="alert" className={styles.error}>
           {error}
@@ -248,21 +261,6 @@ export function ManagedPageEditor({ id }: { id?: string }) {
             )}
           </div>
           <div className={styles.previewTools}>
-            <div data-preview-controls>
-              <PreviewAction
-                icon="sidebar"
-                label="实时预览"
-                description="在独立窗口中查看页面并编辑"
-                disabled={!write || action.busy}
-                onClick={() => void openLive()}
-              />
-              <PreviewAction
-                icon="external"
-                label="前台预览"
-                description="在新窗口中预览当前输入"
-                onClick={preview.openWindow}
-              />
-            </div>
             <Button
               className="admin-button"
               onClick={() => setConfirm("reload")}

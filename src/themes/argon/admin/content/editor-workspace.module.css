@@ -44,10 +44,8 @@
 }
 @media (max-width: 640px) {
   .headerActions {
-    display: grid;
-    grid-template-columns: repeat(2, max-content);
-    justify-content: end;
-    width: auto;
+    width: 100%;
+    min-width: 0;
   }
   .headerActions > :global(.admin-button) {
     min-width: 0;
@@ -58,7 +56,7 @@
     white-space: nowrap;
   }
   .headerActions > :global(.admin-header-dock-home) {
-    grid-column: 1 / -1;
+    width: 100%;
   }
   .previewActions > :global(.admin-button) {
     min-height: 36px;
