@@ -11,6 +11,7 @@ export type Site = StoredSnapshot["site"] & {
     string,
     NonNullable<StoredSnapshot["contents"][number]["translations"]>
   >;
+  navigationResources?: Record<string, string>;
   settings?: PublicSettings;
   settingsRevision?: number;
   cachePolicy?: CachePolicy;

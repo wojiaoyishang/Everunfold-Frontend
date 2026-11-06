@@ -34,6 +34,7 @@
 }
 .search {
   display: flex;
+  min-width: 0;
   gap: 8px;
   flex: 0 1 360px;
 }
@@ -105,6 +106,80 @@
   border: 1px solid var(--admin-border);
   border-radius: 8px;
   background: var(--admin-canvas);
+}
+.enableControl > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--admin-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.enableControl > small {
+  color: var(--admin-danger);
+  display: block;
+  max-width: 240px;
+}
+.languagePanel {
+  scroll-margin-top: calc(var(--admin-header-height, 64px) + 20px);
+}
+.languageHeader,
+.languageMember,
+.languageActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.languageHeader {
+  justify-content: space-between;
+}
+.languageList {
+  margin: 16px 0;
+}
+.languageMember {
+  padding: 14px 0;
+  border-top: 1px solid var(--admin-border);
+}
+.languageMember > div:first-child {
+  flex: 1;
+  min-width: 160px;
+}
+.languageMember small {
+  display: block;
+  color: var(--admin-muted);
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+}
+.languageForm {
+  display: grid;
+  gap: 18px;
+  padding: 24px 4px;
+}
+.languageForm > label {
+  display: grid;
+  gap: 8px;
+}
+.newLanguage {
+  display: grid;
+  gap: 8px;
+  max-width: 340px;
+  margin-bottom: 24px;
+}
+@media (max-width: 700px) {
+  .row {
+    flex-wrap: wrap;
+  }
+  .badges {
+    max-width: none;
+  }
+  .rowActions {
+    flex-wrap: wrap;
+    margin-left: 0;
+  }
+  .languageActions {
+    gap: 6px;
+  }
 }
 .empty {
   padding: 50px 0;

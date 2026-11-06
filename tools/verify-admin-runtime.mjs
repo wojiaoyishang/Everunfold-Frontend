@@ -325,6 +325,18 @@ directory = "./var/absent-admin-verification-cache"
     assert.match(englishHTML, /English fixture body/);
     assert.doesNotMatch(englishHTML, /href="\/francais\/custom-english.html"/);
     const englishHome = await (await fetch(base + "/en/")).text();
+    assert.match(englishHome, /href="\/custom-english-page"/);
+    assert.doesNotMatch(englishHome, /href="\/stale-page-path"/);
+    const authoredEnglish = await fetch(base + "/custom-english-page");
+    assert.equal(authoredEnglish.status, 200);
+    assert.equal(authoredEnglish.headers.get("content-language"), "en");
+    const authoredHTML = await authoredEnglish.text();
+    assert.match(authoredHTML, /href="\/custom-french-page"/);
+    assert.match(authoredHTML, /English authored page body/);
+    const registeredEnglish = await fetch(base + "/en/people-page");
+    assert.equal(registeredEnglish.status, 200);
+    assert.equal(registeredEnglish.headers.get("content-language"), "en");
+    assert.match(await registeredEnglish.text(), /Fixture Person/);
     const titleNodes = DomUtils.findAll(
       (node) =>
         node.type === "tag" &&
@@ -368,6 +380,8 @@ directory = "./var/absent-admin-verification-cache"
     );
     assert.equal((await fetch(base + "/custom-page")).status, 404);
     assert.equal((await fetch(base + "/people-page")).status, 404);
+    assert.equal((await fetch(base + "/en/people-page")).status, 404);
+    assert.equal((await fetch(base + "/custom-english-page")).status, 404);
     console.log(
       "Managed public releases passed: offline reading 200, withdrawal 404 without restarting Next.js.",
     );

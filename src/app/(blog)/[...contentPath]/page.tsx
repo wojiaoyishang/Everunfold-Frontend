@@ -1,5 +1,9 @@
 import { resolveManagedPage } from "@/core/pages/resolve";
 import { ManagedPageView } from "@/themes/argon/pages/view";
+import { pageLanguages } from "@/core/pages/languages";
+import { registeredPageLanguages } from "@/core/pages/registered-languages";
+import { normalizeCatalog } from "@/core/i18n/catalog";
+import { PagePresentation } from "@/themes/argon/components/route-state";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
@@ -22,7 +26,24 @@ export async function generateMetadata({
   const snapshot = await readPublicSnapshot();
   const { contentPath } = await params;
   const managed = resolveManagedPage(snapshot, `/${contentPath.join("/")}`);
-  if (managed)
+  if (managed) {
+    const variants =
+      managed.source === "custom"
+        ? pageLanguages(snapshot, managed)
+        : registeredPageLanguages(
+            managed,
+            normalizeCatalog(snapshot.site.settings?.site.language_catalog),
+            new Set(
+              [...snapshot.contents, ...(snapshot.pages ?? [])].map(
+                (item) => item.path,
+              ),
+            ),
+          );
+    const canonical =
+      managed.source === "registered"
+        ? (variants.find((item) => item.language === snapshot.site.locale)
+            ?.path ?? managed.path)
+        : managed.path;
     return {
       title: managed.title,
       description: managed.description || undefined,
@@ -34,11 +55,18 @@ export async function generateMetadata({
       },
       alternates: readConfiguration().publicSiteUrl
         ? {
-            canonical: new URL(managed.path, readConfiguration().publicSiteUrl!)
+            canonical: new URL(canonical, readConfiguration().publicSiteUrl!)
               .href,
+            languages: Object.fromEntries(
+              variants.map((item) => [
+                item.language,
+                new URL(item.path, readConfiguration().publicSiteUrl!).href,
+              ]),
+            ),
           }
         : undefined,
     };
+  }
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
   if (codePath) return codePageMetadata(snapshot, codePath);
   const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
@@ -61,7 +89,19 @@ export default async function ContentPage({
     searchParams,
   ]);
   const managed = resolveManagedPage(snapshot, `/${contentPath.join("/")}`);
-  if (managed) return <ManagedPageView page={managed} />;
+  if (managed)
+    return (
+      <>
+        <PagePresentation
+          site={snapshot.site}
+          id={`page:${managed.id}:${managed.revision}`}
+        />
+        <ManagedPageView
+          page={managed}
+          translations={pageLanguages(snapshot, managed)}
+        />
+      </>
+    );
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
   if (codePath)
     return (

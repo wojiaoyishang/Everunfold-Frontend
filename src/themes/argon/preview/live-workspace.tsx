@@ -1,18 +1,29 @@
 "use client";
-import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { adminPreferencesKey } from "@/core/admin/preferences";
 import { useAdminPreferences } from "@/core/admin/use-admin-preferences";
 import { UiText, useT } from "@/core/i18n/provider";
 import { isManagementRoute } from "@/core/auth/routes";
-import { checkedPreviewPage } from "@/core/pages/preview-validation";
-import { checkedLiveContent } from "@/core/preview/content";
+import {
+  useLiveBridge,
+  type LiveEditorState,
+} from "@/core/preview/use-live-bridge";
+import { useLiveLeave } from "@/core/preview/use-live-leave";
+import { previewNavigation } from "@/core/preview/bridge";
 import {
   livePreviewPath,
   previewEditorPath,
   type PreviewKind,
 } from "@/core/preview/routes";
-import { RouteLink } from "../components/ui/route-link";
+import { ConfirmDialog } from "../components/ui/confirm-dialog";
 import { Button } from "../components/ui/primitives";
 import { SplitHandle } from "../components/ui/split-handle";
 import { Icon } from "../components/icon";
@@ -32,7 +43,10 @@ export function LivePreviewWorkspace({
   );
   const view = useRef<HTMLIFrameElement>(null),
     editor = useRef<HTMLIFrameElement>(null);
-  const latest = useRef<object | null>(null);
+  const [editorState, setEditorState] = useState<LiveEditorState>({
+    dirty: false,
+    busy: false,
+  });
   const [mobile, setMobile] = useState("preview");
   const [editorWidth, setEditorWidth] = useState(390);
   const [resizing, setResizing] = useState(false);
@@ -58,79 +72,43 @@ export function LivePreviewWorkspace({
     kind === "page"
       ? `/admin/pages/${id}/preview`
       : `/admin/content/${kind}/${id}/preview`;
-  useEffect(() => {
-    const receive = (event: MessageEvent) => {
+  const leave = useLiveLeave(editPath, editorState.dirty, editorState.busy);
+  const onLocation = useCallback(
+    (path: string) => {
+      const url = previewNavigation(path, window.location.origin);
       if (
-        event.origin === window.location.origin &&
-        event.source === view.current?.contentWindow &&
-        event.data?.type === "everunfold:focus-editor" &&
-        event.data.id === id
-      ) {
-        setMobile("editor");
-        editor.current?.contentWindow?.focus();
+        !url ||
+        url.origin !== window.location.origin ||
+        !isManagementRoute(url.pathname) ||
+        url.pathname === editPath
+      )
         return;
-      }
-      if (event.origin !== window.location.origin) return;
-      if (event.source === editor.current?.contentWindow) {
-        if (
-          event.data?.type === "everunfold:embedded-location" &&
-          typeof event.data.path === "string"
-        ) {
-          const url = new URL(event.data.path, window.location.origin);
-          if (
-            url.origin !== window.location.origin ||
-            !isManagementRoute(url.pathname) ||
-            url.pathname === editPath
-          )
-            return;
-          const page = /^\/admin\/pages\/([a-f0-9-]{36})$/.exec(url.pathname);
-          const content =
-            /^\/admin\/content\/(article|shuoshuo)\/([a-f0-9-]{36})\/edit$/.exec(
-              url.pathname,
-            );
-          window.location.assign(
-            page
-              ? livePreviewPath("page", page[1])
-              : content
-                ? livePreviewPath(content[1] as PreviewKind, content[2])
-                : url.pathname + url.search + url.hash,
-          );
-          return;
-        }
-        const valid =
-          kind === "page"
-            ? event.data?.type === "everunfold:page-preview" &&
-              checkedPreviewPage(event.data.page, id)
-            : event.data?.type === "everunfold:content-preview" &&
-              checkedLiveContent(event.data.content, kind, id);
-        if (!valid) return;
-        latest.current = event.data;
-        view.current?.contentWindow?.postMessage(
-          event.data,
-          window.location.origin,
+      const page = /^\/admin\/pages\/([a-f0-9-]{36})$/.exec(url.pathname);
+      const content =
+        /^\/admin\/content\/(article|shuoshuo)\/([a-f0-9-]{36})\/edit$/.exec(
+          url.pathname,
         );
-      } else if (
-        event.source === view.current?.contentWindow &&
-        event.data?.id === id &&
-        [
-          "everunfold:page-preview-ready",
-          "everunfold:content-preview-ready",
-        ].includes(event.data.type)
-      ) {
-        if (latest.current)
-          view.current?.contentWindow?.postMessage(
-            latest.current,
-            window.location.origin,
-          );
-        editor.current?.contentWindow?.postMessage(
-          { type: "everunfold:request-preview", id },
-          window.location.origin,
-        );
-      }
-    };
-    window.addEventListener("message", receive);
-    return () => window.removeEventListener("message", receive);
-  }, [kind, id, editPath]);
+      window.location.assign(
+        page
+          ? livePreviewPath("page", page[1])
+          : content
+            ? livePreviewPath(content[1] as PreviewKind, content[2])
+            : url.pathname + url.search + url.hash,
+      );
+    },
+    [editPath],
+  );
+  const onFocusEditor = useCallback(() => setMobile("editor"), []);
+  const bridge = useLiveBridge({
+    kind,
+    id,
+    editor,
+    view,
+    onEditorState: setEditorState,
+    onLeave: leave.request,
+    onLocation,
+    onFocusEditor,
+  });
   return (
     <div
       className={`admin-root ${styles.workspace}`}
@@ -139,19 +117,18 @@ export function LivePreviewWorkspace({
       data-admin-motion={preferences.motion}
     >
       <header className={styles.toolbar}>
-        <RouteLink
+        <Button
           className="admin-button"
-          href={editPath}
+          onClick={() => leave.request(editPath)}
+          disabled={editorState.busy}
           title={t("完整编辑器")}
           aria-label={t("完整编辑器")}
-          target="_blank"
-          rel="noopener noreferrer"
         >
           <Icon name="logout" />
           <span className={styles.fullEditorLabel}>
             <UiText text="完整编辑器" />
           </span>
-        </RouteLink>
+        </Button>
         <strong>
           <Icon name="eye" />
           <UiText text="实时预览" />
@@ -214,6 +191,7 @@ export function LivePreviewWorkspace({
             src={`${editPath}?preview-embed=1`}
             name={`everunfold-live-editor-${id}`}
             title={t("实时预览编辑器")}
+            onLoad={bridge.loadEditor}
           />
         </aside>
         <SplitHandle
@@ -226,15 +204,57 @@ export function LivePreviewWorkspace({
           onDragging={setResizing}
           onChange={setEditorWidth}
         />
-        <section className={styles.view} data-device={device}>
+        <section
+          className={styles.view}
+          data-device={device}
+          aria-busy={bridge.status !== "ready"}
+        >
+          {bridge.status !== "ready" && (
+            <div
+              className={styles.previewStatus}
+              data-error={bridge.status === "error"}
+              role="status"
+            >
+              <Icon
+                name={bridge.status === "error" ? "cloud-off" : "refresh"}
+                className={bridge.status === "error" ? "" : styles.spin}
+              />
+              <UiText
+                text={
+                  bridge.status === "error"
+                    ? "预览更新未完成，请重试。"
+                    : bridge.status === "loading"
+                      ? "正在载入预览…"
+                      : "正在更新预览…"
+                }
+              />
+              {bridge.status === "error" && (
+                <Button onClick={bridge.retry}>
+                  <UiText text="重试" />
+                </Button>
+              )}
+            </div>
+          )}
           <iframe
             ref={view}
             name={`everunfold-live-preview-${id}`}
             src={previewPath}
             title={t("前台实时预览")}
+            onLoad={bridge.loadPreview}
           />
         </section>
       </div>
+      <ConfirmDialog
+        open={!!leave.destination}
+        title="离开实时预览？"
+        description="当前修改尚未保存，离开会丢失这些输入。可以继续编辑并保存后再离开。"
+        confirmLabel="放弃修改并离开"
+        cancelLabel="继续编辑"
+        busy={editorState.busy}
+        onCancel={leave.cancel}
+        onConfirm={() => true}
+        onConfirmed={leave.leave}
+      />
     </div>
   );
 }

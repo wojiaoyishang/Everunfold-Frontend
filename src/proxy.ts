@@ -46,7 +46,9 @@ export async function proxy(request: NextRequest) {
     const managed = resolveManagedPage(snapshot, path);
     const locale = content
       ? localeOf(content.language)
-      : localePath(path, catalog);
+      : managed?.source === "custom" && managed.language
+        ? localeOf(managed.language)
+        : localePath(path, catalog);
     headers.set("x-everunfold-locale", locale);
     headers.set(
       "x-everunfold-ui-locale",

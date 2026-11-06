@@ -9,6 +9,7 @@ import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
 import styles from "./translations.module.css";
+import { LanguageTrigger } from "./language-trigger";
 
 export const translationStatus = (item: TranslationMember) =>
   item.status === "trash"
@@ -46,16 +47,10 @@ export function TranslationMenu({
       className={styles.trigger}
       disabled={disabled}
       triggerContent={
-        <>
-          <Icon name="languages" />
-          <span>
-            <LanguageLabel
-              code={members.find((item) => item.id === current)?.language}
-              compact
-            />
-            {members.length > 1 ? ` · ${members.length}` : ""}
-          </span>
-        </>
+        <LanguageTrigger
+          code={members.find((item) => item.id === current)?.language}
+          count={members.length}
+        />
       }
     >
       {(close) => (

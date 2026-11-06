@@ -1,7 +1,7 @@
 /* Generated from the backend public contract. Do not edit by hand. */
 
 export type SchemaVersion =
-  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0" | "0.7.0";
+  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0" | "0.7.0" | "0.8.0";
 export type Original = string;
 export type Webp = string;
 export type Family = string;
@@ -31,9 +31,12 @@ export type Source = "custom" | "registered";
 export type ImplementationId = string | null;
 export type ImplementationVersion = string | null;
 export type Revision = number;
+export type Language1 = string | null;
+export type TranslationGroupId1 = string | null;
+export type IsOriginal1 = boolean;
 
 /**
- * 公开阅读快照 0.7；加入已应用的独立页面，兼容已有快照。
+ * 公开阅读快照 0.8；自定义页面支持独立语言关联，兼容已有快照。
  */
 export interface PublicSnapshot {
   schema_version: SchemaVersion;
@@ -156,6 +159,9 @@ export interface PublicManagedPage {
   implementation_id?: ImplementationId;
   implementation_version?: ImplementationVersion;
   revision: Revision;
+  language?: Language1;
+  translation_group_id?: TranslationGroupId1;
+  is_original?: IsOriginal1;
 }
 export interface Options {
   [k: string]: JsonValue;

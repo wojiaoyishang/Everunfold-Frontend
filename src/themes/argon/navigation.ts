@@ -88,15 +88,27 @@ export function navigationTarget(href: string) {
 /** Presentation overrides for the reference theme, without inventing business data. */
 export function siteNavigation(site: Site): NavigationItem[] {
   if (site.settings) {
-    const map = (item: MenuItem): NavigationItem => ({
-      id: item.id,
-      label: item.label,
-      href: item.href,
-      icon: item.icon ?? "link",
-      iconUrl: site.settings?.icon_urls?.[item.icon ?? ""],
-      children: item.children?.length ? item.children.map(map) : undefined,
-    });
-    return (site.settings.site.navigation ?? []).map(map);
+    const map = (item: MenuItem): NavigationItem[] => {
+      const href = item.reference
+        ? site.navigationResources?.[
+            `${item.reference.kind}:${item.reference.id}`
+          ]
+        : item.href;
+      if (!href) return [];
+      return [
+        {
+          id: item.id,
+          label: item.label,
+          href,
+          icon: item.icon ?? "link",
+          iconUrl: site.settings?.icon_urls?.[item.icon ?? ""],
+          children: item.children?.length
+            ? item.children.flatMap(map)
+            : undefined,
+        },
+      ];
+    };
+    return (site.settings.site.navigation ?? []).flatMap(map);
   }
   const items = site.navigation.length
     ? site.navigation

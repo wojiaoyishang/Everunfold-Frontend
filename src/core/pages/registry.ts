@@ -9,6 +9,10 @@ export const pageManifest: PageManifest = {
   protocol: "pages-1",
   pages: [peopleDefinition],
 };
+/** A trusted implementation explicitly opts into shared options with locale-aware program UI. */
+export const localizedPageImplementations: ReadonlySet<string> = new Set([
+  "core.people",
+]);
 export function hasPageImplementation(
   page: Pick<
     PublicManagedPage,

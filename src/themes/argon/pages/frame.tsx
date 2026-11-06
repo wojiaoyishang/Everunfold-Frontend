@@ -1,17 +1,58 @@
 "use client";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { PageValue } from "@/generated/pages-contract";
-import { pageDocument } from "@/core/pages/document";
+import { pageDocument, pageRenderId } from "@/core/pages/document";
 import styles from "./pages.module.css";
 
-export function PageFrame({ value }: { value: PageValue }) {
+export function PageFrame({
+  value,
+  onReady,
+}: {
+  value: PageValue;
+  onReady?: () => void;
+}) {
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(480);
-  const document = useMemo(() => pageDocument(value), [value]);
+  const frameId = useId();
+  const { html, css, javascript, javascript_enabled } = value;
+  const document = useMemo(() => {
+    const token = pageRenderId(frameId, {
+      html,
+      css,
+      javascript,
+      javascript_enabled,
+    });
+    return {
+      token,
+      source: pageDocument(
+        { html, css, javascript, javascript_enabled },
+        token,
+      ),
+    };
+  }, [html, css, javascript, javascript_enabled, frameId]);
+  const [ready, setReady] = useState<{
+    token: string;
+    source: MessageEventSource | null;
+  } | null>(null);
+  useEffect(() => {
+    if (
+      ready?.token === document.token &&
+      ready.source === ref.current?.contentWindow
+    )
+      onReady?.();
+  }, [ready, document.token, onReady]);
   useEffect(() => {
     const resize = (event: MessageEvent) => {
       if (
         event.source !== ref.current?.contentWindow ||
+        event.data?.renderId !== document.token
+      )
+        return;
+      if (event.data.type === "everunfold:page:ready") {
+        setReady({ token: document.token, source: event.source });
+        return;
+      }
+      if (
         event.data?.type !== "everunfold:page:size" ||
         typeof event.data.height !== "number" ||
         !Number.isFinite(event.data.height)
@@ -25,16 +66,17 @@ export function PageFrame({ value }: { value: PageValue }) {
       "*",
     );
     return () => window.removeEventListener("message", resize);
-  }, []);
+  }, [document.token]);
   return (
     <iframe
+      key={document.token}
       ref={ref}
       title={value.title}
       className={styles.frame}
       style={{ height }}
       sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
       referrerPolicy="no-referrer"
-      srcDoc={document}
+      srcDoc={document.source}
       onLoad={(event) =>
         event.currentTarget.contentWindow?.postMessage(
           { type: "everunfold:page:measure" },

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { ContentTypeDefinition } from "@/generated/content-admin-contract";
 import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
+import { requestEmbeddedLeave } from "@/core/preview/bridge";
 import { editorPreviewContent } from "@/core/preview/content";
 import {
   useDraftEditor,
@@ -82,6 +83,10 @@ export function DraftEditor({
     liveContent
       ? { type: "everunfold:content-preview", content: liveContent }
       : null,
+    {
+      dirty: editor.unsaved || editor.uncertain,
+      busy: editor.busy || uploading,
+    },
   );
   const [section, setSection] = useState<"body" | "settings">("body");
   const [mode, setMode] = useState<"edit" | "preview">("edit");
@@ -128,6 +133,7 @@ export function DraftEditor({
   }, [leaving, destination, router]);
   const requestLeave = (href: string) => {
     if (editor.busy || leaving) return;
+    if (requestEmbeddedLeave(href)) return;
     if (editor.unsaved || editor.uncertain) {
       setDestination(href);
       setConfirm("close");

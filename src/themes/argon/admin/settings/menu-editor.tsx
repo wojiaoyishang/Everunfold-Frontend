@@ -3,7 +3,10 @@ import { UiText } from "@/core/i18n/provider";
 
 import { randomUUID } from "@/core/browser/crypto";
 import { useState, type CSSProperties } from "react";
-import type { MenuItem } from "@/generated/settings-contract";
+import type {
+  MenuItem,
+  NavigationReference,
+} from "@/generated/settings-contract";
 import {
   flattenMenu,
   updateMenu,
@@ -18,6 +21,8 @@ import { Icon } from "../../components/icon";
 import { LibraryIcon } from "../../components/library-icon";
 import { IconBrowser } from "../icons/icon-browser";
 import { SettingsText } from "./shared";
+import { NavigationPicker } from "./navigation-picker";
+import { NavigationReferenceField } from "./navigation-reference";
 export function MenuEditor({
   value,
   iconUrls = {},
@@ -32,6 +37,9 @@ export function MenuEditor({
   const [selection, setSelection] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [picker, setPicker] = useState(false);
+  const [resourcePicker, setResourcePicker] = useState<
+    NavigationReference["kind"] | null
+  >(null);
   const entries = flattenMenu(value);
   const selected =
     entries.find((entry) => entry.item.id === selection) ?? entries[0];
@@ -159,12 +167,40 @@ export function MenuEditor({
               maxLength={60}
               onChange={(label) => patch({ label })}
             />
-            <SettingsText
-              label="链接地址"
-              value={item.href}
-              placeholder="/archives 或 https://…"
-              onChange={(href) => patch({ href })}
-            />
+            <div className="admin-settings-field">
+              <span>
+                <UiText text="链接类型" />
+              </span>
+              <Select
+                name="menu-link-kind"
+                label="链接类型"
+                value={item.reference?.kind ?? "manual"}
+                options={[
+                  { value: "manual", label: "手动链接" },
+                  { value: "article", label: "关联文章" },
+                  { value: "shuoshuo", label: "关联说说" },
+                  { value: "page", label: "关联页面" },
+                ]}
+                onValueChange={(value) => {
+                  if (value === "manual") patch({ reference: null });
+                  else setResourcePicker(value as NavigationReference["kind"]);
+                }}
+              />
+            </div>
+            {item.reference ? (
+              <NavigationReferenceField
+                key={`${item.reference.kind}:${item.reference.id}:${item.href}`}
+                reference={item.reference}
+                onChoose={() => setResourcePicker(item.reference!.kind)}
+              />
+            ) : (
+              <SettingsText
+                label="链接地址"
+                value={item.href}
+                placeholder="/archives 或 https://…"
+                onChange={(href) => patch({ href })}
+              />
+            )}
             <div className="admin-settings-field">
               <span>
                 <UiText text="所属菜单" />
@@ -263,6 +299,21 @@ export function MenuEditor({
             }}
           />
         </Modal>
+      )}
+      {resourcePicker && item && (
+        <NavigationPicker
+          kind={resourcePicker}
+          onClose={() => setResourcePicker(null)}
+          onPick={(resource) => {
+            patch({
+              reference: { kind: resource.kind, id: resource.id },
+              href: resource.path,
+              ...(item.label === "新菜单"
+                ? { label: resource.title.slice(0, 60) || "未命名说说" }
+                : {}),
+            });
+          }}
+        />
       )}
     </div>
   );

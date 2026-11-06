@@ -16,6 +16,8 @@ import { Button } from "../components/ui/primitives";
 import { RouteLink } from "../components/ui/route-link";
 import { Icon } from "../components/icon";
 import styles from "./content-preview.module.css";
+import { previewStamp } from "@/core/preview/bridge";
+import { usePreviewReceipt } from "@/core/preview/use-preview-receipt";
 
 export function ContentPreview({
   type,
@@ -30,6 +32,7 @@ export function ContentPreview({
 }) {
   const { detail, error, baseUrl, retry } = useContentPreview(type, id);
   const [liveContent, setLiveContent] = useState<Content | null>(null);
+  const { setStamp, rendered } = usePreviewReceipt(id);
   useEffect(() => {
     if (window.parent === window) return;
     const receive = (event: MessageEvent) => {
@@ -40,7 +43,11 @@ export function ContentPreview({
       )
         return;
       const value = checkedLiveContent(event.data.content, type, id);
-      if (value) setLiveContent(value);
+      const stamp = previewStamp(event.data);
+      if (value && stamp) {
+        setStamp(stamp);
+        setLiveContent(value);
+      }
     };
     window.addEventListener("message", receive);
     window.parent.postMessage(
@@ -48,7 +55,7 @@ export function ContentPreview({
       window.location.origin,
     );
     return () => window.removeEventListener("message", receive);
-  }, [type, id]);
+  }, [type, id, setStamp]);
   const presentation = useMemo(() => {
     if (!detail) return null;
     const content = liveContent ?? previewContent(detail, terms);
@@ -57,6 +64,9 @@ export function ContentPreview({
       rendered: renderContent(content, site?.settings?.shortcodes),
     };
   }, [detail, liveContent, terms, site?.settings?.shortcodes]);
+  useEffect(() => {
+    if (presentation && liveContent) rendered();
+  }, [presentation, liveContent, rendered]);
   const back = `/admin/content/${type}/${id}/edit`;
   if (!site)
     return (

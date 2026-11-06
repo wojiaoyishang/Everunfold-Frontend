@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-9，2026-11-06。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-10，2026-11-06。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -85,3 +85,12 @@ settings.directory/
 站点、主题、系统三个设置页在1200px及以上提供右侧“快速导航”，点击跳到相应分区，滚动时高亮当前项。目录按页面实际分区生成；主题包含代码块。较窄屏幕隐藏目录，保留原表单。保存/撤销栏位于左侧正文列，目录不会遮挡设置。
 
 链接使用稳定hash，可复制带分区的地址、刷新及前进后退，键盘Enter可定位并把焦点移到目标。导航不会保存设置或清空未保存输入；离开页面继续沿原有修改保护。新增分区需在SettingsSection提供唯一且稳定的id。具体展示、顶栏留白和页底短分区处理见[ADR0064](../decisions/0064-desktop-settings-section-navigation.md)，实页范围见[验收](../handoff/settings-section-navigation-verification.md)。
+
+
+## 按内容关联菜单
+
+菜单编辑的“链接类型”可选手动链接、关联文章、关联说说、关联页面。资源选择器支持搜索与翻页，只显示已发布文章/说说和已启用页面；选择后显示当前关联标题与应用路径，也可重新选择。修改设置仍需点击保存，可撤销未保存的选择。
+
+关联保存资源类型与稳定ID，链接随目标发布/应用后的路径变化。当前阅读语言有同组公开版本时优先使用该版本，否则使用关联项；注册页面使用实现显式声明的语言路由。目标未发布、停用、撤回、转私有或回收后隐藏该菜单及其子树，不能回退到旧URL。手动链接不自动跟随。
+
+后端`POST /v1/admin/settings/navigation-resources`要求`settings:read`，浏览器仍检查精确Origin/CSRF。请求含kind、可选id、search、page、page_size，返回最小ID/标题/当前公开路径/语言，不返回草稿、正文或内部元数据。允许管理员和被明确授予读取设置能力的调用方选择已公开资源；此接口不授予页面或内容写入权限。

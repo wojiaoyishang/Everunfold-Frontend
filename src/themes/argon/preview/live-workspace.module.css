@@ -74,10 +74,55 @@
   overflow: hidden;
 }
 .view {
+  position: relative;
   display: flex;
   justify-content: center;
   overflow: hidden;
   background: var(--admin-subtle);
+}
+.previewStatus {
+  position: absolute;
+  z-index: 20;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100% - 24px);
+  padding: 9px 13px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: var(--admin-canvas);
+  color: var(--admin-muted);
+  box-shadow: var(--admin-shadow);
+  font-size: 12px;
+  pointer-events: none;
+}
+.previewStatus svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+.previewStatus[data-error="true"] {
+  color: var(--admin-danger);
+  pointer-events: auto;
+}
+.previewStatus button {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+  border: 0;
+  border-radius: 4px;
+  padding: 5px 8px;
+  flex: none;
+}
+.spin {
+  animation: previewSpin 800ms linear infinite;
+}
+@keyframes previewSpin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .view[data-device="tablet"] iframe {
   width: min(100%, 820px);

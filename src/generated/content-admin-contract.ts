@@ -200,7 +200,7 @@ export type SourceEpoch1 = string;
 export type Resource = "public-content";
 export type Revision4 = number;
 export type SchemaVersion =
-  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0" | "0.7.0";
+  "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.5.0" | "0.6.0" | "0.7.0" | "0.8.0";
 export type SourceEpoch2 = string;
 export type Generation = number;
 export type ExportedAt = string;
@@ -284,6 +284,9 @@ export type Source = "custom" | "registered";
 export type ImplementationId = string | null;
 export type ImplementationVersion = string | null;
 export type Revision5 = number;
+export type Language7 = string | null;
+export type TranslationGroupId4 = string | null;
+export type IsOriginal2 = boolean;
 export type Pages1 = PublicManagedPage[];
 export type Success7 = boolean;
 export type Code8 = number;
@@ -296,7 +299,7 @@ export type Members = TranslationMember[];
 export type Id18 = string;
 export type OperationId4 = string;
 export type ExpectedRevision3 = number;
-export type Language7 = string;
+export type Language8 = string;
 export type CopySource = boolean;
 export type Id19 = string;
 export type OperationId5 = string;
@@ -715,6 +718,9 @@ export interface PublicManagedPage {
   implementation_id?: ImplementationId;
   implementation_version?: ImplementationVersion;
   revision: Revision5;
+  language?: Language7;
+  translation_group_id?: TranslationGroupId4;
+  is_original?: IsOriginal2;
 }
 export interface Options {
   [k: string]: JsonValue;
@@ -736,7 +742,7 @@ export interface TranslationCreate {
   id: Id18;
   operation_id: OperationId4;
   expected_revision: ExpectedRevision3;
-  language: Language7;
+  language: Language8;
   copy_source?: CopySource;
 }
 export interface TranslationLink {

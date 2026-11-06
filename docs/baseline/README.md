@@ -895,3 +895,27 @@ ADR0073、content-management-9、pages-runtime-3与bootstrap14记录本轮用户
 | `docs/development/content-management.md` | `097294b86e00912dd14cae591d78e5747ac547f14abdebdf68311ca1f127f7b7` |
 | `docs/development/pages.md` | `582d3daa8beab17bb298273a1c64ab39d246264058f563c9c75f246c0aad7187` |
 | `docs/handoff/scheduled-publication-verification.md` | `a7d5d2da711ae8722d6ceb0f23ef58122a213f36fb9805e957caf505102616b3` |
+
+## 页面语言与预览后续实施（2026-11-06）
+
+新增ADR0074记录本轮明确要求。以下为当前共享文件；阶段进度由各仓库STATUS记录，后续交付更新相应摘要。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `a761afc522bc3c82c3e1647f9f4c69d1fe50de904f231f8eca9da04318868424` |
+| `docs/decisions/0074-page-languages-linked-navigation-and-live-preview.md` | `179afbfda44cdcd43010f9c5e3faeb2fd0db0993dbcfdcd3656ad9fc6b47b10f` |
+
+## 页面语言、关联菜单与预览交付（2026-11-06）
+
+ADR0074、pages-runtime-4、settings-runtime-10、multilingual-runtime-5、registered-pages-runtime-3与bootstrap15记录当前交付。以下摘要替代对应旧记录；两个STATUS分别维护，实际设备信息/凭据不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `15607f01574f424cb833927c7f5dd6d13ac1fcbda047ea14bd9608cb7245d752` |
+| `docs/architecture/constraints.md` | `97fe4cf7c2eebb23a1d58cc4da04d0165d22b4304c897d1a285b5c83d3e8cd0f` |
+| `docs/architecture/multilingual-content.md` | `55653f65dd45681d3ed36f513fa53cb88b666109bc2bdf7702a434607c963d14` |
+| `docs/architecture/registered-pages.md` | `f218c89def6f9546298bd31ea69e2d5602470a1f5b10576c99fce6f72e92b7bf` |
+| `docs/decisions/0074-page-languages-linked-navigation-and-live-preview.md` | `2406ea1bba03a480c37865db490d1c39ae1d81a12a3be28794bd148ff4e810ef` |
+| `docs/development/pages.md` | `d2796c36324a42d3863aefb77d198d1aed582055a6b2128fa451f9b67d305e3d` |
+| `docs/development/settings.md` | `0cc53c0992ef483f623d0e6d27115ef83cdec6ba92e8ecd4677c86cc708640aa` |
+| `docs/handoff/page-languages-preview-verification.md` | `7fb4791c9f306df8d0c97f1b0587c67aff2b4b20da9efbb4e34c3901988f6e20` |

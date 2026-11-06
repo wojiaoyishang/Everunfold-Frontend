@@ -13,6 +13,8 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import styles from "./pages.module.css";
+import { PageEnabledControl } from "./enabled-control";
+import { PageLanguageMenu } from "./language-menu";
 export function ManagedPagesDirectory() {
   const { baseUrl, csrfToken } = useAdminRequest(),
     actor = useAdminAccount(),
@@ -48,7 +50,7 @@ export function ManagedPagesDirectory() {
       (filter === "trash"
         ? row.archived
         : !row.archived && (filter === "all" || row.source === filter)) &&
-      `${row.title} ${row.path}`
+      `${row.title} ${row.path} ${(row.translations?.members ?? []).map((m) => `${m.title} ${m.path} ${m.language}`).join(" ")}`
         .toLocaleLowerCase()
         .includes(query.toLocaleLowerCase()),
   );
@@ -130,16 +132,12 @@ export function ManagedPagesDirectory() {
                   text={row.source === "registered" ? "前端注册" : "自定义代码"}
                 />
               </span>
-              <span
-                className={`admin-badge ${row.enabled ? "admin-badge-success" : ""}`}
-              >
-                <UiText
-                  text={
-                    row.archived ? "回收站" : row.enabled ? "已启用" : "已停用"
-                  }
-                />
-              </span>
-              {row.revision !== row.applied_revision && (
+              {row.archived && (
+                <span className="admin-badge">
+                  <UiText text="回收站" />
+                </span>
+              )}
+              {row.has_unapplied_changes && (
                 <span className="admin-badge">
                   <UiText text="未应用的草稿" />
                 </span>
@@ -151,6 +149,19 @@ export function ManagedPagesDirectory() {
               )}
             </div>
             <div className={styles.rowActions}>
+              {row.translations && (
+                <PageLanguageMenu group={row.translations} current={row.id} />
+              )}
+              {!row.archived && (
+                <PageEnabledControl
+                  page={row}
+                  disabled={loading}
+                  onChanged={() => {
+                    setLoading(true);
+                    setRefresh((value) => value + 1);
+                  }}
+                />
+              )}
               {row.archived &&
                 can(actor, "pages:write") &&
                 can(actor, "pages:publish") && (
@@ -165,6 +176,11 @@ export function ManagedPagesDirectory() {
                 href={"/admin/pages/" + row.id}
                 className="admin-button"
               >
+                <Icon
+                  name={
+                    can(actor, "pages:write") && !row.archived ? "edit" : "eye"
+                  }
+                />
                 <UiText
                   text={
                     can(actor, "pages:write") && !row.archived

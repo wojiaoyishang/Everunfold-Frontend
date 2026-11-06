@@ -186,3 +186,7 @@
 最新设置交付：[桌面分区导航](decisions/0064-desktop-settings-section-navigation.md)、[运行指南](development/settings.md)与[实页验收](handoff/settings-section-navigation-verification.md)：站点/主题/系统设置共用右侧目录、锚点及滚动高亮。
 
 最新多语言交付：[内容与设置指南](architecture/multilingual-content.md)、[ADR0066](decisions/0066-configurable-languages-and-grouped-translations.md)及[验收](handoff/multilingual-verification.md)已替代[ADR0065历史提案](decisions/0065-multilingual-content-entry-design.md)。语言数量可扩展，默认/中文前缀和标志可配置，译文与原文合并列表，前后台切换及独立发布已接通；程序包与内容语言仍分开管理。
+
+- [页面语言、关联菜单与预览回执](decisions/0074-page-languages-linked-navigation-and-live-preview.md)：自定义页面独立译文、已应用源文启停、稳定内容导航及隔离预览确认；实施与验收以STATUS为准。
+
+本轮交付：[页面多语言、自动关联菜单与预览更新](decisions/0074-page-languages-linked-navigation-and-live-preview.md)、[页面指南4](development/pages.md)、[设置指南10](development/settings.md)与[验收](handoff/page-languages-preview-verification.md)：语言组/独立启用、代码注册页语言路径、稳定ID菜单、主题离开与渲染回执、人物弹窗、启停去重及语言计数对齐。

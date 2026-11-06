@@ -1,6 +1,6 @@
 # 页面管理、注册与缓存边界
 
-版本：registered-pages-runtime-2，2026-11-06。状态：按用户本轮授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。原设计中的菜单资源选择器仍是提案。
+版本：registered-pages-runtime-3，2026-11-06。状态：按用户本轮授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施。
 
 ## 两种来源
 
@@ -45,3 +45,10 @@
 ## 尚未实施的菜单资源选择器
 
 菜单目前仍手填href。后续可增加带权限的文章/内容页/已启用注册页资源选择器，保存稳定类型+ID并解析路径；不为链接预览泄露草稿或私有选项。本轮没有交付该选择器、通用可视化搭建器、运行时插件安装或在线代码编辑注册组件。
+
+
+## 本轮补充
+
+0026新增页面语言组和主库applied_snapshot：published为空表示停用，applied_snapshot保留可重新启用的内容，data仍保存工作稿。三者职责分开，不从公开文件重建工作稿。原停用页面如果没有可恢复应用源文，首次启用必须明确应用草稿。页面启用、语言关联及资源改址复用参考锁/设置行锁和原完整Release/可靠投递事务。
+
+仅custom页面参加语言组，语言来自动态站点目录。目录按source_id聚合，成员独立应用；回收/恢复会维护有效入口。registered页面多语言由可信代码显式决定，现有实现提供语言路径，共用选项和程序字典，不能被浏览器改为普通译文组。私有内部元数据始终按原独立接口读取，不随复制或语言分组公开。

@@ -51,6 +51,20 @@
   width: 15px;
   height: 15px;
 }
+.triggerLabel,
+.count {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+  flex: none;
+}
+.triggerLabel {
+  gap: 6px;
+}
+.count {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .trigger:hover,
 .manage:hover {
   color: var(--admin-accent);

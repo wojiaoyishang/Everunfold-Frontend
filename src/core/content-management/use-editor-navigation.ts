@@ -1,5 +1,6 @@
 "use client";
 import { useEffect } from "react";
+import { requestEmbeddedLeave } from "@/core/preview/bridge";
 
 /** Guard ordinary in-app links as well as the editor's explicit return action. */
 export function useEditorNavigation(
@@ -35,7 +36,7 @@ export function useEditorNavigation(
       if (!["http:", "https:"].includes(url.protocol)) return;
       event.preventDefault();
       event.stopPropagation();
-      if (!busy) request(url.href);
+      if (!busy && !requestEmbeddedLeave(url.href)) request(url.href);
     };
     document.addEventListener("click", intercept, true);
     return () => document.removeEventListener("click", intercept, true);

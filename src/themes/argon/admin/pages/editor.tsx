@@ -24,7 +24,7 @@ import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
 import { PreviewAction } from "../components/preview-action";
 import { usePagePreview } from "@/core/pages/use-preview";
 import { pagesFailure } from "@/core/pages/failure";
-import { UiText, useT } from "@/core/i18n/provider";
+import { UiText, useT, useLanguageCatalog } from "@/core/i18n/provider";
 import { Form, Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { Switch } from "../../components/ui/switch";
@@ -34,6 +34,8 @@ import { UnsavedAccountChanges } from "../../account/unsaved";
 import { AdminPageHeading } from "../components/page-heading";
 import { PageOptionsEditor } from "./options";
 import styles from "./pages.module.css";
+import { Select } from "../../components/ui/select";
+import { PageLanguages } from "./languages";
 
 const SourceEditor = dynamic(() => import("./source-editor"), { ssr: false });
 const blank: PageValue = {
@@ -57,6 +59,8 @@ export function ManagedPageEditor({ id }: { id?: string }) {
   const previewId = id ?? draftId;
   const form = useRef<HTMLFormElement>(null);
   const t = useT();
+  const catalog = useLanguageCatalog();
+  const [language, setLanguage] = useState(catalog.default_code);
   const [saved, setSaved] = useState<ManagedPageItem | null>(null);
   const [value, setValue] = useState<PageValue>(blank);
   const [error, setError] = useState("");
@@ -69,7 +73,9 @@ export function ManagedPageEditor({ id }: { id?: string }) {
     can(actor, "pages:write") &&
     !(value.javascript_enabled && actor.role !== "admin");
   const publish = write && can(actor, "pages:publish");
-  const dirty = JSON.stringify(value) !== JSON.stringify(saved?.value ?? blank);
+  const dirty =
+    JSON.stringify(value) !== JSON.stringify(saved?.value ?? blank) ||
+    (!saved && language !== catalog.default_code);
   useEffect(() => {
     const controller = new AbortController();
     if (id)
@@ -78,6 +84,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
           if (!controller.signal.aborted) {
             setSaved(response.data);
             setValue(response.data.value);
+            if (response.data.language) setLanguage(response.data.language);
             setError("");
           }
         })
@@ -95,6 +102,10 @@ export function ManagedPageEditor({ id }: { id?: string }) {
           value,
           apply,
           current_password: password,
+          language:
+            saved?.source === "registered"
+              ? undefined
+              : (saved?.language ?? language),
         };
         const response = await saveManagedPage(
           baseUrl,
@@ -124,14 +135,22 @@ export function ManagedPageEditor({ id }: { id?: string }) {
       implementation_version: saved?.registration?.version,
       revision: saved?.revision ?? 1,
       enabled: true,
+      language:
+        saved?.source === "registered" ? null : (saved?.language ?? language),
+      translation_group_id: saved?.translation_group_id,
+      is_original: saved?.is_original,
     }),
-    [value, previewId, saved],
+    [value, previewId, saved, language],
   );
   const preview = usePagePreview(previewPage);
-  useEmbeddedPreviewPublisher(previewId, {
-    type: "everunfold:page-preview",
-    page: previewPage,
-  });
+  useEmbeddedPreviewPublisher(
+    previewId,
+    {
+      type: "everunfold:page-preview",
+      page: previewPage,
+    },
+    { dirty, busy: action.busy },
+  );
   const openLive = async () => {
     if ((dirty || !saved) && !form.current?.reportValidity()) return;
     const popup = window.open("about:blank", "_blank");
@@ -230,11 +249,6 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                 text={source === "registered" ? "前端注册" : "自定义代码"}
               />
             </span>
-            <span
-              className={`admin-badge ${saved?.enabled ? "admin-badge-success" : ""}`}
-            >
-              <UiText text={saved?.enabled ? "已启用" : "已停用"} />
-            </span>
             {saved && (
               <span>
                 <UiText text="草稿版本" /> {saved.revision} ·{" "}
@@ -272,6 +286,23 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                   disabled={!write || action.busy || saved?.archived}
                 >
                   <section className="account-card">
+                    {!saved && (
+                      <label className={styles.newLanguage}>
+                        <UiText text="内容语言" />
+                        <Select
+                          name="page-language"
+                          label={t("内容语言")}
+                          value={language}
+                          onValueChange={setLanguage}
+                          options={catalog.languages
+                            .filter((item) => item.enabled)
+                            .map((item) => ({
+                              value: item.code,
+                              label: `${item.flag} ${item.name}`,
+                            }))}
+                        />
+                      </label>
+                    )}
                     <div className="account-form-grid">
                       <AccountField
                         label="页面标题"
@@ -418,6 +449,17 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                   )}
                 </fieldset>
               </Form>
+              {saved && (
+                <PageLanguages
+                  page={saved}
+                  disabled={dirty || action.busy}
+                  onChanged={async () => {
+                    const response = await readManagedPage(baseUrl, saved.id);
+                    setSaved(response.data);
+                    setValue(response.data.value);
+                  }}
+                />
+              )}
               <p className="account-message" role="status">
                 <UiText text={action.message} />
               </p>

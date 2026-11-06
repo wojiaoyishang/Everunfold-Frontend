@@ -4,7 +4,7 @@ import type { PageValue } from "@/generated/pages-contract";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Button, TextField } from "../components/ui/primitives";
 import { Avatar } from "../components/ui/avatar";
-import { ActionPopover } from "../components/ui/action-popover";
+import { PeopleMessage } from "./people-message";
 import { Icon } from "../components/icon";
 import styles from "./pages.module.css";
 
@@ -12,6 +12,9 @@ export function PeoplePage({ options }: { options: PageValue["options"] }) {
   const t = useT();
   const [group, setGroup] = useState("");
   const [query, setQuery] = useState("");
+  const [selected, setSelected] = useState<{ id: number; name: string } | null>(
+    null,
+  );
   const people = (Array.isArray(options?.people) ? options.people : []).flatMap(
     (value, index) => {
       if (!value || Array.isArray(value) || typeof value !== "object")
@@ -30,6 +33,9 @@ export function PeoplePage({ options }: { options: PageValue["options"] }) {
   const groups = [
     ...new Set(people.map((person) => person.group).filter(Boolean)),
   ];
+  const active = people.find(
+    (person) => person.id === selected?.id && person.name === selected.name,
+  );
   const current = groups.includes(group) ? group : "";
   const filtered = people.filter(
     (person) =>
@@ -89,10 +95,10 @@ export function PeoplePage({ options }: { options: PageValue["options"] }) {
           }
         >
           {filtered.map((person) => (
-            <ActionPopover
+            <Button
               key={`${person.id}:${person.name}`}
-              panelWidth={380}
-              label={t("查看{name}的寄语", {
+              aria-haspopup="dialog"
+              aria-label={t("查看{name}的寄语", {
                 name: person.name || t("未命名"),
               })}
               className={
@@ -100,46 +106,30 @@ export function PeoplePage({ options }: { options: PageValue["options"] }) {
                   ? styles.personCard
                   : styles.personName
               }
-              panelClassName={styles.message}
-              triggerContent={
-                <>
-                  <Avatar
-                    name={person.name || "?"}
-                    src={person.avatar}
-                    size={options?.layout === "cards" ? 42 : 28}
-                  />
-                  <span>
-                    {person.name || t("未命名")}
-                    {options?.layout === "cards" && (
-                      <small>{person.group}</small>
-                    )}
-                  </span>
-                  <Icon name="arrow" />
-                </>
-              }
+              onClick={() => setSelected({ id: person.id, name: person.name })}
             >
-              {(close) => (
-                <>
-                  <div className={styles.messageIdentity}>
-                    <Avatar
-                      name={person.name || "?"}
-                      src={person.avatar}
-                      size={56}
-                    />
-                    <div>
-                      <strong>{person.name}</strong>
-                      <span>{person.group}</span>
-                    </div>
-                  </div>
-                  <p>{person.message || t("还没有留下寄语。")}</p>
-                  <Button onClick={close} className={styles.close}>
-                    <UiText text="收起寄语" />
-                  </Button>
-                </>
-              )}
-            </ActionPopover>
+              <>
+                <Avatar
+                  name={person.name || "?"}
+                  src={person.avatar}
+                  size={options?.layout === "cards" ? 42 : 28}
+                />
+                <span>
+                  {person.name || t("未命名")}
+                  {options?.layout === "cards" && <small>{person.group}</small>}
+                </span>
+                <Icon name="arrow" />
+              </>
+            </Button>
           ))}
         </div>
+      )}
+      {active && (
+        <PeopleMessage
+          key={`${active.id}:${active.name}`}
+          person={active}
+          onClose={() => setSelected(null)}
+        />
       )}
       {!filtered.length && (
         <div className={styles.empty}>

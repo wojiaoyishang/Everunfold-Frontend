@@ -86,6 +86,9 @@ value.pages = [
     css: "h2{color:teal}",
     javascript: "document.body.dataset.fixture='ran'",
     javascript_enabled: false,
+    language: "zh-CN",
+    translation_group_id: "00000000-0000-4000-8000-000000000085",
+    is_original: true,
   },
   {
     id: "00000000-0000-4000-8000-000000000082",
@@ -113,6 +116,29 @@ value.pages = [
     implementation_version: "1.0.0",
   },
 ];
+if (multilingual) {
+  const original = value.pages[0];
+  value.pages.push(
+    {
+      ...original,
+      id: "00000000-0000-4000-8000-000000000086",
+      language: "en",
+      is_original: false,
+      title: "Independent English page",
+      path: "/custom-english-page",
+      html: "<p>English authored page body</p>",
+    },
+    {
+      ...original,
+      id: "00000000-0000-4000-8000-000000000087",
+      language: "fr",
+      is_original: false,
+      title: "Independent French page",
+      path: "/custom-french-page",
+      html: "<p>French authored page body</p>",
+    },
+  );
+}
 value.source_epoch = epoch;
 const cache = path.join(root, "var/absent-admin-verification-cache");
 await mkdir(cache, { recursive: true });
@@ -191,6 +217,16 @@ await store.apply({
           href: "/archives",
           icon: "archive",
           children: [],
+        },
+        {
+          id: "bound-page",
+          label: "自动页面导航",
+          href: "/stale-page-path",
+          icon: "code",
+          reference: {
+            kind: "page",
+            id: "00000000-0000-4000-8000-000000000081",
+          },
         },
       ],
       title_template: "%s — %site%",

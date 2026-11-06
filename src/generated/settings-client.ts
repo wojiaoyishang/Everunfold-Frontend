@@ -4,8 +4,8 @@ import addFormats from "ajv-formats";
 import schema from "./settings-v1.schema.json";
 import type { SettingsContract } from "./settings-contract";
 import {
-  requestJSON,
   postJSON,
+  requestJSON,
   postBinary,
   patchJSON,
   type RequestOptions,
@@ -18,6 +18,28 @@ ajv.addSchema(
   ),
   "settings",
 );
+
+const queryNavigationResourcesValidator = ajv.compile<
+  SettingsContract["navigation_catalog"]
+>({ $ref: "settings#/properties/navigation_catalog" });
+export function queryNavigationResources(
+  baseUrl: string,
+  input: SettingsContract["navigation_query"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/settings/navigation-resources",
+    input,
+    queryNavigationResourcesValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
 
 const readShortcodesValidator = ajv.compile<
   SettingsContract["shortcode_catalog"]

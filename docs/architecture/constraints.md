@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-14，2026-11-06（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
+版本：bootstrap-15，2026-11-06（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
 
 ## 已确认的范围
 
@@ -99,3 +99,5 @@ Markdown/HTML 编译插件、整篇共享文档、PostgreSQL 持久确认、Stat
 ## 光标、离线分支与独立版本页（2026-11-05）
 
 用户确认离线冻结个人基线、在线继续；正式合并固定并锁住该文章最新版，迟到输入保留分支。旧历史可软删除，最新版受保护。正文实时保存、块内共享光标/选区、本人撤销、回执核对、三方合并及独立可视化/源码对比页已按[ADR0061](../decisions/0061-cursors-offline-branches-and-version-merges.md)实现，取代旧的显式整篇正文保存阶段。PG继续是事实来源，Redis仅临时通知；真实范围见[验收](../handoff/cursor-versions-verification.md)。
+
+2026-11-06后续：自定义页面语言组、注册页代码语言路径、保留应用源文的目录启停、稳定ID资源菜单与实时预览渲染回执见ADR0074。浏览器内导航/返回使用主题确认；直接关页/强制刷新不能替换为站内弹窗。现有媒体/元数据、权限及可靠事务边界不变。

@@ -1,6 +1,9 @@
 import type { MetadataRoute } from "next";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { readConfiguration } from "@/core/config/server";
+import { pageLanguages } from "@/core/pages/languages";
+import { registeredPageLanguages } from "@/core/pages/registered-languages";
+import { normalizeCatalog } from "@/core/i18n/catalog";
 
 export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -28,6 +31,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...content,
     ...(snapshot.pages ?? [])
       .filter((page) => page.allow_indexing !== false)
-      .map((page) => ({ url: new URL(page.path, site).href })),
+      .map((page) => ({
+        url: new URL(page.path, site).href,
+        alternates: {
+          languages: Object.fromEntries(
+            [
+              ...pageLanguages(snapshot, page),
+              ...registeredPageLanguages(
+                page,
+                normalizeCatalog(snapshot.site.settings?.site.language_catalog),
+                new Set(
+                  [...snapshot.contents, ...(snapshot.pages ?? [])].map(
+                    (item) => item.path,
+                  ),
+                ),
+              ),
+            ].map((member) => [
+              member.language,
+              new URL(member.path, site).href,
+            ]),
+          ),
+        },
+      })),
   ];
 }

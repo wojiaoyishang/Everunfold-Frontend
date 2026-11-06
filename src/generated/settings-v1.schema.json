@@ -1252,6 +1252,17 @@
           "title": "Icon",
           "type": "string"
         },
+        "reference": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/NavigationReference"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "children": {
           "items": {
             "$ref": "#/$defs/MenuItem"
@@ -1266,6 +1277,161 @@
         "href"
       ],
       "title": "MenuItem",
+      "type": "object"
+    },
+    "NavigationCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/NavigationResource"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "total",
+        "page",
+        "page_size"
+      ],
+      "title": "NavigationCatalog",
+      "type": "object"
+    },
+    "NavigationQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "article",
+            "shuoshuo",
+            "page"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id"
+        },
+        "search": {
+          "default": "",
+          "maxLength": 200,
+          "title": "Search",
+          "type": "string"
+        },
+        "page": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 30,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Page Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "NavigationQuery",
+      "type": "object"
+    },
+    "NavigationReference": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "article",
+            "shuoshuo",
+            "page"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "id"
+      ],
+      "title": "NavigationReference",
+      "type": "object"
+    },
+    "NavigationResource": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "article",
+            "shuoshuo",
+            "page"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "language": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Language"
+        }
+      },
+      "required": [
+        "kind",
+        "id",
+        "title",
+        "path",
+        "language"
+      ],
+      "title": "NavigationResource",
       "type": "object"
     },
     "NodeList": {
@@ -1564,6 +1730,34 @@
         "data"
       ],
       "title": "PublicResponse[MediaRemoval]",
+      "type": "object"
+    },
+    "PublicResponse_NavigationCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/NavigationCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[NavigationCatalog]",
       "type": "object"
     },
     "PublicResponse_NodeList_": {
@@ -2443,6 +2637,12 @@
   },
   "additionalProperties": false,
   "properties": {
+    "navigation_query": {
+      "$ref": "#/$defs/NavigationQuery"
+    },
+    "navigation_catalog": {
+      "$ref": "#/$defs/PublicResponse_NavigationCatalog_"
+    },
     "shortcode_catalog": {
       "$ref": "#/$defs/PublicResponse_ShortcodeCatalog_"
     },
@@ -2538,6 +2738,8 @@
     }
   },
   "required": [
+    "navigation_query",
+    "navigation_catalog",
     "shortcode_catalog",
     "shortcode_item",
     "shortcode_preview",
@@ -2573,7 +2775,7 @@
   "title": "SettingsContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.10.0",
+  "x-everunfold-contract-version": "1.11.1",
   "x-everunfold-language-regions": {
     "zh": "CN",
     "en": "GB",
@@ -2737,6 +2939,13 @@
     }
   ],
   "x-everunfold-operations": [
+    {
+      "name": "queryNavigationResources",
+      "path": "/v1/admin/settings/navigation-resources",
+      "method": "POST",
+      "input": "navigation_query",
+      "response": "navigation_catalog"
+    },
     {
       "name": "readShortcodes",
       "path": "/v1/admin/shortcodes",

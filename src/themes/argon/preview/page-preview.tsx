@@ -13,6 +13,8 @@ import { BlogShell } from "../components/shell";
 import { ManagedPageView } from "../pages/view";
 import { Button } from "../components/ui/primitives";
 import styles from "./content-preview.module.css";
+import { previewStamp } from "@/core/preview/bridge";
+import { usePreviewReceipt } from "@/core/preview/use-preview-receipt";
 
 export function ManagedPagePreview({
   id,
@@ -27,6 +29,11 @@ export function ManagedPagePreview({
   const [live, setLive] = useState(false);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
+  const { setStamp, rendered } = usePreviewReceipt(id);
+  useEffect(() => {
+    if (page?.source === "registered" && hasPageImplementation(page))
+      rendered();
+  }, [page, rendered]);
   useEffect(() => {
     const controller = new AbortController();
     let received = false;
@@ -44,7 +51,10 @@ export function ManagedPagePreview({
         return;
       const next = checkedPreviewPage(event.data.page, id);
       if (!next) return;
+      const stamp = previewStamp(event.data);
+      if (window.parent !== window && !stamp) return;
       received = true;
+      setStamp(stamp);
       setPage(next);
       setLive(true);
       setError("");
@@ -76,7 +86,7 @@ export function ManagedPagePreview({
       controller.abort();
       window.removeEventListener("message", receive);
     };
-  }, [baseUrl, id, attempt]);
+  }, [baseUrl, id, attempt, setStamp]);
   if (!site)
     return (
       <main className="admin-root admin-access" data-surface="admin">
@@ -135,7 +145,7 @@ export function ManagedPagePreview({
         </section>
       ) : page ? (
         hasPageImplementation(page) ? (
-          <ManagedPageView page={page} />
+          <ManagedPageView page={page} onReady={rendered} />
         ) : (
           <section className={`surface ${styles.state}`} role="alert">
             <UiText text="页面实现尚未安装，配置已保留。" />

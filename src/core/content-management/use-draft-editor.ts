@@ -40,6 +40,7 @@ import {
 } from "./block-sources";
 import { RequestError } from "@/core/http/request";
 import { hasPrivateDraftChanges } from "./draft-revision";
+import { isEmbeddedEditor } from "@/core/preview/bridge";
 import {
   draftError,
   draftFields,
@@ -369,6 +370,7 @@ export function useDraftEditor(
         !fields.body.some((block) => block.id === key),
     );
   useEffect(() => {
+    if (isEmbeddedEditor()) return;
     if (
       !(detail ? hasPrivateDraftChanges(displayed, detail) : dirty) &&
       !uncertain &&

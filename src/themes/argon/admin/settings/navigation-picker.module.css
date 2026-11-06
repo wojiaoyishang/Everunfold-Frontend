@@ -1,0 +1,72 @@
+.picker {
+  padding: 22px 4px 4px;
+  display: grid;
+  gap: 16px;
+}
+.search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--admin-muted);
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--admin-text);
+  background: var(--admin-subtle);
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  padding: 10px 12px;
+}
+.results {
+  min-height: 180px;
+  max-height: 48dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.results > p {
+  padding: 24px 8px;
+  color: var(--admin-muted);
+}
+.item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 10px;
+  border: 0;
+  border-top: 1px solid var(--admin-border);
+  background: transparent;
+  color: var(--admin-text);
+  text-align: left;
+  font: inherit;
+}
+.item > span {
+  min-width: 0;
+  flex: 1;
+}
+.item strong,
+.item small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.item small {
+  color: var(--admin-muted);
+  font-size: 12px;
+  margin-top: 5px;
+}
+.item:hover,
+.item:focus-visible {
+  background: var(--admin-accent-soft);
+}
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.pagination > span:first-child {
+  flex: 1;
+}

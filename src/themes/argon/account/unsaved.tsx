@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useEditorNavigation } from "@/core/content-management/use-editor-navigation";
 import { ConfirmDialog } from "../components/ui/confirm-dialog";
+import { isEmbeddedEditor } from "@/core/preview/bridge";
 
 export function UnsavedAccountChanges({
   dirty,
@@ -14,7 +15,7 @@ export function UnsavedAccountChanges({
   const request = useCallback((href: string) => setDestination(href), []);
   useEditorNavigation(dirty, busy, request);
   useEffect(() => {
-    if (!dirty && !busy) return;
+    if ((!dirty && !busy) || isEmbeddedEditor()) return;
     const warn = (event: BeforeUnloadEvent) => event.preventDefault();
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);

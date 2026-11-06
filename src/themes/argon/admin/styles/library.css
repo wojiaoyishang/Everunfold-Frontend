@@ -119,6 +119,21 @@
   width: 100%;
   min-width: 0;
 }
+.admin-navigation-reference {
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  background: var(--admin-subtle);
+  display: grid;
+  gap: 6px;
+}
+.admin-navigation-reference strong,
+.admin-navigation-reference small {
+  overflow-wrap: anywhere;
+}
+.admin-navigation-reference small {
+  color: var(--admin-muted);
+}
 .admin-menu-icon-choice {
   width: 100%;
   display: flex;
