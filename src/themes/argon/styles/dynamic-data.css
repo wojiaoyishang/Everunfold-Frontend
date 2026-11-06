@@ -35,12 +35,16 @@
   position: relative;
   display: grid;
   place-items: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
 }
 .backend-status-cloud {
   display: grid;
   place-items: center;
+}
+.backend-status-cloud .icon {
+  width: 22px;
+  height: 22px;
 }
 .backend-status-visual:not([data-stage="cloud"]) .backend-status-cloud {
   visibility: hidden;
@@ -48,8 +52,8 @@
 .backend-status-avatar-image {
   position: absolute;
   inset: 0;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   object-fit: cover;
   border-radius: 50%;
   opacity: 0;
@@ -76,23 +80,6 @@
   stroke-dasharray: 30;
   stroke-dashoffset: 30;
   animation: backend-account-check 300ms 80ms ease-out forwards;
-}
-.backend-status-warning {
-  position: absolute;
-  inset-inline-end: -3px;
-  bottom: -2px;
-  display: grid;
-  place-items: center;
-  width: 15px;
-  height: 15px;
-  color: var(--muted);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: 50%;
-}
-.backend-status-warning .icon {
-  width: 10px;
-  height: 10px;
 }
 .backend-account {
   padding-bottom: 16px;

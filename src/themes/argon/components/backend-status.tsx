@@ -84,7 +84,6 @@ export function BackendStatus() {
             src={user.avatar_url}
             settled={!loading && !checking}
             fallback={presentation.icon}
-            warning={warning}
           />
         ) : (
           <Icon name={presentation.icon} />

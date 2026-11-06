@@ -1,12 +1,12 @@
 # 动态请求开发与联调
 
-版本：reader-requests-3，2026-11-06。初版见 [ADR 0014](../decisions/0014-page-registered-reader-requests.md)；阅读反馈与匿名点赞见 [ADR 0015](../decisions/0015-reader-feedback-and-comment-likes.md)、[本轮验收](../handoff/reader-feedback-verification.md)。
+版本：reader-requests-4，2026-11-06。初版见 [ADR 0014](../decisions/0014-page-registered-reader-requests.md)；阅读反馈与匿名点赞见 [ADR 0015](../decisions/0015-reader-feedback-and-comment-likes.md)、[本轮验收](../handoff/reader-feedback-verification.md)。
 
 ## 当前账号入口
 
 2026-11-06按[ADR0070](../decisions/0070-header-account-entry-and-avatar-readiness.md)把真实账号入口放到右上角云端面板，移除侧栏单独入口。`usePublicAccount`复用生成的Session客户端与现有检查器，身份只在浏览器组件内存；不能登记到ReaderStore、写进公开快照、SSR或持久偏好。演示访客/读者仍明确是独立联调演示，不能作为真实账号。
 
-头像预加载后先打钩再显现，已显现头像在重查时保留；失败/无头像回退云图标，减少动态直接显现。页面部分失败/离线继续显示小型状态标记与面板原始结果，不用头像成功替代动态数据状态。背景复核沿用既有有效Session的断网保留策略；到期或身份否定后不继续显示身份，任何私有操作仍由后端重新鉴权。实际结果见[验收](../handoff/header-account-entry-verification.md)。
+头像预加载后先打钩再显现，已显现头像在重查时保留；失败/无头像回退云图标，减少动态直接显现。页面部分失败/离线信息保留在按钮提示与面板，不叠加头像角标，不用头像成功替代动态数据状态。背景复核沿用既有有效Session的断网保留策略；到期或身份否定后不继续显示身份，任何私有操作仍由后端重新鉴权。实际结果见[验收](../handoff/header-account-entry-verification.md)。
 
 ## 组件如何接入
 

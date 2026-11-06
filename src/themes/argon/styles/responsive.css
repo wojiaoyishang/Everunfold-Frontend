@@ -29,10 +29,11 @@
     --header-height: 80px;
   }
   .header-inner {
-    padding: 20px 20px 20px 65px;
-    gap: 10px;
+    padding: 20px 16px 20px 64px;
+    gap: 8px;
   }
   .site-brand {
+    min-width: 0;
     font-size: 18px;
     gap: 8px;
   }
@@ -50,7 +51,7 @@
     display: none;
   }
   .header-actions {
-    gap: 0;
+    gap: 4px;
   }
   .hero {
     height: 380px;

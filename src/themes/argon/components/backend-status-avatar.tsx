@@ -8,12 +8,10 @@ export function BackendStatusAvatar({
   src,
   settled,
   fallback,
-  warning,
 }: {
   src: string;
   settled: boolean;
   fallback: IconName;
-  warning: boolean;
 }) {
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -48,8 +46,8 @@ export function BackendStatusAvatar({
           className="backend-status-avatar-image"
           src={src}
           alt=""
-          width={30}
-          height={30}
+          width={28}
+          height={28}
           decoding="async"
           onLoad={() => setLoaded(true)}
           onError={() => setFailed(true)}
@@ -63,11 +61,6 @@ export function BackendStatusAvatar({
           }}
         >
           <Icon name="check" />
-        </span>
-      )}
-      {stage === "avatar" && warning && (
-        <span className="backend-status-warning">
-          <Icon name="cloud-off" />
         </span>
       )}
     </span>

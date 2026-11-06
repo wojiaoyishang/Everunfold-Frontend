@@ -133,6 +133,18 @@
   gap: 8px;
   align-items: center;
 }
+.header-actions > .icon-button {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+}
+.header-actions > .icon-button > .icon {
+  width: 22px;
+  height: 22px;
+}
 .icon-button {
   border: 0;
   border-radius: 50%;

@@ -833,3 +833,13 @@ ADR0070、accounts-runtime-5与reader-requests-3记录用户后续入口/菜单�
 | `docs/decisions/0069-accounts-api-keys-and-signed-callbacks.md` | `5f1c19650944415d54f2563ee3b92499c0995a0ff0e1f295313f660747ee101d` |
 | `docs/decisions/0070-header-account-entry-and-avatar-readiness.md` | `f858fb1442edb2fb34ace6954e7684844b5885ff3ce18035c00cc80c4fe77a45` |
 | `docs/handoff/header-account-entry-verification.md` | `425f6b0d8675ccbbcd8225be6effc00767dfc953a47746a972c0c54623ab5370` |
+
+## 顶栏头像与图标对齐补充（2026-11-06）
+
+ADR0070与reader-requests-4记录用户排版反馈后的容器对齐及去角标；以下为当前公共摘要，替代对应旧摘要。未改原始附件，用户头像/实际设备地址不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/decisions/0070-header-account-entry-and-avatar-readiness.md` | `7449335d04c2dcef1b3bed0aebb260fe9171688c063160a23d667743b69100b3` |
+| `docs/development/reader-requests.md` | `7fad62883e583803a3d4e551ae97a21349fbcc39f2bca559c9bb13996f802753` |
+| `docs/handoff/header-account-entry-verification.md` | `53854b4dcb4b44747e389ed34e8ba4d4f75e67143d7ebb104ef088ad123c9dfc` |
