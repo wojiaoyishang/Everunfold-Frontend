@@ -31,6 +31,134 @@
 .backend-status {
   position: relative;
 }
+.backend-status-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+}
+.backend-status-cloud {
+  display: grid;
+  place-items: center;
+}
+.backend-status-visual:not([data-stage="cloud"]) .backend-status-cloud {
+  visibility: hidden;
+}
+.backend-status-avatar-image {
+  position: absolute;
+  inset: 0;
+  width: 30px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 50%;
+  opacity: 0;
+  box-shadow: 0 0 0 1px color-mix(in srgb, currentColor 22%, transparent);
+}
+.backend-status-visual[data-stage="avatar"] .backend-status-avatar-image {
+  opacity: 1;
+  animation: backend-avatar-reveal 180ms var(--motion-ease) both;
+}
+.backend-status-ready-mark {
+  position: absolute;
+  inset: 1px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-radius: 50%;
+  animation: backend-account-ready 620ms var(--motion-ease) both;
+}
+.backend-status-ready-mark .icon {
+  width: 20px;
+  height: 20px;
+}
+.backend-status-ready-mark path {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: backend-account-check 300ms 80ms ease-out forwards;
+}
+.backend-status-warning {
+  position: absolute;
+  inset-inline-end: -3px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+}
+.backend-status-warning .icon {
+  width: 10px;
+  height: 10px;
+}
+.backend-account {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+.backend-account-summary {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.backend-account-summary > div {
+  min-width: 0;
+  flex: 1;
+}
+.backend-account-summary strong,
+.backend-account-summary small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.backend-account-summary strong {
+  font-size: 14px;
+  font-weight: 600;
+}
+.backend-account-summary small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.backend-account-placeholder {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.backend-account-placeholder .icon {
+  width: 20px;
+  height: 20px;
+}
+.backend-account-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 8px;
+  font-size: 13px;
+  text-decoration: none;
+  transition: background-color var(--motion-fast) ease;
+}
+.backend-account-entry:hover {
+  background: color-mix(in srgb, var(--accent) 15%, var(--surface));
+}
+.backend-account-entry .icon {
+  width: 16px;
+  height: 16px;
+}
 .backend-status-panel {
   padding: 18px;
   color: var(--text);
@@ -152,6 +280,46 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+@keyframes backend-account-ready {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  25%,
+  80% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+@keyframes backend-account-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes backend-avatar-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+html[data-motion="reduced"] .backend-status-visual *,
+html[data-motion="reduced"] .backend-account-entry {
+  animation: none;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"]) .backend-status-visual * {
+    animation: none;
   }
 }
 html[data-motion="reduced"] .dynamic-metric-value {

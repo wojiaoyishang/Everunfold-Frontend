@@ -24,7 +24,7 @@ export const builtinAdminModule = {
     {
       id: "core.settings.api-keys",
       href: "/admin/settings/api-keys",
-      label: "API Key接入",
+      label: "应用程序接入",
       description: "应用签名、权限目录与回调投递",
       icon: "extension",
       menu: { group: "core.settings", order: 40 },

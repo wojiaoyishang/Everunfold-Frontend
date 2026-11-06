@@ -84,7 +84,7 @@ export function ApplicationsPage() {
   return (
     <>
       <AdminPageHeading
-        title="API Key接入"
+        title="应用程序接入"
         action={
           <div className="account-heading-actions">
             <Button

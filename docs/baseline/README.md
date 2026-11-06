@@ -820,3 +820,16 @@ accounts-runtime-4、api-key-applications-2、bootstrap-11与ADR0069记录本次
 | `docs/design/accounts-avatar-picker.png` | `beadd84ea592455efcaa88ab4dfa8aebf6cde0b5ed94e165940b42d548a22a6f` |
 | `docs/design/accounts-users.png` | `46fdff3a854f9dff5e2e3b38b5bb5c258752251793860eafd6e393c540cc5d32` |
 | `docs/design/accounts-applications.png` | `ca43ea3951abbd2bb31b60410899f334d91020fb1348c5b3459d487dc24ecae8` |
+
+## 云端账号入口与头像就绪动效（2026-11-06）
+
+ADR0070、accounts-runtime-5与reader-requests-3记录用户后续入口/菜单要求及实页验收。以下为当前公共摘要，替代相关旧摘要；原始附件不变，用户测试图片不提交，STATUS分别维护。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `5af5c26f465efa5cef4ea0a4d28017caec07251d1b3bc91b5be4b8d5d564b602` |
+| `docs/development/accounts.md` | `c47f3f1f5ce786577bc839433b512f84b1b8fec126054182ee5e59a5ff6e356f` |
+| `docs/development/reader-requests.md` | `4224cddbd50b5d2ed732a28dd7a3553b59b5429c494853e8d1f8c997a0cf2abd` |
+| `docs/decisions/0069-accounts-api-keys-and-signed-callbacks.md` | `5f1c19650944415d54f2563ee3b92499c0995a0ff0e1f295313f660747ee101d` |
+| `docs/decisions/0070-header-account-entry-and-avatar-readiness.md` | `f858fb1442edb2fb34ace6954e7684844b5885ff3ce18035c00cc80c4fe77a45` |
+| `docs/handoff/header-account-entry-verification.md` | `425f6b0d8675ccbbcd8225be6effc00767dfc953a47746a972c0c54623ab5370` |

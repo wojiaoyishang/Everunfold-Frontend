@@ -1,10 +1,16 @@
 # 动态请求开发与联调
 
-版本：reader-requests-2，2026-10-31。初版见 [ADR 0014](../decisions/0014-page-registered-reader-requests.md)；阅读反馈与匿名点赞见 [ADR 0015](../decisions/0015-reader-feedback-and-comment-likes.md)、[本轮验收](../handoff/reader-feedback-verification.md)。
+版本：reader-requests-3，2026-11-06。初版见 [ADR 0014](../decisions/0014-page-registered-reader-requests.md)；阅读反馈与匿名点赞见 [ADR 0015](../decisions/0015-reader-feedback-and-comment-likes.md)、[本轮验收](../handoff/reader-feedback-verification.md)。
+
+## 当前账号入口
+
+2026-11-06按[ADR0070](../decisions/0070-header-account-entry-and-avatar-readiness.md)把真实账号入口放到右上角云端面板，移除侧栏单独入口。`usePublicAccount`复用生成的Session客户端与现有检查器，身份只在浏览器组件内存；不能登记到ReaderStore、写进公开快照、SSR或持久偏好。演示访客/读者仍明确是独立联调演示，不能作为真实账号。
+
+头像预加载后先打钩再显现，已显现头像在重查时保留；失败/无头像回退云图标，减少动态直接显现。页面部分失败/离线继续显示小型状态标记与面板原始结果，不用头像成功替代动态数据状态。背景复核沿用既有有效Session的断网保留策略；到期或身份否定后不继续显示身份，任何私有操作仍由后端重新鉴权。实际结果见[验收](../handoff/header-account-entry-verification.md)。
 
 ## 组件如何接入
 
-公共壳提供 `ReaderDataProvider`。`src/core/http/request.ts` 管理 GET 传输，`src/core/reader/tasks.ts` 管理页面登记和释放，`store.ts` 负责重试、生命周期与批量适配；主题的 `reader-data.tsx` 提供 Hook、面板插槽和指标展示。`backend-status.tsx` 只展示聚合状态，禁止在这里写死业务数据清单。
+公共壳提供 `ReaderDataProvider`。`src/core/http/request.ts` 管理 GET 传输，`src/core/reader/tasks.ts` 管理页面登记和释放，`store.ts` 负责重试、生命周期与批量适配；主题的 `reader-data.tsx` 提供 Hook、面板插槽和指标展示。`backend-status.tsx`组合聚合状态与独立账号卡片，不在这里写死页面业务数据清单。
 
 1. 先由后端发布对应能力的契约并提交，前端生成客户端。业务字段不在页面重新定义。
 2. 页面/功能组件调用 `usePageRequest(key, load)`，`load` 使用生成客户端并传入协调层提供的 signal/timeout。`load` 应为模块级函数或稳定的 `useCallback`。键包含模块、资源及影响结果的参数；同键多个组件共享一次工作，最后一个组件卸载后自动取消并从状态集合移除。
@@ -64,7 +70,7 @@ node tools/verify-production.mjs --reader --interactive
 
 ## 尚未交付
 
-真实 Session/权限/CSRF、持久浏览记账和历史统计导入、评论正文异步核对/发布、说说点赞、可靠快照同步/撤回通知、生产容量和全部缓存 P0。演示身份/浏览量默认关闭，不把演示响应改名当作生产事实。
+此段最初记录2026-10-31的未交付范围。Session/权限/CSRF、账号管理及可靠快照/撤回现已有实施，见[账号指南](accounts.md)与STATUS；持久浏览记账、完整评论发布等其他能力仍依各阶段记录。演示身份/浏览量默认关闭，不把演示响应改名当作生产事实。
 
 ## 阅读反馈与历史评论点赞
 

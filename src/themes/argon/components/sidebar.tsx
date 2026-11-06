@@ -20,7 +20,6 @@ import { SidebarNavigation } from "./sidebar-navigation";
 import { useReadingState } from "./reading-state";
 import { useNavigation } from "./navigation-state";
 import { TransitionPanel } from "./transition-panel";
-import { RouteLink } from "./ui/route-link";
 
 export function Sidebar({
   site,
@@ -152,17 +151,6 @@ export function Sidebar({
             />
           </SearchForm>
         </section>
-        <RouteLink
-          href="/account"
-          className="sidebar-account-link"
-          onClick={() => setOpen(false)}
-        >
-          <Icon name="user" />
-          <span>
-            <UiText text="账号中心" />
-          </span>
-          <Icon name="arrow" />
-        </RouteLink>
         <section className="surface sidebar-overview">
           {toc.length > 0 && (
             <div className="sidebar-tabs" role="tablist" aria-label="侧栏内容">

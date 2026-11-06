@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[云端账号入口与头像就绪动效](decisions/0070-header-account-entry-and-avatar-readiness.md)及[实页验收](handoff/header-account-entry-verification.md)：账号中心移入右上角云端面板，头像加载后先打钩再显现；后台统一为“应用程序接入”。
+
 [账号中心与用户管理](development/accounts.md)、[API Key应用接入指南](development/api-key-applications.md)及[真实验收](handoff/accounts-verification.md)：资料/密码/会话、普通用户受限头像库、细分授权、Key与应用签名双向接入；含桌面/窄屏与独立子项目检查。
 
 [账号管理与双向API Key接入决定](decisions/0069-accounts-api-keys-and-signed-callbacks.md)：主项目统一签发/校验，子项目签名查询，主项目按管理员登记URL签名回调；实际范围与限制见指南和STATUS。

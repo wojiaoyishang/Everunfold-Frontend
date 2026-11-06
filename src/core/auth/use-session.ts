@@ -5,7 +5,7 @@ import type { AuthSessionState } from "@/generated/auth-contract";
 import { readAdminSession, readAuthSession } from "@/generated/auth-client";
 import { createSessionCheck, type SessionView } from "./session-check";
 
-/** Private page state only: never shared with the public reader cache or persisted. */
+/** Component-owned identity: never shared with public reader snapshots or persisted. */
 export function useSession(baseUrl: string, admin = false) {
   const [state, setState] = useState<SessionView>({ phase: "checking" });
   const current = useRef<ReturnType<typeof createSessionCheck> | null>(null);

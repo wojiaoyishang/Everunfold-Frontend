@@ -544,26 +544,3 @@ html[data-motion="reduced"]
   height: 100%;
   object-fit: cover;
 }
-.sidebar-account-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 18px 20px;
-  padding: 12px 14px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  color: var(--muted);
-  font-size: 14px;
-  background: var(--surface-soft);
-}
-.sidebar-account-link > span {
-  flex: 1;
-}
-.sidebar-account-link:hover {
-  color: var(--accent);
-  background: var(--accent-soft);
-}
-.sidebar-account-link svg {
-  width: 18px;
-  height: 18px;
-}
