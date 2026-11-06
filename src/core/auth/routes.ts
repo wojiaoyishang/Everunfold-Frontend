@@ -2,12 +2,14 @@ import { adminDestination } from "../admin/navigation";
 
 /** Explicit code routes are reachable without a public-content snapshot. */
 export function isManagementRoute(pathname: string): boolean {
-  return /^\/login\/?$/.test(pathname) || !!adminDestination(pathname);
+  return (
+    /^\/(?:login|account)\/?$/.test(pathname) || !!adminDestination(pathname)
+  );
 }
 
 export function isManagementLink(href: string): boolean {
   try {
-    return /^\/(?:login|admin)(?:\/|$)/.test(
+    return /^\/(?:login|admin|account)(?:\/|$)/.test(
       new URL(href, "https://management.invalid").pathname,
     );
   } catch {
@@ -29,7 +31,9 @@ export function loginReturnPath(input: string | undefined): string | undefined {
     const url = new URL(input, "https://management.invalid");
     if (
       url.origin !== "https://management.invalid" ||
-      (url.pathname !== "/" && !adminDestination(url.pathname))
+      (url.pathname !== "/" &&
+        !/^\/account\/?$/.test(url.pathname) &&
+        !adminDestination(url.pathname))
     )
       return "/";
     return `${url.pathname}${url.search}${url.hash}`;
@@ -42,7 +46,9 @@ export function loginReturnPath(input: string | undefined): string | undefined {
 export function loginDestination(
   returnTo: string | undefined,
   isAdmin: boolean,
+  forcePassword = false,
 ): string {
+  if (forcePassword) return "/account";
   const target = loginReturnPath(returnTo);
   if (target === undefined) return isAdmin ? "/admin" : "/";
   return target.startsWith("/admin") && !isAdmin ? "/" : target;

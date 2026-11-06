@@ -13,12 +13,15 @@ import { formatBytes } from "@/core/media/image-editor";
 import type { FontAsset } from "@/generated/settings-contract";
 import { Icon } from "../../components/icon";
 import styles from "./fonts.module.css";
+import { can } from "@/core/accounts/permissions";
+import { useAdminAccount } from "@/core/admin/account-context";
 
 export function FontLibraryPage({
   onSelect,
   compact = false,
 }: { onSelect?: (font: FontAsset) => void; compact?: boolean } = {}) {
   const library = useFontLibrary();
+  const uploadAllowed = can(useAdminAccount(), "media:upload");
   useFontPreviews(library.items);
   const [sample, setSample] = useState(
     "山川与日常，记录在这里。 The quick brown fox 0123456789",
@@ -37,6 +40,7 @@ export function FontLibraryPage({
         />
         <div className="admin-upload-actions">
           <FilePicker
+            disabled={!uploadAllowed}
             label="上传字体"
             accept=".woff2,.woff,.ttf,.otf,font/woff2,font/woff,font/ttf,font/otf"
             onFiles={library.upload}

@@ -79,6 +79,7 @@ export type Success3 = boolean;
 export type Code4 = number;
 export type Msg3 = string;
 export type Id6 = string;
+export type OwnerId = string | null;
 export type TypeId3 = string;
 export type Title1 = string;
 export type Excerpt1 = string;
@@ -100,6 +101,7 @@ export type Tags1 = string[];
 export type CommentCount = number;
 export type Pinned1 = boolean;
 export type Id7 = string;
+export type OwnerId1 = string | null;
 export type TypeId4 = string;
 export type Title2 = string;
 export type Excerpt2 = string;
@@ -127,6 +129,7 @@ export type Success4 = boolean;
 export type Code5 = number;
 export type Msg4 = string;
 export type Id8 = string;
+export type OwnerId2 = string | null;
 export type TypeId5 = string;
 export type Title3 = string;
 export type Excerpt3 = string;
@@ -417,6 +420,7 @@ export interface DraftCatalog {
 }
 export interface DraftListItem {
   id: Id6;
+  owner_id?: OwnerId;
   type_id: TypeId3;
   title: Title1;
   excerpt: Excerpt1;
@@ -442,6 +446,7 @@ export interface DraftListItem {
 }
 export interface TranslationMember {
   id: Id7;
+  owner_id?: OwnerId1;
   type_id: TypeId4;
   title: Title2;
   excerpt: Excerpt2;
@@ -468,6 +473,7 @@ export interface PublicResponseDraftDetail {
 }
 export interface DraftDetail {
   id: Id8;
+  owner_id?: OwnerId2;
   type_id: TypeId5;
   title: Title3;
   excerpt: Excerpt3;

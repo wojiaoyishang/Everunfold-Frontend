@@ -15,6 +15,8 @@ import { AdminNavigation } from "./navigation";
 import { AdminMobileNavigation } from "./mobile-navigation";
 import { InterfaceLanguage } from "../../components/language-switcher";
 import { AdminLanguageCatalog } from "@/core/i18n/admin-languages";
+import { adminRoutePermission, can } from "@/core/accounts/permissions";
+import { Avatar } from "../../components/ui/avatar";
 
 export function AdminShell({
   user,
@@ -32,8 +34,14 @@ export function AdminShell({
   const pathname = usePathname();
   const destination = adminDestination(pathname);
   const name = user.display_name || user.username;
+  const capability = adminRoutePermission(pathname);
+  const allowed =
+    (!capability || can(user, capability)) &&
+    (!/\/(?:new|edit)$/.test(pathname) ||
+      can(user, "content:write") ||
+      pathname.startsWith("/admin/users"));
   // Keep the confirmed account/request boundary, while the preview owns the public theme shell.
-  if (destination && isContentPreviewPath(pathname)) return children;
+  if (allowed && destination && isContentPreviewPath(pathname)) return children;
   return (
     <AdminLanguageCatalog>
       <div
@@ -101,12 +109,20 @@ export function AdminShell({
                 onChange={onPreferencesChange}
               />
               <span className="admin-header-divider" />
-              <div className="admin-account" title={`${name} · 管理员`}>
-                <span className="admin-account-avatar" aria-hidden="true">
-                  {Array.from(name)[0]}
-                </span>
+              <RouteLink
+                href="/account"
+                className="admin-account"
+                title="账号中心"
+                aria-label="账号中心"
+              >
+                <Avatar
+                  name={name}
+                  src={user.avatar_url}
+                  size={32}
+                  className="admin-account-avatar"
+                />
                 <span className="admin-account-name">{name}</span>
-              </div>
+              </RouteLink>
               <Button
                 className="admin-icon-button"
                 aria-label="退出登录"
@@ -119,7 +135,23 @@ export function AdminShell({
             <span className="admin-navigation-progress" aria-hidden="true" />
           </header>
           <main id="admin-main" tabIndex={-1} className="admin-main">
-            <div className="admin-page">{children}</div>
+            <div className="admin-page">
+              {allowed ? (
+                children
+              ) : (
+                <section className="admin-panel">
+                  <h1>
+                    <UiText text="没有访问此页面的权限" />
+                  </h1>
+                  <p>
+                    <UiText text="请联系管理员调整授权，或返回账号中心。" />
+                  </p>
+                  <RouteLink href="/account" className="admin-button">
+                    <UiText text="账号中心" />
+                  </RouteLink>
+                </section>
+              )}
+            </div>
           </main>
         </div>
       </div>

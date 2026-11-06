@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, type ReactNode } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { readContentLanguages } from "@/generated/content-admin-client";
+import { readAccountLanguages } from "@/generated/accounts-client";
 import { initialCatalog, normalizeCatalog } from "./catalog";
 import { LanguageCatalogProvider } from "./provider";
 
@@ -13,7 +13,7 @@ export function AdminLanguageCatalog({ children }: { children: ReactNode }) {
     const reload = () => {
       current?.abort();
       const request = (current = new AbortController());
-      readContentLanguages(baseUrl, { signal: request.signal })
+      readAccountLanguages(baseUrl, { signal: request.signal })
         .then(({ data }) => {
           if (!request.signal.aborted) setCatalog(normalizeCatalog(data));
         })

@@ -25,6 +25,7 @@ export function TranslationMenu({
   original,
   disabled,
   onNavigate,
+  readOnly = false,
 }: {
   members: TranslationMember[];
   type: string;
@@ -32,6 +33,7 @@ export function TranslationMenu({
   original: string;
   disabled?: boolean;
   onNavigate?: (href: string) => void;
+  readOnly?: boolean;
 }) {
   return (
     <ActionPopover
@@ -59,7 +61,7 @@ export function TranslationMenu({
             <UiText text="语言版本" />
           </strong>
           {members.map((item) => {
-            const href = `/admin/content/${type}/${item.id}/edit`;
+            const href = `/admin/content/${type}/${item.id}/${readOnly ? "preview" : "edit"}`;
             const body = (
               <>
                 <span>
@@ -95,21 +97,23 @@ export function TranslationMenu({
               </RouteLink>
             );
           })}
-          <RouteLink
-            href={`/admin/content/${type}/${original}/edit#content-languages`}
-            className={styles.manage}
-            onClick={(event) => {
-              close();
-              if (onNavigate) {
-                event.preventDefault();
-                onNavigate(
-                  `/admin/content/${type}/${original}/edit#content-languages`,
-                );
-              }
-            }}
-          >
-            <UiText text="管理语言与译文" />
-          </RouteLink>
+          {!readOnly && (
+            <RouteLink
+              href={`/admin/content/${type}/${original}/edit#content-languages`}
+              className={styles.manage}
+              onClick={(event) => {
+                close();
+                if (onNavigate) {
+                  event.preventDefault();
+                  onNavigate(
+                    `/admin/content/${type}/${original}/edit#content-languages`,
+                  );
+                }
+              }}
+            >
+              <UiText text="管理语言与译文" />
+            </RouteLink>
+          )}
         </div>
       )}
     </ActionPopover>

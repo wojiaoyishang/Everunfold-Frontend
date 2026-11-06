@@ -5,34 +5,43 @@ import { useAdminAccount } from "@/core/admin/account-context";
 import { Icon } from "../../components/icon";
 import { RouteLink } from "../../components/ui/route-link";
 import { AdminPageHeading } from "../components/page-heading";
+import { can } from "@/core/accounts/permissions";
 export function AdminOverview() {
   const user = useAdminAccount();
   return (
     <>
       <AdminPageHeading title="工作台" />
       <div className="admin-shortcuts">
-        <RouteLink href="/admin/content" showPending className="admin-shortcut">
-          <span className="admin-shortcut-icon">
-            <Icon name="copy" />
-          </span>
-          <div>
-            <h2>
-              <UiText text="内容管理" />
-            </h2>
-          </div>
-          <Icon name="arrow" />
-        </RouteLink>
-        <RouteLink href="/admin/media" showPending className="admin-shortcut">
-          <span className="admin-shortcut-icon">
-            <Icon name="image" />
-          </span>
-          <div>
-            <h2>
-              <UiText text="媒体库" />
-            </h2>
-          </div>
-          <Icon name="arrow" />
-        </RouteLink>
+        {can(user, "content:read") && (
+          <RouteLink
+            href="/admin/content"
+            showPending
+            className="admin-shortcut"
+          >
+            <span className="admin-shortcut-icon">
+              <Icon name="copy" />
+            </span>
+            <div>
+              <h2>
+                <UiText text="内容管理" />
+              </h2>
+            </div>
+            <Icon name="arrow" />
+          </RouteLink>
+        )}
+        {can(user, "media:read") && (
+          <RouteLink href="/admin/media" showPending className="admin-shortcut">
+            <span className="admin-shortcut-icon">
+              <Icon name="image" />
+            </span>
+            <div>
+              <h2>
+                <UiText text="媒体库" />
+              </h2>
+            </div>
+            <Icon name="arrow" />
+          </RouteLink>
+        )}
       </div>
       <div className="admin-overview-grid">
         <section className="admin-panel">
@@ -62,7 +71,7 @@ export function AdminOverview() {
                 <UiText text="账户角色" />
               </dt>
               <dd>
-                <UiText text="管理员" />
+                <UiText text={user.role === "admin" ? "管理员" : "成员"} />
               </dd>
             </div>
           </dl>
@@ -87,7 +96,9 @@ export function AdminOverview() {
                 <UiText text="草稿编辑" />
               </span>
               <span className="admin-badge admin-badge-success">
-                <UiText text="已启用" />
+                <UiText
+                  text={can(user, "content:write") ? "已启用" : "未授权"}
+                />
               </span>
             </li>
             <li>
@@ -95,7 +106,9 @@ export function AdminOverview() {
                 <UiText text="媒体上传" />
               </span>
               <span className="admin-badge admin-badge-success">
-                <UiText text="已启用" />
+                <UiText
+                  text={can(user, "media:upload") ? "已启用" : "未授权"}
+                />
               </span>
             </li>
           </ul>

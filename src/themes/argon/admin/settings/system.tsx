@@ -11,6 +11,8 @@ import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsSection, DeliveryBadge } from "./shared";
 import { SettingsLayout } from "./section-navigation";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 const fields = [
   {
     key: "dynamic_freshness_seconds",
@@ -93,6 +95,7 @@ export interface RuntimeSummary {
 export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
   const editor = useFrontendNodes();
   const siteEditor = useSettingsEditor();
+  const editable = can(useAdminAccount(), "settings:write");
   const [selected, setSelected] = useState("");
   const node =
     editor.nodes.find((node) => node.node_id === selected) ??
@@ -166,7 +169,7 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
               >
                 <fieldset
                   className="admin-settings-form"
-                  disabled={Boolean(editor.busy)}
+                  disabled={Boolean(editor.busy) || !editable}
                 >
                   <div className="admin-settings-two-col">
                     {fields.map((field) => (
@@ -188,7 +191,9 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
                   <Button
                     type="submit"
                     className="admin-button admin-button-primary"
-                    disabled={Boolean(editor.busy) || !dirty || !valid}
+                    disabled={
+                      Boolean(editor.busy) || !dirty || !valid || !editable
+                    }
                   >
                     <Icon name="check" />
                     {editor.busy === node.node_id ? (
@@ -199,8 +204,9 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
                   </Button>
                   <Button
                     className="admin-button"
-                    disabled={Boolean(editor.busy)}
+                    disabled={Boolean(editor.busy) || !editable}
                     onClick={() =>
+                      editable &&
                       void editor
                         .retry(node.node_id)
                         .then(() => siteEditor.refreshDelivery())

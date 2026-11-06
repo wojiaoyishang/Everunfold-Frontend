@@ -4,6 +4,8 @@ import { UiText } from "@/core/i18n/provider";
 import type { DraftDetail } from "@/generated/content-admin-contract";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 
 export function EditorActions({
   detail,
@@ -21,9 +23,14 @@ export function EditorActions({
   onSave: (action: "save" | "publish") => void;
   onWithdraw: () => void;
 }) {
+  const publishAllowed = can(
+    useAdminAccount(),
+    "content:publish",
+    detail?.owner_id ?? null,
+  );
   return (
     <>
-      {detail?.published_revision && (
+      {publishAllowed && detail?.published_revision && (
         <Button
           className="admin-button"
           disabled={disabled || uncertain}
@@ -58,7 +65,7 @@ export function EditorActions({
           <UiText text="创建草稿" />
         )}
       </Button>
-      {detail && !uncertain && (
+      {publishAllowed && detail && !uncertain && (
         <Button
           className="admin-button admin-button-primary"
           disabled={disabled}

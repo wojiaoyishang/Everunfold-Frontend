@@ -10,6 +10,9 @@ export type Id = string;
 export type Username1 = string;
 export type DisplayName = string;
 export type Role = "admin" | "user";
+export type AvatarUrl = string;
+export type PreferredLocale = string;
+export type MustChangePassword = boolean;
 export type CsrfToken = string;
 export type ExpiresAt = string;
 export type Success1 = false;
@@ -42,6 +45,13 @@ export interface AuthUser {
   username: Username1;
   display_name: DisplayName;
   role: Role;
+  permissions?: Permissions;
+  avatar_url?: AvatarUrl;
+  preferred_locale?: PreferredLocale;
+  must_change_password?: MustChangePassword;
+}
+export interface Permissions {
+  [k: string]: "own" | "all";
 }
 export interface ErrorResponse {
   success: Success1;

@@ -527,3 +527,43 @@ html[data-motion="reduced"]
     opacity: 0.8;
   }
 }
+.ui-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+  vertical-align: middle;
+}
+.ui-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sidebar-account-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  background: var(--surface-soft);
+}
+.sidebar-account-link > span {
+  flex: 1;
+}
+.sidebar-account-link:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+.sidebar-account-link svg {
+  width: 18px;
+  height: 18px;
+}

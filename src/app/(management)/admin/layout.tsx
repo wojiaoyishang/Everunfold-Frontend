@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { readConfiguration } from "@/core/config/server";
 import { AdminWorkspace } from "./workspace";
 import "@/themes/argon/admin/admin.css";
+import "@/themes/argon/account/account.css";
 export const metadata: Metadata = {
   title: { default: "工作台", template: "%s · Everunfold" },
 };

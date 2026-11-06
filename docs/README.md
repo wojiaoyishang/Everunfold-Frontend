@@ -1,6 +1,8 @@
 # Everunfold 文档入口
 
-[账号管理与双向API Key接入设计](decisions/0069-accounts-api-keys-and-signed-callbacks.md)：主项目统一签发/校验，子项目签名查询，主项目按管理员登记URL签名回调；用户已授权开始实施，当前进度见STATUS。
+[账号中心与用户管理](development/accounts.md)、[API Key应用接入指南](development/api-key-applications.md)及[真实验收](handoff/accounts-verification.md)：资料/密码/会话、普通用户受限头像库、细分授权、Key与应用签名双向接入；含桌面/窄屏与独立子项目检查。
+
+[账号管理与双向API Key接入决定](decisions/0069-accounts-api-keys-and-signed-callbacks.md)：主项目统一签发/校验，子项目签名查询，主项目按管理员登记URL签名回调；实际范围与限制见指南和STATUS。
 
 [统一国旗字体](decisions/0068-local-language-flag-font.md)与[验收](handoff/language-flag-font-verification.md)：前后台语言标志使用同源按需彩色字体，覆盖270种旗帜，保留自定义标志和系统回退。
 

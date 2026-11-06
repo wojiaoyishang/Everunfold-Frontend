@@ -1,5 +1,6 @@
 import type { AuthSessionState } from "@/generated/auth-contract";
 import { RequestError } from "@/core/http/request";
+import { canAccessAdmin } from "@/core/accounts/permissions";
 
 export function checkedSession(
   session: AuthSessionState,
@@ -7,7 +8,7 @@ export function checkedSession(
 ): AuthSessionState {
   if (!session.csrf_token || session.authenticated !== (session.user !== null))
     throw new RequestError("invalid");
-  if (admin && (!session.authenticated || session.user?.role !== "admin"))
+  if (admin && (!session.authenticated || !canAccessAdmin(session.user)))
     throw new RequestError("http", session.authenticated ? 403 : 401);
   return session;
 }

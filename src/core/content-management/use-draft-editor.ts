@@ -56,6 +56,8 @@ export function useDraftEditor(
 ) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const account = useAdminAccount();
+  const writeScope =
+    account.role === "admin" ? "all" : account.permissions?.["content:write"];
   const sessionRef = useRef<DraftSession | null>(null);
   const [session, setSession] = useState<DraftSession | null>(null);
   const [collaboration, setCollaboration] =
@@ -157,6 +159,13 @@ export function useDraftEditor(
           if (response.data.type_id !== type.id)
             throw new RequestError("invalid");
           apply(response.data);
+          if (
+            writeScope !== "all" &&
+            (writeScope !== "own" || response.data.owner_id !== account.id)
+          ) {
+            setError("你可以查看这篇内容，但没有编辑权限。");
+            return;
+          }
           if (sourceKey) {
             const restored = readBlockSources(sourceKey);
             sourceRef.current = restored;
@@ -281,7 +290,16 @@ export function useDraftEditor(
     };
     // The effect owns one authorized draft session and its stable storage key.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, type.id, baseUrl, csrfToken, readAttempt, account.id, sourceKey]);
+  }, [
+    id,
+    type.id,
+    baseUrl,
+    csrfToken,
+    readAttempt,
+    account.id,
+    sourceKey,
+    writeScope,
+  ]);
   const displayed = withBlockSources(fields, sources);
   const dirty =
     JSON.stringify(displayed) !== baseline ||
@@ -317,6 +335,13 @@ export function useDraftEditor(
     action: "save" | "publish" | "withdraw" = "save",
     note = "",
   ) => {
+    if (
+      !writeScope ||
+      (detail && writeScope !== "all" && detail.owner_id !== account.id)
+    ) {
+      setError("你可以查看这篇内容，但没有编辑权限。");
+      return null;
+    }
     if (inFlight.current || preparing.current || conflict) return null;
     const invalid = validateDraft(displayed, type);
     if (invalid) {

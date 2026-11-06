@@ -1,7 +1,7 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
   "source_path": "contracts/auth-v0.1.schema.json",
-  "source_commit": "ce825d0d83bb7f0894109debd8231a798f9161f6",
-  "sha256": "a22eb8952bde4f5ae339b7e1cd322961600dcb5b360856e93802df4396b9eaa6"
+  "source_commit": "f14c6bec892c19c64599315565b9633ed96dcf2c",
+  "sha256": "9534aa10c2cb8189c130d325a2df4c53d15cf0a84f59e00c5041ef55d6881f81"
 }

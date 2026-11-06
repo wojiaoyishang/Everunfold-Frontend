@@ -788,3 +788,35 @@ ADR0069记录用户确认方向与实施顺序，接口细节是待实现设计�
 | --- | --- |
 | `docs/README.md` | `3275505910b445269ec80d233624d7218d4766bfbde27cbcb03ca595069da1d6` |
 | `docs/decisions/0069-accounts-api-keys-and-signed-callbacks.md` | `995a0d5a6cc3ff83ef9f6fead0e7a66dd0b6074040e2bfd20abd361fd33e6413` |
+
+## accounts-runtime-2 同步（2026-11-06）
+
+服务端授权与签名回调阶段；前端仍实施中。
+
+| 公共文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `ba8717c6680d608c592a7c3f33348652151852c7d7b1f367abde7c20dcf6b87b` |
+| `docs/decisions/0069-accounts-api-keys-and-signed-callbacks.md` | `c98e94b1a5b2b6ff3de45d41b742230220c1033227d87d8460f7ce825cad4737` |
+| `docs/development/api-key-applications.md` | `3c2343f7589e681dca6c2a5ec03d0c9bffd9cb7a73e0f123f0604c797a380587` |
+
+## accounts-runtime-3 同步（2026-11-06）
+
+个人头像补充约定已同步；ADR0069 SHA256：`43f8535a433a3ef100540a1a68aad30f57c826cace0657ce37c11ea7cd09159e`。前端资料美化与头像页仍实施中。
+
+## 账号、独立头像库与双向Key交付（2026-11-06）
+
+accounts-runtime-4、api-key-applications-2、bootstrap-11与ADR0069记录本次实现、用户确认的头像初值及真实验收；下列为当前共同文件摘要，替代相关旧摘要。原始附件不改，STATUS分仓库维护，设备地址和凭据不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `ebdb0fd790182e698b817b924e2ee57ec3977f1571de661892757a00da42656f` |
+| `docs/architecture/constraints.md` | `70da33732e586ad9b9adb10278367125bdb7d33bbdc528c72a261d1c09902b99` |
+| `docs/decisions/0069-accounts-api-keys-and-signed-callbacks.md` | `3faa57499374f7b4fedaa0139cda80e799da1c8cede98564e8646cdc78447639` |
+| `docs/development/accounts.md` | `6d01923b64b5ef50af24a54b114cc67eec452fd08aa5c682cc8f201dfc7bc5c0` |
+| `docs/development/api-key-applications.md` | `66e620bccd01db0eb5cb13d52b269d199c8a5e7519d3b24b188427df60005a2c` |
+| `docs/handoff/accounts-verification.md` | `4d6088d18ef45599af755b661aefbcd919fa8def7bf9b1c9080d2ec41a3768f8` |
+| `docs/design/accounts-profile-desktop.png` | `7aa1444c233cac5c824c6950aee84a2730faf378ad47fe6349ca12a4a42bfaa8` |
+| `docs/design/accounts-profile-dark-320.png` | `13efea3799ca05e24cb5940839d8b5e9442aa582c10fae5cd5bf6e520974dd19` |
+| `docs/design/accounts-avatar-picker.png` | `beadd84ea592455efcaa88ab4dfa8aebf6cde0b5ed94e165940b42d548a22a6f` |
+| `docs/design/accounts-users.png` | `46fdff3a854f9dff5e2e3b38b5bb5c258752251793860eafd6e393c540cc5d32` |
+| `docs/design/accounts-applications.png` | `ca43ea3951abbd2bb31b60410899f334d91020fb1348c5b3459d487dc24ecae8` |

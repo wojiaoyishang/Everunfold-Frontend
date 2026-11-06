@@ -17,6 +17,8 @@ import { Icon } from "../../components/icon";
 import { MediaPreview } from "./media-preview";
 import { MediaRemovalControls } from "./media-removal";
 import { MediaImageEditor } from "./image-editor";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 export function MediaDetailsDialog({
   item,
   previous,
@@ -35,6 +37,9 @@ export function MediaDetailsDialog({
   onChanged: (item: MediaDetails, created: boolean) => void;
 }) {
   const attachment = useMediaAttachment(item.id);
+  const user = useAdminAccount();
+  const editable = can(user, "media:write"),
+    removable = can(user, "media:delete");
   const { detail, draft, loading, error, notice } = attachment;
   const [removing, setRemoving] = useState(false);
   const busy = attachment.busy || removing;
@@ -152,7 +157,7 @@ export function MediaDetailsDialog({
                 {detail?.editable && (
                   <Button
                     className="admin-button"
-                    disabled={busy || attachment.dirty}
+                    disabled={busy || attachment.dirty || !editable}
                     title={attachment.dirty ? "请先保存资料" : "编辑图片"}
                     onClick={() => setEditing(true)}
                   >
@@ -248,7 +253,7 @@ export function MediaDetailsDialog({
                       <TextField
                         value={draft.title ?? ""}
                         maxLength={160}
-                        disabled={busy || info.deleted}
+                        disabled={busy || info.deleted || !editable}
                         placeholder={info.label}
                         onChange={(event) =>
                           attachment.setDraft({
@@ -265,7 +270,7 @@ export function MediaDetailsDialog({
                           aria-label="替代文本"
                           value={draft.alt_text ?? ""}
                           maxLength={1000}
-                          disabled={busy || info.deleted}
+                          disabled={busy || info.deleted || !editable}
                           onChange={(event) =>
                             attachment.setDraft({
                               ...draft,
@@ -288,7 +293,7 @@ export function MediaDetailsDialog({
                         rows={2}
                         value={draft.caption ?? ""}
                         maxLength={2000}
-                        disabled={busy || info.deleted}
+                        disabled={busy || info.deleted || !editable}
                         onChange={(event) =>
                           attachment.setDraft({
                             ...draft,
@@ -303,7 +308,7 @@ export function MediaDetailsDialog({
                         rows={3}
                         value={draft.description ?? ""}
                         maxLength={10000}
-                        disabled={busy || info.deleted}
+                        disabled={busy || info.deleted || !editable}
                         onChange={(event) =>
                           attachment.setDraft({
                             ...draft,
@@ -346,7 +351,7 @@ export function MediaDetailsDialog({
             </section>
           </div>
           <div className="admin-media-dialog-footer">
-            {detail && (
+            {detail && removable && (
               <MediaRemovalControls
                 detail={detail}
                 disabled={attachment.busy || attachment.dirty}
@@ -367,7 +372,13 @@ export function MediaDetailsDialog({
               </span>
               <Button
                 className="admin-button admin-button-primary"
-                disabled={busy || loading || !attachment.dirty || info.deleted}
+                disabled={
+                  busy ||
+                  loading ||
+                  !attachment.dirty ||
+                  info.deleted ||
+                  !editable
+                }
                 onClick={async () => {
                   const result = await attachment.save();
                   if (result) onChanged(result, false);

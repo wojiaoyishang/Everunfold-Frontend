@@ -12,6 +12,8 @@ import { Icon } from "../../components/icon";
 import { MediaPreview } from "../media/media-preview";
 import styles from "./draft-list.module.css";
 import { TranslationMenu } from "./translation-menu";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 
 const dateLabel = (value: string) =>
   new Intl.DateTimeFormat("zh-CN", {
@@ -48,6 +50,12 @@ export function DraftListRow({
   onAction: () => void;
 }) {
   const icon = type.icon === "leaf" ? "leaf" : "book";
+  const editable = can(
+    useAdminAccount(),
+    "content:write",
+    item.owner_id ?? null,
+  );
+  const destination = `/admin/content/${type.id}/${item.id}/${editable ? "edit" : "preview"}`;
   const cover = resourceUrl(item.cover_url);
   const date = item.published_revision
     ? (item.published_at ?? item.updated_at)
@@ -71,11 +79,7 @@ export function DraftListRow({
         </span>
         <div className={styles.titleText}>
           <div className={styles.titleLine}>
-            <RouteLink
-              className={styles.title}
-              href={`/admin/content/${type.id}/${item.id}/edit`}
-              showPending
-            >
+            <RouteLink className={styles.title} href={destination} showPending>
               {item.title || item.preview.slice(0, 60) || (
                 <UiText text="未命名说说" />
               )}
@@ -97,6 +101,7 @@ export function DraftListRow({
                 current={item.id}
                 original={item.id}
                 disabled={disabled}
+                readOnly={!editable}
               />
             ) : null}
           </div>
@@ -142,23 +147,21 @@ export function DraftListRow({
       </div>
       <div role="cell" className={styles.actions}>
         {!trash && (
-          <RouteLink
-            className="admin-button"
-            href={`/admin/content/${type.id}/${item.id}/edit`}
-            showPending
-          >
-            <UiText text="编辑" />
+          <RouteLink className="admin-button" href={destination} showPending>
+            <UiText text={editable ? "编辑" : "查看"} />
           </RouteLink>
         )}
-        <Button
-          className="admin-icon-button"
-          disabled={disabled}
-          title={trash ? "恢复草稿" : "移至回收站"}
-          aria-label={`${trash ? "恢复" : "删除"} ${item.title || "说说"}`}
-          onClick={onAction}
-        >
-          <Icon name={trash ? "undo" : "trash"} />
-        </Button>
+        {editable && (
+          <Button
+            className="admin-icon-button"
+            disabled={disabled}
+            title={trash ? "恢复草稿" : "移至回收站"}
+            aria-label={`${trash ? "恢复" : "删除"} ${item.title || "说说"}`}
+            onClick={onAction}
+          >
+            <Icon name={trash ? "undo" : "trash"} />
+          </Button>
+        )}
       </div>
     </article>
   );

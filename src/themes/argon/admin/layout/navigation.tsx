@@ -4,9 +4,12 @@ import {
   adminNavigationGroups,
 } from "@/core/admin/navigation";
 import type { AdminPageIcon } from "@/core/admin/registry";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { adminRoutePermission, can } from "@/core/accounts/permissions";
 import { Icon, type IconName } from "../../components/icon";
 import { RouteLink } from "../../components/ui/route-link";
 const navigationIcons: Record<AdminPageIcon, IconName> = {
+  users: "user",
   font: "type",
   book: "book",
   leaf: "leaf",
@@ -26,9 +29,20 @@ export function AdminNavigation({
   onNavigate?: () => void;
 }) {
   const current = adminDestination(pathname);
+  const t = useT();
+  const user = useAdminAccount();
+  const groups = adminNavigationGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => {
+        const capability = adminRoutePermission(item.href);
+        return !capability || can(user, capability);
+      }),
+    }))
+    .filter((group) => group.items.length);
   return (
-    <nav className="admin-navigation" aria-label="后台导航">
-      {adminNavigationGroups.map((group) => {
+    <nav className="admin-navigation" aria-label={t("后台导航")}>
+      {groups.map((group) => {
         const activeIndex = group.items.findIndex(
           (item) => item.id === current?.id,
         );
@@ -53,8 +67,8 @@ export function AdminNavigation({
                   href={item.href}
                   showPending
                   aria-current={current?.id === item.id ? "page" : undefined}
-                  aria-label={item.label}
-                  title={item.label}
+                  aria-label={t(item.label)}
+                  title={t(item.label)}
                   className="admin-nav-link"
                   onClick={onNavigate}
                 >
@@ -71,4 +85,4 @@ export function AdminNavigation({
     </nav>
   );
 }
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";

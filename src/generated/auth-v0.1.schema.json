@@ -59,6 +59,32 @@
           ],
           "title": "Role",
           "type": "string"
+        },
+        "permissions": {
+          "additionalProperties": {
+            "enum": [
+              "own",
+              "all"
+            ],
+            "type": "string"
+          },
+          "title": "Permissions",
+          "type": "object"
+        },
+        "avatar_url": {
+          "default": "",
+          "title": "Avatar Url",
+          "type": "string"
+        },
+        "preferred_locale": {
+          "default": "zh-CN",
+          "title": "Preferred Locale",
+          "type": "string"
+        },
+        "must_change_password": {
+          "default": false,
+          "title": "Must Change Password",
+          "type": "boolean"
         }
       },
       "required": [
@@ -171,7 +197,7 @@
   "title": "AuthContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "0.1.0",
+  "x-everunfold-contract-version": "0.2.0",
   "x-everunfold-csrf-header": "X-CSRF-Token",
   "x-everunfold-credentials": "include",
   "x-everunfold-operations": [

@@ -8,6 +8,8 @@ import { LibraryIcon } from "../../components/library-icon";
 import { Button, TextField } from "../../components/ui/primitives";
 import { UploadQueueView } from "../../components/ui/upload-queue";
 import { FilePicker } from "../../components/ui/file-picker";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 export interface IconChoice {
   id: string;
   label: string;
@@ -85,6 +87,7 @@ export function IconBrowser({
   onSelect?: (icon: IconChoice) => void;
 }) {
   const library = useIconLibrary();
+  const user = useAdminAccount();
   const [source, setSource] = useState<"builtin" | "uploaded">("builtin");
   const [selected, setSelected] = useState<IconChoice | null>(null);
   const builtin = builtinIconNames
@@ -111,6 +114,7 @@ export function IconBrowser({
         />
         <div className="admin-upload-actions">
           <FilePicker
+            disabled={!can(user, "media:upload")}
             label="上传图标"
             onFiles={(files) => {
               setSource("uploaded");

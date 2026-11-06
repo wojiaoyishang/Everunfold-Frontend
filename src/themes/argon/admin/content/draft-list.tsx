@@ -17,9 +17,12 @@ import { DraftActionDialog } from "./draft-action-dialog";
 import { DraftListRow } from "./draft-list-row";
 import styles from "./draft-list.module.css";
 import { Select } from "../../components/ui/select";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 
 export function DraftList({ type }: { type: ContentTypeDefinition }) {
   const catalog = useDraftCatalog(type);
+  const user = useAdminAccount();
   const languages = useLanguageCatalog();
   const t = useT();
   const [action, setAction] = useState<DraftListItem | null>(null);
@@ -31,15 +34,17 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
       <AdminPageHeading
         title={type.label}
         action={
-          <RouteLink
-            className="admin-button admin-button-primary"
-            href={`/admin/content/${type.id}/new`}
-            showPending
-          >
-            <Icon name="plus" />
-            <UiText text="新建" />
-            <UiText text={type.label} />
-          </RouteLink>
+          can(user, "content:write") && (
+            <RouteLink
+              className="admin-button admin-button-primary"
+              href={`/admin/content/${type.id}/new`}
+              showPending
+            >
+              <Icon name="plus" />
+              <UiText text="新建" />
+              <UiText text={type.label} />
+            </RouteLink>
+          )
         }
       />
       <section
@@ -244,9 +249,12 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
           </div>
         </footer>
       </section>
-      <ContentSync
-        key={`${catalog.status}-${data?.items.map((item) => item.revision).join("-")}`}
-      />
+      {(user.role === "admin" ||
+        user.permissions?.["content:publish"] === "all") && (
+        <ContentSync
+          key={`${catalog.status}-${data?.items.map((item) => item.revision).join("-")}`}
+        />
+      )}
       {action && (
         <DraftActionDialog
           key={action.id}

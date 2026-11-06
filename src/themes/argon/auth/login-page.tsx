@@ -14,6 +14,7 @@ import { PasswordField } from "../components/ui/password-field";
 import { ManagementEntry } from "./management-entry";
 import { SessionFeedback } from "./session-feedback";
 import { LoginSuccess } from "./login-success";
+import { canAccessAdmin } from "@/core/accounts/permissions";
 
 export function LoginPage({
   baseUrl,
@@ -37,7 +38,8 @@ export function LoginPage({
   const entering = state.phase === "ready" && state.session.authenticated;
   const destination = loginDestination(
     returnTo,
-    state.phase === "ready" && state.session.user?.role === "admin",
+    state.phase === "ready" && canAccessAdmin(state.session.user),
+    state.phase === "ready" && state.session.user?.must_change_password,
   );
 
   async function submit(event: FormEvent<HTMLFormElement>) {

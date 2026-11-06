@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-10，2026-11-06（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
+版本：bootstrap-11，2026-11-06（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
 
 ## 已确认的范围
 
@@ -43,7 +43,7 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 
 浏览器默认由 FastAPI 管理 HttpOnly Cookie Session；CORS 精确来源、Cookie Domain 与 CSRF 分开设计。API Key 不突破所属用户当前权限。请求身份、语言和数据库 Session 按请求/任务隔离，不共用可变全局上下文。
 
-2026-10-31 已实现基础浏览器认证：[ADR 0018](../decisions/0018-authentication-and-admin-entry.md) 与 [验收记录](../handoff/authentication-verification.md)。用户和可撤销 Session 存 PostgreSQL，密码使用 Argon2id，数据库不保存原始 token；登录/退出要求预会话绑定的 CSRF token 与精确 Origin，后台入口每次按数据库当前角色复核管理员。`/v1/auth/*` 与 `/v1/admin/*` 响应禁止共享缓存。注册、改密、找回密码、2FA、用户管理和细粒度资源权限仍未实现。
+基础浏览器认证见[ADR0018](../decisions/0018-authentication-and-admin-entry.md)。2026-11-06按[ADR0069](../decisions/0069-accounts-api-keys-and-signed-callbacks.md)完成账号中心、改密/会话、用户管理、细分本人/全部授权、个人受限头像库与API Key双向接入，见[操作指南](../development/accounts.md)。用户/可撤销Session/Key摘要与授权存PostgreSQL，密码Argon2id；登录/退出要求预会话CSRF和精确Origin，后台按当前能力授权。Key使用显式权限交集，不能借管理员角色或Cookie越权。`/v1/auth/*`、`/v1/account/*`、`/v1/admin/*`禁止共享缓存，账号资料不进入公开快照；注册、找回密码、邮箱验证和2FA仍未实现。
 
 内部接口要求真实 socket 来源 IP 允许列表 AND 接收 Token，随后检查最小权限。转发头不是原始来源事实；空允许列表、未知 peer 不放行。不能假定 Next.js App Router 暴露 socket；实现须选择可验证的适配层或受控入口并阻断旁路。内部路径仍需公网隔离。Token 不进入浏览器、URL、公开配置、日志或数据库任务参数。
 
@@ -80,7 +80,7 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 
 ## 待定与后续验收
 
-待定：剩余业务DDL、扩展错误码及API/WS/ICP Schema、改密/找回/2FA、生产Cookie域名选择、额外编辑器格式的Python/Yjs互操作、搜索中文策略、审计留存、精确资源配额和协同压缩周期。基础Session、语言目录/前缀与保留路由已有实施决定，无需重新开启已经确认的选择；自动翻译和在线程序包管理仍未实现。
+待定：剩余业务DDL、扩展错误码及API/WS/ICP Schema、注册/找回/2FA、生产Cookie域名选择、额外编辑器格式的Python/Yjs互操作、搜索中文策略、审计留存、容量配额和协同压缩周期。Session、账号改密/管理/Key、头像初值、语言目录/前缀与保留路由已有实施决定，无需重新开启已确认选择；自动翻译和在线程序包管理仍未实现。
 
 对应功能交付前执行原文 P0 与真实多进程验证；各阶段实际覆盖范围见交接状态，不能将构建成功、占位接口成功或配置文件存在视为完成上述验收。
 

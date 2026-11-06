@@ -32,6 +32,14 @@ export function useAdminAccess(baseUrl: string) {
   const [message, setMessage] = useState("");
   const action = useRef<AbortController | null>(null);
   useEffect(() => () => action.current?.abort(), []);
+  useEffect(() => {
+    if (
+      state.phase === "failed" &&
+      state.error instanceof RequestError &&
+      state.error.code === 40363
+    )
+      router.replace("/account");
+  }, [state, router]);
   const signedOut =
     state.phase === "failed" &&
     state.error instanceof RequestError &&

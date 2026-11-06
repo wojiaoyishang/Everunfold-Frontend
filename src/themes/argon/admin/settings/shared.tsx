@@ -14,6 +14,8 @@ import { Switch } from "../../components/ui/switch";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "./section-navigation";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 
 export function SettingsSection({
   id,
@@ -147,6 +149,7 @@ export function SettingsFrame({
   children: ReactNode;
 }) {
   const editor = useSettingsEditor();
+  const editable = can(useAdminAccount(), "settings:write");
   return (
     <SettingsLayout>
       <AdminPageHeading title={title} description={description} />
@@ -169,7 +172,10 @@ export function SettingsFrame({
           }}
           noValidate
         >
-          <fieldset className="admin-settings-form" disabled={editor.busy}>
+          <fieldset
+            className="admin-settings-form"
+            disabled={editor.busy || !editable}
+          >
             {children}
           </fieldset>
           {editor.error && (

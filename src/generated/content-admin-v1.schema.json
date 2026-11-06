@@ -625,6 +625,19 @@
           "title": "Id",
           "type": "string"
         },
+        "owner_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Id"
+        },
         "type_id": {
           "title": "Type Id",
           "type": "string"
@@ -829,6 +842,19 @@
           "format": "uuid",
           "title": "Id",
           "type": "string"
+        },
+        "owner_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Id"
         },
         "type_id": {
           "title": "Type Id",
@@ -2163,6 +2189,19 @@
           "title": "Id",
           "type": "string"
         },
+        "owner_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Owner Id"
+        },
         "type_id": {
           "title": "Type Id",
           "type": "string"
@@ -2403,7 +2442,7 @@
   "title": "ContentAdminContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.8.0",
+  "x-everunfold-contract-version": "1.9.0",
   "x-everunfold-content-types": [
     {
       "id": "article",

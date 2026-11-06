@@ -1,5 +1,5 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 import { useId, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Dialog, Button } from "./primitives";
@@ -27,6 +27,7 @@ export function Modal({
   headerActions?: ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  const t = useT();
   const titleId = useId();
   useDialogSurface(ref);
   useLayoutEffect(() => {
@@ -64,7 +65,7 @@ export function Modal({
         {headerActions}
         <Button
           className="admin-icon-button"
-          aria-label={closeLabel}
+          aria-label={t(closeLabel)}
           onClick={onClose}
           disabled={closing}
         >

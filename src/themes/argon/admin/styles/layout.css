@@ -385,6 +385,26 @@
   }
 }
 @media (max-width: 420px) {
+  .admin-header-location {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
+  }
+  .admin-breadcrumb-current {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .admin-header-actions {
+    flex-shrink: 0;
+  }
+  .admin-header-actions .admin-icon-button,
+  .admin-header-actions .admin-site-link {
+    width: 34px;
+    height: 38px;
+    min-width: 34px;
+    padding-inline: 6px;
+  }
   .admin-main {
     padding-inline: 16px;
   }

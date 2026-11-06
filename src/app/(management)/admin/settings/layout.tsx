@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { SettingsEditorProvider } from "@/core/settings/editor";
+import { SettingsRouteBoundary } from "@/core/settings/route-boundary";
 export default function SettingsLayout({ children }: { children: ReactNode }) {
-  return <SettingsEditorProvider>{children}</SettingsEditorProvider>;
+  return <SettingsRouteBoundary>{children}</SettingsRouteBoundary>;
 }

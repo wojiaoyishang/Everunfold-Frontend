@@ -9,6 +9,27 @@ export const builtinAdminModule = {
   ],
   pages: [
     {
+      id: "core.users",
+      href: "/admin/users",
+      label: "用户管理",
+      description: "用户资料、授权与账号状态",
+      icon: "users",
+      matchesChild: (path: string) =>
+        path === "/admin/users/new" ||
+        /^\/admin\/users\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(
+          path,
+        ),
+      menu: { group: "core.workspace", order: 40 },
+    },
+    {
+      id: "core.settings.api-keys",
+      href: "/admin/settings/api-keys",
+      label: "API Key接入",
+      description: "应用签名、权限目录与回调投递",
+      icon: "extension",
+      menu: { group: "core.settings", order: 40 },
+    },
+    {
       id: "core.shortcodes",
       href: "/admin/shortcodes",
       label: "短代码库",

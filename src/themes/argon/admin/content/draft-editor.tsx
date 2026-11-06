@@ -9,6 +9,8 @@ import { useEditorNavigation } from "@/core/content-management/use-editor-naviga
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 import { Icon } from "../../components/icon";
 import { useInlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
 import { hasUploadMarkers } from "@/core/editor/upload-placeholders";
@@ -44,6 +46,7 @@ export function DraftEditor({
   const languages = useLanguageCatalog();
   const [language, setLanguage] = useState<Locale>("");
   const editor = useDraftEditor(type, id, language || undefined);
+  const account = useAdminAccount();
   const router = useRouter();
   const resources = useEditorResources();
   const shortcodes = useAppliedShortcodes();
@@ -159,6 +162,26 @@ export function DraftEditor({
     },
   ]);
   const notice = editor.dirty ? "" : editor.notice;
+  if (
+    editor.detail &&
+    !can(account, "content:write", editor.detail.owner_id ?? null)
+  )
+    return (
+      <section className="admin-panel">
+        <h1>
+          <UiText text="没有编辑此内容的权限" />
+        </h1>
+        <p>
+          <UiText text="你可以查看这篇内容，但没有编辑权限。" />
+        </p>
+        <RouteLink
+          className="admin-button"
+          href={`/admin/content/${type.id}/${editor.detail.id}/preview`}
+        >
+          <UiText text="前台预览" />
+        </RouteLink>
+      </section>
+    );
   return (
     <CodePreferencesProvider value={resources.codePreferences}>
       <InlineUploadToasts uploads={uploads} />

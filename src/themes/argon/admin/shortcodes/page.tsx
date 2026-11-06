@@ -13,10 +13,18 @@ import { DeliveryBadge } from "../settings/shared";
 import { ShortcodePreview } from "./preview";
 import { ShortcodeEditor } from "./editor";
 import styles from "./shortcodes.module.css";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 
 const origins = { frontend: "前端注册", backend: "后端注册", custom: "自定义" };
 export function ShortcodeLibraryPage() {
   const library = useShortcodeLibrary();
+  const editable = can(useAdminAccount(), "shortcodes:write");
+  const definitions =
+    library.settings?.value.shortcodes ??
+    library.items
+      .filter((item) => item.origin !== "frontend")
+      .map((item) => item.compiled);
   const [query, setQuery] = useState(""),
     [filter, setFilter] = useState("all"),
     [selected, setSelected] = useState<CatalogItem | "new" | null>(null);
@@ -44,13 +52,15 @@ export function ShortcodeLibraryPage() {
       <AdminPageHeading
         title="短代码库"
         action={
-          <Button
-            className="admin-button admin-button-primary"
-            onClick={() => choose("new")}
-          >
-            <Icon name="plus" />
-            <UiText text="新建短代码" />
-          </Button>
+          editable && (
+            <Button
+              className="admin-button admin-button-primary"
+              onClick={() => choose("new")}
+            >
+              <Icon name="plus" />
+              <UiText text="新建短代码" />
+            </Button>
+          )
         }
       />
       <div className={styles.toolbar}>
@@ -96,12 +106,16 @@ export function ShortcodeLibraryPage() {
       {selected && (
         <ShortcodeEditor
           key={selected === "new" ? "new" : selected.id}
-          item={selected === "new" ? null : selected}
+          item={
+            selected === "new"
+              ? null
+              : { ...selected, editable: selected.editable && editable }
+          }
           onSaved={(item) => setSelected(item)}
           onReload={library.reload}
           onClose={() => choose(null)}
           onDirtyChange={onDirtyChange}
-          definitions={library.settings?.value.shortcodes}
+          definitions={definitions}
         />
       )}
       <div
@@ -123,7 +137,7 @@ export function ShortcodeLibraryPage() {
               <ShortcodePreview
                 compact
                 definition={item.compiled}
-                definitions={library.settings?.value.shortcodes}
+                definitions={definitions}
                 body={item.source.example_body}
               />
               <p>
@@ -143,7 +157,7 @@ export function ShortcodeLibraryPage() {
                 )}
               </span>
               <Button className="admin-button" onClick={() => choose(item)}>
-                {item.editable ? (
+                {item.editable && editable ? (
                   <UiText text="编辑模板" />
                 ) : (
                   <UiText text="查看样式" />

@@ -12,6 +12,8 @@ import { Icon } from "../../components/icon";
 import { MediaPreview } from "./media-preview";
 import { MediaDetailsDialog } from "./media-details";
 import { MediaUploadArea } from "./media-upload-area";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 import { formatBytes } from "@/core/media/image-editor";
 export function MediaBrowser({
   kind = "all",
@@ -27,6 +29,7 @@ export function MediaBrowser({
   const [view, setView] = useState<"grid" | "list">("grid");
   const [filter, setFilter] = useState(kind);
   const [trash, setTrash] = useState(false);
+  const canUpload = can(useAdminAccount(), "media:upload");
   const requestKind = pickerTab === "upload" ? kind : filter;
   const library = useMediaLibrary(requestKind, trash);
   const [selected, setSelected] = useState<MediaItem | null>(null);
@@ -46,7 +49,13 @@ export function MediaBrowser({
   return (
     <div className="admin-media-browser">
       {pickerTab === "upload" ? (
-        <MediaUploadArea accept={accept} onFiles={library.upload} />
+        canUpload ? (
+          <MediaUploadArea accept={accept} onFiles={library.upload} />
+        ) : (
+          <p>
+            <UiText text="当前账号没有上传媒体的权限。" />
+          </p>
+        )
       ) : (
         <div className="admin-library-toolbar">
           {pickerTab && kind === "all" && (
@@ -74,7 +83,7 @@ export function MediaBrowser({
             value={library.query}
             onChange={(e) => library.setQuery(e.target.value)}
           />
-          {!pickerTab && (
+          {!pickerTab && canUpload && (
             <div className="admin-upload-actions">
               <FilePicker
                 accept={accept}

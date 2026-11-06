@@ -13,6 +13,8 @@ import type {
 } from "@/generated/settings-contract";
 import { RequestError } from "@/core/http/request";
 import { frontendShortcodes, type CatalogItem } from "./registry";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 
 export function shortcodeFailure(error: unknown) {
   if (error instanceof RequestError) {
@@ -30,6 +32,7 @@ export function shortcodeFailure(error: unknown) {
 
 export function useShortcodeLibrary() {
   const { baseUrl } = useAdminRequest();
+  const canReadSettings = can(useAdminAccount(), "settings:read");
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [settings, setSettings] = useState<SettingsState | null>(null);
   const [loading, setLoading] = useState(true),
@@ -43,11 +46,11 @@ export function useShortcodeLibrary() {
     try {
       const [catalog, state] = await Promise.all([
         readShortcodes(baseUrl),
-        readSettings(baseUrl),
+        canReadSettings ? readSettings(baseUrl) : Promise.resolve(null),
       ]);
       if (mounted.current && request.current === id) {
         setItems([...catalog.data.items, ...frontendShortcodes]);
-        setSettings(state.data);
+        setSettings(state?.data ?? null);
       }
     } catch (error) {
       if (mounted.current && request.current === id)
@@ -55,7 +58,7 @@ export function useShortcodeLibrary() {
     } finally {
       if (mounted.current && request.current === id) setLoading(false);
     }
-  }, [baseUrl]);
+  }, [baseUrl, canReadSettings]);
   useEffect(() => {
     let active = true;
     mounted.current = true;

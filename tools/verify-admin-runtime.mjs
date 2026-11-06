@@ -100,6 +100,11 @@ directory = "./var/absent-admin-verification-cache"
     assert.ok(ready, `Isolated admin server did not become ready: ${logs}`);
     for (const route of [
       "/login",
+      "/account",
+      "/admin/users",
+      "/admin/users/new",
+      "/admin/users/00000000-0000-0000-0000-000000000001",
+      "/admin/settings/api-keys",
       "/admin",
       "/admin/content",
       "/admin/content/article",
@@ -147,7 +152,13 @@ directory = "./var/absent-admin-verification-cache"
         `${route} must not embed an authenticated account in SSR`,
       );
       assert.ok(
-        classes.has(route === "/login" ? "management-root" : "admin-access"),
+        classes.has(
+          route === "/login"
+            ? "management-root"
+            : route === "/account"
+              ? "account-root"
+              : "admin-access",
+        ),
       );
       console.log(
         `${route}: production 200, private/no-store, noindex, anonymous shell`,
