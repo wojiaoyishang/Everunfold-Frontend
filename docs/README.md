@@ -4,6 +4,8 @@
 
 ## 先从这里读
 
+[大量语言的正文切换](decisions/0067-large-language-pickers-and-header-order.md)及[50语言模拟验收](handoff/language-overflow-verification.md)：少量平铺，大量收进可搜索弹层；手机只显示当前语言和+数量。前台顶栏为连接状态、纯语言图标、搜索。
+
 [可配置多语言与原文合并列表](architecture/multilingual-content.md)、[ADR0066](decisions/0066-configurable-languages-and-grouped-translations.md)及[实际验收](handoff/multilingual-verification.md)：文章/说说独立译文与原文共用一行入口，语言数量可扩展；设置支持默认语言、中文前缀、国旗搜索/自定义及备选/自定义语言。内容语言与程序界面包分离，初始中英文不构成语言上限。
 
 [顶部版本选择与HTML可视化差异](decisions/0062-revision-pairs-and-html-visual-diff.md)、[操作指南](development/draft-versions.md)及[本轮验收](handoff/version-revision-layout-verification.md)：编辑页式顶部双选、左右区块/行内高亮、HTML默认可视化和逐块切换。

@@ -751,3 +751,18 @@ ADR0066替代0065历史提案，multilingual-runtime-2、content-management-7、
 | 当前共同文件 | SHA256 |
 | --- | --- |
 | `docs/handoff/multilingual-verification.md` | `d895d621c8d81b762fd61ab1ee88549645a52bee50a50ed6bf63db75ea875b1b` |
+
+## 大量语言入口与前台顶栏交付（2026-11-06）
+
+ADR0067、multilingual-runtime-3和本轮50语言合成验收记录阈值收纳、搜索、原生链接回退及顶栏顺序；不更改业务契约或原始附件。下列当前摘要替代相关旧记录，STATUS分别维护，实际设备地址/凭据不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `bd0af9e7a4fbffc2906095db91c4b96e10aeead2bfa374762c8fedf760cb0361` |
+| `docs/architecture/multilingual-content.md` | `f1be4aae0db2def7e979c4770cd7214a8e966a78d72029bac633ac457116c457` |
+| `docs/decisions/0067-large-language-pickers-and-header-order.md` | `2c216e2f6fc4c41fa9d0437b72ee378295b51de97deef559c9385bbed3b9acd5` |
+| `docs/handoff/language-overflow-verification.md` | `291fcb5ef342c7f7829c2a9152f07f20f56b802b03f4d1add5416c476f43f149` |
+| `docs/design/language-overflow-desktop.png` | `7aa6ca351b2c24a450b02705af99a2592a97fc522f7aa06e7f9663b3febf7c90` |
+| `docs/design/language-overflow-open.png` | `a968290cc973cd5e0079a0320fc9488b49df3aa04f93719f3455e61cfdfe44e2` |
+| `docs/design/language-overflow-320.png` | `684e126036028c5b56fbef9e2bb832398ced46e251ff269143e94a9521fd3a52` |
+| `docs/design/language-overflow-320-open.png` | `bb2a926ab68b2b54490db878afc78c79eec4835d7301bc133484ab43936a6f49` |
