@@ -10,7 +10,7 @@ import { ReactionButton } from "./reaction-button";
 import { Icon } from "./icon";
 import { ViewMetric } from "./reader-data";
 import { ContentEditLink } from "./content-edit-link";
-import { ContentLanguages } from "./language-switcher";
+import { ContentLanguages } from "./content-languages";
 
 export function ShuoshuoCardView({
   entry,

@@ -8,6 +8,7 @@ import {
 } from "../src/core/i18n/choices";
 import { defaultFlag } from "../src/core/i18n/catalog";
 import { nativeMessageLocale } from "../src/core/i18n/locale";
+import { languageSearchText } from "../src/core/i18n/search";
 
 test("flag choices contain qualified national, subdivision and general flags with searchable names", () => {
   const choices = flagChoices("zh-CN");
@@ -39,4 +40,24 @@ test("language suggestions are conveniences while custom tags, prefixes and flag
   assert.equal(defaultFlag("zh-Hans-CN"), "🇨🇳");
   assert.equal(nativeMessageLocale("en"), "en");
   assert.equal(nativeMessageLocale("ja"), undefined);
+});
+
+test("language search accepts configured names, regional codes and native or translated names", () => {
+  const portuguese = languageSearchText("pt-BR", "巴葡读者", "zh-CN");
+  for (const query of [
+    "巴葡读者",
+    "PT-br",
+    "Portuguese",
+    "português",
+    "葡萄牙",
+  ])
+    assert.ok(portuguese.includes(searchText(query)), query);
+  assert.ok(languageSearchText("ja", "自定名称", "en").includes("日本語"));
+  assert.ok(
+    languageSearchText(
+      "qaa-x-personal",
+      "My custom language",
+      "zh-CN",
+    ).includes("my custom language"),
+  );
 });

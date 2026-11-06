@@ -2,6 +2,8 @@ import flags from "./data/flags.json";
 import regions from "@/generated/language-regions.json";
 import { defaultFlag, type Language } from "./catalog";
 import { localeOf, nativeMessageLocale, type MessageLocale } from "./locale";
+import { searchText } from "./search";
+export { searchText } from "./search";
 
 const special: Record<string, string> = {
   "chequered flag": "方格旗",
@@ -35,9 +37,6 @@ export function flagChoices(locale: MessageLocale) {
       ),
     };
   });
-}
-export function searchText(value: string) {
-  return value.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
 }
 export function presetLanguages(locale: MessageLocale) {
   const display = new Intl.DisplayNames([locale], { type: "language" }),

@@ -58,8 +58,8 @@ export function SiteHeader({ site }: { site: Site }) {
         </Link>
         <HeaderNavigation site={site} />
         <div className="header-actions">
-          <PublicLanguage />
           <BackendStatus />
+          <PublicLanguage />
           <SearchDialog />
         </div>
       </div>

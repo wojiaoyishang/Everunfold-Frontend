@@ -3,7 +3,7 @@ import type { Content } from "@/core/content/types";
 import { resourceUrl, taxonomyHref } from "@/core/content/urls";
 import { AppLink as Link } from "./navigation-link";
 import { PostMeta } from "./post-meta";
-import { ContentLanguages } from "./language-switcher";
+import { ContentLanguages } from "./content-languages";
 
 export function ArticleHeader({
   content,

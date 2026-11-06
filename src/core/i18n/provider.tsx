@@ -108,5 +108,6 @@ export function UiText({
 }
 export function useT() {
   const { uiLocale } = useLocale();
-  return (text: string) => translate(text, uiLocale);
+  return (text: string, values?: Record<string, string | number>) =>
+    translate(text, uiLocale, values);
 }

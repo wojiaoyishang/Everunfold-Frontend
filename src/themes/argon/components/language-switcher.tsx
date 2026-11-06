@@ -2,7 +2,6 @@
 import { useLocale, useT, useLanguageCatalog } from "@/core/i18n/provider";
 import { localizeHref } from "@/core/i18n/locale";
 
-import type { Content } from "@/core/content/types";
 import { normalizePath } from "@/core/content/urls";
 import { useRouteState } from "./route-state";
 import { Icon } from "./icon";
@@ -11,20 +10,6 @@ import { Button, TextLink } from "./ui/primitives";
 import { useToast } from "./ui/toast/toast-provider";
 import styles from "./languages.module.css";
 import { LanguageLabel } from "./language-label";
-import { defaultFlag } from "@/core/i18n/catalog";
-
-function LanguageGlyph({ code }: { code: string }) {
-  const catalog = useLanguageCatalog();
-  return (
-    <span className={styles.glyph}>
-      <Icon name="languages" />
-      <span className={styles.badge} aria-hidden="true">
-        {catalog.languages.find((item) => item.code === code)?.flag ||
-          defaultFlag(code)}
-      </span>
-    </span>
-  );
-}
 
 export function InterfaceLanguage({
   className = "admin-icon-button",
@@ -77,7 +62,7 @@ export function PublicLanguage() {
       label={t("语言")}
       className="icon-button"
       panelClassName={styles.menu}
-      triggerContent={<LanguageGlyph code={locale} />}
+      triggerContent={<Icon name="languages" />}
     >
       {(close) => (
         <>
@@ -132,39 +117,5 @@ export function PublicLanguage() {
         </>
       )}
     </ActionPopover>
-  );
-}
-export function ContentLanguages({
-  content,
-}: {
-  content: Pick<Content, "id" | "language" | "translations">;
-}) {
-  const { change } = useLocale(),
-    catalog = useLanguageCatalog();
-  const variants = content.translations ?? [];
-  if (variants.length < 2) return null;
-  return (
-    <nav className={styles.versions} aria-label="Language versions">
-      {variants.map((item) => (
-        <TextLink
-          key={item.id}
-          href={item.path}
-          hrefLang={item.language}
-          lang={item.language}
-          onClick={() =>
-            change(
-              item.language,
-              catalog.languages.find((entry) => entry.code === item.language)
-                ?.ui_locale,
-            )
-          }
-          aria-current={item.id === content.id ? "page" : undefined}
-        >
-          <LanguageLabel code={item.language} />
-          {item.id === content.id && <Icon name="check" />}
-          {item.access !== "public" && <Icon name="lock" />}
-        </TextLink>
-      ))}
-    </nav>
   );
 }
