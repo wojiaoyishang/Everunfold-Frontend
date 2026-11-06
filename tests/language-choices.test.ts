@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import {
   flagChoices,
   presetLanguages,
@@ -9,6 +11,27 @@ import {
 import { defaultFlag } from "../src/core/i18n/catalog";
 import { nativeMessageLocale } from "../src/core/i18n/locale";
 import { languageSearchText } from "../src/core/i18n/search";
+
+test("the bundled flag font matches the shipped Unicode catalog and pinned asset", () => {
+  const root = new URL("../", import.meta.url);
+  const data = readFileSync(new URL("src/core/i18n/data/flags.json", root));
+  const base = new URL("public/content-features/language-flags-1/", root);
+  const manifest = JSON.parse(
+    readFileSync(new URL("source.json", base), "utf8"),
+  );
+  const font = readFileSync(new URL("flags.woff2", base));
+  const digest = (bytes: Buffer) =>
+    createHash("sha256").update(bytes).digest("hex");
+  assert.equal(digest(data), manifest.unicode_data_sha256);
+  assert.equal(JSON.parse(data.toString()).length, manifest.flag_count);
+  assert.equal(font.toString("ascii", 0, 4), "wOF2");
+  assert.equal(font.readUInt32BE(8), font.length);
+  assert.equal(font.length, manifest.bytes);
+  assert.equal(digest(font), manifest.sha256);
+  assert.ok(
+    readFileSync(new URL("LICENSE.md", base), "utf8").includes("CC BY 4.0"),
+  );
+});
 
 test("flag choices contain qualified national, subdivision and general flags with searchable names", () => {
   const choices = flagChoices("zh-CN");

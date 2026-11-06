@@ -1,0 +1,17 @@
+/* Twemoji CC BY 4.0; subset/credits: /content-features/language-flags-1/README.md */
+@font-face {
+  font-family: "Everunfold Flags";
+  src: url("/content-features/language-flags-1/flags.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  unicode-range:
+    U+200D, U+2620, U+26A7, U+FE0F, U+1F1E6-1F1FF, U+1F308, U+1F38C, U+1F3C1,
+    U+1F3F3-1F3F4, U+1F6A9, U+E0062-E0063, U+E0065, U+E0067, U+E006C, U+E006E,
+    U+E0073-E0074, U+E0077, U+E007F;
+}
+:root {
+  --language-flag-font:
+    "Everunfold Flags", "Apple Color Emoji", "Segoe UI Emoji",
+    "Noto Color Emoji", sans-serif;
+}

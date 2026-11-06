@@ -229,6 +229,7 @@ directory = "./var/absent-admin-verification-cache"
     for (const asset of [
       ...resources(richHtml),
       "/content-features/katex-0.19.1/fonts/KaTeX_Main-Regular.woff2",
+      "/content-features/language-flags-1/flags.woff2",
     ]) {
       const response = await fetch(base + asset);
       assert.equal(response.status, 200, asset);

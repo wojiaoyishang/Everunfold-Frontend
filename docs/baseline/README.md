@@ -766,3 +766,16 @@ ADR0067、multilingual-runtime-3和本轮50语言合成验收记录阈值收纳�
 | `docs/design/language-overflow-open.png` | `a968290cc973cd5e0079a0320fc9488b49df3aa04f93719f3455e61cfdfe44e2` |
 | `docs/design/language-overflow-320.png` | `684e126036028c5b56fbef9e2bb832398ced46e251ff269143e94a9521fd3a52` |
 | `docs/design/language-overflow-320-open.png` | `bb2a926ab68b2b54490db878afc78c79eec4835d7301bc133484ab43936a6f49` |
+
+## 语言旗帜字体统一（2026-11-06）
+
+ADR0068、multilingual-runtime-4及实际验收记录同源按需字体、270种旗帜组合/回退与许可。前端运行时依赖/后端契约和原始附件不变；STATUS各自维护，不写实际设备地址或凭据。以下为当前公共文件摘要。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `8529299a93a89ab1ea345db198ff4cc76fffc39998393b15edd7b99a708eb844` |
+| `docs/architecture/multilingual-content.md` | `8534ac1e14540b09572124311c54f44045a8cecb800a9944fbd418f66cc6cd28` |
+| `docs/decisions/0068-local-language-flag-font.md` | `9035ec21f08d40b1bd193d10ef6ba51d5ba6f96e027615b989ccf3fb5badd69a` |
+| `docs/handoff/language-flag-font-verification.md` | `4ab72494980869cbdbf7d1997ca0f84a5ed46cdbc0d22ba4b93409ff599cabf2` |
+| `docs/design/language-flag-font-desktop.png` | `69a45c40b3679c33aa0f5290b6989390bca6ea19b466cd68554a02771f248bc8` |
+| `docs/design/language-flag-font-320.png` | `0fd441289acee70de8c1acefcd9d2121fe721e8915ece1ed4e2939d86a5962f2` |

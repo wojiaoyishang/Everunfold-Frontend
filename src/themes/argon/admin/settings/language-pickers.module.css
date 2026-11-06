@@ -86,9 +86,15 @@
   white-space: nowrap;
 }
 .emoji,
+.largeEmoji,
+.customFlag :global(.ui-input) {
+  font-family: var(--language-flag-font);
+  font-weight: 400;
+  font-style: normal;
+  font-synthesis: none;
+}
+.emoji,
 .largeEmoji {
-  font-family:
-    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   line-height: 1;
 }
 .emoji {

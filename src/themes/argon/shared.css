@@ -1,5 +1,6 @@
 /* Shared control foundation. Public root rules explicitly exclude the admin surface. */
 @import "./styles/base.css";
+@import "./styles/language-flags.css";
 @import "./styles/appearance.css";
 @import "./styles/scrollbars.css";
 @import "./styles/ui-controls.css";
@@ -9,8 +10,10 @@
 .ui-language-flag {
   display: inline-block;
   margin-inline-end: 6px;
-  font-family:
-    "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-family: var(--language-flag-font);
+  font-weight: 400;
+  font-style: normal;
+  font-synthesis: none;
   font-size: 18px;
   line-height: 1;
   vertical-align: middle;

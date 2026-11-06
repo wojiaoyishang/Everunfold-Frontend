@@ -1,0 +1,13 @@
+{
+  "family": "Everunfold Flags",
+  "upstream_url": "https://github.com/poppingmoon/twemoji-colr/releases/download/v0.7.0%2B2026.09.09/TwemojiMozilla.ttf",
+  "upstream_sha256": "1a04f7bd9bd74434797e61b48b6e00f07740dd98458d9d6f8927a039bc17688c",
+  "upstream_version": "0.7.0+2026.09.09",
+  "unicode_data_sha256": "f63c5003c0ffa95e6a615b78ef7b90a2843fab2c0320f0a885d9663c4d0a5aba",
+  "flag_count": 270,
+  "color_format": "COLRv0",
+  "shaping": "VS16-preserving and VS16-consuming ligature spellings",
+  "unicode_range": "U+200D, U+2620, U+26A7, U+FE0F, U+1F1E6-1F1FF, U+1F308, U+1F38C, U+1F3C1, U+1F3F3-1F3F4, U+1F6A9, U+E0062-E0063, U+E0065, U+E0067, U+E006C, U+E006E, U+E0073-E0074, U+E0077, U+E007F",
+  "sha256": "065679c4a1a9427cb9b5db91f1932fbba2803b3eb0e846c643666a7edb0f71d9",
+  "bytes": 86764
+}
