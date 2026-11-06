@@ -101,7 +101,7 @@ export function ManagedUserSecurity({
                   autoComplete="new-password"
                 />
                 <AccountField
-                  label="管理员当前密码"
+                  label="当前管理员密码"
                   value={current}
                   onChange={setCurrent}
                   secret

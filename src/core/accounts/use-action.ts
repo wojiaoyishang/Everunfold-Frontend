@@ -15,6 +15,10 @@ export function accountFailure(error: unknown): string {
       return "请选择本人图库中的静态 JPG、PNG 或 WebP 图片。";
     if (error.code === 40963) return "必须保留至少一个有效管理员。";
     if (error.code === 40361) return "当前密码不正确。";
+    if (error.code === 40970 || error.code === 40470)
+      return "身份预设已更新或移除，请刷新后重新选择。";
+    if (error.code === 40971) return "身份预设名称已存在。";
+    if (error.code === 40370) return "仅管理员可以管理身份预设。";
     if (error.code === 40363) return "请先修改初始密码。";
     if (error.code === 40962) return "用户名已存在。";
     if (error.code === 50360) return "签名服务未就绪，请检查部署配置。";

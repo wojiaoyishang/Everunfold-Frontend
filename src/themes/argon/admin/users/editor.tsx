@@ -6,6 +6,7 @@ import type {
   PermissionCatalog,
   ProfileFields,
   AvatarCatalog,
+  UserPreset,
 } from "@/generated/accounts-contract";
 import {
   createAccountUser,
@@ -13,6 +14,7 @@ import {
   readAccountUser,
   readUserAvatars,
   saveAccountUser,
+  readUserPresets,
 } from "@/generated/accounts-client";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
@@ -32,12 +34,18 @@ import type { PermissionValues } from "../../account/permissions";
 import { AdminPageHeading } from "../components/page-heading";
 import { UserGrants } from "./grants";
 import { ManagedUserSecurity } from "./security";
+import { UserPresetPicker } from "./preset-picker";
 
 export function UserEditor({ id }: { id?: string }) {
   const actor = useAdminAccount(),
     { baseUrl, csrfToken } = useAdminRequest(),
     router = useRouter();
   const action = useAccountAction();
+  const presetReload = useAccountAction();
+  const [presets, setPresets] = useState<UserPreset[]>([]);
+  const [preset, setPreset] = useState<UserPreset | null | undefined>(
+    undefined,
+  );
   const [saved, setSaved] = useState<AccountProfile | null>(null),
     [catalog, setCatalog] = useState<PermissionCatalog | null>(null),
     [avatars, setAvatars] = useState<AvatarCatalog | null>(null);
@@ -59,6 +67,9 @@ export function UserEditor({ id }: { id?: string }) {
           signal: controller.signal,
           headers: { "X-Site-Locale": "zh-CN" },
         });
+        const templates = await readUserPresets(baseUrl, {
+          signal: controller.signal,
+        });
         const user = id
           ? await readAccountUser(baseUrl, id, { signal: controller.signal })
           : null;
@@ -67,6 +78,8 @@ export function UserEditor({ id }: { id?: string }) {
           : null;
         if (controller.signal.aborted) return;
         setCatalog(permissions.data);
+        setPresets(templates.data.items);
+        setPreset(undefined);
         setAvatars(images?.data ?? null);
         if (user) {
           setSaved(user.data);
@@ -85,6 +98,7 @@ export function UserEditor({ id }: { id?: string }) {
   }, [baseUrl, id]);
   const authorizationChanged =
     !saved ||
+    preset !== undefined ||
     role !== saved.role ||
     active !== saved.active ||
     JSON.stringify(grants) !== JSON.stringify(saved.grants);
@@ -95,6 +109,7 @@ export function UserEditor({ id }: { id?: string }) {
       !!fields.display_name ||
       !!password ||
       !!current ||
+      preset !== undefined ||
       !!Object.keys(grants).length;
   const forbidden = saved?.role === "admin" && actor.role !== "admin";
   const save = () =>
@@ -107,6 +122,13 @@ export function UserEditor({ id }: { id?: string }) {
           current_password: current,
           role,
           grants,
+          ...(preset !== undefined
+            ? {
+                preset: preset
+                  ? { id: preset.id, expected_revision: preset.revision }
+                  : null,
+              }
+            : {}),
         };
         const response = await createAccountUser(
           baseUrl,
@@ -127,6 +149,13 @@ export function UserEditor({ id }: { id?: string }) {
           active,
           grants,
           current_password: current,
+          ...(preset !== undefined
+            ? {
+                preset: preset
+                  ? { id: preset.id, expected_revision: preset.revision }
+                  : null,
+              }
+            : {}),
         };
         const response = await saveAccountUser(
           baseUrl,
@@ -138,6 +167,8 @@ export function UserEditor({ id }: { id?: string }) {
         if (!signal.aborted) {
           setSaved(response.data);
           setFields(profileFields(response.data));
+          setGrants(response.data.grants);
+          setPreset(undefined);
           setCurrent("");
           if (id === actor.id && authorizationChanged)
             router.replace("/login?next=%2Faccount");
@@ -289,9 +320,10 @@ export function UserEditor({ id }: { id?: string }) {
                           ]
                         : [{ value: "user", label: "成员" }]
                     }
-                    onValueChange={(value) =>
-                      setRole(value as "admin" | "user")
-                    }
+                    onValueChange={(value) => {
+                      setRole(value as "admin" | "user");
+                      setPreset(null);
+                    }}
                   />
                 </div>
                 {!!id && (
@@ -312,11 +344,40 @@ export function UserEditor({ id }: { id?: string }) {
                   <UiText text="管理员拥有全部系统权限；API Key 仍需单独选择权限。" />
                 </p>
               ) : (
-                <UserGrants
-                  catalog={catalog}
-                  value={grants}
-                  onChange={setGrants}
-                />
+                <>
+                  <UserPresetPicker
+                    items={presets}
+                    applied={saved?.permission_preset}
+                    selected={preset}
+                    onSelect={(value) => {
+                      setPreset(value);
+                      if (value) setGrants(structuredClone(value.grants ?? {}));
+                      else if (value === undefined)
+                        setGrants(saved?.grants ?? {});
+                    }}
+                    onRefresh={() =>
+                      void presetReload.run(async (signal) => {
+                        const response = await readUserPresets(baseUrl, {
+                          signal,
+                        });
+                        if (!signal.aborted) setPresets(response.data.items);
+                      }, "身份预设已刷新。")
+                    }
+                  />
+                  {presetReload.message && (
+                    <p role="status" className="account-message">
+                      <UiText text={presetReload.message} />
+                    </p>
+                  )}
+                  <UserGrants
+                    catalog={catalog}
+                    value={grants}
+                    onChange={(value) => {
+                      setGrants(value);
+                      setPreset(null);
+                    }}
+                  />
+                </>
               )}
               {id === actor.id && (
                 <p className="account-policy-help">

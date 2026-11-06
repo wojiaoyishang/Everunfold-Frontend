@@ -103,6 +103,7 @@ directory = "./var/absent-admin-verification-cache"
       "/account",
       "/admin/users",
       "/admin/users/new",
+      "/admin/users/presets",
       "/admin/users/00000000-0000-0000-0000-000000000001",
       "/admin/settings/api-keys",
       "/admin",

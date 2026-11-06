@@ -843,3 +843,15 @@ ADR0070与reader-requests-4记录用户排版反馈后的容器对齐及去角�
 | `docs/decisions/0070-header-account-entry-and-avatar-readiness.md` | `7449335d04c2dcef1b3bed0aebb260fe9171688c063160a23d667743b69100b3` |
 | `docs/development/reader-requests.md` | `7fad62883e583803a3d4e551ae97a21349fbcc39f2bca559c9bb13996f802753` |
 | `docs/handoff/header-account-entry-verification.md` | `53854b4dcb4b44747e389ed34e8ba4d4f75e67143d7ebb104ef088ad123c9dfc` |
+
+## 可配置身份预设交付（2026-11-06）
+
+ADR0071、accounts-runtime-6与bootstrap12记录管理员维护预设、用户显式应用权限快照、版本/幂等/授权边界及本轮完整检查。修改或删除模板不自动覆盖已有用户；头像限制密码文案统一。下列为当前共同文件摘要，替代相关旧摘要；原始附件不变，STATUS分别维护，设备IP/凭据及用户头像不入文档。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `3d0240e76e95851926c6e863240bc4c204f12c3d6d06f162b547f96ae50a18fb` |
+| `docs/architecture/constraints.md` | `acaf35f76ef9dcc9b800281c2fe196e20ceab29c4212a197ddbb8582ba462dd4` |
+| `docs/development/accounts.md` | `39e3d3a4fc31db132524a1e9718cc71f4ca8b9d4a46b14fb9a089c96288110c5` |
+| `docs/decisions/0071-user-permission-presets.md` | `6a6df7ee9a3a66120ce4883263edfb0294e7f6ba1a1679d336c07206643c7427` |
+| `docs/handoff/user-presets-verification.md` | `37690b0b407b2e896a51deea9b7617cf1d9860781803fd5c691ea91c950f7413` |

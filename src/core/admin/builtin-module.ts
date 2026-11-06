@@ -16,6 +16,7 @@ export const builtinAdminModule = {
       icon: "users",
       matchesChild: (path: string) =>
         path === "/admin/users/new" ||
+        path === "/admin/users/presets" ||
         /^\/admin\/users\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(
           path,
         ),

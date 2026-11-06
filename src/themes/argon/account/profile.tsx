@@ -90,7 +90,11 @@ export function AccountProfileEditor({
           <span>@{profile.username}</span>
           <div>
             <span className="admin-badge">
-              <UiText text={profile.role === "admin" ? "管理员" : "成员"} />
+              {profile.role === "admin" ? (
+                <UiText text="管理员" />
+              ) : (
+                (profile.permission_preset?.name ?? <UiText text="成员" />)
+              )}
             </span>
           </div>
         </div>

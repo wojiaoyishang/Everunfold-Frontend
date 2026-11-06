@@ -5,9 +5,9 @@ import schema from "./accounts-v1.schema.json";
 import type { AccountContract } from "./accounts-contract";
 import {
   requestJSON,
-  postBinary,
   postJSON,
   patchJSON,
+  postBinary,
   type RequestOptions,
 } from "@/core/http/request";
 const ajv = new Ajv({ strict: true });
@@ -18,6 +18,93 @@ ajv.addSchema(
   ),
   "accounts",
 );
+
+const readUserPresetsValidator = ajv.compile<AccountContract["user_presets"]>({
+  $ref: "accounts#/properties/user_presets",
+});
+export function readUserPresets(baseUrl: string, options: RequestOptions = {}) {
+  return requestJSON(
+    baseUrl,
+    "/v1/admin/user-presets",
+    {},
+    readUserPresetsValidator,
+    { ...options, credentials: "include", headers: { ...options.headers } },
+  );
+}
+
+const createUserPresetValidator = ajv.compile<AccountContract["user_preset"]>({
+  $ref: "accounts#/properties/user_preset",
+});
+export function createUserPreset(
+  baseUrl: string,
+  input: AccountContract["user_preset_create"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/user-presets",
+    input,
+    createUserPresetValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const saveUserPresetValidator = ajv.compile<AccountContract["user_preset"]>({
+  $ref: "accounts#/properties/user_preset",
+});
+export function saveUserPreset(
+  baseUrl: string,
+  presetId: string,
+  input: AccountContract["user_preset_save"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return patchJSON(
+    baseUrl,
+    "/v1/admin/user-presets/{preset_id}".replace(
+      "{preset_id}",
+      encodeURIComponent(presetId),
+    ),
+    input,
+    saveUserPresetValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+const removeUserPresetValidator = ajv.compile<AccountContract["user_presets"]>({
+  $ref: "accounts#/properties/user_presets",
+});
+export function removeUserPreset(
+  baseUrl: string,
+  presetId: string,
+  input: AccountContract["user_preset_remove"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/admin/user-presets/{preset_id}/remove".replace(
+      "{preset_id}",
+      encodeURIComponent(presetId),
+    ),
+    input,
+    removeUserPresetValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
 
 const readAccountAvatarsValidator = ajv.compile<
   AccountContract["avatar_catalog"]

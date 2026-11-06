@@ -27,6 +27,7 @@ test("private account and user-management destinations have explicit safe login 
     "/account",
     "/admin/users",
     "/admin/users/new",
+    "/admin/users/presets",
     `/admin/users/${user.id}`,
     "/admin/settings/api-keys",
   ]) {

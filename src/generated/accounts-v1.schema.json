@@ -106,6 +106,17 @@
           "title": "Grants",
           "type": "object"
         },
+        "permission_preset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UserPresetStamp"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "created_at": {
           "format": "date-time",
           "title": "Created At",
@@ -2012,6 +2023,62 @@
       "title": "PublicResponse[SessionList]",
       "type": "object"
     },
+    "PublicResponse_UserPresetCatalog_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/UserPresetCatalog"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[UserPresetCatalog]",
+      "type": "object"
+    },
+    "PublicResponse_UserPreset_": {
+      "additionalProperties": false,
+      "properties": {
+        "success": {
+          "default": true,
+          "title": "Success",
+          "type": "boolean"
+        },
+        "code": {
+          "default": 200,
+          "title": "Code",
+          "type": "integer"
+        },
+        "msg": {
+          "default": "请求成功",
+          "title": "Msg",
+          "type": "string"
+        },
+        "data": {
+          "$ref": "#/$defs/UserPreset"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "PublicResponse[UserPreset]",
+      "type": "object"
+    },
     "SessionItem": {
       "additionalProperties": false,
       "properties": {
@@ -2136,6 +2203,17 @@
           },
           "title": "Grants",
           "type": "object"
+        },
+        "preset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UserPresetSelection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -2146,6 +2224,255 @@
         "current_password"
       ],
       "title": "UserCreate",
+      "type": "object"
+    },
+    "UserPreset": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "grants": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "enum": [
+                "own",
+                "all"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Grants",
+          "type": "object"
+        },
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "updated_at": {
+          "format": "date-time",
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "id",
+        "revision",
+        "created_at",
+        "updated_at"
+      ],
+      "title": "UserPreset",
+      "type": "object"
+    },
+    "UserPresetCatalog": {
+      "additionalProperties": false,
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/UserPreset"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "can_manage": {
+          "title": "Can Manage",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "items",
+        "can_manage"
+      ],
+      "title": "UserPresetCatalog",
+      "type": "object"
+    },
+    "UserPresetCreate": {
+      "additionalProperties": false,
+      "properties": {
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "current_password": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Current Password",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/UserPresetFields"
+        }
+      },
+      "required": [
+        "operation_id",
+        "current_password",
+        "value"
+      ],
+      "title": "UserPresetCreate",
+      "type": "object"
+    },
+    "UserPresetFields": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Description",
+          "type": "string"
+        },
+        "grants": {
+          "additionalProperties": {
+            "additionalProperties": {
+              "enum": [
+                "own",
+                "all"
+              ],
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Grants",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "UserPresetFields",
+      "type": "object"
+    },
+    "UserPresetRemove": {
+      "additionalProperties": false,
+      "properties": {
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        },
+        "current_password": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Current Password",
+          "type": "string"
+        }
+      },
+      "required": [
+        "operation_id",
+        "expected_revision",
+        "current_password"
+      ],
+      "title": "UserPresetRemove",
+      "type": "object"
+    },
+    "UserPresetSave": {
+      "additionalProperties": false,
+      "properties": {
+        "operation_id": {
+          "format": "uuid",
+          "title": "Operation Id",
+          "type": "string"
+        },
+        "current_password": {
+          "maxLength": 1024,
+          "minLength": 1,
+          "title": "Current Password",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/UserPresetFields"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "operation_id",
+        "current_password",
+        "value",
+        "expected_revision"
+      ],
+      "title": "UserPresetSave",
+      "type": "object"
+    },
+    "UserPresetSelection": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "expected_revision": {
+          "minimum": 1,
+          "title": "Expected Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "expected_revision"
+      ],
+      "title": "UserPresetSelection",
+      "type": "object"
+    },
+    "UserPresetStamp": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "revision"
+      ],
+      "title": "UserPresetStamp",
       "type": "object"
     },
     "UserSave": {
@@ -2195,6 +2522,17 @@
           "maxLength": 1024,
           "title": "Current Password",
           "type": "string"
+        },
+        "preset": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UserPresetSelection"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -2210,6 +2548,21 @@
   },
   "additionalProperties": false,
   "properties": {
+    "user_preset": {
+      "$ref": "#/$defs/PublicResponse_UserPreset_"
+    },
+    "user_presets": {
+      "$ref": "#/$defs/PublicResponse_UserPresetCatalog_"
+    },
+    "user_preset_create": {
+      "$ref": "#/$defs/UserPresetCreate"
+    },
+    "user_preset_save": {
+      "$ref": "#/$defs/UserPresetSave"
+    },
+    "user_preset_remove": {
+      "$ref": "#/$defs/UserPresetRemove"
+    },
     "avatar_catalog": {
       "$ref": "#/$defs/PublicResponse_AvatarCatalog_"
     },
@@ -2308,6 +2661,11 @@
     }
   },
   "required": [
+    "user_preset",
+    "user_presets",
+    "user_preset_create",
+    "user_preset_save",
+    "user_preset_remove",
     "avatar_catalog",
     "avatar_item",
     "avatar_policy",
@@ -2344,10 +2702,43 @@
   "title": "AccountContract",
   "type": "object",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "x-everunfold-contract-version": "1.3.0",
+  "x-everunfold-contract-version": "1.4.0",
   "x-everunfold-csrf-header": "X-CSRF-Token",
   "x-everunfold-credentials": "include",
   "x-everunfold-operations": [
+    {
+      "name": "readUserPresets",
+      "path": "/v1/admin/user-presets",
+      "method": "GET",
+      "response": "user_presets"
+    },
+    {
+      "name": "createUserPreset",
+      "path": "/v1/admin/user-presets",
+      "method": "POST",
+      "response": "user_preset",
+      "input": "user_preset_create"
+    },
+    {
+      "name": "saveUserPreset",
+      "path": "/v1/admin/user-presets/{preset_id}",
+      "method": "PATCH",
+      "response": "user_preset",
+      "input": "user_preset_save",
+      "path_params": [
+        "preset_id"
+      ]
+    },
+    {
+      "name": "removeUserPreset",
+      "path": "/v1/admin/user-presets/{preset_id}/remove",
+      "method": "POST",
+      "response": "user_presets",
+      "input": "user_preset_remove",
+      "path_params": [
+        "preset_id"
+      ]
+    },
     {
       "name": "readAccountAvatars",
       "path": "/v1/account/avatars",

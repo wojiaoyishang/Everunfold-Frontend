@@ -786,6 +786,28 @@
   margin-bottom: 26px;
   flex-wrap: wrap;
 }
+.account-preset-picker {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-subtle);
+}
+.account-preset-select {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  flex: 1 1 240px;
+}
+.account-preset-picker > p {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 12px;
+}
 .account-role-controls > .account-field {
   min-width: 200px;
 }
@@ -926,5 +948,16 @@
   .account-callback-row {
     flex-direction: column;
     gap: 8px;
+  }
+}
+.account-preset-content .account-permissions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.account-preset-content .account-subheading {
+  margin-block: 26px 12px;
+}
+@media (max-width: 740px) {
+  .account-preset-content .account-permissions {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -146,7 +146,7 @@ export function AvatarPolicyEditor({ onClose }: { onClose: () => void }) {
               />
               <div className="account-wide">
                 <AccountField
-                  label="管理员当前密码"
+                  label="当前管理员密码"
                   value={password}
                   onChange={setPassword}
                   secret

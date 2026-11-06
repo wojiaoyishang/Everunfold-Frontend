@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[可配置用户身份预设](decisions/0071-user-permission-presets.md)、[操作指南](development/accounts.md)及[验收](handoff/user-presets-verification.md)：用户管理新增“身份预设”入口，初始编辑/审稿人可增删改，在用户创建/编辑时应用；变更模板不自动覆盖既有用户权限。头像限制密码标签统一为“当前管理员密码”。
+
 [云端账号入口与头像就绪动效](decisions/0070-header-account-entry-and-avatar-readiness.md)及[实页验收](handoff/header-account-entry-verification.md)：账号中心移入右上角云端面板，头像加载后先打钩再显现；后台统一为“应用程序接入”。
 
 [账号中心与用户管理](development/accounts.md)、[API Key应用接入指南](development/api-key-applications.md)及[真实验收](handoff/accounts-verification.md)：资料/密码/会话、普通用户受限头像库、细分授权、Key与应用签名双向接入；含桌面/窄屏与独立子项目检查。

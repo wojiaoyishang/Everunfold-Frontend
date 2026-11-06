@@ -58,6 +58,15 @@ export function UsersPage() {
         title="用户管理"
         action={
           <div className="account-heading-actions">
+            {actor.role === "admin" && (
+              <RouteLink
+                href="/admin/users/presets"
+                className="admin-button"
+                showPending
+              >
+                <UiText text="身份预设" />
+              </RouteLink>
+            )}
             <Button className="admin-button" onClick={() => setPolicy(true)}>
               <UiText text="头像上传限制" />
             </Button>
@@ -138,7 +147,11 @@ export function UsersPage() {
             </div>
             <div className="account-user-badges">
               <span className="admin-badge">
-                <UiText text={user.role === "admin" ? "管理员" : "成员"} />
+                {user.role === "admin" ? (
+                  <UiText text="管理员" />
+                ) : (
+                  (user.permission_preset?.name ?? <UiText text="成员" />)
+                )}
               </span>
               <span
                 className={`admin-badge ${user.active ? "admin-badge-success" : ""}`}
