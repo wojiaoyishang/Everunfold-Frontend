@@ -1,12 +1,16 @@
 # 页面管理、注册与缓存边界
 
-版本：registered-pages-runtime-5，2026-11-07。状态：按用户本轮授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施。
+版本：registered-pages-runtime-6，2026-11-07。状态：按用户授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施，脚本执行位置见[ADR0081](../decisions/0081-authored-page-script-position.md)。
 
 ## 两种来源
 
 `/admin/pages`统一展示自定义源码页与可信前端注册页，支持搜索、状态和回收站。既有内容类型`page`的历史数据保留；本轮不改其历史正文或导入WordPress人员。
 
 自定义页面允许HTML、CSS和可选JavaScript，页面与脚本各自默认关闭。HTML/CSS/脚本仅放进无`allow-same-origin`的独立iframe，不能成为本站顶层脚本。CSP默认只允许固定哈希的测高脚本，作者脚本与HTML事件关闭；开启后仅允许iframe内联脚本，仍禁止脚本的fetch/WebSocket连接、外部脚本、嵌套框架、对象、表单提交和base改写。启用或修改启用脚本的持久页面要求管理员Session；按2026-11-07最新要求改为醒目提示，不再要求再次输入密码（ADR0075）。普通文章、HTML区块及短代码继续使用原有过滤边界。
+
+自pages1.6起，PageValue.javascript_position可选head/body_end，缺省body_end；旧JSONB工作稿、已应用源文和快照没有此字段时仍按末尾执行。它只控制JavaScript编辑区的独立脚本：head位于沙箱head中的CSP和样式之后、body解析之前；body_end位于作者HTML之后、结束body标签之前。HTML内脚本仍保持作者原有顺序并受相同脚本开关控制，不把该开关升级成宿主脚本权限。选择随工作稿、应用源文及公开快照保存；草稿不修改已应用位置。注册页面不接受自定义脚本位置，由可信实现控制自身生命周期。
+
+前台、新窗口预览和实时预览共用同一PageFrame与文档生成器；执行位置参与渲染标识和memo依赖，因此仅切换位置也会替换内层沙箱，并等待新标识就绪。原测高脚本、窗口校验、CSP及不透明来源边界保持。权威契约为pages1.6/public0.9/content-admin1.13，不新增数据库迁移。
 
 注册页由可信前端实现交互；后台仅改标题、路径、说明、收录、启用状态及明确声明的选项，不提供源码编辑。页面由`src/plugins/*/plugin.ts`的setup注册，原生目录发现装配可信身份；渲染组件和模型留在所属插件目录，不从数据库或远程URL导入模块。`core.people`首期提供姓名云/卡片、人物分组、搜索、头像、点击寄语及排序；没有友链卡片、访客留言写入或真实旧站人员导入。
 

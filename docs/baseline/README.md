@@ -1014,3 +1014,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/child-themes.md` | `child-themes-3` | `d201d552c0dda2e79907926abdc57c5b8b1f6c6b5562fefac23b64a8c5ad0cf8` |
 | `docs/decisions/0080-minimal-paper-starter-theme.md` | `ADR0080` | `4103f5fbcb0ea72f6785b203fb696f50d4cf5ec207b114022f96322ee977f7ac` |
 | `docs/handoff/paper-starter-verification.md` | `paper-starter-1` | `0bb8a03ecf1cff4e60a07359bdf067bd7fe14a73f8a0936bb5baa40a40391ae1` |
+
+
+## 自定义页面脚本位置交付（2026-11-07）
+
+后端b6fbaf7、前端1b86420按ADR0081实现Head/Body末尾执行。pages1.6/public0.9/content-admin1.13为权威契约；以下当前说明替代相应旧摘要，历史验收和原始基线保留，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `74266d6b80fda5da8ec9100daf327f4074763e8716594c2561be34a125322df4` |
+| `docs/architecture/registered-pages.md` | `registered-pages-runtime-6` | `178dfcadb55b4888bae6a21d52d9cafa651b2ac0959279d1f28f55be7cdcb410` |
+| `docs/development/pages.md` | `pages-runtime-8` | `801ae38e3f8ed03418a32ecadd8b358a5e3c5791509ecc5bd840124bc8adc85c` |
+| `docs/decisions/0081-authored-page-script-position.md` | `ADR0081` | `c00a8520ce569a93e34354aad5d6d7dd322526f7e2e5586709e2f25fd529d6a5` |
+| `docs/handoff/page-script-position-verification.md` | `page-script-position-1` | `b6c3b91a39cd28051e26607ced0e226e62e417513e52f1bfcad416786e1430b7` |

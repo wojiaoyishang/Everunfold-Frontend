@@ -1,12 +1,19 @@
 # 页面管理与实时预览指南
 
-版本：pages-runtime-7，2026-11-07。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
+版本：pages-runtime-8，2026-11-07。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
 
 ## 管理页面
 
 在后台“页面”查看来源、启用状态、草稿/应用修订，按标题或路径搜索。新建自定义页面，输入标题和站内绝对路径，分别编辑HTML/CSS/JavaScript。页面和JavaScript默认关闭；“保存草稿”不影响公开内容，“保存并应用”才更新入口；关闭启用后“保存并停用”。改址后旧路径失效，不产生别名。
 
 JavaScript仅在独立沙箱内运行；启用后显示脚本提示，维护启用脚本仍仅限管理员，不再要求重复输入密码（ADR0075）。沙箱没有同源权限，不能直接操作站点DOM或调用管理Session。脚本关闭时HTML事件也关闭。HTML/CSS不进入管理页文档，文章/短代码继续保留原安全过滤。
+
+源码区的“脚本执行位置”提供两个选项，控制JavaScript编辑区中的脚本：
+
+- 正文加载前（Head内）：在正文解析前执行，适合初始化变量或注册事件；此时document.body与正文元素尚未生成。若要操作正文，先监听DOMContentLoaded。
+- 正文加载后（Body末尾）：在作者HTML解析完毕后执行，可直接访问已有正文元素。这是缺省值，旧页面保持原行为；不表示等待图片、视频等资源全部下载完成。
+
+可以先选位置再开启脚本；关闭JavaScript时，两种位置都不会执行作者脚本。位置随页面工作稿保存，点击“保存并应用”才更新正式前台，预览立即使用当前选择。HTML编辑区自行写入的script仍在其原位置执行，不随此选项搬移。前台和两种预览使用同一生成器，实际检查见[脚本位置验收](../handoff/page-script-position-verification.md)。
 
 注册页标记“前端注册”，只能维护暴露选项和通用设置。当前“一路有你”支持页面介绍、姓名云/人物卡片、显示搜索及人物姓名、分组、头像地址、寄语和顺序。姓名必填；人物数量上限300、姓名/分组80字、寄语5000字。没有真实人员种子数据；注册组件不可在后台改源码。
 
@@ -56,7 +63,7 @@ npm run extensions:register -- --node-id web-main
 从后端已提交契约生成的前端客户端使用示例：
 
 ```ts
-import { readPageMetadata, savePageMetadata } from "@/generated/pages-client";
+import { readPageMetadata, savePageMetadata } from "@/core/contracts/pages";
 
 const current = await readPageMetadata(baseUrl, pageId, { signal });
 await savePageMetadata(baseUrl, pageId, {

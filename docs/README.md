@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[页面脚本执行位置](development/pages.md)、[ADR0081](decisions/0081-authored-page-script-position.md)及[验收](handoff/page-script-position-verification.md)：自定义页面可选Head或Body末尾，随草稿/应用保存，前台与两种预览保持一致。
+
 [Paper精简主题](development/child-themes.md)、[ADR0080](decisions/0080-minimal-paper-starter-theme.md)及[验收](handoff/paper-starter-verification.md)：Paper仅保留主题声明和CSS，完整继承Argon，作为二次开发的起点。
 
 [独立插件运行规范](architecture/frontend-plugin-runtime.md)、[插件/SDK开发指南](development/frontend-plugins.md)、[ADR0079](decisions/0079-runtime-plugin-packages-and-var-cache.md)与[验收](handoff/independent-plugins-verification.md)：var/cache统一派生产物；主题随主体构建后动态选择，插件独立打包、透明开发更新与部署后启停。

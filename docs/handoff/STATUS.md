@@ -1,5 +1,11 @@
 # 前端交接状态
 
+## 最新交付：自定义页面脚本执行位置（2026-11-07）
+
+- 前端1b86420、后端b6fbaf7；源码页新增Head/Body末尾执行选项，缺省Body末尾。位置随工作稿/应用保存，加入沙箱渲染标识及依赖，仅改变位置也更新前台预览与双栏右侧；注册页面由可信实现自行管理。见[ADR0081](../decisions/0081-authored-page-script-position.md)、[指南](../development/pages.md)。
+- pages1.6/public0.9/content-admin1.13从精确后端提交恢复，无迁移或新依赖。前端最终check291与隔离生产34私有入口/原公开回归通过；后端主套件235通过及遗漏的跨进程用例单独通过，合计236，Ruff/460格式/mypy231通过。
+- 实页1440/320、中英/深色、Head先于正文/Body末尾操作DOM、关闭脚本、保存重载、双栏更新及真实发布/撤回通过；pageerror0/native dialog0。临时页已可恢复回收，前台404，自己的会话退出200；六服务/0.0.0.0/HTTP200保持。范围及执行记录见[验收](page-script-position-verification.md)，共享文档与SHA同步，仅本地提交未push。
+
 ## 最新交付：Paper精简为二次开发起点（2026-11-07）
 
 - 前端源码dd515fa；Paper 2.0.0仅保留theme.ts和styles.ts，组件/模板/钩子全部继承Argon。减淡背景、纯色导航、短横幅和细边框，移除横幅包装、人物模板及额外页脚；复杂组合示例移入生产测试夹具，见[ADR0080](../decisions/0080-minimal-paper-starter-theme.md)和[指南](../development/child-themes.md)。
