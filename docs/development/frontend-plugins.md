@@ -1,6 +1,6 @@
 # 独立插件、页面与短代码开发
 
-版本：frontend-plugins-3，2026-11-07。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people和src/plugins/gallery。
+版本：frontend-plugins-4，2026-11-07。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
 
 ## 源码和命令
 

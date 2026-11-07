@@ -1,6 +1,6 @@
 # 页面管理、注册与缓存边界
 
-版本：registered-pages-runtime-6，2026-11-07。状态：按用户授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施，脚本执行位置见[ADR0081](../decisions/0081-authored-page-script-position.md)。
+版本：registered-pages-runtime-7，2026-11-07。状态：按用户授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施，脚本执行位置见[ADR0081](../decisions/0081-authored-page-script-position.md)。
 
 ## 两种来源
 
@@ -13,6 +13,8 @@
 前台、新窗口预览和实时预览共用同一PageFrame与文档生成器；执行位置参与渲染标识和memo依赖，因此仅切换位置也会替换内层沙箱，并等待新标识就绪。原测高脚本、窗口校验、CSP及不透明来源边界保持。权威契约为pages1.6/public0.9/content-admin1.13，不新增数据库迁移。
 
 注册页由可信前端实现交互；后台仅改标题、路径、说明、收录、启用状态及明确声明的选项，不提供源码编辑。页面由`src/plugins/*/plugin.ts`的setup注册，原生目录发现装配可信身份；渲染组件和模型留在所属插件目录，不从数据库或远程URL导入模块。`core.people`首期提供姓名云/卡片、人物分组、搜索、头像、点击寄语及排序；没有友链卡片、访客留言写入或真实旧站人员导入。
+
+`core.honors`提供分类荣誉墙、精度可为年月的日期、证书查看及媒体字段；表单标签和界面文案由插件自行本地化，再委托主题控件。当前实例定向导入的旧页内容保存在页面options，来源指纹在私有metadata；插件缺省不携带用户数据。详见[ADR0082](../decisions/0082-honors-registered-page-plugin.md)。
 
 ## 可信清单和部署
 

@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[我的荣誉注册页面](development/honors-page.md)、[ADR0082](decisions/0082-honors-registered-page-plugin.md)及[验收](handoff/honors-page-verification.md)：独立插件荣誉墙、筛选/时间线、媒体选图与证书弹窗，原页内容定向导入本实例业务配置。
+
 [页面脚本执行位置](development/pages.md)、[ADR0081](decisions/0081-authored-page-script-position.md)及[验收](handoff/page-script-position-verification.md)：自定义页面可选Head或Body末尾，随草稿/应用保存，前台与两种预览保持一致。
 
 [Paper精简主题](development/child-themes.md)、[ADR0080](decisions/0080-minimal-paper-starter-theme.md)及[验收](handoff/paper-starter-verification.md)：Paper仅保留主题声明和CSS，完整继承Argon，作为二次开发的起点。
