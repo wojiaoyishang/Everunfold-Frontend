@@ -106,6 +106,26 @@ value.pages = [
     },
   },
   {
+    id: "00000000-0000-4000-8000-000000000089",
+    source: "registered",
+    title: "荣誉页面样例",
+    path: "/honors-page",
+    enabled: true,
+    revision: 1,
+    implementation_id: "core.honors",
+    implementation_version: "1.0.0",
+    options: {
+      honors: [
+        {
+          title: "Fixture Honor",
+          category: "Awards",
+          date: "2025.6",
+          award: "First prize",
+        },
+      ],
+    },
+  },
+  {
     id: "00000000-0000-4000-8000-000000000083",
     source: "registered",
     title: "缺失实现",

@@ -253,9 +253,12 @@ directory = "./var/absent-admin-verification-cache"
     const peoplePage = await fetch(base + "/people-page");
     assert.equal(peoplePage.status, 200);
     assert.match(await peoplePage.text(), /Fixture Person/);
+    const honorsPage = await fetch(base + "/honors-page");
+    assert.equal(honorsPage.status, 200);
+    assert.match(await honorsPage.text(), /Fixture Honor/);
     assert.equal((await fetch(base + "/unavailable-page")).status, 503);
     console.log(
-      "Managed pages: isolated source 200, registered people 200, unavailable implementation 503.",
+      "Managed pages: isolated source 200, registered people/honors 200, unavailable implementation 503.",
     );
     const richArticle = await fetch(base + "/second.html");
     assert.equal(richArticle.status, 200);
