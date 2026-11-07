@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[Paper精简主题](development/child-themes.md)、[ADR0080](decisions/0080-minimal-paper-starter-theme.md)及[验收](handoff/paper-starter-verification.md)：Paper仅保留主题声明和CSS，完整继承Argon，作为二次开发的起点。
+
 [独立插件运行规范](architecture/frontend-plugin-runtime.md)、[插件/SDK开发指南](development/frontend-plugins.md)、[ADR0079](decisions/0079-runtime-plugin-packages-and-var-cache.md)与[验收](handoff/independent-plugins-verification.md)：var/cache统一派生产物；主题随主体构建后动态选择，插件独立打包、透明开发更新与部署后启停。
 
 [父子主题规范](architecture/frontend-themes.md)、[子主题指南](development/child-themes.md)与[ADR0078](decisions/0078-parent-child-themes-and-public-hooks.md)：Argon作为默认父主题，子主题局部覆盖模板、组件、样式并使用前台钩子；具体实现验收见STATUS。

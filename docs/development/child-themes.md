@@ -1,6 +1,6 @@
 # 子主题开发与启用
 
-版本：child-themes-2，2026-11-07。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。
+版本：child-themes-3，2026-11-07。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。
 
 ## 最小子主题
 
@@ -28,6 +28,20 @@ export default css;
 ```
 
 仅当前主题链输出CSS，按祖先到子级排序。变量使用原主题的--accent、--surface、--text、--muted、--line等，保留深色与减少动态偏好。不要选择html/body或管理界面；CSS Modules也应限定在自己的组件元素上。共享Modal/ConfirmDialog与人物寄语弹窗挂到当前展示容器，继承作用域CSS；自定义Portal可用core/themes/portal的surfacePortalTarget，仍须使用共享控件和弹窗焦点/退出机制。
+
+## 从Paper开始
+
+Paper 2.0.0是纯CSS子主题，只有两个源文件：
+
+```text
+src/themes/paper/
+  theme.ts    # 身份、版本、父主题及样式声明
+  styles.ts   # 背景、导航、短横幅、细边框和正文行距
+```
+
+复制这个目录为src/themes/my-theme/，把theme.ts的id和styles.ts选择器中的paper一并改成my-theme，即可开始二次开发；parent继续使用argon。颜色、圆角、深浅色和动效偏好沿用父主题变量，无需复制完整布局或注册组件。只想叠加Paper样式时，也可以新建主题并声明parent: "paper"。
+
+Paper不再提供public.hero包装、paper.people模板和paper.footer-note钩子组件。若其他子主题引用了这些旧实现，应改为继承Argon，或在自己的目录提供需要的实现；因此版本升为2.0.0。组件、模板和插入钩子的扩展方式见下文，生产构建中的多级组合测试放在tools/fixtures/extensions.mjs，不作为Paper的启动代码。实际效果与检查见[精简验收](../handoff/paper-starter-verification.md)。
 
 ## 覆盖组件、复用父组件
 
@@ -120,4 +134,4 @@ npm start
 
 npm start从var/cache/build/theme-catalog.json报告部署元数据。发布时一并保留此构建目录；不要在正式机器重新扫描源码推断已编译主题。也可按[插件指南](frontend-plugins.md)显式登记。多个启用节点登记一致ID/版本/父级后，选择器才允许切换；主题改动应更新语义版本并部署各节点。已安装主题的切换无需重建或重启，后台仍独立使用Argon。更多运行时验收见[本轮记录](../handoff/independent-plugins-verification.md)。
 
-本轮验收用paper与隔离的三层继承夹具；测试结束恢复原实例配置和用户数据。详见[验收记录](../handoff/child-themes-verification.md)。
+初版Paper与三层继承的历史验收见[原验收记录](../handoff/child-themes-verification.md)。Paper 2.0.0的精简展示和隔离四层继承检查见[精简验收](../handoff/paper-starter-verification.md)。

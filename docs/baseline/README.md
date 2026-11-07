@@ -1001,3 +1001,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/pages.md` | `pages-runtime-7` | `2cd45ca4e69942f2266f2d53597f839ab992996e8454fb4dc8877e28841eb4f5` |
 | `docs/decisions/0079-runtime-plugin-packages-and-var-cache.md` | `本轮更新` | `36055d32c7726ef36855b92e758dd57e6a2241d53df6f7de429751b9da0058ae` |
 | `docs/handoff/independent-plugins-verification.md` | `independent-plugins-1` | `348d69a3b88856a5ae553d7cba8ffef376ff882b75cd62abd76b2398872f78ff` |
+
+
+## Paper精简主题交付（2026-11-07）
+
+前端dd515fa与ADR0080将Paper升级为2.0.0的纯CSS子主题。当前frontend-themes-3、child-themes-3及paper-starter-1替代对应当前说明；历史验收和原始基线保留，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `7fa776d79603dd913973283f4581c5be887674a227feecac9abdc3772ecf1a6b` |
+| `docs/architecture/frontend-themes.md` | `frontend-themes-3` | `9c43e82502732afd6cc49c4778aa34f02130556b60d0c7055530937047c19182` |
+| `docs/development/child-themes.md` | `child-themes-3` | `d201d552c0dda2e79907926abdc57c5b8b1f6c6b5562fefac23b64a8c5ad0cf8` |
+| `docs/decisions/0080-minimal-paper-starter-theme.md` | `ADR0080` | `4103f5fbcb0ea72f6785b203fb696f50d4cf5ec207b114022f96322ee977f7ac` |
+| `docs/handoff/paper-starter-verification.md` | `paper-starter-1` | `0bb8a03ecf1cff4e60a07359bdf067bd7fe14a73f8a0936bb5baa40a40391ae1` |
