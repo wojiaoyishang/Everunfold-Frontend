@@ -37,18 +37,18 @@
       "sha256": "7a2d7f38ccecaa925f7a2f24bd55efc3098e48aa737949db3463a7456313e638"
     },
     "content-admin-v1.schema.json": {
-      "schema_version": "1.12.0",
+      "schema_version": "1.13.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/content-admin-v1.schema.json",
-      "source_commit": "85b3bac052912aa25de7c7d473c21fdd56c8b9e1",
-      "sha256": "5b55a1df0cac299f50e340f181a124ec63b1ab73a3eaf9c75e41a7b202a90166"
+      "source_commit": "b6fbaf713b298cc6e05bc6b8dd1bdcba30c62077",
+      "sha256": "93e8d6b16e7de3ee100dfbae4dc7f24fef313251f45460dedb5c2a3a53dd48d2"
     },
     "pages-v1.schema.json": {
-      "schema_version": "1.5.0",
+      "schema_version": "1.6.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/pages-v1.schema.json",
-      "source_commit": "0e9ca683e94454f9d63eb9f2de2bbf94a543d083",
-      "sha256": "d47e3553ba7eeaf5cceda80798b1b6e30935c33837a4fb37bf67640ed40b2d8c"
+      "source_commit": "b6fbaf713b298cc6e05bc6b8dd1bdcba30c62077",
+      "sha256": "f4fd4ff45a418dde508ecbc9c12f8092af3f73e9c3ef1ef08997c952089a7bee"
     },
     "presentation-v0.2.schema.json": {
       "schema_version": "0.2.0-preview.1",
@@ -58,11 +58,11 @@
       "sha256": "3c490a93eb9baf76db6df3b3cb5438fb732db41d8191a797a3ce8de8f9e770f5"
     },
     "public-v0.1.schema.json": {
-      "schema_version": "0.8.0",
+      "schema_version": "0.9.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/public-v0.1.schema.json",
-      "source_commit": "c0d55691456080d3be9df4ca6cff05842009a967",
-      "sha256": "1f0e46d4fb41382af4977120a307a0e42f943059ac1e9c4603ebc4075243f085"
+      "source_commit": "b6fbaf713b298cc6e05bc6b8dd1bdcba30c62077",
+      "sha256": "793423d68094d4c2781d4d3bc118eef6132700232180ba3190ad88a089b8f5c7"
     },
     "reader-preview-v0.1.schema.json": {
       "schema_version": "0.1.0-preview.1",

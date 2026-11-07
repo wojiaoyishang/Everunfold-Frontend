@@ -51,6 +51,7 @@ const blank: PageValue = {
   css: "",
   javascript: "",
   javascript_enabled: false,
+  javascript_position: "body_end",
   enabled: false,
   allow_indexing: true,
   options: {},
@@ -476,6 +477,34 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                       <p className={styles.help}>
                         <UiText text="JavaScript 默认关闭，仅在独立页面沙箱内运行。" />
                       </p>
+                      <div className={`account-field ${styles.scriptPosition}`}>
+                        <span>
+                          <UiText text="脚本执行位置" />
+                        </span>
+                        <Select
+                          name="page-javascript-position"
+                          label="脚本执行位置"
+                          value={value.javascript_position ?? "body_end"}
+                          onValueChange={(position) => {
+                            if (position === "head" || position === "body_end")
+                              setValue({
+                                ...value,
+                                javascript_position: position,
+                              });
+                          }}
+                          options={[
+                            { value: "head", label: "正文加载前（Head 内）" },
+                            {
+                              value: "body_end",
+                              label: "正文加载后（Body 末尾）",
+                            },
+                          ]}
+                          programOptions
+                        />
+                        <small>
+                          <UiText text="加载前执行时，正文 DOM 尚未生成；直接操作页面元素请选择加载后。" />
+                        </small>
+                      </div>
                       {value.javascript_enabled && (
                         <AdminWarning text="JavaScript 已启用，脚本可以改变页面交互或触发跳转。请只使用可信代码。" />
                       )}

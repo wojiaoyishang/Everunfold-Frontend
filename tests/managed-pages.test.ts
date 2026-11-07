@@ -7,6 +7,7 @@ import {
   pageDocument,
   pageResizeScript,
   pageResizeHash,
+  pageRenderId,
 } from "../src/core/pages/document";
 import {
   pageManifest,
@@ -58,6 +59,39 @@ test("page documents isolate source and enforce script opt-in, including injecte
   assert.match(enabled, /script-src 'unsafe-inline'/);
   assert.ok(enabled.includes("<\\/script>"));
   assert.equal((enabled.match(/<script>/g) || []).length, 2);
+});
+
+test("page script placement preserves legacy ordering, script opt-in and preview identity", () => {
+  const value = {
+    html: '<p id="content">Body content</p>',
+    javascript: 'document.documentElement.dataset.stage="authored-script";',
+    javascript_enabled: true,
+  };
+  const legacy = pageDocument(value);
+  for (const position of ["head", "body_end"] as const) {
+    const source = { ...value, javascript_position: position };
+    const document = pageDocument(source);
+    const scriptAt = document.indexOf(value.javascript);
+    const bodyAt = document.indexOf("<body>");
+    const contentAt = document.indexOf(value.html);
+    assert.ok(scriptAt > document.indexOf("Content-Security-Policy"));
+    if (position === "head") {
+      assert.ok(scriptAt < document.indexOf("</head>"));
+      assert.ok(scriptAt < bodyAt);
+      assert.notEqual(
+        pageRenderId("frame", value),
+        pageRenderId("frame", source),
+      );
+    } else {
+      assert.ok(scriptAt > contentAt && scriptAt < document.indexOf("</body>"));
+      assert.equal(document, legacy);
+      assert.equal(pageRenderId("frame", value), pageRenderId("frame", source));
+    }
+    const disabled = pageDocument({ ...source, javascript_enabled: false });
+    assert.ok(!disabled.includes(value.javascript));
+    assert.match(disabled, /script-src 'sha256-/);
+    assert.match(disabled, /everunfold:page:ready/);
+  }
 });
 
 test("frontend page declarations are reproducibly exported and implementation versions are explicit", async () => {

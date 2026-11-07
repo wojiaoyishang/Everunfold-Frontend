@@ -14,22 +14,24 @@ export function PageFrame({
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(480);
   const frameId = useId();
-  const { html, css, javascript, javascript_enabled } = value;
+  const { html, css, javascript, javascript_enabled, javascript_position } =
+    value;
   const document = useMemo(() => {
     const token = pageRenderId(frameId, {
       html,
       css,
       javascript,
       javascript_enabled,
+      javascript_position,
     });
     return {
       token,
       source: pageDocument(
-        { html, css, javascript, javascript_enabled },
+        { html, css, javascript, javascript_enabled, javascript_position },
         token,
       ),
     };
-  }, [html, css, javascript, javascript_enabled, frameId]);
+  }, [html, css, javascript, javascript_enabled, javascript_position, frameId]);
   const [ready, setReady] = useState<{
     token: string;
     source: MessageEventSource | null;
