@@ -8,8 +8,11 @@ import {
   stat,
   cp,
   rm,
+  symlink,
 } from "node:fs/promises";
 import path from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { tmpdir } from "node:os";
 import { readInstalledPlugins } from "../src/server/plugins/packages";
 import { installRuntimePlugins } from "../src/core/plugins/runtime/store";
@@ -22,7 +25,7 @@ import { pluginRegistry } from "../src/core/plugins/registry";
 
 const declaration = (title = "Runtime test") =>
   `export default { id:"test.runtime",title:${JSON.stringify(title)},version:"1.0.0",setup({pages,components}){ components.register("test.runtime.control");pages.register({registration:{id:"test.runtime",version:"1.0.0",title:"Runtime test",path:"/runtime-test"},component:"test.runtime.control"});}};`;
-const control = `import {useState} from "react";import {Button} from "@everunfold/plugin-sdk/client";import styles from "./control.module.css";export default {"test.runtime.control":function Control(){const [value,setValue]=useState(0);return <Button className={styles.control} onClick={()=>setValue(value+1)}>{value}</Button>;}};`;
+const control = `import {useState} from "react";import {Button} from "@everunfold/plugin-sdk/client";import styles from "./control.module.css";import mark from "./mark.svg";export default {"test.runtime.control":function Control(){const [value,setValue]=useState(0);return <Button className={styles.control} onClick={()=>setValue(value+1)}><img alt="" src={mark}/>{value}</Button>;}};`;
 
 test("independent packages load without source, preserve last good build, and disable without deleting declarations", async () => {
   const { buildPlugin } = await import("../tools/plugins/build.mjs");
@@ -42,6 +45,47 @@ test("independent packages load without source, preserve last good build, and di
       path.join(source, "control.module.css"),
       ".control{color:var(--accent)}",
     );
+    await writeFile(
+      path.join(source, "mark.svg"),
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>',
+    );
+    await symlink(
+      path.resolve("node_modules"),
+      path.join(root, "node_modules"),
+      "junction",
+    );
+    await writeFile(
+      path.join(source, "pixel.png"),
+      Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    );
+    await writeFile(
+      path.join(source, "asset-types.tsx"),
+      'import image from "./pixel.png"; const url:string=image; export const view=<img alt="" src={url}/>;',
+    );
+    const typeConfig = path.join(root, "asset-types.json");
+    await writeFile(
+      typeConfig,
+      JSON.stringify({
+        extends: path.resolve("tsconfig.plugins.json"),
+        compilerOptions: {
+          tsBuildInfoFile: path.join(root, "types.tsbuildinfo"),
+        },
+        include: [
+          path.resolve("src/sdk/plugin-assets.d.ts"),
+          path.join(source, "asset-types.tsx"),
+        ],
+        exclude: [],
+      }),
+    );
+    await promisify(execFile)(process.execPath, [
+      path.resolve("node_modules/typescript/bin/tsc"),
+      "--noEmit",
+      "-p",
+      typeConfig,
+    ]);
     const first = await buildPlugin(root, "runtime", {
       output,
       development: true,
@@ -63,6 +107,7 @@ test("independent packages load without source, preserve last good build, and di
       "utf8",
     );
     assert.match(js, /everunfold\.plugin-sdk\.1/);
+    assert.match(js, /\/__plugins\/assets\/runtime\/asset\.[0-9a-f]{64}\.svg/);
     assert.match(js, /createSignatureFunctionForTransform/);
     assert.doesNotMatch(js, /node_modules\/react\/cjs/);
     assert.match(

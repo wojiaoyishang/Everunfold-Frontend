@@ -53,8 +53,12 @@ export async function verifyRuntimePlugins({ base, workspace, projectRoot }) {
       'export default {id:"verification.late",title:"Late plugin",version:"1.0.0",setup({components}){components.register("verification.late-control");}};',
     );
     await writeFile(
+      path.join(source, "mark.svg"),
+      '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>',
+    );
+    await writeFile(
       path.join(source, "components.tsx"),
-      `import {useState} from "react";import {Button} from "@everunfold/plugin-sdk/client";function Control(){const [count,setCount]=useState(0);return <Button data-late-plugin="true" onClick={()=>setCount(count+1)}>${label} {count}</Button>;}export default {"verification.late-control":Control};export function activate({onDispose}){window.__lateActivations=(window.__lateActivations??0)+1;onDispose(()=>window.__lateDisposals=(window.__lateDisposals??0)+1);}`,
+      `import mark from "./mark.svg";import {useState} from "react";import {Button} from "@everunfold/plugin-sdk/client";function Control(){const [count,setCount]=useState(0);return <Button data-late-plugin="true" onClick={()=>setCount(count+1)}><img src={mark} alt=""/>${label} {count}</Button>;}export default {"verification.late-control":Control};export function activate({onDispose}){window.__lateActivations=(window.__lateActivations??0)+1;onDispose(()=>window.__lateDisposals=(window.__lateDisposals??0)+1);}`,
     );
     const script = `const {buildPlugin}=await import("./tools/plugins/build.mjs");await buildPlugin(${JSON.stringify(author)},"late",{output:${JSON.stringify(path.join(workspace, "plugins"))}});`;
     await execute(
@@ -71,6 +75,15 @@ export async function verifyRuntimePlugins({ base, workspace, projectRoot }) {
     await page.locator('[data-extension-plugin="true"]').waitFor();
     await compile("Late");
     await page.getByRole("button", { name: "Late 0", exact: true }).waitFor();
+    const image = page.locator("[data-late-plugin] img");
+    await page.waitForFunction(() => {
+      const image = document.querySelector("[data-late-plugin] img");
+      return image?.complete && image.naturalWidth === 1;
+    });
+    assert.match(
+      await image.getAttribute("src"),
+      /^\/__plugins\/assets\/late\/asset\.[0-9a-f]{64}\.svg$/,
+    );
     await page.getByRole("button", { name: "Late 0", exact: true }).click();
     await page.getByRole("button", { name: "Late 1", exact: true }).click();
     const installed = await (await fetch(base + "/__plugins/catalog")).json();

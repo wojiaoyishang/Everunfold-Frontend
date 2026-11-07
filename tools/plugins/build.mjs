@@ -217,11 +217,17 @@ export async function buildPlugin(
       ],
       loader: {
         ".png": "file",
+        ".jpg": "file",
+        ".jpeg": "file",
+        ".gif": "file",
+        ".webm": "file",
+        ".mp4": "file",
         ".webp": "file",
         ".svg": "file",
         ".woff2": "file",
       },
       assetNames: "asset.[hash]",
+      publicPath: `/__plugins/assets/${directory}/`,
     });
     // Give every public asset a full content hash; references survive a package hot swap.
     const renames = new Map();

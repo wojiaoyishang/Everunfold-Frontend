@@ -2,8 +2,13 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "incremental": true,
-    "tsBuildInfoFile": "./var/cache/plugins-types.tsbuildinfo"
+    "tsBuildInfoFile": "./var/cache/plugins-types.tsbuildinfo",
+    "types": ["node", "react", "react-dom", "next/types/global"]
   },
-  "include": ["next-env.d.ts", "src/plugins/**/*.ts", "src/plugins/**/*.tsx"],
+  "include": [
+    "src/sdk/plugin-assets.d.ts",
+    "src/plugins/**/*.ts",
+    "src/plugins/**/*.tsx"
+  ],
   "exclude": ["node_modules", "var", "plugins"]
 }

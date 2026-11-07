@@ -14,15 +14,22 @@ export async function GET(
     return new Response(null, { status: 404 });
   const value = await readPluginAsset(directory, filename);
   if (!value) return new Response(null, { status: 404 });
-  const mime = filename.endsWith(".mjs")
-    ? "text/javascript; charset=utf-8"
-    : filename.endsWith(".css")
-      ? "text/css; charset=utf-8"
-      : filename.endsWith(".svg")
-        ? "image/svg+xml"
-        : filename.endsWith(".woff2")
-          ? "font/woff2"
-          : "application/octet-stream";
+  const mime =
+    (
+      {
+        mjs: "text/javascript; charset=utf-8",
+        css: "text/css; charset=utf-8",
+        svg: "image/svg+xml",
+        woff2: "font/woff2",
+        png: "image/png",
+        jpg: "image/jpeg",
+        jpeg: "image/jpeg",
+        webp: "image/webp",
+        gif: "image/gif",
+        webm: "video/webm",
+        mp4: "video/mp4",
+      } as Record<string, string>
+    )[filename.split(".").at(-1)!] ?? "application/octet-stream";
   return new Response(Buffer.from(value), {
     headers: {
       "Content-Type": mime,

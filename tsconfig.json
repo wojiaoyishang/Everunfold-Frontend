@@ -33,5 +33,11 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "var", "plugins", "src/plugins"]
+  "exclude": [
+    "node_modules",
+    "var",
+    "plugins",
+    "src/plugins",
+    "src/sdk/plugin-assets.d.ts"
+  ]
 }
