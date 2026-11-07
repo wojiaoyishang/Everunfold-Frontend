@@ -58,7 +58,7 @@ export async function verifyRuntimePlugins({ base, workspace, projectRoot }) {
     );
     await writeFile(
       path.join(source, "components.tsx"),
-      `import mark from "./mark.svg";import {useState} from "react";import {Button} from "@everunfold/plugin-sdk/client";function Control(){const [count,setCount]=useState(0);return <Button data-late-plugin="true" onClick={()=>setCount(count+1)}><img src={mark} alt=""/>${label} {count}</Button>;}export default {"verification.late-control":Control};export function activate({onDispose}){window.__lateActivations=(window.__lateActivations??0)+1;onDispose(()=>window.__lateDisposals=(window.__lateDisposals??0)+1);}`,
+      `import mark from "./mark.svg";import {useState} from "react";import {Button} from "@everunfold/plugin-sdk/client";function Control(){const [count,setCount]=useState(0);${label === "Broken" ? 'throw new Error("Expected isolated plugin render failure");' : ""}return <Button data-late-plugin="true" onClick={()=>setCount(count+1)}><img src={mark} alt=""/>${label} {count}</Button>;}export default {"verification.late-control":Control};export function activate({onDispose}){window.__lateActivations=(window.__lateActivations??0)+1;onDispose(()=>window.__lateDisposals=(window.__lateDisposals??0)+1);}`,
     );
     const script = `const {buildPlugin}=await import("./tools/plugins/build.mjs");await buildPlugin(${JSON.stringify(author)},"late",{output:${JSON.stringify(path.join(workspace, "plugins"))}});`;
     await execute(
@@ -114,6 +114,14 @@ export async function verifyRuntimePlugins({ base, workspace, projectRoot }) {
       200,
     );
     assert.ok(await page.evaluate(() => window.__lateDisposals >= 1));
+    await compile("Broken");
+    await page
+      .getByText("verification.late-control", { exact: true })
+      .waitFor();
+    await compile("Recovered");
+    await page
+      .getByRole("button", { name: "Recovered 0", exact: true })
+      .waitFor();
     const manifest = path.join(workspace, "plugins/late/manifest.json"),
       bytes = await readFile(manifest);
     await writeFile(manifest, "{partial-upload");
@@ -122,18 +130,18 @@ export async function verifyRuntimePlugins({ base, workspace, projectRoot }) {
     assert.ok(retained.errors.length);
     assert.equal(
       await page
-        .getByRole("button", { name: "Updated late 0", exact: true })
+        .getByRole("button", { name: "Recovered 0", exact: true })
         .count(),
       1,
     );
     await writeFile(manifest, bytes);
     await rm(path.join(workspace, "plugins/late"), { recursive: true });
     await page
-      .getByRole("button", { name: "Updated late 0", exact: true })
+      .getByRole("button", { name: "Recovered 0", exact: true })
       .waitFor({ state: "detached" });
     assert.deepEqual(errors, []);
     console.log(
-      "Production runtime plugins passed: no host plugin source, post-build install, shared React hooks, hot replacement, editor guard, retained assets, lifecycle disposal and partial-upload rollback.",
+      "Production runtime plugins passed: no host plugin source, post-build install, shared React hooks, hot replacement, editor guard, retained assets, lifecycle disposal, render-error recovery and partial-upload rollback.",
     );
   } finally {
     await browser.close();

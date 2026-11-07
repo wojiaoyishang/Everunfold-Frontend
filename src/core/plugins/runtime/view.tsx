@@ -5,13 +5,23 @@ import { ExtensionPlaceholder } from "@/themes/argon/components/extension-placeh
 class RuntimeBoundary extends Component<
   {
     name: string;
+    generation: string;
     children: ReactNode;
     inherited?: ReactNode;
     onReady?: unknown;
   },
-  { failed: boolean }
+  { failed: boolean; generation: string }
 > {
-  state = { failed: false };
+  state = { failed: false, generation: "" };
+  static getDerivedStateFromProps(
+    props: { generation: string },
+    state: { generation: string },
+  ) {
+    // Retry only on a new complete build, keeping compatible component identity during normal updates.
+    return props.generation !== state.generation
+      ? { generation: props.generation, failed: false }
+      : null;
+  }
   static getDerivedStateFromError() {
     return { failed: true };
   }
@@ -48,6 +58,7 @@ export function RuntimeComponent({
     <RuntimeBoundary
       key={`${owner?.id ?? "missing"}:${name}`}
       name={name}
+      generation={owner?.build ?? "missing"}
       inherited={props.children as ReactNode}
       onReady={props.onReady}
     >
