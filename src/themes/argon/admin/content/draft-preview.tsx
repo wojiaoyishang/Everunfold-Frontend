@@ -1,3 +1,4 @@
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { UiText } from "@/core/i18n/provider";
 import { useMemo } from "react";
 import { renderContent } from "@/core/rendering/content";
@@ -14,21 +15,22 @@ export function DraftPreview({
   media?: Record<string, MediaURL>;
   shortcodes?: readonly PublicShortcode[];
 }) {
-  const rendered = useMemo(
-    () =>
-      renderContent(
-        {
-          id: "draft-preview",
-          content: fields.body.map((block) => ({
-            ...block,
-            type: block.type ?? "markdown",
-          })),
-          media_urls: media,
-        },
-        shortcodes,
-      ),
-    [fields.body, media, shortcodes],
-  );
+  const runtime = usePluginRuntime();
+  const rendered = useMemo(() => {
+    // The render registry is replaced atomically when a runtime package changes.
+    void runtime.catalog?.revision;
+    return renderContent(
+      {
+        id: "draft-preview",
+        content: fields.body.map((block) => ({
+          ...block,
+          type: block.type ?? "markdown",
+        })),
+        media_urls: media,
+      },
+      shortcodes,
+    );
+  }, [fields.body, media, shortcodes, runtime.catalog?.revision]);
   return (
     <article className="admin-draft-preview">
       {fields.title && <h1>{fields.title}</h1>}

@@ -18,7 +18,7 @@ export default async function PagePreview({
   if (!isManagedPagePreviewPath(`/admin/pages/${id}/preview`)) notFound();
   const snapshot = await readPublicSnapshot().catch(() => null);
   return (
-    <PublicTheme theme={readActiveTheme()}>
+    <PublicTheme theme={await readActiveTheme()}>
       <ManagedPagePreview key={id} id={id} site={snapshot?.site ?? null} />
     </PublicTheme>
   );

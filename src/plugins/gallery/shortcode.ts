@@ -1,4 +1,4 @@
-import type { PluginShortcode } from "@/core/plugins/types";
+import type { PluginShortcode } from "@everunfold/plugin-sdk";
 import { galleryStyles, galleryScope } from "./styles";
 
 export const gallery: PluginShortcode = {

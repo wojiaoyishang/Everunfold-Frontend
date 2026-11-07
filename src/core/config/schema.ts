@@ -9,6 +9,7 @@ export class ConfigurationError extends Error {
 
 export interface FrontendConfiguration {
   theme: { active: string };
+  plugins: { directory: string };
   publicSiteUrl: string | undefined;
   backendBaseUrl: string;
   frontendNodeId: string;
@@ -139,8 +140,15 @@ export function parseConfiguration(
       "cache",
       "settings",
       "theme",
+      "plugins",
     ],
     "根配置",
+  );
+  const plugins = object(root.plugins ?? {}, "plugins");
+  knownKeys(plugins, ["directory"], "plugins");
+  const pluginDirectory = string(
+    environment.PLUGINS_DIRECTORY ?? plugins.directory ?? "./plugins",
+    "plugins.directory",
   );
   const theme = object(root.theme ?? {}, "theme");
   knownKeys(theme, ["active"], "theme");
@@ -222,6 +230,7 @@ export function parseConfiguration(
     throw new ConfigurationError("PUBLIC_SITE_URL 必须为前台公开站点根地址");
   return {
     theme: { active: activeTheme },
+    plugins: { directory: pluginDirectory },
     settings: {
       directory: string(
         settings.directory ?? "./var/settings",

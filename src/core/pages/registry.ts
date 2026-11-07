@@ -3,11 +3,19 @@ import { pluginRegistry } from "@/core/plugins/registry";
 import { collectCustomPages } from "./registration";
 
 /** Component identities are deployed code; database data cannot import a module or URL. */
-const registered = collectCustomPages(pluginRegistry.pages);
-export const pageManifest: PageManifest = registered.manifest;
+const registered = () => collectCustomPages(pluginRegistry.pages);
+export const pageManifest: PageManifest = {
+  protocol: "pages-1",
+  get pages() {
+    return registered().manifest.pages;
+  },
+};
 /** A trusted implementation explicitly opts into shared options with locale-aware program UI. */
-export const localizedPageImplementations: ReadonlySet<string> =
-  registered.localized;
+export const localizedPageImplementations = {
+  has(id: string) {
+    return registered().localized.has(id);
+  },
+};
 export function hasPageImplementation(
   page: Pick<
     PublicManagedPage,

@@ -48,8 +48,10 @@ try {
   });
   for (const name of [
     "src",
-    "cache/contracts",
-    "cache/build",
+    "tools",
+    "tsconfig.plugins.json",
+    "var/cache/contracts",
+    "var/cache/build",
     "package.json",
     "package-lock.json",
     "tsconfig.json",
@@ -92,6 +94,26 @@ try {
     recursive: true,
     dereference: true,
   });
+  // Compile packages independently, then remove all plugin source before building the host.
+  for (const tool of [
+    "tools/plugins/build.mjs",
+    "tools/plugins/theme-catalog.mts",
+  ]) {
+    await new Promise((resolve, reject) => {
+      const child = spawn(process.execPath, ["--import", "tsx", tool], {
+        cwd: workspace,
+        stdio: "inherit",
+        windowsHide: true,
+      });
+      child.once("error", reject);
+      child.once("exit", (code) =>
+        code === 0
+          ? resolve()
+          : reject(new Error("Independent extension build failed")),
+      );
+    });
+  }
+  await rm(path.join(workspace, "src/plugins"), { recursive: true });
   const code = await new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath,
@@ -108,6 +130,15 @@ try {
   });
   process.exitCode = Number(code);
   if (code === 0 && process.argv.includes("--admin")) {
+    // The production coordinator must not import Babel or the independent compiler.
+    await rm(path.join(workspace, "node_modules/@babel/core"), {
+      recursive: true,
+      force: true,
+    });
+    await rm(path.join(workspace, "node_modules/react-refresh"), {
+      recursive: true,
+      force: true,
+    });
     const { verifyAdminRuntime } = await import("./verify-admin-runtime.mjs");
     await verifyAdminRuntime({ workspace, projectRoot });
   }

@@ -1,3 +1,4 @@
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { useMemo } from "react";
 import type { PublicShortcode } from "@/core/contracts/settings";
 import type { MediaURL } from "@/core/contracts/content-admin";
@@ -24,25 +25,34 @@ export function ShortcodePreview({
   media?: Record<string, MediaURL>;
   definitions?: readonly PublicShortcode[];
 }) {
-  const rendered = useMemo(
-    () =>
-      renderContent(
-        {
-          id: "shortcode-preview",
-          content: [
-            {
-              id: "sample",
-              type: format,
-              content: shortcodeCall(definition, values, body),
-            },
-          ],
-          media_urls: media,
-        },
-        previewShortcodeDefinitions(definition, definitions),
-        { shortcodePreview: true },
-      ),
-    [definition, values, body, format, media, definitions],
-  );
+  const runtime = usePluginRuntime();
+  const rendered = useMemo(() => {
+    // The render registry is replaced atomically when a runtime package changes.
+    void runtime.catalog?.revision;
+    return renderContent(
+      {
+        id: "shortcode-preview",
+        content: [
+          {
+            id: "sample",
+            type: format,
+            content: shortcodeCall(definition, values, body),
+          },
+        ],
+        media_urls: media,
+      },
+      previewShortcodeDefinitions(definition, definitions),
+      { shortcodePreview: true },
+    );
+  }, [
+    definition,
+    values,
+    body,
+    format,
+    media,
+    definitions,
+    runtime.catalog?.revision,
+  ]);
   return (
     <div className={styles.preview} data-compact={compact}>
       <ContentMarkup

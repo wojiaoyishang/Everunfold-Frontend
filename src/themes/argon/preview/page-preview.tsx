@@ -1,4 +1,5 @@
 "use client";
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Site } from "@/core/content/types";
@@ -23,6 +24,7 @@ export function ManagedPagePreview({
   id: string;
   site: Site | null;
 }) {
+  usePluginRuntime();
   const { baseUrl } = useAdminRequest();
   const router = useRouter();
   const [page, setPage] = useState<PublicManagedPage | null>(null);

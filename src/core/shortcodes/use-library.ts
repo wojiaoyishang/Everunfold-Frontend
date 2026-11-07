@@ -15,6 +15,7 @@ import { RequestError } from "@/core/http/request";
 import { frontendShortcodes, type CatalogItem } from "./registry";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
 
 export function shortcodeFailure(error: unknown) {
   if (error instanceof RequestError) {
@@ -31,6 +32,7 @@ export function shortcodeFailure(error: unknown) {
 }
 
 export function useShortcodeLibrary() {
+  const runtime = usePluginRuntime();
   const { baseUrl } = useAdminRequest();
   const canReadSettings = can(useAdminAccount(), "settings:read");
   const [items, setItems] = useState<CatalogItem[]>([]);
@@ -49,7 +51,7 @@ export function useShortcodeLibrary() {
         canReadSettings ? readSettings(baseUrl) : Promise.resolve(null),
       ]);
       if (mounted.current && request.current === id) {
-        setItems([...catalog.data.items, ...frontendShortcodes]);
+        setItems(catalog.data.items);
         setSettings(state?.data ?? null);
       }
     } catch (error) {
@@ -93,7 +95,13 @@ export function useShortcodeLibrary() {
       clearInterval(timer);
     };
   }, [baseUrl, pending, settings?.revision]);
-  return { items, settings, loading, error, reload };
+  return {
+    items: [...items, ...(runtime.loading ? [] : frontendShortcodes())],
+    settings,
+    loading,
+    error,
+    reload,
+  };
 }
 
 export function useShortcodeCompilation(

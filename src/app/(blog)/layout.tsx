@@ -40,7 +40,7 @@ export default async function BlogLayout({
   const { site } = await readPublicSnapshot();
   const { backendBaseUrl } = readConfiguration();
   return (
-    <PublicTheme theme={readActiveTheme()}>
+    <PublicTheme theme={await readActiveTheme()}>
       <BlogShell site={site} backendBaseUrl={backendBaseUrl}>
         {children}
       </BlogShell>

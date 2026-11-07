@@ -1,4 +1,5 @@
 "use client";
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
@@ -55,6 +56,7 @@ const blank: PageValue = {
   options: {},
 };
 export function ManagedPageEditor({ id }: { id?: string }) {
+  usePluginRuntime();
   const actor = useAdminAccount(),
     { baseUrl, csrfToken } = useAdminRequest(),
     router = useRouter();

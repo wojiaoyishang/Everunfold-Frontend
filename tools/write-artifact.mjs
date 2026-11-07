@@ -6,7 +6,9 @@ import { fileURLToPath } from "node:url";
 /** Preserve unchanged mtimes and publish complete files; checks must not repeatedly reload editors. */
 export async function writeArtifact(target, content) {
   const file = target instanceof URL ? fileURLToPath(target) : target;
-  if ((await readFile(file, "utf8").catch(() => null)) === content) return;
+  const previous = await readFile(file).catch(() => null);
+  const bytes = Buffer.from(content);
+  if (previous?.equals(bytes)) return;
   await mkdir(path.dirname(file), { recursive: true });
   const staging = path.join(
     path.dirname(file),

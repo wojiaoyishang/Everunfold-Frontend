@@ -49,7 +49,12 @@ receiver_host = "127.0.0.1"
 receiver_port = 3001
 # source_epoch = "实际后端 UUID"
 
-# 公开阅读与授权前台预览的主题；后台不受影响。已构建主题切换后刷新生效。
+# 实例默认主题；后台已保存的 extensions.theme 优先。选择“实例默认”后使用此项。
 [theme]
 active = "argon"
 # 可选择随项目提供的paper子主题；FRONTEND_THEME环境变量可覆盖。
+
+# 独立编译的可信插件产物。npm run dev 自动改用 var/cache/plugins。
+[plugins]
+directory = "./plugins"
+# PLUGINS_DIRECTORY 可覆盖；不配置源码目录或远程URL。

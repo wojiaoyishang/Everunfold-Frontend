@@ -240,7 +240,9 @@ await store.apply({
       accent: "#397566",
     },
     shortcodes: (() => {
-      const source = builtinShortcodes.find((item) => item.name === "notice")!;
+      const source = builtinShortcodes().find(
+        (item) => item.name === "notice",
+      )!;
       const scope = "ef-sc-00000000000000000000000000000002";
       return [
         {

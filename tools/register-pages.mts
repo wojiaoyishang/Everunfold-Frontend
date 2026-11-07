@@ -3,7 +3,7 @@ import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import path from "node:path";
-import { readExtensionCatalog } from "./extensions/catalog";
+import { readInventory } from "./plugins/inventory.mts";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const { values } = parseArgs({
@@ -16,7 +16,7 @@ const { values } = parseArgs({
 });
 if (!values["node-id"])
   throw new Error(
-    "Usage: npm run pages:register -- --node-id NODE [--backend PATH] [--config PATH] [--python PATH]",
+    "Usage: npm run extensions:register -- --node-id NODE [--backend PATH] [--config PATH] [--python PATH]",
   );
 const backend = path.resolve(root, values.backend!);
 const python =
@@ -26,19 +26,17 @@ const python =
     ".venv",
     process.platform === "win32" ? "Scripts/python.exe" : "bin/python",
   );
-const { manifest } = await readExtensionCatalog(root);
+const manifest = await readInventory(root, process.env.PLUGINS_DIRECTORY);
 await new Promise<void>((resolve, reject) => {
   const child = spawn(
     python,
     [
       "-m",
-      "tools.register_frontend_pages",
+      "tools.register_frontend_extensions",
       "--config",
       values.config!,
       "--node-id",
       values["node-id"]!,
-      "--manifest",
-      "-",
     ],
     { cwd: backend, stdio: ["pipe", "inherit", "inherit"], windowsHide: true },
   );

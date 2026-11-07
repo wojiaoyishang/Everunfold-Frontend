@@ -1,4 +1,5 @@
 /** Actual production HTTP checks in the disposable build; no user cache/config/server is touched. */
+import { verifyRuntimePlugins } from "./verify-plugin-runtime.mjs";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
@@ -53,10 +54,10 @@ directory = "./var/absent-admin-verification-cache"
     child = spawn(
       process.execPath,
       [
-        path.join(workspace, "node_modules/next/dist/bin/next"),
+        "--import",
+        "tsx",
+        "tools/plugins/run.mts",
         "start",
-        "--hostname",
-        "127.0.0.1",
         "--port",
         String(port),
       ],
@@ -135,6 +136,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/shortcodes",
       "/admin/settings",
       "/admin/settings/theme",
+      "/admin/settings/plugins",
       "/admin/settings/system",
     ]) {
       const response = await fetch(base + route, {
@@ -213,6 +215,7 @@ directory = "./var/absent-admin-verification-cache"
     assert.ok(body.includes("离线公告标题") && body.includes("离线公告正文"));
     try {
       await verifyExtensionFixture(base);
+      await verifyRuntimePlugins({ base, workspace, projectRoot });
       await verifyThemeSwitch(base, configFile);
     } catch (error) {
       throw new Error("Extension runtime failed: " + logs, { cause: error });

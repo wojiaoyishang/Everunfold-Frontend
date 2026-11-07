@@ -7,7 +7,6 @@ export function nodeCatalogSource(root, commonjs = false) {
     outputs = [];
   let sequence = 0;
   for (const [kind, entry, exported] of [
-    ["plugins", "plugin.ts", "pluginModules"],
     ["themes", "theme.ts", "themeModules"],
   ]) {
     const pairs = [];

@@ -10,15 +10,14 @@ import {
   type ComponentType,
   type ReactNode,
 } from "react";
-import { pluginModules, themeModules } from "./discovered";
-import { pluginRegistry } from "@/core/plugins/registry";
+import { themeModules } from "./discovered";
+import { RuntimeComponent } from "@/core/plugins/runtime/view";
 import { themeRegistry as themes } from "./themes";
 import { ExtensionPlaceholder } from "@/themes/argon/components/extension-placeholder";
 
 type UIComponent = ComponentType<Record<string, unknown>>;
 type ComponentModule = { default: Record<string, UIComponent> };
 const modules = {
-  ...import.meta.glob<ComponentModule>("/src/plugins/*/components.tsx"),
   ...import.meta.glob<ComponentModule>("/src/themes/*/components.tsx"),
 };
 const ThemeContext = createContext("argon");
@@ -87,13 +86,7 @@ function componentPath(name: string, theme: string) {
         .find(([, value]) => value.id === selected)?.[0]
         .replace(/theme\.ts$/, "components.tsx"),
     };
-  const owner = pluginRegistry.componentOwner(name);
-  return {
-    owner: null,
-    path: Object.entries(pluginModules)
-      .find(([, value]) => value.id === owner)?.[0]
-      .replace(/plugin\.ts$/, "components.tsx"),
-  };
+  return { owner: null, path: undefined };
 }
 
 function MissingAdapter(props: Record<string, unknown>) {
@@ -151,7 +144,6 @@ const names = new Set([
       slot === false ? [] : slot,
     ),
   ]),
-  ...pluginRegistry.componentNames,
 ]);
 for (const theme of themes.all)
   for (const name of names)
@@ -171,6 +163,8 @@ export function renderThemeComponent(
   name: string,
   props: Record<string, unknown>,
 ): ReactNode {
+  const owned = themes.owner(theme, name);
+  if (!owned) return <RuntimeComponent name={name} {...props} />;
   const component = cache.get(`${theme}:${name}`);
   if (!component)
     return (

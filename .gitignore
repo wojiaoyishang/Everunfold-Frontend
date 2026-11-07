@@ -40,5 +40,5 @@ public/uploads/wordpress/
 .DS_Store
 Thumbs.db
 
-# Reproducible local contract/build artifacts; no runtime state is moved here
-/cache/
+# Installed plugin packages and all derived artifacts are local.
+/plugins/

@@ -1,6 +1,6 @@
 "use client";
-import type { FormFieldProps } from "@/core/forms/renderer";
-import { ExtensionComponent } from "@/core/extensions/components";
+import type { FormFieldProps } from "@everunfold/plugin-sdk";
+import { ExtensionComponent } from "@everunfold/plugin-sdk/client";
 import styles from "./styles.module.css";
 
 /** A plugin-owned control composed with the current theme's textarea implementation. */

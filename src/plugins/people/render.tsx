@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
-import type { CustomPageProps } from "@/core/pages/registered-view";
-import { UiText, useT } from "@/core/i18n/provider";
-import { Button, TextField } from "@/themes/argon/components/ui/primitives";
-import { Avatar } from "@/themes/argon/components/ui/avatar";
+import type { CustomPageProps } from "@everunfold/plugin-sdk";
+import { UiText, useT } from "@everunfold/plugin-sdk/client";
+import { Button, TextField } from "@everunfold/plugin-sdk/client";
+import { Avatar } from "@everunfold/plugin-sdk/client";
 import { PeopleMessage } from "./message";
-import { Icon } from "@/themes/argon/components/icon";
+import { Icon } from "@everunfold/plugin-sdk/client";
 import styles from "./styles.module.css";
 
 export default function PeoplePage({ page }: CustomPageProps) {

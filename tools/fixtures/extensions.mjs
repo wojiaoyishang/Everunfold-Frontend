@@ -29,8 +29,8 @@ const components={
 import {ExtensionComponent} from "@/core/extensions/components";
 import {PublicTheme,ThemeTemplate,ThemeSlot} from "@/core/themes/presentation";
 import {readPublicSnapshot} from "@/core/content/snapshot";
-export default async function Page(){const {site}=await readPublicSnapshot();const page={id:"fixture-instance",source:"registered" as const,implementation_id:"core.people",title:"Fixture",path:"/fixture",description:"",enabled:true as const,revision:1};return <PublicTheme theme="verification">
-<ExtensionComponent name="verification.plugin-control"/><ExtensionComponent name="verification.theme-control"/><ExtensionComponent name="verification.unregistered"/>
+export default async function Page(){const {site}=await readPublicSnapshot();const page={id:"fixture-instance",source:"registered" as const,implementation_id:"core.people",title:"Fixture",path:"/fixture",description:"",enabled:true as const,revision:1};return <PublicTheme theme="verification" followActive={false}>
+<ExtensionComponent name="verification.plugin-control"/><ExtensionComponent name="verification.late-control"/><ExtensionComponent name="verification.theme-control"/><ExtensionComponent name="verification.unregistered"/>
 <ExtensionComponent name="public.hero" site={site}/>
 <ThemeTemplate name="home" context={{site}}><p data-parent-view="true">Parent view</p></ThemeTemplate>
 <ThemeTemplate name="page" context={{page}}><p data-parent-page="true">Parent page</p></ThemeTemplate>
@@ -50,7 +50,6 @@ export async function verifyExtensionFixture(base) {
   assert.equal(response.status, 200);
   const html = await response.text();
   for (const marker of [
-    "data-extension-plugin",
     "data-extension-theme",
     "data-grandchild-hero",
     "data-child-template",
@@ -62,6 +61,7 @@ export async function verifyExtensionFixture(base) {
     "data-overridden-inherited-hook",
   ])
     assert.match(html, new RegExp(`${marker}="true"`));
+  assert.match(html, /verification.plugin-control/);
   assert.match(html, /data-paper-hero="true"/);
   assert.match(html, /data-paper-page="true"/);
   assert.match(html, /data-theme-chain="verification paper argon"/);

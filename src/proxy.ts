@@ -104,6 +104,6 @@ export async function proxy(request: NextRequest) {
 }
 export const config = {
   matcher: [
-    "/((?!_next/|reference/|content-features/|media/|uploads/|health/|favicon.ico|robots.txt|sitemap.xml).*)",
+    "/((?!_next/|__plugins/|reference/|content-features/|media/|uploads/|health/|favicon.ico|robots.txt|sitemap.xml).*)",
   ],
 };

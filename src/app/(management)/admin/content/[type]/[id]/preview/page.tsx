@@ -26,7 +26,7 @@ export default async function PreviewPage({
   // Only public theme data crosses SSR. Draft content is fetched after the workspace confirms identity.
   const publicData = await readPublicSnapshot().catch(() => null);
   return (
-    <PublicTheme theme={readActiveTheme()}>
+    <PublicTheme theme={await readActiveTheme()}>
       <ContentPreview
         type={type}
         id={id}

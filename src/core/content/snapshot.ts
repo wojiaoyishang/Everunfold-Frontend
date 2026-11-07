@@ -1,4 +1,5 @@
 import "server-only";
+import { readRuntimeCatalog } from "@/server/plugins/current";
 
 import fs from "node:fs/promises";
 import path from "node:path";
@@ -20,6 +21,12 @@ export class SnapshotUnavailable extends Error {
 
 export const readPublicSnapshot = cache(async (): Promise<PublicSnapshot> => {
   try {
+    const catalog = await readRuntimeCatalog();
+    const disabledPages = new Set(
+      catalog.plugins
+        .filter((plugin) => catalog.disabled.includes(plugin.id))
+        .flatMap((plugin) => plugin.pages.map((page) => page.registration.id)),
+    );
     const configuration = readConfiguration();
     const received = await new FileContentStore(
       configuration.cache.directory,
@@ -42,6 +49,11 @@ export const readPublicSnapshot = cache(async (): Promise<PublicSnapshot> => {
       const value = applied.publicSettings;
       return {
         ...snapshot,
+        pages: snapshot.pages?.filter(
+          (page) =>
+            !page.implementation_id ||
+            !disabledPages.has(page.implementation_id),
+        ),
         site: {
           ...snapshot.site,
           ...(value

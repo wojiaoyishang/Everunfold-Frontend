@@ -1,8 +1,16 @@
-import { pluginModules } from "@/core/extensions/discovered";
-import builtins from "@/core/contracts/shortcode-builtins";
-import { createPluginRegistry } from "./create-registry";
+import { runtimeStore, type PluginRegistry } from "./runtime/store";
 
-export const pluginRegistry = createPluginRegistry(
-  Object.values(pluginModules),
-  builtins.map((item) => item.compiled),
+/** Always resolve against the current complete registry; no plugin source is bundled by the host. */
+export const pluginRegistry: PluginRegistry = new Proxy({} as PluginRegistry, {
+  get(_target, property) {
+    return Reflect.get(runtimeStore().active, property);
+  },
+});
+export const allPluginRegistry: PluginRegistry = new Proxy(
+  {} as PluginRegistry,
+  {
+    get(_target, property) {
+      return Reflect.get(runtimeStore().all, property);
+    },
+  },
 );

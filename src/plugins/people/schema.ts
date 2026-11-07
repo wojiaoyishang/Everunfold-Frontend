@@ -1,4 +1,4 @@
-import type { SettingsModel } from "@/core/forms/schema";
+import type { SettingsModel } from "@everunfold/plugin-sdk";
 
 export const peopleSettings: SettingsModel = {
   fields: [

@@ -17,6 +17,7 @@ import type { ThemePreferences } from "@/core/contracts/settings";
 import { useFontLibrary } from "@/core/media/font-library";
 import { FontField } from "../fonts/font-field";
 import { CodeSettingsSection } from "./code-settings";
+import { InstalledThemeSection } from "./installed-theme";
 const palette = ["#673bb7", "#3865b9", "#397566", "#ad466f", "#a26032"];
 export function ThemeSettingsPage() {
   const fonts = useFontLibrary();
@@ -33,6 +34,7 @@ export function ThemeSettingsPage() {
     >
       {theme && (
         <>
+          <InstalledThemeSection />
           <SettingsSection
             id="settings-appearance"
             title="色彩与外观"

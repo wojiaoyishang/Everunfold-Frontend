@@ -1,11 +1,7 @@
 import "server-only";
 import { cache } from "react";
-import { readConfiguration } from "@/core/config/server";
-import { themeRegistry } from "@/core/extensions/themes";
+import { readRuntimeCatalog } from "@/server/plugins/current";
 
-/** Request-local identity, shared by the public shell and authorized preview entries. */
-export const readActiveTheme = cache(() => {
-  const id = readConfiguration().theme.active;
-  themeRegistry.chain(id);
-  return id;
-});
+export const readActiveTheme = cache(
+  async () => (await readRuntimeCatalog()).theme,
+);

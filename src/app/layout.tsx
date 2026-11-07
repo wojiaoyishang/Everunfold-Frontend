@@ -1,3 +1,6 @@
+import { PluginRuntimeProvider } from "@/core/plugins/runtime/provider";
+import { readRuntimeCatalog } from "@/server/plugins/current";
+import type { RuntimeCatalog } from "@/core/plugins/runtime/types";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { headers } from "next/headers";
@@ -23,6 +26,19 @@ export default async function RootLayout({
   const locale = localeOf(request.get("x-everunfold-locale"));
   const privateUI = request.get("x-everunfold-management") === "true";
   const uiLocale = messageLocale(request.get("x-everunfold-ui-locale"));
+  // Keep the settings repair surface reachable if the applied local revision is corrupt.
+  const runtime = await readRuntimeCatalog().catch((error): RuntimeCatalog => {
+    if (!privateUI) throw error;
+    return {
+      protocol: "plugin-catalog-1",
+      revision: "repair",
+      theme: "argon",
+      disabled: [],
+      plugins: [],
+      errors: [],
+      development: process.env.NODE_ENV !== "production",
+    };
+  });
   const catalog = privateUI
     ? undefined
     : normalizeCatalog(
@@ -47,7 +63,9 @@ export default async function RootLayout({
           catalog={catalog}
           privateUI={privateUI}
         >
-          <ToastProvider>{children}</ToastProvider>
+          <PluginRuntimeProvider initial={runtime}>
+            <ToastProvider>{children}</ToastProvider>
+          </PluginRuntimeProvider>
         </LocaleProvider>
       </body>
     </html>

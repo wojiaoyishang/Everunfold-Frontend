@@ -52,7 +52,11 @@ if (locked) {
     });
   } catch {
     source = await readFile(
-      path.join(projectRoot, "cache/contracts", path.basename(relativeSource)),
+      path.join(
+        projectRoot,
+        "var/cache/contracts",
+        path.basename(relativeSource),
+      ),
       "utf8",
     ).catch(() => null);
     if (
@@ -149,7 +153,7 @@ const outputName = pages
                     : "public-contract";
 const output = process.env.EVERUNFOLD_CONTRACT_OUTPUT
   ? path.resolve(process.env.EVERUNFOLD_CONTRACT_OUTPUT)
-  : path.join(projectRoot, "cache/contracts");
+  : path.join(projectRoot, "var/cache/contracts");
 await mkdir(output, { recursive: true });
 const types = await compile(schema, rootName, {
   bannerComment:

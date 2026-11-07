@@ -1,4 +1,4 @@
-import type { CustomPageDefinition } from "@/core/pages/registration";
+import type { CustomPageDefinition } from "@everunfold/plugin-sdk";
 import { peopleSettings } from "./schema";
 
 export default {

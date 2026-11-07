@@ -1,14 +1,14 @@
 "use client";
-import { surfacePortalTarget } from "@/core/themes/portal";
+import { surfacePortalTarget } from "@everunfold/plugin-sdk/client";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
-import { UiText, useT } from "@/core/i18n/provider";
-import { Avatar } from "@/themes/argon/components/ui/avatar";
-import { Button, Dialog } from "@/themes/argon/components/ui/primitives";
-import { Icon } from "@/themes/argon/components/icon";
-import { useDialogSurface } from "@/themes/argon/hooks/use-dialog-surface";
-import { useDialogDismiss } from "@/themes/argon/hooks/use-dialog-dismiss";
-import { useMotion } from "@/themes/argon/hooks/use-motion";
+import { UiText, useT } from "@everunfold/plugin-sdk/client";
+import { Avatar } from "@everunfold/plugin-sdk/client";
+import { Button, Dialog } from "@everunfold/plugin-sdk/client";
+import { Icon } from "@everunfold/plugin-sdk/client";
+import { useDialogSurface } from "@everunfold/plugin-sdk/client";
+import { useDialogDismiss } from "@everunfold/plugin-sdk/client";
+import { useMotion } from "@everunfold/plugin-sdk/client";
 import styles from "./message.module.css";
 
 function OpeningFireworks() {

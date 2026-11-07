@@ -1,4 +1,5 @@
 "use client";
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { UiText } from "@/core/i18n/provider";
 
 import { useMemo, useState } from "react";
@@ -23,13 +24,14 @@ export function ProtectedArticle({
   site: Site;
   baseUrl: string;
 }) {
+  const runtime = usePluginRuntime();
   const access = useProtectedContent(baseUrl, content.id, content.opens_at);
   const [password, setPassword] = useState("");
   const readable = access.content ?? content;
-  const rendered = useMemo(
-    () => renderContent(readable, site.settings?.shortcodes),
-    [readable, site.settings?.shortcodes],
-  );
+  const rendered = useMemo(() => {
+    void runtime.catalog?.revision;
+    return renderContent(readable, site.settings?.shortcodes);
+  }, [readable, site.settings?.shortcodes, runtime.catalog?.revision]);
   return (
     <>
       <PagePresentation id={content.id} site={site} toc={rendered.toc} />

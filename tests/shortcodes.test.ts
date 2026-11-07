@@ -17,8 +17,8 @@ const render = (source: string, type: "markdown" | "html" = "markdown") =>
     content({ content: [{ id: "native", type, content: source }] }),
   );
 test("preview overrides a name with a temporary identity and retains other custom containers", () => {
-  const notice = builtinShortcodes.find((item) => item.name === "notice")!;
-  const accordion = builtinShortcodes.find(
+  const notice = builtinShortcodes().find((item) => item.name === "notice")!;
+  const accordion = builtinShortcodes().find(
     (item) => item.name === "accordion",
   )!;
   const saved = {
@@ -107,7 +107,7 @@ test("protected code, comments, attribute strings and escaped native calls stay 
     "\\{{< notice >}}example\\{{< /notice >}}",
   ]) {
     assert.deepEqual(
-      parseShortcodes(source, builtinShortcodes, true).nodes,
+      parseShortcodes(source, builtinShortcodes(), true).nodes,
       [],
       source,
     );
@@ -135,7 +135,7 @@ test("unclosed, unknown, duplicate and invalid parameter calls retain source wit
 
 test("quoted delimiters and HTML parameters cannot inject markup or replace body slots", () => {
   const source = shortcodeCall(
-    builtinShortcodes.find((item) => item.name === "notice")!,
+    builtinShortcodes().find((item) => item.name === "notice")!,
     { title: 'a >}} " <img src=x onerror=bad> {{content}}', type: "info" },
     "<b>正文</b><script>bad-code</script>",
   );
@@ -159,7 +159,7 @@ test("quoted delimiters and HTML parameters cannot inject markup or replace body
 test("leaf calls have no closing marker and gallery resolves only provided media IDs", () => {
   const id = "11111111-1111-1111-1111-111111111111";
   const source = `{{< gallery id="${id}" columns="2" >}}`;
-  const parsed = parseShortcodes(source, builtinShortcodes, true);
+  const parsed = parseShortcodes(source, builtinShortcodes(), true);
   assert.equal(parsed.nodes.length, 1);
   const result = renderContent(
     content({

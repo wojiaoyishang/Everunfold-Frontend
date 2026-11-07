@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": "./var/cache/plugins-types.tsbuildinfo"
+  },
+  "include": ["next-env.d.ts", "src/plugins/**/*.ts", "src/plugins/**/*.tsx"],
+  "exclude": ["node_modules", "var", "plugins"]
+}

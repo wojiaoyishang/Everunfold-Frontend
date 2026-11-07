@@ -6,7 +6,7 @@ export type CatalogItem = Omit<ShortcodeItem, "origin"> & {
   origin: "backend" | "frontend" | "custom";
 };
 /** Trusted frontend registrations share the catalog, but expose no write capability. */
-export const frontendShortcodes: readonly CatalogItem[] =
+export const frontendShortcodes = (): readonly CatalogItem[] =>
   pluginRegistry.shortcodes.map(({ definition, pluginId }) => ({
     id: definition.id,
     origin: "frontend",
@@ -27,7 +27,7 @@ export const frontendShortcodes: readonly CatalogItem[] =
     compiled: definition,
     versions: [],
   }));
-export const builtinShortcodes: readonly PublicShortcode[] = [
+export const builtinShortcodes = (): readonly PublicShortcode[] => [
   ...registrations.map((item) => item.compiled as PublicShortcode),
   ...pluginRegistry.shortcodes.map((item) => item.definition),
 ];
@@ -35,7 +35,7 @@ export const builtinShortcodes: readonly PublicShortcode[] = [
 export function shortcodeDefinitions(custom: readonly PublicShortcode[] = []) {
   const names = new Set<string>();
   return [
-    ...builtinShortcodes,
+    ...builtinShortcodes(),
     ...custom.filter((item) => item.name.startsWith("custom:")),
   ].map((item) => {
     if (names.has(item.name))

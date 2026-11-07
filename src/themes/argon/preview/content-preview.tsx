@@ -1,4 +1,5 @@
 "use client";
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { UiText } from "@/core/i18n/provider";
 
 import { useEffect, useMemo, useState } from "react";
@@ -30,6 +31,7 @@ export function ContentPreview({
   site: Site | null;
   terms: Taxonomy[];
 }) {
+  const runtime = usePluginRuntime();
   const { detail, error, baseUrl, retry } = useContentPreview(type, id);
   const [liveContent, setLiveContent] = useState<Content | null>(null);
   const { setStamp, rendered } = usePreviewReceipt(id);
@@ -57,13 +59,20 @@ export function ContentPreview({
     return () => window.removeEventListener("message", receive);
   }, [type, id, setStamp]);
   const presentation = useMemo(() => {
+    void runtime.catalog?.revision;
     if (!detail) return null;
     const content = liveContent ?? previewContent(detail, terms);
     return {
       content,
       rendered: renderContent(content, site?.settings?.shortcodes),
     };
-  }, [detail, liveContent, terms, site?.settings?.shortcodes]);
+  }, [
+    detail,
+    liveContent,
+    terms,
+    site?.settings?.shortcodes,
+    runtime.catalog?.revision,
+  ]);
   useEffect(() => {
     if (presentation && liveContent) rendered();
   }, [presentation, liveContent, rendered]);

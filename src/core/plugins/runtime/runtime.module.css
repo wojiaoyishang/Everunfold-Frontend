@@ -1,0 +1,19 @@
+.error {
+  position: fixed;
+  inset: auto 18px 18px;
+  max-width: 620px;
+  max-height: min(45vh, 320px);
+  overflow: auto;
+  z-index: 1500;
+  padding: 18px;
+  border: 1px solid var(--admin-border, var(--line));
+  border-radius: 12px;
+  background: var(--admin-panel, var(--surface));
+  color: var(--admin-text, var(--text));
+  box-shadow: var(--shadow);
+}
+.error pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}

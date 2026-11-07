@@ -15,6 +15,8 @@ import { RequestError } from "@/core/http/request";
 
 export function settingsFailure(error: unknown) {
   if (error instanceof RequestError) {
+    if (error.code === 42298)
+      return "选中的主题或插件尚未在所有启用节点完成部署登记。当前修改已保留，请刷新部署清单。";
     if (error.code === 42292)
       return "该语言仍有文章或说说，请保留语言或改为禁用。";
     if (error.code === 42294)

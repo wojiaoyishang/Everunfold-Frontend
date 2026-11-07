@@ -25,6 +25,8 @@ export interface PluginShortcode {
 }
 
 export interface FrontendPlugin {
+  title?: string;
+  description?: string;
   id: string;
   version: string;
   setup: (context: {

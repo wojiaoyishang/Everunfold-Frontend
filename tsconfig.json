@@ -20,8 +20,10 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@contracts/*": ["./cache/contracts/*"],
-      "@build/*": ["./cache/build/*"]
+      "@everunfold/plugin-sdk": ["./src/sdk/index.ts"],
+      "@everunfold/plugin-sdk/client": ["./src/sdk/client.ts"],
+      "@contracts/*": ["./var/cache/contracts/*"],
+      "@build/*": ["./var/cache/build/*"]
     }
   },
   "include": [
@@ -31,5 +33,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "var", "cache"]
+  "exclude": ["node_modules", "var", "plugins", "src/plugins"]
 }

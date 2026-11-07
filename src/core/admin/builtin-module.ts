@@ -9,6 +9,14 @@ export const builtinAdminModule = {
   ],
   pages: [
     {
+      id: "core.settings.plugins",
+      href: "/admin/settings/plugins",
+      label: "插件管理",
+      description: "已部署插件与启用设置",
+      icon: "extension",
+      menu: { group: "core.settings", order: 25 },
+    },
+    {
       id: "core.users",
       href: "/admin/users",
       label: "用户管理",

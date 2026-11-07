@@ -8,6 +8,7 @@ import {
 import { themeRegistry } from "@/core/extensions/themes";
 import { themeModules } from "@/core/extensions/discovered";
 import { templateTargets } from "./targets";
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import type {
   ThemeTemplateProps,
   ThemeViewContext,
@@ -28,10 +29,14 @@ const styleById = new Map(
 export function PublicTheme({
   theme,
   children,
+  followActive = true,
 }: {
+  followActive?: boolean;
   theme: string;
   children: ReactNode;
 }) {
+  const runtime = usePluginRuntime();
+  theme = (followActive && runtime.catalog?.theme) || theme;
   const chain = themeRegistry.chain(theme);
   return (
     <ThemeComponentsProvider theme={theme}>
