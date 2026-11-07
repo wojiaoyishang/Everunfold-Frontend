@@ -1,11 +1,9 @@
 import type { ThemeDefinition } from "@/core/extensions/types";
 
+/** A CSS-only starting point: inherit Argon's components, templates and hooks. */
 export default {
   id: "paper",
-  version: "1.0.0",
+  version: "2.0.0",
   parent: "argon",
-  components: ["public.hero", "paper.people", "paper.footer-note"],
-  templates: { "page:core.people": "paper.people" },
-  slots: { "shell.footer.after": ["paper.footer-note"] },
   styles: true,
 } satisfies ThemeDefinition;

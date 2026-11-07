@@ -150,10 +150,10 @@ test("a built-in working child inherits Argon and contributes only its local dif
     ["paper", "argon"],
   );
   assert.equal(themeRegistry.owner("paper", "public.header"), "argon");
-  assert.equal(themeRegistry.owner("paper", "public.hero"), "paper");
+  assert.equal(themeRegistry.owner("paper", "public.hero"), "argon");
   assert.deepEqual(
     themeRegistry.templates("paper", "page", ["page:core.people"]),
-    [{ theme: "paper", component: "paper.people" }],
+    [],
   );
 });
 

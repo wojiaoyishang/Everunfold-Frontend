@@ -9,8 +9,21 @@ export async function installExtensionFixture(workspace) {
       'export default {id:"verification.plugin",version:"1.0.0",setup({components}:{components:{register:(name:string)=>void}}){components.register("verification.plugin-control");}};',
     "src/plugins/verification/components.tsx":
       'const components={"verification.plugin-control":function Control(){return <div data-extension-plugin="true">Discovered plugin component</div>;}}; export default components;',
+    "src/themes/verification-parent/theme.ts":
+      'export default {id:"verification-parent",version:"1.0.0",parent:"paper",components:["public.hero","verification-parent.people","verification-parent.footer-note"],templates:{"page:core.people":"verification-parent.people"},slots:{"shell.footer.after":["verification-parent.footer-note"]},styles:true};',
+    "src/themes/verification-parent/styles.ts":
+      'export default ".public-theme[data-theme-chain~=verification-parent]{--verification-parent-style:1;}";',
+    "src/themes/verification-parent/components.tsx": `
+import type {Site} from "@/core/content/types";
+import type {ThemeTemplateProps} from "@/core/extensions/types";
+import {ParentThemeComponent} from "@/core/extensions/components";
+export default {
+  "public.hero":function Hero({site}:{site:Site}){return <div data-parent-theme-hero="true"><ParentThemeComponent name="public.hero" site={site}/></div>;},
+  "verification-parent.people":function People({children}:ThemeTemplateProps){return <section data-parent-page-template="true">{children}</section>;},
+  "verification-parent.footer-note":function Note(){return <p>Parent fixture hook</p>;}
+};`,
     "src/themes/verification/theme.ts":
-      'export default {id:"verification",version:"1.0.0",parent:"paper",components:["verification.theme-control","public.hero","verification.layout","verification.page","verification.note","paper.footer-note"],templates:{home:"verification.layout","page:core.people":"verification.page",article:"verification.missing-template"},slots:{"shell.footer.after":["verification.note"]},styles:true};',
+      'export default {id:"verification",version:"1.0.0",parent:"verification-parent",components:["verification.theme-control","public.hero","verification.layout","verification.page","verification.note","verification-parent.footer-note"],templates:{home:"verification.layout","page:core.people":"verification.page",article:"verification.missing-template"},slots:{"shell.footer.after":["verification.note"]},styles:true};',
     "src/themes/verification/styles.ts":
       'const css=".public-theme[data-theme-chain~=verification] { --verification-style: 1; }";export default css;',
     "src/themes/verification/components.tsx": `
@@ -23,7 +36,7 @@ const components={
   "verification.layout":function Layout({children}:ThemeTemplateProps){return <section data-child-template="true">{children}</section>;},
   "verification.page":function Layout({children}:ThemeTemplateProps){return <section data-child-page="true">{children}</section>;},
   "verification.note":function Note(){return <p data-child-hook="true">Child hook</p>;},
-  "paper.footer-note":function Note(){return <p data-overridden-inherited-hook="true">Overridden inherited hook</p>;}
+  "verification-parent.footer-note":function Note(){return <p data-overridden-inherited-hook="true">Overridden inherited hook</p>;}
 };export default components;`,
     "src/app/health/extension-verification/page.tsx": `
 import {ExtensionComponent} from "@/core/extensions/components";
@@ -62,9 +75,12 @@ export async function verifyExtensionFixture(base) {
   ])
     assert.match(html, new RegExp(`${marker}="true"`));
   assert.match(html, /verification.plugin-control/);
-  assert.match(html, /data-paper-hero="true"/);
-  assert.match(html, /data-paper-page="true"/);
-  assert.match(html, /data-theme-chain="verification paper argon"/);
+  assert.match(html, /data-parent-theme-hero="true"/);
+  assert.match(html, /data-parent-page-template="true"/);
+  assert.match(
+    html,
+    /data-theme-chain="verification verification-parent paper argon"/,
+  );
   assert.match(html, /verification\.unregistered/);
   assert.match(html, /verification\.missing-template/);
   assert.match(html, /组件暂不可用/);
@@ -73,7 +89,7 @@ export async function verifyExtensionFixture(base) {
       html.indexOf('data-theme-style="verification"'),
   );
   console.log(
-    "Production child-theme discovery passed: three-level parent composition, ID templates, hooks, ordered styles and missing-template parent preservation.",
+    "Production child-theme discovery passed: multi-level parent composition, ID templates, hooks, ordered styles and missing-template parent preservation.",
   );
 }
 
@@ -86,7 +102,11 @@ export async function verifyThemeSwitch(base, configFile) {
     assert.equal(selected.status, 200);
     const html = await selected.text();
     assert.match(html, /data-public-theme="paper"/);
-    assert.match(html, /data-paper-hero="true"/);
+    assert.match(html, /class="hero"/);
+    assert.doesNotMatch(
+      html,
+      /data-paper-hero|data-paper-page|paper-footer-note/,
+    );
     assert.match(html, /data-theme-style="paper"/);
     assert.doesNotMatch(
       html,
