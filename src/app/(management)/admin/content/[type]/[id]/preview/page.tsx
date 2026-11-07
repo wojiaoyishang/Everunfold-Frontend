@@ -1,3 +1,5 @@
+import { PublicTheme } from "@/core/themes/presentation";
+import { readActiveTheme } from "@/core/themes/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { readPublicSnapshot } from "@/core/content/snapshot";
@@ -24,11 +26,13 @@ export default async function PreviewPage({
   // Only public theme data crosses SSR. Draft content is fetched after the workspace confirms identity.
   const publicData = await readPublicSnapshot().catch(() => null);
   return (
-    <ContentPreview
-      type={type}
-      id={id}
-      site={publicData?.site ?? null}
-      terms={publicData?.taxonomies ?? []}
-    />
+    <PublicTheme theme={readActiveTheme()}>
+      <ContentPreview
+        type={type}
+        id={id}
+        site={publicData?.site ?? null}
+        terms={publicData?.taxonomies ?? []}
+      />
+    </PublicTheme>
   );
 }

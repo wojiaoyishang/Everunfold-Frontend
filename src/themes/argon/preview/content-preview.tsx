@@ -9,8 +9,8 @@ import { useContentPreview } from "@/core/content-management/use-content-preview
 import { presentLegacyContent } from "@/core/content/presentation";
 import { renderContent } from "@/core/rendering/content";
 import { BlogShell } from "../components/shell";
-import { ArticleCard } from "../components/article-card";
-import { ShuoshuoCardView } from "../components/shuoshuo-card";
+import { ExtensionComponent } from "@/core/extensions/components";
+import { ThemeTemplate } from "@/core/themes/presentation";
 import { PagePresentation } from "../components/route-state";
 import { Button } from "../components/ui/primitives";
 import { RouteLink } from "../components/ui/route-link";
@@ -152,23 +152,35 @@ export function ContentPreview({
             id={presentation.content.id}
             toc={presentation.rendered.toc}
           />
-          {type === "shuoshuo" ? (
-            <ShuoshuoCardView
-              entry={{
-                content: presentLegacyContent(presentation.content),
-                example: false,
-              }}
-              detail
-              rendered={presentation.rendered}
-              interactive={false}
-            />
-          ) : (
-            <ArticleCard
-              content={presentation.content}
-              rendered={presentation.rendered}
-              interactive={false}
-            />
-          )}
+          <ThemeTemplate
+            name={type === "shuoshuo" ? "shuoshuo" : "article"}
+            context={{
+              site,
+              content: presentation.content,
+              path: presentation.content.path,
+              preview: true,
+            }}
+          >
+            {type === "shuoshuo" ? (
+              <ExtensionComponent
+                name="public.shuoshuo.card"
+                entry={{
+                  content: presentLegacyContent(presentation.content),
+                  example: false,
+                }}
+                detail
+                rendered={presentation.rendered}
+                interactive={false}
+              />
+            ) : (
+              <ExtensionComponent
+                name="public.article.card"
+                content={presentation.content}
+                rendered={presentation.rendered}
+                interactive={false}
+              />
+            )}
+          </ThemeTemplate>
         </>
       ) : (
         <section

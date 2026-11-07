@@ -5,7 +5,7 @@ import {
   type FeedEntry,
   type FeedType,
 } from "@/core/content/presentation";
-import { PostCard } from "./post-card";
+import { ExtensionComponent } from "@/core/extensions/components";
 import { ShuoshuoCard } from "./shuoshuo";
 import { PagePresentation } from "./route-state";
 import { Pagination } from "./pagination";
@@ -17,7 +17,7 @@ export function ContentCard({ entry }: { entry: FeedEntry }) {
   return entry.content.type === "shuoshuo" ? (
     <ShuoshuoCard entry={entry} />
   ) : (
-    <PostCard content={entry.content} />
+    <ExtensionComponent name="public.post.card" content={entry.content} />
   );
 }
 

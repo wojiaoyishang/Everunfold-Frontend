@@ -1,3 +1,4 @@
+import { ThemeTemplate } from "@/core/themes/presentation";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { PublicSnapshot } from "@/core/content/types";
@@ -43,7 +44,34 @@ export function codePageMetadata(
       : {}),
   };
 }
-export function CodePage({
+type CodePageProps = {
+  snapshot: PublicSnapshot;
+  path: string;
+  parameters?: PageParameters;
+};
+
+export function CodePage(props: CodePageProps) {
+  const { snapshot, path, parameters = {} } = props;
+  const output = renderCodePage(props);
+  const query = parameters.q || parameters.s;
+  const name =
+    path === "/" && !query
+      ? "home"
+      : path === "/search" || path === "/"
+        ? "search"
+        : path === "/archives"
+          ? "archives"
+          : path === "/ss" || path === "/article"
+            ? "feed"
+            : "taxonomy";
+  return (
+    <ThemeTemplate name={name} context={{ site: snapshot.site, path }}>
+      {output}
+    </ThemeTemplate>
+  );
+}
+
+function renderCodePage({
   snapshot,
   path,
   parameters = {},

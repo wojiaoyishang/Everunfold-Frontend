@@ -1,6 +1,7 @@
 import { collectThemes } from "../../src/core/extensions/component-descriptors";
 import type { ThemeDefinition } from "../../src/core/extensions/types";
 import { pathToFileURL } from "node:url";
+import { lstat } from "node:fs/promises";
 import path from "node:path";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
@@ -36,11 +37,19 @@ export async function readExtensionCatalog(root: string) {
     builtins.map((d) => d.compiled),
   );
   const collected = collectCustomPages(registry.pages);
-  collectThemes(
-    await Promise.all(
-      themes.map((name) => load<ThemeDefinition>("themes", name)),
-    ),
+  const definitions = await Promise.all(
+    themes.map((name) => load<ThemeDefinition>("themes", name)),
   );
+  const themeRegistry = collectThemes(definitions);
+  for (const [index, definition] of definitions.entries()) {
+    if (!definition.styles) continue;
+    const file = path.join(root, "src/themes", themes[index], "styles.ts");
+    if (!(await lstat(file).catch(() => null))?.isFile())
+      throw new Error(`Missing theme styles: ${definition.id}`);
+    const css = (await import(pathToFileURL(file).href)).default;
+    if (typeof css !== "string")
+      throw new Error(`Invalid theme CSS: ${definition.id}`);
+  }
   const ajv = new Ajv({ strict: true });
   addFormats(ajv);
   const validate = ajv.compile({
@@ -57,5 +66,6 @@ export async function readExtensionCatalog(root: string) {
     themes,
     manifest: collected.manifest,
     registry,
+    themeRegistry,
   };
 }

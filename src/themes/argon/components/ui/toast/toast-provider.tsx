@@ -39,7 +39,9 @@ function ToastViewport({ store }: { store: ToastStore }) {
   if (!entries.length || typeof document === "undefined") return null;
   const target =
     Array.from(document.querySelectorAll("dialog[open]")).at(-1) ??
-    document.querySelector("[data-surface='admin'], .blog-shell, .auth-root") ??
+    document.querySelector(
+      "[data-surface='admin'], [data-public-theme], .blog-shell, .auth-root",
+    ) ??
     document.body;
   return createPortal(
     <section className={styles.viewport} aria-label="通知" tabIndex={-1}>

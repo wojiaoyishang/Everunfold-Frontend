@@ -9,9 +9,6 @@ import { setSiteAppearance } from "@/core/browser/appearance";
 import { resourceUrl } from "@/core/content/urls";
 import { fontFace, fontFamily } from "@/core/rendering/fonts";
 
-import { SiteHeader } from "./site-header";
-import { Sidebar } from "./sidebar";
-import { FloatingTools } from "./floating-tools";
 import { NavigationProvider } from "./navigation-state";
 import { BackgroundVideoProvider } from "./background-video";
 import { ReadingStateProvider } from "./reading-state";
@@ -21,6 +18,8 @@ import { HomeFeedPreference } from "./home-feed-settings";
 import { ReaderDataProvider } from "./reader-data";
 import { FeedbackProvider } from "./ui/feedback";
 import { CodePreferencesProvider } from "./code-preferences";
+import { ExtensionComponent } from "@/core/extensions/components";
+import { ThemeSlot } from "@/core/themes/presentation";
 
 export function BlogShell({
   site,
@@ -37,7 +36,9 @@ export function BlogShell({
         <ReadingStateProvider>
           <ReaderDataProvider baseUrl={backendBaseUrl}>
             <FeedbackProvider>
-              <ShellFrame>{children}</ShellFrame>
+              <ExtensionComponent name="public.shell">
+                {children}
+              </ExtensionComponent>
             </FeedbackProvider>
           </ReaderDataProvider>
         </ReadingStateProvider>
@@ -46,7 +47,7 @@ export function BlogShell({
   );
 }
 
-function ShellFrame({ children }: { children: ReactNode }) {
+export function ShellFrame({ children }: { children: ReactNode }) {
   const { site, toc, presentationId } = useRouteState();
   useEffect(() => {
     setSiteAppearance({
@@ -96,32 +97,29 @@ function ShellFrame({ children }: { children: ReactNode }) {
           <TextLink className="skip-link" href="#main-content">
             <UiText text="跳到正文" />
           </TextLink>
-          <SiteHeader site={site} />
-          <section className="hero" aria-label="站点横幅">
-            <div className="hero-copy">
-              <p className="hero-title">{site.hero_title || site.name}</p>
-              <p className="hero-subtitle">
-                {site.hero_subtitle || site.description}
-              </p>
-            </div>
-          </section>
+          <ThemeSlot name="shell.header.before" context={{ site }} />
+          <ExtensionComponent name="public.header" site={site} />
+          <ThemeSlot name="shell.header.after" context={{ site }} />
+          <ThemeSlot name="shell.hero.before" context={{ site }} />
+          <ExtensionComponent name="public.hero" site={site} />
+          <ThemeSlot name="shell.hero.after" context={{ site }} />
           <div className="blog-container">
-            <Sidebar site={site} toc={toc} contentKey={presentationId} />
+            <ExtensionComponent
+              name="public.sidebar"
+              site={site}
+              toc={toc}
+              contentKey={presentationId}
+            />
             <main id="main-content" className="main-column" tabIndex={-1}>
+              <ThemeSlot name="shell.content.before" context={{ site }} />
               <RouteContent>{children}</RouteContent>
+              <ThemeSlot name="shell.content.after" context={{ site }} />
             </main>
           </div>
-          <footer className="site-footer">
-            <p>
-              © {new Date().getFullYear()} {site.author} ·{" "}
-              {site.hero_title || site.name}
-            </p>
-            <p>
-              Every story is still unfolding.{" "}
-              <span className="footer-separator">·</span> Powered by Everunfold
-            </p>
-          </footer>
-          <FloatingTools />
+          <ThemeSlot name="shell.footer.before" context={{ site }} />
+          <ExtensionComponent name="public.footer" site={site} />
+          <ThemeSlot name="shell.footer.after" context={{ site }} />
+          <ExtensionComponent name="public.tools" />
         </BackgroundVideoProvider>
       </div>
     </CodePreferencesProvider>

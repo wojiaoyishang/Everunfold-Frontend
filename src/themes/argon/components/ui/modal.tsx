@@ -1,4 +1,5 @@
 "use client";
+import { surfacePortalTarget } from "@/core/themes/portal";
 import { UiText, useT } from "@/core/i18n/provider";
 import { useId, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
@@ -74,6 +75,6 @@ export function Modal({
       </div>
       {children}
     </Dialog>,
-    document.querySelector(".admin-root") ?? document.body,
+    surfacePortalTarget(),
   );
 }

@@ -12,7 +12,7 @@ import {
 } from "react";
 import { pluginModules, themeModules } from "./discovered";
 import { pluginRegistry } from "@/core/plugins/registry";
-import { collectThemes } from "./component-descriptors";
+import { themeRegistry as themes } from "./themes";
 import { ExtensionPlaceholder } from "@/themes/argon/components/extension-placeholder";
 
 type UIComponent = ComponentType<Record<string, unknown>>;
@@ -21,8 +21,12 @@ const modules = {
   ...import.meta.glob<ComponentModule>("/src/plugins/*/components.tsx"),
   ...import.meta.glob<ComponentModule>("/src/themes/*/components.tsx"),
 };
-const themes = collectThemes(Object.values(themeModules));
 const ThemeContext = createContext("argon");
+const ImplementationThemeContext = createContext<string | null>(null);
+
+export function useThemeId() {
+  return useContext(ThemeContext);
+}
 const cache = new Map<string, UIComponent>();
 
 export function ThemeComponentsProvider({
@@ -32,6 +36,7 @@ export function ThemeComponentsProvider({
   theme: string;
   children: ReactNode;
 }) {
+  themes.chain(theme);
   return (
     <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
   );
@@ -48,7 +53,12 @@ function Ready({ callback }: { callback: unknown }) {
 }
 
 class ComponentBoundary extends Component<
-  { name: string; children: ReactNode },
+  {
+    name: string;
+    children: ReactNode;
+    inherited?: ReactNode;
+    onReady?: unknown;
+  },
   { failed: boolean }
 > {
   state = { failed: false };
@@ -57,7 +67,11 @@ class ComponentBoundary extends Component<
   }
   render() {
     return this.state.failed ? (
-      <Missing name={this.props.name} />
+      <>
+        <Missing name={this.props.name} />
+        {this.props.inherited}
+        <Ready callback={this.props.onReady} />
+      </>
     ) : (
       this.props.children
     );
@@ -65,31 +79,34 @@ class ComponentBoundary extends Component<
 }
 
 function componentPath(name: string, theme: string) {
-  const selected = themes.get(theme)?.components.includes(name)
-    ? theme
-    : themes.get("argon")?.components.includes(name)
-      ? "argon"
-      : null;
+  const selected = themes.owner(theme, name);
   if (selected)
-    return Object.entries(themeModules)
-      .find(([, value]) => value.id === selected)?.[0]
-      .replace(/theme\.ts$/, "components.tsx");
+    return {
+      owner: selected,
+      path: Object.entries(themeModules)
+        .find(([, value]) => value.id === selected)?.[0]
+        .replace(/theme\.ts$/, "components.tsx"),
+    };
   const owner = pluginRegistry.componentOwner(name);
-  return Object.entries(pluginModules)
-    .find(([, value]) => value.id === owner)?.[0]
-    .replace(/plugin\.ts$/, "components.tsx");
+  return {
+    owner: null,
+    path: Object.entries(pluginModules)
+      .find(([, value]) => value.id === owner)?.[0]
+      .replace(/plugin\.ts$/, "components.tsx"),
+  };
 }
 
 function MissingAdapter(props: Record<string, unknown>) {
   return (
     <>
       <Missing name={String(props.componentName ?? "unknown")} />
-      <Ready callback={props.onReady} />
+      {props.children as ReactNode}
+      {props.notifyReady === false && <Ready callback={props.onReady} />}
     </>
   );
 }
 function prepareComponent(name: string, theme: string): UIComponent {
-  const path = componentPath(name, theme);
+  const { path, owner } = componentPath(name, theme);
   const load = path ? modules[path] : undefined;
   const Impl = load
     ? lazy(async () => {
@@ -109,17 +126,31 @@ function prepareComponent(name: string, theme: string): UIComponent {
     : MissingAdapter;
   return function RegisteredComponent(props) {
     return (
-      <ComponentBoundary name={name}>
+      <ComponentBoundary
+        name={name}
+        inherited={props.children as ReactNode}
+        onReady={props.onReady}
+      >
         <Suspense fallback={<ExtensionPlaceholder name={name} loading />}>
-          {createElement(Impl, { ...props, componentName: name })}
-          <Ready callback={props.onReady} />
+          <ImplementationThemeContext.Provider value={owner}>
+            {createElement(Impl, { ...props, componentName: name })}
+          </ImplementationThemeContext.Provider>
+          <Ready
+            callback={props.notifyReady === false ? undefined : props.onReady}
+          />
         </Suspense>
       </ComponentBoundary>
     );
   };
 }
 const names = new Set([
-  ...themes.all.flatMap((theme) => theme.components),
+  ...themes.all.flatMap((theme) => [
+    ...(theme.components ?? []),
+    ...Object.values(theme.templates ?? {}),
+    ...Object.values(theme.slots ?? {}).flatMap((slot) =>
+      slot === false ? [] : slot,
+    ),
+  ]),
   ...pluginRegistry.componentNames,
 ]);
 for (const theme of themes.all)
@@ -132,10 +163,24 @@ export function useThemeComponent(
   props: Record<string, unknown> = {},
 ): ReactNode {
   const theme = useContext(ThemeContext);
-  const component =
-    cache.get(`${theme}:${name}`) ??
-    cache.get(`argon:${name}`) ??
-    MissingAdapter;
+  return renderThemeComponent(theme, name, props);
+}
+
+export function renderThemeComponent(
+  theme: string,
+  name: string,
+  props: Record<string, unknown>,
+): ReactNode {
+  const component = cache.get(`${theme}:${name}`);
+  if (!component)
+    return (
+      <>
+        <MissingAdapter componentName={name} {...props} />
+        <Ready
+          callback={props.notifyReady === false ? undefined : props.onReady}
+        />
+      </>
+    );
   return createElement(component, { componentName: name, ...props });
 }
 
@@ -144,4 +189,18 @@ export function ExtensionComponent({
   ...props
 }: { name: string } & Record<string, unknown>) {
   return useThemeComponent(name, props);
+}
+
+/** Start above the implementation being rendered, even in multi-level inheritance. */
+export function ParentThemeComponent({
+  name,
+  ...props
+}: { name: string } & Record<string, unknown>) {
+  const owner = useContext(ImplementationThemeContext);
+  const parent = owner ? themes.get(owner)?.parent : null;
+  return parent ? (
+    renderThemeComponent(parent, name, props)
+  ) : (
+    <MissingAdapter componentName={name} {...props} />
+  );
 }

@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { readConfiguration } from "@/core/config/server";
+import { PublicTheme } from "@/core/themes/presentation";
+import { readActiveTheme } from "@/core/themes/server";
 import { BlogShell } from "@/themes/argon/components/shell";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -38,8 +40,10 @@ export default async function BlogLayout({
   const { site } = await readPublicSnapshot();
   const { backendBaseUrl } = readConfiguration();
   return (
-    <BlogShell site={site} backendBaseUrl={backendBaseUrl}>
-      {children}
-    </BlogShell>
+    <PublicTheme theme={readActiveTheme()}>
+      <BlogShell site={site} backendBaseUrl={backendBaseUrl}>
+        {children}
+      </BlogShell>
+    </PublicTheme>
   );
 }

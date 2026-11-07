@@ -1,5 +1,7 @@
 # Everunfold Frontend
 
+Argon是默认父主题；子主题自动发现，支持组件/单页模板/作用域样式覆盖和前台钩子。已内置可运行的paper子主题，公开阅读与授权前台预览同步使用；[开发和启用说明](docs/development/child-themes.md)。
+
 页面支持HTML/CSS/可选隔离JavaScript与注册人物分组/寄语；页面、文章、说说共用独立实时预览，左编辑右前台、三设备视图、可拖动分界线及顶部原保存操作。私有元数据与公开页面设置分开，见[指南](docs/development/pages.md)和[验收](docs/handoff/pages-live-preview-verification.md)。
 
 新 Docker 设备运行方式见[容器开发部署指南](docs/development/container-deployment.md)：当前本地联调通过 `http://127.0.0.1:3000` 访问，监听仍为 `0.0.0.0`；Nginx 统一转发页面、API 和 WebSocket，Next 开发进程在 3100。当前状态以最新交接为准。
@@ -69,7 +71,9 @@ CI 使用相同的检查与构建命令。
 | --- | --- |
 | `src/app/` | 薄 App Router 路由、错误/空/加载状态 |
 | `src/core/` | 服务端配置、快照验证、公开查询与安全渲染 |
-| `src/themes/argon/` | 可复用主题组件和样式；不混入数据库访问 |
+| `src/themes/argon/` | 默认父主题、具名组件和展示钩子；不混入数据库访问 |
+| `src/themes/paper/` | 可运行的子主题；仅声明相对父主题的差异 |
+| `src/core/themes/` | 公开主题选择、继承模板/插入位置和Portal作用域 |
 | `src/plugins/` | 自动发现的可信插件；页面、短代码、模型、组件与样式 |
 | `src/core/contracts/` | 稳定业务契约访问模块；不负责UI注册 |
 | `cache/contracts/`、`cache/build/` | 忽略的契约/构建产物，按contracts.lock.json恢复 |

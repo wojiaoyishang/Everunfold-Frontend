@@ -48,3 +48,8 @@ directory = "./var/settings"
 receiver_host = "127.0.0.1"
 receiver_port = 3001
 # source_epoch = "实际后端 UUID"
+
+# 公开阅读与授权前台预览的主题；后台不受影响。已构建主题切换后刷新生效。
+[theme]
+active = "argon"
+# 可选择随项目提供的paper子主题；FRONTEND_THEME环境变量可覆盖。

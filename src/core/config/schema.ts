@@ -8,6 +8,7 @@ export class ConfigurationError extends Error {
 }
 
 export interface FrontendConfiguration {
+  theme: { active: string };
   publicSiteUrl: string | undefined;
   backendBaseUrl: string;
   frontendNodeId: string;
@@ -137,9 +138,18 @@ export function parseConfiguration(
       "backend",
       "cache",
       "settings",
+      "theme",
     ],
     "根配置",
   );
+  const theme = object(root.theme ?? {}, "theme");
+  knownKeys(theme, ["active"], "theme");
+  const activeTheme = string(
+    environment.FRONTEND_THEME ?? theme.active ?? "argon",
+    "theme.active",
+  );
+  if (!/^[a-z][a-z0-9-]*$/.test(activeTheme))
+    throw new ConfigurationError("theme.active 必须为已安装主题的ID");
   const backend = object(root.backend ?? {}, "backend");
   const cache = object(root.cache ?? {}, "cache");
   const settings = object(root.settings ?? {}, "settings");
@@ -211,6 +221,7 @@ export function parseConfiguration(
   if (publicSiteUrl && new URL(publicSiteUrl).pathname !== "/")
     throw new ConfigurationError("PUBLIC_SITE_URL 必须为前台公开站点根地址");
   return {
+    theme: { active: activeTheme },
     settings: {
       directory: string(
         settings.directory ?? "./var/settings",

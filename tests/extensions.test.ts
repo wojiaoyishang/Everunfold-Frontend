@@ -197,7 +197,7 @@ test("adding and removing directories changes the discovered catalog without edi
     );
     await writeFile(
       path.join(page, "theme.ts"),
-      'export default { id:"fixture", version:"1.0.0", components:["form.custom"] };',
+      'export default { id:"fixture", version:"1.0.0", parent:null, components:["form.custom"] };',
     );
     await writeFile(
       path.join(page, "render.tsx"),

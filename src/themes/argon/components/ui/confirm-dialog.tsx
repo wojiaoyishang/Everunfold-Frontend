@@ -1,4 +1,5 @@
 "use client";
+import { surfacePortalTarget } from "@/core/themes/portal";
 import { useT, UiText } from "@/core/i18n/provider";
 import {
   useId,
@@ -186,6 +187,6 @@ function ConfirmDialogSurface({
         </Button>
       </div>
     </Dialog>,
-    document.querySelector(".admin-root") ?? document.body,
+    surfacePortalTarget(),
   );
 }

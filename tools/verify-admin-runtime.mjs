@@ -7,7 +7,10 @@ import { createServer } from "node:net";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Parser, parseDocument, DomUtils } from "htmlparser2";
-import { verifyExtensionFixture } from "./fixtures/extensions.mjs";
+import {
+  verifyExtensionFixture,
+  verifyThemeSwitch,
+} from "./fixtures/extensions.mjs";
 
 export async function verifyAdminRuntime({ workspace, projectRoot }) {
   let backendRequests = 0;
@@ -210,6 +213,7 @@ directory = "./var/absent-admin-verification-cache"
     assert.ok(body.includes("离线公告标题") && body.includes("离线公告正文"));
     try {
       await verifyExtensionFixture(base);
+      await verifyThemeSwitch(base, configFile);
     } catch (error) {
       throw new Error("Extension runtime failed: " + logs, { cause: error });
     }

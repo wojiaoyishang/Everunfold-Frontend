@@ -1,3 +1,5 @@
+import { PublicTheme } from "@/core/themes/presentation";
+import { readActiveTheme } from "@/core/themes/server";
 import { notFound } from "next/navigation";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { isManagedPagePreviewPath } from "@/core/pages/preview";
@@ -15,5 +17,9 @@ export default async function PagePreview({
   const { id } = await params;
   if (!isManagedPagePreviewPath(`/admin/pages/${id}/preview`)) notFound();
   const snapshot = await readPublicSnapshot().catch(() => null);
-  return <ManagedPagePreview key={id} id={id} site={snapshot?.site ?? null} />;
+  return (
+    <PublicTheme theme={readActiveTheme()}>
+      <ManagedPagePreview key={id} id={id} site={snapshot?.site ?? null} />
+    </PublicTheme>
+  );
 }

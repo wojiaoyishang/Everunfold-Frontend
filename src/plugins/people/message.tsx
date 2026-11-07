@@ -1,4 +1,5 @@
 "use client";
+import { surfacePortalTarget } from "@/core/themes/portal";
 import { useEffect, useId, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { UiText, useT } from "@/core/i18n/provider";
@@ -107,6 +108,6 @@ export function PeopleMessage({
         </Button>
       </footer>
     </Dialog>,
-    document.body,
+    surfacePortalTarget(),
   );
 }
