@@ -1,6 +1,6 @@
 # 子主题开发与启用
 
-版本：child-themes-1，2026-11-07。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。
+版本：child-themes-2，2026-11-07。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。
 
 ## 最小子主题
 
@@ -111,6 +111,13 @@ npm run build
 active = "paper"
 ```
 
-也可以在进程启动前设置FRONTEND_THEME。配置中的主题必须已被构建发现，缺省argon；已有主题只改实例选择、刷新即生效，无需重启或重构建。新的源码仍要构建/部署。开发服务器支持目录发现和HMR，但最终须做生产验证。没有后台安装任意JS，也没有新增后端主题选择字段；多节点要一致挂载配置。切回argon只需改active并刷新。
+可用FRONTEND_THEME覆盖实例缺省。后台“主题设置→已安装主题”提供实际已部署主题选择；保存并等待节点应用后生效。选“实例默认”才读取上述本地配置，否则后端extensions.theme优先。新增/修改主题源码后执行build:host或完整build并部署，启动协调器登记主题目录；全新主题不能在生产临时新增。
+
+```sh
+npm run build:host
+npm start
+```
+
+npm start从var/cache/build/theme-catalog.json报告部署元数据。发布时一并保留此构建目录；不要在正式机器重新扫描源码推断已编译主题。也可按[插件指南](frontend-plugins.md)显式登记。多个启用节点登记一致ID/版本/父级后，选择器才允许切换；主题改动应更新语义版本并部署各节点。已安装主题的切换无需重建或重启，后台仍独立使用Argon。更多运行时验收见[本轮记录](../handoff/independent-plugins-verification.md)。
 
 本轮验收用paper与隔离的三层继承夹具；测试结束恢复原实例配置和用户数据。详见[验收记录](../handoff/child-themes-verification.md)。

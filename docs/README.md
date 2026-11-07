@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[独立插件运行规范](architecture/frontend-plugin-runtime.md)、[插件/SDK开发指南](development/frontend-plugins.md)、[ADR0079](decisions/0079-runtime-plugin-packages-and-var-cache.md)与[验收](handoff/independent-plugins-verification.md)：var/cache统一派生产物；主题随主体构建后动态选择，插件独立打包、透明开发更新与部署后启停。
+
 [父子主题规范](architecture/frontend-themes.md)、[子主题指南](development/child-themes.md)与[ADR0078](decisions/0078-parent-child-themes-and-public-hooks.md)：Argon作为默认父主题，子主题局部覆盖模板、组件、样式并使用前台钩子；具体实现验收见STATUS。
 
 [定时发布与阅读进度](decisions/0073-scheduled-content-publication.md)、[操作指南](development/content-management.md)及[本轮验收](handoff/scheduled-publication-verification.md)：冻结排期版本、可靠Worker发布及取消，页面移除通用读取按钮、列表前台入口和铅笔、右下阅读进度填充。

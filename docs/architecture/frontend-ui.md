@@ -117,7 +117,7 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 
 详见 [ADR 0016](../decisions/0016-anchored-popovers-and-failure-pages.md)。共享 anchored popover 的触发按钮在水合前禁用；每次打开重新测量，`data-positioned` 写入之前不显示，避免原生弹出先于 React 定位。仍支持打开期间观察尺寸与滚动，关闭动画不丢坐标。
 
-`themes/argon/failure/` 统一状态展示、样式和四组翻牌配对；`FailureView` 用于 Next 的局部/根错误边界，`document` 用于 Proxy 独立 404/503。前者消费同一组件/游戏，后者消费 `tools/generate-failure-pages.mts` 构建时生成的 `cache/build/failure-pages.json`，不能在 Proxy 运行时导入 React 服务端渲染器。此 JSON 是展示产物，不是业务契约。修改主题源码后运行 `npm run failure:generate`；启动开发/生产构建自动生成，`npm run check` 与独立构建拒绝过期产物。
+`themes/argon/failure/` 统一状态展示、样式和四组翻牌配对；`FailureView` 用于 Next 的局部/根错误边界，`document` 用于 Proxy 独立 404/503。前者消费同一组件/游戏，后者消费 `tools/generate-failure-pages.mts` 构建时生成的 `var/cache/build/failure-pages.json`，不能在 Proxy 运行时导入 React 服务端渲染器。此 JSON 是展示产物，不是业务契约。修改主题源码后运行 `npm run failure:generate`；启动开发/生产构建自动生成，`npm run check` 与独立构建拒绝过期产物。
 
 独立 404/503 的核心说明与样式不依赖脚本、快照或远程资产；游戏只在本地内存运行。Next 意外渲染错误依赖框架客户端错误边界接管，不声称具有同等的无脚本可用性。原有导航准备/超时/旧页保留及撤回内容禁回退规则不变。
 

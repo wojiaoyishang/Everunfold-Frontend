@@ -1,27 +1,45 @@
-# 前端插件、主题与声明式设置规范
+# 前端插件、主题与运行时扩展规范
 
-版本：plugin-runtime-2，2026-11-07。状态：本轮实现依据，逐项验证结果在STATUS记录。以用户最新要求替代ADR0076中的custom_pages目录和生成式装配；不把本规范的后续拆分建议当成已交付能力。
+版本：plugin-runtime-3，2026-11-07。已按ADR0079实现，实际检查见[本轮验收](../handoff/independent-plugins-verification.md)。本版替代plugin-runtime-2中的插件随主体编译、根cache和仅显式页面登记规则；数据协议、开放模型与父子主题规则保留。
 
-## 宿主和扩展
+## 宿主、主题和插件
 
-宿主固定掌握认证/授权、CSRF、数据库事务、审计、可靠投递、版本/撤回守卫、源文和上传队列。插件提供可选页面、短代码、设置模型和展示组件；主题提供布局和具名控件实现。数据库配置不能成为动态模块路径。第一方插件与主题同样经过本地可信代码发现；不声称它们是恶意代码的安全沙箱。
+宿主掌握认证/权限、CSRF、事务、审计、可靠投递、版本/撤回守卫、源文、上传队列和路由。主题提供具名控件、布局、模板与钩子。可选页面、短代码和新控件通过插件贡献。第一方人物页和画廊也使用同一运行时。
 
-只保留src/plugins/<插件>/，不另设custom_pages。每个插件的plugin.ts声明稳定id、version和同步setup，目录可包含页面、短代码、schema、组件与样式。setup通过pages.register、shortcodes.register等已实现能力贡献项目，短代码和页面定义不自行注册。组件由本目录components.tsx按稳定名称导出。主题放src/themes/<主题>/，theme.ts声明身份/父级/模板/钩子和components.tsx提供具名实现；父子主题与作用域CSS见[主题规范](frontend-themes.md)。新增能力只在所属目录维护。
+主题源码在src/themes/<目录>，固定本地import.meta.glob随主体构建。所有准备提供的主题都在构建时包含；部署后可以切换已经编译的主题，不能新增TSX主题源码。子主题逐级继承、ParentThemeComponent、稳定ID模板和具名钩子见[主题规范](frontend-themes.md)。后台保持Argon管理上下文。
 
-Next.js当前Turbopack支持import.meta.glob，宿主使用固定本地路径自动发现插件/主题及组件表（eager元数据使用模块对象，避免生产默认导出差异），不生成中央组件文件，不允许配置远程JS地址。Node检查/导出工具采用同一目录规则；纯配置清单不导入组件/CSS。插件身份、页面ID、短代码ID/名称的重复声明是部署错误，明确失败；没有注册的展示组件显示主题占位提示，保留原配置，其余设置继续可用。组件实现发生异常时局部错误边界显示提示，不吞掉网络保存失败。
+插件源码在src/plugins/<目录>，由独立esbuild编译器处理，主体不导入这些源码。每个plugin.ts以同步setup贡献页面、短代码及组件名；components.tsx提供React实现和可选activate生命周期。插件不能以宿主私有路径或越出自身目录的相对路径导入宿主代码；公共SDK为唯一宿主能力入口。相同React/JSX实例由宿主提供，不在插件中另打包React。
 
-## 配置模型与主题控件
+主体编译和插件编译可以分别执行。新增插件无需修改中央注册表或重建主体。目录ID、插件ID、页面ID、短代码UUID/调用名保持稳定，重复声明或保留名冲突属于无效包。缺少展示实现使用占位及局部错误边界，保留配置；组件渲染失败后，新的完整构建会重试该边界，普通更新不通过重挂载边界来清空状态；整个已发布页面实现缺失/版本不匹配继续按既有503边界处理。
 
-页面设置只声明schema；model字段包含key、component、label、default及可选的props、fields。component是开放的有命名空间字符串，主题或插件可提供新组件，不限定项目内枚举。常用text、textarea、number、boolean、select、object/list等由主题实现。表单宿主负责递归值更新、保持未声明键、禁用与错误反馈；控件通过FormFieldProps读取field、value、onChange、disabled与renderFields，不发业务请求或直接存库。useThemeComponent(name, props)按当前主题及基础控件优先、插件补充新名称返回React节点；缺失时显示可读占位。JSON高级入口与结构化表单编辑同一配置；无效JSON保留输入、阻止保存并维持最后有效预览。
+## 包、发现与热更新
 
-页面设置options是公开JSON键值，不是表单白名单。32层/256KiB和整页512KiB是传输/存储上限；前端自行解释语义并安全输出。私有元数据沿独立权限接口，不通过公开options、组件props、SSR或共享快照泄露。
+生产目录为plugins/<目录>/manifest.json及带SHA256文件名的资源，直接覆盖该目录，不设版本号子目录。manifest包含plugin-package-1、SDK协议号1、入口/资源摘要、公开注册元信息及自动构建摘要；源代码中的语义版本仍用于接口/页面数据兼容，不承担浏览器缓存失效。
 
-## 生成物、部署和快速修改
+构建先写完整资源，最后原子rename清单。Node验证协议、目录、资源大小/摘要和共享声明，并把已验证资源复制到var/cache/plugin-packages后加载不可变CJS共享定义。浏览器仅获得公开ESM/CSS及元信息，Node入口不由资产接口提供。导入的图片/字体/视频使用同源插件资产绝对路径，避免随文章URL解析；独立类型检查将其视为URL字符串，和Next静态图像对象类型隔离。正文短代码在Node和浏览器使用同一纯共享逻辑，继续经过宿主HTML/媒体过滤。
 
-删除src/generated和registrations目录。类型/客户端/Schema等机器产物写入根cache/contracts，HTTP后备页写cache/build，整个/cache被Git忽略。Git仅保留生成工具、精确版本/提交/SHA锁文件及稳定core/contracts访问模块；构建前能从已锁定的后端提交恢复产物，不依赖工作目录里的未提交后端Schema。组件不从产物目录选择UI实现。现有公开运行副本继续var/public-snapshots和var/settings，按用户指示不迁移。
+并发扫描合并执行。更新失败保留该进程最后一次通过校验的包；冷启动没有历史可用包时展示不可用状态，不伪造成功。开发包不能用于生产。删除目录移除贡献，但不删除数据库页面、原始正文或历史配置。停用已安装插件会隐藏其页面和插入入口，保留源文；缺失代码与主动停用是不同状态。
 
-本地开发、检查、生产构建统一prepare。页面声明通过显式pages:register命令直接送后端stdin；构建不写库。配置值、页面路径、启停、人员等数据通过后端保存/应用和可靠回执更新，编译后的站点无需重新构建。新增React组件、TypeScript业务代码或全新主题实现仍需构建部署；目录自动发现减少改中央文件，不意味着运行时执行任意源码。
+同源技术接口为GET /__plugins/catalog和GET /__plugins/assets/<目录>/<文件>。目录不携带用户身份和私有配置，使用no-store及内容ETag；资产按摘要不可变缓存。页面每次读取本地已应用设置，不回源依赖FastAPI在线。开发浏览器约1.5秒检查目录，生产活动标签页约10秒，后台标签页暂停检查；这不替代可靠的设置投递或变成公开快照TTL。
 
-## 解耦顺序
+开发npm run dev自动编译、监听Docker挂载目录、新增/删除插件并更新对应资源。React Refresh复用Next宿主已初始化的刷新运行时；兼容函数组件保留Hook状态，Hook结构变化仍可能重挂载。编译错误显示开发提示并继续使用旧包，修正后恢复。生产阅读页允许热替换；文章/说说/页面的完整、首次创建和嵌入编辑器固定已加载的插件集合，遇到构建/启停变化先提示重新打开，避免打断草稿。离开编辑界面后可应用待更新集合。activate的onDispose用于释放订阅、事件和计时器；ESM模块本身由浏览器缓存，不能宣称可强制卸载JS内存。
 
-本轮迁出人物页面、画廊短代码和设置表单。后续优先拆附件/媒体展示、代码与公式展示、评论/互动、搜索展示、导航扩展；编辑器适配继续沿既有插件和单一Y.Doc。用户/API Key管理可以拆展示模块，但认证、权限判定、审计和密钥生命周期由宿主保持。SEO/路由/公开副本是跨插件协调能力，先保留宿主服务，避免插件卸载破坏既有URL和撤回规则。没有消费方的通用事件总线/热代码分发不预建。
+首期运行时React页面/控件在浏览器挂载，首屏显示主题加载占位；任意RSC、Server Action、热装后端Python包和数据库迁移均不属于这一插件协议。插件是受信任部署代码，不是恶意代码沙箱；管理后台不提供远程JS URL或npm安装。
+
+## 后端权威设置与节点清单
+
+settings 1.12.0新增PublicSettings.extensions：theme为空时使用实例默认，否则为已部署主题ID；disabled_plugins为停用的稳定插件ID列表。新增插件缺省启用，首次登记的页面仍是未启用工作稿，须另行审阅/应用。设置沿原PATCH /v1/admin/settings的修订、权限、CSRF、事务、审计及可靠投递，不在本地配置另存一套开关。
+
+GET /v1/admin/extensions返回配置的前端节点及最后登记清单，使用settings:read权限。reported_at代表登记时间，enabled代表节点配置，不能解释为在线探测。选择主题时要求所有启用节点都登记相同主题ID/版本/父级描述；重新启用插件时要求这些节点都有相同构建摘要。缺失/不一致返回42298，不改变设置修订。
+
+Node的dev/start协调进程从本地完整包和构建出的主题清单形成extensions-1，变化时登记，平时约60秒更新记录；失败在后台重试，读页面不等待网络。POST /internal/extensions/{node_id}验证真实socket来源IP AND该节点的Next→FastAPI环境变量Token，忽略X-Forwarded-For。清单最多512KiB，只接受元数据，不接收执行代码。浏览器不能调用它安装程序。
+
+登记在与设置/页面引用相同的锁下事务更新节点目录，并复用页面登记器。第一次创建未启用页面工作稿；之后保留既有data、发布快照、修订及应用状态，不用代码defaults覆盖用户配置。显式CLI登记继续可用，构建命令本身不连接数据库。迁移0027_extensions显式建立节点清单表；服务启动不自动迁移。
+
+## 配置模型、数据和缓存
+
+页面options继续是开放JSON对象，不是表单白名单；32层/256KiB及整页512KiB是既有上限。字段使用开放component名称及key/label/default/props/fields，主题提供标准控件，插件补充新控件。SettingsForm递归更新、保留未声明键；无效JSON保留输入并阻止保存。模型、UI和保存逻辑不进入generated目录。
+
+所有派生产物集中在被Git忽略的var/cache：contracts为精确锁定契约，build为错误后备页及主题目录，plugins为开发包，plugin-packages为验证后的不可变运行副本。根cache已移除，无兼容软链接；src/generated、registrations、custom_pages均不恢复。原var/settings、var/public-snapshots及浏览器IndexedDB位置保持，生产plugins也是被忽略的部署产物。
+
+公开配置可随原页面快照下发；私有元数据继续走独立鉴权接口，不进入options、公开props或公共缓存。SDK立即refresh、通知后重新鉴权拉取、deferred等待/取消等边界见[数据规范](../development/plugin-data-protocol.md)。已有pageConfigurationSource实现立即读取管理工作稿；没有真实后端消费者的资源不宣称已有Callback或异步执行服务。

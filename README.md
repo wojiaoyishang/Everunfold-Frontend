@@ -74,9 +74,11 @@ CI 使用相同的检查与构建命令。
 | `src/themes/argon/` | 默认父主题、具名组件和展示钩子；不混入数据库访问 |
 | `src/themes/paper/` | 可运行的子主题；仅声明相对父主题的差异 |
 | `src/core/themes/` | 公开主题选择、继承模板/插入位置和Portal作用域 |
-| `src/plugins/` | 自动发现的可信插件；页面、短代码、模型、组件与样式 |
+| `src/plugins/` | 独立编译的可信插件源码；页面、短代码、模型、组件与样式 |
+| `plugins/` | 被Git忽略的独立插件产物，部署后自动发现 |
+| `src/sdk/` | 公共插件SDK与宿主React/控件桥接 |
 | `src/core/contracts/` | 稳定业务契约访问模块；不负责UI注册 |
-| `cache/contracts/`、`cache/build/` | 忽略的契约/构建产物，按contracts.lock.json恢复 |
+| `var/cache/contracts/`、`var/cache/build/` | 忽略的契约/构建产物，按contracts.lock.json恢复 |
 | `deploy/`、`tests/` | 预留部署资料与测试 |
 | `docs/` | 基线、规范、决策和交接 |
 
@@ -108,3 +110,6 @@ CI 使用相同的检查与构建命令。
 最新编辑器提供顶置标题、根级固定链接、混合 Markdown/HTML 多块、分类标签/封面/SEO/评论设置、文章密码与定时开放；日期控件和后台面板已统一，逐组件浏览器检查为开发约定。版本与结果见 [编辑工作台验收](docs/handoff/editor-workspace-verification.md)。
 
 插件、主题与设置模型开发见[指南](docs/development/frontend-plugins.md)。`npm run prepare:local`恢复锁定契约/构建产物并检查插件；开发与构建会自动执行。`npm run pages:register -- --node-id web-main`显式登记插件页面，无registrations目录；原运行副本保留在var。
+
+
+独立插件构建、透明dev和后台主题/插件开关见[开发指南](docs/development/frontend-plugins.md)。运行时统一使用var/cache派生产物；公开副本和已应用设置仍保留原var位置。

@@ -1,6 +1,6 @@
 # 开发协议
 
-版本：development-18，2026-11-07（Asia/Shanghai）。适用于两个 Everunfold 仓库。它规定持续开发与交接方式，不修改已确认产品范围；功能约束见 [架构约束](../architecture/constraints.md)。
+版本：development-19，2026-11-07（Asia/Shanghai）。适用于两个 Everunfold 仓库。它规定持续开发与交接方式，不修改已确认产品范围；功能约束见 [架构约束](../architecture/constraints.md)。
 
 ## 需求依据与决定记录
 
@@ -174,4 +174,11 @@ HTML/Markdown 插件统一消费宿主源码字符串，正文输入先保留在
 
 ## 插件/主题发现与构建产物（2026-11-07）
 
-遵循ADR0077：只扫描固定可信目录，页面/短代码通过插件setup贡献，不生成组件注册文件。模型组件名开放，主题/插件提供实现，未知展示组件占位而非中断整个表单。src/generated和registrations移除；Git保留精确contracts.lock与工具，cache/contracts与cache/build忽略，检查/构建统一prepare。生成器内容不变时不得触碰mtime，内容变化原子发布，避免开发编辑器反复重载。数据方法和回调边界先更新规范再实现；没有真实消费者的后端操作不写假成功接口。原var副本不迁移。
+遵循ADR0077：只扫描固定可信目录，页面/短代码通过插件setup贡献，不生成组件注册文件。模型组件名开放，主题/插件提供实现，未知展示组件占位而非中断整个表单。src/generated和registrations移除；Git保留精确contracts.lock与工具，var/cache/contracts与var/cache/build忽略，检查/构建统一prepare。生成器内容不变时不得触碰mtime，内容变化原子发布，避免开发编辑器反复重载。数据方法和回调边界先更新规范再实现；没有真实消费者的后端操作不写假成功接口。原var副本不迁移。
+
+
+## 独立插件包与主题选择
+
+ADR0079覆盖插件随主体编译的旧规则。主体只静态发现主题；插件通过独立编译器和SDK，在生产plugins目录运行时发现。开发源码仍在src/plugins，dev自动编译/监听；不要手工维护摘要文件或恢复generated注册。生产资源先到、清单最后原子替换，失败保留上次可用包；编辑器遇到包集合变化先保留当前构建。Next锁定版本的Refresh宿主适配与Babel转换共同测试，升级依赖须复测兼容Hook状态保留。
+
+主题选择/插件停用列表由后端设置事务及可靠投递管理，Node仅报告受信部署目录。登记真实socket IP AND节点Token，代码与页面私有数据不随清单上传。原运行副本位置保持，根cache合并var/cache；所有派生包/契约/构建数据不入Git。新增主题仍随主体编译，不扩展为动态安装后端代码。详见运行规范和开发指南。

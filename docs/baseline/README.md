@@ -982,3 +982,22 @@ ADR0078已实现，源码前端721f0bb；当前bootstrap-18、plugin-runtime-2�
 | `docs/development/child-themes.md` | `e21f88af63c45e8b5d6fe3c2781bf8cca30055874578d8fd0d1813d97f7f49cd` |
 | `docs/decisions/0078-parent-child-themes-and-public-hooks.md` | `b0ee213a3a9fe6748e6971aa10f17a1bf893cb7631cf8bd72235032bb9f0d534` |
 | `docs/handoff/child-themes-verification.md` | `4657e912fea3ca390e414820e22f4688172985f19c7350feeef0d0b5f99003d8` |
+
+
+## 独立插件、动态主题与var/cache交付（2026-11-07）
+
+ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当前plugin-runtime-3、frontend-plugins-3、frontend-themes-2、child-themes-2、pages-runtime-7、development-19、bootstrap-19与independent-plugins-1替代相应旧说明；原始基线及历史摘要保持。STATUS各仓库单独维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `9775db0320e9a67e4151919a5b67b9d663141e48842c1e0bf4e9d08a6f70f4ce` |
+| `docs/architecture/constraints.md` | `bootstrap-19` | `92bb4dac189f4b58a1b5157d9bcde3ae13069266a7f9269e46436c55c8bf150e` |
+| `docs/architecture/frontend-plugin-runtime.md` | `plugin-runtime-3` | `4601bbc508b96ad732cc4fc10605f64b4fd4e6769fe452e9cd8bf2e17f4a4fae` |
+| `docs/architecture/frontend-themes.md` | `frontend-themes-2` | `cfbad882198ca5a29a644f872cab41645f453a12dd951583b24a850eac470eab` |
+| `docs/architecture/frontend-ui.md` | `本轮更新` | `9d98c886c20f630e3382db5228e3ccb458e232f2d5f5fa05ae71bf4ee035c265` |
+| `docs/development/protocol.md` | `development-19` | `f9d9e36ed631c22bb4df034ecf0f0df08c84304a2b5f458240b212278eac7673` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-3` | `6fa4bf3a78e9f3871f5a1459f46dfb430afc1007a1c2febcbe3912bea232ea67` |
+| `docs/development/child-themes.md` | `child-themes-2` | `7656f535cf9871f9735647da83485302eda71e1af2e46914469a845991a7b4f4` |
+| `docs/development/pages.md` | `pages-runtime-7` | `2cd45ca4e69942f2266f2d53597f839ab992996e8454fb4dc8877e28841eb4f5` |
+| `docs/decisions/0079-runtime-plugin-packages-and-var-cache.md` | `本轮更新` | `36055d32c7726ef36855b92e758dd57e6a2241d53df6f7de429751b9da0058ae` |
+| `docs/handoff/independent-plugins-verification.md` | `independent-plugins-1` | `348d69a3b88856a5ae553d7cba8ffef376ff882b75cd62abd76b2398872f78ff` |

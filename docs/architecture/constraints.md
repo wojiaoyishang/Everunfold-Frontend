@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-18，2026-11-07（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
+版本：bootstrap-19，2026-11-07（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
 
 ## 已确认的范围
 
@@ -36,7 +36,7 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 - 后端 `frontends.<node_id>` 绑定地址、投递 `enabled`、双向 Token 环境变量引用；根级 `FRONTEND_NODE_ID` 标识前端。更换域名不改变身份，`enabled` 不授予或撤销入站权限。
 - 前端连接、来源限制与双向 Token 引用统一位于仅服务端 `[backend]`，不另设 `[internal_auth]`，不整体公开给浏览器。实际密钥从受控环境解析，不保存于任务载荷。
 - Redis 项目主键来自后端 `[project].key`，示例保留 `lovepikachu`；scope 非空时生成 `{project.key}:{scope}:`。业务 Key、频道及 Celery 适配前缀集中派生，不因项目改名擅改运行命名空间。
-- 后端发布版本化 OpenAPI 与 WS/事件 Schema，前端从精确提交/SHA锁文件恢复类型和客户端，不手工另建业务字段定义。按2026-11-07用户要求，生成物写入被Git忽略的cache/contracts与cache/build，删除src/generated；稳定core/contracts模块隔离访问。原var公开副本不迁移。
+- 后端发布版本化 OpenAPI 与 WS/事件 Schema，前端从精确提交/SHA锁文件恢复类型和客户端，不手工另建业务字段定义。按2026-11-07用户最新要求，根cache合并到var/cache，生成物写入被Git忽略的var/cache/contracts与var/cache/build，删除src/generated；稳定core/contracts模块隔离访问。原var公开副本不迁移。
 - 业务 JSON 外壳为 `success/code/msg/data`，`code` 是整数，`data=None` 可省略，使用真实 HTTP 状态。文件、流、WS、204/304 等例外；`msg` 只供本地化展示。
 
 ## 身份与安全
@@ -109,3 +109,10 @@ Markdown/HTML 编译插件、整篇共享文档、PostgreSQL 持久确认、Stat
 ## 父子主题展示边界（2026-11-07）
 
 Argon作为默认父主题，子主题继承具名组件、逐级可组合模板与作用域CSS，并可使用前台展示钩子。主题仅选择/渲染已允许下发的数据；路由、SEO、受限内容门禁、正文安全渲染、预览鉴权与回执由宿主保持。现有管理界面不随公开主题切换。规范见[父子主题](frontend-themes.md)和ADR0078。
+
+
+## 独立前端插件与扩展偏好（ADR0079）
+
+主题源码随主体构建，部署后只切换已编译主题；插件源码单独编译为plugins/<目录>，主体不打包它们，可运行时新增/更新完整可信包。不设版本目录，按资源SHA与SDK协议校验；SDK共用宿主React，缺失展示组件占位，生产编辑器保留正在使用的构建。
+
+PublicSettings.extensions是后端权威偏好，沿原审计/可靠投递，不以节点本地开关替代。节点清单登记为POST /internal/extensions/{node_id}，正文协议extensions-1，真实IP AND节点Token、512KiB边界，只接受元数据。首次创建停用页面工作稿，重新登记不覆盖已有数据。所有迁移显式执行，运行时包不是后端迁移或恶意代码沙箱。

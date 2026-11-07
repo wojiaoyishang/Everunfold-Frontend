@@ -1,6 +1,6 @@
 # 页面管理与实时预览指南
 
-版本：pages-runtime-6，2026-11-07。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
+版本：pages-runtime-7，2026-11-07。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
 
 ## 管理页面
 
@@ -28,15 +28,16 @@ JavaScript仅在独立沙箱内运行；启用后显示脚本提示，维护启�
 
 1. 在`src/plugins/<插件>/plugin.ts`的同步setup调用`pages.register`，页面配置、schema、渲染和样式保留在同一插件目录。主题/插件具名组件在`components.tsx`导出；固定目录原生自动发现，不编辑中央列表，不生成组件文件。详见[插件开发指南](frontend-plugins.md)。
 2. 页面模型用开放组件名，后台通过主题hook渲染；未知组件显示占位，配置保留并可用JSON继续编辑。`fields`仅为旧表单描述，新的`settings_schema`与`defaults`由pages1.5支持，任意JSON配置不按字段白名单裁剪。保存是完整对象替换；首次登记使用默认值，重新登记不覆盖已保存数据。
-3. 开发/构建运行`npm run prepare:local`；Git只保存源码与`contracts.lock.json`，契约类型/客户端/Schema在忽略的`cache/contracts`恢复。不存在`src/generated`或`registrations`目录。运行副本仍位于var，未迁移。
+3. 开发/构建运行`npm run prepare:local`；Git只保存源码与`contracts.lock.json`，契约类型/客户端/Schema在忽略的`var/cache/contracts`恢复。不存在`src/generated`或`registrations`目录。运行副本仍位于var，未迁移。
 4. 显式登记（在前端根目录执行，后端环境与配置需已准备好）：
 
 ```sh
-npm run pages:manifest
-npm run pages:register -- --node-id web-main
+npm run plugins:build
+npm run themes:catalog
+npm run extensions:register -- --node-id web-main
 ```
 
-`pages:manifest`只向stdout输出JSON，供审阅；`pages:register`直接通过stdin调用相邻后端的安装器。可指定`--backend`、`--config`、`--python`。逐个启用节点登记一致清单后再应用；开发启动和构建不自动写数据库。后端也保留`--manifest -`，无需中间目录。
+`pages:manifest`仍可只输出源码声明供审阅；`extensions:register`从已编译包和主题目录形成清单，经stdin调用相邻后端安装器，可指定`--backend`、`--config`、`--python`。`pages:register`保留为同一命令的旧名称。构建不连接数据库；dev/start协调进程已支持鉴权后自动登记，首次创建停用工作稿、后续保留用户数据。详见[独立插件指南](frontend-plugins.md)。
 
 表单与JSON修改同一options对象，未知键和嵌套值保留。无效JSON保留输入并阻止保存/应用，预览维持最后有效值；项目内离开使用主题确认。配置可含嵌套对象、数组、null、布尔与有限数字，最多32层/256KiB，整页仍512KiB。配置和页面源码只在显式应用后影响公开副本；内部元数据不公开。
 

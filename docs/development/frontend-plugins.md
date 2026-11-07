@@ -1,47 +1,51 @@
-# 前端插件、主题和设置表单开发
+# 独立插件、页面与短代码开发
 
-版本：frontend-plugins-2，2026-11-07。当前实现见ADR0077，数据接口见[独立规范](plugin-data-protocol.md)。
+版本：frontend-plugins-3，2026-11-07。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people和src/plugins/gallery。
 
-## 目录与自动发现
+## 源码和命令
 
 ```text
-src/plugins/
-  people/
-    plugin.ts          插件身份和同步setup；贡献页面/组件
-    page.ts            页面身份、缺省配置、语言能力
-    schema.ts          设置模型，不写表单JSX
-    components.tsx     具名组件实现表
-    render.tsx         公开人物页
-    message-field.tsx  插件自定义控件，复用主题textarea
-    message.tsx        寄语弹窗和有限烟花
-    *.module.css       该插件的样式
-  gallery/
-    plugin.ts          setup贡献短代码
-    shortcode.ts       定义、参数、渲染、样例和媒体选择
-    styles.ts          仅使用时输出的作用域CSS
-src/themes/argon/
-  theme.ts             主题身份与提供的组件名
-  components.tsx       具名组件实现表
-  forms/               标准控件及主题样式
-src/core/
-  extensions/          原生发现、主题hook、组件加载和占位
-  plugins/             同步贡献收集、身份/重名守卫
-  forms/               模型、递归渲染和值更新
-  contracts/           稳定业务契约访问模块
-  plugin-data/         数据驱动接口和管理配置拉取适配器
+src/plugins/example/
+  plugin.ts          纯共享声明，setup统一注册贡献
+  page.ts            页面身份、默认配置、语言能力
+  schema.ts          设置模型
+  components.tsx     浏览器具名组件表、可选activate
+  render.tsx         页面或控件
+  shortcode.ts       纯共享短代码渲染器
+  *.module.css       插件样式
+src/sdk/             宿主公共SDK实现
+src/themes/          随主体编译的主题
+plugins/example/     独立生产产物，被Git忽略
+var/cache/plugins/   透明开发构建，被Git忽略
 ```
 
-仅扫描`src/plugins/*/plugin.ts`与`src/themes/*/theme.ts`。使用当前Next.js/Turbopack的原生import.meta.glob，生产/开发都支持；不适用于改用webpack。组件按各目录`components.tsx`懒加载。新增插件/主题只新增自己的目录，没有中央生成注册文件。目录名用小写字母/数字/连字符，身份使用稳定命名空间；纯声明入口不导入组件、CSS或浏览器API。Node CLI/测试使用同一目录规则的进程内适配器，不写生成源文件。
+```sh
+npm ci --ignore-scripts
+npm run dev
+npm run check
+npm run build:host
+npm run plugins:build -- --plugin people
+npm run plugins:build -- --plugin people --output ./plugins
+npm run build
+npm start
+```
 
-## 插件声明
+dev绑定0.0.0.0，可追加-- --port PORT。首次启动准备契约和主题目录，然后逐个编译插件；个别插件编译失败不阻止主体启动。修改/新增/删除源码由监听器处理，不手动维护产物。普通插件开发无需运行第二个构建进程；改宿主SDK/编译工具本身后重启dev协调进程。插件删除只清除本开发进程管理的开发包，不清理其他部署产物。
+
+build:host只构建主体和已有主题，不读取插件源码；plugins:build默认单独构建全部插件，也可重复--plugin指定多个目录。默认输出根plugins，--output可指定另一个部署根；--dev仅用于开发包，生产拒绝它。build是两次独立构建的串联。check包含插件独立类型检查和测试前包构建；CI不依赖未提交的本地产物。
+
+## 注册声明
+
+plugin.ts及其共享依赖不能使用DOM、React、Node专有模块或SDK/client；它们同时进入浏览器和Node。只使用公共SDK，不导入@/私有源码或跨出本插件目录。
 
 ```ts
-import type { FrontendPlugin } from "@/core/plugins/types";
+import { definePlugin } from "@everunfold/plugin-sdk";
 import page from "./page";
 import { shortcode } from "./shortcode";
-
-export default {
+export default definePlugin({
   id: "example.feature",
+  title: "示例功能",
+  description: "示例页面和短代码",
   version: "1.0.0",
   setup({ pages, shortcodes, components }) {
     pages.register(page);
@@ -49,34 +53,21 @@ export default {
     components.register("example.feature.page");
     components.register("example.feature.control");
   },
-} satisfies FrontendPlugin;
+});
 ```
 
-只调用需要的能力。setup必须同步，关闭收集后不得再注册；重复插件ID、页面ID/路径、短代码ID/调用名是清单错误，构建检查明确失败。后端内置短代码名称/ID保留，自定义数据库模板保留custom:命名空间。没有远端代码下载或后台安装npm包。
+只调用需要的register。setup必须同步，不能稍后追加。页面/短代码定义只是对象，通过插件setup注册，不写顶层自注册副作用。身份、调用名或后端内置保留名冲突会拒绝该包。数据库自定义短代码保留custom:命名空间，调用格式仍是`{{< name key="value" >}}`及容器结束标记。
 
-## 页面声明与部署
+版本用于语义兼容，不出现在目录名中；资源和构建摘要自动变化。页面registration.version变化后须核对已有发布快照及数据兼容，再显式保存/应用，不用改版本号触发缓存刷新。
 
-页面贡献类型为`CustomPageDefinition`，包含registration（后端PageRegistration）、component（具名实现）、settingsModel（可选模型）、localized（是否使用站点语言路径）。保持ID和版本稳定，版本不一致或整个实现未部署继续503；只是某个展示控件缺失时显示占位。
-
-registration支持defaults与开放settings_schema。现有人物页把schema序列化给settings_schema，默认值来自模型；后端仅保存JSON，不限制组件名。首次登记创建默认工作稿，后续登记保留已有配置。页面路径、状态、人员等保存/应用后沿原可靠完整快照同步。
-
-```sh
-npm run prepare:local
-npm run pages:manifest
-npm run pages:register -- --node-id web-main
-```
-
-第一条恢复构建产物并验证源代码声明；第二条只打印可审阅JSON；第三条显式通过stdin调用相邻后端`.venv`中的安装器。可传`--backend PATH --config PATH --python PATH`；配置中的环境变量需在调用前准备好。为各启用节点登记一致版本，构建/开发本身不写数据库。没有registrations目录。
-
-编译后可修改配置、已注册控件的模型/字段布局与页面路径等：模型经后台声明下发，管理端优先读取registration.settings_schema；未下发模型时才使用本地模型。新增React/TypeScript组件实现仍需构建部署。未知组件可以先保留配置并用JSON编辑，安装匹配实现后再展示，不能把组件名当任意模块路径。
-
-## 模型、主题hook与自定义组件
+## 页面、模型和额外数据
 
 ```ts
-const schema = {
+import type { CustomPageDefinition, SettingsModel } from "@everunfold/plugin-sdk";
+const model = {
   fields: [
-    { key: "title", label: "标题", component: "form.text", default: "" },
-    { key: "enabled", label: "显示", component: "form.boolean", default: true },
+    { key: "intro", label: "介绍", component: "form.textarea", default: "" },
+    { key: "visible", label: "显示", component: "form.boolean", default: true },
     { key: "people", label: "人物", component: "form.list", default: [],
       props: { maxItems: 300, addLabel: "添加人物", itemLabel: "人物" },
       fields: [
@@ -85,46 +76,107 @@ const schema = {
       ],
     },
   ],
-};
+} satisfies SettingsModel;
+export default {
+  registration: {
+    id: "example.feature", version: "1.0.0", title: "示例页", path: "/example",
+    defaults: { intro: "欢迎", visible: true, people: [], extra: { any: [1, null] } },
+    settings_schema: JSON.parse(JSON.stringify(model)),
+  },
+  component: "example.feature.page",
+  settingsModel: model,
+  localized: true,
+} satisfies CustomPageDefinition;
 ```
 
-`component`是开放字符串，不需要扩展后端枚举。`SettingsForm`负责递归值更新；模型未声明的键、嵌套额外值和显式null保持。主题实现通过`FormFieldProps`接收field、value、onChange、disabled和renderFields。JSON高级模式与表单修改同一配置；无效JSON保留源文、禁用保存/应用，项目内离开会确认。
+options保存公开JSON，不限制为schema中的键；不得放密钥或私有数据。模型只描述表单，宿主处理保存、权限、修订和预览，不在插件中复制整页编辑流程。管理端优先用后端登记的settings_schema，缺省时使用本地模型。字段布局可以改变，未知控件显示占位，配置和JSON高级编辑仍可使用。
 
-| 标准组件名 | 主题实现及主要props |
+| 标准组件 | 主要props |
 | --- | --- |
-| form.text / form.textarea | 共享AccountField；maxLength、minLength、required |
-| form.number | 数字输入；min、max；空值为null |
+| form.text / form.textarea | maxLength、minLength、required |
+| form.number | min、max；空值为null |
 | form.boolean | 共享Switch |
-| form.select | 共享Select；choices为字符串或value/label列表 |
-| form.object | 按fields递归编辑对象 |
-| form.list | 按fields编辑对象列表；maxItems、addLabel、itemLabel、emptyText |
+| form.select | choices为字符串或value/label列表 |
+| form.object | 递归fields |
+| form.list | fields、maxItems、addLabel、itemLabel、emptyText |
 
-`useThemeComponent(name, props)`返回已解析的React节点，或直接使用`<ExtensionComponent name="..." {...props}/>`。主题（含基础主题）负责已有控件样式，插件补充新名称；`ThemeComponentsProvider`可为局部界面选择已发现主题的控件表。组件类型在模块装配时固定，输入变化不会重新创建组件/丢失焦点。公开阅读与授权前台预览现在通过父子主题选择组件、可组合模板与插入钩子；后台上下文仍独立。详见[子主题指南](child-themes.md)与ADR0078。
+localized:true由实现自行解释站点语言/前缀，同一配置生成代码页的各语言入口；内容不被自动翻译。手工HTML页面的独立译文沿原页面管理流程。
 
-主题新增控件时在theme.ts的components列出名称，并在components.tsx的default对象提供同名实现。插件使用components.register声明并提供自己的components.tsx。未注册名称、没有实现的声明显示“组件暂不可用”及名称；不会删配置或让整个表单白屏。插件自定义寄语控件`people/message-field.tsx`是可运行示例：内部通过主题textarea组合，实现计数，页面schema只引用core.people.message。
+## React组件与SDK
 
-## 短代码贡献
+components.tsx的default对象必须按声明名称导出组件，组件定义在模块顶层，不能在render中重新声明。正常import React/ReactDOM/JSX即可，编译器将它们连接到宿主单例。图片、视频和woff2可从本插件目录导入，输出为同源资产URL字符串，不是Next的StaticImageData；配套tsconfig.plugins.json使用SDK的独立资产声明。CSS Modules中的资源引用也使用插件自身路径。
 
-`PluginShortcode`同时包含definition、render、可选preview/classNames/mediaPicker。definition沿权威短代码参数协议，scope须与稳定UUID一致。宿主由这一次贡献派生正文解析和后台只读目录，主题/核心不按gallery名称写分支。
+```tsx
+import type { CustomPageProps, FormFieldProps, PluginActivationContext } from "@everunfold/plugin-sdk";
+import { TextArea, useLocale } from "@everunfold/plugin-sdk/client";
+function Page({ page }: CustomPageProps) {
+  const { locale } = useLocale();
+  return <section lang={locale}><h2>{page.title}</h2><p>{String(page.options?.intro ?? "")}</p></section>;
+}
+function MessageField({ value, onChange, disabled }: FormFieldProps) {
+  return <TextArea value={typeof value === "string" ? value : ""}
+    disabled={disabled} onChange={event => onChange(event.target.value)} />;
+}
+export default { "example.feature.page": Page, "example.feature.control": MessageField };
+export function activate({ onDispose }: PluginActivationContext) {
+  const onResize = () => { /* 更新插件自己的布局信息 */ };
+  window.addEventListener("resize", onResize);
+  onDispose(() => window.removeEventListener("resize", onResize));
+}
+```
 
-render获得parameters、已格式化body、当前正文media及escape。参数插入文字时使用escape，最终HTML仍走公共allowlist与媒体解析；classNames只为需要的类显式授权。CSS保留该定义作用域、仅实际使用时输出。preview用于目录空态示例，不允许替代真实插入时的参数/媒体校验。mediaPicker只声明参数、图片类型、限额和文案，宿主复用原媒体权限/选择/上传/引用保护。
+运行时等待模块、样式和一次React提交后确认组件已挂载。插件内部的异步资源应另设就绪状态，不能把通用包加载回执当成其业务数据已完成。
 
-## 产物与缓存
+| SDK入口 | 已提供能力 |
+| --- | --- |
+| @everunfold/plugin-sdk | definePlugin及页面/短代码/模型/控件/数据/生命周期类型 |
+| @everunfold/plugin-sdk/client | Button、TextField/TextArea、Form、Icon、Avatar、Select、Switch等共享控件 |
+| 同上 | Modal、ConfirmDialog、Dialog、Popover、Toast、统一动效/焦点/退出机制 |
+| 同上 | ExtensionComponent、ParentThemeComponent、useThemeComponent、SettingsForm、主题Portal作用域 |
+| 同上 | useLocale、useLanguageCatalog、UiText、useT；插件可用当前locale管理自己的任意语言字典 |
+| 同上 | 按需MediaPickerDialog；复用已有媒体权限、选择/上传队列，不授予额外权限 |
+| 同上 | pageConfigurationSource、createPluginDataSource、readPageMetadata/savePageMetadata、管理请求上下文 |
+
+activate可通过components.register补充清单中已声明的实现，通过onDispose释放资源。共享定义与组件模块顶层保持无持久副作用，避免每次热更新重复订阅。业务请求继续直达配置的FastAPI，SDK不提供内部Token、数据库连接或任意后端代码执行。
+
+## 短代码
+
+PluginShortcode包含definition、render及可选preview/classNames/mediaPicker。definition使用权威短代码参数协议，scope须匹配稳定UUID。render得到parameters、已格式化body、当前正文media及escape；参数插入文字时escape，最终HTML仍过公共allowlist/媒体校验。CSS限定本定义scope，仅使用时输出。preview用于目录样例，不替代真实参数校验。
+
+mediaPicker声明参数名、图片类型、数量上限及文案，宿主据此提供媒体选择和当前区块插入。画廊是完整示例，核心没有按gallery名称写解析分支。插件目录项只读；数据库纯HTML/CSS模板仍由原后台短代码库管理。
+
+## 部署、启停和主题选择
+
+将独立包的整个plugins/<目录>复制到目标plugins根中，资源先到、manifest.json最后原子替换。保留旧的摘要资源，已有页面可能仍引用它们。不要把src/plugins源码当运行产物；生产启动不加载插件编译器或Babel开发依赖，也不在运行机器上编译插件源码；协调器沿用现有tsx执行宿主工具。使用与宿主协议兼容的SDK构建。
+
+npm start除Next服务外运行清单协调器，按配置的FRONTEND_NODE_ID和[backend]内部连接登记元数据。后端须先显式升级0027_extensions，并已配置实际socket来源白名单及Next→FastAPI Token。只运行next start时不会自动登记，须自行运行协调器或显式登记：
+
+```sh
+npm run plugins:build
+npm run themes:catalog
+npm run extensions:register -- --node-id web-main --backend ../Everunfold-Backend
+```
+
+该命令只读已编译包，通过stdin调用相邻后端安装器；支持--config/--python。构建不写数据库；登记首次创建默认未启用页面，之后保留已有页面数据。pages:register保留为同一命令的旧名称，pages:manifest仍用于开发时查看页面声明。
+
+后台“插件管理”切换开关后保存，后端用修订守卫并可靠同步至节点。“主题设置→已安装主题”选择主题并保存；已有主题无需重构建或重启。主题/插件未在所有启用节点登记一致描述/构建时，选择或重新启用返回提示，草稿保留。节点时间为最后登记记录，不能视为在线健康状态。
+
+生产阅读页取得更新包；正在打开的完整/嵌入编辑器提示重新打开，宿主草稿继续保留。开发兼容Hook状态尽量保留，修改Hook顺序/签名可能重置插件内部状态；重要编辑值应交给宿主字段onChange，不只存在组件useState。
+
+## 缓存、版本与验证
 
 | 内容 | 位置 | Git |
 | --- | --- | --- |
-| 稳定契约入口与精确提交/SHA锁 | src/core/contracts、contracts.lock.json | 提交 |
-| 类型/客户端/Schema和派生目录数据 | cache/contracts | 忽略 |
-| 主题HTTP错误后备文档 | cache/build | 忽略 |
-| 运行公开内容和已应用设置副本 | 原var目录 | 忽略，未迁移 |
-| 私有协作离线稿 | 浏览器IndexedDB | 不进入仓库 |
+| 契约入口和精确提交/SHA锁 | src/core/contracts、contracts.lock.json | 提交 |
+| 契约类型/客户端/Schema | var/cache/contracts | 忽略 |
+| 错误后备页/编译主题清单 | var/cache/build | 忽略 |
+| 开发包/验证后不可变副本 | var/cache/plugins、var/cache/plugin-packages | 忽略 |
+| 独立生产插件包 | plugins | 忽略 |
+| 运行公开副本/已应用设置 | 原var/public-snapshots、var/settings | 忽略，位置不变 |
+| 私有协作离线稿 | 浏览器IndexedDB | 不入Git |
 
-不存在src/generated。恢复优先读取EVERUNFOLD_BACKEND_PATH（缺省相邻后端）的锁定Git对象，其次校验已有本地产物；缺少时可下载该精确GitHub提交的Schema，必须通过SHA验证。私有/未推送提交需提供包含它们的后端checkout，不以最新分支替代锁定提交。`contract:sync`仅接受已提交后端契约并更新锁文件；首次安装后先prepare/check再开发。
+根cache和src/generated不存在。契约恢复依旧校验锁定后端提交和SHA；私有未推送提交需要包含它们的后端checkout。产物不变时保留mtime，变化时原子发布。var/cache可在服务停止后重建，不要把var/settings、公开副本或用户数据当构建缓存删除。
 
-生成器内容未变时保留mtime，变化时原子发布，避免检查命令反复触发开发编辑器重载。不要把cache添加到Git；当前版本已从Git移除旧生成目录，历史提交保留。
+npm run check覆盖类型、格式、注册不变量和包完整性/回退检查；npm run verify:admin在隔离副本中编译插件后删除其源码再构建主体，并验证公开/私有故障边界。设置PLAYWRIGHT_MODULE和CHROMIUM_EXECUTABLE可额外运行真实生产浏览器的后部署新增、热替换、编辑保护及生命周期检查。具体结果见[验收](../handoff/independent-plugins-verification.md)。
 
-## 数据与后续拆分
-
-`pageConfigurationSource(baseUrl).refresh({pageId})`立即读取授权工作稿配置，只返回options/修订/时间，不写公共缓存。数据驱动的通知、等待、取消/超时接口见独立规范；真实deferred后端操作需要插件实际后端资源及契约，不因有接口类型就自动存在。
-
-下一步优先把评论/互动、搜索展示、媒体/附件展示、代码/公式等可选展示能力按实际消费者拆分；认证、权限、主库事务、审计与可靠投递保留宿主。现有块编辑器继续沿单一Y.Doc和既有适配接口，不另建文档或保存流程。
+立即数据refresh、私有元数据、版本通知后重新鉴权及未来deferred消费者继续遵循[数据接口规范](plugin-data-protocol.md)。运行时包不意味着通用后端异步资源已经存在。可继续解耦评论、搜索和媒体展示；认证、事务、可靠投递与单一Y.Doc留在宿主。
