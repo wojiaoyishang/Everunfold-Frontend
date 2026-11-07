@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[父子主题规范](architecture/frontend-themes.md)与[ADR0078](decisions/0078-parent-child-themes-and-public-hooks.md)：Argon作为默认父主题，子主题局部覆盖模板、组件、样式并使用前台钩子；具体实现验收见STATUS。
+
 [定时发布与阅读进度](decisions/0073-scheduled-content-publication.md)、[操作指南](development/content-management.md)及[本轮验收](handoff/scheduled-publication-verification.md)：冻结排期版本、可靠Worker发布及取消，页面移除通用读取按钮、列表前台入口和铅笔、右下阅读进度填充。
 
 [编辑操作组随滚动进入顶栏](handoff/editor-actions-dock-verification.md)：文章/说说保存与发布加入预览组，页面预览/保存合并并将返回列表左置；同步修复已有协作回执拥有者字段遗漏导致的保存误报。

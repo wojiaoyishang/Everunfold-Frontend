@@ -956,3 +956,13 @@ ADR0074、pages-runtime-4、settings-runtime-10、multilingual-runtime-5、regis
 | `docs/development/plugin-data-protocol.md` | `22049e14ec71a48a6c7392794033bebc2d14105f3793daf58bee197eddeb285e` |
 | `docs/development/protocol.md` | `983d504423702ad080a134a1aa2cd8c9418250865d31cc4537c7f5d5f4bea648` |
 | `docs/handoff/plugin-runtime-verification.md` | `b389614e383d19a8cf6aab5ce2aa7885933002fbc4877e0ddfac40e13ad6ece6` |
+
+## 父子主题实施约定（2026-11-07）
+
+新增frontend-themes-1与ADR0078；本节是实现前的约定存档，最终验收另记。原始基线不改。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `c90519b1103dec72b5781436208311e51494bbf9779a5075bdef9a69921fbf95` |
+| `docs/architecture/frontend-themes.md` | `97e91642fe30fc13fa307dbcbcd582294aafca695e2d61e970fb4fc8807d315a` |
+| `docs/decisions/0078-parent-child-themes-and-public-hooks.md` | `3efad4efb0154a5ea9cc6e97709196fad11a8ad54e0af001cd08970ad48b048e` |
