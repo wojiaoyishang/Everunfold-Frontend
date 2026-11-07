@@ -1,6 +1,6 @@
 # 前端插件、主题和设置表单开发
 
-版本：frontend-plugins-1，2026-11-07。当前实现见ADR0077，数据接口见[独立规范](plugin-data-protocol.md)。
+版本：frontend-plugins-2，2026-11-07。当前实现见ADR0077，数据接口见[独立规范](plugin-data-protocol.md)。
 
 ## 目录与自动发现
 
@@ -99,7 +99,7 @@ const schema = {
 | form.object | 按fields递归编辑对象 |
 | form.list | 按fields编辑对象列表；maxItems、addLabel、itemLabel、emptyText |
 
-`useThemeComponent(name, props)`返回已解析的React节点，或直接使用`<ExtensionComponent name="..." {...props}/>`。主题（含基础主题）负责已有控件样式，插件补充新名称；`ThemeComponentsProvider`可为局部界面选择已发现主题的控件表。组件类型在模块装配时固定，输入变化不会重新创建组件/丢失焦点。它不是全站布局皮肤热切换器，现有博客布局仍由Argon提供。
+`useThemeComponent(name, props)`返回已解析的React节点，或直接使用`<ExtensionComponent name="..." {...props}/>`。主题（含基础主题）负责已有控件样式，插件补充新名称；`ThemeComponentsProvider`可为局部界面选择已发现主题的控件表。组件类型在模块装配时固定，输入变化不会重新创建组件/丢失焦点。公开阅读与授权前台预览现在通过父子主题选择组件、可组合模板与插入钩子；后台上下文仍独立。详见[子主题指南](child-themes.md)与ADR0078。
 
 主题新增控件时在theme.ts的components列出名称，并在components.tsx的default对象提供同名实现。插件使用components.register声明并提供自己的components.tsx。未注册名称、没有实现的声明显示“组件暂不可用”及名称；不会删配置或让整个表单白屏。插件自定义寄语控件`people/message-field.tsx`是可运行示例：内部通过主题textarea组合，实现计数，页面schema只引用core.people.message。
 

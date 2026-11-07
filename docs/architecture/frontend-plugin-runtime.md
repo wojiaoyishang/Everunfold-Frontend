@@ -1,12 +1,12 @@
 # 前端插件、主题与声明式设置规范
 
-版本：plugin-runtime-1，2026-11-07。状态：本轮实现依据，逐项验证结果在STATUS记录。以用户最新要求替代ADR0076中的custom_pages目录和生成式装配；不把本规范的后续拆分建议当成已交付能力。
+版本：plugin-runtime-2，2026-11-07。状态：本轮实现依据，逐项验证结果在STATUS记录。以用户最新要求替代ADR0076中的custom_pages目录和生成式装配；不把本规范的后续拆分建议当成已交付能力。
 
 ## 宿主和扩展
 
 宿主固定掌握认证/授权、CSRF、数据库事务、审计、可靠投递、版本/撤回守卫、源文和上传队列。插件提供可选页面、短代码、设置模型和展示组件；主题提供布局和具名控件实现。数据库配置不能成为动态模块路径。第一方插件与主题同样经过本地可信代码发现；不声称它们是恶意代码的安全沙箱。
 
-只保留src/plugins/<插件>/，不另设custom_pages。每个插件的plugin.ts声明稳定id、version和同步setup，目录可包含页面、短代码、schema、组件与样式。setup通过pages.register、shortcodes.register等已实现能力贡献项目，短代码和页面定义不自行注册。组件由本目录components.tsx按稳定名称导出。主题放src/themes/<主题>/，theme.ts声明身份和components.tsx提供具名控件。新增能力只在所属目录维护。
+只保留src/plugins/<插件>/，不另设custom_pages。每个插件的plugin.ts声明稳定id、version和同步setup，目录可包含页面、短代码、schema、组件与样式。setup通过pages.register、shortcodes.register等已实现能力贡献项目，短代码和页面定义不自行注册。组件由本目录components.tsx按稳定名称导出。主题放src/themes/<主题>/，theme.ts声明身份/父级/模板/钩子和components.tsx提供具名实现；父子主题与作用域CSS见[主题规范](frontend-themes.md)。新增能力只在所属目录维护。
 
 Next.js当前Turbopack支持import.meta.glob，宿主使用固定本地路径自动发现插件/主题及组件表（eager元数据使用模块对象，避免生产默认导出差异），不生成中央组件文件，不允许配置远程JS地址。Node检查/导出工具采用同一目录规则；纯配置清单不导入组件/CSS。插件身份、页面ID、短代码ID/名称的重复声明是部署错误，明确失败；没有注册的展示组件显示主题占位提示，保留原配置，其余设置继续可用。组件实现发生异常时局部错误边界显示提示，不吞掉网络保存失败。
 

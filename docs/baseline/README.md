@@ -966,3 +966,19 @@ ADR0074、pages-runtime-4、settings-runtime-10、multilingual-runtime-5、regis
 | `docs/README.md` | `c90519b1103dec72b5781436208311e51494bbf9779a5075bdef9a69921fbf95` |
 | `docs/architecture/frontend-themes.md` | `97e91642fe30fc13fa307dbcbcd582294aafca695e2d61e970fb4fc8807d315a` |
 | `docs/decisions/0078-parent-child-themes-and-public-hooks.md` | `3efad4efb0154a5ea9cc6e97709196fad11a8ad54e0af001cd08970ad48b048e` |
+
+## 父子主题与前台展示钩子交付（2026-11-07）
+
+ADR0078已实现，源码前端721f0bb；当前bootstrap-18、plugin-runtime-2、frontend-plugins-2、frontend-themes-1、child-themes-1与本轮验收。以下摘要替代这些文件的旧摘要，实施前存档与原始基线保留。STATUS各仓库单独维护。
+
+| 当前共同文件 | SHA256 |
+| --- | --- |
+| `docs/README.md` | `4ed75f34c388f4a0ac37effe99ad770d6c9ad0fa75bce9804af44ed7dfac3fb4` |
+| `docs/architecture/constraints.md` | `c3e3ea90751e1193b44315547027c052d2abd42830d4ed531971fdc74e412e4c` |
+| `docs/architecture/frontend-plugin-runtime.md` | `78d4f93a05fa82cb40d9f49dedde70addb650daad1da62a0d3ef66fb76a36280` |
+| `docs/architecture/frontend-themes.md` | `c03c06f9582a33ee194d4f7948c99c275a5862d763d32a488808c5e8b14b37e6` |
+| `docs/architecture/frontend-ui.md` | `ce556c4938027b9c3f1b246500e5a73de61dd3042b4abb08138cb3d57aabfc34` |
+| `docs/development/frontend-plugins.md` | `1005dd3a3cdb2a95b95cdf7997fd33d3fa2391fae96bcb315c197721f25cebde` |
+| `docs/development/child-themes.md` | `e21f88af63c45e8b5d6fe3c2781bf8cca30055874578d8fd0d1813d97f7f49cd` |
+| `docs/decisions/0078-parent-child-themes-and-public-hooks.md` | `b0ee213a3a9fe6748e6971aa10f17a1bf893cb7631cf8bd72235032bb9f0d534` |
+| `docs/handoff/child-themes-verification.md` | `4657e912fea3ca390e414820e22f4688172985f19c7350feeef0d0b5f99003d8` |

@@ -1,6 +1,6 @@
 # 前台组件、导航与动效边界
 
-更新：2026-10-31。适用于当前 Next.js App Router 前台；在线 0.1 API/快照保持不变，展示原型另消费后端 0.2.0-preview.1 草案。最新导航检查见 [导航验证](../handoff/frontend-navigation-verification.md)，其余阅读能力见 [说说与阅读工具记录](../handoff/frontend-reader-verification.md)。
+历史主体更新：2026-10-31；父子主题补充：2026-11-07。适用于当前 Next.js App Router 前台；在线 0.1 API/快照保持不变，展示原型另消费后端 0.2.0-preview.1 草案。最新导航检查见 [导航验证](../handoff/frontend-navigation-verification.md)，其余阅读能力见 [说说与阅读工具记录](../handoff/frontend-reader-verification.md)。
 
 2026-11-05实现更新：旧兼容解析、legacy样式及旧摘要/引用汇总已经移除；下文词表仅为历史记录。当前采用`{{< … >}}`原生语法，目录、受控HTML/CSS、自定义保存/应用、只读代码注册和文章插入已接通，见[短代码架构](shortcodes.md)、[ADR0057](../decisions/0057-native-shortcode-implementation.md)。HTML源码可进入可视化修改，源文保留和边界见[ADR0058](../decisions/0058-preserved-html-visual-editing.md)。
 
@@ -142,3 +142,7 @@ HorizontalRail 将原生横向列表与 core/browser/horizontal-wheel 连接，�
 ## 插件控件与产物隔离（2026-11-07）
 
 页面/短代码均由可信插件提供，组件模块原生自动发现，不从自动生成文件选择界面。设置使用core/forms的声明模型与渲染宿主，Argon/forms实现标准控件，插件可声明新组件名；缺失时显示主题占位。core/contracts是业务契约访问边界，类型/客户端在忽略的cache中恢复。详见ADR0077和[插件指南](../development/frontend-plugins.md)。
+
+## 父子主题补充（2026-11-07）
+
+Argon作为默认父主题。公开壳、卡片、页面和授权前台预览现通过具名组件、模板和插入钩子参与主题继承；后台保持独立上下文。不要继续把本文件历史目录图理解为新主题须复制整套Argon，见[主题规范](frontend-themes.md)、[操作指南](../development/child-themes.md)与ADR0078。
