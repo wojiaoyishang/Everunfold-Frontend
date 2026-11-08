@@ -1,8 +1,10 @@
 # 页面管理、注册与缓存边界
 
-版本：registered-pages-runtime-7，2026-11-07。状态：按用户授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施，脚本执行位置见[ADR0081](../decisions/0081-authored-page-script-position.md)。
+版本：registered-pages-runtime-8，2026-11-08。状态：按用户授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施，脚本执行位置见[ADR0081](../decisions/0081-authored-page-script-position.md)。
 
 ## 两种来源
+
+按[ADR0083](../decisions/0083-plugin-activation-usage-confirmation.md)，目录不返回available=false的注册页面，包括插件主动停用和登记缺失/不一致；按ID记录、配置、元数据、已应用源文及修订保留。重新启用并部署一致后恢复条目，打开的目录随运行清单修订重读。应用快照仍用于启停使用计数，不用过滤后的目录反推引用。
 
 `/admin/pages`统一展示自定义源码页与可信前端注册页，支持搜索、状态和回收站。既有内容类型`page`的历史数据保留；本轮不改其历史正文或导入WordPress人员。
 

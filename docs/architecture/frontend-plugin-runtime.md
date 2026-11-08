@@ -1,6 +1,6 @@
 # 前端插件、主题与运行时扩展规范
 
-版本：plugin-runtime-3，2026-11-07。已按ADR0079实现，实际检查见[本轮验收](../handoff/independent-plugins-verification.md)。本版替代plugin-runtime-2中的插件随主体编译、根cache和仅显式页面登记规则；数据协议、开放模型与父子主题规则保留。
+版本：plugin-runtime-4，2026-11-08。已按ADR0079实现，实际检查见[本轮验收](../handoff/independent-plugins-verification.md)。本版替代plugin-runtime-2中的插件随主体编译、根cache和仅显式页面登记规则；数据协议、开放模型与父子主题规则保留。
 
 ## 宿主、主题和插件
 
@@ -31,6 +31,10 @@
 settings 1.12.0新增PublicSettings.extensions：theme为空时使用实例默认，否则为已部署主题ID；disabled_plugins为停用的稳定插件ID列表。新增插件缺省启用，首次登记的页面仍是未启用工作稿，须另行审阅/应用。设置沿原PATCH /v1/admin/settings的修订、权限、CSRF、事务、审计及可靠投递，不在本地配置另存一套开关。
 
 GET /v1/admin/extensions返回配置的前端节点及最后登记清单，使用settings:read权限。reported_at代表登记时间，enabled代表节点配置，不能解释为在线探测。选择主题时要求所有启用节点都登记相同主题ID/版本/父级描述；重新启用插件时要求这些节点都有相同构建摘要。缺失/不一致返回42298，不改变设置修订。
+
+settings 1.13新增POST /v1/admin/extensions/usage，输入plugin_ids（每次1至100个稳定ID），响应scanned_at与plugins数组；每项包含plugin_id/title/registered/applied_pages/published_contents/scheduled_contents。要求settings:write；浏览器POST保留CSRF/Origin验证。只返回计数，不暴露私有内容。归属从所有已存清单收集，停用时仍能检查；计数读取权威应用快照与正文，定时内容取冻结计划，不取后来修改的工作稿。
+
+设置保存统一检查启停差异，有使用或注册信息未知时显示可继续的项目确认弹窗，无使用直接保存；失败保留输入且不保存。预检不锁全站，不能推断任意脚本或配置隐式依赖。页面目录过滤不可用的注册页，按ID记录与配置仍保留；重新启用并部署就绪后恢复，已打开目录随插件清单变化重新读取。详见[ADR0083](../decisions/0083-plugin-activation-usage-confirmation.md)与[本轮验收](../handoff/plugin-activation-usage-verification.md)。
 
 Node的dev/start协调进程从本地完整包和构建出的主题清单形成extensions-1，变化时登记，平时约60秒更新记录；失败在后台重试，读页面不等待网络。POST /internal/extensions/{node_id}验证真实socket来源IP AND该节点的Next→FastAPI环境变量Token，忽略X-Forwarded-For。清单最多512KiB，只接受元数据，不接收执行代码。浏览器不能调用它安装程序。
 

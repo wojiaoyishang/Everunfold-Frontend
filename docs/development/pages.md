@@ -1,8 +1,10 @@
 # 页面管理与实时预览指南
 
-版本：pages-runtime-9，2026-11-07。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
+版本：pages-runtime-10，2026-11-08。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
 
 ## 管理页面
+
+列表仅展示可用插件的注册页面；插件停用或部署不可用时隐藏相关条目，已有配置与应用快照保留，重新启用并部署一致后恢复。自定义源码页不受此过滤影响。插件管理在保存启停时检查已应用页面及正文引用并提供继续/取消提示，见[ADR0083](../decisions/0083-plugin-activation-usage-confirmation.md)。
 
 在后台“页面”查看来源、启用状态、草稿/应用修订，按标题或路径搜索。新建自定义页面，输入标题和站内绝对路径，分别编辑HTML/CSS/JavaScript。页面和JavaScript默认关闭；“保存草稿”不影响公开内容，“保存并应用”才更新入口；关闭启用后“保存并停用”。改址后旧路径失效，不产生别名。
 

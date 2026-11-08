@@ -1,6 +1,6 @@
 # 独立插件、页面与短代码开发
 
-版本：frontend-plugins-4，2026-11-07。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
+版本：frontend-plugins-5，2026-11-08。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
 
 ## 源码和命令
 
@@ -160,6 +160,10 @@ npm run extensions:register -- --node-id web-main --backend ../Everunfold-Backen
 该命令只读已编译包，通过stdin调用相邻后端安装器；支持--config/--python。构建不写数据库；登记首次创建默认未启用页面，之后保留已有页面数据。pages:register保留为同一命令的旧名称，pages:manifest仍用于开发时查看页面声明。
 
 后台“插件管理”切换开关后保存，后端用修订守卫并可靠同步至节点。“主题设置→已安装主题”选择主题并保存；已有主题无需重构建或重启。主题/插件未在所有启用节点登记一致描述/构建时，选择或重新启用返回提示，草稿保留。节点时间为最后登记记录，不能视为在线健康状态。
+
+保存插件启停前，管理端查询当前应用的页面、已发布正文与定时发布冻结版本中的短代码引用。有使用时会列出插件、方向及数量，选择“继续并保存”或“取消”；取消保留未保存设置，无使用直接保存。查询失败不会保存，缺少清单则显示人工核对提示；原部署/修订守卫不被绕过。历史草稿及脚本动态调用不在静态统计内，详见[ADR0083](../decisions/0083-plugin-activation-usage-confirmation.md)。
+
+未启用或部署不可用插件的注册页面从“页面”列表隐藏，数据仍保留；重新启用后同一条目恢复。首次登记的页面只是未应用工作稿，不因插件缺省启用就自动公开。插件作者须保持贡献ID与调用名稳定，归属清单由独立构建产出，不额外维护第二张引用表。
 
 生产阅读页取得更新包；正在打开的完整/嵌入编辑器提示重新打开，宿主草稿继续保留。开发兼容Hook状态尽量保留，修改Hook顺序/签名可能重置插件内部状态；重要编辑值应交给宿主字段onChange，不只存在组件useState。
 

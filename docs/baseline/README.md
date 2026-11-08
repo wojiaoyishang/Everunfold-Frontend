@@ -1042,3 +1042,18 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/honors-page.md` | `honors-page-1` | `2e9442130cec4dacd839156972371168b3f348c642e2be36c909e72332eec2b6` |
 | `docs/decisions/0082-honors-registered-page-plugin.md` | `ADR0082` | `aef281588ab7eae6e5c8a83f00ce49157d706321b84d8cf291c0cf06940b0025` |
 | `docs/handoff/honors-page-verification.md` | `honors-verification-1` | `38dc6dc41b4e7833dbb22c37bb10927275d4d7765109a2ffcbc2805720aaa3a2` |
+
+
+## 插件启停使用提示与目录过滤交付（2026-11-08）
+
+前端72a4156、后端f335cf8按ADR0083交付，settings 1.13锁定精确提交/SHA；页面配置和原始正文不因插件停用删除。以下版本覆盖对应旧摘要，历史基线与验收保留，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `0c259316af33c64e6a3709b8d4ec77d1fb96cc5344c17ac886bdb374b07f3933` |
+| `docs/architecture/frontend-plugin-runtime.md` | `plugin-runtime-4` | `8c68cbe42b228f4985b3340cd23766b470695629105d2795d95300086ac9fce6` |
+| `docs/architecture/registered-pages.md` | `registered-pages-runtime-8` | `85eba3384701898444137a4cec649f650be35ec9880d41b9ed01b307bb30e8ce` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-5` | `598bb484136a99bbae4d5467dedd07ac440a51cee9359b2ef4758702cf937a97` |
+| `docs/development/pages.md` | `pages-runtime-10` | `62a2b1a5f0f2171580a22b2f7b3d004a35ecb8876d07d464ba8a439e795c7f6e` |
+| `docs/decisions/0083-plugin-activation-usage-confirmation.md` | `ADR0083` | `b7a1d6df773619d28a80314e0ab4264d02c9dd0afc9929b80c905c3cab86dc87` |
+| `docs/handoff/plugin-activation-usage-verification.md` | `plugin-activation-usage-1` | `2570b4d97754259e03d63093cfd6c0a0e442b1579d83f5c07a235f89b7df6afe` |
