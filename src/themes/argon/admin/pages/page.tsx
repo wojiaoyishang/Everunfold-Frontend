@@ -15,6 +15,7 @@ import { AdminPageHeading } from "../components/page-heading";
 import styles from "./pages.module.css";
 import { PageEnabledControl } from "./enabled-control";
 import { PageLanguageMenu } from "./language-menu";
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
 export function ManagedPagesDirectory() {
   const { baseUrl, csrfToken } = useAdminRequest(),
     actor = useAdminAccount(),
@@ -27,6 +28,7 @@ export function ManagedPagesDirectory() {
   const [loading, setLoading] = useState(true);
   const [restore, setRestore] = useState<ManagedPageSummary | null>(null);
   const action = useAccountAction(pagesFailure);
+  const { catalog } = usePluginRuntime();
   useEffect(() => {
     const controller = new AbortController();
     void readManagedPages(baseUrl, { signal: controller.signal })
@@ -44,7 +46,7 @@ export function ManagedPagesDirectory() {
         }
       });
     return () => controller.abort();
-  }, [baseUrl, refresh]);
+  }, [baseUrl, refresh, catalog?.revision]);
   const rows = items.filter(
     (row) =>
       (filter === "trash"

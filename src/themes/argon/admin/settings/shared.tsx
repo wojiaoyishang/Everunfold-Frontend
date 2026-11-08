@@ -227,7 +227,9 @@ export function SettingsFrame({
                 disabled={editor.busy || !editor.dirty}
               >
                 <Icon name={editor.busy ? "refresh" : "check"} />
-                {editor.busy ? (
+                {editor.checkingPlugins ? (
+                  <UiText text="正在检查使用情况…" />
+                ) : editor.busy ? (
                   <UiText text="正在保存" />
                 ) : (
                   <UiText text="保存更改" />

@@ -1355,5 +1355,18 @@
   "暂时无法读取部署清单，请稍后重试。": "The deployment catalog is unavailable. Try again shortly.",
   "选中的主题或插件尚未在所有启用节点完成部署登记。当前修改已保留，请刷新部署清单。": "The selected extension is not registered on every enabled node. Your changes are retained. Refresh the deployment catalog.",
   "扩展已更新，重新打开编辑器后应用。当前编辑内容已保留。": "Extensions have been updated. Reopen the editor to apply them. Your current edits are retained.",
-  "插件更新暂未完成，当前内容已保留。": "The plugin update is incomplete. Current content is retained."
+  "插件更新暂未完成，当前内容已保留。": "The plugin update is incomplete. Current content is retained.",
+  "确认插件启停": "Confirm plugin changes",
+  "停用会隐藏相关页面和插入入口，正文中的插件功能可能无法显示。配置和源内容会保留，重新启用后可恢复。": "Disabling hides related pages and insertion tools. Plugin features in content may stop displaying. Settings and source content are retained and can be restored by enabling the plugin again.",
+  "继续并保存": "Continue and save",
+  "将停用": "Will disable",
+  "将启用": "Will enable",
+  "已应用页面": "Applied pages",
+  "已发布内容": "Published content",
+  "定时发布内容": "Scheduled content",
+  "未能取得完整注册信息，请确认该插件的使用情况后继续。": "Complete registration information is unavailable. Check how this plugin is used before continuing.",
+  "检查覆盖当前已应用页面、已发布正文和定时发布版本中的短代码引用；不含历史草稿或脚本动态调用。取消会保留未保存的设置。": "The check covers applied pages and shortcode references in published and scheduled content. Historical drafts and dynamic script calls are excluded. Canceling keeps your unsaved changes.",
+  "无法检查插件使用情况，设置尚未保存。请稍后重试。": "Plugin usage could not be checked. Settings have not been saved. Please try again.",
+  "正在检查使用情况…": "Checking plugin usage…",
+  "荣誉与证书": "Honors and certificates"
 }

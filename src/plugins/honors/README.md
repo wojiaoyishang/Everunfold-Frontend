@@ -2,15 +2,15 @@
 
 `core.honors`注册`/myhonor`页面及自己的配置控件。开发服务自动发现/编译；生产单独构建并部署本插件包，不修改中央注册列表。源码不含用户证书或荣誉种子数据。
 
-| 文件 | 职责 |
-| --- | --- |
-| plugin.ts / page.ts | 插件setup、页面身份、默认配置和语言路由声明 |
-| schema.ts | 配置模型；列表字段、开关、布局和排序 |
-| components.tsx | 具名组件导出 |
-| field.tsx / image-field.tsx | 本地化标签后委托主题控件；使用SDK媒体选择器 |
-| model.ts | 开放JSON配置的展示投影、日期精度、筛选和URL校验 |
-| render.tsx / image.tsx / certificate.tsx | 荣誉墙、图片和共享Dialog证书查看 |
-| labels.ts / styles.module.css | 包内界面文案与作用域样式 |
+| 文件                                     | 职责                                            |
+| ---------------------------------------- | ----------------------------------------------- |
+| plugin.ts / page.ts                      | 插件setup、页面身份、默认配置和语言路由声明     |
+| schema.ts                                | 配置模型；列表字段、开关、布局和排序            |
+| components.tsx                           | 具名组件导出                                    |
+| field.tsx / image-field.tsx              | 本地化标签后委托主题控件；使用SDK媒体选择器     |
+| model.ts                                 | 开放JSON配置的展示投影、日期精度、筛选和URL校验 |
+| render.tsx / image.tsx / certificate.tsx | 荣誉墙、图片和共享Dialog证书查看                |
+| labels.ts / styles.module.css            | 包内界面文案与作用域样式                        |
 
 后台的“页面→我的荣誉”可维护介绍、网格/时间线、默认排序、搜索/年份/统计开关及荣誉列表。分类来自记录，没有固定分类枚举；日期为展示文字，支持年、年月、年月日（例如2025、2025.06、2025-06-18），缺失/未知日期保持原文并在日期排序中靠后。列表顺序即录入顺序。
 

@@ -8,10 +8,20 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import type { PublicSettings, SettingsState } from "@/core/contracts/settings";
-import { readSettings, saveSettings } from "@/core/contracts/settings";
+import type {
+  PluginUsage,
+  PublicSettings,
+  SaveSettings,
+  SettingsState,
+} from "@/core/contracts/settings";
+import {
+  queryExtensionUsage,
+  readSettings,
+  saveSettings,
+} from "@/core/contracts/settings";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { RequestError } from "@/core/http/request";
+import { changedPluginIds, pluginNeedsConfirmation } from "./plugin-impact";
 
 export function settingsFailure(error: unknown) {
   if (error instanceof RequestError) {
@@ -37,6 +47,13 @@ function useEditor() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [checkingPlugins, setCheckingPlugins] = useState(false);
+  const [pluginImpact, setPluginImpact] = useState<{
+    input: SaveSettings;
+    plugins: PluginUsage[];
+  } | null>(null);
+  const inFlight = useRef(false);
+  const pluginChangeTrigger = useRef<HTMLElement | null>(null);
   const [loading, setLoading] = useState(true);
   const operation = useRef(0);
   const mounted = useRef(true);
@@ -112,25 +129,80 @@ function useEditor() {
     }, 2000);
     return () => clearInterval(timer);
   }, [waiting, saved?.revision, refreshDelivery]);
-  async function save() {
-    if (!saved || !draft || busy) return;
-    setBusy(true);
-    setError("");
-    setMessage("");
+  async function persist(input: SaveSettings) {
     try {
-      const response = await saveSettings(
-        baseUrl,
-        { expected_revision: saved.revision, value: draft },
-        csrfToken,
-      );
-      if (!mounted.current) return;
+      const response = await saveSettings(baseUrl, input, csrfToken);
+      if (!mounted.current) return false;
       setSaved(response.data);
       window.dispatchEvent(new Event("everunfold-language-catalog"));
       setDraft(response.data.value);
       setMessage("设置已保存。节点应用后，下一次页面访问将使用最新配置。");
+      return true;
     } catch (error) {
       if (mounted.current) setError(settingsFailure(error));
+      return false;
+    }
+  }
+  async function save() {
+    if (!saved || !draft || inFlight.current || pluginImpact) return;
+    pluginChangeTrigger.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    inFlight.current = true;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    const input: SaveSettings = {
+      expected_revision: saved.revision,
+      value: structuredClone(draft),
+    };
+    try {
+      const ids = changedPluginIds(saved.value, input.value);
+      if (ids.length) {
+        setCheckingPlugins(true);
+        const plugins: PluginUsage[] = [];
+        for (let offset = 0; offset < ids.length; offset += 100) {
+          const report = await queryExtensionUsage(
+            baseUrl,
+            { plugin_ids: ids.slice(offset, offset + 100) },
+            csrfToken,
+          );
+          plugins.push(...report.data.plugins.filter(pluginNeedsConfirmation));
+        }
+        if (!mounted.current) return;
+        setCheckingPlugins(false);
+        if (plugins.length) {
+          setPluginImpact({ input, plugins });
+          return;
+        }
+      }
+      await persist(input);
+    } catch (error) {
+      if (mounted.current)
+        setError(
+          error instanceof RequestError &&
+            (error.status === 401 || error.status === 403)
+            ? settingsFailure(error)
+            : "无法检查插件使用情况，设置尚未保存。请稍后重试。",
+        );
     } finally {
+      inFlight.current = false;
+      if (mounted.current) {
+        setCheckingPlugins(false);
+        setBusy(false);
+      }
+    }
+  }
+  async function confirmPluginChange() {
+    if (!pluginImpact || inFlight.current) return false;
+    inFlight.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      return await persist(pluginImpact.input);
+    } finally {
+      inFlight.current = false;
       if (mounted.current) setBusy(false);
     }
   }
@@ -141,6 +213,11 @@ function useEditor() {
     error,
     message,
     busy,
+    checkingPlugins,
+    pluginImpact,
+    pluginChangeTrigger,
+    confirmPluginChange,
+    dismissPluginImpact: () => setPluginImpact(null),
     loading,
     dirty,
     save,

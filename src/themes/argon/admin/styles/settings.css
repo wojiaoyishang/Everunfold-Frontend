@@ -352,6 +352,50 @@
 .admin-extension-card:last-of-type {
   border-bottom: 0;
 }
+.admin-plugin-impact-list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+.admin-plugin-impact-list > li {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow-wrap: anywhere;
+}
+.admin-plugin-impact-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px 12px;
+}
+.admin-plugin-impact-heading > span {
+  color: var(--accent);
+  font-size: 13px;
+}
+.admin-plugin-impact-list small {
+  color: var(--muted);
+}
+.admin-plugin-impact-counts {
+  display: grid;
+  gap: 5px;
+  margin: 12px 0 0;
+}
+.admin-plugin-impact-counts:empty {
+  display: none;
+}
+.admin-plugin-impact-counts > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.admin-plugin-impact-counts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
 .admin-extension-card > small {
   color: var(--admin-muted);
   overflow-wrap: anywhere;

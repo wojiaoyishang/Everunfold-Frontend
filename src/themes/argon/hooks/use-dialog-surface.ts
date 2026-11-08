@@ -5,10 +5,11 @@ import { useLayoutEffect, type RefObject } from "react";
 export function useDialogSurface(
   dialogRef: RefObject<HTMLDialogElement | null>,
   initialFocus?: RefObject<HTMLElement | null>,
+  returnFocus?: RefObject<HTMLElement | null>,
 ) {
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
-    const trigger = document.activeElement;
+    const trigger = returnFocus?.current ?? document.activeElement;
     dialog?.showModal();
     initialFocus?.current?.focus({ preventScroll: true });
     return () => {
@@ -16,5 +17,5 @@ export function useDialogSurface(
       if (trigger instanceof HTMLElement && trigger.isConnected)
         trigger.focus({ preventScroll: true });
     };
-  }, [dialogRef, initialFocus]);
+  }, [dialogRef, initialFocus, returnFocus]);
 }

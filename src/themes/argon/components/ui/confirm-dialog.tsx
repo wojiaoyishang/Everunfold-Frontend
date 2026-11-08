@@ -7,6 +7,7 @@ import {
   useState,
   useSyncExternalStore,
   type ReactNode,
+  type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
 import { useDialogDismiss } from "../../hooks/use-dialog-dismiss";
@@ -27,6 +28,8 @@ export interface ConfirmDialogProps {
   busy?: boolean;
   confirmDisabled?: boolean;
   error?: string;
+  /** Preserve the initiating control when an async preflight temporarily disabled it. */
+  returnFocus?: RefObject<HTMLElement | null>;
   auxiliaryAction?: ReactNode;
   onCancel: () => void;
   /** Return true on success; false or rejection keeps the dialog open. */
@@ -59,6 +62,7 @@ function ConfirmDialogSurface({
   busy = false,
   confirmDisabled = false,
   error,
+  returnFocus,
   auxiliaryAction,
   onCancel,
   onConfirm,
@@ -81,7 +85,7 @@ function ConfirmDialogSurface({
   const working = busy || pending;
   const { closing, dismiss: finishAndDismiss } = useDialogDismiss(dialog);
   const locked = working || closing;
-  useDialogSurface(dialog, cancel);
+  useDialogSurface(dialog, cancel, returnFocus);
   const dismiss = () => {
     if (!busy && !inFlight.current) finishAndDismiss(onCancel);
   };
