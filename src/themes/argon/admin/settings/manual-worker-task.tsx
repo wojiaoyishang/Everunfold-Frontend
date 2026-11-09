@@ -2,6 +2,12 @@
 import { useId, useState } from "react";
 import type { RuntimeOverview } from "@/core/contracts/settings";
 import { useManualWorkerTask } from "@/core/tasks/use-manual-worker-task";
+import {
+  asRecord,
+  checkTaskParameters,
+  initialTaskParameters,
+  type TaskParameterValues,
+} from "@/core/tasks/task-parameters";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Button, Form, TextField } from "../../components/ui/primitives";
 import { Modal } from "../../components/ui/modal";
@@ -9,6 +15,7 @@ import { Select } from "../../components/ui/select";
 import { FormField } from "../../components/ui/form-field";
 import { Icon } from "../../components/icon";
 import styles from "./manual-worker-task.module.css";
+import { TaskParameters } from "./task-parameters";
 
 export function ManualWorkerTaskDialog({
   plans,
@@ -24,6 +31,8 @@ export function ManualWorkerTaskDialog({
     request = useManualWorkerTask();
   const [search, setSearch] = useState(""),
     [taskId, setTaskId] = useState("");
+  const [parameters, setParameters] = useState<TaskParameterValues>({}),
+    [parametersValid, setParametersValid] = useState(true);
   const [closing, setClosing] = useState(false),
     [result, setResult] = useState<RuntimeOverview | null>(null);
   const available = plans.filter((plan) => plan.kind === "periodic");
@@ -34,7 +43,24 @@ export function ManualWorkerTaskDialog({
       .includes(query),
   );
   const selected = available.find((plan) => plan.id === taskId);
-  const ready = selected?.enabled && selected.available;
+  const parameterSchema = asRecord(selected?.parameters_schema);
+  const hasParameters = Object.keys(parameterSchema).length > 0;
+  const ready =
+    selected?.enabled &&
+    selected.available &&
+    parametersValid &&
+    checkTaskParameters(parameterSchema, parameters).length === 0;
+  const chooseTask = (next: string) => {
+    const plan = available.find((item) => item.id === next);
+    const schema = asRecord(plan?.parameters_schema);
+    const values = initialTaskParameters(
+      schema,
+      asRecord(plan?.parameter_defaults),
+    );
+    setTaskId(next);
+    setParameters(values);
+    setParametersValid(checkTaskParameters(schema, values).length === 0);
+  };
   const close = () => {
     if (!request.busy) setClosing(true);
   };
@@ -54,7 +80,7 @@ export function ManualWorkerTaskDialog({
         onSubmit={(event) => {
           event.preventDefault();
           if (!ready || request.busy) return;
-          void request.submit(taskId).then((overview) => {
+          void request.submit(taskId, parameters).then((overview) => {
             if (!overview) return;
             setResult(overview);
             setClosing(true);
@@ -73,7 +99,7 @@ export function ManualWorkerTaskDialog({
             disabled={request.busy}
             onChange={(event) => {
               setSearch(event.target.value);
-              setTaskId("");
+              chooseTask("");
             }}
           />
         </FormField>
@@ -89,7 +115,7 @@ export function ManualWorkerTaskDialog({
             name="manual-worker-task"
             label="注册任务"
             value={taskId}
-            onValueChange={setTaskId}
+            onValueChange={chooseTask}
             disabled={request.busy || !filtered.length}
             options={[
               { value: "", label: t("选择 Worker 任务"), disabled: true },
@@ -132,8 +158,20 @@ export function ManualWorkerTaskDialog({
             </div>
           </dl>
         )}
+        {selected && hasParameters && (
+          <TaskParameters
+            key={selected.id}
+            schema={parameterSchema}
+            value={parameters}
+            disabled={request.busy}
+            onChange={(value, valid) => {
+              setParameters(value);
+              setParametersValid(valid);
+            }}
+          />
+        )}
         <p className={styles.hint}>
-          <UiText text="已有排队或运行中的执行时，将继续跟踪原执行记录。" />
+          <UiText text="相同参数的活动执行会继续跟踪；参数不同则需等待原执行结束。" />
         </p>
         {request.error && (
           <p className={styles.error} role="alert">

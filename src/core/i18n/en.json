@@ -1828,5 +1828,16 @@
   "没有手动触发此任务的权限。": "You do not have permission to trigger this task.",
   "任务未启用、不可用或已变更，请刷新任务列表后重试。": "The task is disabled, unavailable or changed. Refresh the task list and try again.",
   "请求结果尚未确认，请先查看执行记录。": "The request result is unconfirmed. Check the execution history first.",
-  "最多展示 100 个常用标签。": "Shows up to 100 frequently used tags."
+  "最多展示 100 个常用标签。": "Shows up to 100 frequently used tags.",
+  "任务参数": "Task parameters",
+  "参数表单": "Parameter form",
+  "JSON 模式": "JSON mode",
+  "参数 JSON 对象": "Parameter JSON object",
+  "请输入有效的 JSON 对象。": "Enter a valid JSON object.",
+  "请选择参数值": "Choose a parameter value",
+  "请输入有效的 JSON 值。": "Enter a valid JSON value.",
+  "请检查参数的必填项、类型与取值范围。": "Check required parameters, types and value ranges.",
+  "相同参数的活动执行会继续跟踪；参数不同则需等待原执行结束。": "An active execution with the same parameters will be tracked; wait for it to finish before using different parameters.",
+  "任务参数不符合要求，请检查必填项、类型和取值范围。": "The task parameters are invalid. Check required fields, types and value ranges.",
+  "任务状态已改变或存在不同参数的活动执行，请刷新记录后重试。": "The task state changed or an execution with different parameters is active. Refresh the execution records and try again."
 }

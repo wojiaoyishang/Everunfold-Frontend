@@ -91,21 +91,7 @@ export function RuntimePage() {
   };
   return (
     <div className={styles.page}>
-      <AdminPageHeading
-        title="运行与任务"
-        action={
-          writable && (
-            <Button
-              className="admin-button admin-button-primary"
-              disabled={!data || !!busy}
-              onClick={() => setManualOpen(true)}
-            >
-              <Icon name="play" />
-              <UiText text="手动触发" />
-            </Button>
-          )
-        }
-      />
+      <AdminPageHeading title="运行与任务" />
       <div className={styles.toolbar}>
         <div className={styles.tabs}>
           {["概览", "定时任务", "常驻任务", "执行记录"].map((name) => (
@@ -119,10 +105,22 @@ export function RuntimePage() {
             </Button>
           ))}
         </div>
-        <Button className="admin-button" onClick={() => void refresh()}>
-          <Icon name="refresh" />
-          <UiText text="刷新" />
-        </Button>
+        <div className={styles.toolbarActions}>
+          {writable && (
+            <Button
+              className="admin-button admin-button-primary"
+              disabled={!data || !!busy}
+              onClick={() => setManualOpen(true)}
+            >
+              <Icon name="play" />
+              <UiText text="手动触发" />
+            </Button>
+          )}
+          <Button className="admin-button" onClick={() => void refresh()}>
+            <Icon name="refresh" />
+            <UiText text="刷新" />
+          </Button>
+        </div>
       </div>
       {error && (
         <p role="alert">

@@ -1,0 +1,78 @@
+.root {
+  min-width: 0;
+  border-top: 1px solid var(--admin-border);
+  padding-top: 20px;
+  display: grid;
+  gap: 16px;
+}
+.heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.heading strong {
+  font-size: 15px;
+}
+.fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+}
+.field,
+.field > *,
+.field :global(.ui-field-control),
+.selectField :global(.ui-select),
+.selectField :global(.ui-select-trigger) {
+  min-width: 0;
+  max-width: 100%;
+}
+.field :global(.ui-input),
+.field :global(.ui-textarea),
+.selectField :global(.ui-select) {
+  box-sizing: border-box;
+  width: 100%;
+}
+.field :global(.ui-textarea) {
+  min-height: 100px;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  color: var(--admin-text);
+  background: var(--admin-canvas);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.65;
+  resize: vertical;
+}
+.selectField > span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.booleanField {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+}
+.field small {
+  display: block;
+  margin-top: 7px;
+  color: var(--admin-muted);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.required,
+.error,
+.field .error {
+  color: var(--admin-danger);
+}
+.error {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+}

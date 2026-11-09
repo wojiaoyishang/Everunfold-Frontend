@@ -11,7 +11,10 @@ export function useManualWorkerTask() {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   useEffect(() => () => active.current?.abort(), []);
-  const submit = async (taskId: string) => {
+  const submit = async (
+    taskId: string,
+    parameters: Record<string, unknown>,
+  ) => {
     if (active.current) return null;
     const controller = new AbortController();
     active.current = controller;
@@ -20,7 +23,7 @@ export function useManualWorkerTask() {
     try {
       const response = await controlRuntime(
         baseUrl,
-        { task_id: taskId, action: "debug_run" },
+        { task_id: taskId, action: "debug_run", parameters },
         csrfToken,
         { signal: controller.signal },
       );
@@ -30,10 +33,13 @@ export function useManualWorkerTask() {
         setError(
           reason instanceof RequestError && reason.status === 403
             ? "没有手动触发此任务的权限。"
-            : reason instanceof RequestError &&
-                [404, 409, 422].includes(reason.status ?? 0)
-              ? "任务未启用、不可用或已变更，请刷新任务列表后重试。"
-              : "请求结果尚未确认，请先查看执行记录。",
+            : reason instanceof RequestError && reason.status === 422
+              ? "任务参数不符合要求，请检查必填项、类型和取值范围。"
+              : reason instanceof RequestError && reason.status === 409
+                ? "任务状态已改变或存在不同参数的活动执行，请刷新记录后重试。"
+                : reason instanceof RequestError && reason.status === 404
+                  ? "任务未启用、不可用或已变更，请刷新任务列表后重试。"
+                  : "请求结果尚未确认，请先查看执行记录。",
         );
       }
       return null;
