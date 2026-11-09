@@ -1,5 +1,11 @@
 # 前端交接状态
 
+## 最新交付：取消插件启停时还原开关（2026-11-09）
+
+- 前端f0033bd；取消或Esc恢复本次待保存的全部插件开关，包含同批次未使用插件，保留站点名称/主题等其他修改。仅开关修改时恢复无修改状态，同页回焦到最近操作开关；成功关闭独立处理，保持新状态。中英提示同步，详见[ADR0083更新](../decisions/0083-plugin-activation-usage-confirmation.md)与[补充验收](plugin-activation-usage-verification.md)。
+- 完整check301及新增回归通过；实页1440/320/390、中英、进退/焦点、单项/批量/同时改站点名、Esc和启用/停用双向取消通过。取消未请求保存；实际继续停用和恢复启用两次PATCH成功，原设置value和页面DTO保持，节点最终applied。pageerror0/native dialog0，退出本次会话200，测试浏览器/转发关闭。
+- 无后端代码/契约/迁移/依赖变化，未重复无关后端或隔离生产矩阵；六服务、四端口0.0.0.0和HTTP200正常。共享指南、ADR、补充验收、版本SHA已同步；截图/测试副本仅忽略var，本地提交未push。
+
 ## 最新交付：插件启停使用提示与页面目录过滤（2026-11-08）
 
 - 前端72a4156、后端f335cf8；停用或部署不可用的注册页面从列表隐藏，按ID数据/配置保留，重新启用后恢复。打开的目录随运行清单刷新，详见[ADR0083](../decisions/0083-plugin-activation-usage-confirmation.md)与[验收](plugin-activation-usage-verification.md)。

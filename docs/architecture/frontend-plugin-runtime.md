@@ -1,6 +1,6 @@
 # 前端插件、主题与运行时扩展规范
 
-版本：plugin-runtime-4，2026-11-08。已按ADR0079实现，实际检查见[本轮验收](../handoff/independent-plugins-verification.md)。本版替代plugin-runtime-2中的插件随主体编译、根cache和仅显式页面登记规则；数据协议、开放模型与父子主题规则保留。
+版本：plugin-runtime-5，2026-11-09。已按ADR0079实现，实际检查见[本轮验收](../handoff/independent-plugins-verification.md)。本版替代plugin-runtime-2中的插件随主体编译、根cache和仅显式页面登记规则；数据协议、开放模型与父子主题规则保留。
 
 ## 宿主、主题和插件
 
@@ -34,7 +34,7 @@ GET /v1/admin/extensions返回配置的前端节点及最后登记清单，使�
 
 settings 1.13新增POST /v1/admin/extensions/usage，输入plugin_ids（每次1至100个稳定ID），响应scanned_at与plugins数组；每项包含plugin_id/title/registered/applied_pages/published_contents/scheduled_contents。要求settings:write；浏览器POST保留CSRF/Origin验证。只返回计数，不暴露私有内容。归属从所有已存清单收集，停用时仍能检查；计数读取权威应用快照与正文，定时内容取冻结计划，不取后来修改的工作稿。
 
-设置保存统一检查启停差异，有使用或注册信息未知时显示可继续的项目确认弹窗，无使用直接保存；失败保留输入且不保存。预检不锁全站，不能推断任意脚本或配置隐式依赖。页面目录过滤不可用的注册页，按ID记录与配置仍保留；重新启用并部署就绪后恢复，已打开目录随插件清单变化重新读取。详见[ADR0083](../decisions/0083-plugin-activation-usage-confirmation.md)与[本轮验收](../handoff/plugin-activation-usage-verification.md)。
+设置保存统一检查启停差异，有使用或注册信息未知时显示可继续的项目确认弹窗，无使用直接保存；失败保留输入且不保存。取消或Esc按预检时原状态还原本批次插件开关，保留其他工作稿字段；成功关闭不执行回退。预检不锁全站，不能推断任意脚本或配置隐式依赖。页面目录过滤不可用的注册页，按ID记录与配置仍保留；重新启用并部署就绪后恢复，已打开目录随插件清单变化重新读取。详见[ADR0083](../decisions/0083-plugin-activation-usage-confirmation.md)与[本轮验收](../handoff/plugin-activation-usage-verification.md)。
 
 Node的dev/start协调进程从本地完整包和构建出的主题清单形成extensions-1，变化时登记，平时约60秒更新记录；失败在后台重试，读页面不等待网络。POST /internal/extensions/{node_id}验证真实socket来源IP AND该节点的Next→FastAPI环境变量Token，忽略X-Forwarded-For。清单最多512KiB，只接受元数据，不接收执行代码。浏览器不能调用它安装程序。
 

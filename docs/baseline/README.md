@@ -1057,3 +1057,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/pages.md` | `pages-runtime-10` | `62a2b1a5f0f2171580a22b2f7b3d004a35ecb8876d07d464ba8a439e795c7f6e` |
 | `docs/decisions/0083-plugin-activation-usage-confirmation.md` | `ADR0083` | `b7a1d6df773619d28a80314e0ab4264d02c9dd0afc9929b80c905c3cab86dc87` |
 | `docs/handoff/plugin-activation-usage-verification.md` | `plugin-activation-usage-1` | `2570b4d97754259e03d63093cfd6c0a0e442b1579d83f5c07a235f89b7df6afe` |
+
+
+## 插件取消还原开关修正（2026-11-09）
+
+前端f0033bd按用户要求取消时还原本批次插件开关，保留其他设置修改，成功关闭保持新状态。后端仅同步文档，原settings 1.13契约/部署规则不变。以下当前共同版本替代相应旧摘要，历史验收保留，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `d2bab867048a9f7d8bc64395b6f1061d86b86ae295a9f14fc9b0b16ca0959199` |
+| `docs/architecture/frontend-plugin-runtime.md` | `plugin-runtime-5` | `8d696a3772653cbe4493b84888bdf8c34fef8fbc9484c7e041cc6b22784c67ec` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-6` | `9c03941ab135cf4ac1a65ac6e88bad60146b47013951966b2624875145771d92` |
+| `docs/decisions/0083-plugin-activation-usage-confirmation.md` | `ADR0083-2` | `573f60a327575a0183a50c589933d628b482e850d10130d979d13a5f9054c07f` |
+| `docs/handoff/plugin-activation-usage-verification.md` | `plugin-activation-usage-2` | `adb9d21083735f597ecc6d76004c5217f58df703fe4c61e71b536a41a08efe61` |
