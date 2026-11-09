@@ -90,6 +90,14 @@ export async function proxy(request: NextRequest) {
     }
     const response = NextResponse.next({ request: { headers } });
     response.headers.set("Content-Language", locale);
+    if (
+      snapshot.site.settings?.site.allow_indexing === false ||
+      content?.allow_indexing === false ||
+      managed?.allow_indexing === false ||
+      (content?.access && content.access !== "public") ||
+      managed?.access === "captcha"
+    )
+      response.headers.set("X-Robots-Tag", "noindex, follow");
     return response;
   } catch {
     return new NextResponse(failureDocument(503), {
@@ -104,6 +112,6 @@ export async function proxy(request: NextRequest) {
 }
 export const config = {
   matcher: [
-    "/((?!_next/|__plugins/|reference/|content-features/|media/|uploads/|health/|favicon.ico|robots.txt|sitemap.xml).*)",
+    "/((?!_next/|__plugins/|reference/|content-features/|media/|uploads/|health/|favicon.ico|robots.txt|sitemap.xml|feed.xml|atom.xml).*)",
   ],
 };

@@ -1,3 +1,5 @@
+import { discoverySettings, feedAlternates } from "@/core/seo/discovery";
+import { resourceUrl } from "@/core/content/urls";
 import "@/themes/argon/argon.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
@@ -10,7 +12,27 @@ import { BlogShell } from "@/themes/argon/components/shell";
 export async function generateMetadata(): Promise<Metadata> {
   try {
     const { site } = await readPublicSnapshot();
+    const seo = discoverySettings(site);
+    const origin = readConfiguration().publicSiteUrl;
+    const image = resourceUrl(seo.share_image);
     return {
+      ...(origin ? { metadataBase: new URL(origin) } : {}),
+      verification: {
+        google: seo.google_verification || undefined,
+        other: seo.bing_verification
+          ? { "msvalidate.01": seo.bing_verification }
+          : {},
+      },
+      alternates: { types: feedAlternates(site, origin) },
+      openGraph: {
+        title: site.name,
+        description: site.settings?.site.seo_description || site.description,
+        siteName: site.name,
+        type: "website",
+        ...(image && origin
+          ? { images: [{ url: new URL(image, origin).href }] }
+          : {}),
+      },
       title: {
         default: site.name,
         template: (

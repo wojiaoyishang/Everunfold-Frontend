@@ -351,6 +351,16 @@ function CaptchaPanel({ settings, update, disabled }: PanelProps) {
 function SeoPanel({ settings, update, fields, disabled }: PanelProps) {
   return (
     <Panel title="搜索展示" initialOpen={false}>
+      <label className="admin-settings-toggle">
+        <span>
+          <UiText text="允许搜索引擎收录" />
+        </span>
+        <Switch
+          checked={settings.allow_indexing !== false}
+          disabled={disabled}
+          onCheckedChange={(allow_indexing) => update({ allow_indexing })}
+        />
+      </label>
       <label className="admin-field">
         <span>
           <UiText text="搜索标题" />

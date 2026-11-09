@@ -1,4 +1,5 @@
 "use client";
+import { DiscoverySettings } from "./discovery";
 import { UiText } from "@/core/i18n/provider";
 
 import { useSettingsEditor } from "@/core/settings/editor";
@@ -141,6 +142,7 @@ export function SiteSettingsPage() {
               onChange={(allow_indexing) => update({ allow_indexing })}
             />
           </SettingsSection>
+          <DiscoverySettings />
         </>
       )}
     </SettingsFrame>

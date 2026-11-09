@@ -20,7 +20,7 @@ export function pageLanguages(
       id: item.id,
       language: item.language!,
       path: item.path,
-      access: "public",
+      access: item.access ?? "public",
       is_original: item.is_original ?? item.id === page.id,
     }));
 }

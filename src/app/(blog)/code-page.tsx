@@ -1,3 +1,6 @@
+import { readConfiguration } from "@/core/config/server";
+import { feedAlternates } from "@/core/seo/discovery";
+import { localizeHref } from "@/core/i18n/locale";
 import { ThemeTemplate } from "@/core/themes/presentation";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -37,7 +40,29 @@ export function codePageMetadata(
       "/article": "文章",
     } as Record<string, string>
   )[path];
+  const origin = readConfiguration().publicSiteUrl;
+  const catalog = normalizeCatalog(
+    snapshot.site.settings?.site.language_catalog,
+  );
+  const locale = snapshot.site.locale ?? catalog.default_code;
   return {
+    ...(origin
+      ? {
+          alternates: {
+            types: feedAlternates(snapshot.site, origin),
+            canonical: new URL(localizeHref(path, locale, catalog), origin)
+              .href,
+            languages: Object.fromEntries(
+              catalog.languages
+                .filter((item) => item.enabled)
+                .map((item) => [
+                  item.code,
+                  new URL(localizeHref(path, item.code, catalog), origin).href,
+                ]),
+            ),
+          },
+        }
+      : {}),
     ...(title ? { title: translator(snapshot)(title) } : {}),
     ...(path === "/search" || path === "/ss"
       ? { robots: { index: false, follow: true } }

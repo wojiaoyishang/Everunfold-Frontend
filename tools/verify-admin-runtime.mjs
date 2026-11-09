@@ -151,6 +151,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/content/article/00000000-0000-0000-0000-000000000001/live",
       "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/live",
       "/admin/media",
+      "/admin/comments",
       "/admin/icons",
       "/admin/fonts",
       "/admin/shortcodes",

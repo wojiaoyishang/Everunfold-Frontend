@@ -1,3 +1,9 @@
+import type { Site } from "./types";
+import {
+  discoverySettings,
+  feedAlternates,
+  indexable,
+} from "@/core/seo/discovery";
 import type { Metadata } from "next";
 import type { ContentPresentation } from "@/core/contracts/presentation";
 import { resourceUrl } from "./urls";
@@ -6,6 +12,8 @@ export function contentMetadata(
   siteName: string,
   siteUrl?: string,
   example = false,
+  site?: Site,
+  indexedPaths?: ReadonlySet<string>,
 ): Metadata {
   const title = content.seo_title?.trim() || content.title || "一则随记";
   const description =
@@ -15,7 +23,11 @@ export function contentMetadata(
   const url =
     siteUrl && !example ? new URL(content.path, siteUrl).href : undefined;
   const cover =
-    content.access === "public" ? resourceUrl(content.cover_url) : null;
+    content.access === "public"
+      ? resourceUrl(
+          content.cover_url || discoverySettings(site ?? {}).share_image,
+        )
+      : null;
   const image =
     cover && (siteUrl || cover.startsWith("http"))
       ? new URL(cover, siteUrl).href
@@ -28,11 +40,16 @@ export function contentMetadata(
       ? {
           alternates: {
             canonical: url,
+            types: feedAlternates(site ?? {}, siteUrl),
             ...(content.access === "public"
               ? {
                   languages: Object.fromEntries(
                     (content.translations ?? [])
-                      .filter((item) => item.access === "public")
+                      .filter(
+                        (item) =>
+                          item.access === "public" &&
+                          (!indexedPaths || indexedPaths.has(item.path)),
+                      )
                       .map((item) => [
                         item.language,
                         new URL(item.path, siteUrl).href,
@@ -43,8 +60,8 @@ export function contentMetadata(
           },
         }
       : {}),
-    ...(example || content.access !== "public"
-      ? { robots: { index: false } }
+    ...(example || !indexable(site ?? {}, content)
+      ? { robots: { index: false, follow: true } }
       : {}),
     openGraph: {
       title,

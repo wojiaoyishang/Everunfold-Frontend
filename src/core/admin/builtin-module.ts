@@ -9,6 +9,14 @@ export const builtinAdminModule = {
   ],
   pages: [
     {
+      id: "core.comments",
+      href: "/admin/comments",
+      label: "评论管理",
+      description: "审核、回复与整理评论",
+      icon: "comment",
+      menu: { group: "core.workspace", order: 45 },
+    },
+    {
       id: "core.settings.plugins",
       href: "/admin/settings/plugins",
       label: "插件管理",

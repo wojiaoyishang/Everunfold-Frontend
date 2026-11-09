@@ -9,6 +9,7 @@ import { adminRoutePermission, can } from "@/core/accounts/permissions";
 import { Icon, type IconName } from "../../components/icon";
 import { RouteLink } from "../../components/ui/route-link";
 const navigationIcons: Record<AdminPageIcon, IconName> = {
+  comment: "comment",
   users: "user",
   lock: "lock",
   font: "type",

@@ -1,3 +1,11 @@
+import {
+  discoverySettings,
+  feedAlternates,
+  indexable,
+} from "@/core/seo/discovery";
+import { resourceUrl } from "@/core/content/urls";
+import { articleSchema, StructuredData } from "@/core/seo/structured-data";
+import { CommentSection } from "@/themes/argon/components/comments/comment-section";
 import { resolveManagedPage } from "@/core/pages/resolve";
 import { ManagedPageView } from "@/themes/argon/pages/view";
 import { pageLanguages } from "@/core/pages/languages";
@@ -44,24 +52,53 @@ export async function generateMetadata({
         ? (variants.find((item) => item.language === snapshot.site.locale)
             ?.path ?? managed.path)
         : managed.path;
+    const origin = readConfiguration().publicSiteUrl;
+    const image = resourceUrl(discoverySettings(snapshot.site).share_image);
+    const url = origin ? new URL(canonical, origin).href : undefined;
+    const description = managed.description || undefined;
+    const images = image && origin ? [new URL(image, origin).href] : undefined;
     return {
       title: managed.title,
-      description: managed.description || undefined,
+      description,
+      openGraph: {
+        title: managed.title,
+        description,
+        type: "website",
+        siteName: snapshot.site.name,
+        url,
+        images,
+      },
+      twitter: {
+        card: images ? "summary_large_image" : "summary",
+        title: managed.title,
+        description,
+        images,
+      },
       robots: {
         index:
+          managed.access !== "captcha" &&
           managed.allow_indexing !== false &&
           snapshot.site.settings?.site.allow_indexing !== false,
         follow: true,
       },
-      alternates: readConfiguration().publicSiteUrl
+      alternates: origin
         ? {
-            canonical: new URL(canonical, readConfiguration().publicSiteUrl!)
-              .href,
+            canonical: url,
+            types: feedAlternates(snapshot.site, origin),
             languages: Object.fromEntries(
-              variants.map((item) => [
-                item.language,
-                new URL(item.path, readConfiguration().publicSiteUrl!).href,
-              ]),
+              variants
+                .filter((item) =>
+                  managed.source === "registered"
+                    ? indexable(snapshot.site, managed)
+                    : snapshot.pages?.some(
+                        (page) =>
+                          page.id === item.id && indexable(snapshot.site, page),
+                      ),
+                )
+                .map((item) => [
+                  item.language,
+                  new URL(item.path, origin).href,
+                ]),
             ),
           }
         : undefined,
@@ -76,6 +113,12 @@ export async function generateMetadata({
         snapshot.site.name,
         readConfiguration().publicSiteUrl,
         presented.example,
+        snapshot.site,
+        new Set(
+          snapshot.contents
+            .filter((item) => indexable(snapshot.site, item))
+            .map((item) => item.path),
+        ),
       )
     : { title: "404 页面未找到", robots: { index: false } };
 }
@@ -100,6 +143,13 @@ export default async function ContentPage({
           page={managed}
           translations={pageLanguages(snapshot, managed)}
         />
+        {managed.access !== "captcha" && (
+          <CommentSection
+            comments={snapshot.comments[managed.id] ?? []}
+            path={managed.path}
+            contentId={managed.id}
+          />
+        )}
       </>
     );
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
@@ -126,14 +176,36 @@ export default async function ContentPage({
       />
     );
   if (presented?.content.type === "shuoshuo")
-    return <ShuoshuoDetail snapshot={snapshot} entry={presented} />;
+    return (
+      <>
+        <StructuredData
+          data={articleSchema(
+            presented.content,
+            snapshot.site,
+            readConfiguration().publicSiteUrl,
+          )}
+        />
+        <ShuoshuoDetail snapshot={snapshot} entry={presented} />
+      </>
+    );
   const content = resolveContent(snapshot, `/${contentPath.join("/")}`);
   if (!content) notFound();
   return (
-    <Article
-      snapshot={snapshot}
-      content={content}
-      commentsPage={pageNumber(parameters.comments_page)}
-    />
+    <>
+      {presented && (
+        <StructuredData
+          data={articleSchema(
+            presented.content,
+            snapshot.site,
+            readConfiguration().publicSiteUrl,
+          )}
+        />
+      )}
+      <Article
+        snapshot={snapshot}
+        content={content}
+        commentsPage={pageNumber(parameters.comments_page)}
+      />
+    </>
   );
 }

@@ -86,7 +86,19 @@ export function parsePublicSnapshot(input: unknown): PublicSnapshot {
     pageIds.add(page.id);
     paths.add(normalized);
   }
-  if (Object.keys(input.comments).some((contentId) => !ids.has(contentId)))
+  if (
+    Object.keys(input.comments).some(
+      (contentId) => !ids.has(contentId) && !pageIds.has(contentId),
+    )
+  )
     throw new Error("Comments refer to unavailable content");
+  for (const item of [...input.contents, ...(input.pages ?? [])]) {
+    if (
+      item.access &&
+      item.access !== "public" &&
+      input.comments[item.id]?.length
+    )
+      throw new Error("Restricted comments leaked into public snapshot");
+  }
   return input;
 }
