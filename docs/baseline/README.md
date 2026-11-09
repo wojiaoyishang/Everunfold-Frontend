@@ -1156,6 +1156,6 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/README.md` | `本轮更新` | `81f5d9d2aa85e0377d771599f0565deb784f2d0509ee795a2da5798ad2acc76e` |
 | `docs/architecture/constraints.md` | `bootstrap-22` | `a92cfbd3f07a70a25e251b46f6eaebf9aca844960b7c221e2fd1cba25b31730d` |
 | `docs/development/settings.md` | `settings-runtime-14` | `72ada1d2ddb4d39a95a197ccb7fb048f4d6fdf2b47e55d1232b72a5baa112ad3` |
-| `docs/development/operations-and-search.md` | `operations-search-1` | `9d329bd50c0f83c08b99c040ab49ade643d245e1f8c48f0b26e14a22f17db711` |
+| `docs/development/operations-and-search.md` | `operations-search-1` | `08f29b3f8fca838d6f1ebe79ad95ea93c793b7a99b95664fb7f05f16a5af0a81` |
 | `docs/decisions/0088-operations-workflows-and-search-discovery.md` | `ADR0088-2` | `a7a5d6fec980c98a280922d9d56fed5396a6f479eb2cf7060f5d5e647496c95a` |
 | `docs/handoff/operations-search-verification.md` | `operations-search-verification-1` | `c4cef5bd7e3d305b8145a04aae3bde2b4b6fb3c53996db9592a19e8c75eb0e0f` |

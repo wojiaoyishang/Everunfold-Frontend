@@ -56,4 +56,3 @@ canonical、站点地图和分享地址使用前端服务端部署配置 publicS
 后续批次：内容多维筛选/快速编辑/批量操作与分类标签管理；隔离迁移/恢复演练；邮件验证、找回密码、通知和真实阅读统计。上述尚未由本轮交付，不因 ADR 路线图存在而视为已实现。
 
 官方参考：[Next.js JSON-LD](https://nextjs.org/docs/app/guides/json-ld)、[Google 站点地图](https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview)、[网站所有权验证](https://support.google.com/webmasters/answer/9012289/)。
-
