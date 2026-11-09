@@ -553,3 +553,15 @@ html[data-motion="reduced"]
   height: 100%;
   object-fit: cover;
 }
+
+/* Native required semantics drive a shared marker across settings, account and basic forms. */
+:is(.ui-form-field, .admin-settings-field, .account-field):has(
+    :is(input, textarea, select)[required]
+  )
+  > label::after,
+label:has(+ :is(input, textarea, select)[required])::after,
+label:has(+ .ui-password-field input[required])::after {
+  content: " *";
+  color: var(--admin-danger, var(--accent));
+  font-weight: 600;
+}

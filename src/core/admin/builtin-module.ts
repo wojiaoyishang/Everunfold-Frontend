@@ -5,13 +5,13 @@ export const builtinAdminModule = {
   id: "core",
   groups: [
     { id: "core.workspace", label: "工作空间", order: 10 },
-    { id: "core.settings", label: "设置", order: 20 },
+    { id: "core.settings", label: "管理", order: 20 },
   ],
   branches: [
     {
-      id: "core.system",
+      id: "core.configuration",
       group: "core.settings",
-      label: "系统管理",
+      label: "设置",
       icon: "system",
       order: 30,
     },
@@ -23,7 +23,7 @@ export const builtinAdminModule = {
       label: "邮件配置",
       description: "SMTP服务器与发件人资料",
       icon: "mail",
-      menu: { group: "core.settings", branch: "core.system", order: 30 },
+      menu: { group: "core.settings", branch: "core.configuration", order: 40 },
     },
     {
       id: "core.settings.runtime",
@@ -31,7 +31,7 @@ export const builtinAdminModule = {
       label: "运行与任务",
       description: "Scheduler、Worker 与常驻任务",
       icon: "runtime",
-      menu: { group: "core.settings", branch: "core.system", order: 20 },
+      menu: { group: "core.settings", branch: "core.configuration", order: 60 },
     },
     {
       id: "core.comments",
@@ -101,7 +101,7 @@ export const builtinAdminModule = {
       label: "站点设置",
       description: "站点资料、菜单与搜索展示",
       icon: "settings",
-      menu: { group: "core.settings", order: 10 },
+      menu: { group: "core.settings", branch: "core.configuration", order: 10 },
     },
     {
       id: "core.settings.theme",
@@ -117,7 +117,7 @@ export const builtinAdminModule = {
       label: "系统设置",
       description: "前端节点策略与同步状态",
       icon: "node-settings",
-      menu: { group: "core.settings", branch: "core.system", order: 10 },
+      menu: { group: "core.settings", branch: "core.configuration", order: 50 },
     },
     {
       id: "core.settings.captcha",
@@ -125,7 +125,7 @@ export const builtinAdminModule = {
       label: "验证码设置",
       description: "验证码提供方与应用规则",
       icon: "lock",
-      menu: { group: "core.settings", order: 25 },
+      menu: { group: "core.settings", branch: "core.configuration", order: 30 },
     },
     {
       id: "core.overview",

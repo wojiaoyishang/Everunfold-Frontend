@@ -16,6 +16,7 @@ import { adminRoutePermission, can } from "@/core/accounts/permissions";
 import { Icon, type IconName } from "../../components/icon";
 import { RouteLink } from "../../components/ui/route-link";
 import { Button } from "../../components/ui/primitives";
+import { AdminNavigationFlyout } from "./navigation-flyout";
 const navigationIcons: Record<AdminPageIcon, IconName> = {
   comment: "comment",
   users: "user",
@@ -41,11 +42,13 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
 export function AdminNavigation({
   pathname,
   onNavigate,
+  flyouts = false,
   collapsed = false,
   onExpand,
 }: {
   pathname: string;
   onNavigate?: () => void;
+  flyouts?: boolean;
   collapsed?: boolean;
   onExpand?: () => void;
 }) {
@@ -75,7 +78,7 @@ export function AdminNavigation({
   } | null>(null);
   const expanded =
     expansion?.pathname === pathname ? expansion.branch : current?.menu?.branch;
-  const link = (item: AdminPageRegistration) => (
+  const link = (item: AdminPageRegistration, onSelect?: () => void) => (
     <RouteLink
       key={item.id}
       href={item.href}
@@ -84,7 +87,10 @@ export function AdminNavigation({
       aria-label={t(item.label)}
       title={t(item.label)}
       className="admin-nav-link"
-      onClick={onNavigate}
+      onClick={() => {
+        onSelect?.();
+        onNavigate?.();
+      }}
     >
       <Icon name={navigationIcons[item.icon]} />
       <span className="admin-nav-text">
@@ -103,11 +109,34 @@ export function AdminNavigation({
             {group.entries.map((entry) => {
               if (entry.kind === "page") return link(entry.page);
               const { branch, items } = entry;
-              const open = !collapsed && expanded === branch.id;
               const panelId = `${id}-${branch.id}`;
+              const pinned =
+                expanded === branch.id || current?.menu?.branch === branch.id;
+              if (flyouts && !pinned)
+                return (
+                  <AdminNavigationFlyout
+                    key={branch.id}
+                    label={branch.label}
+                    icon={<Icon name={navigationIcons[branch.icon]} />}
+                    current={false}
+                    onPin={() => {
+                      if (collapsed) onExpand?.();
+                      setExpansion({ pathname, branch: branch.id });
+                      requestAnimationFrame(() =>
+                        document
+                          .getElementById(`${panelId}-trigger`)
+                          ?.focus({ preventScroll: true }),
+                      );
+                    }}
+                  >
+                    {items.map((item) => link(item, onExpand))}
+                  </AdminNavigationFlyout>
+                );
+              const open = !collapsed && expanded === branch.id;
               return (
                 <div className="admin-nav-branch" key={branch.id}>
                   <Button
+                    id={`${panelId}-trigger`}
                     className="admin-nav-link admin-nav-trigger"
                     aria-expanded={open}
                     aria-controls={panelId}
@@ -139,7 +168,7 @@ export function AdminNavigation({
                   >
                     <div>
                       <div className="admin-nav-children">
-                        {items.map(link)}
+                        {items.map((item) => link(item))}
                       </div>
                     </div>
                   </div>

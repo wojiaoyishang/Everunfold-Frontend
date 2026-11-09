@@ -31,3 +31,31 @@
     gap: 18px;
   }
 }
+
+.testForm {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.testForm > :global(.admin-settings-field) {
+  flex: 1 1 260px;
+}
+.testForm > button {
+  flex-shrink: 0;
+}
+
+.testResult {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.testResult > svg {
+  flex: 0 0 18px;
+  margin-top: 2px;
+}
+.testResult > span {
+  flex: 1 1 200px;
+  overflow-wrap: anywhere;
+}

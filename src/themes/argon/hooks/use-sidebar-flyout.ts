@@ -9,8 +9,8 @@ import {
 } from "react";
 import { usePathname } from "next/navigation";
 
-/** Public sidebar panels use the top layer, independently of editor/disclosure trees. */
-export function useSidebarFlyout() {
+/** Sidebar panels use the top layer, independently of editor/disclosure trees. */
+export function useSidebarFlyout(sideContainer?: string) {
   const row = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -41,8 +41,12 @@ export function useSidebarFlyout() {
     const popupWidth = Math.min(264, width - 24);
     popup.style.width = `${popupWidth}px`;
     const popupHeight = Math.min(popup.scrollHeight, height - 24);
-    const right = bounds.right + 8;
-    const left = bounds.left - popupWidth - 8;
+    const sideBounds =
+      (sideContainer &&
+        row.current?.closest(sideContainer)?.getBoundingClientRect()) ||
+      bounds;
+    const right = sideBounds.right + 8;
+    const left = sideBounds.left - popupWidth - 8;
     const side =
       right + popupWidth <= width - 12
         ? "right"
@@ -54,7 +58,7 @@ export function useSidebarFlyout() {
     popup.style.top = `${Math.max(12, Math.min(side === "below" ? bounds.bottom + 6 : bounds.top, height - popupHeight - 12))}px`;
     popup.style.maxHeight = `${height - 24}px`;
     popup.dataset.positioned = "true";
-  }, [close]);
+  }, [close, sideContainer]);
   const show = (focus = false) => {
     cancelLeave();
     panel.current?.showPopover();

@@ -29,7 +29,7 @@
 }
 .admin-shell[data-collapsed="true"]
   .admin-sidebar
-  :is(.admin-brand > span:last-child, .admin-nav-text, .admin-nav-label) {
+  :where(.admin-brand > span:last-child, .admin-nav-text, .admin-nav-label) {
   opacity: 0;
   visibility: hidden;
 }

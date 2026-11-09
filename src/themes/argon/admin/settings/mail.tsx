@@ -15,6 +15,7 @@ import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "./section-navigation";
 import { SettingsSection, SettingsToggle } from "./shared";
 import styles from "./mail.module.css";
+import { MailTestPanel } from "./mail-test";
 
 export function MailSettingsPage() {
   const editor = useMailSettings(),
@@ -39,6 +40,13 @@ export function MailSettingsPage() {
       <TextField
         id={`${id}-${key}`}
         value={draft?.value[key] ?? ""}
+        type={key === "from_address" || key === "reply_to" ? "email" : "text"}
+        required={
+          !!draft?.value.enabled &&
+          (key === "host" ||
+            key === "from_address" ||
+            (key === "username" && !!draft.value.authenticate))
+        }
         autoComplete="off"
         placeholder={placeholder}
         maxLength={
@@ -59,7 +67,7 @@ export function MailSettingsPage() {
       <UnsavedAccountChanges dirty={editor.dirty} busy={editor.busy} />
       <AdminPageHeading
         title="邮件配置"
-        description="配置用于后续邮件发送。本阶段仅保存设置，不连接 SMTP 或发送邮件。"
+        description="配置邮件服务器与发件人资料，保存后可以发送测试邮件。"
       />
       {editor.loading ? (
         <p role="status">
@@ -69,6 +77,7 @@ export function MailSettingsPage() {
         draft &&
         saved && (
           <Form
+            id={`${id}-configuration`}
             onSubmit={(event) => {
               event.preventDefault();
               void editor.save();
@@ -85,7 +94,7 @@ export function MailSettingsPage() {
               >
                 <SettingsToggle
                   label="允许邮件发送"
-                  hint="关闭时保留配置，后续发送服务将遵循此开关。"
+                  hint="控制后续自动通知，关闭时仍可手动测试发件。"
                   value={draft.value.enabled ?? false}
                   onChange={(enabled) => update({ enabled })}
                 />
@@ -98,6 +107,7 @@ export function MailSettingsPage() {
                     <TextField
                       id={`${id}-port`}
                       type="number"
+                      required
                       min={1}
                       max={65535}
                       step={1}
@@ -129,6 +139,7 @@ export function MailSettingsPage() {
                     <TextField
                       id={`${id}-timeout`}
                       type="number"
+                      required
                       min={3}
                       max={120}
                       step={1}
@@ -161,6 +172,11 @@ export function MailSettingsPage() {
                       <PasswordField
                         id={`${id}-password`}
                         value={draft.password ?? ""}
+                        required={
+                          !!draft.value.enabled &&
+                          !!draft.value.authenticate &&
+                          (!saved.password_configured || !!draft.clear_password)
+                        }
                         maxLength={2048}
                         autoComplete="new-password"
                         placeholder={t(
@@ -231,37 +247,6 @@ export function MailSettingsPage() {
                 <UiText text={editor.message} />
               </p>
             )}
-            <div className="admin-settings-savebar">
-              <span>
-                <UiText
-                  text={
-                    editor.dirty
-                      ? "有尚未保存的修改"
-                      : saved.revision
-                        ? "已保存"
-                        : "尚未配置"
-                  }
-                />
-              </span>
-              <div className="admin-settings-actions">
-                <Button
-                  className="admin-button"
-                  disabled={editor.busy || !editor.dirty}
-                  onClick={editor.reset}
-                >
-                  <Icon name="undo" />
-                  <UiText text="撤销修改" />
-                </Button>
-                <Button
-                  type="submit"
-                  className="admin-button admin-button-primary"
-                  disabled={!editable || editor.busy || !editor.dirty}
-                >
-                  <Icon name={editor.busy ? "refresh" : "save"} />
-                  <UiText text={editor.busy ? "正在保存" : "保存配置"} />
-                </Button>
-              </div>
-            </div>
           </Form>
         )
       )}
@@ -280,6 +265,47 @@ export function MailSettingsPage() {
             <Icon name="refresh" />
             <UiText text="重新读取" />
           </Button>
+        </div>
+      )}
+      {saved && (
+        <MailTestPanel
+          saved={saved}
+          dirty={editor.dirty}
+          disabled={!editable || editor.busy || editor.loading}
+        />
+      )}
+      {draft && saved && !editor.loading && (
+        <div className="admin-settings-savebar">
+          <span>
+            <UiText
+              text={
+                editor.dirty
+                  ? "有尚未保存的修改"
+                  : saved.revision
+                    ? "已保存"
+                    : "尚未配置"
+              }
+            />
+          </span>
+          <div className="admin-settings-actions">
+            <Button
+              className="admin-button"
+              disabled={editor.busy || !editor.dirty}
+              onClick={editor.reset}
+            >
+              <Icon name="undo" />
+              <UiText text="撤销修改" />
+            </Button>
+            <Button
+              type="submit"
+              form={`${id}-configuration`}
+              className="admin-button admin-button-primary"
+              disabled={!editable || editor.busy || !editor.dirty}
+            >
+              <Icon name={editor.busy ? "refresh" : "save"} />
+              <UiText text={editor.busy ? "正在保存" : "保存配置"} />
+            </Button>
+          </div>
         </div>
       )}
       <ConfirmDialog

@@ -38,6 +38,8 @@
   font-size: 19px;
 }
 .admin-navigation {
+  min-width: 0;
+  width: 100%;
   --admin-nav-row-height: 42px;
   --admin-nav-row-gap: 5px;
   display: grid;
@@ -529,4 +531,81 @@ body:has(.admin-embedded-editor) .admin-editor-preview-action,
     :is(.admin-nav-submenu, .admin-nav-chevron) {
     transition: none;
   }
+}
+
+/* Desktop navigation floats beside the sidebar, including its collapsed form. */
+.admin-nav-flyout-branch .admin-nav-trigger[aria-expanded="true"] {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+}
+.admin-nav-flyout-branch .admin-nav-chevron {
+  transform: none;
+}
+.admin-nav-flyout {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+  box-shadow: var(--admin-shadow);
+  max-width: calc(100vw - 24px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  opacity: 0;
+  transform: translateX(-6px);
+  transition:
+    opacity var(--admin-motion-fast),
+    transform var(--admin-motion-fast) var(--admin-motion-ease),
+    display var(--admin-motion-fast) allow-discrete,
+    overlay var(--admin-motion-fast) allow-discrete;
+}
+.admin-nav-flyout[data-positioned="false"] {
+  visibility: hidden;
+}
+.admin-nav-flyout:popover-open {
+  opacity: 1;
+  transform: none;
+}
+.admin-nav-flyout-heading {
+  margin: 0 4px 6px;
+  padding: 6px 8px 10px;
+  border-bottom: 1px solid var(--admin-border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--admin-muted);
+}
+.admin-nav-flyout .admin-nav-link {
+  font-size: 13px;
+}
+.admin-shell[data-collapsed="true"]
+  .admin-sidebar
+  .admin-nav-flyout
+  .admin-nav-text {
+  opacity: 1;
+  visibility: visible;
+}
+@starting-style {
+  .admin-nav-flyout:popover-open {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+}
+.admin-root[data-admin-motion="reduced"] .admin-nav-flyout {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-root:not([data-admin-motion="full"]) .admin-nav-flyout {
+    transition: none;
+  }
+}
+
+.admin-shell[data-collapsed="true"]
+  .admin-sidebar
+  .admin-nav-flyout
+  .ui-route-pending {
+  right: 12px;
+  top: calc(50% - 6px);
 }

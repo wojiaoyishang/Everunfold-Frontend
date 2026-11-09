@@ -109,6 +109,7 @@ export function AdminShell({
           </RouteLink>
           <AdminNavigation
             pathname={pathname}
+            flyouts
             collapsed={preferences.sidebarCollapsed}
             onExpand={() => onPreferencesChange({ sidebarCollapsed: false })}
           />

@@ -146,7 +146,7 @@ test("submenu filtering cannot expose hidden destinations or leave an empty bran
   assert.equal(entries.length, 1);
   assert.equal(entries[0].kind, "branch");
   if (entries[0].kind !== "branch") throw new Error("missing branch");
-  assert.equal(entries[0].branch.id, "core.system");
+  assert.equal(entries[0].branch.id, "core.configuration");
   assert.deepEqual(
     entries[0].items.map((p) => p.id),
     ["core.settings.runtime"],
@@ -163,7 +163,7 @@ test("submenu filtering cannot expose hidden destinations or leave an empty bran
 });
 
 test("submenu registration rejects unknown branches and cross-group placement", () => {
-  for (const branch of ["core.missing", "core.system"]) {
+  for (const branch of ["core.missing", "core.configuration"]) {
     assert.throws(
       () =>
         createAdminRegistry([
