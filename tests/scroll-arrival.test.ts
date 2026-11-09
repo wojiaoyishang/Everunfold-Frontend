@@ -28,7 +28,7 @@ test("arrival feedback waits for scrolling, cancels cleanly, and works without m
     document: {
       documentElement: { scrollHeight: 3000, dataset: {} },
       getElementById: (id: string) =>
-        id === "comment-example" ? target : null,
+        id === "section-example" ? target : null,
     },
     localStorage: { getItem: () => preference },
     matchMedia: () => ({ matches: false }),
@@ -63,7 +63,7 @@ test("arrival feedback waits for scrolling, cancels cleanly, and works without m
       false,
     );
     assert.equal(
-      scrollToAnchor("#comment-example", () => arrivals++),
+      scrollToAnchor("#section-example", () => arrivals++),
       true,
     );
     assert.equal(arrivals, 0);
@@ -76,23 +76,23 @@ test("arrival feedback waits for scrolling, cancels cleanly, and works without m
     const interrupted = scrollToPosition(1200);
     stopScrolling();
     assert.equal(await interrupted, false);
-    scrollToAnchor("#comment-example", () => arrivals++);
+    scrollToAnchor("#section-example", () => arrivals++);
     step(700);
     await Promise.resolve();
     assert.equal(arrivals, 1);
     assert.equal(windowMock.scrollY, 900);
     // Repeated location while already in place still produces feedback.
-    scrollToAnchor("#comment-example", () => arrivals++);
+    scrollToAnchor("#section-example", () => arrivals++);
     await Promise.resolve();
     assert.equal(arrivals, 2);
     preference = "reduced";
     windowMock.scrollY = 0;
-    scrollToAnchor("#comment-example", () => arrivals++);
+    scrollToAnchor("#section-example", () => arrivals++);
     await Promise.resolve();
     assert.equal(arrivals, 3);
     assert.equal(frames.size, 0);
     target.isConnected = false;
-    scrollToAnchor("#comment-example", () => arrivals++);
+    scrollToAnchor("#section-example", () => arrivals++);
     await Promise.resolve();
     assert.equal(arrivals, 3);
   } finally {

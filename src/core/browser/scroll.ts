@@ -1,10 +1,14 @@
 import { dampedPosition, easeOutExpo, wheelDistance } from "./scroll-policy";
 import { motionEnabled, subscribeMotion } from "./motion";
+import { waitForAnchorLayout } from "./anchor-readiness";
 
 let cancelAnimation: (() => void) | undefined;
+let cancelPreparation: (() => void) | undefined;
 let wheelTarget: number | undefined;
 
 export function stopScrolling(): void {
+  cancelPreparation?.();
+  cancelPreparation = undefined;
   cancelAnimation?.();
   cancelAnimation = undefined;
   wheelTarget = undefined;
@@ -52,7 +56,11 @@ export function scrollToPosition(
   });
 }
 
-export function scrollToAnchor(hash: string, onArrive?: () => void): boolean {
+export function scrollToAnchor(
+  hash: string,
+  onArrive?: () => void,
+  signal?: AbortSignal,
+): boolean {
   let id: string;
   try {
     id = decodeURIComponent(hash.slice(1));
@@ -60,7 +68,7 @@ export function scrollToAnchor(hash: string, onArrive?: () => void): boolean {
     return false;
   }
   const target = document.getElementById(id);
-  if (!target) return false;
+  if (!target || signal?.aborted) return false;
   for (
     let parent = target.parentElement;
     parent;
@@ -68,10 +76,32 @@ export function scrollToAnchor(hash: string, onArrive?: () => void): boolean {
   ) {
     if (parent instanceof HTMLDetailsElement) parent.open = true;
   }
-  const top = target.getBoundingClientRect().top + window.scrollY - 100;
-  void scrollToPosition(top, 650).then((arrived) => {
-    if (arrived && target.isConnected) onArrive?.();
-  });
+  const begin = () => {
+    if (!target.isConnected || signal?.aborted) return;
+    const top = target.getBoundingClientRect().top + window.scrollY - 100;
+    const arrival = scrollToPosition(top, 650);
+    const ownedAnimation = cancelAnimation;
+    const cancel = () => {
+      if (ownedAnimation && cancelAnimation === ownedAnimation) stopScrolling();
+    };
+    signal?.addEventListener("abort", cancel, { once: true });
+    void arrival.then((arrived) => {
+      signal?.removeEventListener("abort", cancel);
+      if (arrived && !signal?.aborted && target.isConnected) onArrive?.();
+    });
+  };
+  if (id === "comments" || id.startsWith("comment-")) {
+    stopScrolling();
+    const controller = new AbortController();
+    const cancel = () => controller.abort();
+    cancelPreparation = cancel;
+    signal?.addEventListener("abort", cancel, { once: true });
+    void waitForAnchorLayout(target, controller.signal).then((ready) => {
+      signal?.removeEventListener("abort", cancel);
+      if (cancelPreparation === cancel) cancelPreparation = undefined;
+      if (ready && !controller.signal.aborted) begin();
+    });
+  } else begin();
   return true;
 }
 

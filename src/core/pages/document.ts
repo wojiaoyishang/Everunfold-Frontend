@@ -26,9 +26,9 @@ export function pageRenderId(frame: string, value: PageSource): string {
   );
 }
 export const pageResizeScript =
-  "(()=>{let previous=0;const renderId=document.documentElement.dataset.everunfoldRender;const send=(force=false)=>{const height=Math.ceil(document.documentElement.getBoundingClientRect().height);if(force||height!==previous){previous=height;parent.postMessage({type:'everunfold:page:size',height,renderId},'*')}};new ResizeObserver(()=>send()).observe(document.documentElement);addEventListener('load',()=>send(true));addEventListener('message',event=>{if(event.source===parent&&event.data?.type==='everunfold:page:measure'){send(true);parent.postMessage({type:'everunfold:page:ready',renderId},'*')}});send(true);requestAnimationFrame(()=>requestAnimationFrame(()=>parent.postMessage({type:'everunfold:page:ready',renderId},'*')))})()";
+  "(()=>{let previous=0;const renderId=document.documentElement.dataset.everunfoldRender;const send=(force=false)=>{const height=Math.ceil(document.documentElement.getBoundingClientRect().height);if(force||height!==previous){previous=height;parent.postMessage({type:'everunfold:page:size',height,renderId},'*')}};new ResizeObserver(()=>send()).observe(document.documentElement);const loaded=()=>Promise.resolve(document.fonts?.ready).then(()=>{send(true);parent.postMessage({type:'everunfold:page:loaded',renderId},'*')});addEventListener('load',loaded);addEventListener('message',event=>{if(event.source===parent&&event.data?.type==='everunfold:page:measure'){send(true);parent.postMessage({type:'everunfold:page:ready',renderId},'*');if(document.readyState==='complete')loaded()}});send(true);requestAnimationFrame(()=>requestAnimationFrame(()=>parent.postMessage({type:'everunfold:page:ready',renderId},'*')))})()";
 export const pageResizeHash =
-  "sha256-sB9K6WL4wfwDLc18Yc2z3dsrlJ7ZjgnAtjMkxRgRxMA=";
+  "sha256-AeuFvAIcXQyW8db/CZtrul8pB7Hf1/beuYIKB4vfGs0=";
 const attribute = (value: string) =>
   value
     .replaceAll("&", "&amp;")

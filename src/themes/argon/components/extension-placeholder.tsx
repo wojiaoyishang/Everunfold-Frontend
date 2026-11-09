@@ -9,7 +9,11 @@ export function ExtensionPlaceholder({
   loading?: boolean;
 }) {
   return (
-    <div className={styles.placeholder} role="status">
+    <div
+      className={styles.placeholder}
+      role="status"
+      data-anchor-pending={loading || undefined}
+    >
       <UiText text={loading ? "正在加载组件…" : "组件暂不可用"} />{" "}
       {!loading && <code>{name}</code>}
     </div>

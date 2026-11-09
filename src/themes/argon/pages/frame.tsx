@@ -13,6 +13,7 @@ export function PageFrame({
 }) {
   const ref = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(480);
+  const [loadedToken, setLoadedToken] = useState("");
   const frameId = useId();
   const { html, css, javascript, javascript_enabled, javascript_position } =
     value;
@@ -54,6 +55,10 @@ export function PageFrame({
         setReady({ token: document.token, source: event.source });
         return;
       }
+      if (event.data.type === "everunfold:page:loaded") {
+        setLoadedToken(document.token);
+        return;
+      }
       if (
         event.data?.type !== "everunfold:page:size" ||
         typeof event.data.height !== "number" ||
@@ -75,6 +80,7 @@ export function PageFrame({
       ref={ref}
       title={value.title}
       className={styles.frame}
+      data-anchor-pending={loadedToken !== document.token || undefined}
       style={{ height }}
       sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox"
       referrerPolicy="no-referrer"
