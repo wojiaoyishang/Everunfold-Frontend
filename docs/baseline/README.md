@@ -1159,3 +1159,14 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/operations-and-search.md` | `operations-search-1` | `08f29b3f8fca838d6f1ebe79ad95ea93c793b7a99b95664fb7f05f16a5af0a81` |
 | `docs/decisions/0088-operations-workflows-and-search-discovery.md` | `ADR0088-2` | `a7a5d6fec980c98a280922d9d56fed5396a6f479eb2cf7060f5d5e647496c95a` |
 | `docs/handoff/operations-search-verification.md` | `operations-search-verification-1` | `c4cef5bd7e3d305b8145a04aae3bde2b4b6fb3c53996db9592a19e8c75eb0e0f` |
+
+## 评论界面与原文入口（2026-11-09）
+
+前端8b9558d，后端仅文档同步，operations1.0.0及其余契约保持。共享表单修正、动作图标/语义色和原文类型/标题/地址入口完成；以下版本替代对应旧摘要，原始基线不改，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `8aa16d49641468cd5acdf947217ca1f201e308427848506f8eddd7ea4104c58d` |
+| `docs/development/operations-and-search.md` | `operations-search-2` | `b394e09ec50b9a291c18fcf7d7704712580b5a821e3e88fcd25dd9620f67fe58` |
+| `docs/decisions/0088-operations-workflows-and-search-discovery.md` | `ADR0088-3` | `8388bef6f697773812948caf02c6d20213025e43170af7fd0161106c5c3bc79e` |
+| `docs/handoff/comment-ui-verification.md` | `comment-ui-verification-1` | `1975870114dd65a934ee3874da24a4948a7867d54607bd14b44ce7316022256e` |
