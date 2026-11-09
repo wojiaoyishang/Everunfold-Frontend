@@ -48,6 +48,7 @@ export function PluginImpactDialog() {
                   ["已应用页面", plugin.applied_pages],
                   ["已发布内容", plugin.published_contents],
                   ["定时发布内容", plugin.scheduled_contents],
+                  ["验证码配置", plugin.captcha_references],
                 ] as const
               )
                 .filter(([, count]) => (count ?? 0) > 0)
@@ -68,6 +69,13 @@ export function PluginImpactDialog() {
           </li>
         ))}
       </ul>
+      {impact?.plugins.some(
+        (plugin) => (plugin.captcha_references ?? 0) > 0,
+      ) && (
+        <p>
+          <UiText text="停用验证码组件后，相关验证将暂时无法完成。请先切换到其他验证方式，或确认后继续。" />
+        </p>
+      )}
       <p>
         <UiText text="检查覆盖当前已应用页面、已发布正文和定时发布版本中的短代码引用；不含历史草稿或脚本动态调用。取消将撤销本次插件开关修改，其他设置修改仍保留。" />
       </p>

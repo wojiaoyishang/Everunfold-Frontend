@@ -15,6 +15,8 @@ import { ManagementEntry } from "./management-entry";
 import { SessionFeedback } from "./session-feedback";
 import { LoginSuccess } from "./login-success";
 import { canAccessAdmin } from "@/core/accounts/permissions";
+import { useCaptcha, captchaFailure } from "@/core/captcha/use-captcha";
+import { CaptchaField } from "../components/captcha-field";
 
 export function LoginPage({
   baseUrl,
@@ -25,16 +27,18 @@ export function LoginPage({
 }) {
   const card = useRef<HTMLDivElement>(null);
   const { state, check, accept, fail } = useSession(baseUrl);
+  const captcha = useCaptcha(baseUrl, "login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
   const action = useRef<AbortController | null>(null);
   const passwordField = useRef<HTMLInputElement>(null);
   useEffect(() => () => action.current?.abort(), []);
   useEffect(() => {
-    if (!busy && message) passwordField.current?.focus();
-  }, [busy, message]);
+    if (!busy && message && passwordError) passwordField.current?.focus();
+  }, [busy, message, passwordError]);
   const entering = state.phase === "ready" && state.session.authenticated;
   const destination = loginDestination(
     returnTo,
@@ -44,15 +48,22 @@ export function LoginPage({
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || state.phase !== "ready" || state.session.authenticated) return;
+    if (
+      busy ||
+      !captcha.ready ||
+      state.phase !== "ready" ||
+      state.session.authenticated
+    )
+      return;
     const controller = new AbortController();
     action.current = controller;
     setBusy(true);
     setMessage("");
+    setPasswordError(false);
     try {
       const response = await login(
         baseUrl,
-        { username: username.trim(), password },
+        { username: username.trim(), password, captcha: captcha.response },
         state.session.csrf_token,
         { signal: controller.signal },
       );
@@ -62,8 +73,18 @@ export function LoginPage({
       accept(session);
     } catch (error) {
       if (controller.signal.aborted) return;
+      if (
+        error instanceof RequestError &&
+        [40386, 40387, 40986, 50386, 42986].includes(error.code ?? 0)
+      ) {
+        setMessage(captchaFailure(error));
+        void captcha.refresh();
+        return;
+      }
       setPassword("");
       setMessage(authFailureMessage(error, "login"));
+      setPasswordError(error instanceof RequestError && error.status === 401);
+      void captcha.refresh();
       if (!(
         error instanceof RequestError &&
         [401, 422, 429].includes(error.status ?? 0)
@@ -120,7 +141,7 @@ export function LoginPage({
             id="login-password"
             label="密码"
             icon="lock"
-            invalid={Boolean(message)}
+            invalid={passwordError}
           >
             <PasswordField
               id="login-password"
@@ -134,9 +155,10 @@ export function LoginPage({
               ref={passwordField}
               placeholder="输入密码"
               aria-describedby={message ? "login-error" : undefined}
-              aria-invalid={Boolean(message)}
+              aria-invalid={passwordError}
             />
           </FormField>
+          <CaptchaField control={captcha} />
           <div
             className="login-message"
             id="login-error"
@@ -153,7 +175,7 @@ export function LoginPage({
           <Button
             type="submit"
             className="management-primary login-submit"
-            disabled={busy || !username.trim() || !password}
+            disabled={busy || !captcha.ready || !username.trim() || !password}
           >
             <span aria-live="polite">
               {busy ? <UiText text="正在登录" /> : <UiText text="登录" />}

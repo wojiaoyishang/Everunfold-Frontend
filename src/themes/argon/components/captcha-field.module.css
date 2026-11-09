@@ -1,0 +1,61 @@
+.field {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  text-align: left;
+}
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.heading label {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  background: transparent;
+  border: 0;
+}
+.refresh svg {
+  width: 16px;
+  height: 16px;
+}
+.image {
+  width: fit-content;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.image img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+.field input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.field small,
+.field p {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.field .error {
+  color: var(--danger-color, #b44545);
+}

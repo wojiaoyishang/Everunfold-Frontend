@@ -32,9 +32,9 @@
   margin: 0;
 }
 .gate form {
-  display: flex;
-  gap: 10px;
-  width: min(440px, 100%);
+  display: grid;
+  gap: 14px;
+  width: min(360px, 100%);
   margin-top: 8px;
 }
 .gate form > span {

@@ -1,4 +1,5 @@
 /** Stable plugin authoring contract. Runtime capabilities live in the client entry. */
+export type { CaptchaWidgetProps } from "./captcha";
 export type {
   FrontendPlugin,
   PluginShortcode,

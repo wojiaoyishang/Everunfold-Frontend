@@ -1,0 +1,15 @@
+.keys {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.hint {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--admin-muted);
+}
+@media (max-width: 640px) {
+  .keys {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

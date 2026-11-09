@@ -1,0 +1,15 @@
+.fields {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.field {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+.fields small {
+  color: var(--admin-muted);
+  line-height: 1.7;
+  font-size: 12px;
+}

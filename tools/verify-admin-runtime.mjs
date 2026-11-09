@@ -157,6 +157,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/settings",
       "/admin/settings/theme",
       "/admin/settings/plugins",
+      "/admin/settings/captcha",
       "/admin/settings/system",
     ]) {
       const response = await fetch(base + route, {

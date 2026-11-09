@@ -3,6 +3,10 @@
   padding: 30px 38px 22px;
   scroll-margin-top: 95px;
 }
+.composer-captcha {
+  margin-top: 22px;
+  max-width: 360px;
+}
 .composer-heading {
   display: flex;
   gap: 13px;

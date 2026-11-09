@@ -42,6 +42,7 @@ export async function Article({
           </div>
         )}
         <CommentSection
+          contentId={content.id}
           open={content.comments_open ?? true}
           key={content.id}
           comments={snapshot.comments[content.id] ?? []}

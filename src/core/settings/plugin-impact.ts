@@ -36,6 +36,7 @@ export function restorePluginChoices(
 export function pluginNeedsConfirmation(usage: PluginUsage) {
   return (
     !usage.registered ||
+    (usage.captcha_references ?? 0) > 0 ||
     (usage.applied_pages ?? 0) > 0 ||
     (usage.published_contents ?? 0) > 0 ||
     (usage.scheduled_contents ?? 0) > 0

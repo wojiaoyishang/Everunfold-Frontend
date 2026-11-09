@@ -41,6 +41,7 @@ import styles from "./pages.module.css";
 import { Select } from "../../components/ui/select";
 import { PageLanguages } from "./languages";
 import { AdminWarning } from "../components/warning";
+import { CaptchaOverrides } from "../components/captcha-overrides";
 
 const SourceEditor = dynamic(() => import("./source-editor"), { ssr: false });
 const blank: PageValue = {
@@ -337,6 +338,13 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                         required
                         maxLength={500}
                         hint="例如 /links 或 /about，已有内容和系统路径不可占用。"
+                      />
+                    </div>
+                    <div className={styles.description}>
+                      <CaptchaOverrides
+                        value={value}
+                        onChange={(patch) => setValue({ ...value, ...patch })}
+                        disabled={!write || action.busy}
                       />
                     </div>
                     <div className={styles.description}>

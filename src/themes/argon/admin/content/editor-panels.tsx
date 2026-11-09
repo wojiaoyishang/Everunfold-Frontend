@@ -16,6 +16,7 @@ import { DateTimeField } from "../../components/ui/date-time-field";
 import { Select } from "../../components/ui/select";
 import { PasswordField } from "../../components/ui/password-field";
 import { Switch } from "../../components/ui/switch";
+import { CaptchaOverrides } from "../components/captcha-overrides";
 import { CategorySelector, type CreateCategory } from "./category-selector";
 import { TagSelector } from "./tag-selector";
 import { Icon } from "../../components/icon";
@@ -336,6 +337,17 @@ function DiscussionPanel({ settings, update, disabled }: PanelProps) {
     </Panel>
   );
 }
+function CaptchaPanel({ settings, update, disabled }: PanelProps) {
+  return (
+    <Panel title="验证码" initialOpen={false}>
+      <CaptchaOverrides
+        value={settings}
+        onChange={update}
+        disabled={disabled}
+      />
+    </Panel>
+  );
+}
 function SeoPanel({ settings, update, fields, disabled }: PanelProps) {
   return (
     <Panel title="搜索展示" initialOpen={false}>
@@ -380,6 +392,7 @@ const panels: Readonly<Record<string, ComponentType<PanelProps>>> =
     taxonomy: CategoryPanel,
     tags: TagsPanel,
     discussion: DiscussionPanel,
+    captcha: CaptchaPanel,
     seo: SeoPanel,
   });
 export function EditorPanels({
@@ -407,7 +420,7 @@ export function EditorPanels({
           id === "taxonomy"
             ? ["taxonomy", "tags"]
             : id === "publication"
-              ? ["publication", "access", "opening"]
+              ? ["publication", "access", "captcha", "opening"]
               : [id],
         )
         .filter((id, index, all) => all.indexOf(id) === index)

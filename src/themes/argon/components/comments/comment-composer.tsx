@@ -15,6 +15,8 @@ import { Icon } from "../icon";
 import { TransitionPanel } from "../transition-panel";
 import { CommentEditor } from "./comment-editor";
 import { CommentIdentity } from "./comment-identity";
+import { CaptchaField } from "../captcha-field";
+import type { CaptchaController } from "@/core/captcha/use-captcha";
 import {
   validateDraft,
   type CommentDraft,
@@ -37,12 +39,14 @@ export function CommentComposer({
   onCancelReply,
   onAdd,
   notice,
+  captcha,
 }: {
   reply: CommentEntry | null;
   replying: boolean;
   onCancelReply: () => void;
-  onAdd: (draft: Omit<CommentDraft, "email">) => void;
+  onAdd: (draft: Omit<CommentDraft, "email">) => boolean | Promise<boolean>;
   notice: string;
+  captcha?: CaptchaController;
 }) {
   const prefix = useId();
   const form = useRef<HTMLFormElement>(null);
@@ -50,6 +54,7 @@ export function CommentComposer({
   const [errors, setErrors] = useState<DraftErrors>({});
   const [preview, setPreview] = useState(false);
   const [extra, setExtra] = useState(false);
+  const [sending, setSending] = useState(false);
   const [editorRevision, setEditorRevision] = useState(0);
   const hydrated = useSyncExternalStore(
     noSubscription,
@@ -79,8 +84,9 @@ export function CommentComposer({
       ),
     );
   }
-  function submit(event: FormEvent<HTMLFormElement>) {
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (sending || (captcha && !captcha.ready)) return;
     const nextErrors = validateDraft(draft);
     setErrors(nextErrors);
     const first = Object.keys(nextErrors)[0];
@@ -92,12 +98,19 @@ export function CommentComposer({
       );
       return;
     }
-    onAdd({
-      author: draft.author.trim(),
-      body: draft.body.trim(),
-      website: draft.website.trim(),
-      formatted: draft.formatted,
-    });
+    setSending(true);
+    let accepted = false;
+    try {
+      accepted = await onAdd({
+        author: draft.author.trim(),
+        body: draft.body.trim(),
+        website: draft.website.trim(),
+        formatted: draft.formatted,
+      });
+    } finally {
+      setSending(false);
+    }
+    if (!accepted) return;
     setDraft((current) => ({ ...current, body: "", email: "" }));
     setPreview(false);
     setEditorRevision((current) => current + 1);
@@ -164,16 +177,35 @@ export function CommentComposer({
           setExtra={setExtra}
           update={update}
         />
+        {captcha && (
+          <div className="composer-captcha">
+            <CaptchaField control={captcha} />
+          </div>
+        )}
         <div className="composer-submit-row">
-          <p>
-            <span className="preview-badge">
-              <UiText text="互动演示" />
-            </span>
-            <UiText text="留言只显示在本页，不会发布；刷新后清除。" />
-          </p>
-          <Button className="primary-button" type="submit" disabled={!hydrated}>
+          {captcha ? (
+            <p>
+              <UiText text="评论提交后须经审核才会公开。" />
+            </p>
+          ) : (
+            <p>
+              <span className="preview-badge">
+                <UiText text="互动演示" />
+              </span>
+              <UiText text="留言只显示在本页，不会发布；刷新后清除。" />
+            </p>
+          )}
+          <Button
+            className="primary-button"
+            type="submit"
+            disabled={
+              !hydrated || sending || Boolean(captcha && !captcha.ready)
+            }
+          >
             <Icon name="send" />
-            <UiText text="添加到本页" />
+            <UiText
+              text={sending ? "正在提交…" : captcha ? "提交评论" : "添加到本页"}
+            />
           </Button>
         </div>
         <p className="composer-status" role="status">

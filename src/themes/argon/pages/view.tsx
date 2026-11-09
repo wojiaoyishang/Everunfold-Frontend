@@ -7,6 +7,7 @@ import { PageFrame } from "./frame";
 import styles from "./pages.module.css";
 import { ContentLanguages } from "../components/content-languages";
 import type { Content } from "@/core/content/types";
+import { ProtectedManagedPage } from "./protected-page";
 
 export function ManagedPageView({
   page,
@@ -25,13 +26,21 @@ export function ManagedPageView({
       context={{ page, path: page.path, preview: Boolean(onReady) }}
       onReady={onReady}
     >
-      <ExtensionComponent
-        name="public.page.surface"
-        notifyReady={false}
-        page={page}
-        onReady={onReady}
-        translations={translations}
-      />
+      {page.access === "captcha" && !onReady ? (
+        <ProtectedManagedPage
+          key={`${page.id}:${page.revision}`}
+          page={page}
+          translations={translations}
+        />
+      ) : (
+        <ExtensionComponent
+          name="public.page.surface"
+          notifyReady={false}
+          page={page}
+          onReady={onReady}
+          translations={translations}
+        />
+      )}
     </ThemeTemplate>
   );
 }

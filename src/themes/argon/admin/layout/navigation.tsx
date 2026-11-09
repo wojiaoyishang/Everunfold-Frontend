@@ -10,6 +10,7 @@ import { Icon, type IconName } from "../../components/icon";
 import { RouteLink } from "../../components/ui/route-link";
 const navigationIcons: Record<AdminPageIcon, IconName> = {
   users: "user",
+  lock: "lock",
   font: "type",
   book: "book",
   leaf: "leaf",

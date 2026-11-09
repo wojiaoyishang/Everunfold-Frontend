@@ -16,6 +16,12 @@ export function parsePublicSnapshot(input: unknown): PublicSnapshot {
   if (!validate(input)) throw new Error("Invalid public snapshot contract");
   if (
     input.contents.some(
+      (item) => item.read_receipt || item.unlocked_comments?.length,
+    )
+  )
+    throw new Error("Private reader data leaked into public snapshot");
+  if (
+    input.contents.some(
       (item) =>
         item.access &&
         item.access !== "public" &&
@@ -51,6 +57,17 @@ export function parsePublicSnapshot(input: unknown): PublicSnapshot {
     throw new Error("Invalid public content path");
   const pageIds = new Set<string>();
   for (const page of input.pages ?? []) {
+    if (page.read_receipt)
+      throw new Error("Private page reader data leaked into public snapshot");
+    if (
+      page.access === "captcha" &&
+      (page.html ||
+        page.css ||
+        page.javascript ||
+        page.description ||
+        Object.keys(page.options ?? {}).length)
+    )
+      throw new Error("Restricted page leaked into public snapshot");
     const normalized = normalizePath(page.path);
     if (
       !page.path.startsWith("/") ||

@@ -19,20 +19,25 @@ export async function generateSettingsClient(
     operations.some(
       (op) =>
         !/^[a-z][a-zA-Z]+$/.test(op.name) ||
-        !(stem === "content-access"
-          ? op.path === "/v1/reader/access"
-          : stem === "accounts"
-            ? /^\/v1\/(?:account|admin\/users|admin\/user-presets|admin\/api-key-applications)(?:\/[a-z/{}_-]+)?$/.test(
-                op.path,
-              )
-            : /^\/v1\/admin\/[a-z/{}_-]+$/.test(op.path)) ||
+        !(stem === "captcha"
+          ? /^\/v1\/(?:admin\/captcha|reader\/(?:captcha\/challenge|access-page|comments))$/.test(
+              op.path,
+            )
+          : stem === "content-access"
+            ? op.path === "/v1/reader/access"
+            : stem === "accounts"
+              ? /^\/v1\/(?:account|admin\/users|admin\/user-presets|admin\/api-key-applications)(?:\/[a-z/{}_-]+)?$/.test(
+                  op.path,
+                )
+              : /^\/v1\/admin\/[a-z/{}_-]+$/.test(op.path)) ||
         !["GET", "PATCH", "POST"].includes(op.method) ||
         !schema.properties[op.response] ||
         (op.input && !schema.properties[op.input]) ||
         (op.encoding !== undefined && op.encoding !== "binary") ||
         (op.encoding === "binary" && (op.method !== "POST" || !op.input)) ||
-        (op.csrf === false && stem !== "content-access") ||
-        (op.credentials === "omit" && stem !== "content-access"),
+        (op.csrf === false && !["content-access", "captcha"].includes(stem)) ||
+        (op.credentials === "omit" &&
+          !["content-access", "captcha"].includes(stem)),
     )
   )
     throw new Error("Invalid settings operation metadata");

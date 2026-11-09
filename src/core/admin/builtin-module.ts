@@ -87,6 +87,14 @@ export const builtinAdminModule = {
       menu: { group: "core.settings", order: 30 },
     },
     {
+      id: "core.settings.captcha",
+      href: "/admin/settings/captcha",
+      label: "验证码设置",
+      description: "验证码提供方与应用规则",
+      icon: "lock",
+      menu: { group: "core.settings", order: 25 },
+    },
+    {
       id: "core.overview",
       href: "/admin",
       label: "工作台",

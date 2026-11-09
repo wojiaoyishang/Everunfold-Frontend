@@ -1,8 +1,7 @@
 "use client";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
-import { UiText } from "@/core/i18n/provider";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { Content, Site } from "@/core/content/types";
 import { useProtectedContent } from "@/core/content/use-protected-content";
 import { renderContent } from "@/core/rendering/content";
@@ -10,9 +9,9 @@ import { ContentMarkup } from "./content-markup";
 import { ExtensionComponent } from "@/core/extensions/components";
 import { ArticleMedia } from "./article-media";
 import { PagePresentation } from "./route-state";
-import { Button, Form } from "./ui/primitives";
-import { PasswordField } from "./ui/password-field";
-import { Icon } from "./icon";
+import { useCaptcha } from "@/core/captcha/use-captcha";
+import { ReadingAccessForm } from "./reading-access-form";
+import { CommentSection } from "./comments/comment-section";
 import styles from "./protected-article.module.css";
 
 export function ProtectedArticle({
@@ -25,8 +24,13 @@ export function ProtectedArticle({
   baseUrl: string;
 }) {
   const runtime = usePluginRuntime();
-  const access = useProtectedContent(baseUrl, content.id, content.opens_at);
-  const [password, setPassword] = useState("");
+  const access = useProtectedContent(
+    baseUrl,
+    content.id,
+    content.opens_at,
+    content.captcha_required,
+  );
+  const captcha = useCaptcha(baseUrl, "read", content.id, !access.content);
   const readable = access.content ?? content;
   const rendered = useMemo(() => {
     void runtime.catalog?.revision;
@@ -52,76 +56,27 @@ export function ProtectedArticle({
             </ArticleMedia>
           </div>
         ) : (
-          <div className={styles.gate} aria-busy={access.pending}>
-            <span className={styles.mark}>
-              <Icon name="lock" />
-            </span>
-            <h2>
-              {content.opens_at ? (
-                <UiText text="这篇内容尚未开放" />
-              ) : (
-                <UiText text="这篇内容需要密码" />
-              )}
-            </h2>
-            <p>
-              {content.opens_at ? (
-                <>
-                  <UiText text="开放时间：" />
-                  <time dateTime={content.opens_at}>
-                    {new Date(content.opens_at).toLocaleString("zh-CN", {
-                      timeZone: "Asia/Shanghai",
-                      hour12: false,
-                    })}
-                  </time>
-                  <UiText text="（北京时间）。在此之前，也可以输入密码阅读。" />
-                </>
-              ) : (
-                <UiText text="输入作者提供的文章密码，继续阅读正文。" />
-              )}
-            </p>
-            <Form
-              onSubmit={(event) => {
-                event.preventDefault();
-                void access.load(password).then((success) => {
-                  if (success) setPassword("");
-                });
-              }}
-            >
-              <PasswordField
-                aria-label="文章访问密码"
-                autoComplete="off"
-                value={password}
-                maxLength={200}
-                disabled={access.pending}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="文章密码"
-              />
-              <Button type="submit" disabled={access.pending || !password}>
-                <Icon name={access.pending ? "refresh" : "lock"} />
-                {access.pending ? (
-                  <UiText text="正在验证…" />
-                ) : (
-                  <UiText text="解锁阅读" />
-                )}
-              </Button>
-            </Form>
-            {content.opens_at && (
-              <Button
-                className={styles.checkTime}
-                disabled={access.pending}
-                onClick={() => void access.load()}
-              >
-                <Icon name="refresh" /> <UiText text="检查开放状态" />
-              </Button>
-            )}
-            {access.error && (
-              <p className={styles.error} role="alert">
-                {access.error}
-              </p>
-            )}
-          </div>
+          <ReadingAccessForm
+            captcha={captcha}
+            pending={access.pending}
+            error={access.error}
+            passwordRequired={
+              content.password_required ?? content.access !== "captcha"
+            }
+            opensAt={content.opens_at}
+            onUnlock={(password) => access.load(password, captcha.response)}
+          />
         )}
       </article>
+      {access.content && (
+        <CommentSection
+          contentId={content.id}
+          readReceipt={access.content.read_receipt}
+          open={access.content.comments_open}
+          comments={access.content.unlocked_comments ?? []}
+          path={content.path}
+        />
+      )}
     </>
   );
 }

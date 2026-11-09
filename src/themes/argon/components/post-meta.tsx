@@ -34,7 +34,9 @@ export function PostMeta({
       {locked ? (
         <span>
           <Icon name={content.opens_at ? "clock" : "lock"} />
-          {content.opens_at ? (
+          {content.access === "captcha" ? (
+            <UiText text="验证后阅读" />
+          ) : content.opens_at ? (
             <UiText text="定时开放" />
           ) : (
             <UiText text="密码保护" />

@@ -101,6 +101,7 @@ const likes =
   path.basename(absoluteSource) === "comment-likes-v0.1.schema.json";
 const auth = path.basename(absoluteSource) === "auth-v0.1.schema.json";
 const accounts = path.basename(absoluteSource) === "accounts-v1.schema.json";
+const captcha = path.basename(absoluteSource) === "captcha-v1.schema.json";
 const pages = path.basename(absoluteSource) === "pages-v1.schema.json";
 const settings = path.basename(absoluteSource) === "settings-v1.schema.json";
 const contentAdmin =
@@ -109,48 +110,52 @@ const contentAccess =
   path.basename(absoluteSource) === "content-access-v1.schema.json";
 const collaboration =
   path.basename(absoluteSource) === "collaboration-v1.schema.json";
-const rootName = pages
-  ? "PagesContract"
-  : accounts
-    ? "AccountContract"
-    : collaboration
-      ? "CollaborationContract"
-      : contentAccess
-        ? "ContentAccessContract"
-        : contentAdmin
-          ? "ContentAdminContract"
-          : settings
-            ? "SettingsContract"
-            : auth
-              ? "AuthContract"
-              : likes
-                ? "CommentLikesContract"
-                : reader
-                  ? "ReaderPreviewContract"
-                  : presentation
-                    ? "ContentPresentation"
-                    : "PublicSnapshot";
-const outputName = pages
-  ? "pages-contract"
-  : accounts
-    ? "accounts-contract"
-    : collaboration
-      ? "collaboration-contract"
-      : contentAccess
-        ? "content-access-contract"
-        : contentAdmin
-          ? "content-admin-contract"
-          : settings
-            ? "settings-contract"
-            : auth
-              ? "auth-contract"
-              : likes
-                ? "comment-likes-contract"
-                : reader
-                  ? "reader-preview-contract"
-                  : presentation
-                    ? "presentation-contract"
-                    : "public-contract";
+const rootName = captcha
+  ? "CaptchaAPIContract"
+  : pages
+    ? "PagesContract"
+    : accounts
+      ? "AccountContract"
+      : collaboration
+        ? "CollaborationContract"
+        : contentAccess
+          ? "ContentAccessContract"
+          : contentAdmin
+            ? "ContentAdminContract"
+            : settings
+              ? "SettingsContract"
+              : auth
+                ? "AuthContract"
+                : likes
+                  ? "CommentLikesContract"
+                  : reader
+                    ? "ReaderPreviewContract"
+                    : presentation
+                      ? "ContentPresentation"
+                      : "PublicSnapshot";
+const outputName = captcha
+  ? "captcha-contract"
+  : pages
+    ? "pages-contract"
+    : accounts
+      ? "accounts-contract"
+      : collaboration
+        ? "collaboration-contract"
+        : contentAccess
+          ? "content-access-contract"
+          : contentAdmin
+            ? "content-admin-contract"
+            : settings
+              ? "settings-contract"
+              : auth
+                ? "auth-contract"
+                : likes
+                  ? "comment-likes-contract"
+                  : reader
+                    ? "reader-preview-contract"
+                    : presentation
+                      ? "presentation-contract"
+                      : "public-contract";
 const output = process.env.EVERUNFOLD_CONTRACT_OUTPUT
   ? path.resolve(process.env.EVERUNFOLD_CONTRACT_OUTPUT)
   : path.join(projectRoot, "var/cache/contracts");
@@ -160,6 +165,7 @@ const types = await compile(schema, rootName, {
     "/* Generated from the backend public contract. Do not edit by hand. */",
   additionalProperties: false,
   ignoreMinAndMaxItems:
+    captcha ||
     pages ||
     accounts ||
     reader ||
@@ -182,27 +188,29 @@ await writeArtifact(path.join(output, path.basename(absoluteSource)), source);
 await writeArtifact(
   path.join(
     output,
-    pages
-      ? "pages-source.json"
-      : accounts
-        ? "accounts-source.json"
-        : collaboration
-          ? "collaboration-source.json"
-          : contentAccess
-            ? "content-access-source.json"
-            : contentAdmin
-              ? "content-admin-source.json"
-              : settings
-                ? "settings-source.json"
-                : auth
-                  ? "auth-source.json"
-                  : likes
-                    ? "comment-likes-source.json"
-                    : reader
-                      ? "reader-preview-source.json"
-                      : presentation
-                        ? "presentation-source.json"
-                        : "contract-source.json",
+    captcha
+      ? "captcha-source.json"
+      : pages
+        ? "pages-source.json"
+        : accounts
+          ? "accounts-source.json"
+          : collaboration
+            ? "collaboration-source.json"
+            : contentAccess
+              ? "content-access-source.json"
+              : contentAdmin
+                ? "content-admin-source.json"
+                : settings
+                  ? "settings-source.json"
+                  : auth
+                    ? "auth-source.json"
+                    : likes
+                      ? "comment-likes-source.json"
+                      : reader
+                        ? "reader-preview-source.json"
+                        : presentation
+                          ? "presentation-source.json"
+                          : "contract-source.json",
   ),
   `${JSON.stringify(
     {
@@ -352,6 +360,12 @@ if (settings) {
     }),
   );
 }
+if (captcha)
+  await generateSettingsClient(schema, output, {
+    contractName: "CaptchaAPIContract",
+    stem: "captcha",
+    schemaFile: path.basename(absoluteSource),
+  });
 if (accounts)
   await generateSettingsClient(schema, output, {
     contractName: "AccountContract",

@@ -12,6 +12,10 @@ import { Icon } from "../icon";
 import { CommentComposer } from "./comment-composer";
 import { CommentItem } from "./comment-item";
 import { exampleComments } from "./examples";
+import { useCaptcha, captchaFailure } from "@/core/captcha/use-captcha";
+import { submitReaderComment } from "@/core/contracts/captcha";
+import { RequestError } from "@/core/http/request";
+import { useReaderData } from "../reader-data";
 import { useCommentLikes } from "./use-comment-likes";
 import {
   COMMENT_PAGE_SIZE,
@@ -28,14 +32,26 @@ export function CommentSection({
   path,
   initialPage = 1,
   open = true,
+  contentId,
+  readReceipt,
 }: {
   comments: PublicComment[];
   path: string;
   initialPage?: number;
   open?: boolean;
+  contentId?: string;
+  readReceipt?: string;
 }) {
+  const { store } = useReaderData();
+  const captcha = useCaptcha(
+    store.baseUrl,
+    "comment",
+    contentId,
+    Boolean(contentId && open),
+  );
+  const submission = useRef<{ fingerprint: string; id: string } | null>(null);
   const [local, setLocal] = useState<CommentEntry[]>([]);
-  const [examples, setExamples] = useState(true);
+  const [examples, setExamples] = useState(!contentId);
   const [reply, setReply] = useState<{
     entry: CommentEntry | null;
     active: boolean;
@@ -89,7 +105,44 @@ export function CommentSection({
     setRequestedPage(destination);
     setTarget({ id: `comment-${id}` });
   }
-  function add(draft: Omit<CommentDraft, "email">) {
+  async function add(draft: Omit<CommentDraft, "email">) {
+    if (contentId) {
+      const parentId =
+        reply.active && reply.entry?.origin === "history"
+          ? reply.entry.id
+          : undefined;
+      const fingerprint = JSON.stringify({ draft, parentId, contentId });
+      if (submission.current?.fingerprint !== fingerprint)
+        submission.current = { fingerprint, id: randomUUID() };
+      try {
+        await submitReaderComment(store.baseUrl, {
+          operation_id: submission.current.id,
+          content_id: contentId,
+          client_id: captcha.clientId,
+          parent_id: parentId,
+          author: draft.author,
+          body: draft.body,
+          captcha: captcha.response,
+          read_receipt: readReceipt,
+        });
+        setNotice("评论已提交，等待审核。通过审核后会公开显示。");
+        setReply((current) => ({ ...current, active: false }));
+        submission.current = null;
+        void captcha.refresh();
+        return true;
+      } catch (reason) {
+        setNotice(
+          reason instanceof RequestError && reason.code === 40388
+            ? "此内容已关闭评论或阅读验证已过期，请刷新页面。"
+            : reason instanceof RequestError &&
+                [40386, 40387, 40986, 50386, 42986].includes(reason.code ?? 0)
+              ? captchaFailure(reason)
+              : "暂时无法确认提交结果。输入已保留，可以重试。",
+        );
+        void captcha.refresh();
+        return false;
+      }
+    }
     const entry: CommentEntry = {
       id: `local-${randomUUID()}`,
       parentId: reply.active ? (reply.entry?.id ?? null) : null,
@@ -108,6 +161,7 @@ export function CommentSection({
     setTarget({ id: `comment-${entry.id}` });
     setReply((current) => ({ ...current, active: false }));
     setNotice("已加入本页预览。这条留言没有发布到网站。");
+    return true;
   }
   return (
     <>
@@ -151,7 +205,7 @@ export function CommentSection({
             </TextLink>
           )}
         </header>
-        {open ? (
+        {open && !contentId ? (
           <div className="comments-demo-note">
             <span>
               <span className="preview-badge">
@@ -174,11 +228,11 @@ export function CommentSection({
               )}
             </Button>
           </div>
-        ) : (
+        ) : !open ? (
           <p className="comments-demo-note">
             <UiText text="评论已关闭，已有留言仍可阅读。" />
           </p>
-        )}
+        ) : null}
         <div className="comment-view-options" aria-label="留言浏览方式">
           <Button
             type="button"
@@ -284,6 +338,7 @@ export function CommentSection({
       </section>
       {open && (
         <CommentComposer
+          captcha={contentId ? captcha : undefined}
           reply={reply.entry}
           replying={reply.active}
           onCancelReply={() =>
