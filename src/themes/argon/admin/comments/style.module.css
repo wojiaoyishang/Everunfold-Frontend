@@ -117,8 +117,9 @@
 }
 .targetHeading {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 10px;
+  line-height: 20px;
 }
 .targetType {
   display: inline-flex;
@@ -126,7 +127,8 @@
   gap: 5px;
   white-space: nowrap;
   flex-shrink: 0;
-  font-size: 12px;
+  font-size: inherit;
+  min-height: 20px;
 }
 .targetTitle {
   min-width: 0;
@@ -145,6 +147,7 @@
 .target svg {
   flex-shrink: 0;
   width: 15px;
+  height: 15px;
 }
 .target > a {
   flex-shrink: 0;

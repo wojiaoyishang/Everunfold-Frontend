@@ -37,7 +37,7 @@ export function CommentsPage() {
   const t = useT();
   const user = useAdminAccount();
   const { baseUrl, csrfToken } = useAdminRequest();
-  const [status, setStatus] = useState<CommentQuery["status"]>("pending");
+  const [status, setStatus] = useState<CommentQuery["status"]>(null);
   const [text, setText] = useState("");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
