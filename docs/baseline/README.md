@@ -1286,3 +1286,19 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/backend-plugins.md` | `backend-plugins-3` | `9c814b56261fbad12e5556e7d92c00b892cb33236f2a38a10ef6f03575afe2b7` |
 | `docs/decisions/0095-typed-worker-invocation-parameters.md` | `ADR0095-1` | `9c46745f452dde2471bcb14e833baf4e1e6e9bee346abc73f81d420b9bc89ba5` |
 | `docs/handoff/worker-parameters-verification.md` | `worker-parameters-verification-1` | `027097ebc8acac6d75914a8f5f63067ff48df89c10333e2c5ef5483a4e9b57d9` |
+
+
+## 页面评论与插件SDK（2026-11-10）
+
+后端eb2ae91、前端f808291，五份契约精确固定后端提交及SHA。无迁移；部署与检查详见验收。以下替代相应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-page-comments-1` | `333aa8506f93654070ee7536309fa5b0e497db330f437f3051dac4f32a3313f8` |
+| `docs/architecture/registered-pages.md` | `registered-pages-runtime-9` | `a8cb27b94f5480c4767b9ae97e4fb297c4df40e53059ca9fbc0c5064b7867f1f` |
+| `docs/development/pages.md` | `pages-runtime-11` | `c93b3e4039b6ed4284d465c249d00a1f6d38402cd6a90cbc53c615c69aac58b3` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-11` | `ec15eef717dd03712dcc64836e38f767f8b03752ce3a52d33bdcb5a43ae091bc` |
+| `docs/development/captcha.md` | `captcha-3` | `fc5ebce5749e1680ade5e866ebc237571e1d12b436532d6cded3cc7ffc67c23d` |
+| `docs/development/page-comments.md` | `page-comments-1` | `de49df9f78e008e8aa6e72ae1f812ca1bd639def5773c7745a08dcefaab9b4a3` |
+| `docs/decisions/0096-managed-page-comments-and-plugin-sdk.md` | `ADR0096-1` | `21b5b6d66d12b26f731dd4a18e731a174b272160d1e0a6cfb7928988a327f442` |
+| `docs/handoff/page-comments-verification.md` | `page-comments-verification-1` | `292cf3892fdb9cdb1aa248f90270fbc2f5f28629584feb58cc1b9ffd4c4167cf` |

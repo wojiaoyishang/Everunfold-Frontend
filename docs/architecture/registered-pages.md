@@ -1,6 +1,6 @@
 # 页面管理、注册与缓存边界
 
-版本：registered-pages-runtime-8，2026-11-08。状态：按用户授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施，脚本执行位置见[ADR0081](../decisions/0081-authored-page-script-position.md)。
+版本：registered-pages-runtime-9，2026-11-10。状态：按用户授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施，脚本执行位置见[ADR0081](../decisions/0081-authored-page-script-position.md)。
 
 ## 两种来源
 
@@ -63,3 +63,8 @@
 ## 插件与数据边界补充（2026-11-07）
 
 人物页面与画廊已移入统一插件目录；主题与插件均可提供新控件，详见[运行规范](frontend-plugin-runtime.md)、[开发指南](../development/frontend-plugins.md)与[数据接口](../development/plugin-data-protocol.md)。可选展示控件缺失显示占位；整个页面实现缺失或版本不匹配仍按原规则503。配置/模型可同步更新，新的可信组件代码仍需构建。
+
+
+## 页面评论
+
+PageValue.comments_open默认true并随工作稿/应用快照保存，关闭只禁止新提交，已有审核评论仍受阅读权限保护。注册初值不覆盖既有配置。HTML沙箱外由宿主渲染评论，可信插件通过统一PageCommentsBoundary获得上下文；支持页末、正文内锚点/选择器及完全自行实现UI。单一客户端Portal宿主移动保持输入，正文仍SSR。主题覆盖点为public.page.comments；预览禁止评论互动，私有阅读回执仅在内存。接口及边界见[ADR0096](../decisions/0096-managed-page-comments-and-plugin-sdk.md)和[SDK指南](../development/page-comments.md)。

@@ -1,5 +1,13 @@
 # 前端交接状态
 
+## 最新交付：自定义页面评论与插件 SDK（2026-11-10）
+
+- 后端eb2ae91、前端f808291。HTML页和注册页增加“允许评论”开关，默认开启、旧值兼容，关闭保留已审核历史；保存草稿不影响前台，应用后生效。插件注册初值只用于新页，不覆盖管理员设置。见[SDK指南](../development/page-comments.md)、[ADR0096](../decisions/0096-managed-page-comments-and-plugin-sdk.md)与[验收](page-comments-verification.md)。
+- 插件支持默认页末、PageComments锚点/正文内selector与manual自行UI；稳定Portal移动保留输入/选区/焦点，公共主题覆盖点public.page.comments。usePageComments/usePageCommentClient及原始读写/验证码导出进入独立SDK桥接。HTML沙箱权限保持，预览评论互动零请求。
+- 新增POST /v1/reader/page-comments，受限页校验目标/peer/凭据/代次及内存阅读回执，只返回审核记录；关闭/撤回后的幂等重试也重新准入。pages1.8.0/captcha1.3.0/content-admin1.17.0/settings1.24.0/public0.12.0精确固定eb2ae91及SHA，无迁移/依赖。
+- 后端完整真实库319项/332.79秒、Ruff/359格式/mypy211通过；前端完整check335、独立正式构建与停后端阅读矩阵通过。真实React/Chromium5组定位/单实例/输入保留/预览零请求等通过；实际后台桌面/390/深色、未保存HTML预览和现有注册页已看图，pageerror0/原生dialog0。首次生成允许列表/测试默认后端目录失败已修正或配置后重验，见验收。
+- API/Worker/前端协调进程/接收器已重启，六服务/四端口0.0.0.0/HTTP200保持；未改主站内容、邮件或WordPress数据。页面评论客户端挂载，正文仍SSR；未新增自动通知或实时评论推送、未做全浏览器/长期负载。共享文档与SHA双仓一致，私有日志/截图仅忽略var，本地存档未push。
+
 ## 最新交付：Worker任务参数与按钮位置（2026-11-10）
 
 - 后端4a81d6d/224be3c、前端845a99f；“手动触发”移至刷新旁。TaskDefinition可声明Pydantic参数模型及有效默认值，自动发布Schema/defaults，界面支持基本字段/必填/范围/枚举与复杂JSON；切换任务不沿用旧参数。见[任务指南](../development/runtime-tasks.md)、[ADR0095](../decisions/0095-typed-worker-invocation-parameters.md)、[验收](worker-parameters-verification.md)。

@@ -1,6 +1,6 @@
 # 独立插件、页面与短代码开发
 
-版本：frontend-plugins-10，2026-11-09。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
+版本：frontend-plugins-11，2026-11-10。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
 
 ## 源码和命令
 
@@ -201,3 +201,8 @@ npm run check覆盖类型、格式、注册不变量和包完整性/回退检查
 ## 插件详情元数据
 
 definePlugin允许author、homepage、license、preview、readme；版本继续使用version。preview填写安全HTTP(S)或同源资源URL，readme直接提供Markdown字符串。独立构建、运行清单和后端登记保留这些字段，管理页以全宽列表显示来源，点击详情打开主题弹窗。旧包缺失字段时正常显示占位，不执行原始HTML/脚本。修改宿主构建/清单工具需要重启dev协调进程，普通插件声明仍自动重编译。常驻/有限任务由[后端SDK](runtime-tasks.md)贡献，不在浏览器运行。
+
+
+## 页面评论 SDK
+
+页面支持`registration.comments_open`初值与前端`comments`放置声明。默认页末；`PageComments`提供正文内锚点，selector限定当前页面正文；manual无锚点适合自行绘制。`usePageComments`提供上下文，`usePageCommentClient`、`CaptchaField`复用阅读回执/验证码/幂等提交，另开放原始读写客户端；预览禁止评论互动。主题可覆盖`public.page.comments`。参数、最小例子与安全边界见[页面评论指南](page-comments.md)。

@@ -1,6 +1,6 @@
 # 验证码配置与提供方开发
 
-版本：captcha-2，2026-11-09。决定见[ADR0086](../decisions/0086-captcha-providers-and-content-policies.md)，检查见[实际验收](../handoff/captcha-verification.md)。
+版本：captcha-3，2026-11-10。决定见[ADR0086](../decisions/0086-captcha-providers-and-content-policies.md)，检查见[实际验收](../handoff/captcha-verification.md)。
 
 ## 配置和使用
 
@@ -10,7 +10,7 @@
 
 全局设置改变后，后端校验立即使用新规则，公开阅读通过既有可靠投递更新节点；界面会提示等待节点同步。部署新契约时先升级全部接收器、前端与协同/API进程，再启用规则。单篇发布/页面应用同样更新完整快照。公开 HTML、搜索正文和共享缓存只携带受限占位信息；解锁响应使用 private/no-store，只在当前页面内存中使用。
 
-当前评论提交会写入独立的待审核记录，验证通过不代表公开。历史已批准评论的读取/点赞保持；本次没有新增评论审核管理界面。自定义页面/注册页可通过统一评论提交接口使用其单篇规则，页面不会因此自动插入评论区。
+评论提交写入待审核记录，验证通过不代表公开；审核入口见[评论管理](operations-and-search.md)。自定义 HTML 页面和插件注册页面提供“允许评论”开关及默认评论区，插件可指定位置或自行实现 UI，见[页面评论 SDK](page-comments.md)。关闭新提交后仍保留已审核历史，页面本身的阅读门禁继续生效。
 
 ## 接口和暂存
 
@@ -23,9 +23,10 @@
 | POST `/v1/auth/login` | 原登录接口增加可选 captcha，原会话/CSRF/Origin校验保持 |
 | POST `/v1/reader/access` | 原密码阅读增加可选 captcha，两种条件分别校验 |
 | POST `/v1/reader/access-page` | 校验后取得启用页面的源码/配置 |
+| POST `/v1/reader/page-comments` | 已审核页面评论分页，受保护页面携带内存态阅读回执 |
 | POST `/v1/reader/comments` | CAPTCHA、阅读回执、评论开关与稳定 operation_id；成功为 pending |
 
-`captcha` 为 `{challenge_id, client_id, answer}`。本地 answer 是图片文字，第三方是组件返回的令牌。挑战绑定用途、内容、策略修订、发布代次、浏览器随机 ID 和真实 socket peer；Redis GETDEL 原子消费，一次尝试后需刷新。业务提交前再次核对规则，防止校验过程中规则/内容变化。评论重试使用同一 operation_id 和原输入，已有提交返回原回执，不重复落库。
+`captcha` 为 `{challenge_id, client_id, answer}`。本地 answer 是图片文字，第三方是组件返回的令牌。挑战绑定用途、内容、策略修订、发布代次、浏览器随机 ID 和真实 socket peer；Redis GETDEL 原子消费，一次尝试后需刷新。业务提交前再次核对规则，防止校验过程中规则/内容变化。评论重试使用同一 operation_id 和原输入，已有提交在重新检查当前页面/内容准入、评论开关和阅读凭据后返回原回执，不重复落库。
 
 PostgreSQL 的 `site_settings.data._captcha_private` 是策略/密钥事实，只经专有私有接口输出过滤后的配置；不进入公共设置、业务审计差异、队列或公开快照。`contents.captcha_read_required` 是事务内更新的阅读投影，供搜索/评论过滤。`reader_comment_submissions` 保存待审核提交。
 
@@ -35,11 +36,11 @@ Redis 仅保存按项目/环境隔离的短时状态：图片答案只存随机�
 
 机器接口不适合每次要求人工完成验证码。后台“API Key 请求”提供明确授权豁免开关及每 Key 的阅读侧请求额度，默认允许明确授权的 Key 豁免、每分钟60次（可配置1–1000）。用户中心创建 Key 时，可独立选择 `captcha:read_bypass`（阅读免验证码）和 `captcha:comment_bypass`（评论免验证码）。现有 Key 不自动获得新授权；Key 的权限仍与所属用户当前授权、应用目录及 audience 取交集。关闭全局豁免后，需要验证码的阅读/评论恢复正常挑战流程。
 
-四个阅读侧 POST 接口（challenge、access、access-page、comments）可使用 `Authorization: Bearer <API Key>`。仅接受面向 `everunfold` 的有效 Key；服务端调用可不带 Origin，带 Origin 时仍须在允许列表中。无效、过期、撤销、所属用户失效或授权已撤回都直接拒绝，不回退匿名；不接受 URL 中的 Key。有效 Key 的上述请求共用每 Key 的 Redis 预算，达到上限返回429和Retry-After；Redis不可用时机器请求拒绝放行。
+五个阅读侧 POST 接口（challenge、access、access-page、page-comments、comments）可使用 `Authorization: Bearer <API Key>`。仅接受面向 `everunfold` 的有效 Key；服务端调用可不带 Origin，带 Origin 时仍须在允许列表中。无效、过期、撤销、所属用户失效或授权已撤回都直接拒绝，不回退匿名；不接受 URL 中的 Key。有效 Key 的上述请求共用每 Key 的 Redis 预算，达到上限返回429和Retry-After；Redis不可用时机器请求拒绝放行。
 
 豁免只替代指定用途的验证码，不授予草稿/非公开内容访问权，不绕过文章密码、评论关闭、阅读前置条件或审核。调用评论前，受限正文/页面仍须通过access取得阅读回执；回执和挑战绑定该 Key，不能拿到匿名请求或另一把 Key 下使用。读取后提交前会锁定并重新校验 Key、用户和应用，处理验证过程中撤销/缩权；成功访问更新last_used_at，实际豁免另有不含密钥明文的审计。创建/撤销 Key 沿既有用户中心功能，不额外索取验证码。
 
-登录禁止使用Key代替浏览器身份，也不支持“登录免验证码”。管理业务 API 的原有最小权限鉴权，以及应用查询的 HMAC签名/时间戳/nonce、过期与撤销 Callback 协议保持，不强加人工验证码。外部子项目是否缓存鉴权结果及多久失效仍按[接入规范](api-key-applications.md)实施；此处的Key额度仅覆盖阅读侧四个入口，不是全站机器接口的统一限额。
+登录禁止使用Key代替浏览器身份，也不支持“登录免验证码”。管理业务 API 的原有最小权限鉴权，以及应用查询的 HMAC签名/时间戳/nonce、过期与撤销 Callback 协议保持，不强加人工验证码。外部子项目是否缓存鉴权结果及多久失效仍按[接入规范](api-key-applications.md)实施；此处的Key额度仅覆盖阅读侧五个入口，不是全站机器接口的统一限额。
 
 ## 增加提供方
 
