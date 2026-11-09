@@ -589,6 +589,11 @@
   border-radius: 10px;
   margin-bottom: 20px;
 }
+.account-key-create .account-field-hint {
+  margin: 14px 0 0;
+  font-size: 12px;
+  line-height: 1.8;
+}
 .account-key-row {
   display: flex;
   justify-content: space-between;
@@ -661,6 +666,18 @@
   }
 }
 @media (max-width: 420px) {
+  .account-permission-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .account-permission-row > small,
+  .account-permission-row > .ui-select {
+    margin-inline-start: 28px;
+  }
+  .account-permission-row > .ui-select {
+    align-self: start;
+  }
   .account-card-heading {
     flex-wrap: wrap;
   }

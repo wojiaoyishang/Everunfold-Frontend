@@ -2,7 +2,7 @@
 import { useId } from "react";
 import Image from "next/image";
 import type { CaptchaController } from "@/core/captcha/use-captcha";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 import { ExtensionComponent } from "@/core/extensions/components";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { Button, TextField } from "./ui/primitives";
@@ -10,6 +10,7 @@ import { Icon } from "./icon";
 import styles from "./captcha-field.module.css";
 
 export function CaptchaField({ control }: { control: CaptchaController }) {
+  const t = useT();
   const id = useId();
   const runtime = usePluginRuntime();
   const missing =
@@ -42,7 +43,7 @@ export function CaptchaField({ control }: { control: CaptchaController }) {
           className={styles.refresh}
           disabled={control.pending}
           onClick={() => void control.refresh()}
-          aria-label="刷新验证码"
+          aria-label={t("刷新验证码")}
         >
           <Icon name="refresh" />
           <UiText text="刷新验证码" />
@@ -62,19 +63,19 @@ export function CaptchaField({ control }: { control: CaptchaController }) {
                 src={control.challenge.image ?? ""}
                 width={220}
                 height={76}
-                alt="验证码图片"
+                alt={t("验证码图片")}
               />
             </div>
             <TextField
               id={id}
-              aria-label="图形验证码"
+              aria-label={t("图形验证码")}
               value={control.answer}
               autoComplete="off"
               autoCapitalize="characters"
               spellCheck={false}
               maxLength={5}
               onChange={(event) => control.setAnswer(event.target.value)}
-              placeholder="输入图片中的 5 位字符"
+              placeholder={t("输入图片中的 5 位字符")}
             />
             <small>
               <UiText text="字母不区分大小写。看不清时可刷新图片。" />

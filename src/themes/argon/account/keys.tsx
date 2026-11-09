@@ -202,6 +202,11 @@ export function AccountKeys({
                 value={permissions}
                 onChange={setPermissions}
               />
+              {app.audience === "everunfold" && (
+                <p className="account-field-hint">
+                  <UiText text="机器读取或评论需要免验证码时，单独勾选对应权限。仍遵守站点的验证码豁免开关、请求限额、文章密码和评论审核。" />
+                </p>
+              )}
               <div className="account-actions">
                 <Button
                   className="admin-button admin-button-primary"

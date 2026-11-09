@@ -14,6 +14,8 @@ function draftFromState(state: CaptchaSettingsState): SaveCaptchaSettings {
     expected_revision: state.revision,
     provider: state.provider,
     rules: state.rules,
+    api_key_bypass: state.api_key_bypass,
+    api_key_rate_limit: state.api_key_rate_limit,
     providers: Object.fromEntries(
       Object.entries(state.providers).map(([id, value]) => [
         id,
@@ -88,7 +90,7 @@ export function useCaptchaSettings() {
           reason instanceof RequestError && reason.status === 409
             ? "设置已在其他地方修改。当前输入已保留，请重新读取后合并。"
             : reason instanceof RequestError && reason.status === 422
-              ? "请检查 Site Key、Secret 和允许的主机名。当前输入已保留。"
+              ? "请检查验证码配置和请求频率。当前输入已保留。"
               : "保存结果尚未确认，当前输入已保留，请重新检查服务器设置。",
         );
     } finally {

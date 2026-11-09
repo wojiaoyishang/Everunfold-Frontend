@@ -1,6 +1,6 @@
 "use client";
 import { useId } from "react";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 import { useCaptchaSettings } from "@/core/captcha/use-settings";
 import { can } from "@/core/accounts/permissions";
 import { useAdminAccount } from "@/core/admin/account-context";
@@ -25,6 +25,7 @@ const contentTypes = [
   { key: "page", label: "页面" },
 ] as const;
 export function CaptchaSettingsPage() {
+  const t = useT();
   const editor = useCaptchaSettings();
   const editable = can(useAdminAccount(), "settings:write");
   const id = useId();
@@ -116,11 +117,11 @@ export function CaptchaSettingsPage() {
                           value={selected.secret ?? ""}
                           maxLength={2048}
                           autoComplete="new-password"
-                          placeholder={
+                          placeholder={t(
                             saved.providers[provider]?.secret_configured
                               ? "已配置，留空保留原密钥"
-                              : "输入服务端密钥"
-                          }
+                              : "输入服务端密钥",
+                          )}
                           onChange={(event) =>
                             updateProvider({
                               secret: event.target.value,
@@ -205,6 +206,43 @@ export function CaptchaSettingsPage() {
                   ))}
                 </SettingsSection>
               ))}
+              <SettingsSection
+                id="captcha-api-keys"
+                title="API Key 请求"
+                description="机器调用使用 Key 的权限、有效期和请求频率控制。Key 无效或已撤销时直接拒绝，不降级为匿名访问。"
+              >
+                <SettingsToggle
+                  label="允许明确授权的 Key 免验证码"
+                  hint="仅对授予“阅读免验证码”或“评论免验证码”的 Key 生效。已有 Key 不自动获得授权，登录和文章密码仍独立校验。"
+                  value={draft.api_key_bypass ?? true}
+                  onChange={(api_key_bypass) =>
+                    editor.setDraft({ ...draft, api_key_bypass })
+                  }
+                />
+                <div className="admin-settings-field">
+                  <label htmlFor={`${id}-key-limit`}>
+                    <UiText text="每个 Key 每分钟最多请求" />
+                  </label>
+                  <TextField
+                    id={`${id}-key-limit`}
+                    type="number"
+                    min={1}
+                    max={1000}
+                    step={1}
+                    required
+                    value={draft.api_key_rate_limit ?? 60}
+                    onChange={(event) =>
+                      editor.setDraft({
+                        ...draft,
+                        api_key_rate_limit: Number(event.target.value),
+                      })
+                    }
+                  />
+                  <small>
+                    <UiText text="阅读解锁、评论提交和验证码请求共用此额度；达到上限返回 429，不影响其他 Key。" />
+                  </small>
+                </div>
+              </SettingsSection>
             </fieldset>
             <div className="admin-settings-savebar">
               <div>

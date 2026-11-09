@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 import type { CaptchaController } from "@/core/captcha/use-captcha";
 import { CaptchaField } from "./captcha-field";
 import { Button, Form } from "./ui/primitives";
@@ -24,6 +24,7 @@ export function ReadingAccessForm({
   onUnlock: (password: string) => Promise<boolean>;
 }) {
   const [password, setPassword] = useState("");
+  const t = useT();
   return (
     <div className={styles.gate} aria-busy={pending}>
       <span className={styles.mark}>
@@ -64,13 +65,13 @@ export function ReadingAccessForm({
       >
         {passwordRequired && (
           <PasswordField
-            aria-label="文章访问密码"
+            aria-label={t("文章访问密码")}
             value={password}
             autoComplete="off"
             onChange={(event) => setPassword(event.target.value)}
             disabled={pending}
             maxLength={200}
-            placeholder="文章密码"
+            placeholder={t("文章密码")}
           />
         )}
         <CaptchaField control={captcha} />
