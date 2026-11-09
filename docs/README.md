@@ -1,6 +1,8 @@
 # Everunfold 文档入口
 
-[评论管理、工作台与SEO](development/operations-and-search.md)、[ADR0088](decisions/0088-operations-workflows-and-search-discovery.md)及[验收](handoff/operations-search-verification.md)：正式评论审核/回复/回收与可靠投递、按权限裁剪的真实待办；全站/单篇收录、站点地图、RSS/Atom、canonical/hreflang、分享图/JSON-LD与站长验证。路线后续的批量编辑、通知邮件和迁移恢复演练尚未交付。
+[内容运营与拖拽上传](development/content-operations.md)、[ADR0089](decisions/0089-content-management-workflows.md)及[验收](handoff/content-operations-verification.md)：列表精确筛选/排序、协作快速编辑、原子批量操作、分类标签管理；统一拖放进入原上传队列，并补齐验证码页面解锁后的评论和点赞。
+
+[评论管理、工作台与SEO](development/operations-and-search.md)、[ADR0088](decisions/0088-operations-workflows-and-search-discovery.md)及[验收](handoff/operations-search-verification.md)：正式评论审核/回复/回收与可靠投递、按权限裁剪的真实待办；全站/单篇收录、站点地图、RSS/Atom、canonical/hreflang、分享图/JSON-LD与站长验证。批量编辑已由 ADR0089 交付，通知邮件和迁移恢复演练仍留在后续。
 
 [评论界面补充验收](handoff/comment-ui-verification.md)：修复编辑/回复窗口间距，统一操作图标和语义色；列表默认「全部」，所属文章/说说/页面的类型与标题对齐，支持新窗口查看原文。前台评论等待页面资源与布局稳定后定位，主动操作可取消；保留冲突输入与取消回焦。
 

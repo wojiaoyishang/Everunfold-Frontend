@@ -1,6 +1,6 @@
 # 评论运营与搜索发现
 
-版本：operations-search-3，2026-11-09。对应 ADR0088 第一批及评论界面、加载后定位补充交付。
+版本：operations-search-4，2026-11-09。对应 ADR0088 第一批及评论界面、加载后定位补充交付。
 
 ## 使用入口
 
@@ -39,7 +39,7 @@
 
 修改先核对整批 revision，任一过期返回409且整批回滚；重试使用原 operation_id。状态、审计、操作回执和公开快照 Outbox 在同一个事务提交，前端不把HTTP成功误当成所有节点已应用。回收保留 previous_status，恢复回收前的审核状态。编辑/恢复不会绕过原文可见性。父评论不可见时，可见回复作为顶层显示，不输出隐藏父正文。
 
-Comment 以 content_id/page_id 二选一关联原文。历史评论保持身份；0029_comments 将已有读者提交回执补入审核目录，保留原 ID、正文、作者、时间与合法父子关系。文章、说说和页面共用审核和点赞，当前公开页面提供评论区；验证码页面解锁后的评论交互尚未补齐。
+Comment 以 content_id/page_id 二选一关联原文。历史评论保持身份；0029_comments 将已有读者提交回执补入审核目录，保留原 ID、正文、作者、时间与合法父子关系。文章、说说和页面共用审核和点赞，当前公开页面提供评论区；验证码页面解锁后已支持已审核评论读取、留言与点赞，阅读回执失效会拒绝操作，见[内容运营指南](content-operations.md)。
 
 数据库升级必须显式执行 `.venv/bin/alembic -c migrations/alembic.ini upgrade head`，启动不自动迁移。降级遇到页面评论或新审核状态会拒绝，需先导出并处理，不能静默丢弃。
 
@@ -69,6 +69,6 @@ canonical、站点地图和分享地址使用前端服务端部署配置 publicS
 - operations 1.0.0、settings 1.17.0、content-admin 1.15.0、content-access 1.4.0、collaboration 2.4.0、presentation 0.2.0-preview.3、public 0.11.0。前端 contracts.lock.json 固定后端6f39606及SHA，生成物仍只写忽略的var/cache。
 - 部署次序：显式迁移，更新/重启API与Worker，更新前端接收器及主体；旧接收器仍加载旧契约时可能拒绝新公开设置，升级后通过既有同步重试恢复。业务写入不回滚为旧快照。
 
-后续批次：内容多维筛选/快速编辑/批量操作与分类标签管理；隔离迁移/恢复演练；邮件验证、找回密码、通知和真实阅读统计。上述尚未由本轮交付，不因 ADR 路线图存在而视为已实现。
+内容多维筛选/快速编辑/批量操作与分类标签管理已由 ADR0089 交付。后续批次仍包括隔离迁移/恢复演练、邮件验证、找回密码、通知和真实阅读统计，尚未实现。
 
 官方参考：[Next.js JSON-LD](https://nextjs.org/docs/app/guides/json-ld)、[Google 站点地图](https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview)、[网站所有权验证](https://support.google.com/webmasters/answer/9012289/)。

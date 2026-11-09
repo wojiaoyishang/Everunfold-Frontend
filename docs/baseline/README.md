@@ -1181,3 +1181,17 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/operations-and-search.md` | `operations-search-3` | `0cb3eee862715f0f638483f71d3778807079ce8a1a93bead090c73b5700f5221` |
 | `docs/decisions/0088-operations-workflows-and-search-discovery.md` | `ADR0088-4` | `6036ff88547408259af66bc366899d30559e99eeab5cc10c8a9574552fa73f66` |
 | `docs/handoff/comment-ui-verification.md` | `comment-ui-verification-2` | `435577962d735b472f6a2acd14f0826235bc5954f66a937e4ef0afc46a6e6c33` |
+
+
+## 内容运营与统一拖拽上传（2026-11-09）
+
+后端097ddd7/fbde989/0b02472、前端e8f7339；本次替代下列文档旧摘要，原始基线不变，STATUS各自维护。新契约的精确提交及SHA由前端锁文件固定。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-content-operations-1` | `c614079b81df44f4eb513d1aebe63843cd50e58e20bfe7948da20adbc621803e` |
+| `docs/decisions/0089-content-management-workflows.md` | `ADR0089-1` | `5a12ab6f1999173ce824959b8ec5b15590053813713917c16c4cc72b3b5d3162` |
+| `docs/development/content-operations.md` | `content-operations-1` | `93ecafe39209fee4e378f32464f6590d62a626b18c25a6ebf08035fb628c5a96` |
+| `docs/development/content-management.md` | `content-management-10` | `7175e2e2ee54c19c69f39f38b0edb471a8a960d499f1f768334bb3374de9a69a` |
+| `docs/development/operations-and-search.md` | `operations-search-4` | `0394d9c8a28b541c364fd93c3f869de53a30fcd673781b8f79e0d6236cc57be4` |
+| `docs/handoff/content-operations-verification.md` | `content-operations-verification-1` | `119be469dc31aa2312f9e94f47b7781ff61e0219e266dbe59ffd0b86388a0d21` |
