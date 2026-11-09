@@ -1,7 +1,7 @@
 "use client";
 import { useImperativeHandle, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { useFontLibrary } from "@/core/media/font-library";
+import { useFontLibrary } from "@/core/fonts/library";
 import { EditorViewToggle } from "./editor-view-toggle";
 import { RichTextEditor } from "../../../components/ui/rich-text-editor";
 import type {

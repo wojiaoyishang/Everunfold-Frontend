@@ -8,6 +8,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
 import { writeArtifact } from "../write-artifact.mjs";
+import { bundleFonts } from "./fonts.mjs";
 import { createPluginRegistry } from "../../src/core/plugins/create-registry.ts";
 import {
   SDK_CLIENT_EXPORTS,
@@ -260,6 +261,7 @@ export async function buildPlugin(
     }
   }
   const manifest = {
+    fonts: await bundleFonts(source, directory, registry.fonts, target, assets),
     protocol: "plugin-package-1",
     sdk: 1,
     directory,

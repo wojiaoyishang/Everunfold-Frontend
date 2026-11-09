@@ -1,6 +1,8 @@
 import type { PublicShortcode } from "@/core/contracts/settings";
 import type { CustomPageDefinition } from "@/core/pages/registration";
 import { collectCustomPages } from "@/core/pages/registration";
+import type { FontDefinition } from "@/core/fonts/types";
+import { createFontRegistry, defineFont } from "@/core/fonts/registry";
 import type {
   FrontendPlugin,
   PluginShortcode,
@@ -22,6 +24,7 @@ export function createPluginRegistry(
   const contributions: RegisteredPluginShortcode[] = [];
   const pages: (CustomPageDefinition & { pluginId: string })[] = [];
   const components = new Map<string, string>();
+  const fonts: FontDefinition[] = [];
   for (const plugin of plugins) {
     if (
       !identity.test(plugin.id) ||
@@ -88,6 +91,17 @@ export function createPluginRegistry(
       const result: unknown = plugin.setup(
         Object.freeze({
           shortcodes: Object.freeze({ register }),
+          fonts: Object.freeze({
+            register(font: FontDefinition) {
+              if (!collecting)
+                throw new Error(`Plugin setup has finished: ${plugin.id}`);
+              if (!font.id.startsWith(plugin.id + "."))
+                throw new Error(
+                  `Font must use its plugin namespace: ${plugin.id}`,
+                );
+              fonts.push(defineFont(font));
+            },
+          }),
           pages: Object.freeze({
             register(page: CustomPageDefinition) {
               if (!collecting)
@@ -129,6 +143,7 @@ export function createPluginRegistry(
     shortcodes.map((item) => [item.definition.name, item]),
   );
   return Object.freeze({
+    fonts: createFontRegistry(fonts).all,
     shortcodes,
     pages: Object.freeze(pages),
     componentNames: Object.freeze([...components.keys()]),

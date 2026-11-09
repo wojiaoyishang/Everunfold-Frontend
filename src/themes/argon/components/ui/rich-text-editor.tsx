@@ -29,7 +29,7 @@ import { resourceUrl } from "@/core/content/urls";
 import { inspectContentFeatures } from "@/core/rendering/features/content-features";
 import { renderMarkdownSource } from "@/core/rendering/content";
 import { ContentResources } from "../content-resources";
-import { referencedFontFaces } from "@/core/rendering/fonts";
+import { referencedFontFaces } from "@/core/fonts/media";
 import type { UploadEntry } from "@/core/media/upload-queue";
 import type { MediaItem } from "@/core/contracts/settings";
 import { UPLOAD_SCHEME } from "@/core/editor/upload-placeholders";

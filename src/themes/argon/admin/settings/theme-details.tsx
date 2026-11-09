@@ -133,7 +133,7 @@ export function ThemeDetails({
                 : selected
                   ? "已启用"
                   : theme
-                    ? "启用"
+                    ? "启用主题"
                     : "使用实例默认"
             }
           />

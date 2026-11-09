@@ -14,18 +14,15 @@ import { themeModules } from "./discovered";
 import { RuntimeComponent } from "@/core/plugins/runtime/view";
 import { themeRegistry as themes } from "./themes";
 import { ExtensionPlaceholder } from "@/themes/argon/components/extension-placeholder";
+import { ThemeContext } from "./theme-context";
+export { useThemeId } from "./theme-context";
 
 type UIComponent = ComponentType<Record<string, unknown>>;
 type ComponentModule = { default: Record<string, UIComponent> };
 const modules = {
   ...import.meta.glob<ComponentModule>("/src/themes/*/components.tsx"),
 };
-const ThemeContext = createContext("argon");
 const ImplementationThemeContext = createContext<string | null>(null);
-
-export function useThemeId() {
-  return useContext(ThemeContext);
-}
 const cache = new Map<string, UIComponent>();
 
 export function ThemeComponentsProvider({

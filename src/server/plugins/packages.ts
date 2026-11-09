@@ -11,7 +11,10 @@ import {
   realpath,
 } from "node:fs/promises";
 import path from "node:path";
-import { parsePluginPackage } from "@/core/plugins/runtime/manifest";
+import {
+  parsePluginPackage,
+  packageFontsMatch,
+} from "@/core/plugins/runtime/manifest";
 import { createPluginRegistry } from "@/core/plugins/create-registry";
 import builtins from "@/core/contracts/shortcode-builtins";
 import type { FrontendPlugin } from "@/core/plugins/types";
@@ -141,6 +144,7 @@ async function scanInstalledPlugins(directory: string, cacheDirectory: string) {
       );
       if (
         plugin.id !== manifest.id ||
+        !packageFontsMatch(registry.fonts, manifest) ||
         JSON.stringify(registry.componentNames) !==
           JSON.stringify(manifest.components) ||
         JSON.stringify(

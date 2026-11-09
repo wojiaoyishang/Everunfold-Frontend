@@ -128,3 +128,39 @@
   animation: none;
   transition: none;
 }
+.registered {
+  padding-block: 8px 26px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.sectionTitle {
+  font-size: 18px;
+  margin: 0 0 18px;
+}
+.registered header h2 {
+  font-size: 18px;
+  margin: 0 0 8px;
+}
+.registered header p {
+  color: var(--admin-muted);
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+.registered .sample[data-preview="false"] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  font-size: 32px;
+}
+.registered .sample small {
+  color: var(--admin-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.license {
+  padding: 0 18px 16px;
+  font-size: 12px;
+  color: var(--admin-muted);
+  overflow-wrap: anywhere;
+}

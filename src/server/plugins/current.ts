@@ -85,7 +85,7 @@ export async function readPluginAsset(directory: string, filename: string) {
   if (
     !info?.isFile() ||
     info.size > 16 * 1024 * 1024 ||
-    !/^[a-z]+\.[0-9a-f]{64}\.(?:mjs|css|png|webp|svg|woff2|jpg|jpeg|gif|webm|mp4)$/.test(
+    !/^[a-z]+\.[0-9a-f]{64}\.(?:mjs|css|png|webp|svg|woff2?|ttf|otf|jpg|jpeg|gif|webm|mp4)$/.test(
       filename,
     )
   )

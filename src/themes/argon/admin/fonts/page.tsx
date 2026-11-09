@@ -2,8 +2,8 @@
 import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
-import { useFontPreviews } from "@/core/media/font-preview";
-import { useFontLibrary } from "@/core/media/font-library";
+import { useFontPreviews } from "@/core/fonts/preview";
+import { useFontLibrary } from "@/core/fonts/library";
 import { Button, TextField } from "../../components/ui/primitives";
 import { FilePicker } from "../../components/ui/file-picker";
 import { UploadQueueView } from "../../components/ui/upload-queue";
@@ -13,6 +13,7 @@ import { formatBytes } from "@/core/media/image-editor";
 import type { FontAsset } from "@/core/contracts/settings";
 import { Icon } from "../../components/icon";
 import styles from "./fonts.module.css";
+import { RegisteredFonts } from "./registered";
 import { can } from "@/core/accounts/permissions";
 import { useAdminAccount } from "@/core/admin/account-context";
 
@@ -71,9 +72,10 @@ export function FontLibraryPage({
           onChange={(e) => setSample(e.target.value)}
         />
         <span>
-          {library.total} <UiText text="款字体" />
+          {library.total} <UiText text="款上传字体" />
         </span>
       </div>
+      {!onSelect && <RegisteredFonts search={library.query} sample={sample} />}
       {library.error && (
         <div className="admin-library-feedback" role="alert">
           {library.error}
@@ -81,6 +83,11 @@ export function FontLibraryPage({
             <UiText text="重试" />
           </Button>
         </div>
+      )}
+      {!onSelect && (
+        <h2 className={styles.sectionTitle}>
+          <UiText text="已上传字体" />
+        </h2>
       )}
       <div className={styles.grid} aria-busy={library.loading}>
         {library.items.map((font) => (

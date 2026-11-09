@@ -7,7 +7,7 @@ import { useEffect, type CSSProperties, type ReactNode } from "react";
 import type { Site } from "@/core/content/types";
 import { setSiteAppearance } from "@/core/browser/appearance";
 import { resourceUrl } from "@/core/content/urls";
-import { fontFace, fontFamily } from "@/core/rendering/fonts";
+import { fontFace, fontFamily } from "@/core/fonts/media";
 
 import { NavigationProvider } from "./navigation-state";
 import { BackgroundVideoProvider } from "./background-video";
@@ -76,6 +76,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
             ...(themeFont
               ? {
                   fontFamily: `"${fontFamily(theme?.font_media_id ?? "")}", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif`,
+                  "--theme-heading-font": `"${fontFamily(theme?.font_media_id ?? "")}", -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif`,
                 }
               : {}),
           } as CSSProperties

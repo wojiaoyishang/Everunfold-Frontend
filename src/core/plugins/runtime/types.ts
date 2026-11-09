@@ -1,5 +1,6 @@
 import type { CustomPageDefinition } from "@/core/pages/registration";
 import type { PluginShortcode } from "@/core/plugins/types";
+import type { FontDefinition } from "@/core/fonts/types";
 
 export interface PluginPackage {
   protocol: "plugin-package-1";
@@ -15,6 +16,7 @@ export interface PluginPackage {
   components: readonly string[];
   pages: readonly CustomPageDefinition[];
   shortcodes: readonly Omit<PluginShortcode, "render" | "preview">[];
+  fonts?: readonly FontDefinition[];
 }
 export type PublicPluginPackage = Omit<PluginPackage, "entries" | "assets"> & {
   entries: Omit<PluginPackage["entries"], "node">;

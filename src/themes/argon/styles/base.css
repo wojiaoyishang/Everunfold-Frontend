@@ -76,8 +76,12 @@ button {
     color var(--motion-fast) ease,
     border-color var(--motion-normal) ease;
 }
+:where(.public-theme) :where(h1, h2, h3, h4, h5, h6, .hero-title) {
+  font-family: var(--theme-heading-font, inherit);
+}
 html:not(:has([data-surface="admin"]))[data-reading-font="serif"]
   .article-content {
+  --theme-heading-font: Georgia, "Noto Serif SC", "Songti SC", SimSun, serif;
   font-family: Georgia, "Noto Serif SC", "Songti SC", SimSun, serif;
 }
 html:not(:has([data-surface="admin"]))[data-reading-shadow="deep"] .surface {

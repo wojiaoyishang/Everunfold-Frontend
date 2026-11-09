@@ -25,6 +25,16 @@ export function definePlugin<T extends FrontendPlugin>(plugin: T): T {
 
 export type { MediaItem, MediaQuery } from "@/core/contracts/settings";
 export type { ThemeDefinition } from "@/core/extensions/types";
+export {
+  defineFont,
+  fontStack,
+  registeredFontFamily,
+} from "../core/fonts/registry";
+export type {
+  FontDefinition,
+  RegisteredFontFace,
+  ThemeTypography,
+} from "../core/fonts/types";
 export interface PluginActivationContext {
   components: {
     register(

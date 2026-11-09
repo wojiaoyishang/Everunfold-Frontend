@@ -1398,5 +1398,17 @@
   "卡片": "Cards",
   "上一组主题": "Previous themes",
   "下一组主题": "Next themes",
-  "查看主题详情后启用，节点同步后生效；后台继续使用管理主题。": "Open theme details to enable it. Changes take effect after nodes synchronize; the admin theme stays the same."
+  "查看主题详情后启用，节点同步后生效；后台继续使用管理主题。": "Open theme details to enable it. Changes take effect after nodes synchronize; the admin theme stays the same.",
+  "代码注册": "Code registration",
+  "点击预览后加载字体": "Load this font by opening its preview",
+  "系统字体，无需下载": "System font, no download",
+  "预览字体": "Preview font",
+  "已注册字体": "Registered fonts",
+  "由主题和插件声明，按需加载。上传字体仍可在编辑器和站点设置中选择。": "Declared by themes and plugins and loaded on demand. Uploaded fonts can still be selected in the editor and site settings.",
+  "没有匹配的注册字体": "No matching registered fonts",
+  "款上传字体": "uploaded fonts",
+  "启用主题": "Enable",
+  "已上传字体": "Uploaded fonts",
+  "上传字体": "Upload fonts",
+  "收起预览": "Collapse preview"
 }

@@ -111,7 +111,8 @@ html:has([data-admin-mode="dark"]),
   --admin-space: 20px;
   --admin-row: 48px;
 }
-.admin-root :is(h1, h2, h3, p) {
+/* Reset defaults without overriding the spacing declared by individual components. */
+:where(.admin-root) :where(h1, h2, h3, p) {
   margin: 0;
 }
 .admin-root :is(button, input, a) {

@@ -9,6 +9,8 @@ import { themeRegistry } from "@/core/extensions/themes";
 import { themeModules } from "@/core/extensions/discovered";
 import { templateTargets } from "./targets";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
+import { inheritedTypography } from "@/core/fonts/registry";
+import { FontStyles, useTypographyStyle } from "@/core/fonts/provider";
 import type {
   ThemeTemplateProps,
   ThemeViewContext,
@@ -38,12 +40,15 @@ export function PublicTheme({
   const runtime = usePluginRuntime();
   theme = (followActive && runtime.catalog?.theme) || theme;
   const chain = themeRegistry.chain(theme);
+  const typography = inheritedTypography(chain);
+  const typographyStyle = useTypographyStyle(typography);
   return (
     <ThemeComponentsProvider theme={theme}>
       <div
         className="public-theme"
         data-public-theme={theme}
         data-theme-chain={chain.map((item) => item.id).join(" ")}
+        style={typographyStyle}
       >
         {[...chain]
           .reverse()
@@ -56,6 +61,11 @@ export function PublicTheme({
             />
           ))}
         {children}
+        <FontStyles
+          ids={[typography.body, typography.heading].filter(
+            (id): id is string => Boolean(id),
+          )}
+        />
       </div>
     </ThemeComponentsProvider>
   );

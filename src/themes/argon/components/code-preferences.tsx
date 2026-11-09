@@ -6,7 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import type { CodePreferences } from "@/core/contracts/settings";
-import { fontFace, fontFamily } from "@/core/rendering/fonts";
+import { fontFace, fontFamily } from "@/core/fonts/media";
 
 const CodeContext = createContext<CodePreferences>({});
 export function CodePreferencesProvider({

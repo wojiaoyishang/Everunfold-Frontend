@@ -12,6 +12,7 @@ import type { PublicPluginPackage, RuntimeCatalog } from "./types";
 import { RuntimeComponent } from "./view";
 import { isPluginEditingRoute, packageSetChanged } from "./update-policy";
 import styles from "./runtime.module.css";
+import { RegisteredFontsProvider } from "@/core/fonts/provider";
 
 const assetURL = (plugin: PublicPluginPackage, file: string) =>
   `/__plugins/assets/${encodeURIComponent(plugin.directory)}/${encodeURIComponent(file)}`;
@@ -250,9 +251,18 @@ export function PluginRuntimeProvider({
         ...(error ? [error] : []),
       ].join("\n")
     : "";
+  const fonts = React.useMemo(
+    () =>
+      value.catalog.plugins
+        .filter((plugin) => !value.catalog.disabled.includes(plugin.id))
+        .flatMap((plugin) => plugin.fonts ?? []),
+    [value.catalog],
+  );
   return (
     <RuntimeContext.Provider value={value}>
-      {children}
+      <RegisteredFontsProvider fonts={fonts}>
+        {children}
+      </RegisteredFontsProvider>
       {updatePending && (
         <aside className={styles.error} role="status">
           <client.UiText text="扩展已更新，重新打开编辑器后应用。当前编辑内容已保留。" />

@@ -1,6 +1,7 @@
 import type { MediaURL } from "@/core/contracts/content-admin";
 import { resourceUrl } from "@/core/content/urls";
 
+/** Existing uploaded-font identities and references remain unchanged. */
 const identity = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 export function fontFamily(id: string) {
   const key = id.replace(/^media:/, "");

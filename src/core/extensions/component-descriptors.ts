@@ -1,5 +1,6 @@
 import type { ThemeDefinition } from "./types";
 import { themeMetadata } from "./theme-metadata";
+import { createFontRegistry, normalizeTypography } from "@/core/fonts/registry";
 
 const idPattern = /^[a-z][a-z0-9-]*$/;
 const namePattern = /^[a-zA-Z0-9][a-zA-Z0-9_.:/-]*$/;
@@ -23,6 +24,7 @@ export function collectThemes(themes: readonly ThemeDefinition[]) {
         theme.parent !== null &&
         !idPattern.test(theme.parent)) ||
       (theme.styles !== undefined && typeof theme.styles !== "boolean") ||
+      (theme.fonts ?? []).some((font) => !font.id.startsWith(theme.id + ".")) ||
       Object.entries(theme.templates ?? {}).some(
         ([key, value]) =>
           !namePattern.test(key) ||
@@ -40,6 +42,8 @@ export function collectThemes(themes: readonly ThemeDefinition[]) {
       Object.freeze({
         ...theme,
         ...themeMetadata(theme),
+        fonts: createFontRegistry(theme.fonts ?? [], false).all,
+        typography: normalizeTypography(theme.typography),
         author: theme.author ? Object.freeze({ ...theme.author }) : null,
         parent:
           theme.parent === undefined && theme.id !== "argon"

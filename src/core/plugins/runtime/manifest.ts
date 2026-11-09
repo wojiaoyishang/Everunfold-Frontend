@@ -1,4 +1,6 @@
 import type { PluginPackage } from "./types";
+import { createFontRegistry } from "@/core/fonts/registry";
+import type { FontDefinition } from "@/core/fonts/types";
 
 export const validAssetName = (name: string) =>
   /^[A-Za-z0-9][A-Za-z0-9._-]{0,150}$/.test(name) && !name.includes("..");
@@ -40,7 +42,9 @@ export function parsePluginPackage(
   for (const [name, asset] of Object.entries(item.assets)) {
     if (
       !validAssetName(name) ||
-      !/\.(?:mjs|css|png|webp|svg|woff2|jpg|jpeg|gif|webm|mp4)$/.test(name) ||
+      !/\.(?:mjs|css|png|webp|svg|woff2?|ttf|otf|jpg|jpeg|gif|webm|mp4)$/.test(
+        name,
+      ) ||
       !/^[0-9a-f]{64}$/.test(asset.sha256) ||
       !Number.isSafeInteger(asset.bytes) ||
       asset.bytes < 0 ||
@@ -54,5 +58,38 @@ export function parsePluginPackage(
     (item.entries.css && !item.entries.css.endsWith(".css"))
   )
     throw new Error("Plugin entry type mismatch");
+  const fonts = createFontRegistry(item.fonts ?? [], false).all;
+  if (fonts.some((font) => !font.id.startsWith(item.id + ".")))
+    throw new Error("Invalid plugin font namespace");
+  // Preserve the original object: normalizing before digest verification would reject old packages.
   return item;
+}
+
+export function packageFontsMatch(
+  declarations: readonly FontDefinition[],
+  manifest: PluginPackage,
+): boolean {
+  const published = createFontRegistry(manifest.fonts ?? [], false).all;
+  if (declarations.length !== published.length) return false;
+  let linked = true;
+  const expected = declarations.map((font, index) => ({
+    ...font,
+    faces: (font.faces ?? []).map((face, faceIndex) => {
+      if (!face.src.startsWith("asset:")) return face;
+      const src = published[index]?.faces?.[faceIndex]?.src ?? "";
+      const prefix = `/__plugins/assets/${encodeURIComponent(manifest.directory)}/`,
+        file = src.slice(prefix.length);
+      const valid =
+        src.startsWith(prefix) &&
+        validAssetName(file) &&
+        Object.hasOwn(manifest.assets, file);
+      if (!valid) linked = false;
+      return valid ? { ...face, src } : face;
+    }),
+  }));
+  return (
+    linked &&
+    JSON.stringify(createFontRegistry(expected, false).all) ===
+      JSON.stringify(published)
+  );
 }

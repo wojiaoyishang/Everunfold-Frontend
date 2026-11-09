@@ -37,3 +37,4 @@ export { useAdminRequest } from "@/core/admin/account-context";
 
 export { MediaPickerDialog } from "./media-picker";
 export { SettingsForm } from "@/core/forms/renderer";
+export { FontStyles, useFont, useRegisteredFonts } from "@/core/fonts/provider";

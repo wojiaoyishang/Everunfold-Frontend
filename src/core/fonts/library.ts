@@ -6,8 +6,8 @@ import {
   useAssetLibrary,
   InvalidUpload,
   type LibraryAdapter,
-} from "./asset-library";
-import type { MediaUploadPayload } from "./media-library";
+} from "../media/asset-library";
+import type { MediaUploadPayload } from "../media/media-library";
 
 const adapter: LibraryAdapter<FontAsset, MediaUploadPayload> = {
   read: async (base, query, page, _kind, csrf, signal) =>

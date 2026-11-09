@@ -7,7 +7,7 @@ import { publicHref, resourceUrl } from "@/core/content/urls";
 import { renderNativeShortcodes } from "./native-shortcodes";
 import type { PublicShortcode } from "@/core/contracts/settings";
 import type { ShortcodeDiagnostic } from "@/core/shortcodes/parser";
-import { fontFamily, referencedFontFaces } from "./fonts";
+import { fontFamily, referencedFontFaces } from "@/core/fonts/media";
 import { markdownMath } from "./features/markdown-math";
 import { markdownVideo } from "./features/markdown-video";
 import { inspectContentFeatures } from "./features/content-features";

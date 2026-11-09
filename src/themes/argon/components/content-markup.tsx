@@ -8,6 +8,7 @@ import {
   useCodePreferences,
 } from "./code-preferences";
 import { useCodeTools } from "../hooks/use-code-tools";
+import { ThemeCodeFont } from "@/core/fonts/provider";
 
 export function ContentMarkup({
   html,
@@ -86,6 +87,7 @@ export function ContentMarkup({
   return (
     <>
       <ContentResources features={features} />
+      {features.code && !font && <ThemeCodeFont />}
       {font && (
         <style data-code-font dangerouslySetInnerHTML={{ __html: font }} />
       )}
