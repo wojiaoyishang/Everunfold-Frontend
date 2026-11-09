@@ -1,6 +1,6 @@
 # 字体库与按需加载
 
-版本：font-library-1，2026-11-03。已实现；[ADR0042](../decisions/0042-visual-editors-and-font-library.md)与development-11定义边界。
+版本：font-library-2，2026-11-09。已实现；[ADR0042](../decisions/0042-visual-editors-and-font-library.md)与development-11定义边界。
 
 ## 使用
 
@@ -22,3 +22,9 @@ HTML工具栏的字体选择和主题设置的全站字体都能打开同一字�
 新增正文块、插件、SSR、受限内容及主题必须使用相同依赖收集规则。列表仅显示纯摘要时不应下载文章内字体；普通文章不加载其他文章或字体库的文件。移除引用后新页面不再声明该字体，不以清浏览器缓存维持一致性。后续子集化、unicode-range、字体授权信息及编辑器更多字体样式尚未实现。
 
 验收：查看浏览器字体资源，未使用页面无8001字体库请求；引用文章只有所用文件，无其他字体或批量preload。当前真实结果见[验收](../handoff/visual-editor-font-verification.md)。
+
+## 代码注册字体
+
+字体业务模块统一到src/core/fonts（library、preview、media及新注册/Provider），不保留原rendering/fonts或media/font-*的平行入口。上传与稳定媒体引用行为保持。后台新增“已注册字体”，与上传区分开，可搜索并逐项点击预览，不提供媒体编辑/删除；选择弹窗仍只接受上传媒体身份。
+
+主题、插件都可调用defineFont声明，经各自注册生命周期贡献；主题默认角色、SDK引用及包内文件方式见[统一注册指南](font-registration.md)。当前不把注册ID写入后端只接受媒体UUID的字段。系统项及Paper示例不含下载文件，功能引擎附带的专用字体仍按功能加载。

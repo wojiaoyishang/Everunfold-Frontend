@@ -1087,3 +1087,26 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/decisions/0084-theme-cards-metadata-and-settings-scroll.md` | `ADR0084` | `a1dad3662a927d66e3c4a01e0872c65e9099ab30062843bbf14ae476969c75a0` |
 | `docs/handoff/honors-page-verification.md` | `honors-verification-2` | `991a98587437ee0b3a46393a10049504ff92fb7c56084c98705ef909cf9af74b` |
 | `docs/handoff/theme-cards-and-navigation-verification.md` | `theme-cards-navigation-1` | `3c31fff122f1f9aa71c4f10b0b6cf97cca79ff763726306bf56d8a5c4f0b71a3` |
+
+
+## 主题浏览、Paper、统一字体与视觉间距（2026-11-09）
+
+前端6682396/9157c54/5fc570c，后端仅文档同步，settings 1.14和业务契约保持。主题详情独立启用、卡片/列表、Paper 2.0.1及三篇业务示例、主题/插件字体共用与按需打包完成；用户指出的标题贴卡片已修复并按桌面/窄屏复核。以下当前共同版本替代旧摘要，历史验收保留，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `96f8ad7eb2a9a61ca9f9abcf685085979b231e867fdc164f2453fe7a687e4a29` |
+| `docs/architecture/frontend-plugin-runtime.md` | `plugin-runtime-7` | `db9e22e99903f51488e6b7b2d62e931d1615fec79efe2c763522433edaacb61c` |
+| `docs/architecture/frontend-themes.md` | `frontend-themes-5` | `fcfc1d11529dedef2900661db33d3ccc0270820b54c3b069e344449b75aa67f0` |
+| `docs/development/child-themes.md` | `child-themes-5` | `7ed3f9439d46600db7422b7cef26391bb90eefada62ea238de9aca39f606ad09` |
+| `docs/development/font-library.md` | `font-library-2` | `16fb0b8a4274038a03e8882e9c5b5954299d87dd3a37ade88936f017d5eb3637` |
+| `docs/development/font-registration.md` | `font-registration-1` | `c83fce15b8be12fb3980f615d6762d128c1aa60930fb448f8be83d1684c60389` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-7` | `08fced8dc6f6b1b6af0faf598b97b670f27205d54132234b5b7daae8d7022465` |
+| `docs/development/settings.md` | `settings-runtime-11` | `131ab1bb5903f01f988bd0d2b050a529f4d1b354e84afee7c46782a60134b61a` |
+| `docs/development/protocol.md` | `development-20` | `3e9f07ba561e742c6d5be7b256a62852601a321cda2e6b624f4ea0c08e529e36` |
+| `docs/decisions/0080-minimal-paper-starter-theme.md` | `ADR0080-2` | `0f7a9b020c64afdd569241fae67dbc272b3ec2028474d72e44f0c1c5bcc5f9f7` |
+| `docs/decisions/0084-theme-cards-metadata-and-settings-scroll.md` | `ADR0084-2` | `e39535b125f6d5103544a6e4f05eb490f52da2447a2fa884a244c241da708551` |
+| `docs/decisions/0085-shared-font-registration.md` | `ADR0085` | `60c7c469e00620f86f1ea1bc4bf0491bd3b0d45dbe445b8175d4b1e6fe63062d` |
+| `docs/handoff/paper-starter-verification.md` | `paper-starter-2` | `0d6fd1a719714c8ea6714b159ddc908efc9e9c2216bca6ddccadd747f2babbab` |
+| `docs/handoff/theme-cards-and-navigation-verification.md` | `theme-cards-navigation-2` | `2fbdc49507e7725b78af2a3606e5b7621ac78b6d2c4830ef0c335aff60adf70d` |
+| `docs/handoff/theme-browser-paper-fonts-verification.md` | `theme-browser-paper-fonts-1` | `b8b875c5cbc200f23b17df93e42cab8f7e6c07d7c92ef0221b9ab196bb98cf1c` |

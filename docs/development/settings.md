@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-10，2026-11-06。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-11，2026-11-09。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -20,7 +20,7 @@
 
 头像/背景图片/背景视频均可从媒体库上传或选择，也可手填地址。小缩略图与输入框同行，点击查看大图/视频；选择后按稳定媒体 ID保存，服务端派生地址，手动改地址会解除关联。见 [媒体指南](media-library.md) 和 [菜单与图标指南](menu-icons.md)。公告分为可选标题和内容（原 notice 字段），保存并同步后显示在首页内容列表上方。无标题时显示内容；超过一行或标题下有正文时可点击「展开更多」原位展开，保留动画并可收起。两项都清空隐藏公告，当前不使用首次弹窗或导航栏公告入口。讨论/注册/邮件/媒体提供器及高级 SEO 尚未实现；正式站点地址仍由 `PUBLIC_SITE_URL` 部署配置确定。标题模板保留一个 `%s` 文章标题，可用 `%site%` 站点名；不允许索引生成页面 robots noindex，后台始终 private/no-store/noindex。
 
-保存时把整份站点与主题草稿作为一个版本提交。提交成功后节点状态可能仍是等待同步，收到落盘确认才显示已应用。若提示版本冲突，当前草稿仍在；先保留你的修改，再使用明确标注的「放弃本地修改并载入服务器版本」合并。写请求不自动重试，未知结果先读取核对。节点策略按节点单独保存，切换选择不会覆盖该页其它节点草稿。
+一般“保存更改”把整份站点与主题草稿作为一个版本提交。已安装主题先通过卡片/列表打开详情，右下角启用按钮只保存主题选择，并保留其他未保存输入；可从实例默认的详情中恢复部署默认。提交成功后节点状态可能仍是等待同步，收到落盘确认才显示已应用。若提示版本冲突，当前草稿仍在；先保留你的修改，再使用明确标注的「放弃本地修改并载入服务器版本」合并。写请求不自动重试，未知结果先读取核对。节点策略按节点单独保存，切换选择不会覆盖该页其它节点草稿。
 
 ## 保存与读取端点
 

@@ -1,6 +1,6 @@
 # 主题卡片、元数据与设置导航验收
 
-版本：theme-cards-navigation-1，2026-11-09。前端522f8a1、后端d51ff20/settings 1.14，决定见[ADR0084](../decisions/0084-theme-cards-metadata-and-settings-scroll.md)，配置见[子主题指南](../development/child-themes.md)。证书操作栏另由f203e9b交付，见[补充记录](honors-page-verification.md)。
+版本：theme-cards-navigation-2，2026-11-09。此页保留初版卡片的阶段结果；后续详情确认、横向/列表、Paper及字体的最终结果见[最新验收](theme-browser-paper-fonts-verification.md)，旧的点击修改工作稿规则已由后续要求替代。前端522f8a1、后端d51ff20/settings 1.14，决定见[ADR0084](../decisions/0084-theme-cards-metadata-and-settings-scroll.md)，配置见[子主题指南](../development/child-themes.md)。证书操作栏另由f203e9b交付，见[补充记录](honors-page-verification.md)。
 
 ## 实现和自动检查
 

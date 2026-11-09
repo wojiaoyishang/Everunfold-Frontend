@@ -1,6 +1,6 @@
 # 独立插件、页面与短代码开发
 
-版本：frontend-plugins-6，2026-11-09。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
+版本：frontend-plugins-7，2026-11-09。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
 
 ## 源码和命令
 
@@ -184,3 +184,7 @@ npm run extensions:register -- --node-id web-main --backend ../Everunfold-Backen
 npm run check覆盖类型、格式、注册不变量和包完整性/回退检查；npm run verify:admin在隔离副本中编译插件后删除其源码再构建主体，并验证公开/私有故障边界。设置PLAYWRIGHT_MODULE和CHROMIUM_EXECUTABLE可额外运行真实生产浏览器的后部署新增、热替换、编辑保护及生命周期检查。具体结果见[验收](../handoff/independent-plugins-verification.md)。
 
 立即数据refresh、私有元数据、版本通知后重新鉴权及未来deferred消费者继续遵循[数据接口规范](plugin-data-protocol.md)。运行时包不意味着通用后端异步资源已经存在。可继续解耦评论、搜索和媒体展示；认证、事务、可靠投递与单一Y.Doc留在宿主。
+
+## 字体注册
+
+同步setup可fonts.register(defineFont(...))；客户端用FontStyles/useFont按ID引用。主题也可用同一defineFont在ThemeDefinition.fonts中注册。字体业务统一src/core/fonts，插件asset:字体按原哈希资产协议独立打包，支持开发热更新；系统栈不下载，文件只随实际引用加载。完整范例、文件约定与宿主更新边界见[字体指南](font-registration.md)。

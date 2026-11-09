@@ -1,6 +1,6 @@
 # 父主题、子主题与前台展示钩子
 
-版本：frontend-themes-4，2026-11-09。状态：已实现；基础机制见[原交接记录](../handoff/child-themes-verification.md)，Paper精简见[本轮验收](../handoff/paper-starter-verification.md)。
+版本：frontend-themes-5，2026-11-09。状态：已实现；基础机制见[原交接记录](../handoff/child-themes-verification.md)，Paper精简见[本轮验收](../handoff/paper-starter-verification.md)。
 
 现有Argon为缺省父主题。子主题放在src/themes/<id>/，theme.ts声明parent；自动发现沿用现有本地可信源码机制。省略parent的非Argon主题默认继承Argon，允许多级继承；不存在的父主题、循环或重复身份属于部署错误，不能静默退回另一主题。后台/账号界面继续使用原控件上下文；只有公开阅读与授权前台预览进入选中的主题上下文。
 
@@ -24,3 +24,9 @@ settings 1.14支持主题展示元数据，ThemeDefinition可选title/descriptio
 Paper 2.0.0作为精简的二次开发起点，仅保留theme.ts和styles.ts，所有组件、模板和钩子继承Argon。局部CSS提供减淡背景、纯色导航、短横幅、细边框与正文行距，不额外包裹父组件、覆盖人物模板或添加页脚说明。复杂组合由隔离生产测试夹具覆盖，开发方式见[子主题指南](../development/child-themes.md)和[ADR0080](../decisions/0080-minimal-paper-starter-theme.md)。默认配置仍为argon，示例不修改站点业务数据。
 
 具名组件名称和公开props作为可复用接口维护，优先追加钩子；破坏变更须升级主题主版本并核对子主题。当前parent绑定已发现的主题ID，不实现远程版本解析或npm安装。
+
+## 字体与主题详情
+
+ThemeDefinition.fonts可直接使用共享defineFont，typography定义正文/标题/代码角色，父到子合并与null重置。公共接口不归某个插件私有；实际文件只按可见使用加载，上传字体显式选择优先。规范见[字体注册](../development/font-registration.md)。
+
+后台默认横向卡片、可切纵向列表；先开详情，右下角启用主题。主题选择独立保存且保留其他工作稿，偏好不回写服务器，详见ADR0084更新。Paper 2.0.1在两文件中提供纸白/浅灰、左文右栏、简约工具/阅读关联及独立中性表面，仍继承Argon交互与阅读偏好。

@@ -1,6 +1,6 @@
 # 前端插件、主题与运行时扩展规范
 
-版本：plugin-runtime-6，2026-11-09。已按ADR0079实现，实际检查见[本轮验收](../handoff/independent-plugins-verification.md)。本版替代plugin-runtime-2中的插件随主体编译、根cache和仅显式页面登记规则；数据协议、开放模型与父子主题规则保留。
+版本：plugin-runtime-7，2026-11-09。已按ADR0079实现，实际检查见[本轮验收](../handoff/independent-plugins-verification.md)。本版替代plugin-runtime-2中的插件随主体编译、根cache和仅显式页面登记规则；数据协议、开放模型与父子主题规则保留。
 
 ## 宿主、主题和插件
 
@@ -32,7 +32,7 @@ settings 1.12.0新增PublicSettings.extensions：theme为空时使用实例默�
 
 GET /v1/admin/extensions返回配置的前端节点及最后登记清单，使用settings:read权限。reported_at代表登记时间，enabled代表节点配置，不能解释为在线探测。选择主题时要求所有启用节点都登记相同主题ID/版本/父级描述；重新启用插件时要求这些节点都有相同构建摘要。缺失/不一致返回42298，不改变设置修订。
 
-settings 1.14为主题目录增加可选简介、特色图、开发者、主页、源码及许可证；声明在theme.ts，统一导出和验证，旧声明仍可用。后台通过卡片选择并沿原设置保存/同步，不在用户配置或缓存另存元数据副本。展示图片不会被后端下载，默认放在已有/reference静态空间；详见[主题指南](../development/child-themes.md)及[ADR0084](../decisions/0084-theme-cards-metadata-and-settings-scroll.md)。
+settings 1.14为主题目录增加可选简介、特色图、开发者、主页、源码及许可证；声明在theme.ts，统一导出和验证，旧声明仍可用。后台通过卡片/列表先查看详情，再由启用按钮独立保存主题选择并同步，保留其他未保存工作稿；不在用户配置或缓存另存元数据副本。展示图片不会被后端下载，默认放在已有/reference静态空间；详见[主题指南](../development/child-themes.md)及[ADR0084](../decisions/0084-theme-cards-metadata-and-settings-scroll.md)。
 
 settings 1.13新增POST /v1/admin/extensions/usage，输入plugin_ids（每次1至100个稳定ID），响应scanned_at与plugins数组；每项包含plugin_id/title/registered/applied_pages/published_contents/scheduled_contents。要求settings:write；浏览器POST保留CSRF/Origin验证。只返回计数，不暴露私有内容。归属从所有已存清单收集，停用时仍能检查；计数读取权威应用快照与正文，定时内容取冻结计划，不取后来修改的工作稿。
 
@@ -49,3 +49,7 @@ Node的dev/start协调进程从本地完整包和构建出的主题清单形成e
 所有派生产物集中在被Git忽略的var/cache：contracts为精确锁定契约，build为错误后备页及主题目录，plugins为开发包，plugin-packages为验证后的不可变运行副本。根cache已移除，无兼容软链接；src/generated、registrations、custom_pages均不恢复。原var/settings、var/public-snapshots及浏览器IndexedDB位置保持，生产plugins也是被忽略的部署产物。
 
 公开配置可随原页面快照下发；私有元数据继续走独立鉴权接口，不进入options、公开props或公共缓存。SDK立即refresh、通知后重新鉴权拉取、deferred等待/取消等边界见[数据规范](../development/plugin-data-protocol.md)。已有pageConfigurationSource实现立即读取管理工作稿；没有真实后端消费者的资源不宣称已有Callback或异步执行服务。
+
+## 字体贡献
+
+主题与插件共用src/core/fonts的声明/目录/按需CSS；主题fonts、typography和插件setup.fonts.register均可贡献。插件包可选fonts字段随已验证目录下发，asset:相对字体引用编译为不可变资源，部署后不依赖原文件；旧包不补字段改变摘要。宿主字体SDK升级后需重启开发协调器，后续字体文件热更新沿原自动编译机制。详见[规范与范例](../development/font-registration.md)及[ADR0085](../decisions/0085-shared-font-registration.md)。后端节点清单只接收原白名单部署资料，不接收字体执行代码或新增用户设置字段。

@@ -1,6 +1,6 @@
 # Paper精简主题验收
 
-版本：paper-starter-1，2026-11-07。前端源码提交dd515fa；决定见[ADR0080](../decisions/0080-minimal-paper-starter-theme.md)，使用方式见[子主题指南](../development/child-themes.md)。
+版本：paper-starter-2，2026-11-09。此页原主体保留2026-11-07的2.0.0验收；2.0.1与字体/工具/真实示例的新结果见[最新验收](theme-browser-paper-fonts-verification.md)。前端源码提交dd515fa；决定见[ADR0080](../decisions/0080-minimal-paper-starter-theme.md)，使用方式见[子主题指南](../development/child-themes.md)。
 
 Paper 2.0.0仅包含theme.ts与styles.ts。所有展示组件、模板和钩子继承Argon；移除原横幅包装、人物模板与页脚说明，采用减淡背景、纯色导航、短横幅、细边框和较紧凑行距。颜色和阅读偏好沿用父主题变量；多级组合示例迁入隔离生产测试夹具。没有新增依赖、后端代码、契约或迁移。
 

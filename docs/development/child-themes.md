@@ -1,10 +1,10 @@
 # 子主题开发与启用
 
-版本：child-themes-4，2026-11-09。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。
+版本：child-themes-5，2026-11-09。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。
 
 ## 主题卡片与开发者信息
 
-后台“主题设置→已安装主题”使用卡片选择；点击仅修改工作稿，“保存更改”才应用。可随时选择“实例默认”恢复跟随部署配置。右侧快速导航点击后平滑定位，减少动态时即时定位，保留可恢复的URL片段。
+后台“主题设置→已安装主题”默认使用横向卡片，可切为纵向列表，浏览方式按当前站点/账号保存在本浏览器。点击卡片先打开主题详情，右下角“启用”才写入并同步；取消/Esc不保存。启用只改变已保存设置中的主题，保留站点、插件及其他未保存工作稿。“实例默认”也先查看详情再确认，恢复跟随部署配置。右侧快速导航点击后平滑定位，减少动态时即时定位，保留可恢复的URL片段。
 
 在theme.ts与身份/父主题一起声明可选展示字段，不需要额外注册文件：
 
@@ -152,7 +152,7 @@ npm run build
 active = "paper"
 ```
 
-可用FRONTEND_THEME覆盖实例缺省。后台“主题设置→已安装主题”提供实际已部署主题选择；保存并等待节点应用后生效。选“实例默认”才读取上述本地配置，否则后端extensions.theme优先。新增/修改主题源码后执行build:host或完整build并部署，启动协调器登记主题目录；全新主题不能在生产临时新增。
+可用FRONTEND_THEME覆盖实例缺省。后台“主题设置→已安装主题”提供实际已部署主题选择；在详情中启用并等待节点应用后生效。选“实例默认”才读取上述本地配置，否则后端extensions.theme优先。新增/修改主题源码后执行build:host或完整build并部署，启动协调器登记主题目录；全新主题不能在生产临时新增。
 
 ```sh
 npm run build:host
@@ -162,3 +162,11 @@ npm start
 npm start从var/cache/build/theme-catalog.json报告部署元数据。发布时一并保留此构建目录；不要在正式机器重新扫描源码推断已编译主题。也可按[插件指南](frontend-plugins.md)显式登记。多个启用节点登记一致ID/版本/父级后，选择器才允许切换；主题改动应更新语义版本并部署各节点。已安装主题的切换无需重建或重启，后台仍独立使用Argon。更多运行时验收见[本轮记录](../handoff/independent-plugins-verification.md)。
 
 初版Paper与三层继承的历史验收见[原验收记录](../handoff/child-themes-verification.md)。Paper 2.0.0的精简展示和隔离四层继承检查见[精简验收](../handoff/paper-starter-verification.md)。
+
+## Paper 2.0.1与字体
+
+Paper仍只有theme.ts和styles.ts，完整继承组件、模板和钩子。以特色图中的纸白卡片、浅灰背景、左正文右侧栏、对齐的左侧横幅和清楚留白为实际布局；颜色随继承的color-scheme切换，保留主题色和阅读偏好，支持深色/纯黑。桌面工具合为小竖栏，手机使用底部横向工具条；阅读设置在上方打开，进度使用同一灰色表面填充。相邻/相关文章改为文字卡片，去除背景图覆盖，封面和标题分开呈现。
+
+字体通过src/core/fonts的defineFont注册，不限定由插件提供。ThemeDefinition.fonts与typography分别声明字体和正文/标题/代码角色，父子继承和上传字体优先级见[统一字体指南](font-registration.md)。Paper实际注册paper.ui系统栈，代码使用system.mono，没有附带额外下载。
+
+本实例新增三篇“示例”文章用于验收，均为通过正常内容API发布的数据，并非主题硬编码，可在后台编辑或删除：/paper-demo-layout.html（封面/表格/引文）、/paper-demo-notes.html（无封面/长标题）、/paper-demo-code.html（代码/公式/HTML）。验收见[记录](../handoff/theme-browser-paper-fonts-verification.md)。

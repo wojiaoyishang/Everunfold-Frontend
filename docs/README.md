@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-[主题卡片与设置滚动](decisions/0084-theme-cards-metadata-and-settings-scroll.md)、[开发者元数据配置](development/child-themes.md)及[验收](handoff/theme-cards-and-navigation-verification.md)：平滑定位分区、特色图片和开发者/版本/父主题/许可证/项目链接，选择后保存；证书弹窗操作栏固定底部见[补充验收](handoff/honors-page-verification.md)。
+[主题详情、卡片/列表与Paper](decisions/0084-theme-cards-metadata-and-settings-scroll.md)、[开发指南](development/child-themes.md)及[最新验收](handoff/theme-browser-paper-fonts-verification.md)：横向卡片/纵向列表、详情中启用并保留其他草稿；Paper按特色图形成纸白左文右栏、简约阅读工具，提供三篇业务示例。[主题/插件统一字体注册](development/font-registration.md)与[ADR0085](decisions/0085-shared-font-registration.md)提供共用声明、独立字体打包和按需引用。原平滑导航/元数据见[阶段验收](handoff/theme-cards-and-navigation-verification.md)，证书置底见[记录](handoff/honors-page-verification.md)。
 
 [插件启停使用提示](decisions/0083-plugin-activation-usage-confirmation.md)及[验收](handoff/plugin-activation-usage-verification.md)：隐藏不可用插件的注册页，保存启停前检查已应用页面、已发布/定时正文引用，提醒后可继续；取消还原本批次开关，保留其他设置修改与原页面配置。
 
