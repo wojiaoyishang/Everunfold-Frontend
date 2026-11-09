@@ -19,6 +19,8 @@ const failures: Record<string, string> = {
   configuration_changed: "排队期间配置已改变，本次测试已取消，请重新测试。",
   queue_timeout: "等待发送超时，请检查运行与任务中的 Scheduler 和 Worker。",
   connection: "无法完成 SMTP 连接，请检查地址、端口及网络。",
+  timeout: "SMTP 操作超时，请检查网络或调整连接超时设置。",
+  transport: "邮件传输组件发生异常，请查看任务日志中的错误类型。",
 };
 export function MailTestPanel({
   saved,

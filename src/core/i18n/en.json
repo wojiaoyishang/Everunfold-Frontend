@@ -1801,5 +1801,7 @@
   "传输邮件报文": "Transmitting the email message",
   "邮件服务器已接收": "Accepted by the mail server",
   "开始执行任务": "Starting task execution",
-  "任务执行完成": "Task execution completed"
+  "任务执行完成": "Task execution completed",
+  "SMTP 操作超时，请检查网络或调整连接超时设置。": "SMTP operation timed out. Check the network or adjust the connection timeout.",
+  "邮件传输组件发生异常，请查看任务日志中的错误类型。": "The mail transport encountered an error. Check the error type in the task log."
 }
