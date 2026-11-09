@@ -1,8 +1,22 @@
 import type { ReactNode } from "react";
 import type { ReadableContent, Site } from "@/core/content/types";
 import type { PublicManagedPage } from "@/core/contracts/pages";
+import type { InstalledTheme } from "@/core/contracts/settings";
 
-export interface ThemeDefinition {
+type ThemeMetadata = Partial<
+  Pick<
+    InstalledTheme,
+    | "title"
+    | "description"
+    | "preview"
+    | "author"
+    | "homepage"
+    | "repository"
+    | "license"
+  >
+>;
+
+export interface ThemeDefinition extends ThemeMetadata {
   id: string;
   version: string;
   /** Other themes inherit Argon unless an explicit standalone root is requested. */

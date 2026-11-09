@@ -5,7 +5,7 @@ import { spawn } from "node:child_process";
 import { once } from "node:events";
 import { createServer as createHttpServer } from "node:http";
 import { createServer } from "node:net";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Parser, parseDocument, DomUtils } from "htmlparser2";
 import {
@@ -103,6 +103,26 @@ directory = "./var/absent-admin-verification-cache"
       await new Promise((resolve) => setTimeout(resolve, 250));
     }
     assert.ok(ready, `Isolated admin server did not become ready: ${logs}`);
+    const themes = JSON.parse(
+      await readFile(
+        path.join(workspace, "var/cache/build/theme-catalog.json"),
+        "utf8",
+      ),
+    );
+    for (const theme of themes) {
+      if (!theme.preview?.startsWith("/") || theme.preview.startsWith("//"))
+        continue;
+      const image = await fetch(new URL(theme.preview, base));
+      assert.equal(image.status, 200, `Missing theme artwork: ${theme.id}`);
+      assert.match(
+        image.headers.get("content-type") ?? "",
+        /^image\//,
+        `Theme artwork resolved as a page: ${theme.id}`,
+      );
+    }
+    console.log(
+      "Theme artwork is available in production without a public snapshot or backend.",
+    );
     for (const route of [
       "/login",
       "/account",

@@ -1,5 +1,5 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { TextLink } from "../../components/ui/primitives";
@@ -9,6 +9,7 @@ type SectionLink = { id: string; title: string };
 
 /** Builds a local directory from the sections actually mounted in this page. */
 export function SettingsLayout({ children }: { children: ReactNode }) {
+  const t = useT();
   const root = useRef<HTMLDivElement>(null);
   const [sections, setSections] = useState<SectionLink[]>([]);
   const [active, setActive] = useState("");
@@ -89,7 +90,7 @@ export function SettingsLayout({ children }: { children: ReactNode }) {
     <div ref={root} className={`admin-settings-page ${styles.layout}`}>
       <div className={styles.main}>{children}</div>
       {sections.length > 1 && (
-        <nav className={styles.navigation} aria-label="设置分区导航">
+        <nav className={styles.navigation} aria-label={t("设置分区导航")}>
           <strong>
             <UiText text="快速导航" />
           </strong>
@@ -98,6 +99,32 @@ export function SettingsLayout({ children }: { children: ReactNode }) {
               key={section.id}
               href={`#${section.id}`}
               aria-current={active === section.id ? "location" : undefined}
+              onClick={(event) => {
+                if (
+                  event.button !== 0 ||
+                  event.metaKey ||
+                  event.ctrlKey ||
+                  event.shiftKey ||
+                  event.altKey
+                )
+                  return;
+                const target = document.getElementById(section.id);
+                if (!target) return;
+                event.preventDefault();
+                const preference =
+                  root.current?.closest<HTMLElement>(".admin-root")?.dataset
+                    .adminMotion;
+                const reduced =
+                  preference === "reduced" ||
+                  (preference !== "full" &&
+                    matchMedia("(prefers-reduced-motion: reduce)").matches);
+                history.replaceState(history.state, "", `#${section.id}`);
+                target.focus({ preventScroll: true });
+                target.scrollIntoView({
+                  block: "start",
+                  behavior: reduced ? "instant" : "smooth",
+                });
+              }}
             >
               <UiText text={section.title} />
             </TextLink>

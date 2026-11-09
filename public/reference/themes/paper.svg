@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600">
+  <rect width="960" height="600" fill="#f5f5f4"/>
+  <rect width="960" height="83" fill="#fff"/><path d="M0 83h960" stroke="#dededc"/>
+  <text x="70" y="52" fill="#25282d" font-family="sans-serif" font-size="24" font-weight="600">Everunfold</text>
+  <g stroke="#b4b7bb" stroke-width="3" stroke-linecap="round"><path d="M718 41h42m28 0h25m29 0h48"/></g>
+  <text x="70" y="165" fill="#282b30" font-family="sans-serif" font-size="34" font-weight="500">Less, but enough.</text>
+  <text x="70" y="202" fill="#777b80" font-family="sans-serif" font-size="16">A simple starting point for your own theme.</text>
+  <g fill="#fff" stroke="#dededc"><rect x="70" y="247" width="568" height="277" rx="3"/><rect x="665" y="247" width="225" height="277" rx="3"/></g>
+  <rect x="100" y="280" width="104" height="23" rx="3" fill="#eef0f1"/>
+  <rect x="100" y="331" width="358" height="18" rx="3" fill="#3c4147"/>
+  <g fill="#d9dcdf"><rect x="100" y="378" width="496" height="8" rx="3"/><rect x="100" y="400" width="463" height="8" rx="3"/><rect x="100" y="422" width="481" height="8" rx="3"/></g>
+  <path d="M100 462h496" stroke="#e7e9ea"/>
+  <rect x="100" y="483" width="103" height="7" rx="3" fill="#b6bdc4"/>
+  <circle cx="777" cy="308" r="29" fill="#e4e7ea"/>
+  <rect x="731" y="360" width="92" height="12" rx="3" fill="#4d555e"/>
+  <g fill="#d9dcdf"><rect x="698" y="400" width="157" height="7" rx="3"/><rect x="714" y="420" width="126" height="7" rx="3"/></g>
+  <path d="M698 452h157" stroke="#e7e9ea"/>
+</svg>

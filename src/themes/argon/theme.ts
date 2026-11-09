@@ -2,6 +2,14 @@ import type { ThemeDefinition } from "@/core/extensions/types";
 
 export default {
   id: "argon",
+  title: "Argon",
+  description: "博客阅读界面，包含文章、说说与插件页面。",
+  preview: "/reference/themes/argon.svg",
+  author: {
+    name: "Everunfold contributors",
+    url: "https://github.com/wojiaoyishang",
+  },
+  repository: "https://github.com/wojiaoyishang/Everunfold-Frontend",
   version: "1.1.0",
   parent: null,
   components: [

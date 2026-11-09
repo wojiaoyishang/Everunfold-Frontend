@@ -1368,5 +1368,19 @@
   "检查覆盖当前已应用页面、已发布正文和定时发布版本中的短代码引用；不含历史草稿或脚本动态调用。取消将撤销本次插件开关修改，其他设置修改仍保留。": "The check covers applied pages and shortcode references in published and scheduled content. Historical drafts and dynamic script calls are excluded. Canceling restores the plugin switches and keeps other settings changes.",
   "无法检查插件使用情况，设置尚未保存。请稍后重试。": "Plugin usage could not be checked. Settings have not been saved. Please try again.",
   "正在检查使用情况…": "Checking plugin usage…",
-  "荣誉与证书": "Honors and certificates"
+  "荣誉与证书": "Honors and certificates",
+  "选择主题": "Select theme",
+  "开发者": "Developer",
+  "父主题": "Parent theme",
+  "主主题": "Base theme",
+  "许可证": "License",
+  "项目主页": "Homepage",
+  "源代码": "Source",
+  "主题相关链接": "Theme links",
+  "设置分区导航": "Settings sections",
+  "没有可用的已安装主题。": "No installed themes are available.",
+  "所选主题尚未在所有启用节点完成部署。": "The selected theme is not deployed on every enabled node.",
+  "博客阅读界面，包含文章、说说与插件页面。": "A blog reading theme for articles, short posts and plugin pages.",
+  "继承 Argon 的简约子主题，适合二次开发。": "A minimal child theme of Argon, ready to customize.",
+  "已选择": "Selected"
 }

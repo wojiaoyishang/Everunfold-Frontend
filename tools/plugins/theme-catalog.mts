@@ -4,6 +4,7 @@ import { discoverExtensions } from "../extensions/discovery";
 import { collectThemes } from "../../src/core/extensions/component-descriptors";
 import { writeArtifact } from "../write-artifact.mjs";
 import type { ThemeDefinition } from "../../src/core/extensions/types";
+import { themeMetadata } from "../../src/core/extensions/theme-metadata";
 export async function exportThemes(root: string) {
   const directories = await discoverExtensions(root, "themes");
   const definitions: ThemeDefinition[] = await Promise.all(
@@ -17,17 +18,7 @@ export async function exportThemes(root: string) {
     ),
   );
   const registry = collectThemes(definitions);
-  const themes = registry.all.map((theme) => ({
-    id: theme.id,
-    title:
-      theme.id === "argon"
-        ? "Argon"
-        : theme.id === "paper"
-          ? "Paper"
-          : theme.id,
-    version: theme.version,
-    parent: theme.parent ?? null,
-  }));
+  const themes = registry.all.map(themeMetadata);
   await writeArtifact(
     path.join(root, "var/cache/build/theme-catalog.json"),
     JSON.stringify(themes, null, 2) + "\n",

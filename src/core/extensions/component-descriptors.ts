@@ -1,4 +1,5 @@
 import type { ThemeDefinition } from "./types";
+import { themeMetadata } from "./theme-metadata";
 
 const idPattern = /^[a-z][a-z0-9-]*$/;
 const namePattern = /^[a-zA-Z0-9][a-zA-Z0-9_.:/-]*$/;
@@ -38,6 +39,8 @@ export function collectThemes(themes: readonly ThemeDefinition[]) {
       theme.id,
       Object.freeze({
         ...theme,
+        ...themeMetadata(theme),
+        author: theme.author ? Object.freeze({ ...theme.author }) : null,
         parent:
           theme.parent === undefined && theme.id !== "argon"
             ? "argon"
