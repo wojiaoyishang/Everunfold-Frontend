@@ -1209,3 +1209,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/backend-plugins.md` | `backend-plugins-2` | `2d68adf02f63b6084e419fc9fb926ea16ad2d18fe10f3bbea21abc2c4ab609b6` |
 | `docs/development/frontend-plugins.md` | `frontend-plugins-10` | `ffded62cccfa34f7f060bb36c3bb65a3ac3104a90a46e162d5436be8239d8d60` |
 | `docs/handoff/runtime-tasks-verification.md` | `runtime-tasks-verification-1` | `51fb52aa696854a711c58d96e741996b7cf5c4bd5e0c176b97f6ec2db79cc435` |
+
+
+## 系统子菜单与邮件配置（2026-11-09）
+
+后端25ae8b9、前端28350cd；settings1.19.0固定后端提交及SHA。菜单与配置已实现，实际凭据由用户填写，发送仍为后续规划。以下版本替代对应旧摘要，原始基线不变，STATUS各自维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-mail-1` | `8d647ae7a3201109085ca75fef166d8d550150a13b503f4a1c8b6c12be44808e` |
+| `docs/architecture/admin-navigation.md` | `admin-navigation-4` | `1edd61d51797a44620050bc571ba11dd11624a367cbbf94c33b8463cf686c806` |
+| `docs/development/mail.md` | `mail-1` | `ff927931b00b7acd6037baa2ea3d73ef33dda334fbeec7ae5d69aded9f038f00` |
+| `docs/decisions/0091-system-submenus-and-private-mail-settings.md` | `ADR0091-1` | `aa5f3bd807e9ec86db097793116dc6584957d8686d9988779b39d31b33da7704` |
+| `docs/handoff/navigation-mail-verification.md` | `navigation-mail-verification-1` | `dca9acb4113acaa99e364f017bdbf40007ac8d07067f6e0523814caf257e12fa` |

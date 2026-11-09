@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[系统子菜单与邮件配置](development/mail.md)、[ADR0091](decisions/0091-system-submenus-and-private-mail-settings.md)及[验收](handoff/navigation-mail-verification.md)：桌面折叠、手机手风琴与独立菜单图标；SMTP 私有配置、只写密码与并发修订。当前仅保存配置，测试邮件、Worker 投递和通知按指南分阶段实现。
+
 [Scheduler、Worker与运行管理](development/runtime-tasks.md)、[ADR0090](decisions/0090-scheduler-owned-residents-and-runtime-monitoring.md)及[验收](handoff/runtime-tasks-verification.md)：Scheduler统一指派常驻子进程，插件任务SDK、可靠执行与后台存活状态；同期完善插件来源/详情、标签词云和登录留白。
 
 [内容运营与拖拽上传](development/content-operations.md)、[ADR0089](decisions/0089-content-management-workflows.md)及[验收](handoff/content-operations-verification.md)：列表精确筛选/排序、协作快速编辑、原子批量操作、分类标签管理；统一拖放进入原上传队列，并补齐验证码页面解锁后的评论和点赞。
