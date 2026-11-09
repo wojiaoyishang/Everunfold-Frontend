@@ -7,7 +7,14 @@ export type {
 } from "@/core/plugins/types";
 export type { SettingsModel, SettingField } from "@/core/forms/schema";
 export type { FormFieldProps } from "@/core/forms/renderer";
-export type { CustomPageDefinition } from "@/core/pages/registration";
+export type {
+  CustomPageDefinition,
+  PageCommentsPlacement,
+} from "@/core/pages/registration";
+export type { PageCommentsContextValue } from "@/core/pages/comments";
+export type { PageCommentInput } from "@/core/pages/comment-client";
+export type { CaptchaController } from "@/core/captcha/use-captcha";
+export type { PublicComment } from "@/core/content/types";
 export type { CustomPageProps } from "@/core/pages/registered-view";
 export type {
   ThemeTemplateProps,

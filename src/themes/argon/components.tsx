@@ -8,6 +8,7 @@ import { ArticleHeader } from "./components/article-header";
 import { PostCard } from "./components/post-card";
 import { ShuoshuoCardView } from "./components/shuoshuo-card";
 import { ManagedPageSurface, ManagedPageHeading } from "./pages/view";
+import { ManagedPageComments } from "./pages/comments";
 import {
   TextControl,
   NumberControl,
@@ -31,6 +32,7 @@ const components = {
   "public.shuoshuo.card": ShuoshuoCardView,
   "public.page.surface": ManagedPageSurface,
   "public.page.heading": ManagedPageHeading,
+  "public.page.comments": ManagedPageComments,
   "form.text": TextControl,
   "form.textarea": TextControl,
   "form.number": NumberControl,

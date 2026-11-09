@@ -29,8 +29,8 @@ import type { RuntimeCatalog } from "../src/core/plugins/runtime/types";
 import { pluginRegistry } from "../src/core/plugins/registry";
 
 const declaration = (title = "Runtime test") =>
-  `export default { id:"test.runtime",title:${JSON.stringify(title)},version:"1.0.0",setup({pages,components}){ components.register("test.runtime.control");pages.register({registration:{id:"test.runtime",version:"1.0.0",title:"Runtime test",path:"/runtime-test"},component:"test.runtime.control"});}};`;
-const control = `import {useState} from "react";import {Button} from "@everunfold/plugin-sdk/client";import styles from "./control.module.css";import mark from "./mark.svg";export default {"test.runtime.control":function Control(){const [value,setValue]=useState(0);return <Button className={styles.control} onClick={()=>setValue(value+1)}><img alt="" src={mark}/>{value}</Button>;}};`;
+  `export default { id:"test.runtime",title:${JSON.stringify(title)},version:"1.0.0",setup({pages,components}){ components.register("test.runtime.control");pages.register({registration:{id:"test.runtime",version:"1.0.0",title:"Runtime test",path:"/runtime-test"},component:"test.runtime.control",comments:{placement:"manual"}});}};`;
+const control = `import {useState} from "react";import {Button,PageComments,usePageComments,usePageCommentClient,CaptchaField,readPageComments,submitReaderComment,useCaptcha,captchaFailure} from "@everunfold/plugin-sdk/client";import styles from "./control.module.css";import mark from "./mark.svg";export default {"test.runtime.control":function Control(){const [value,setValue]=useState(0);const page=usePageComments();const client=usePageCommentClient();return <><Button className={styles.control} onClick={()=>setValue(value+1)}><img alt="" src={mark}/>{value}</Button><PageComments/>{!page.preview&&<CaptchaField control={client.captcha}/>}</>;},"test.runtime.api":function Api(){return String([readPageComments,submitReaderComment,useCaptcha,captchaFailure].length)}};`;
 
 test("independent packages load without source, preserve last good build, and disable without deleting declarations", async () => {
   const { buildPlugin } = await import("../tools/plugins/build.mjs");
@@ -112,6 +112,17 @@ test("independent packages load without source, preserve last good build, and di
       "utf8",
     );
     assert.match(js, /everunfold\.plugin-sdk\.1/);
+    for (const name of [
+      "PageComments",
+      "usePageComments",
+      "usePageCommentClient",
+      "CaptchaField",
+      "useCaptcha",
+      "captchaFailure",
+      "readPageComments",
+      "submitReaderComment",
+    ])
+      assert.ok(js.includes(name), `Independent package bridges ${name}`);
     assert.match(js, /\/__plugins\/assets\/runtime\/asset\.[0-9a-f]{64}\.svg/);
     assert.match(js, /createSignatureFunctionForTransform/);
     assert.doesNotMatch(js, /node_modules\/react\/cjs/);
@@ -122,6 +133,10 @@ test("independent packages load without source, preserve last good build, and di
     let loaded = await readInstalledPlugins(output, cache);
     assert.equal(loaded.packages.length, 1);
     assert.deepEqual(loaded.errors, []);
+    assert.equal(
+      loaded.packages[0].manifest.pages[0].comments?.placement,
+      "manual",
+    );
     installRuntimePlugins(
       loaded.packages.map((p) => p.plugin),
       [],

@@ -34,6 +34,7 @@ export function CommentSection({
   open = true,
   contentId,
   readReceipt,
+  interactive = true,
 }: {
   comments: PublicComment[];
   path: string;
@@ -41,13 +42,15 @@ export function CommentSection({
   open?: boolean;
   contentId?: string;
   readReceipt?: string;
+  /** Previews can show history without challenge, like or submission requests. */
+  interactive?: boolean;
 }) {
   const { store } = useReaderData();
   const captcha = useCaptcha(
     store.baseUrl,
     "comment",
     contentId,
-    Boolean(contentId && open),
+    Boolean(contentId && open && interactive),
   );
   const submission = useRef<{ fingerprint: string; id: string } | null>(null);
   const [local, setLocal] = useState<CommentEntry[]>([]);
@@ -78,6 +81,7 @@ export function CommentSection({
       .map((entry) => entry.id),
     contentId,
     readReceipt,
+    interactive,
   );
   useCommentLocation(target, page);
   useEffect(() => {
@@ -108,6 +112,7 @@ export function CommentSection({
     setTarget({ id: `comment-${id}` });
   }
   async function add(draft: Omit<CommentDraft, "email">) {
+    if (!interactive || !open) return false;
     if (contentId) {
       const parentId =
         reply.active && reply.entry?.origin === "history"
@@ -185,7 +190,7 @@ export function CommentSection({
               {local.length ? ` · ${local.length} 条本页留言` : ""}
             </p>
           </div>
-          {open && (
+          {open && interactive && (
             <TextLink
               href="#comment-composer"
               className="comments-write"
@@ -207,7 +212,11 @@ export function CommentSection({
             </TextLink>
           )}
         </header>
-        {open && !contentId ? (
+        {!interactive ? (
+          <p className="comments-demo-note">
+            <UiText text="预览模式下无法提交评论。" />
+          </p>
+        ) : open && !contentId ? (
           <div className="comments-demo-note">
             <span>
               <span className="preview-badge">
@@ -272,11 +281,12 @@ export function CommentSection({
               liked={likes.get(entry.id)?.liked ?? false}
               likeCount={likes.get(entry.id)?.count}
               liking={likes.pending.has(entry.id)}
+              interactive={interactive}
               onLike={() => {
                 void likes.toggle(entry.id);
               }}
               onReply={
-                open
+                open && interactive
                   ? () => {
                       setReply({ entry, active: true });
                       setTarget({ id: "comment-composer" });
@@ -338,7 +348,7 @@ export function CommentSection({
           </nav>
         )}
       </section>
-      {open && (
+      {open && interactive && (
         <CommentComposer
           captcha={contentId ? captcha : undefined}
           reply={reply.entry}

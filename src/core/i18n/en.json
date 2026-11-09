@@ -1839,5 +1839,7 @@
   "请检查参数的必填项、类型与取值范围。": "Check required parameters, types and value ranges.",
   "相同参数的活动执行会继续跟踪；参数不同则需等待原执行结束。": "An active execution with the same parameters will be tracked; wait for it to finish before using different parameters.",
   "任务参数不符合要求，请检查必填项、类型和取值范围。": "The task parameters are invalid. Check required fields, types and value ranges.",
-  "任务状态已改变或存在不同参数的活动执行，请刷新记录后重试。": "The task state changed or an execution with different parameters is active. Refresh the execution records and try again."
+  "任务状态已改变或存在不同参数的活动执行，请刷新记录后重试。": "The task state changed or an execution with different parameters is active. Refresh the execution records and try again.",
+  "关闭评论只停止新提交，已有评论仍可阅读。保存草稿不会影响前台，保存并应用后生效。": "Turning comments off only stops new submissions; existing comments remain readable. Saving a draft does not change the public page. Save and apply to make it effective.",
+  "预览模式下无法提交评论。": "Comments cannot be submitted in preview mode."
 }

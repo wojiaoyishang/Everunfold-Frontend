@@ -35,6 +35,14 @@ export const SDK_CLIENT_EXPORTS = [
   "readPageMetadata",
   "savePageMetadata",
   "useAdminRequest",
+  "PageComments",
+  "usePageComments",
+  "usePageCommentClient",
+  "useCaptcha",
+  "captchaFailure",
+  "CaptchaField",
+  "submitReaderComment",
+  "readPageComments",
 ] as const;
 export const REACT_EXPORTS = [
   "Children",

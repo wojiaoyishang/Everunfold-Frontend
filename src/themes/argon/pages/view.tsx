@@ -6,17 +6,20 @@ import { RegisteredPageView } from "@/core/pages/registered-view";
 import { PageFrame } from "./frame";
 import styles from "./pages.module.css";
 import { ContentLanguages } from "../components/content-languages";
-import type { Content } from "@/core/content/types";
+import type { Content, PublicComment } from "@/core/content/types";
 import { ProtectedManagedPage } from "./protected-page";
+import { PageCommentsBoundary } from "@/core/pages/comments";
 
 export function ManagedPageView({
   page,
   onReady,
   translations,
+  comments = [],
 }: {
   page: PublicManagedPage;
   onReady?: () => void;
   translations?: Content["translations"];
+  comments?: PublicComment[];
 }) {
   if (!hasPageImplementation(page))
     throw new Error("Unavailable registered page implementation");
@@ -33,13 +36,20 @@ export function ManagedPageView({
           translations={translations}
         />
       ) : (
-        <ExtensionComponent
-          name="public.page.surface"
-          notifyReady={false}
+        <PageCommentsBoundary
+          key={page.id}
           page={page}
-          onReady={onReady}
-          translations={translations}
-        />
+          comments={comments}
+          preview={Boolean(onReady)}
+        >
+          <ExtensionComponent
+            name="public.page.surface"
+            notifyReady={false}
+            page={page}
+            onReady={onReady}
+            translations={translations}
+          />
+        </PageCommentsBoundary>
       )}
     </ThemeTemplate>
   );
@@ -69,11 +79,13 @@ export function ManagedPageSurface({
         name="page.body.before"
         context={{ page, preview: Boolean(onReady) }}
       />
-      {page.source === "custom" ? (
-        <PageFrame value={page} onReady={onReady} />
-      ) : (
-        <RegisteredPageView page={page} onReady={onReady} />
-      )}
+      <div data-managed-page-body="true">
+        {page.source === "custom" ? (
+          <PageFrame value={page} onReady={onReady} />
+        ) : (
+          <RegisteredPageView page={page} onReady={onReady} />
+        )}
+      </div>
       <ThemeSlot
         name="page.body.after"
         context={{ page, preview: Boolean(onReady) }}

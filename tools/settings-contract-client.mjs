@@ -20,7 +20,7 @@ export async function generateSettingsClient(
       (op) =>
         !/^[a-z][a-zA-Z]+$/.test(op.name) ||
         !(stem === "captcha"
-          ? /^\/v1\/(?:admin\/captcha|reader\/(?:captcha\/challenge|access-page|comments))$/.test(
+          ? /^\/v1\/(?:admin\/captcha|reader\/(?:captcha\/challenge|access-page|page-comments|comments))$/.test(
               op.path,
             )
           : stem === "content-access"

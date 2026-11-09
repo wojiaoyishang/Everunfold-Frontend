@@ -18,8 +18,9 @@ export function useCommentLikes(
   ids: string[],
   contentId?: string,
   readReceipt?: string,
+  enabled = true,
 ) {
-  const idsKey = ids.join(",");
+  const idsKey = enabled ? ids.join(",") : "";
   const { store } = useReaderData();
   const notify = useFeedback();
   const [confirmed, setConfirmed] = useState<Record<string, LikeState>>({});
@@ -79,7 +80,7 @@ export function useCommentLikes(
       ? request.value.items.find((item) => item.comment_id === id)
       : undefined);
   async function toggle(id: string) {
-    if (controllers.current.has(id)) return;
+    if (!enabled || controllers.current.has(id)) return;
     const desired = !get(id)?.liked;
     const controller = new AbortController();
     controllers.current.set(id, controller);

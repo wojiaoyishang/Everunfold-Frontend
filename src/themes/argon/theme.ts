@@ -26,6 +26,7 @@ export default {
     "public.shuoshuo.card",
     "public.page.surface",
     "public.page.heading",
+    "public.page.comments",
     "form.text",
     "form.textarea",
     "form.number",

@@ -5,7 +5,6 @@ import {
 } from "@/core/seo/discovery";
 import { resourceUrl } from "@/core/content/urls";
 import { articleSchema, StructuredData } from "@/core/seo/structured-data";
-import { CommentSection } from "@/themes/argon/components/comments/comment-section";
 import { resolveManagedPage } from "@/core/pages/resolve";
 import { ManagedPageView } from "@/themes/argon/pages/view";
 import { pageLanguages } from "@/core/pages/languages";
@@ -142,14 +141,8 @@ export default async function ContentPage({
         <ManagedPageView
           page={managed}
           translations={pageLanguages(snapshot, managed)}
+          comments={snapshot.comments[managed.id] ?? []}
         />
-        {managed.access !== "captcha" && (
-          <CommentSection
-            comments={snapshot.comments[managed.id] ?? []}
-            path={managed.path}
-            contentId={managed.id}
-          />
-        )}
       </>
     );
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);

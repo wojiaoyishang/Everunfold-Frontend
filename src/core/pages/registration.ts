@@ -1,12 +1,20 @@
 import type { PageRegistration } from "@/core/contracts/pages";
 import type { SettingsModel } from "@/core/forms/schema";
 
+export interface PageCommentsPlacement {
+  /** Auto appends the shared section; manual pages opt in with PageComments. */
+  placement: "auto" | "manual";
+  /** A selector within this page's body, never the surrounding site shell. */
+  selector?: string;
+}
+
 export interface CustomPageDefinition {
   registration: PageRegistration;
   component: string;
   settingsModel?: SettingsModel;
   /** Share options across the configured language paths; translations stay in code. */
   localized?: boolean;
+  comments?: PageCommentsPlacement;
 }
 
 export function collectCustomPages(

@@ -14,6 +14,7 @@ export function CommentItem({
   floor,
   liked,
   liking = false,
+  interactive = true,
   likeCount,
   onLike,
   onReply,
@@ -25,6 +26,7 @@ export function CommentItem({
   floor: number;
   liked: boolean;
   liking?: boolean;
+  interactive?: boolean;
   likeCount?: number;
   onLike: () => void;
   onReply?: () => void;
@@ -134,7 +136,7 @@ export function CommentItem({
             className="comment-like"
             aria-pressed={liked}
             aria-busy={liking}
-            disabled={liking || entry.origin !== "history"}
+            disabled={!interactive || liking || entry.origin !== "history"}
             onClick={onLike}
             aria-label={`${liked ? "取消赞同" : "赞同"} ${entry.author} 的留言`}
             title={

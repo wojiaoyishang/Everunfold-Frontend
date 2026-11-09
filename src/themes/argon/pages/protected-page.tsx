@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { PublicManagedPage } from "@/core/contracts/pages";
-import { CommentSection } from "../components/comments/comment-section";
+import { PageCommentsBoundary } from "@/core/pages/comments";
 import {
   readProtectedPage,
   type UnlockedManagedPage,
@@ -50,19 +50,17 @@ export function ProtectedManagedPage({
     }
   };
   return unlocked ? (
-    <>
+    <PageCommentsBoundary
+      page={unlocked}
+      comments={unlocked.unlocked_comments ?? []}
+      readReceipt={unlocked.read_receipt}
+    >
       <ExtensionComponent
         name="public.page.surface"
         page={unlocked}
         translations={translations}
       />
-      <CommentSection
-        contentId={unlocked.id}
-        path={unlocked.path}
-        comments={unlocked.unlocked_comments ?? []}
-        readReceipt={unlocked.read_receipt}
-      />
-    </>
+    </PageCommentsBoundary>
   ) : (
     <article className={styles.page}>
       <ExtensionComponent

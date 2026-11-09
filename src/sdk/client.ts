@@ -38,3 +38,11 @@ export { useAdminRequest } from "@/core/admin/account-context";
 export { MediaPickerDialog } from "./media-picker";
 export { SettingsForm } from "@/core/forms/renderer";
 export { FontStyles, useFont, useRegisteredFonts } from "@/core/fonts/provider";
+export { PageComments, usePageComments } from "@/core/pages/comments";
+export { usePageCommentClient } from "@/core/pages/comment-client";
+export { useCaptcha, captchaFailure } from "@/core/captcha/use-captcha";
+export { CaptchaField } from "@/themes/argon/components/captcha-field";
+export {
+  readPageComments,
+  submitReaderComment,
+} from "@/core/contracts/captcha";

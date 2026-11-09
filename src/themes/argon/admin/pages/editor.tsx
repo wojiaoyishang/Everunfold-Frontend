@@ -55,6 +55,7 @@ const blank: PageValue = {
   javascript_position: "body_end",
   enabled: false,
   allow_indexing: true,
+  comments_open: true,
   options: {},
 };
 export function ManagedPageEditor({ id }: { id?: string }) {
@@ -146,6 +147,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
   const previewPage = useMemo<PublicManagedPage>(
     () => ({
       ...value,
+      comments_open: value.comments_open ?? true,
       title: value.title || "未命名页面",
       path: value.path || "/preview",
       id: previewId,
@@ -379,9 +381,22 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                           }
                         />
                       </span>
+                      <span>
+                        <UiText text="允许评论" />
+                        <Switch
+                          aria-label={t("允许评论")}
+                          checked={value.comments_open ?? true}
+                          onCheckedChange={(comments_open) =>
+                            setValue({ ...value, comments_open })
+                          }
+                        />
+                      </span>
                     </div>
                     <p className={styles.help}>
                       <UiText text="开关和修改在点击“保存并应用”后生效。新页面默认停用。" />
+                    </p>
+                    <p className={styles.help}>
+                      <UiText text="关闭评论只停止新提交，已有评论仍可阅读。保存草稿不会影响前台，保存并应用后生效。" />
                     </p>
                   </section>
                   {source === "registered" ? (
