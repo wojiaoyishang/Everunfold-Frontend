@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-13，2026-11-09。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-14，2026-11-09。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -105,3 +105,7 @@ settings.directory/
 插件管理合并已登记前端包与后端单入口插件，展示来源、版本和作者，使用同一extensions.disabled_plugins保存启停偏好。后端目录由部署命令写入私有_backend_plugins，不能由浏览器设置修改；PublicSettings.shortcodes仅投影启用的代码模板及用户已应用模板。普通设置保存由服务端按开关重算目录，拒绝伪造代码模板。
 
 后端代码与登记目录不一致时显示部署提示；重新启用需先完成同步，依赖须同时满足。验证码提供方也纳入引用提示和实际服务端启停守卫。操作流程和开发接口见[后端插件](backend-plugins.md)，实际验收见[本轮记录](../handoff/backend-plugins-verification.md)。
+
+## 搜索发现设置（2026-11-09）
+
+settings 1.17.0新增site.discovery：站点地图、RSS/Atom、条数、分享图、JSON-LD与Google/Bing站长验证。站点设置新增两组表单及快速导航；全站关闭收录时地图为空、订阅404，同时页面输出noindex, follow。文章/说说新增单篇allow_indexing，页面沿用原值。配置使用原revision保存、审计和可靠投递；升级前端接收器契约后再同步。具体字段、默认值和边界见[运营与搜索指南](operations-and-search.md)。

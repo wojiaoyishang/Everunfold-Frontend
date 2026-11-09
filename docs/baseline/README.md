@@ -1145,3 +1145,17 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/decisions/0086-captcha-providers-and-content-policies.md` | `ADR0086-2` | `bb5e28e49bb8b27649a8709648dd8fa0f197e326d074aa8afe89a29ccd5eee5b` |
 | `docs/decisions/0087-single-entry-backend-plugins.md` | `ADR0087` | `e26b023a5349c712c43a3c33033603910770fefbc28d1e99152ff1ce85510918` |
 | `docs/handoff/backend-plugins-verification.md` | `backend-plugins-verification-1` | `b0b884c7a7eb38290c577ce916b370281f602d021dd241fe67b92804d8931df8` |
+
+
+## 评论运营与搜索发现第一批（2026-11-09）
+
+后端6f39606/787301d、前端5b87263；受影响契约固定6f39606。评论审核、真实工作台及SEO/地图/订阅已完成，其余ADR0088路线保持后续。以下版本替代对应旧摘要，原始基线不改，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `81f5d9d2aa85e0377d771599f0565deb784f2d0509ee795a2da5798ad2acc76e` |
+| `docs/architecture/constraints.md` | `bootstrap-22` | `a92cfbd3f07a70a25e251b46f6eaebf9aca844960b7c221e2fd1cba25b31730d` |
+| `docs/development/settings.md` | `settings-runtime-14` | `72ada1d2ddb4d39a95a197ccb7fb048f4d6fdf2b47e55d1232b72a5baa112ad3` |
+| `docs/development/operations-and-search.md` | `operations-search-1` | `9d329bd50c0f83c08b99c040ab49ade643d245e1f8c48f0b26e14a22f17db711` |
+| `docs/decisions/0088-operations-workflows-and-search-discovery.md` | `ADR0088-2` | `a7a5d6fec980c98a280922d9d56fed5396a6f479eb2cf7060f5d5e647496c95a` |
+| `docs/handoff/operations-search-verification.md` | `operations-search-verification-1` | `c4cef5bd7e3d305b8145a04aae3bde2b4b6fb3c53996db9592a19e8c75eb0e0f` |

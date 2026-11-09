@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[评论管理、工作台与SEO](development/operations-and-search.md)、[ADR0088](decisions/0088-operations-workflows-and-search-discovery.md)及[验收](handoff/operations-search-verification.md)：正式评论审核/回复/回收与可靠投递、按权限裁剪的真实待办；全站/单篇收录、站点地图、RSS/Atom、canonical/hreflang、分享图/JSON-LD与站长验证。路线后续的批量编辑、通知邮件和迁移恢复演练尚未交付。
+
 [单入口后端插件SDK](development/backend-plugins.md)、[ADR0087](decisions/0087-single-entry-backend-plugins.md)与[验收](handoff/backend-plugins-verification.md)：只固定app/plugins/*/plugin.py，函数或类统一注册短代码、验证码与文案；示例卡片/标签、后台启停、显式部署与可靠目录投递。后端模板不再编译进前端主体，其他文件布局自由。
 
 [验证码配置与插件](development/captcha.md)、[ADR0086](decisions/0086-captcha-providers-and-content-policies.md)与[验收](handoff/captcha-verification.md)：本地图片、Google/Turnstile、登录/阅读/评论全局规则和文章/说说/页面覆盖，后端一次性验证与受限投影，API Key独立豁免授权、每Key限流与撤销围栏。后端插件统一app/plugins，根目录旧占位已删除；评论提交为待审核。

@@ -1,0 +1,59 @@
+# 评论运营与搜索发现
+
+版本：operations-search-1，2026-11-09。对应 ADR0088 第一批交付。
+
+## 使用入口
+
+- 后台工作台读取真实待办：待审核评论、未发布草稿、定时发布、发布失败、译文待核对、最新节点投递失败，以及最近编辑和排期。
+- 后台「评论管理」提供搜索、按状态筛选、分页、单条/批量通过审核、撤回审核、拒绝、垃圾评论、回收与恢复，支持编辑正文和管理员回复。新评论先待审核；通过审核后随公开快照同步显示。
+- 站点设置保留原 SEO 标题模板、描述和全站允许收录开关，新增「站点地图与订阅」「分享与结构化数据」。设置保存并同步后生效。
+- 文章和说说的 SEO 面板新增单篇允许收录开关；页面沿用原有 allow_indexing。关闭单篇收录不改变访问权限，也不删除正文。
+
+## 评论边界
+
+读取使用 comments:read，修改使用 comments:moderate，均为全站范围。管理员拥有全部权限，普通账户和已有 API Key 不自动增权；需要在用户授权与 Key 权限中显式添加。浏览器仍使用当前 Session、精确 Origin 与 CSRF；API Key 遵循所属用户的权限交集、应用范围和撤销围栏。后台工作台当前仅供浏览器会话使用。
+
+| 接口 | 用途 |
+| --- | --- |
+| POST /v1/admin/comments/query | status/search/content_id/page/page_size 查询，最多每页100条 |
+| POST /v1/admin/comments/moderate | operation_id、action、items[{id,revision}]，每批1至100条 |
+| POST /v1/admin/comments/edit | operation_id、id、revision、body |
+| POST /v1/admin/comments/reply | 同编辑参数；仅回复当前已通过审核的评论 |
+| GET /v1/admin/workspace | 只返回当前用户可见的数量和内容标题 |
+
+修改先核对整批 revision，任一过期返回409且整批回滚；重试使用原 operation_id。状态、审计、操作回执和公开快照 Outbox 在同一个事务提交，前端不把HTTP成功误当成所有节点已应用。回收保留 previous_status，恢复回收前的审核状态。编辑/恢复不会绕过原文可见性。父评论不可见时，可见回复作为顶层显示，不输出隐藏父正文。
+
+Comment 以 content_id/page_id 二选一关联原文。历史评论保持身份；0029_comments 将已有读者提交回执补入审核目录，保留原 ID、正文、作者、时间与合法父子关系。文章、说说和页面共用审核和点赞，当前公开页面提供评论区；验证码页面解锁后的评论交互尚未补齐。
+
+数据库升级必须显式执行 `.venv/bin/alembic -c migrations/alembic.ini upgrade head`，启动不自动迁移。降级遇到页面评论或新审核状态会拒绝，需先导出并处理，不能静默丢弃。
+
+## 站点地图、订阅与元数据
+
+| 设置或入口 | 行为 |
+| --- | --- |
+| site.allow_indexing | 全站关闭时输出 noindex, follow 和相应 X-Robots-Tag；地图为空、订阅404 |
+| site.discovery.sitemap_enabled | 默认开启；/sitemap.xml 包含语言首页、文章、说说和有可用实现的启用页面 |
+| site.discovery.feeds_enabled | 默认开启；/feed.xml 为 RSS 2.0，/atom.xml 为 Atom |
+| site.discovery.feed_limit | 默认30，允许1至100；按发布时间倒序输出标题、摘要、原文链接 |
+| language 查询参数 | 例如 /feed.xml?language=en；使用配置中的语言代码，无效或禁用语言返回404 |
+| site.discovery.structured_data | 默认开启；可收录文章输出 BlogPosting，说说输出 CreativeWork JSON-LD |
+| site.discovery.share_image | 默认分享图；文章优先使用自身封面，页面使用站点默认图 |
+| google_verification / bing_verification | 只填站长验证标签的 content 值，禁止整段HTML；输出标准meta标签 |
+
+发现入口只读取已应用的公开快照，不查询草稿，不解锁受保护内容。验证码/密码/未列出内容、撤回内容、禁止收录的内容及不可用插件页面不会被列入。hreflang 仅引用真实可收录的语言版本。文章 lastmod 来自实际内容更新时间；管理页面没有可信更新时间时省略 lastmod。RSS/Atom 使用稳定内容ID，XML及JSON-LD按上下文转义。
+
+canonical、站点地图和分享地址使用前端服务端部署配置 publicSiteUrl 对应的公开站点地址，不使用任意请求 Host。缺少该配置时不伪造正式域名。后台、登录、账号与内部地址由 robots.txt 排除；全站禁止收录时仍允许爬虫读取 noindex，robots.txt 本身不承担权限控制。每个页面保留 RSS/Atom 自动发现链接，避免子页面 alternates 覆盖布局而丢失订阅入口。
+
+没有自动向搜索引擎提交站点地图或验证网站所有权。配置后在搜索引擎站长平台提交 /sitemap.xml；收录/展示由搜索引擎决定。本轮不引入排名分数、虚构统计、重定向历史或关键词堆砌。当前是单份站点地图，大体量站点的拆分索引与压力验收另行推进。
+
+## 开发位置与发布
+
+- 后端 app/modules/comments 负责审核与工作台，通过已有 content.router_init(ctx) 装配。权限、迁移、事务与公开投影属于宿主。
+- 前端 src/core/operations 负责请求；管理主题在 src/themes/argon/admin/comments 和 admin/pages/overview.tsx 展示。搜索发现规则位于 src/core/seo，与主题样式无关。
+- operations 1.0.0、settings 1.17.0、content-admin 1.15.0、content-access 1.4.0、collaboration 2.4.0、presentation 0.2.0-preview.3、public 0.11.0。前端 contracts.lock.json 固定后端6f39606及SHA，生成物仍只写忽略的var/cache。
+- 部署次序：显式迁移，更新/重启API与Worker，更新前端接收器及主体；旧接收器仍加载旧契约时可能拒绝新公开设置，升级后通过既有同步重试恢复。业务写入不回滚为旧快照。
+
+后续批次：内容多维筛选/快速编辑/批量操作与分类标签管理；隔离迁移/恢复演练；邮件验证、找回密码、通知和真实阅读统计。上述尚未由本轮交付，不因 ADR 路线图存在而视为已实现。
+
+官方参考：[Next.js JSON-LD](https://nextjs.org/docs/app/guides/json-ld)、[Google 站点地图](https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview)、[网站所有权验证](https://support.google.com/webmasters/answer/9012289/)。
+

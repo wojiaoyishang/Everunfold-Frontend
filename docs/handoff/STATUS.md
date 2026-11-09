@@ -1,5 +1,15 @@
 # 前端交接状态
 
+## 最新交付：评论运营与SEO第一批（2026-11-09）
+
+- 后端6f39606/787301d、前端5b87263。新增评论管理（搜索/筛选、单条与批量审核、回复/编辑、垃圾/回收/恢复），文章/说说/页面统一持久审核；工作台展示按权限裁剪的真实待办和编辑/发布队列。见[指南](../development/operations-and-search.md)、[ADR0088](../decisions/0088-operations-workflows-and-search-discovery.md)及[验收](operations-search-verification.md)。
+- 新增SEO站点地图/RSS/Atom、默认分享图、JSON-LD、Google/Bing验证设置；文章/说说单篇收录开关与已有页面规则统一。canonical/hreflang、真实修改日期、全站关闭收录和受保护投影过滤已核对；不改主题或访问权限，不自动提交搜索引擎。
+- 0029_comments已显式升级本地/专用测试数据库，原回执补入审核目录。operations1.0/settings1.17及受影响契约由前端固定6f39606/SHA；API/Worker/接收器更新，旧契约拒收曾出现，升级重试后恢复。
+- 后端完整真实库264项/205.70秒、Ruff/格式/mypy275通过，含双API真实P0；前端check320、最后metadata修正后相关7项与隔离生产36私有入口、插件/主题/多语言/撤回和真实停后端reader矩阵通过。中间失败和未执行项见验收，不跳过失败断言。
+- 实页1440/390检查工作台/评论/SEO，评论另核对英文/深色/减少动态；审核→前台、回复/编辑、取消回焦、SEO配置真实保存与全站noindex/地图/订阅实际HTTP通过。pageerror0/native dialog0；定位器和过渡截图问题已重验。
+- 临时文章与两条评论已回收，前台404、地图/订阅无测试记录；原内容/账户/头像/主题/插件/WordPress未改。收录及discovery恢复原值，待审核0、最新投递失败0，退出本次会话200。六服务、四个0.0.0.0监听/HTTP200保持。
+- 分阶段本地提交未push，文档/SHA双仓同步；地址/凭据/截图仅忽略配置与var。本轮没有内容快速/批量编辑、邮件通知/验证/找回、真实浏览计数或迁移恢复演练；验证码页面解锁后的评论交互、全浏览器/长期负载及正式收录验证仍未覆盖，后续分批推进。
+
 ## 最新交付：后端插件启停与运行时短代码目录（2026-11-09）
 
 - 前端5ad3705、后端4df1fdb/3b85ad2。后端改为app/plugins/*/plugin.py单入口，函数/类注册短代码、验证码、具名文案；示例example:card/example:badge和原notice/accordion均由插件提供。见[指南](../development/backend-plugins.md)、[ADR0087](../decisions/0087-single-entry-backend-plugins.md)与[共同验收](backend-plugins-verification.md)。
