@@ -21,8 +21,9 @@ export interface ConfirmDialogProps {
   description?: ReactNode;
   children?: ReactNode;
   icon?: IconName;
-  intent?: "default" | "danger";
+  intent?: "default" | "danger" | "positive" | "warning";
   confirmLabel?: string;
+  confirmIcon?: IconName;
   cancelLabel?: string;
   busyLabel?: string;
   busy?: boolean;
@@ -57,6 +58,7 @@ function ConfirmDialogSurface({
   icon,
   intent = "default",
   confirmLabel = "确认",
+  confirmIcon,
   cancelLabel = "取消",
   busyLabel = "正在处理…",
   busy = false,
@@ -185,6 +187,7 @@ function ConfirmDialogSurface({
           {working && (
             <span className="ui-confirm-spinner" aria-hidden="true" />
           )}
+          {!working && confirmIcon && <Icon name={confirmIcon} />}
           <span key={working ? "busy" : "idle"} className="ui-confirm-label">
             {working ? busyLabel : confirmLabel}
           </span>

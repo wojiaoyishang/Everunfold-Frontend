@@ -52,6 +52,15 @@
   padding: 10px 14px;
   border-radius: var(--field-radius, 6px);
 }
+.ui-field-control .ui-textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--field-radius, 6px);
+  line-height: 1.75;
+  resize: vertical;
+}
 .ui-field-control[data-leading-icon="true"] .ui-input {
   padding-inline-start: 43px;
 }

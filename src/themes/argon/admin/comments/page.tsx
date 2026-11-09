@@ -1,5 +1,5 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { UiText, useT } from "@/core/i18n/provider";
 import { can } from "@/core/accounts/permissions";
 import { useAccountAction } from "@/core/accounts/use-action";
@@ -11,38 +11,28 @@ import {
   replyToComment,
   type CommentQuery,
   type ModerationItem,
-  type ModerateComments,
 } from "@/core/contracts/operations";
 import {
   Button,
   Form,
   TextField,
   TextArea,
-  TextLink,
 } from "../../components/ui/primitives";
 import { Checkbox } from "../../components/ui/checkbox";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
+import { FormField } from "../../components/ui/form-field";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
+import { AdminActionButton } from "../components/action-button";
+import { CommentTarget } from "./comment-target";
+import {
+  commentActions,
+  commentStatuses,
+  commentTargets,
+  type CommentAction,
+} from "./presentation";
 import styles from "./style.module.css";
 
-const labels = {
-  pending: "待审核",
-  approved: "已通过",
-  rejected: "未通过",
-  spam: "垃圾评论",
-  trash: "回收站",
-  hidden: "已隐藏",
-};
-const actions = {
-  approve: "通过审核",
-  pending: "撤回审核",
-  reject: "不通过",
-  spam: "标为垃圾",
-  trash: "移至回收站",
-  restore: "恢复评论",
-};
-type Action = ModerateComments["action"];
 export function CommentsPage() {
   const t = useT();
   const user = useAdminAccount();
@@ -53,7 +43,7 @@ export function CommentsPage() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<string[]>([]);
   const [command, setCommand] = useState<{
-    action: Action;
+    action: CommentAction;
     items: ModerationItem[];
   } | null>(null);
   const [editor, setEditor] = useState<{
@@ -61,6 +51,7 @@ export function CommentsPage() {
     reply: boolean;
   } | null>(null);
   const [body, setBody] = useState("");
+  const editorId = useId();
   const action = useAccountAction();
   const query = useMemo(
     () => ({ status, search, page, page_size: 20 }),
@@ -80,17 +71,23 @@ export function CommentsPage() {
     setPage(1);
     setSelected([]);
   };
-  const ask = (kind: Action, rows: ModerationItem[]) => {
+  const ask = (kind: CommentAction, rows: ModerationItem[]) => {
     action.setMessage("");
     setCommand({ action: kind, items: rows });
   };
+  const confirmation = command ? commentActions[command.action] : null;
+  const confirmationTone = confirmation?.tone ?? "neutral";
   return (
     <>
       <AdminPageHeading
         title="评论管理"
         description="审核通过后，评论才会在前台公开显示。"
         action={
-          <Button className="admin-button" disabled={locked} onClick={refresh}>
+          <Button
+            className="admin-button"
+            disabled={action.busy || state.loading}
+            onClick={refresh}
+          >
             <Icon name="refresh" />
             <UiText text="刷新" />
           </Button>
@@ -105,14 +102,16 @@ export function CommentsPage() {
             <Button aria-pressed={!status} onClick={() => changeStatus(null)}>
               <UiText text="全部" />
             </Button>
-            {Object.entries(labels).map(([key, label]) => (
+            {Object.entries(commentStatuses).map(([key, { label }]) => (
               <Button
                 key={key}
                 aria-pressed={status === key}
                 onClick={() => changeStatus(key as CommentQuery["status"])}
               >
                 <UiText text={label} />
-                <span>{state.data ? (state.data.counts[key] ?? 0) : "—"}</span>
+                <span className={styles.count}>
+                  {state.data ? (state.data.counts[key] ?? 0) : "—"}
+                </span>
               </Button>
             ))}
           </nav>
@@ -171,14 +170,15 @@ export function CommentsPage() {
               ? (["restore"] as const)
               : (["approve", "spam", "trash"] as const)
             ).map((kind) => (
-              <Button
+              <AdminActionButton
                 key={kind}
-                className="admin-button"
+                icon={commentActions[kind].icon}
+                tone={commentActions[kind].tone}
                 disabled={locked || !selectedItems.length}
                 onClick={() => ask(kind, selectedItems)}
               >
-                <UiText text={actions[kind]} />
-              </Button>
+                <UiText text={commentActions[kind].label} />
+              </AdminActionButton>
             ))}
           </div>
         )}
@@ -202,8 +202,12 @@ export function CommentsPage() {
               <div className={styles.message}>
                 <div className={styles.identity}>
                   <strong>{item.author}</strong>
-                  <span className="admin-badge">
-                    <UiText text={labels[item.status]} />
+                  <span
+                    className="admin-badge admin-status-badge"
+                    data-tone={commentStatuses[item.status].tone}
+                  >
+                    <Icon name={commentStatuses[item.status].icon} />
+                    <UiText text={commentStatuses[item.status].label} />
                   </span>
                   <time dateTime={item.created_at}>
                     {new Date(item.created_at).toLocaleString()}
@@ -215,20 +219,7 @@ export function CommentsPage() {
                   </small>
                 )}
                 <p className={styles.body}>{item.body}</p>
-                <div className={styles.target}>
-                  <Icon name="book" />
-                  {item.content_path ? (
-                    <TextLink
-                      href={item.content_path + "#comment-" + item.id}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {item.content_title || t("无标题")}
-                    </TextLink>
-                  ) : (
-                    <span>{item.content_title || t("无标题")}</span>
-                  )}
-                </div>
+                <CommentTarget item={item} />
                 {writable && (
                   <div className={styles.actions}>
                     {(item.status === "trash"
@@ -243,18 +234,20 @@ export function CommentsPage() {
                           !(item.status === "rejected" && kind === "reject"),
                       )
                       .map((kind) => (
-                        <Button
-                          className="admin-button"
+                        <AdminActionButton
+                          icon={commentActions[kind].icon}
+                          tone={commentActions[kind].tone}
                           key={kind}
                           disabled={locked}
                           onClick={() => ask(kind, [item])}
                         >
-                          <UiText text={actions[kind]} />
-                        </Button>
+                          <UiText text={commentActions[kind].label} />
+                        </AdminActionButton>
                       ))}
                     {item.status !== "trash" && (
-                      <Button
-                        className="admin-button"
+                      <AdminActionButton
+                        icon="edit"
+                        tone="accent"
                         disabled={locked}
                         onClick={() => {
                           setBody(item.body);
@@ -262,13 +255,13 @@ export function CommentsPage() {
                           action.setMessage("");
                         }}
                       >
-                        <Icon name="edit" />
                         <UiText text="编辑" />
-                      </Button>
+                      </AdminActionButton>
                     )}
                     {item.status === "approved" && (
-                      <Button
-                        className="admin-button"
+                      <AdminActionButton
+                        icon="reply"
+                        tone="accent"
                         disabled={locked}
                         onClick={() => {
                           setBody("");
@@ -276,9 +269,8 @@ export function CommentsPage() {
                           action.setMessage("");
                         }}
                       >
-                        <Icon name="comment" />
                         <UiText text="回复" />
-                      </Button>
+                      </AdminActionButton>
                     )}
                   </div>
                 )}
@@ -300,33 +292,46 @@ export function CommentsPage() {
           <div>
             <Button
               className="admin-button"
+              aria-label={t("上一页")}
+              title={t("上一页")}
               disabled={locked || page === 1}
               onClick={() => {
                 setPage(page - 1);
                 setSelected([]);
               }}
             >
-              <UiText text="上一页" />
+              <Icon name="arrow-left" />
+              <span className={styles.paginationLabel}>
+                <UiText text="上一页" />
+              </span>
             </Button>
-            <span>
+            <span className={styles.pageCount}>
               {page} / {Math.max(1, Math.ceil((state.data?.total ?? 0) / 20))}
             </span>
             <Button
               className="admin-button"
+              aria-label={t("下一页")}
+              title={t("下一页")}
               disabled={locked || page * 20 >= (state.data?.total ?? 0)}
               onClick={() => {
                 setPage(page + 1);
                 setSelected([]);
               }}
             >
-              <UiText text="下一页" />
+              <span className={styles.paginationLabel}>
+                <UiText text="下一页" />
+              </span>
+              <Icon name="arrow" />
             </Button>
           </div>
         </footer>
       </section>
       <ConfirmDialog
         open={Boolean(command)}
-        title={command ? actions[command.action] : "确认"}
+        title={confirmation?.label ?? "确认"}
+        icon={confirmation?.icon}
+        confirmIcon={confirmation?.icon}
+        intent={confirmationTone === "neutral" ? "default" : confirmationTone}
         description={
           command?.action === "approve"
             ? "通过后将公开评论。"
@@ -334,7 +339,10 @@ export function CommentsPage() {
         }
         busy={action.busy}
         error={action.message}
-        onCancel={() => setCommand(null)}
+        onCancel={() => {
+          setCommand(null);
+          action.setMessage("");
+        }}
         onConfirmed={() => {
           setCommand(null);
           action.setMessage("评论已更新，正在同步前台。");
@@ -358,7 +366,7 @@ export function CommentsPage() {
             );
           }, "")
         }
-        confirmLabel="确认操作"
+        confirmLabel={confirmation?.label ?? "确认操作"}
       >
         <p>
           {command?.items.length} <UiText text="条评论" />
@@ -367,11 +375,21 @@ export function CommentsPage() {
       <ConfirmDialog
         open={Boolean(editor)}
         title={editor?.reply ? "回复评论" : "编辑评论"}
+        icon={editor?.reply ? "reply" : "edit"}
+        description={
+          editor?.reply
+            ? "回复将以你的账号发布。"
+            : "修改正文不会改变作者和审核状态。"
+        }
         busy={action.busy}
         error={action.message}
         confirmLabel={editor?.reply ? "发布回复" : "保存修改"}
+        confirmIcon={editor?.reply ? "send" : "save"}
         confirmDisabled={!body.trim()}
-        onCancel={() => setEditor(null)}
+        onCancel={() => {
+          setEditor(null);
+          action.setMessage("");
+        }}
         onConfirmed={() => {
           setEditor(null);
           action.setMessage("评论已更新，正在同步前台。");
@@ -395,18 +413,39 @@ export function CommentsPage() {
           }, "")
         }
       >
-        <label className="admin-field">
-          <span>
-            <UiText text="评论正文" />
-          </span>
+        {editor && (
+          <div className={styles.context}>
+            <div className={styles.contextAuthor}>
+              <Icon name="user" />
+              <strong>{editor.item.author}</strong>
+            </div>
+            <span className={styles.contextTitle}>
+              <UiText text={commentTargets[editor.item.content_type].label} />
+              {" · "}
+              {editor.item.content_title || t("无标题")}
+            </span>
+            {editor.reply && <blockquote>{editor.item.body}</blockquote>}
+          </div>
+        )}
+        <FormField
+          id={editorId}
+          label={editor?.reply ? "回复正文" : "评论正文"}
+        >
           <TextArea
+            id={editorId}
+            className={styles.editorBody}
+            aria-describedby={`${editorId}-count`}
+            placeholder={t(editor?.reply ? "写下你的回复…" : "输入评论正文…")}
             rows={7}
             value={body}
             disabled={action.busy}
             maxLength={5000}
             onChange={(event) => setBody(event.target.value)}
           />
-        </label>
+        </FormField>
+        <small id={`${editorId}-count`} className={styles.characterCount}>
+          {body.length.toLocaleString()} / 5,000
+        </small>
       </ConfirmDialog>
     </>
   );

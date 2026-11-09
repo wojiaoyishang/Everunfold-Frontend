@@ -29,6 +29,14 @@
   --confirm-action: var(--confirm-danger);
   --confirm-on-action: var(--surface);
 }
+.ui-confirm-dialog[data-intent="positive"] {
+  --confirm-action: var(--admin-positive, var(--accent));
+  --confirm-on-action: var(--surface);
+}
+.ui-confirm-dialog[data-intent="warning"] {
+  --confirm-action: var(--admin-warning, var(--accent));
+  --confirm-on-action: var(--surface);
+}
 .ui-confirm-dialog::backdrop {
   background: rgb(15 20 32 / 28%);
   backdrop-filter: blur(2px);
@@ -144,6 +152,11 @@
 }
 .ui-confirm-button.ui-button:active:not(:disabled) {
   scale: 0.97;
+}
+.ui-confirm-button > .icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 .ui-confirm-submit.ui-button {
   color: var(--confirm-on-action);

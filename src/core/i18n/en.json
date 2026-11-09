@@ -1521,8 +1521,14 @@
   "暂无符合条件的评论": "No matching comments",
   "回复评论": "Reply to comment",
   "编辑评论": "Edit comment",
+  "保存修改": "Save changes",
   "发布回复": "Publish reply",
   "评论正文": "Comment text",
+  "回复正文": "Reply text",
+  "回复将以你的账号发布。": "Your reply will be published under your account.",
+  "修改正文不会改变作者和审核状态。": "Editing keeps the author and moderation status unchanged.",
+  "写下你的回复…": "Write your reply…",
+  "输入评论正文…": "Enter the comment text…",
   "评论已更新，正在同步前台。": "Comment updated. Syncing the public site.",
   "通过后将公开评论。": "Approving makes these comments public.",
   "此操作会同步更新前台显示，回收站中的评论可以恢复。": "This updates the public site. Trashed comments can be restored.",
@@ -1561,5 +1567,8 @@
   "只填写验证标签的 content 值，不粘贴整段 HTML。": "Enter only the verification tag's content value, not the full HTML tag.",
   "只填写 msvalidate.01 标签的 content 值。": "Enter only the msvalidate.01 tag's content value.",
   "读取评论": "Read comments",
-  "审核与回复评论": "Moderate and reply to comments"
+  "审核与回复评论": "Moderate and reply to comments",
+  "查看原文": "View original",
+  "在新窗口查看原文": "Open original in a new tab",
+  "原文未公开或已停用": "Original is unpublished or disabled"
 }

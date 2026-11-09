@@ -48,6 +48,74 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+.admin-root :is(.admin-action-button, .admin-status-badge) {
+  --admin-action-color: var(--admin-muted);
+}
+.admin-root :is(.admin-action-button, .admin-status-badge)[data-tone="accent"] {
+  --admin-action-color: var(--admin-accent);
+}
+.admin-root
+  :is(.admin-action-button, .admin-status-badge)[data-tone="positive"] {
+  --admin-action-color: var(--admin-positive);
+}
+.admin-root
+  :is(.admin-action-button, .admin-status-badge)[data-tone="warning"] {
+  --admin-action-color: var(--admin-warning);
+}
+.admin-root :is(.admin-action-button, .admin-status-badge)[data-tone="danger"] {
+  --admin-action-color: var(--admin-danger);
+}
+.admin-root .admin-action-button {
+  color: var(--admin-action-color);
+  border-color: color-mix(
+    in srgb,
+    var(--admin-action-color) 22%,
+    var(--admin-border)
+  );
+  background: color-mix(
+    in srgb,
+    var(--admin-action-color) 5%,
+    var(--admin-canvas)
+  );
+  transition:
+    color 150ms,
+    background-color 150ms,
+    border-color 150ms;
+}
+.admin-root .admin-action-button:hover:not(:disabled) {
+  background: color-mix(
+    in srgb,
+    var(--admin-action-color) 12%,
+    var(--admin-canvas)
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--admin-action-color) 55%,
+    var(--admin-border)
+  );
+}
+.admin-root .admin-action-button:disabled {
+  color: var(--admin-muted);
+  background: var(--admin-canvas);
+  border-color: var(--admin-border);
+}
+.admin-action-button > .icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+.admin-root .admin-status-badge {
+  color: var(--admin-action-color);
+  background: color-mix(
+    in srgb,
+    var(--admin-action-color) 9%,
+    var(--admin-canvas)
+  );
+}
+.admin-status-badge > .icon {
+  width: 13px;
+  height: 13px;
+}
 .admin-eyebrow {
   display: block;
   font-size: 11px;

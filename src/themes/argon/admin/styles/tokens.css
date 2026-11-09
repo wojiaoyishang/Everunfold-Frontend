@@ -14,6 +14,7 @@ html:has([data-surface="admin"]),
   --admin-accent-soft: #edf1fc;
   --admin-on-accent: #ffffff;
   --admin-danger: #b54343;
+  --admin-warning: #866019;
   --admin-positive: #28775a;
   --admin-positive-soft: #edf6f1;
   --admin-syntax-mark: #52688b;
@@ -69,6 +70,7 @@ html:has([data-admin-mode="dark"]),
   --admin-accent-soft: #29354e;
   --admin-on-accent: #182033;
   --admin-danger: #f0a1a1;
+  --admin-warning: #e0ba77;
   --admin-positive: #8bceb1;
   --admin-positive-soft: #22382e;
   --admin-syntax-mark: #a5bad9;
@@ -92,6 +94,7 @@ html:has([data-admin-mode="dark"]),
     --admin-accent-soft: #29354e;
     --admin-on-accent: #182033;
     --admin-danger: #f0a1a1;
+    --admin-warning: #e0ba77;
     --admin-positive: #8bceb1;
     --admin-positive-soft: #22382e;
     --admin-syntax-mark: #a5bad9;
