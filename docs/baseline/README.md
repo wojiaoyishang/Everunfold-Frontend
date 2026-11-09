@@ -1259,3 +1259,17 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | --- | --- | --- |
 | `docs/development/mail.md` | `mail-4` | `a6bbe4bb5c2b1951da38f848c687dc4ae1c74921a9212343dfd822de4cda2d93` |
 | `docs/handoff/task-progress-verification.md` | `task-progress-verification-2` | `b7097826df28ca6af6d6b7be908728c3ffed09ed2edbf7b5367c362f4229cc0d` |
+
+
+## 管理词云、菜单一致性与Worker手动测试（2026-11-10）
+
+后端e3da550、前端1714eb4；settings1.22.0固定e3da550及精确SHA。无迁移变化，检查与限制见验收。以下替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-admin-cloud-manual-1` | `3a5c0ad905de309fcff48cc9f4a74523e916996f70976be9a313762e7b117f3b` |
+| `docs/development/content-operations.md` | `content-operations-2` | `8ad1b4adeee6841ed529259efe663ee97a4e40a0e2a5b60e652768ae97fc5b4b` |
+| `docs/architecture/admin-navigation.md` | `admin-navigation-6` | `93cda9363eea3f69999466c4e770b30e034388053ae9bb4c97cda1e7fb0f0e5b` |
+| `docs/development/runtime-tasks.md` | `runtime-tasks-4` | `e24961dc10617cb2efc79eaabfc2b87757cf1f0accc05604bab45b305cfb7ce2` |
+| `docs/decisions/0094-manual-worker-dispatch.md` | `ADR0094-1` | `f7a51f96e6c4e1800eb4d32cfb52067e03960af9737e7bc817b02126dedbf383` |
+| `docs/handoff/admin-cloud-manual-verification.md` | `admin-cloud-manual-verification-1` | `38ad0cca2965fd31187a511bd816ac17bb202f0190e3cf259d72a1f664a0adcd` |

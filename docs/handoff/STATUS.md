@@ -1,5 +1,14 @@
 # 前端交接状态
 
+## 最新交付：后台密集词云与Worker手动测试（2026-11-10）
+
+- 后端e3da550、前端1714eb4。标签管理加入全目录词云/列表，按已发布引用权重稳定选择最多100词，旋转/密排/少词放大、尺寸/字体测量适配；点击复用编辑，搜索联动。菜单父级默认/hover/current与普通链接统一，搜索复用带图标输入样式。见[验收](admin-cloud-manual-verification.md)、[标签指南](../development/content-operations.md)。
+- 任务页新增名称/函数/ID搜索的“手动触发”，仅已注册可用启用periodic，持久入队后自动切执行记录并展开统一进度；有活动执行复用，不改周期/开关。settings1.22.0固定e3da550及SHA，无迁移/依赖。见[任务指南](../development/runtime-tasks.md)、[ADR0094](../decisions/0094-manual-worker-dispatch.md)。
+- 后端定向13项契约+真实隔离PG/API/Scheduler/Worker一项通过，6并发只登记一条、权限/CSRF和拒绝边界、next_at不变、实际执行及进度通过，Ruff/mypy通过；未重复全部后端。前端最终check333和隔离生产矩阵通过，密排四项测试含边界/不重叠/旋转/100上限/稀疏放大，最后字框padding对齐另做格式和实页重验。
+- 实际查看桌面/手机/深色和125词夹具、搜索/编辑退出/列表/全目录、菜单颜色比较；手动Modal搜索函数、入队一次、自动进度完成通过。修复长选择文本撑宽，dialog 364/364无内部溢出。脚本错误0；不写主站标签或触发实际主站任务，真实投递用隔离测试。
+- API已重启，六进程/四端口0.0.0.0/HTTP200正常；现有数据和SMTP/任务开关不改。共享文档/SHA双仓一致，实际设备/会话/截图保持忽略，本地存档不push。未做全浏览器/长期负载；小画布不足时词云可省略部分，完整标签在列表；手动任务仍会执行其实际业务。
+
+
 ## 最新修复：SMTP STARTTLS主机身份（2026-11-10）
 
 - 后端23755d9、前端5b30729。SMTP空主机构造后connect未设置TLS使用的hostname，导致STARTTLS接受后ValueError/transport；改为构造时提供host/port并预置trace，直接SSL同修。保留完整证书/hostname验证。日志补安全异常类型、TLS校验码与timeout分类，前端补传输异常和超时说明。见[指南](../development/mail.md)与[补充验收](task-progress-verification.md)。

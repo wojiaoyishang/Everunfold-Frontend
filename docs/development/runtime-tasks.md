@@ -1,6 +1,6 @@
 # Scheduler、Worker 与运行管理
 
-版本：runtime-tasks-3；2026-11-09。状态：第一阶段已实现；具体已执行检查及未覆盖项目见[验收](../handoff/runtime-tasks-verification.md)。开发前先登记的规划由本版补充实际接口，不把后续能力标为交付。
+版本：runtime-tasks-4；2026-11-10。状态：第一阶段已实现；具体已执行检查及未覆盖项目见[验收](../handoff/runtime-tasks-verification.md)。开发前先登记的规划由本版补充实际接口，不把后续能力标为交付。
 
 ## 产品与进程归属
 
@@ -85,7 +85,7 @@ GET /v1/admin/runtime 要求 settings:read；POST /v1/admin/runtime/control 要�
 1. 显式运行迁移至 0034_task_progress，服务启动不自动迁移。
 2. 部署后端代码，受控重启 API、Worker、Scheduler；显式执行 uv run python -m tools.register_backend_plugins --config config.toml --apply。
 3. 保持原 Scheduler 和 Celery Worker 启动命令，无额外 runner 命令；检查后台最近心跳/扫描及三项核心任务。
-4. 前端固定 settings 1.21.0 的精确契约提交与 SHA，生成客户端只放忽略的 var/cache。修改插件构建工具后重启开发协调进程；普通插件源码编辑继续自动编译。
+4. 前端固定 settings 1.22.0 的精确契约提交与 SHA，生成客户端只放忽略的 var/cache。修改插件构建工具后重启开发协调进程；普通插件源码编辑继续自动编译。
 
 当前阶段只提供固定间隔声明和启停、执行历史，不提供任意命令/任务参数编辑、Cron 日历、拖动流程图、跨地域分布式锁或无限时间序列监控。任务阶段/增量日志已由统一进度接口提供，进程标准输出仍使用现有进程管理器。Python 插件更新需要受控部署，不是在线热安装 Python 包。
 
@@ -102,3 +102,13 @@ GET /v1/admin/runtime 要求 settings:read；POST /v1/admin/runtime/control 要�
 Worker与常驻执行上下文绑定统一 `task_progress`，从app.plugin_sdk导出；有限任务可调用 `await task_progress(stage="fetch", message="正在读取目录", completed=3, total=10, unit="items")`。未绑定上下文时返回False，持久诊断失败不阻断业务；参数错误仍拒绝。业务提交和外部幂等仍由任务负责。核心设置同步、鉴权回调和排期发布已经报告实际完成条数。
 
 运行记录可展开当前执行，使用与邮件测试相同的 `/v1/admin/tasks/watch`、增量游标、状态和主题进度面板。有限总量有百分比，未知总量只有阶段。常驻任务可沿相同上下文报告，不要求结束才显示。每任务最多1000事件，单条8192字符，no-op核心扫描一小时清理时联动删除事件。邮件空扫描也纳入清理。详见[统一进度规范](task-progress.md)。
+
+## 手动触发 Worker 开发测试（2026-11-10）
+
+运行与任务页提供“手动触发”，可按任务名称、注册函数module:function或稳定任务ID搜索已登记的periodic任务。界面列出名称和函数，选中后显示任务ID；已停用/不可用条目不可选，常驻任务不在此入口。原周期任务开关与“执行一次”保持各自用途。
+
+新增 `POST /v1/admin/runtime/control` action=debug_run，body仍为 `{task_id, action}`；settings1.22.0给RuntimePlan增加可选默认空字符串handler。控制始终按稳定ID查当前进程已注册目录，不将用户文本当Python导入路径。需要settings:write及正常CSRF/API Key授权。
+
+后端锁TaskPlan并检查已部署可用、已启用、periodic；有queued/running时复用原执行，否则持久登记一次queued，再由原Scheduler派发给Worker。返回RuntimeOverview，前端退出弹窗后切到执行记录并展开对应统一进度；入队不等于执行完成。审计保存debug_run/run_id/reused。操作不改变enabled、next_at或周期，不自动重试未知请求结果。
+
+开发测试可能执行任务本身真实业务；无可用任务时应先由开发者正常注册/启用，不提供任意命令或未登记函数执行。并发触发会复用活动执行，已完成之后再次明确触发属于新执行，不宣称跨所有外部副作用永久去重。无新增迁移/依赖；后端e3da550、前端1714eb4，检查见[验收](../handoff/admin-cloud-manual-verification.md)。

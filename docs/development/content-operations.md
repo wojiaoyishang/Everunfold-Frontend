@@ -1,6 +1,6 @@
 # 内容运营与拖拽上传
 
-版本：content-operations-1，2026-11-09。对应 [ADR0089](../decisions/0089-content-management-workflows.md)，实际检查见[验收](../handoff/content-operations-verification.md)。
+版本：content-operations-2，2026-11-10。对应 [ADR0089](../decisions/0089-content-management-workflows.md)，实际检查见[验收](../handoff/content-operations-verification.md)。
 
 ## 列表筛选与快速编辑
 
@@ -57,3 +57,11 @@ ID 与 slug 保持稳定，旧名称是内部身份索引：改名/合并后，�
 开发入口：`src/core/media/use-file-drop.ts` 统一事件识别，主题共享 `FileDropZone` 提供高亮和提示，`FilePicker` 提供点选及按钮拖放。新上传入口复用这些组件并把文件传给已有 queue.add，不另写传输。包含 CodeMirror/Tiptap 等有原生文件 drop 行为的区域使用 `capture`，阻止重复插入；只对文件拖动拦截，不接管文字拖动。
 
 上述目录是前端源码位置；没有新增 generated 目录、依赖或生产测试开关。截图、运行日志和本机地址只存忽略的 var。
+
+## 后台标签词云（2026-11-10）
+
+后台 `/admin/taxonomies` 的标签页默认词云，可切换原分页列表。复用私有目录返回的完整parents集合，不只取当前20条；搜索同时过滤词云。字号按published_count，标题提示已发布/工作稿各自数量。点击词打开原编辑窗口；只读用户点击进入该标签的列表筛选，不因此获得写权限。分类页继续使用列表。
+
+词云稳定选择已发布引用次数最多的前100个标签，自适应字号、水平/竖向/斜向旋转与剩余空间密排；词少时按画布放大，词多时缩小，仍放不下的显示实际数量并允许切列表。使用真实字体宽度和旋转包围盒，尺寸/字体变化重新计算，不将密排当成数据总数。公用layoutWords默认仍为公开词云的80词/无旋转，只有后台启用dense/fill。主题useWordCloud封装测量，公开与后台复用。
+
+搜索沿用共享admin-search的图标、输入高度/内边距和焦点样式，手机合理换行。该功能无后端接口、迁移或数据写入变更；实际视觉/边界验收见[本轮记录](../handoff/admin-cloud-manual-verification.md)。
