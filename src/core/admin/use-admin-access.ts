@@ -13,6 +13,7 @@ import { authFailureMessage, checkedSession } from "@/core/auth/session";
 import { loginReturnPath } from "@/core/auth/routes";
 import { RequestError } from "@/core/http/request";
 import { logout } from "@/core/contracts/auth";
+import { clearRecentTaskIds } from "@/core/tasks/recent-task";
 
 /** One authenticated session owner for the persistent private workspace. */
 export function useAdminAccess(baseUrl: string) {
@@ -46,12 +47,13 @@ export function useAdminAccess(baseUrl: string) {
     state.error.status === 401;
   useEffect(() => {
     if (!signedOut || recovery) return;
+    clearRecentTaskIds(baseUrl);
     const destination =
       loginReturnPath(
         `${pathname}${window.location.search}${window.location.hash}`,
       ) ?? "/admin";
     router.replace(`/login?next=${encodeURIComponent(destination)}`);
-  }, [signedOut, pathname, router, recovery]);
+  }, [signedOut, pathname, router, recovery, baseUrl]);
   const previousPath = useRef(pathname);
   useEffect(() => {
     if (previousPath.current === pathname) return;
@@ -73,6 +75,7 @@ export function useAdminAccess(baseUrl: string) {
       if (session.authenticated || session.user !== null)
         throw new RequestError("invalid");
       clearRecovery();
+      clearRecentTaskIds(baseUrl, state.session.user?.id);
       if (!controller.signal.aborted) router.replace("/login");
     } catch (error) {
       if (!controller.signal.aborted) {

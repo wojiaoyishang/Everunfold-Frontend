@@ -13,6 +13,7 @@ import { Button } from "../../components/ui/primitives";
 import { Switch } from "../../components/ui/switch";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
+import { ConnectedTaskProgress } from "../components/task-progress";
 import styles from "./runtime.module.css";
 const labels: Record<string, string> = {
   online: "在线",
@@ -42,6 +43,7 @@ export function RuntimePage() {
     [error, setError] = useState(""),
     [busy, setBusy] = useState("");
   const [tab, setTab] = useState("概览");
+  const [selectedRun, setSelectedRun] = useState<string | null>(null);
   const serial = useRef(0);
   const refresh = useCallback(
     async (signal?: AbortSignal) => {
@@ -310,22 +312,48 @@ export function RuntimePage() {
                 </p>
               )}
               {data.runs.map((run) => (
-                <article className={styles.plan} key={run.id}>
-                  <div>
-                    <strong>
-                      {data.plans.find((p) => p.id === run.task_id)?.title ??
-                        run.task_id}
-                    </strong>
-                    <small>
-                      {date(run.started_at ?? run.planned_at)} ·{" "}
-                      {run.id.slice(0, 8)}
-                    </small>
-                    {run.error && <small>{run.error}</small>}
-                  </div>
-                  <span data-state={run.status}>
-                    <UiText text={labels[run.status] ?? run.status} />
-                  </span>
-                </article>
+                <div className={styles.run} key={run.id}>
+                  <article className={styles.plan}>
+                    <div>
+                      <strong>
+                        {data.plans.find((p) => p.id === run.task_id)?.title ??
+                          run.task_id}
+                      </strong>
+                      <small>
+                        {date(run.started_at ?? run.planned_at)} ·{" "}
+                        {run.id.slice(0, 8)}
+                      </small>
+                      {run.error && <small>{run.error}</small>}
+                    </div>
+                    <div className={styles.actions}>
+                      <span data-state={run.status}>
+                        <UiText text={labels[run.status] ?? run.status} />
+                      </span>
+                      <Button
+                        className="admin-button"
+                        aria-expanded={selectedRun === run.id}
+                        onClick={() =>
+                          setSelectedRun((current) =>
+                            current === run.id ? null : run.id,
+                          )
+                        }
+                      >
+                        <Icon name="activity" />
+                        <UiText
+                          text={
+                            selectedRun === run.id ? "收起进度" : "查看进度"
+                          }
+                        />
+                      </Button>
+                    </div>
+                  </article>
+                  {selectedRun === run.id && (
+                    <ConnectedTaskProgress
+                      key={run.id}
+                      identity={{ resource: "runtime", id: run.id }}
+                    />
+                  )}
+                </div>
               ))}
             </section>
           )}

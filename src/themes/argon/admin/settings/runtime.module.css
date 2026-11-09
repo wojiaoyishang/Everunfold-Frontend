@@ -118,3 +118,25 @@
 .page :global(.admin-page-heading) {
   margin-bottom: 0;
 }
+
+.run {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 18px;
+}
+.run:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.run > .plan {
+  border-bottom: 0;
+}
+@media (max-width: 640px) {
+  .run .plan {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .run .actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

@@ -6,6 +6,7 @@ import { UiText } from "@/core/i18n/provider";
 import { Button, Form, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { SettingsSection } from "./shared";
+import { TaskProgressPanel } from "../components/task-progress";
 import styles from "./mail.module.css";
 
 const failures: Record<string, string> = {
@@ -37,7 +38,14 @@ export function MailTestPanel({
     value.from_address &&
     (!value.authenticate || (value.username && saved.password_configured))
   );
-  const status = test.job?.status;
+  const taskState = test.progress.data?.state;
+  const status = taskState
+    ? taskState === "succeeded"
+      ? "sent"
+      : taskState === "running"
+        ? "sending"
+        : taskState
+    : test.job?.status;
   return (
     <SettingsSection
       id="mail-test"
@@ -135,17 +143,15 @@ export function MailTestPanel({
             />{" "}
             <span>{test.job.recipient}</span>
           </span>
-          {(test.running || test.paused) && (
-            <Button
-              className="admin-button"
-              disabled={test.busy}
-              onClick={() => void test.refresh()}
-            >
-              <Icon name="refresh" />
-              <UiText text="刷新状态" />
-            </Button>
-          )}
         </div>
+      )}
+      {test.identity && (
+        <>
+          <p className={styles.hint}>
+            <UiText text="认证报文已脱敏，不展示用户名、密码或授权码。" />
+          </p>
+          <TaskProgressPanel key={test.identity} monitor={test.progress} />
+        </>
       )}
     </SettingsSection>
   );

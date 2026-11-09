@@ -1,0 +1,137 @@
+.panel {
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  padding: 18px;
+  background: var(--admin-surface);
+  min-width: 0;
+  margin-top: 20px;
+}
+.heading,
+.summary,
+.stage,
+.logToolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.heading {
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.summary strong {
+  font-size: 15px;
+}
+.summary > span,
+.stage small,
+.connection,
+.count {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.summary [data-state="failed"],
+.summary [data-state="unknown"] {
+  color: var(--admin-danger);
+}
+.stage {
+  font-size: 13px;
+  justify-content: space-between;
+  overflow-wrap: anywhere;
+}
+.progress {
+  height: 6px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--admin-subtle);
+  margin-top: 12px;
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--admin-accent);
+  border-radius: inherit;
+  transition: width 200ms ease;
+}
+.progress[data-indeterminate="true"] > span {
+  width: 35%;
+  animation: task-progress 1.4s ease-in-out infinite alternate;
+}
+.connection {
+  margin: 10px 0 0;
+  line-height: 1.7;
+}
+.logToolbar {
+  justify-content: space-between;
+  margin: 16px 0 12px;
+}
+.log {
+  max-height: 360px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-subtle);
+  scrollbar-gutter: stable;
+}
+.entry {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.entry:last-child {
+  border-bottom: 0;
+}
+.meta {
+  display: flex;
+  gap: 12px;
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+.entry pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.65;
+  margin: 6px 0 0;
+}
+.entry[data-level="error"] pre {
+  color: var(--admin-danger);
+}
+.empty {
+  padding: 20px 14px;
+  color: var(--admin-muted);
+  font-size: 13px;
+  margin: 0;
+}
+@keyframes task-progress {
+  from {
+    transform: translateX(-40%);
+  }
+  to {
+    transform: translateX(225%);
+  }
+}
+@media (max-width: 640px) {
+  .panel {
+    padding: 14px;
+  }
+  .heading {
+    gap: 12px;
+  }
+  .logToolbar {
+    justify-content: flex-start;
+  }
+  .logToolbar button {
+    padding-inline: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :global([data-admin-motion="system"]) .progress > span {
+    transition: none;
+    animation: none;
+  }
+}
+:global([data-admin-motion="reduced"]) .progress > span {
+  animation: none;
+  transition: none;
+}
