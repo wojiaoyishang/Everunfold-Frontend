@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   createAdminRegistry,
+  adminMenuEntries,
   type AdminModuleRegistration,
 } from "../src/core/admin/registry";
 import { builtinAdminModule } from "../src/core/admin/builtin-module";
@@ -133,4 +134,51 @@ test("compiled admin metadata is immutable and omits empty groups", () => {
     TypeError,
   );
   assert.equal(registry.resolve("/admin/content")?.id, "core.content");
+});
+
+test("submenu filtering cannot expose hidden destinations or leave an empty branch", () => {
+  const registry = createAdminRegistry([builtinAdminModule]);
+  const group = registry.navigation.find((g) => g.id === "core.settings")!;
+  const entries = adminMenuEntries(
+    group,
+    (page) => page.id === "core.settings.runtime",
+  );
+  assert.equal(entries.length, 1);
+  assert.equal(entries[0].kind, "branch");
+  if (entries[0].kind !== "branch") throw new Error("missing branch");
+  assert.equal(entries[0].branch.id, "core.system");
+  assert.deepEqual(
+    entries[0].items.map((p) => p.id),
+    ["core.settings.runtime"],
+  );
+  assert.deepEqual(
+    adminMenuEntries(group, () => false),
+    [],
+  );
+  assert.equal(
+    registry.resolve("/admin/settings/runtime")?.id,
+    "core.settings.runtime",
+  );
+  assert.equal(registry.resolve("/admin/system"), undefined);
+});
+
+test("submenu registration rejects unknown branches and cross-group placement", () => {
+  for (const branch of ["core.missing", "core.system"]) {
+    assert.throws(
+      () =>
+        createAdminRegistry([
+          builtinAdminModule,
+          {
+            ...extension,
+            pages: [
+              {
+                ...extension.pages[0],
+                menu: { group: "example.tools", order: 1, branch },
+              },
+            ],
+          },
+        ]),
+      /Unknown or misplaced admin branch/,
+    );
+  }
 });

@@ -107,7 +107,11 @@ export function AdminShell({
             </span>
             <span>Everunfold</span>
           </RouteLink>
-          <AdminNavigation pathname={pathname} />
+          <AdminNavigation
+            pathname={pathname}
+            collapsed={preferences.sidebarCollapsed}
+            onExpand={() => onPreferencesChange({ sidebarCollapsed: false })}
+          />
         </aside>
         <div className="admin-main-column">
           <header className="admin-header">

@@ -7,14 +7,31 @@ export const builtinAdminModule = {
     { id: "core.workspace", label: "工作空间", order: 10 },
     { id: "core.settings", label: "设置", order: 20 },
   ],
+  branches: [
+    {
+      id: "core.system",
+      group: "core.settings",
+      label: "系统管理",
+      icon: "system",
+      order: 30,
+    },
+  ],
   pages: [
+    {
+      id: "core.settings.mail",
+      href: "/admin/settings/mail",
+      label: "邮件配置",
+      description: "SMTP服务器与发件人资料",
+      icon: "mail",
+      menu: { group: "core.settings", branch: "core.system", order: 30 },
+    },
     {
       id: "core.settings.runtime",
       href: "/admin/settings/runtime",
       label: "运行与任务",
       description: "Scheduler、Worker 与常驻任务",
-      icon: "system",
-      menu: { group: "core.settings", order: 35 },
+      icon: "runtime",
+      menu: { group: "core.settings", branch: "core.system", order: 20 },
     },
     {
       id: "core.comments",
@@ -51,7 +68,7 @@ export const builtinAdminModule = {
       href: "/admin/settings/api-keys",
       label: "应用程序接入",
       description: "应用签名、权限目录与回调投递",
-      icon: "extension",
+      icon: "applications",
       menu: { group: "core.settings", order: 40 },
     },
     {
@@ -59,7 +76,7 @@ export const builtinAdminModule = {
       href: "/admin/shortcodes",
       label: "短代码库",
       description: "预览和管理原生短代码模板",
-      icon: "extension",
+      icon: "shortcode",
       menu: { group: "core.workspace", order: 37 },
     },
     {
@@ -75,7 +92,7 @@ export const builtinAdminModule = {
       href: "/admin/icons",
       label: "图标库",
       description: "管理内置与上传的图标",
-      icon: "media",
+      icon: "icons",
       menu: { group: "core.workspace", order: 35 },
     },
     {
@@ -99,8 +116,8 @@ export const builtinAdminModule = {
       href: "/admin/settings/system",
       label: "系统设置",
       description: "前端节点策略与同步状态",
-      icon: "system",
-      menu: { group: "core.settings", order: 30 },
+      icon: "node-settings",
+      menu: { group: "core.settings", branch: "core.system", order: 10 },
     },
     {
       id: "core.settings.captcha",

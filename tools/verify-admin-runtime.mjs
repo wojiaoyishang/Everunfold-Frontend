@@ -162,6 +162,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/settings/captcha",
       "/admin/settings/system",
       "/admin/settings/runtime",
+      "/admin/settings/mail",
     ]) {
       const response = await fetch(base + route, {
         signal: AbortSignal.timeout(5000),

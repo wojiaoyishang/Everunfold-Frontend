@@ -12,11 +12,23 @@ export type AdminPageIcon =
   | "extension"
   | "settings"
   | "theme"
+  | "icons"
+  | "shortcode"
+  | "applications"
+  | "taxonomy"
+  | "mail"
+  | "node-settings"
+  | "runtime"
   | "system";
 export interface AdminMenuGroup {
   readonly id: string;
   readonly label: string;
   readonly order: number;
+}
+/** A disclosure heading, not a destination or an authorization boundary. */
+export interface AdminMenuBranch extends AdminMenuGroup {
+  readonly group: string;
+  readonly icon: AdminPageIcon;
 }
 export interface AdminPageRegistration {
   readonly id: string;
@@ -27,15 +39,49 @@ export interface AdminPageRegistration {
   /** Explicit trusted child routes; arbitrary descendants are never accepted. */
   readonly matchesChild?: (pathname: string) => boolean;
   /** Detail pages can be registered without appearing in the sidebar. */
-  readonly menu: { readonly group: string; readonly order: number } | null;
+  readonly menu: {
+    readonly group: string;
+    readonly order: number;
+    readonly branch?: string;
+  } | null;
 }
 export interface AdminModuleRegistration {
   readonly id: string;
   readonly groups?: readonly AdminMenuGroup[];
+  readonly branches?: readonly AdminMenuBranch[];
   readonly pages: readonly AdminPageRegistration[];
 }
 export interface AdminNavigationGroup extends AdminMenuGroup {
   readonly items: readonly AdminPageRegistration[];
+  readonly branches: readonly AdminMenuBranch[];
+}
+export type AdminNavigationEntry =
+  | { kind: "page"; page: AdminPageRegistration }
+  | {
+      kind: "branch";
+      branch: AdminMenuBranch;
+      items: readonly AdminPageRegistration[];
+    };
+
+/** Filter destinations before grouping, so an empty or unauthorized branch disappears. */
+export function adminMenuEntries(
+  group: AdminNavigationGroup,
+  visible: (page: AdminPageRegistration) => boolean,
+): AdminNavigationEntry[] {
+  const items = group.items.filter(visible);
+  const entries: AdminNavigationEntry[] = items
+    .filter((page) => !page.menu?.branch)
+    .map((page) => ({ kind: "page", page }));
+  for (const branch of group.branches) {
+    const children = items.filter((page) => page.menu?.branch === branch.id);
+    if (children.length)
+      entries.push({ kind: "branch", branch, items: children });
+  }
+  const order = (entry: AdminNavigationEntry) =>
+    entry.kind === "branch"
+      ? entry.branch
+      : { id: entry.page.id, order: entry.page.menu!.order };
+  return entries.sort((a, b) => byOrder(order(a), order(b)));
 }
 
 const byOrder = (
@@ -50,6 +96,7 @@ export function createAdminRegistry(
 ) {
   const moduleIds = new Set<string>();
   const groupMap = new Map<string, AdminMenuGroup>();
+  const branchMap = new Map<string, AdminMenuBranch>();
   const pageMap = new Map<string, AdminPageRegistration>();
   const routeMap = new Map<string, AdminPageRegistration>();
   for (const registration of modules) {
@@ -78,6 +125,16 @@ export function createAdminRegistry(
         throw new Error(`Invalid or duplicate admin group: ${group.id}`);
       groupMap.set(group.id, Object.freeze({ ...group }));
     }
+    for (const branch of registration.branches ?? []) {
+      validateId(branch.id);
+      if (
+        branchMap.has(branch.id) ||
+        !branch.label.trim() ||
+        !Number.isSafeInteger(branch.order)
+      )
+        throw new Error(`Invalid or duplicate admin branch: ${branch.id}`);
+      branchMap.set(branch.id, Object.freeze({ ...branch }));
+    }
     for (const page of registration.pages) {
       validateId(page.id);
       if (pageMap.has(page.id) || routeMap.has(page.href))
@@ -97,9 +154,18 @@ export function createAdminRegistry(
     }
   }
   const pages = Object.freeze([...pageMap.values()]);
+  for (const branch of branchMap.values()) {
+    if (!groupMap.has(branch.group))
+      throw new Error(`Unknown admin branch group: ${branch.group}`);
+  }
   for (const page of pages) {
     if (page.menu && !groupMap.has(page.menu.group))
       throw new Error(`Unknown admin menu group: ${page.menu.group}`);
+    if (
+      page.menu?.branch &&
+      branchMap.get(page.menu.branch)?.group !== page.menu.group
+    )
+      throw new Error(`Unknown or misplaced admin branch: ${page.menu.branch}`);
   }
   const navigation: readonly AdminNavigationGroup[] = Object.freeze(
     [...groupMap.values()]
@@ -107,6 +173,11 @@ export function createAdminRegistry(
       .map((group) =>
         Object.freeze({
           ...group,
+          branches: Object.freeze(
+            [...branchMap.values()]
+              .filter((branch) => branch.group === group.id)
+              .sort(byOrder),
+          ),
           items: Object.freeze(
             pages
               .filter((page) => page.menu?.group === group.id)

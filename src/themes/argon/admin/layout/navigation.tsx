@@ -1,13 +1,21 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useId, useState } from "react";
+import { UiText, useT } from "@/core/i18n/provider";
 import {
   adminDestination,
   adminNavigationGroups,
 } from "@/core/admin/navigation";
-import type { AdminPageIcon } from "@/core/admin/registry";
+import {
+  adminMenuEntries,
+  type AdminPageIcon,
+  type AdminPageRegistration,
+} from "@/core/admin/registry";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { adminRoutePermission, can } from "@/core/accounts/permissions";
 import { Icon, type IconName } from "../../components/icon";
 import { RouteLink } from "../../components/ui/route-link";
+import { Button } from "../../components/ui/primitives";
 const navigationIcons: Record<AdminPageIcon, IconName> = {
   comment: "comment",
   users: "user",
@@ -17,26 +25,38 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   leaf: "leaf",
   settings: "settings",
   theme: "sun",
-  system: "cloud",
+  system: "server",
+  "node-settings": "sliders",
+  runtime: "activity",
   overview: "grid",
   content: "copy",
   media: "image",
-  extension: "grid",
+  extension: "puzzle",
+  icons: "shapes",
+  shortcode: "shortcode",
+  applications: "plug",
+  taxonomy: "tag",
+  mail: "mail",
 };
 export function AdminNavigation({
   pathname,
   onNavigate,
+  collapsed = false,
+  onExpand,
 }: {
   pathname: string;
   onNavigate?: () => void;
+  collapsed?: boolean;
+  onExpand?: () => void;
 }) {
-  const current = adminDestination(pathname);
-  const t = useT();
-  const user = useAdminAccount();
+  const current = adminDestination(pathname),
+    t = useT(),
+    user = useAdminAccount();
+  const id = useId();
   const groups = adminNavigationGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => {
+      entries: adminMenuEntries(group, (item) => {
         const capability = adminRoutePermission(item.href);
         return (
           !capability ||
@@ -48,50 +68,87 @@ export function AdminNavigation({
         );
       }),
     }))
-    .filter((group) => group.items.length);
+    .filter((group) => group.entries.length);
+  const [expansion, setExpansion] = useState<{
+    pathname: string;
+    branch: string | undefined;
+  } | null>(null);
+  const expanded =
+    expansion?.pathname === pathname ? expansion.branch : current?.menu?.branch;
+  const link = (item: AdminPageRegistration) => (
+    <RouteLink
+      key={item.id}
+      href={item.href}
+      showPending
+      aria-current={current?.id === item.id ? "page" : undefined}
+      aria-label={t(item.label)}
+      title={t(item.label)}
+      className="admin-nav-link"
+      onClick={onNavigate}
+    >
+      <Icon name={navigationIcons[item.icon]} />
+      <span className="admin-nav-text">
+        <UiText text={item.label} />
+      </span>
+    </RouteLink>
+  );
   return (
     <nav className="admin-navigation" aria-label={t("后台导航")}>
-      {groups.map((group) => {
-        const activeIndex = group.items.findIndex(
-          (item) => item.id === current?.id,
-        );
-        return (
-          <div className="admin-nav-group" key={group.id}>
-            <span className="admin-nav-label">
-              <UiText text={group.label} />
-            </span>
-            <div
-              className="admin-nav-items"
-              data-active={activeIndex >= 0}
-              style={
-                {
-                  "--admin-active-index": Math.max(0, activeIndex),
-                } as CSSProperties
-              }
-            >
-              <span className="admin-nav-indicator" aria-hidden="true" />
-              {group.items.map((item) => (
-                <RouteLink
-                  key={item.id}
-                  href={item.href}
-                  showPending
-                  aria-current={current?.id === item.id ? "page" : undefined}
-                  aria-label={t(item.label)}
-                  title={t(item.label)}
-                  className="admin-nav-link"
-                  onClick={onNavigate}
-                >
-                  <Icon name={navigationIcons[item.icon]} />
-                  <span className="admin-nav-text">
-                    <UiText text={item.label} />
-                  </span>
-                </RouteLink>
-              ))}
-            </div>
+      {groups.map((group) => (
+        <div className="admin-nav-group" key={group.id}>
+          <span className="admin-nav-label">
+            <UiText text={group.label} />
+          </span>
+          <div className="admin-nav-items">
+            {group.entries.map((entry) => {
+              if (entry.kind === "page") return link(entry.page);
+              const { branch, items } = entry;
+              const open = !collapsed && expanded === branch.id;
+              const panelId = `${id}-${branch.id}`;
+              return (
+                <div className="admin-nav-branch" key={branch.id}>
+                  <Button
+                    className="admin-nav-link admin-nav-trigger"
+                    aria-expanded={open}
+                    aria-controls={panelId}
+                    aria-label={t(branch.label)}
+                    title={t(branch.label)}
+                    data-current={items.some((item) => item.id === current?.id)}
+                    onClick={() => {
+                      if (collapsed) onExpand?.();
+                      setExpansion({
+                        pathname,
+                        branch: open ? undefined : branch.id,
+                      });
+                    }}
+                  >
+                    <Icon name={navigationIcons[branch.icon]} />
+                    <span className="admin-nav-text">
+                      <UiText text={branch.label} />
+                    </span>
+                    <span className="admin-nav-chevron" aria-hidden="true">
+                      <Icon name="chevron" />
+                    </span>
+                  </Button>
+                  <div
+                    id={panelId}
+                    className="admin-nav-submenu"
+                    data-open={open}
+                    inert={!open}
+                    aria-hidden={!open}
+                  >
+                    <div>
+                      <div className="admin-nav-children">
+                        {items.map(link)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        );
-      })}
+        </div>
+      ))}
     </nav>
   );
 }
-import { UiText, useT } from "@/core/i18n/provider";

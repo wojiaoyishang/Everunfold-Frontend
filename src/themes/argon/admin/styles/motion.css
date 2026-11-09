@@ -36,12 +36,6 @@
 .admin-brand {
   padding-inline: 7px;
 }
-.admin-nav-indicator {
-  transition:
-    transform var(--admin-motion-layout) var(--admin-motion-ease),
-    opacity var(--admin-motion-fast) ease,
-    background-color var(--admin-motion-fast) ease;
-}
 .admin-header,
 .admin-root {
   transition:

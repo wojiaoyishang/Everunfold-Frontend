@@ -1,6 +1,17 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  sliders: "M4 6h5m4 0h7M4 18h9m4 0h3M9 3v6h4V3H9Zm4 12v6h4v-6h-4",
+  puzzle:
+    "M4 4h5a3 3 0 1 1 6 0h5v5a3 3 0 1 0 0 6v5h-5a3 3 0 1 0-6 0H4v-5a3 3 0 1 1 0-6V4Z",
+  shapes:
+    "M7 3 2 11h10L7 3ZM14 14h7v7h-7v-7ZM21 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM10 18a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z",
+  plug: "M8 3v5M16 3v5M5 8h14M7 8v5a5 5 0 0 0 10 0V8M12 18v4",
+  mail: "M3 5h18v14H3V5Zm0 0 9 8 9-8",
+
+  server:
+    "M3 3h18v7H3V3ZM3 14h18v7H3v-7ZM6 6.5h.01M6 17.5h.01M10 6.5h8M10 17.5h8",
+  activity: "M2 12h4l3-8 6 16 3-8h4",
   languages:
     "M4 5h10M9 3v2M6 5c0 5 4 8 8 10M12 5c0 5-4 8-9 10M14 21l4-10 4 10M15.5 17h5",
   video: "M3 5h13v14H3V5Zm13 5 5-3v10l-5-3M7 9l5 3-5 3V9Z",

@@ -16,7 +16,7 @@ export const contentAdminModule: AdminModuleRegistration = {
       href: "/admin/taxonomies",
       label: "分类与标签",
       description: "名称、层级与内容关联",
-      icon: "content",
+      icon: "taxonomy",
       menu: { group: "content.types", order: 95 },
     },
     ...registeredContentTypes.map((type) => ({
