@@ -1222,3 +1222,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/mail.md` | `mail-1` | `ff927931b00b7acd6037baa2ea3d73ef33dda334fbeec7ae5d69aded9f038f00` |
 | `docs/decisions/0091-system-submenus-and-private-mail-settings.md` | `ADR0091-1` | `aa5f3bd807e9ec86db097793116dc6584957d8686d9988779b39d31b33da7704` |
 | `docs/handoff/navigation-mail-verification.md` | `navigation-mail-verification-1` | `dca9acb4113acaa99e364f017bdbf40007ac8d07067f6e0523814caf257e12fa` |
+
+
+## 设置归类、悬停固定与测试邮件（2026-11-09）
+
+后端37c6a62/398b36f、前端81fd5ee；settings1.20.0固定37c6a62及精确SHA，0033_mail_test显式部署。以下替代对应旧摘要，原始基线不变，STATUS各自维护。实际测试和未执行边界见验收。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-mail-2` | `2e7776993c189e33457fa6475662344cd0458fd557f2375446d0ebfe7ebe265e` |
+| `docs/architecture/admin-navigation.md` | `admin-navigation-5` | `a1e7fcb264ffc91315b10cd7d04eda3d7d814dd32422bee9bbc27b8a04093355` |
+| `docs/development/mail.md` | `mail-2` | `de5ac034dc6a2d08d91b2008f63007ca3fc3e28fbde231fc0cb016f3ba0830c0` |
+| `docs/decisions/0092-settings-hover-and-test-mail.md` | `ADR0092-1` | `a4c0e18ceb3d891a60c61236d2af1b99382bb984c625ef1d47d6c9b6aaa61699` |
+| `docs/handoff/navigation-mail-verification.md` | `navigation-mail-verification-2` | `f964a3aeec12c99481c278b0ad28ebcd051adfc3f4ce90cdc0072e0f2db74f15` |
