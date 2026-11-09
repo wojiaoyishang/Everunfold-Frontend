@@ -1,6 +1,6 @@
 # 父主题、子主题与前台展示钩子
 
-版本：frontend-themes-3，2026-11-07。状态：已实现；基础机制见[原交接记录](../handoff/child-themes-verification.md)，Paper精简见[本轮验收](../handoff/paper-starter-verification.md)。
+版本：frontend-themes-4，2026-11-09。状态：已实现；基础机制见[原交接记录](../handoff/child-themes-verification.md)，Paper精简见[本轮验收](../handoff/paper-starter-verification.md)。
 
 现有Argon为缺省父主题。子主题放在src/themes/<id>/，theme.ts声明parent；自动发现沿用现有本地可信源码机制。省略parent的非Argon主题默认继承Argon，允许多级继承；不存在的父主题、循环或重复身份属于部署错误，不能静默退回另一主题。后台/账号界面继续使用原控件上下文；只有公开阅读与授权前台预览进入选中的主题上下文。
 
@@ -14,6 +14,8 @@
 宿主保留公开快照、元信息、路由/404/撤回/受限内容守卫、服务端正文渲染、预览权限及回执。模板为可在服务端预渲染的同步React展示组件，不能在客户端导入Node渲染器；复用children保留已渲染正文，不下发整份快照。后台输入不会被自定义页面CSS/JS污染。受限文章的访问门禁不作为可替换模板。
 
 ## 启用与部署
+
+settings 1.14支持主题展示元数据，ThemeDefinition可选title/description/preview/author{name,url}/homepage/repository/license；从权威契约取类型，构建目录只输出白名单字段。元数据属于当前主题自身，不随父主题覆盖或增加执行权限。后台按已部署清单显示卡片，图片沿既有静态资源或HTTP(S)地址加载，缺失使用占位；开发者链接与选择分开。选择仍只写extensions.theme，实例默认和节点一致性规则保持，见[ADR0084](../decisions/0084-theme-cards-metadata-and-settings-scroll.md)。
 
 所有主题随主体构建；部署后通过“主题设置→已安装主题”选择已登记主题，extensions.theme在PostgreSQL保存并沿原设置审计/可靠投递同步。空值“实例默认”才读取服务端config.toml的[theme].active（FRONTEND_THEME可覆盖实例缺省），最终缺省argon。各启用节点须登记一致主题ID/版本/父级描述后才能切换。节点已应用设置后，新请求使用新主题，活动浏览器通过目录更新也可取得新选择；无需重启或重新构建已有主题。后台保持原管理上下文。
 

@@ -1070,3 +1070,20 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/frontend-plugins.md` | `frontend-plugins-6` | `9c03941ab135cf4ac1a65ac6e88bad60146b47013951966b2624875145771d92` |
 | `docs/decisions/0083-plugin-activation-usage-confirmation.md` | `ADR0083-2` | `573f60a327575a0183a50c589933d628b482e850d10130d979d13a5f9054c07f` |
 | `docs/handoff/plugin-activation-usage-verification.md` | `plugin-activation-usage-2` | `adb9d21083735f597ecc6d76004c5217f58df703fe4c61e71b536a41a08efe61` |
+
+
+## 主题卡片、分区滚动与证书操作栏交付（2026-11-09）
+
+前端522f8a1、证书布局f203e9b，后端d51ff20/settings 1.14。以下共同版本替代相应旧摘要；首次荣誉导入与历史验收保留，元数据不进入另一份用户配置，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `b8f8d3a7cfcc6329550ff81624656714fd9858030bceb08cd16585f6c19c421c` |
+| `docs/architecture/frontend-plugin-runtime.md` | `plugin-runtime-6` | `5e8dc1c2e4d376b6c65360a046c2a3ec03d57270a8312320a64c3dc3b7331607` |
+| `docs/architecture/frontend-themes.md` | `frontend-themes-4` | `6599acdab68e0e70f7f8b70e869a5e9875fe3d6461c2ba0b5f3812f9a0db6ef1` |
+| `docs/development/child-themes.md` | `child-themes-4` | `c9fa7cd62c41233899cbb80f7e8489afd751cf53635345aabe220b0d06c03c27` |
+| `docs/development/honors-page.md` | `honors-page-2` | `3c6a3720a65339d6a4190c1b7f522c496393a516239858e3a3eb4e202a35358b` |
+| `docs/decisions/0082-honors-registered-page-plugin.md` | `ADR0082-2` | `23f02ff570f68e3a4bbc6fbfeec805c560d56aac3365d18bcf77b4189eb286ab` |
+| `docs/decisions/0084-theme-cards-metadata-and-settings-scroll.md` | `ADR0084` | `a1dad3662a927d66e3c4a01e0872c65e9099ab30062843bbf14ae476969c75a0` |
+| `docs/handoff/honors-page-verification.md` | `honors-verification-2` | `991a98587437ee0b3a46393a10049504ff92fb7c56084c98705ef909cf9af74b` |
+| `docs/handoff/theme-cards-and-navigation-verification.md` | `theme-cards-navigation-1` | `3c31fff122f1f9aa71c4f10b0b6cf97cca79ff763726306bf56d8a5c4f0b71a3` |

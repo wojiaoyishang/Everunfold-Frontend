@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[主题卡片与设置滚动](decisions/0084-theme-cards-metadata-and-settings-scroll.md)、[开发者元数据配置](development/child-themes.md)及[验收](handoff/theme-cards-and-navigation-verification.md)：平滑定位分区、特色图片和开发者/版本/父主题/许可证/项目链接，选择后保存；证书弹窗操作栏固定底部见[补充验收](handoff/honors-page-verification.md)。
+
 [插件启停使用提示](decisions/0083-plugin-activation-usage-confirmation.md)及[验收](handoff/plugin-activation-usage-verification.md)：隐藏不可用插件的注册页，保存启停前检查已应用页面、已发布/定时正文引用，提醒后可继续；取消还原本批次开关，保留其他设置修改与原页面配置。
 
 [我的荣誉注册页面](development/honors-page.md)、[ADR0082](decisions/0082-honors-registered-page-plugin.md)及[验收](handoff/honors-page-verification.md)：独立插件荣誉墙、筛选/时间线、媒体选图与证书弹窗，原页内容定向导入本实例业务配置。

@@ -1,6 +1,33 @@
 # 子主题开发与启用
 
-版本：child-themes-3，2026-11-07。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。
+版本：child-themes-4，2026-11-09。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。
+
+## 主题卡片与开发者信息
+
+后台“主题设置→已安装主题”使用卡片选择；点击仅修改工作稿，“保存更改”才应用。可随时选择“实例默认”恢复跟随部署配置。右侧快速导航点击后平滑定位，减少动态时即时定位，保留可恢复的URL片段。
+
+在theme.ts与身份/父主题一起声明可选展示字段，不需要额外注册文件：
+
+```ts
+import type { ThemeDefinition } from "@/core/extensions/types";
+export default {
+  id: "my-theme",
+  title: "My Theme",
+  version: "1.0.0",
+  parent: "argon",
+  description: "A short description of the theme.",
+  preview: "/reference/themes/my-theme.webp",
+  author: { name: "Your name", url: "https://example.test/author" },
+  homepage: "https://example.test/theme",
+  repository: "https://example.test/source",
+  license: "Your declared license",
+  styles: true,
+} satisfies ThemeDefinition;
+```
+
+title最长80字，description最长500字，开发者名称/许可证最长100字，各URL最长2048字；图片可以是站内路径或HTTP(S)地址。建议把静态图片放在public/reference/themes，引用/reference/themes/文件名；该目录走既有静态资源入口，正式部署须把图片一并复制。内置Argon/Paper提供不含业务数据的SVG示意图。未提供图片或图片不可用时显示占位，其他资料和选择按钮仍可使用；未声明许可证不推断为某个开源许可。
+
+元数据经npm run themes:catalog输出到忽略的var/cache/build/theme-catalog.json，再由节点协调器向后端登记。dev启动/prepare自动导出；开发时改完声明可运行该命令或重启dev更新清单。正式部署更新主题声明仍需要主构建；主题切换本身不需要重建。各启用节点需登记一致描述，元数据是部署资料，不是另一份站点设置。协议详见[ADR0084](../decisions/0084-theme-cards-metadata-and-settings-scroll.md)。
 
 ## 最小子主题
 

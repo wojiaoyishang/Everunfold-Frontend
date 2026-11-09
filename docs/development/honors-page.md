@@ -1,6 +1,6 @@
 # 我的荣誉：注册页面与证书配置
 
-版本：honors-page-1，2026-11-07。实现为`src/plugins/honors/`中的独立`core.honors`插件，决定见[ADR0082](../decisions/0082-honors-registered-page-plugin.md)，实际导入及检查见[验收](../handoff/honors-page-verification.md)。参考原页[我的荣誉](https://lovepikachu.top/myhonor)，本项目缺省地址为`/myhonor`。
+版本：honors-page-2，2026-11-09。实现为`src/plugins/honors/`中的独立`core.honors`插件，决定见[ADR0082](../decisions/0082-honors-registered-page-plugin.md)，实际导入及检查见[验收](../handoff/honors-page-verification.md)。参考原页[我的荣誉](https://lovepikachu.top/myhonor)，本项目缺省地址为`/myhonor`。
 
 ## 后台维护
 
@@ -15,6 +15,8 @@
 分类、年份和搜索组合筛选；日期排序保持原有日期精度，未知日期置后。网格按分类展示，时间线可按日期排列。统计中的证书数量按不同图片地址去重，同一张证书用于多条记录只计一次。
 
 点击图片打开证书弹窗，图片保持完整比例；支持上一张/下一张、左右方向键、原图入口、Escape及焦点回归。仅在当前筛选结果的证书中切换。减少动态偏好关闭弹层动画，颜色继承当前主题。
+
+证书弹窗标题和底部操作栏位于滚动区之外；图片与奖项/说明在中间独立滚动。长图片或长说明不会把上一张/下一张、计数和查看原图入口推到视口外；前台、后台预览与实时预览复用同一组件。
 
 ## 插件开发与数据
 
