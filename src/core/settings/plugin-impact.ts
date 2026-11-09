@@ -9,6 +9,30 @@ export function changedPluginIds(saved: PublicSettings, draft: PublicSettings) {
     .sort();
 }
 
+/** Undo this pending activation batch while retaining all other draft edits. */
+export function restorePluginChoices(
+  current: PublicSettings,
+  previous: PublicSettings,
+  ids: readonly string[],
+): PublicSettings {
+  const before = new Set(previous.extensions?.disabled_plugins ?? []);
+  const disabled = new Set(current.extensions?.disabled_plugins ?? []);
+  for (const id of ids) {
+    if (before.has(id)) disabled.add(id);
+    else disabled.delete(id);
+  }
+  const extensions = { ...current.extensions };
+  if (disabled.size || previous.extensions?.disabled_plugins !== undefined)
+    extensions.disabled_plugins = [...disabled].sort();
+  else delete extensions.disabled_plugins;
+  return {
+    ...current,
+    extensions: Object.keys(extensions).length
+      ? extensions
+      : previous.extensions,
+  };
+}
+
 export function pluginNeedsConfirmation(usage: PluginUsage) {
   return (
     !usage.registered ||

@@ -21,7 +21,11 @@ import {
 } from "@/core/contracts/settings";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { RequestError } from "@/core/http/request";
-import { changedPluginIds, pluginNeedsConfirmation } from "./plugin-impact";
+import {
+  changedPluginIds,
+  pluginNeedsConfirmation,
+  restorePluginChoices,
+} from "./plugin-impact";
 
 export function settingsFailure(error: unknown) {
   if (error instanceof RequestError) {
@@ -51,6 +55,8 @@ function useEditor() {
   const [pluginImpact, setPluginImpact] = useState<{
     input: SaveSettings;
     plugins: PluginUsage[];
+    previous: PublicSettings;
+    changedIds: string[];
   } | null>(null);
   const inFlight = useRef(false);
   const pluginChangeTrigger = useRef<HTMLElement | null>(null);
@@ -145,10 +151,11 @@ function useEditor() {
   }
   async function save() {
     if (!saved || !draft || inFlight.current || pluginImpact) return;
-    pluginChangeTrigger.current =
-      document.activeElement instanceof HTMLElement
-        ? document.activeElement
-        : null;
+    if (!pluginChangeTrigger.current?.isConnected)
+      pluginChangeTrigger.current =
+        document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
     inFlight.current = true;
     setBusy(true);
     setError("");
@@ -173,7 +180,12 @@ function useEditor() {
         if (!mounted.current) return;
         setCheckingPlugins(false);
         if (plugins.length) {
-          setPluginImpact({ input, plugins });
+          setPluginImpact({
+            input,
+            plugins,
+            previous: saved.value,
+            changedIds: ids,
+          });
           return;
         }
       }
@@ -206,6 +218,19 @@ function useEditor() {
       if (mounted.current) setBusy(false);
     }
   }
+  function cancelPluginChange() {
+    if (!pluginImpact || inFlight.current) return;
+    setDraft((current) =>
+      current
+        ? restorePluginChoices(
+            current,
+            pluginImpact.previous,
+            pluginImpact.changedIds,
+          )
+        : current,
+    );
+    setPluginImpact(null);
+  }
   return {
     saved,
     draft,
@@ -217,6 +242,7 @@ function useEditor() {
     pluginImpact,
     pluginChangeTrigger,
     confirmPluginChange,
+    cancelPluginChange,
     dismissPluginImpact: () => setPluginImpact(null),
     loading,
     dirty,

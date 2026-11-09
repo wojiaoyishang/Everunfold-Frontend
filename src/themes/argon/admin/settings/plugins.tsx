@@ -5,7 +5,7 @@ import { useExtensionCatalog } from "@/core/plugins/use-catalog";
 import { SettingsFrame, SettingsSection, SettingsToggle } from "./shared";
 import { Button } from "../../components/ui/primitives";
 export function PluginsSettingsPage() {
-  const { draft, setDraft } = useSettingsEditor();
+  const { draft, setDraft, pluginChangeTrigger } = useSettingsEditor();
   const deployed = useExtensionCatalog();
   const disabled = draft?.extensions?.disabled_plugins ?? [];
   const ids = [...new Set([...deployed.plugins.map((p) => p.id), ...disabled])];
@@ -56,7 +56,11 @@ export function PluginsSettingsPage() {
                   plugin?.description || "插件未安装，保留停用设置与现有内容。"
                 }
                 value={!disabled.includes(id)}
-                onChange={(enabled) =>
+                onChange={(enabled) => {
+                  pluginChangeTrigger.current =
+                    document.activeElement instanceof HTMLElement
+                      ? document.activeElement
+                      : null;
                   setDraft((value) =>
                     value
                       ? {
@@ -69,8 +73,8 @@ export function PluginsSettingsPage() {
                           },
                         }
                       : value,
-                  )
-                }
+                  );
+                }}
               />
               <small>
                 {id}

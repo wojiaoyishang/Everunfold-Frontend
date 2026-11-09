@@ -1365,7 +1365,7 @@
   "已发布内容": "Published content",
   "定时发布内容": "Scheduled content",
   "未能取得完整注册信息，请确认该插件的使用情况后继续。": "Complete registration information is unavailable. Check how this plugin is used before continuing.",
-  "检查覆盖当前已应用页面、已发布正文和定时发布版本中的短代码引用；不含历史草稿或脚本动态调用。取消会保留未保存的设置。": "The check covers applied pages and shortcode references in published and scheduled content. Historical drafts and dynamic script calls are excluded. Canceling keeps your unsaved changes.",
+  "检查覆盖当前已应用页面、已发布正文和定时发布版本中的短代码引用；不含历史草稿或脚本动态调用。取消将撤销本次插件开关修改，其他设置修改仍保留。": "The check covers applied pages and shortcode references in published and scheduled content. Historical drafts and dynamic script calls are excluded. Canceling restores the plugin switches and keeps other settings changes.",
   "无法检查插件使用情况，设置尚未保存。请稍后重试。": "Plugin usage could not be checked. Settings have not been saved. Please try again.",
   "正在检查使用情况…": "Checking plugin usage…",
   "荣誉与证书": "Honors and certificates"

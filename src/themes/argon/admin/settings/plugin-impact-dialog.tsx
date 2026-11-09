@@ -18,7 +18,7 @@ export function PluginImpactDialog() {
       busy={editor.busy}
       returnFocus={editor.pluginChangeTrigger}
       error={editor.error ? t(editor.error) : undefined}
-      onCancel={editor.dismissPluginImpact}
+      onCancel={editor.cancelPluginChange}
       onConfirm={editor.confirmPluginChange}
       onConfirmed={editor.dismissPluginImpact}
     >
@@ -69,7 +69,7 @@ export function PluginImpactDialog() {
         ))}
       </ul>
       <p>
-        <UiText text="检查覆盖当前已应用页面、已发布正文和定时发布版本中的短代码引用；不含历史草稿或脚本动态调用。取消会保留未保存的设置。" />
+        <UiText text="检查覆盖当前已应用页面、已发布正文和定时发布版本中的短代码引用；不含历史草稿或脚本动态调用。取消将撤销本次插件开关修改，其他设置修改仍保留。" />
       </p>
     </ConfirmDialog>
   );

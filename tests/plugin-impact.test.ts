@@ -5,6 +5,7 @@ import { queryExtensionUsage } from "@/core/contracts/settings";
 import {
   changedPluginIds,
   pluginNeedsConfirmation,
+  restorePluginChoices,
 } from "@/core/settings/plugin-impact";
 import { RequestError } from "@/core/http/request";
 
@@ -12,6 +13,56 @@ const settings = (disabled: string[]): PublicSettings => ({
   site: { name: "Test", author: "Test", description: "", navigation: [] },
   theme: {},
   extensions: { theme: "argon", disabled_plugins: disabled },
+});
+
+test("cancel restores every pending switch in both directions while preserving unrelated and later edits", () => {
+  const saved = settings(["plugin.disabled"]);
+  const attempted = settings(["plugin.enabled", "plugin.unused"]);
+  const current = structuredClone(attempted);
+  current.site.name = "Unsaved site name";
+  current.theme = { ...current.theme, hero_title: "Unsaved banner" };
+  current.extensions!.theme = "paper";
+  current.extensions!.disabled_plugins!.push("plugin.later");
+  const restored = restorePluginChoices(
+    current,
+    saved,
+    changedPluginIds(saved, attempted),
+  );
+  assert.deepEqual(restored.extensions?.disabled_plugins, [
+    "plugin.disabled",
+    "plugin.later",
+  ]);
+  assert.equal(restored.extensions?.theme, "paper");
+  assert.deepEqual(restored.site, current.site);
+  assert.deepEqual(restored.theme, current.theme);
+  assert.deepEqual(current.extensions?.disabled_plugins, [
+    "plugin.enabled",
+    "plugin.unused",
+    "plugin.later",
+  ]);
+  assert.deepEqual(saved.extensions?.disabled_plugins, ["plugin.disabled"]);
+});
+
+test("canceling switch-only edits restores the saved value, including absent default preferences", () => {
+  const saved = settings(["plugin.disabled"]);
+  const attempted = settings(["plugin.enabled"]);
+  assert.deepEqual(
+    restorePluginChoices(attempted, saved, changedPluginIds(saved, attempted)),
+    saved,
+  );
+  const legacy = { ...settings([]), extensions: undefined };
+  const legacyDraft = {
+    ...legacy,
+    extensions: { disabled_plugins: ["plugin.enabled"] },
+  };
+  assert.deepEqual(
+    restorePluginChoices(
+      legacyDraft,
+      legacy,
+      changedPluginIds(legacy, legacyDraft),
+    ),
+    legacy,
+  );
 });
 
 test("activation checks only effective changes, including re-enabling and changes across settings tabs", () => {
