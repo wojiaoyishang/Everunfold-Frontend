@@ -1249,3 +1249,13 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/mail.md` | `mail-3` | `8d7e7f694610b050a86bfba4abcb6328fdb3f2294ea347338b6871d116d829a3` |
 | `docs/decisions/0093-unified-task-progress-and-smtp-transcripts.md` | `ADR0093-1` | `24c3f011afa0cd780fcaab655b6dfa8d0bb2e53443c9f1ee258eb7819631bcf6` |
 | `docs/handoff/task-progress-verification.md` | `task-progress-verification-1` | `f4c8073a59ac97b1e205c904e7fd0b917c9c23d54d395e066f848825b9a8de4e` |
+
+
+## SMTP TLS主机身份修复（2026-11-10）
+
+后端23755d9、前端5b30729；无契约或迁移变化。以下替代对应旧摘要，实际TLS回归与未覆盖范围见验收，原始基线保持。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/development/mail.md` | `mail-4` | `a6bbe4bb5c2b1951da38f848c687dc4ae1c74921a9212343dfd822de4cda2d93` |
+| `docs/handoff/task-progress-verification.md` | `task-progress-verification-2` | `b7097826df28ca6af6d6b7be908728c3ffed09ed2edbf7b5367c362f4229cc0d` |

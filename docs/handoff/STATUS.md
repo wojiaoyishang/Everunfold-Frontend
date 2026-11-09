@@ -1,5 +1,12 @@
 # 前端交接状态
 
+## 最新修复：SMTP STARTTLS主机身份（2026-11-10）
+
+- 后端23755d9、前端5b30729。SMTP空主机构造后connect未设置TLS使用的hostname，导致STARTTLS接受后ValueError/transport；改为构造时提供host/port并预置trace，直接SSL同修。保留完整证书/hostname验证。日志补安全异常类型、TLS校验码与timeout分类，前端补传输异常和超时说明。见[指南](../development/mail.md)与[补充验收](task-progress-verification.md)。
+- 新增真实本地STARTTLS/直接SSL握手、SNI、加密后AUTH/DATA和错误hostname/不信任证书拒绝；安全诊断回归及既有邮件/真实Worker测试共24项/12.78秒通过，Ruff/格式/mypy通过。前端定向lint/格式、完整typecheck通过，390px错误说明实页看图，无溢出/脚本错误；未重复全套或生产构建。
+- 无契约/迁移/依赖变化；只读确认无活动测试邮件后重启Worker，六服务/四端口0.0.0.0/HTTP200保持。管理员配置未改，未自动重发或向外部邮箱发信。真实供应商认证/送达由管理员再主动测试。共享文档与摘要同步，本地存档未push。
+
+
 ## 最新交付：统一任务进度与SMTP诊断（2026-11-09）
 
 - 后端21a60c1/8aec05e/7f2d791、前端f66ce9e；统一POST /v1/admin/tasks/watch、后端SDK task_progress、前端useTaskProgress及主题面板。Worker/常驻上下文、核心同步/鉴权回调/排期与邮件测试接入；游标分页、租约围栏、未知总量不伪造百分比。见[规范](../development/task-progress.md)、[ADR0093](../decisions/0093-unified-task-progress-and-smtp-transcripts.md)、[验收](task-progress-verification.md)。

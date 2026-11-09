@@ -1,6 +1,6 @@
 # 统一任务进度与邮件诊断验收
 
-版本：task-progress-verification-1；2026-11-09。范围见[开发规范](../development/task-progress.md)、[ADR0093](../decisions/0093-unified-task-progress-and-smtp-transcripts.md)。
+版本：task-progress-verification-2；2026-11-10。范围见[开发规范](../development/task-progress.md)、[ADR0093](../decisions/0093-unified-task-progress-and-smtp-transcripts.md)。
 
 ## 交付
 
@@ -37,3 +37,11 @@
 最初浏览器脚本在请求返回前断言20%，此时仍为不定进度，改为等真实aria-valuenow再断言；深色截图最初捕获弹层退出动画，等待关闭后重新看图。终态重复“已完成”已隐藏，保留计量。全量Ruff格式扫描包含旧Markdown代码块，整理本轮相关指南后，代码目录检查通过。
 
 未做全浏览器/OS矩阵、长时间负载、主机断电、真实供应商TLS证书及认证成功/垃圾箱送达；额外生产插件浏览器安装矩阵未开启。连续读取采用HTTP长轮询，没有新增SSE/WS，也不是外部webhook日志。日志有保留和大小限制，历史已完成任务不能补造SMTP报文。六服务和0.0.0.0/HTTP继续保持，实际凭据/会话/截图不入Git；本地存档，不push。
+
+## 后续：STARTTLS 220后transport失败修复（2026-11-10）
+
+用户真实日志定位在STARTTLS接受后失败。读取本地标准库确认此前空主机构造SMTP/SMTP_SSL后调用connect未保存TLS主机身份，默认验证上下文因此抛ValueError并归到transport。后端23755d9构造时传host/port、日志先初始化；前端5b30729补transport/timeout说明，异常仅输出安全类名、TLS校验码，不输出异常原文。没有关闭证书或hostname验证。
+
+- 新增临时CA/证书与真实本地TLS服务。STARTTLS/直接SSL成功路径断言SNI为localhost、CERT_REQUIRED/check_hostname开启、AUTH/DATA在加密后执行；两种模式下错误hostname/不信任证书共四项拒绝路径都不发送AUTH/MAIL/RCPT/DATA。另两项验证timeout/ValueError分类和异常文本脱敏。8项新测试和既有SMTP/Worker/私有设置共**24 passed / 12.78秒**，Ruff/格式/mypy通过。
+- 前端定向ESLint/Prettier、完整typecheck通过。390px真实页面请求夹具展示transport/timeout及安全错误类型，水平溢出与pageerror均0，已看图。未重跑全部330前端或288后端，也未再次构建生产；此修复无契约、迁移或依赖变更。
+- 只读确认主环境没有queued/sending邮件后重启Worker，六服务/四端口0.0.0.0及HTTP保持正常。未修改管理员配置、未自动重试旧失败或向外部发信；本地分阶段存档，不push。真实供应商TLS/认证/送达仍待管理员主动测试，新覆盖的是可控本地TLS协议与证书拒绝。
