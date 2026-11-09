@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { commentReadHeaders } from "@/core/content/comment-read-grant";
 import { visitorId } from "@/core/browser/visitor";
 import { RequestError, type RequestOptions } from "@/core/http/request";
 import {
@@ -13,7 +14,11 @@ import { useFeedback } from "../ui/feedback";
 
 type LikeState = CommentLikesContract["state"]["data"];
 
-export function useCommentLikes(ids: string[]) {
+export function useCommentLikes(
+  ids: string[],
+  contentId?: string,
+  readReceipt?: string,
+) {
   const idsKey = ids.join(",");
   const { store } = useReaderData();
   const notify = useFeedback();
@@ -37,7 +42,13 @@ export function useCommentLikes(ids: string[]) {
             store.baseUrl,
             { ids: requested.slice(offset, offset + 50) },
             visitorId(store.baseUrl),
-            options,
+            {
+              ...options,
+              headers: {
+                ...options.headers,
+                ...commentReadHeaders(contentId, readReceipt),
+              },
+            },
           ),
         );
       }
@@ -56,7 +67,7 @@ export function useCommentLikes(ids: string[]) {
       }
       return result.data;
     },
-    [idsKey, store],
+    [idsKey, store, contentId, readReceipt],
   );
   const request = usePageRequest(
     idsKey ? `comments:likes:${idsKey}` : null,
@@ -80,7 +91,10 @@ export function useCommentLikes(ids: string[]) {
         id,
         { liked: desired },
         visitorId(store.baseUrl),
-        { signal: controller.signal },
+        {
+          signal: controller.signal,
+          headers: commentReadHeaders(contentId, readReceipt),
+        },
       );
       if (response.data.comment_id !== id || response.data.liked !== desired)
         throw new RequestError("invalid");
@@ -91,11 +105,13 @@ export function useCommentLikes(ids: string[]) {
     } catch (error) {
       if (controller.signal.aborted) return;
       notify(
-        error instanceof RequestError && error.status === 404
-          ? "这条留言暂时无法点赞，请刷新后重试。"
-          : navigator.onLine === false
-            ? "当前网络离线，点赞未发送。"
-            : "点赞未能确认，请检查网络后重试。",
+        error instanceof RequestError && error.code === 40388
+          ? "阅读验证已过期，请刷新页面并重新解锁。"
+          : error instanceof RequestError && error.status === 404
+            ? "这条留言暂时无法点赞，请刷新后重试。"
+            : navigator.onLine === false
+              ? "当前网络离线，点赞未发送。"
+              : "点赞未能确认，请检查网络后重试。",
         "error",
       );
     } finally {

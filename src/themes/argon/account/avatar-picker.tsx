@@ -1,4 +1,5 @@
 "use client";
+import { FileDropZone } from "../components/ui/file-drop-zone";
 import { useState } from "react";
 import type { AvatarItem } from "@/core/contracts/accounts";
 import { useAvatarLibrary } from "@/core/accounts/avatar-library";
@@ -64,7 +65,11 @@ export function AvatarPicker({
       }}
     >
       <div className="account-avatar-picker-body">
-        <div className="account-avatar-upload">
+        <FileDropZone
+          className="account-avatar-upload"
+          onFiles={(files) => library.queue.add(files, "avatar")}
+          disabled={!library.catalog || closing}
+        >
           <div className="account-avatar-upload-icon">
             <Icon name="image" />
           </div>
@@ -92,7 +97,7 @@ export function AvatarPicker({
             disabled={!library.catalog || closing}
             onFiles={(files) => library.queue.add(files, "avatar")}
           />
-        </div>
+        </FileDropZone>
         {library.catalog && (
           <div className="account-avatar-quota">
             <span>

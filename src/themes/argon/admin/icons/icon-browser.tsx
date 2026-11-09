@@ -1,4 +1,5 @@
 "use client";
+import { FileDropZone } from "../../components/ui/file-drop-zone";
 import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
@@ -103,7 +104,14 @@ export function IconBrowser({
     onSelect?.(icon);
   };
   return (
-    <div className="admin-icon-browser">
+    <FileDropZone
+      className="admin-icon-browser"
+      onFiles={(files) => {
+        setSource("uploaded");
+        library.upload(files);
+      }}
+      disabled={!can(user, "media:upload")}
+    >
       <div className="admin-library-toolbar">
         <TextField
           type="search"
@@ -223,6 +231,6 @@ export function IconBrowser({
           </Button>
         </div>
       )}
-    </div>
+    </FileDropZone>
   );
 }

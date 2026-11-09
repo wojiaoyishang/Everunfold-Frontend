@@ -1,7 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import type { PublicManagedPage } from "@/core/contracts/pages";
-import { readProtectedPage } from "@/core/contracts/captcha";
+import { CommentSection } from "../components/comments/comment-section";
+import {
+  readProtectedPage,
+  type UnlockedManagedPage,
+} from "@/core/contracts/captcha";
 import { useCaptcha, captchaFailure } from "@/core/captcha/use-captcha";
 import { ExtensionComponent } from "@/core/extensions/components";
 import type { Content } from "@/core/content/types";
@@ -17,7 +21,7 @@ export function ProtectedManagedPage({
   translations?: Content["translations"];
 }) {
   const { store } = useReaderData();
-  const [unlocked, setUnlocked] = useState<PublicManagedPage | null>(null);
+  const [unlocked, setUnlocked] = useState<UnlockedManagedPage | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const request = useRef<AbortController | null>(null);
@@ -46,11 +50,19 @@ export function ProtectedManagedPage({
     }
   };
   return unlocked ? (
-    <ExtensionComponent
-      name="public.page.surface"
-      page={unlocked}
-      translations={translations}
-    />
+    <>
+      <ExtensionComponent
+        name="public.page.surface"
+        page={unlocked}
+        translations={translations}
+      />
+      <CommentSection
+        contentId={unlocked.id}
+        path={unlocked.path}
+        comments={unlocked.unlocked_comments ?? []}
+        readReceipt={unlocked.read_receipt}
+      />
+    </>
   ) : (
     <article className={styles.page}>
       <ExtensionComponent

@@ -10,7 +10,7 @@
   display: grid;
   grid-template-columns:
     minmax(220px, 2.7fr) minmax(64px, 0.7fr) minmax(90px, 1fr)
-    minmax(90px, 1fr) 46px minmax(126px, 1fr) 96px;
+    minmax(90px, 1fr) 46px minmax(126px, 1fr) 126px;
   column-gap: 16px;
   align-items: center;
   padding: 12px 18px;
@@ -218,7 +218,7 @@
 @media (max-width: 1200px) {
   .headers,
   .row {
-    grid-template-columns: minmax(180px, 2.5fr) 55px 78px 78px 36px 112px 96px;
+    grid-template-columns: minmax(180px, 2.5fr) 55px 78px 78px 36px 112px 126px;
     column-gap: 10px;
     padding-inline: 14px;
   }
@@ -228,7 +228,7 @@
     display: none;
   }
   .row {
-    grid-template-columns: minmax(0, 1fr) minmax(90px, 1fr) 118px 96px;
+    grid-template-columns: minmax(0, 1fr) minmax(90px, 1fr) 118px 126px;
     gap: 9px 12px;
   }
   .titleCell {

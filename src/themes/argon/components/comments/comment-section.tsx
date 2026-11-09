@@ -76,6 +76,8 @@ export function CommentSection({
     shown
       .filter((entry) => entry.origin === "history")
       .map((entry) => entry.id),
+    contentId,
+    readReceipt,
   );
   useCommentLocation(target, page);
   useEffect(() => {

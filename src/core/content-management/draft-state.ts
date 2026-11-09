@@ -59,6 +59,12 @@ export function draftError(error: unknown): string {
   if (error instanceof Error && !(error instanceof RequestError))
     return error.message;
   if (error instanceof RequestError) {
+    if (error.code === 40990)
+      return "分类目录或影响范围已变化，也可能使用了保留名称。请重新检查；尚未修改任何内容。";
+    if (error.code === 42290)
+      return "请选择有效的目标分类；父分类不能是自身或自己的子分类。";
+    if (error.code === 40995)
+      return "回收原文需要包含该组全部语言版本，请将语言范围改为全部。";
     if (error.code === 40980)
       return "正在合并版本，最新版暂时只读。输入已保留，请从草稿分支恢复。";
     if (error.code === 40981) return "无法确认共同基线，请保留或导出本地草稿。";

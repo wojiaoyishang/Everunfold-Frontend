@@ -1,4 +1,5 @@
 "use client";
+import { FileDropZone } from "../../components/ui/file-drop-zone";
 import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
@@ -29,7 +30,11 @@ export function FontLibraryPage({
   );
   const [selected, setSelected] = useState<FontAsset | null>(null);
   return (
-    <div className="admin-settings-page admin-library-page">
+    <FileDropZone
+      className="admin-settings-page admin-library-page"
+      onFiles={library.upload}
+      disabled={!uploadAllowed}
+    >
       {!compact && <AdminPageHeading title="字体库" />}
       <div className="admin-library-toolbar">
         <TextField
@@ -185,6 +190,6 @@ export function FontLibraryPage({
           onNavigate={() => setSelected(null)}
         />
       )}
-    </div>
+    </FileDropZone>
   );
 }

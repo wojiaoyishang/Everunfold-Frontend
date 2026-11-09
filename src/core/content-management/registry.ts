@@ -11,6 +11,14 @@ export const contentAdminModule: AdminModuleRegistration = {
   id: "content",
   groups: [{ id: "content.types", label: "内容", order: 15 }],
   pages: [
+    {
+      id: "content.taxonomies",
+      href: "/admin/taxonomies",
+      label: "分类与标签",
+      description: "名称、层级与内容关联",
+      icon: "content",
+      menu: { group: "content.types", order: 95 },
+    },
     ...registeredContentTypes.map((type) => ({
       id: `content.${type.id}`,
       href: `/admin/content/${type.id}`,

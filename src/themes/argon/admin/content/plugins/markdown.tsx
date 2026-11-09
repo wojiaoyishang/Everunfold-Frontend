@@ -1,4 +1,5 @@
 "use client";
+import { FileDropZone } from "../../../components/ui/file-drop-zone";
 import {
   useImperativeHandle,
   useRef,
@@ -172,7 +173,11 @@ export default function MarkdownEditor(props: BlockEditorProps) {
     });
   };
   return (
-    <div>
+    <FileDropZone
+      capture
+      disabled={props.disabled || !props.onUpload}
+      onFiles={(files) => props.onUpload?.(files)}
+    >
       {props.modeControls &&
         createPortal(
           <div
@@ -259,6 +264,6 @@ export default function MarkdownEditor(props: BlockEditorProps) {
         className={styles.status}
         data-editor-status-outlet
       />
-    </div>
+    </FileDropZone>
   );
 }

@@ -1,0 +1,156 @@
+.card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.toolbar,
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 18px 22px;
+}
+.toolbar {
+  border-bottom: 1px solid var(--admin-border);
+}
+.search {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+.search input {
+  min-width: 0;
+  flex: 1;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.identity {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 5px;
+  overflow-wrap: anywhere;
+}
+.identity small,
+.counts,
+.footer {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.counts {
+  display: flex;
+  gap: 16px;
+}
+.counts b {
+  color: var(--admin-text);
+  font-variant-numeric: tabular-nums;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.actions :global(.admin-button) {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.message {
+  padding: 18px 22px;
+}
+.dialog:global(.admin-library-modal) {
+  width: min(580px, calc(100vw - 24px));
+}
+.form {
+  display: grid;
+  gap: 20px;
+}
+.form :global(.ui-form-field) {
+  min-width: 0;
+}
+.form :global(.ui-field-control > .ui-input),
+.form :global(.ui-select) {
+  width: 100%;
+}
+.form :global(.ui-form-field label) {
+  display: block;
+  margin-bottom: 8px;
+}
+.form footer {
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+.termName {
+  overflow-wrap: anywhere;
+  color: var(--admin-accent);
+}
+.impact {
+  display: grid;
+  gap: 14px;
+}
+.impact h3 {
+  font-size: 16px;
+}
+.impact dl {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
+}
+.impact dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  background: var(--admin-subtle);
+  border-radius: 6px;
+}
+.impact dd {
+  font-weight: 600;
+}
+.impact p {
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.error {
+  color: var(--admin-danger);
+}
+@media (max-width: 650px) {
+  .row {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 14px;
+  }
+  .identity {
+    flex-basis: 55%;
+  }
+  .actions {
+    width: 100%;
+  }
+  .search {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .search input {
+    flex-basis: 100%;
+  }
+  .toolbar,
+  .footer {
+    padding: 14px;
+  }
+  .footer .actions {
+    width: auto;
+  }
+  .form {
+    gap: 16px;
+  }
+}

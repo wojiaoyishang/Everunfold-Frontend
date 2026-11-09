@@ -1,4 +1,5 @@
 "use client";
+import { FileDropZone } from "../../components/ui/file-drop-zone";
 import { UiText } from "@/core/i18n/provider";
 
 import { useState } from "react";
@@ -47,7 +48,11 @@ export function MediaBrowser({
         ? ".svg,.png,.jpg,.jpeg,.webp,image/svg+xml,image/png,image/jpeg,image/webp"
         : "";
   return (
-    <div className="admin-media-browser">
+    <FileDropZone
+      className="admin-media-browser"
+      onFiles={library.upload}
+      disabled={!canUpload || trash}
+    >
       {pickerTab === "upload" ? (
         canUpload ? (
           <MediaUploadArea accept={accept} onFiles={library.upload} />
@@ -294,6 +299,6 @@ export function MediaBrowser({
           }}
         />
       )}
-    </div>
+    </FileDropZone>
   );
 }

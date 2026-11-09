@@ -38,7 +38,14 @@ export function AdminNavigation({
       ...group,
       items: group.items.filter((item) => {
         const capability = adminRoutePermission(item.href);
-        return !capability || can(user, capability);
+        return (
+          !capability ||
+          can(
+            user,
+            capability,
+            item.href === "/admin/taxonomies" ? null : undefined,
+          )
+        );
       }),
     }))
     .filter((group) => group.items.length);

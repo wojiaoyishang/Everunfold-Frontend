@@ -1,7 +1,7 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useLanguageCatalog, useT } from "@/core/i18n/provider";
 import type {
   ContentTypeDefinition,
@@ -12,6 +12,12 @@ import { Button, Form, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { RouteLink } from "../../components/ui/route-link";
+import { BatchEditor } from "./batch-editor";
+import { Checkbox } from "../../components/ui/checkbox";
+import { AdminActionButton } from "../components/action-button";
+import management from "./management.module.css";
+import { QuickEditor } from "./quick-editor";
+import { CatalogFilters } from "./catalog-filters";
 import { ContentSync } from "./content-sync";
 import { DraftActionDialog } from "./draft-action-dialog";
 import { DraftListRow } from "./draft-list-row";
@@ -26,9 +32,36 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
   const languages = useLanguageCatalog();
   const t = useT();
   const [action, setAction] = useState<DraftListItem | null>(null);
+  const [quick, setQuick] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const data = catalog.result;
   const trash = catalog.status === "trash";
+  const signature = JSON.stringify([
+    catalog.filters,
+    catalog.appliedSearch,
+    catalog.page,
+    data?.items.map((item) => [item.id, item.revision, item.collaboration_seq]),
+  ]);
+  const [selection, setSelection] = useState<{
+    signature: string;
+    ids: string[];
+  }>({ signature, ids: [] });
+  if (selection.signature !== signature) setSelection({ signature, ids: [] });
+  const selected = selection.signature === signature ? selection.ids : [];
+  const selectable =
+    data?.items.filter((item) =>
+      can(user, "content:write", item.owner_id ?? null),
+    ) ?? [];
+  const select = (ids: string[]) => setSelection({ signature, ids });
+  const [batch, setBatch] = useState<{
+    rows: DraftListItem[];
+    mode: "edit" | "trash" | "restore";
+  } | null>(null);
+  const openBatch = (mode: "edit" | "trash" | "restore") =>
+    setBatch({
+      rows: selectable.filter((item) => selected.includes(item.id)),
+      mode,
+    });
   return (
     <>
       <AdminPageHeading
@@ -58,6 +91,8 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
                 ["all", "全部"],
                 ["draft", "草稿"],
                 ["published", "已发布"],
+                ["scheduled", "待定时发布"],
+                ["failed", "定时失败"],
               ] as const
             ).map(([value, label]) => (
               <Button
@@ -122,9 +157,63 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
             </Button>
           </Form>
         </div>
+        <CatalogFilters catalog={catalog} />
+        {can(user, "content:write") && (
+          <div className={management.batchToolbar}>
+            <label>
+              <Checkbox
+                aria-label="选择本页"
+                checked={
+                  !!selectable.length && selected.length === selectable.length
+                }
+                disabled={
+                  catalog.loading || !catalog.compatible || !selectable.length
+                }
+                onChange={() =>
+                  select(
+                    selected.length === selectable.length
+                      ? []
+                      : selectable.map((item) => item.id),
+                  )
+                }
+              />
+              <UiText text="选择本页" />
+            </label>
+            <span>
+              <UiText
+                text="已选 {count} 组"
+                values={{ count: selected.length }}
+              />
+            </span>
+            {!trash && (
+              <AdminActionButton
+                icon="edit"
+                tone="accent"
+                disabled={
+                  !selected.length || catalog.loading || !catalog.compatible
+                }
+                onClick={() => openBatch("edit")}
+              >
+                <UiText text="批量编辑" />
+              </AdminActionButton>
+            )}
+            <AdminActionButton
+              icon={trash ? "undo" : "trash"}
+              tone={trash ? "neutral" : "danger"}
+              disabled={
+                !selected.length || catalog.loading || !catalog.compatible
+              }
+              onClick={() => openBatch(trash ? "restore" : "trash")}
+            >
+              <UiText text={trash ? "恢复草稿" : "移至回收站"} />
+            </AdminActionButton>
+          </div>
+        )}
         {catalog.error && (
           <div className="admin-draft-message" role="alert">
-            <span>{catalog.error}</span>
+            <span>
+              <UiText text={catalog.error} />
+            </span>
             <Button className="admin-button" onClick={catalog.refresh}>
               <UiText text="重试" />
             </Button>
@@ -190,14 +279,48 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
                 )}
               </div>
               {data.items.map((item) => (
-                <DraftListRow
-                  key={item.id}
-                  item={item}
-                  type={type}
-                  trash={trash}
-                  disabled={catalog.loading || !catalog.compatible}
-                  onAction={() => setAction(item)}
-                />
+                <Fragment key={item.id}>
+                  <DraftListRow
+                    item={item}
+                    type={type}
+                    trash={trash}
+                    disabled={catalog.loading || !catalog.compatible}
+                    selected={selected.includes(item.id)}
+                    onSelect={() =>
+                      select(
+                        selected.includes(item.id)
+                          ? selected.filter((id) => id !== item.id)
+                          : [...selected, item.id],
+                      )
+                    }
+                    onQuick={() => setQuick(item.id)}
+                    onAction={() =>
+                      trash
+                        ? setBatch({ rows: [item], mode: "restore" })
+                        : setAction(item)
+                    }
+                  />
+                  {quick === item.id && !trash && (
+                    <QuickEditor
+                      item={item}
+                      type={type}
+                      terms={catalog.terms?.terms ?? []}
+                      onClose={() => {
+                        setQuick(null);
+                        document
+                          .querySelector<HTMLButtonElement>(
+                            `button[aria-label="快速编辑 ${CSS.escape(item.title || "说说")}"]`,
+                          )
+                          ?.focus();
+                      }}
+                      onSaved={() => {
+                        setQuick(null);
+                        setNotice("修改已保存到草稿，前台保持已发布版本。");
+                        catalog.refresh();
+                      }}
+                    />
+                  )}
+                </Fragment>
               ))}
             </div>
           )}
@@ -253,6 +376,24 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
         user.permissions?.["content:publish"] === "all") && (
         <ContentSync
           key={`${catalog.status}-${data?.items.map((item) => item.revision).join("-")}`}
+        />
+      )}
+      {batch && (
+        <BatchEditor
+          {...batch}
+          onClose={() => setBatch(null)}
+          onSaved={() => {
+            setBatch(null);
+            select([]);
+            setNotice(
+              batch.mode === "edit"
+                ? "批量修改已保存到草稿。"
+                : batch.mode === "trash"
+                  ? "内容已移至回收站"
+                  : "内容已恢复到草稿",
+            );
+            catalog.refresh();
+          }}
         />
       )}
       {action && (

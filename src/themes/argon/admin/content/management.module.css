@@ -1,0 +1,303 @@
+.filters {
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.filterHeading,
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.filterHeading {
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.sort {
+  min-width: 0;
+}
+.sort :global(.ui-select) {
+  width: 135px;
+}
+.filters :global(.admin-button),
+.filters :global(.ui-select-trigger) {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding-inline: 4px;
+  border-radius: 8px;
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+  font-variant-numeric: tabular-nums;
+}
+.expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 180ms ease,
+    opacity 180ms ease;
+}
+.expand[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.expand > div {
+  min-height: 0;
+  overflow: hidden;
+}
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+  gap: 16px;
+  padding-block: 18px 4px;
+}
+.filterGrid > label {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--admin-muted);
+}
+.filterGrid :global(.ui-select) {
+  width: 100%;
+}
+.filterGrid :global(.ui-button) {
+  max-width: 100%;
+}
+.filterGrid > :global(.admin-button) {
+  justify-self: start;
+}
+@media (max-width: 700px) {
+  .filterGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 450px) {
+  .filterGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .filters {
+    padding-inline: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .expand {
+    transition: none;
+  }
+}
+.quick {
+  padding: 20px;
+  background: var(--admin-subtle);
+  border-bottom: 1px solid var(--admin-border);
+  animation: management-enter 160ms ease both;
+}
+.quick[data-state="closing"] {
+  animation: management-exit 160ms ease both;
+}
+.quickHeading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.quickHeading h3 {
+  font-size: 15px;
+}
+.quickHeading span {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.quickFields {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.quickFields :global(.ui-form-field > label) {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 12px;
+}
+.quickFields :global(.ui-input),
+.quickFields :global(.ui-textarea) {
+  width: 100%;
+}
+.metadataGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+}
+.switches > label {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.quickFooter {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 20px;
+}
+.error {
+  margin-top: 14px;
+  color: var(--admin-danger);
+  font-size: 13px;
+}
+@keyframes management-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes management-exit {
+  to {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+@media (max-width: 600px) {
+  .metadataGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .quick {
+    padding: 16px 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .quick,
+  .quick[data-state="closing"] {
+    animation: none;
+  }
+}
+:global([data-admin-motion="reduced"]) .quick {
+  animation: none;
+}
+.batchDialog:global(.admin-library-modal) {
+  width: min(740px, calc(100vw - 24px));
+}
+.batchForm {
+  display: flex;
+  flex-direction: column;
+}
+.fieldLabel {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+  min-width: 0;
+}
+.fieldLabel :global(.ui-select) {
+  width: 100%;
+}
+.batchSummary {
+  font-size: 13px;
+  color: var(--admin-muted);
+  line-height: 1.7;
+}
+.targets {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 160px;
+  overflow: auto;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+}
+.targets li {
+  display: flex;
+  align-items: start;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--admin-border);
+  font-size: 12px;
+}
+.targets li:last-child {
+  border: 0;
+}
+.targets li span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.targets small {
+  color: var(--admin-muted);
+  white-space: nowrap;
+}
+.batchTerm {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  min-width: 0;
+}
+.batchToolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--admin-border);
+  background: var(--admin-sidebar);
+  font-size: 12px;
+}
+.batchToolbar label {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.batchToolbar :global(.admin-button) {
+  min-height: 32px;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.quick {
+  scroll-margin-top: 80px;
+}
+.batchDialog:global(.admin-library-modal) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.batchDialog > :global(.admin-library-modal-heading) {
+  flex: none;
+}
+.batchForm {
+  min-height: 0;
+  overflow: hidden;
+}
+.batchBody {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.batchBody > * + * {
+  margin-top: 16px;
+}
+.batchForm > .quickFooter {
+  flex: none;
+  padding-block: 16px 0;
+  background: var(--admin-surface);
+  margin-top: 0;
+}
+
+:global([data-admin-motion="reduced"]) .expand {
+  transition: none;
+}

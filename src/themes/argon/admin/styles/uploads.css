@@ -250,3 +250,9 @@
   font-size: 13px;
   line-height: 1.8;
 }
+
+.ui-button[data-file-drag="true"] {
+  outline: 2px dashed var(--accent);
+  outline-offset: 3px;
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface));
+}

@@ -6,6 +6,7 @@ import type {
   DraftListItem,
 } from "@/core/contracts/content-admin";
 import { resourceUrl } from "@/core/content/urls";
+import { Checkbox } from "../../components/ui/checkbox";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
@@ -42,12 +43,18 @@ export function DraftListRow({
   trash,
   disabled,
   onAction,
+  onQuick,
+  selected,
+  onSelect,
 }: {
   item: DraftListItem;
   type: ContentTypeDefinition;
   trash: boolean;
   disabled: boolean;
   onAction: () => void;
+  onQuick: () => void;
+  selected: boolean;
+  onSelect: () => void;
 }) {
   const t = useT();
   const icon = type.icon === "leaf" ? "leaf" : "book";
@@ -64,7 +71,9 @@ export function DraftListRow({
       ? (item.published_at ?? item.updated_at)
       : item.updated_at);
   const status = trash
-    ? "已回收"
+    ? item.status === "trash"
+      ? "已回收"
+      : "有回收的译文"
     : item.scheduled_for
       ? item.published_revision
         ? "已发布 · 待定时更新"
@@ -77,6 +86,14 @@ export function DraftListRow({
   return (
     <article role="row" className={styles.row}>
       <div role="rowheader" className={styles.titleCell}>
+        {editable && (
+          <Checkbox
+            aria-label={`选择 ${item.title || "说说"}`}
+            checked={selected}
+            disabled={disabled}
+            onChange={onSelect}
+          />
+        )}
         <span className={styles.cover} aria-hidden="true">
           {cover ? (
             <MediaPreview
@@ -177,6 +194,17 @@ export function DraftListRow({
             <Icon name={editable ? "edit" : "eye"} />
             <UiText text={editable ? "编辑" : "查看"} />
           </RouteLink>
+        )}
+        {editable && !trash && (
+          <Button
+            className="admin-icon-button"
+            title="快速编辑"
+            aria-label={`快速编辑 ${item.title || "说说"}`}
+            disabled={disabled}
+            onClick={onQuick}
+          >
+            <Icon name="settings" />
+          </Button>
         )}
         {editable && (
           <Button

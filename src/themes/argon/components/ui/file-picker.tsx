@@ -1,4 +1,6 @@
 "use client";
+import { useT } from "@/core/i18n/provider";
+import { useFileDrop } from "@/core/media/use-file-drop";
 import { useRef } from "react";
 import { Button } from "./primitives";
 import { Icon } from "../icon";
@@ -18,7 +20,9 @@ export function FilePicker({
   className?: string;
   iconOnly?: boolean;
 }) {
+  const t = useT();
   const input = useRef<HTMLInputElement>(null);
+  const drop = useFileDrop(onFiles, disabled);
   return (
     <>
       <input
@@ -35,8 +39,10 @@ export function FilePicker({
         }}
       />
       <Button
+        {...drop.handlers}
+        data-file-drag={drop.active}
         className={className}
-        title={label}
+        title={t(label) + " · " + t("拖放文件到这里")}
         aria-label={label}
         disabled={disabled}
         onClick={() => input.current?.click()}
@@ -44,6 +50,7 @@ export function FilePicker({
         <Icon name="upload" />
         {!iconOnly && label}
       </Button>
+      {drop.message && <span role="status">{t(drop.message)}</span>}
     </>
   );
 }

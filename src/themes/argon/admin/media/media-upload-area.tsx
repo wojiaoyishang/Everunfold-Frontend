@@ -1,7 +1,7 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import { useRef, useState } from "react";
+import { FileDropZone } from "../../components/ui/file-drop-zone";
 import { FilePicker } from "../../components/ui/file-picker";
 import { Icon } from "../../components/icon";
 import styles from "./media-picker.module.css";
@@ -13,34 +13,8 @@ export function MediaUploadArea({
   accept: string;
   onFiles: (files: File[]) => void;
 }) {
-  const depth = useRef(0);
-  const [dragging, setDragging] = useState(false);
   return (
-    <section
-      className={styles.uploadArea}
-      data-dragging={dragging}
-      aria-label="上传文件"
-      onDragEnter={(event) => {
-        if (!event.dataTransfer.types.includes("Files")) return;
-        event.preventDefault();
-        depth.current++;
-        setDragging(true);
-      }}
-      onDragOver={(event) => {
-        if (event.dataTransfer.types.includes("Files")) event.preventDefault();
-      }}
-      onDragLeave={() => {
-        depth.current = Math.max(0, depth.current - 1);
-        if (!depth.current) setDragging(false);
-      }}
-      onDrop={(event) => {
-        event.preventDefault();
-        depth.current = 0;
-        setDragging(false);
-        const files = Array.from(event.dataTransfer.files);
-        if (files.length) onFiles(files);
-      }}
-    >
+    <FileDropZone className={styles.uploadArea} onFiles={onFiles}>
       <Icon name="upload" />
       <h3>
         <UiText text="拖放文件到这里" />
@@ -54,6 +28,6 @@ export function MediaUploadArea({
           <UiText text="图片20 MB内 · SVG 1 MB内" />
         </small>
       </div>
-    </section>
+    </FileDropZone>
   );
 }

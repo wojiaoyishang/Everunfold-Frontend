@@ -1,4 +1,5 @@
 "use client";
+import { FileDropZone } from "../../../components/ui/file-drop-zone";
 import { useImperativeHandle, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useFontLibrary } from "@/core/fonts/library";
@@ -37,7 +38,11 @@ export default function HtmlEditor(props: BlockEditorProps) {
     [],
   );
   return (
-    <>
+    <FileDropZone
+      capture
+      disabled={props.disabled || !props.onUpload}
+      onFiles={(files) => props.onUpload?.(files)}
+    >
       {props.modeControls &&
         createPortal(
           <div
@@ -85,6 +90,6 @@ export default function HtmlEditor(props: BlockEditorProps) {
           initialSelection={selection}
         />
       )}
-    </>
+    </FileDropZone>
   );
 }
