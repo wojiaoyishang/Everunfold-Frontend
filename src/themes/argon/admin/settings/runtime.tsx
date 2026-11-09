@@ -14,6 +14,7 @@ import { Switch } from "../../components/ui/switch";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { ConnectedTaskProgress } from "../components/task-progress";
+import { ManualWorkerTaskDialog } from "./manual-worker-task";
 import styles from "./runtime.module.css";
 const labels: Record<string, string> = {
   online: "在线",
@@ -44,6 +45,7 @@ export function RuntimePage() {
     [busy, setBusy] = useState("");
   const [tab, setTab] = useState("概览");
   const [selectedRun, setSelectedRun] = useState<string | null>(null);
+  const [manualOpen, setManualOpen] = useState(false);
   const serial = useRef(0);
   const refresh = useCallback(
     async (signal?: AbortSignal) => {
@@ -89,7 +91,21 @@ export function RuntimePage() {
   };
   return (
     <div className={styles.page}>
-      <AdminPageHeading title="运行与任务" />
+      <AdminPageHeading
+        title="运行与任务"
+        action={
+          writable && (
+            <Button
+              className="admin-button admin-button-primary"
+              disabled={!data || !!busy}
+              onClick={() => setManualOpen(true)}
+            >
+              <Icon name="play" />
+              <UiText text="手动触发" />
+            </Button>
+          )
+        }
+      />
       <div className={styles.toolbar}>
         <div className={styles.tabs}>
           {["概览", "定时任务", "常驻任务", "执行记录"].map((name) => (
@@ -358,6 +374,24 @@ export function RuntimePage() {
             </section>
           )}
         </>
+      )}
+      {manualOpen && data && (
+        <ManualWorkerTaskDialog
+          plans={data.plans}
+          onClose={() => setManualOpen(false)}
+          onSubmitted={(overview, taskId) => {
+            ++serial.current;
+            setData(overview);
+            setError("");
+            setManualOpen(false);
+            setTab("执行记录");
+            const runs = overview.runs.filter((run) => run.task_id === taskId);
+            const selected =
+              runs.find((run) => ["queued", "running"].includes(run.status)) ??
+              runs[0];
+            setSelectedRun(selected?.id ?? null);
+          }}
+        />
       )}
     </div>
   );

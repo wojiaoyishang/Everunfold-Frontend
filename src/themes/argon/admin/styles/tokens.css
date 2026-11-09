@@ -160,7 +160,8 @@ html:has([data-admin-mode="dark"]),
     --admin-muted: CanvasText;
     --admin-accent: LinkText;
   }
-  .admin-root .admin-nav-link[aria-current="page"] {
+  .admin-root .admin-nav-link[aria-current="page"],
+  .admin-root .admin-nav-trigger[data-current="true"] {
     outline: 1px solid Highlight;
   }
 }

@@ -1,0 +1,95 @@
+.dialog:global(.admin-library-modal) {
+  width: min(640px, calc(100vw - 24px));
+}
+.form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+  gap: 20px;
+}
+.form > *,
+.form :global(.ui-field-control),
+.field :global(.ui-select-trigger) {
+  min-width: 0;
+  max-width: 100%;
+}
+.hint {
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+}
+.form :global(.ui-form-field label),
+.field > span {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.form :global(.ui-field-control > .ui-input),
+.field :global(.ui-select) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+.field :global(.ui-select-trigger > span) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.field small {
+  display: block;
+  margin-top: 8px;
+  color: var(--admin-muted);
+}
+.details {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  margin: 0;
+  background: var(--admin-subtle);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+.details > div {
+  display: grid;
+  grid-template-columns: 90px minmax(0, 1fr);
+  gap: 12px;
+}
+.details dt {
+  color: var(--admin-muted);
+}
+.details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.details code {
+  font-size: 12px;
+}
+.error {
+  color: var(--admin-danger);
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+@media (max-width: 640px) {
+  .form {
+    gap: 16px;
+  }
+  .details > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 5px;
+  }
+}
+
+.required {
+  color: var(--admin-danger);
+  font-weight: 600;
+}

@@ -1,42 +1,15 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { Taxonomy } from "@/core/content/types";
-import { layoutWords, type PlacedWord } from "@/core/taxonomy/cloud-layout";
+import { useWordCloud } from "../hooks/use-word-cloud";
 import { taxonomyHref } from "@/core/content/urls";
 import { AppLink } from "./navigation-link";
 import { Button } from "./ui/primitives";
 import { UiText } from "@/core/i18n/provider";
 import styles from "./tag-word-cloud.module.css";
 export function TagWordCloud({ terms }: { terms: Taxonomy[] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [placed, setPlaced] = useState<PlacedWord[]>([]),
-    [list, setList] = useState(false);
-  useEffect(() => {
-    const root = ref.current;
-    if (!root) return;
-    let alive = true;
-    const update = () => {
-      if (!alive) return;
-      const canvas = document.createElement("canvas"),
-        ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      const width = root.clientWidth,
-        height = width < 500 ? 360 : 440;
-      setPlaced(
-        layoutWords(terms, width, height, (text, size) => {
-          ctx.font = `600 ${size}px ${getComputedStyle(root).fontFamily}`;
-          return ctx.measureText(text).width;
-        }),
-      );
-    };
-    const observer = new ResizeObserver(update);
-    observer.observe(root);
-    void document.fonts.ready.then(update);
-    return () => {
-      alive = false;
-      observer.disconnect();
-    };
-  }, [terms]);
+  const { ref, placed } = useWordCloud(terms);
+  const [list, setList] = useState(false);
   const byId = new Map(terms.map((t) => [t.id, t]));
   return (
     <section className={`surface ${styles.root}`}>

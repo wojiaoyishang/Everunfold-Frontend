@@ -18,8 +18,16 @@
 }
 .search {
   display: flex;
+  align-items: center;
   gap: 8px;
   min-width: 0;
+}
+.searchField {
+  flex: 1 1 230px;
+  min-width: 160px;
+}
+.searchField:focus-within > :global(.icon) {
+  color: var(--admin-accent);
 }
 .search input {
   min-width: 0;
@@ -140,9 +148,6 @@
     flex-wrap: wrap;
     width: 100%;
   }
-  .search input {
-    flex-basis: 100%;
-  }
   .toolbar,
   .footer {
     padding: 14px;
@@ -153,4 +158,108 @@
   .form {
     gap: 16px;
   }
+}
+
+.views {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.views :global(.admin-button[aria-pressed="true"]) {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+  border-color: var(--admin-accent);
+}
+.cloud {
+  padding: 20px 22px;
+}
+.cloudHint {
+  color: var(--admin-muted);
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0;
+}
+.cloudStage {
+  position: relative;
+  height: 400px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+.cloudStage[data-packed="false"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  height: auto;
+}
+.cloudWord {
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--admin-accent);
+  font-weight: 600;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cloudWord:nth-child(3n) {
+  color: var(--admin-text);
+}
+.cloudWord:hover {
+  background: var(--admin-accent-soft);
+}
+.cloudStage[data-packed="false"] .cloudWord {
+  position: static;
+  min-height: 36px;
+  max-width: 100%;
+}
+@media (max-width: 650px) {
+  .cloud {
+    padding: 16px 14px;
+  }
+}
+@media (max-width: 1160px) {
+  .toolbar .search {
+    flex-basis: 100%;
+  }
+}
+@container (max-width: 499px) {
+  .cloudStage[data-packed="true"] {
+    height: 360px;
+  }
+}
+.cloud {
+  container-type: inline-size;
+}
+
+@media (max-width: 480px) {
+  .searchField {
+    flex-basis: 100%;
+  }
+}
+
+.cloudText {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.cloudStage[data-packed="false"] .cloudText {
+  position: static;
 }

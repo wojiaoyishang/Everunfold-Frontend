@@ -71,6 +71,7 @@
   min-height: var(--admin-nav-row-height);
   padding: 10px 12px;
   border-radius: 6px;
+  background: transparent;
   color: var(--admin-muted);
   transition:
     color 150ms,
@@ -82,11 +83,13 @@
   flex: 0 0 18px;
   font-size: 17px;
 }
-.admin-nav-link:hover {
+.admin-nav-link:hover,
+.admin-nav-flyout-branch .admin-nav-trigger[aria-expanded="true"] {
   color: var(--admin-text);
   background: var(--admin-subtle);
 }
-.admin-nav-link[aria-current="page"] {
+.admin-nav-link[aria-current="page"],
+.admin-nav-trigger[data-current="true"] {
   background: var(--admin-accent-soft);
   color: var(--admin-accent);
   font-weight: 550;
@@ -475,9 +478,6 @@ body:has(.admin-embedded-editor) .admin-editor-preview-action,
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.admin-nav-trigger[data-current="true"] {
-  color: var(--admin-accent);
-}
 .admin-nav-chevron {
   display: flex;
   flex-shrink: 0;
@@ -534,10 +534,6 @@ body:has(.admin-embedded-editor) .admin-editor-preview-action,
 }
 
 /* Desktop navigation floats beside the sidebar, including its collapsed form. */
-.admin-nav-flyout-branch .admin-nav-trigger[aria-expanded="true"] {
-  background: var(--admin-accent-soft);
-  color: var(--admin-accent);
-}
 .admin-nav-flyout-branch .admin-nav-chevron {
   transform: none;
 }
