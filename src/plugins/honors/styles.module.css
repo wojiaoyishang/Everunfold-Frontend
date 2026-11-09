@@ -312,8 +312,7 @@
   margin: auto;
   width: min(1040px, calc(100vw - 32px));
   max-height: calc(100dvh - 32px);
-  overflow: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
   padding: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -321,6 +320,16 @@
   color: var(--text);
   box-shadow: var(--shadow);
   animation: enter 200ms var(--motion-ease) both;
+}
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.dialogBody {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
 }
 .dialog::backdrop {
   background: rgb(10 8 24 / 60%);
@@ -339,6 +348,7 @@
 }
 .dialogHeader {
   display: flex;
+  flex-shrink: 0;
   justify-content: space-between;
   align-items: start;
   gap: 20px;
@@ -394,12 +404,18 @@
   object-fit: contain;
 }
 .dialogFooter {
+  flex-shrink: 0;
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--surface);
+}
+.certificateDetails {
   padding: 20px 24px;
 }
-.dialogFooter strong {
+.certificateDetails strong {
   color: var(--accent);
 }
-.dialogFooter p {
+.certificateDetails p {
   white-space: pre-wrap;
   color: var(--muted);
   line-height: 1.8;
@@ -410,7 +426,6 @@
   gap: 10px;
   flex-wrap: wrap;
   align-items: center;
-  margin-top: 16px;
   font-size: 12px;
   color: var(--muted);
 }
@@ -475,8 +490,11 @@
     border-bottom: 1px solid var(--line);
   }
   .dialogHeader,
-  .dialogFooter {
+  .certificateDetails {
     padding: 18px;
+  }
+  .dialogFooter {
+    padding: 14px 18px;
   }
   .dialogHeader h2 {
     font-size: 17px;

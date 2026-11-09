@@ -91,21 +91,25 @@ export function Certificate({
           <Icon name="close" />
         </Button>
       </header>
-      <div className={styles.certificateImage}>
-        {item.image && (
-          <CertificateImage
-            key={item.image}
-            src={item.image}
-            title={item.title}
-            large
-          />
+      <div className={styles.dialogBody}>
+        <div className={styles.certificateImage}>
+          {item.image && (
+            <CertificateImage
+              key={item.image}
+              src={item.image}
+              title={item.title}
+              large
+            />
+          )}
+        </div>
+        {(item.award || item.description) && (
+          <div className={styles.certificateDetails}>
+            {item.award && <strong>{item.award}</strong>}
+            {item.description && <p>{item.description}</p>}
+          </div>
         )}
       </div>
       <footer className={styles.dialogFooter}>
-        <div>
-          {item.award && <strong>{item.award}</strong>}
-          {item.description && <p>{item.description}</p>}
-        </div>
         <div className={styles.viewerActions}>
           <Button
             className={styles.iconButton}
