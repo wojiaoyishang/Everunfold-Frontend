@@ -1110,3 +1110,20 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/handoff/paper-starter-verification.md` | `paper-starter-2` | `0d6fd1a719714c8ea6714b159ddc908efc9e9c2216bca6ddccadd747f2babbab` |
 | `docs/handoff/theme-cards-and-navigation-verification.md` | `theme-cards-navigation-2` | `2fbdc49507e7725b78af2a3606e5b7621ac78b6d2c4830ef0c335aff60adf70d` |
 | `docs/handoff/theme-browser-paper-fonts-verification.md` | `theme-browser-paper-fonts-1` | `b8b875c5cbc200f23b17df93e42cab8f7e6c07d7c92ef0221b9ab196bb98cf1c` |
+
+
+## 验证码与 API Key 策略交付（2026-11-09）
+
+后端9d54f9e/9033616/1bf2161、前端3711671/369196c；captcha1.1.0及content-access1.3.0锁定9033616，嵌套公开/协同契约已统一。全局/单篇规则、提供方、受限投影和Key独立豁免/限流/撤销围栏完成；后端根plugins旧占位按用户要求删除。以下当前共同版本替代对应旧摘要，原始基线保留，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `a4d80715063154e11aeb07c1daa4ba17bf04fa75d6e6101aec11c027841dd239` |
+| `docs/architecture/constraints.md` | `bootstrap-20` | `cd2a21ae3975302e1539edfd19873f35cd680ec0ef550aa0e5817b400877e576` |
+| `docs/development/captcha.md` | `captcha-1` | `fa0505cdf4d93abafcfd9085ce81cf75f241f0e365892a8067559c6dca4f1a4e` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-8` | `75e6eb8fe2271c4f73f22cda65e561eb8032f7a95badfd7ca538aa7a7db8f184` |
+| `docs/development/settings.md` | `settings-runtime-12` | `d07fc1dbf18bdf6770825136aa27ab9cb9b17420406328f3fb684cd1f759bead` |
+| `docs/development/accounts.md` | `accounts-runtime-8` | `6518285dcd777aea888bbe8894eae190ba46d0d4a60636cc71518a0922f6035b` |
+| `docs/development/api-key-applications.md` | `api-key-applications-3` | `37182da1da60291ab1bbc191265ee628488630874ae2be5b9299be849e91e553` |
+| `docs/decisions/0086-captcha-providers-and-content-policies.md` | `ADR0086` | `b5b957a4e9a8ec83e842e9bd28f564aaee723a153438a9a24e2451180394c0f4` |
+| `docs/handoff/captcha-verification.md` | `captcha-verification-1` | `b8551fdc6e9e0f0a2ce0c774b23dfc7cfbc05d772bed52009cbd2bc10a18e73f` |

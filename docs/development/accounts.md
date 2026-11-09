@@ -1,6 +1,6 @@
 # 账号中心与用户管理
 
-版本：accounts-runtime-7，2026-11-06。基础检查见[验收记录](../handoff/accounts-verification.md)，入口与头像动效见[最新验收](../handoff/header-account-entry-verification.md)；身份预设见[本轮验收](../handoff/user-presets-verification.md)，协议见[API Key接入指南](api-key-applications.md)。
+版本：accounts-runtime-8，2026-11-09。基础检查见[验收记录](../handoff/accounts-verification.md)，入口与头像动效见[最新验收](../handoff/header-account-entry-verification.md)；身份预设见[本轮验收](../handoff/user-presets-verification.md)，协议见[API Key接入指南](api-key-applications.md)。
 
 ## 使用入口
 
@@ -78,3 +78,7 @@ Key只在生成成功当次显示，数据库仅存摘要。相同操作重试�
 ## 部署与契约
 
 后端显式迁移至`0022_user_permission_presets`，启动不自动迁移。使用accounts1.4.0、auth0.2.0、content-admin1.9.0及api-key-protocol1.0.0；前端生成文件锁定后端已提交来源，不手改Schema或客户端。先迁移、部署API/Worker，再部署匹配前端。当前容器按原要求使用HTTP和`0.0.0.0`，设备地址和凭据只在忽略的运行配置中维护。
+
+## API Key的验证码权限
+
+面向博客的Key创建表单增加“阅读免验证码”“评论免验证码”，两项默认不选，只有已获对应权限的用户可签发。站点验证码设置还可禁止豁免及调整每Key阅读侧请求额度；授权并不跳过文章密码或直接公开评论。失效Key不回退匿名，签名查询/Callback仍沿原协议。完整使用与限制见[验证码指南](captcha.md)。

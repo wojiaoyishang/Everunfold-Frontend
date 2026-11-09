@@ -1,6 +1,6 @@
 # 独立插件、页面与短代码开发
 
-版本：frontend-plugins-7，2026-11-09。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
+版本：frontend-plugins-8，2026-11-09。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
 
 ## 源码和命令
 
@@ -188,3 +188,7 @@ npm run check覆盖类型、格式、注册不变量和包完整性/回退检查
 ## 字体注册
 
 同步setup可fonts.register(defineFont(...))；客户端用FontStyles/useFont按ID引用。主题也可用同一defineFont在ThemeDefinition.fonts中注册。字体业务统一src/core/fonts，插件asset:字体按原哈希资产协议独立打包，支持开发热更新；系统栈不下载，文件只随实际引用加载。完整范例、文件约定与宿主更新边界见[字体指南](font-registration.md)。
+
+## 验证码组件
+
+[验证码指南](captcha.md)描述随项目提供的src/plugins/captcha、SDK CaptchaWidgetProps及后端验证接口。前端按components.register贡献具名组件，后端可信验证器在其app/plugins目录发现。本文src/plugins和产物plugins均指前端仓库；后端根plugins旧占位已删除。

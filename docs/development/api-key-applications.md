@@ -1,6 +1,6 @@
 # API Key接入应用
 
-版本：api-key-applications-2，2026-11-06。主项目是唯一签发/授权来源；接口Schema见后端`contracts/api-key-protocol-v1.schema.json`，浏览器管理另见`accounts-v1`及[账号指南](accounts.md)。页面及部署见[验收记录](../handoff/accounts-verification.md)。
+版本：api-key-applications-3，2026-11-09。主项目是唯一签发/授权来源；接口Schema见后端`contracts/api-key-protocol-v1.schema.json`，浏览器管理另见`accounts-v1`及[账号指南](accounts.md)。页面及部署见[验收记录](../handoff/accounts-verification.md)。
 
 ## 身份与接口目标
 
@@ -40,3 +40,7 @@
 接收方须防止较新回调后迟到的旧查询回填，单调app_version和请求开始的本地generation共同守卫。`examples/api-key-client.mjs`给出Node22独立实现，支持验签、绝对短缓存、只读/写入、nonce、重复/乱序回调及迟到响应保护，不依赖主项目Python代码。示例缓存限1000项、nonce限10000项；只供单个子项目服务进程使用。多进程子项目应将版本下界/失效通过共享Redis等原子存储传播到所有进程，或禁用读取缓存；仅通知一个进程不能声称整个集群已应用。示例只清缓存，重复事件无额外业务效果；扩展业务副作用须另做持久event_id幂等。
 
 网络分区无法承诺零延迟撤销，普通读取以短期限兜底，过期无法确认就拒绝。已在执行的操作不回滚；长任务执行关键步骤仍需重新授权。回调只传失效事件，不接收子项目更改主项目权限。
+
+## 阅读侧验证码与机器请求
+
+机器查询及Callback继续使用上面的签名/nonce/期限协议，不增加人工验证码。博客阅读侧新增独立的 `captcha:read_bypass` 和 `captcha:comment_bypass` 权限：与全局许可同时满足时才免去对应挑战，已有Key不自动增权；撤销、缩权、密码和评论审核继续生效。每Key的阅读侧额度、私有回执及鉴权围栏见[验证码指南](captcha.md#api-key-与机器调用)。这不是对所有管理业务API统一新增限额。

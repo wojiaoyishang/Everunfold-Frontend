@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-11，2026-11-09。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-12，2026-11-09。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -12,9 +12,10 @@
 | `/admin/icons` | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用 |
 | `/admin/media` | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取 |
 | `/admin/settings/theme` | 默认主题色/显示模式、首页横幅文字、背景图片/视频地址、默认播放；代码深浅配色、行号/折行/折叠、字号/行高/tab-size、代码字体与实际阅读框预览 |
+| `/admin/settings/captcha` | 本地图片/Google/Turnstile、登录与阅读/评论全局规则、API Key明确授权豁免和阅读侧请求限额；单篇覆盖见各编辑器 |
 | `/admin/settings/system` | 按稳定节点 ID 保存动态请求刷新间隔、超时、重试间隔、批处理窗口；查看期望/确认版本、重新同步；部署来源脱敏展示 |
 
-当前settings契约1.10.0新增site.language_catalog，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON补默认值，目录字段无需SQL迁移。历史1.8.0的theme.code继续保留，代码字体只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL；沿既有可靠投递及媒体引用保护处理CDN改址。参数和加载规则见[代码指南](code-blocks.md)。
+settings契约1.10.0新增site.language_catalog，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON补默认值，目录字段无需SQL迁移。历史1.8.0的theme.code继续保留，代码字体只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL；沿既有可靠投递及媒体引用保护处理CDN改址。参数和加载规则见[代码指南](code-blocks.md)。
 
 语言分区支持默认语言和中文前缀修改；标志小按钮打开可搜索国旗/自定义标志弹窗，“添加语言”分备选和自定义。只有默认语言可留空前缀，更换默认值不批量修改已有文章地址。已有本语言程序包显示“本语言界面”，只有缺包项选择界面回退。被内容使用的语言不可删除，可禁用；新增语言不自动翻译正文。完整约束见[多语言指南](../architecture/multilingual-content.md)，更改后仍需点击“保存更改”并等待节点确认。
 
@@ -22,19 +23,22 @@
 
 一般“保存更改”把整份站点与主题草稿作为一个版本提交。已安装主题先通过卡片/列表打开详情，右下角启用按钮只保存主题选择，并保留其他未保存输入；可从实例默认的详情中恢复部署默认。提交成功后节点状态可能仍是等待同步，收到落盘确认才显示已应用。若提示版本冲突，当前草稿仍在；先保留你的修改，再使用明确标注的「放弃本地修改并载入服务器版本」合并。写请求不自动重试，未知结果先读取核对。节点策略按节点单独保存，切换选择不会覆盖该页其它节点草稿。
 
+验证码使用独立的私有配置和修订，不把 Secret 放到普通站点设置或公开快照。首次规则全部关闭；机器调用豁免还须在Key创建时授予对应权限。见[验证码指南](captcha.md)。
+
 ## 保存与读取端点
 
 全部浏览器管理请求直达配置的 FastAPI，使用已有 HttpOnly 会话；写请求附 `X-CSRF-Token`，不在 URL 传凭据。
 
 | 方法与路径 | 作用 |
 | --- | --- |
+| GET/PATCH `/v1/admin/captcha` | 独立验证码修订、提供方与写入式密钥、用途规则、API Key策略，见[指南](captcha.md) |
 | GET `/v1/admin/settings` | 当前站点/主题值、source_epoch、revision、节点状态 |
 | PATCH `/v1/admin/settings` | `{expected_revision, value: {site, theme}}` 保存整份配置 |
 | GET `/v1/admin/frontend-nodes` | 已配置的节点、各自策略与状态 |
 | GET/PATCH `/v1/admin/frontend-nodes/{node_id}/cache-policy` | 读取/以 expected_revision 保存该节点策略 |
 | POST `/v1/admin/frontend-nodes/{node_id}/sync` | 重发当前版本；若派生媒体 URL 变化则发布新的公共设置修订 |
 
-公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以settings1.10.0生成契约为准；被内容使用的语言移除为42292，导航路径冲突为42294。公共value包含site/theme与后端派生的icon_urls；客户端映射不作为保存事实源。Node内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
+公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以当前settings1.15.0生成契约为准；被内容使用的语言移除为42292，导航路径冲突为42294。公共value包含site/theme与后端派生的icon_urls；客户端映射不作为保存事实源。Node内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
 
 ## 初次启动与配置
 
