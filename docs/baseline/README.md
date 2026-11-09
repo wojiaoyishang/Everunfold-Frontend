@@ -1127,3 +1127,21 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/api-key-applications.md` | `api-key-applications-3` | `37182da1da60291ab1bbc191265ee628488630874ae2be5b9299be849e91e553` |
 | `docs/decisions/0086-captcha-providers-and-content-policies.md` | `ADR0086` | `b5b957a4e9a8ec83e842e9bd28f564aaee723a153438a9a24e2451180394c0f4` |
 | `docs/handoff/captcha-verification.md` | `captcha-verification-1` | `b8551fdc6e9e0f0a2ce0c774b23dfc7cfbc05d772bed52009cbd2bc10a18e73f` |
+
+
+## 单入口后端插件交付（2026-11-09）
+
+后端4df1fdb/3b85ad2、前端5ad3705；settings1.16.1锁定3b85ad2。单入口函数/类SDK、动态只读短代码目录、统一验证码注册及后台启停完成，前端不再内嵌后端模板。以下版本替代对应旧摘要，原始基线保留，STATUS各自维护。
+
+| 当前共同文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `本轮更新` | `7c0f481e35b1768464579437d66970b7b5c549f3d619226ca1b59cf0e38fc315` |
+| `docs/architecture/constraints.md` | `bootstrap-21` | `570ec4165cb0d054371eee1de7d3811d9bfd143cd3d1e533a88d7d59d81dcee6` |
+| `docs/architecture/shortcodes.md` | `shortcodes-5` | `505809d37027e674164987c79a3424bba8e767c78d2f058d467538fc15e0f5ab` |
+| `docs/development/backend-plugins.md` | `backend-plugins-1` | `5085944a5692753e4700fdc02c766b2ee57d80af3dfd7557c7e1db4aa9842b0d` |
+| `docs/development/captcha.md` | `captcha-2` | `9cb168c0e834d47095c262e3fb9759d71405fe40b7e785302644a598006fe59b` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-9` | `9e5de60218bb9abe4c34a0f6cf52b093866126d73e432f4374c2364b801b3120` |
+| `docs/development/settings.md` | `settings-runtime-13` | `f51ba1aa09ac329814575c7ac6a28602e5c714255fef096c9185d704659ca6ba` |
+| `docs/decisions/0086-captcha-providers-and-content-policies.md` | `ADR0086-2` | `bb5e28e49bb8b27649a8709648dd8fa0f197e326d074aa8afe89a29ccd5eee5b` |
+| `docs/decisions/0087-single-entry-backend-plugins.md` | `ADR0087` | `e26b023a5349c712c43a3c33033603910770fefbc28d1e99152ff1ce85510918` |
+| `docs/handoff/backend-plugins-verification.md` | `backend-plugins-verification-1` | `b0b884c7a7eb38290c577ce916b370281f602d021dd241fe67b92804d8931df8` |

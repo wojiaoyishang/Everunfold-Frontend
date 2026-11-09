@@ -1,12 +1,12 @@
 # 验证码配置与提供方开发
 
-版本：captcha-1，2026-11-09。决定见[ADR0086](../decisions/0086-captcha-providers-and-content-policies.md)，检查见[实际验收](../handoff/captcha-verification.md)。
+版本：captcha-2，2026-11-09。决定见[ADR0086](../decisions/0086-captcha-providers-and-content-policies.md)，检查见[实际验收](../handoff/captcha-verification.md)。
 
 ## 配置和使用
 
 后台入口为“设置 → 验证码设置”。初始选择本地图片验证码，所有应用规则默认关闭。可分别开启登录、文章/说说/页面的阅读或评论验证。文章、说说的内容属性“验证码”面板，以及页面编辑器，提供“跟随全局 / 必须验证 / 无需验证”；保存草稿保留设置，发布或应用后生效。各语言内容沿既有独立发布规则，注册页面的同一配置覆盖其所有语言入口。
 
-本地验证无需密钥。外部提供方目前有 Google reCAPTCHA v2 Checkbox 和 Cloudflare Turnstile，须填写对应 Site Key、Secret、允许的主机名，并启用前端“第三方验证码”插件。主机名每行一个，不包含协议、端口或通配符。Secret 写入后只显示“已配置”；留空保留原值，API 的 `clear_secret` 可明确清除，`remove_providers` 可移除未选中的完整配置。外部服务配置不完整不能保存；故障、插件缺失、过期或校验失败均不放行，不自动切换到本地。
+本地验证无需密钥。外部提供方目前有 Google reCAPTCHA v2 Checkbox 和 Cloudflare Turnstile，须填写对应 Site Key、Secret、允许的主机名，并启用前端“第三方验证码”插件及对应后端验证器插件。主机名每行一个，不包含协议、端口或通配符。Secret 写入后只显示“已配置”；留空保留原值，API 的 `clear_secret` 可明确清除，`remove_providers` 可移除未选中的完整配置。外部服务配置不完整不能保存；故障、插件缺失、过期或校验失败均不放行，不自动切换到本地。
 
 全局设置改变后，后端校验立即使用新规则，公开阅读通过既有可靠投递更新节点；界面会提示等待节点同步。部署新契约时先升级全部接收器、前端与协同/API进程，再启用规则。单篇发布/页面应用同样更新完整快照。公开 HTML、搜索正文和共享缓存只携带受限占位信息；解锁响应使用 private/no-store，只在当前页面内存中使用。
 
@@ -43,25 +43,32 @@ Redis 仅保存按项目/环境隔离的短时状态：图片答案只存随机�
 
 ## 增加提供方
 
-后端统一使用 `app/plugins/<目录>/captcha.py`，导出 `CaptchaProvider` 实例 `provider`。API的 `captcha.router_init(ctx)` 自动发现并拒绝重复 ID；可信 Python 源码部署后重启 API 生效。已删除后端根 `plugins/` 的旧占位目录；工程原始附件中的旧目录图保留为历史资料。
+后端统一使用 `app/plugins/<目录>/plugin.py`，导出插件对象，通过setup注册CaptchaProvider。只规定该入口，verify_token可放在任意文件中；旧captcha.py不再单独扫描。发现、生命周期和显式部署命令见[后端插件指南](backend-plugins.md)。可信Python源码部署到全部API进程后重启，再运行目录同步命令。后端根plugins旧占位不恢复。
 
 ```python
-from app.modules.captcha.providers import CaptchaProvider
+from app.plugin_sdk import CaptchaProvider, PluginRegistry, define_plugin
 from .verification import verify_token
 
-provider = CaptchaProvider(
-    id="example.captcha",
-    title="Example CAPTCHA",
-    widget="example.captcha.widget",
-    verify=verify_token,
-)
+
+def setup(registry: PluginRegistry) -> None:
+    registry.captcha.register(
+        CaptchaProvider(
+            id="example.captcha",
+            title="Example CAPTCHA",
+            widget="example.captcha.widget",
+            verify=verify_token,
+        )
+    )
+
+
+plugin = define_plugin(id="example.verification", title="Example CAPTCHA", setup=setup)
 ```
 
-`verify_token(token: str, settings: StoredProvider) -> bool` 必须是异步函数，执行实际服务端校验。`settings` 只提供给后端，包含 site_key、secret、hostnames。兼容 `success/hostname` 响应的服务可复用 `verify_site_token`；其他协议自行检查签名、时效、用途/主机名，设置超时并拒绝失败。固定可信服务端点写在插件代码中，浏览器不提交校验 URL。外部 HTTP 在业务事务之外执行；不能用总是返回 True 的占位实现。
+`verify_token(token: str, settings: StoredProvider) -> bool` 必须是异步函数，执行实际服务端校验。`StoredProvider`可从app.plugin_sdk导入；`settings`只提供给后端，包含site_key、secret、hostnames。兼容 `success/hostname` 响应的服务可复用 `verify_site_token`；其他协议自行检查签名、时效、用途/主机名，设置超时并拒绝失败。固定可信服务端点写在插件代码中，浏览器不提交校验 URL。外部 HTTP 在业务事务之外执行；不能用总是返回 True 的占位实现。
 
 前端在其独立仓库的 `src/plugins/<目录>/plugin.ts` 通过 `components.register("example.captcha.widget")` 注册，再在 components.tsx 导出组件。SDK提供 `CaptchaWidgetProps`：siteKey、challengeId、onChange(token)、onError。验证成功/过期时分别传令牌/空字符串，失败调用 onError；清理 iframe/事件、按需加载脚本，并支持重复挂载。宿主负责刷新、提交与错误展示。随项目交付的 `src/plugins/captcha` 是完整示例：Google使用ready；异步加载的Turnstile在script.onload后直接显式render。
 
-前端沿原有独立构建、开发热更新和部署启停机制；其根 `plugins/<目录>` 是前端产物目录。后端的 `app/plugins` 是 Python 源码，两者各自归属，不共用根路径。停用被验证码配置引用的前端插件会显示确认提示；取消还原开关，继续则保留配置并阻止无法完成的验证。
+前端沿原有独立构建、开发热更新和部署启停机制；其根 `plugins/<目录>` 是前端产物目录。后端的 `app/plugins` 是 Python 源码，两者各自归属，不共用根路径。停用被验证码配置引用的前端或后端插件会显示确认提示；取消还原开关，继续则保留配置并阻止无法完成的验证。后端校验器要求本地目录与已登记摘要一致且启用；停用、重启到未登记构建或在途状态变化会拒绝验证，不降级为无需验证码。
 
 ## 部署与范围
 

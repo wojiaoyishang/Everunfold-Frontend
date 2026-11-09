@@ -1,5 +1,14 @@
 # 前端交接状态
 
+## 最新交付：后端插件启停与运行时短代码目录（2026-11-09）
+
+- 前端5ad3705、后端4df1fdb/3b85ad2。后端改为app/plugins/*/plugin.py单入口，函数/类注册短代码、验证码、具名文案；示例example:card/example:badge和原notice/accordion均由插件提供。见[指南](../development/backend-plugins.md)、[ADR0087](../decisions/0087-single-entry-backend-plugins.md)与[共同验收](backend-plugins-verification.md)。
+- settings1.16.1按精确后端提交/SHA锁定，删除主体内嵌的后端短代码目录和相应生成逻辑。插入器、目录和正文渲染使用已部署applied模板，普通编辑者不需settings:read，未应用草稿隔离；前后端名称冲突拒绝登记，渲染保护后端已应用模板所有权。
+- 插件管理合并前后端来源、版本、作者及贡献，复用启停/使用确认/取消还原，部署不同步提示。前端画廊示例仍由自身renderer展示；CSS白名单在实际渲染时获取当前插件注册表，修复延迟加载后的样式丢失。
+- 最终npm run check的lint/类型/插件类型/格式和316项通过；隔离生产35私有入口、构建后新增/替换/移除插件、主题切换、多语言/页面/代码公式及真实停后端reader矩阵通过。后端完整262项和静态检查通过。中间SIGTERM/定位器/断言错误及修正均记入验收，未跳过失败检查。
+- 实页1440/390、中英/深色/减少动态检查并实际看图；基础插件真实停用/恢复、使用确认Esc回焦、只读代码模板、文章工具栏卡片调用与预览通过。没有写入或发布测试正文，原开关恢复，验证码local/全局关闭；pageerror0/native dialog0，本次会话退出200并关闭自己的浏览器。
+- 后端纯模板新增无需重新编译主体，Python侧仍须重启并显式同步；React插件部署方式保持。六服务/四个0.0.0.0监听/HTTP200，当前应用目录一致。公共规范及版本SHA双仓同步，本地分阶段提交未push，实际设备地址/凭据/截图仅在忽略配置或var。
+
 ## 最新交付：验证码配置、阅读保护与 API Key 授权（2026-11-09）
 
 - 前端3711671/369196c，后端9033616/1bf2161。验证码设置提供本地图片、Google/Turnstile，登录/文章/说说/页面阅读及评论全局开关；各编辑器提供inherit/required/off。API Key新增阅读/评论免验证码权限、全局许可和每Key阅读侧限额。已获权限且Key/用户/应用有效才放行，原Key不增权；密码、内容可见性与评论审核独立。见[指南](../development/captcha.md)、[ADR0086](../decisions/0086-captcha-providers-and-content-policies.md)、[验收](captcha-verification.md)。

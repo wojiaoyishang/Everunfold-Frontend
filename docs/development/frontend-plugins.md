@@ -1,6 +1,6 @@
 # 独立插件、页面与短代码开发
 
-版本：frontend-plugins-8，2026-11-09。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
+版本：frontend-plugins-9，2026-11-09。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
 
 ## 源码和命令
 
@@ -56,7 +56,7 @@ export default definePlugin({
 });
 ```
 
-只调用需要的register。setup必须同步，不能稍后追加。页面/短代码定义只是对象，通过插件setup注册，不写顶层自注册副作用。身份、调用名或后端内置保留名冲突会拒绝该包。数据库自定义短代码保留custom:命名空间，调用格式仍是`{{< name key="value" >}}`及容器结束标记。
+只调用需要的register。setup必须同步，不能稍后追加。页面/短代码定义只是对象，通过插件setup注册，不写顶层自注册副作用。包内及前端插件间的身份、调用名冲突会拒绝该包；后端部署登记另行检查已安装后端插件的调用名。前端主体不再保存后端内置名称表。数据库自定义短代码保留custom:命名空间，调用格式仍是`{{< name key="value" >}}`及容器结束标记。
 
 版本用于语义兼容，不出现在目录名中；资源和构建摘要自动变化。页面registration.version变化后须核对已有发布快照及数据兼容，再显式保存/应用，不用改版本号触发缓存刷新。
 
@@ -191,4 +191,9 @@ npm run check覆盖类型、格式、注册不变量和包完整性/回退检查
 
 ## 验证码组件
 
-[验证码指南](captcha.md)描述随项目提供的src/plugins/captcha、SDK CaptchaWidgetProps及后端验证接口。前端按components.register贡献具名组件，后端可信验证器在其app/plugins目录发现。本文src/plugins和产物plugins均指前端仓库；后端根plugins旧占位已删除。
+[验证码指南](captcha.md)描述随项目提供的src/plugins/captcha、SDK CaptchaWidgetProps及后端验证接口。前端按components.register贡献具名组件，后端可信验证器通过app/plugins/*/plugin.py的setup登记，见[单入口后端SDK](backend-plugins.md)。本文src/plugins和产物plugins均指前端仓库；后端根plugins旧占位已删除。
+
+
+## 后端模板协作
+
+后端注册的纯HTML/CSS模板通过可靠设置流的PublicSettings.shortcodes抵达节点，前端按当前应用目录解析，不在contracts缓存生成已安装短代码清单。前端贡献继续负责自定义渲染和交互，后端模板只读。管理端ShortcodeCatalog.applied提供编辑器所需的已应用模板，普通编辑者无需settings:read权限；草稿模板不会提前影响插入和预览。运行时类名白名单与当前插件目录同步更新，避免晚加载、热替换或停用后使用过期清单。

@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-12，2026-11-09。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-13，2026-11-09。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -98,3 +98,10 @@ settings.directory/
 关联保存资源类型与稳定ID，链接随目标发布/应用后的路径变化。当前阅读语言有同组公开版本时优先使用该版本，否则使用关联项；注册页面使用实现显式声明的语言路由。目标未发布、停用、撤回、转私有或回收后隐藏该菜单及其子树，不能回退到旧URL。手动链接不自动跟随。
 
 后端`POST /v1/admin/settings/navigation-resources`要求`settings:read`，浏览器仍检查精确Origin/CSRF。请求含kind、可选id、search、page、page_size，返回最小ID/标题/当前公开路径/语言，不返回草稿、正文或内部元数据。允许管理员和被明确授予读取设置能力的调用方选择已公开资源；此接口不授予页面或内容写入权限。
+
+
+## 后端插件目录
+
+插件管理合并已登记前端包与后端单入口插件，展示来源、版本和作者，使用同一extensions.disabled_plugins保存启停偏好。后端目录由部署命令写入私有_backend_plugins，不能由浏览器设置修改；PublicSettings.shortcodes仅投影启用的代码模板及用户已应用模板。普通设置保存由服务端按开关重算目录，拒绝伪造代码模板。
+
+后端代码与登记目录不一致时显示部署提示；重新启用需先完成同步，依赖须同时满足。验证码提供方也纳入引用提示和实际服务端启停守卫。操作流程和开发接口见[后端插件](backend-plugins.md)，实际验收见[本轮记录](../handoff/backend-plugins-verification.md)。

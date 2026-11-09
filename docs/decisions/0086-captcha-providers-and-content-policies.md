@@ -2,6 +2,8 @@
 
 日期：2026-11-09。状态：已实施；接口、部署与限制见[指南](../development/captcha.md)，实际检查见[验收](../handoff/captcha-verification.md)。
 
+2026-11-09追加：后端验证码专用captcha.py发现方式由[ADR0087](0087-single-entry-backend-plugins.md)的统一plugin.py入口替代；本页其余规则和权限边界保持。
+
 用户要求：可选 Google 或插件提供的验证码；没有外部提供方时自行生成。登录、评论、阅读可全局启用，文章、说说、页面可分别覆盖。
 
 追加要求：API Key也提供对应设置；机器调用采用明确授权豁免和每Key限流，原有Key不自动升级。
