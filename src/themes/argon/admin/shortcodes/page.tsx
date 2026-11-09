@@ -20,11 +20,7 @@ const origins = { frontend: "前端注册", backend: "后端注册", custom: "�
 export function ShortcodeLibraryPage() {
   const library = useShortcodeLibrary();
   const editable = can(useAdminAccount(), "shortcodes:write");
-  const definitions =
-    library.settings?.value.shortcodes ??
-    library.items
-      .filter((item) => item.origin !== "frontend")
-      .map((item) => item.compiled);
+  const definitions = library.applied;
   const [query, setQuery] = useState(""),
     [filter, setFilter] = useState("all"),
     [selected, setSelected] = useState<CatalogItem | "new" | null>(null);

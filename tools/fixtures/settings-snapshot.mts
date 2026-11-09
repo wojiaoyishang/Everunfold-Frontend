@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { snapshot } from "../../tests/fixtures";
 import { FileSettingsStore } from "../../src/server/settings/store";
 import { FileContentStore } from "../../src/server/content/store";
-import { builtinShortcodes } from "../../src/core/shortcodes/registry";
+import { backendShortcodes } from "./backend-shortcodes";
 const root = await realpath(process.argv[2]);
 const relative = path.relative(await realpath(tmpdir()), root);
 if (
@@ -260,11 +260,10 @@ await store.apply({
       accent: "#397566",
     },
     shortcodes: (() => {
-      const source = builtinShortcodes().find(
-        (item) => item.name === "notice",
-      )!;
+      const source = backendShortcodes.find((item) => item.name === "notice")!;
       const scope = "ef-sc-00000000000000000000000000000002";
       return [
+        ...backendShortcodes,
         {
           ...source,
           id: "00000000-0000-0000-0000-000000000002",

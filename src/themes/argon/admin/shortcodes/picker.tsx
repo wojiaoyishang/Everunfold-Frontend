@@ -42,9 +42,7 @@ export function ShortcodePicker({
     .filter((item) => !item.archived && item.applied_revision)
     .map((item) =>
       item.origin === "custom"
-        ? library.settings?.value.shortcodes?.find(
-            (definition) => definition.id === item.id,
-          )
+        ? library.applied.find((definition) => definition.id === item.id)
         : item.compiled,
     )
     .filter((item) => item !== undefined);
@@ -59,7 +57,7 @@ export function ShortcodePicker({
       content: [{ id: "sample", type: format, content: call }],
       media_urls: media,
     },
-    library.settings?.value.shortcodes ?? [],
+    library.applied,
   );
   return (
     <Modal
@@ -141,7 +139,7 @@ export function ShortcodePicker({
             )}
             <ShortcodePreview
               definition={selected}
-              definitions={library.settings?.value.shortcodes}
+              definitions={library.applied}
               values={values}
               body={body}
               format={format}

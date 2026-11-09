@@ -8,7 +8,13 @@ export function PluginsSettingsPage() {
   const { draft, setDraft, pluginChangeTrigger } = useSettingsEditor();
   const deployed = useExtensionCatalog();
   const disabled = draft?.extensions?.disabled_plugins ?? [];
-  const ids = [...new Set([...deployed.plugins.map((p) => p.id), ...disabled])];
+  const ids = [
+    ...new Set([
+      ...deployed.plugins.map((p) => p.id),
+      ...deployed.backendPlugins.map((p) => p.id),
+      ...disabled,
+    ]),
+  ];
   return (
     <SettingsFrame
       title="插件管理"
@@ -37,16 +43,25 @@ export function PluginsSettingsPage() {
             <UiText text="还没有已登记的插件。" />
           </p>
         )}
+        {!deployed.loading && deployed.catalog && !deployed.backendInSync && (
+          <p role="status">
+            <UiText text="后端插件目录有变更，完成部署同步后生效。" />
+          </p>
+        )}
         {ids.map((id) => {
-          const plugin = deployed.plugins.find((p) => p.id === id);
+          const frontend = deployed.plugins.find((p) => p.id === id);
+          const backend = deployed.backendPlugins.find((p) => p.id === id);
+          const plugin = frontend ?? backend;
           const ready = Boolean(
             plugin &&
-            deployed.nodes.length &&
-            deployed.nodes.every((node) =>
-              node.inventory?.plugins?.some(
-                (p) => p.id === id && p.build === plugin.build,
-              ),
-            ),
+            (!backend || deployed.backendInSync) &&
+            (!frontend ||
+              (deployed.nodes.length &&
+                deployed.nodes.every((node) =>
+                  node.inventory?.plugins?.some(
+                    (p) => p.id === id && p.build === plugin.build,
+                  ),
+                ))),
           );
           return (
             <section key={id} className="admin-extension-card">
@@ -82,9 +97,29 @@ export function PluginsSettingsPage() {
                   ? ` · ${plugin.build.slice(0, 12)} · ${plugin.page_ids?.length ?? 0} 个页面 / ${plugin.shortcodes?.length ?? 0} 个短代码 / ${plugin.components?.length ?? 0} 个组件`
                   : ""}
               </small>
+              {backend && (
+                <small className="admin-extension-origin">
+                  <UiText text={frontend ? "前后端插件" : "后端插件"} /> ·{" "}
+                  {backend.version}
+                  {backend.author ? ` · ${backend.author}` : ""}
+                  {backend.captcha_providers?.length ? (
+                    <>
+                      {" "}
+                      · <UiText text="验证码提供方" />{" "}
+                      {backend.captcha_providers.length}
+                    </>
+                  ) : null}
+                </small>
+              )}
               {!ready && (
                 <p>
-                  <UiText text="部分节点缺少相同构建，完成部署登记后才能启用。" />
+                  <UiText
+                    text={
+                      backend && !deployed.backendInSync
+                        ? "后端插件需要完成部署同步后才能启用。"
+                        : "部分节点缺少相同构建，完成部署登记后才能启用。"
+                    }
+                  />
                 </p>
               )}
             </section>

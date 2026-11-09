@@ -10,7 +10,6 @@ import { collectCustomPages } from "../../src/core/pages/registration";
 import { createPluginRegistry } from "../../src/core/plugins/create-registry";
 import type { FrontendPlugin } from "../../src/core/plugins/types";
 import schema from "@/core/contracts/pages-v1-schema";
-import builtins from "@/core/contracts/shortcode-builtins";
 
 export async function readExtensionCatalog(root: string) {
   const themes = await discoverExtensions(root, "themes");
@@ -32,10 +31,7 @@ export async function readExtensionCatalog(root: string) {
   const implementations = await Promise.all(
     plugins.map((name) => load<FrontendPlugin>("plugins", name)),
   );
-  const registry = createPluginRegistry(
-    implementations,
-    builtins.map((d) => d.compiled),
-  );
+  const registry = createPluginRegistry(implementations, []);
   const collected = collectCustomPages(registry.pages);
   const definitions = await Promise.all(
     themes.map((name) => load<ThemeDefinition>("themes", name)),

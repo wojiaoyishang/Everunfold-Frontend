@@ -7,14 +7,17 @@ import {
 } from "../src/core/rendering/native-shortcodes";
 import { parseShortcodes, shortcodeCall } from "../src/core/shortcodes/parser";
 import {
-  builtinShortcodes,
+  builtinShortcodes as frontendShortcodes,
   previewShortcodeDefinitions,
 } from "../src/core/shortcodes/registry";
 import { content } from "./fixtures";
+import { backendShortcodes } from "../tools/fixtures/backend-shortcodes";
+const builtinShortcodes = () => [...backendShortcodes, ...frontendShortcodes()];
 
 const render = (source: string, type: "markdown" | "html" = "markdown") =>
   renderContent(
     content({ content: [{ id: "native", type, content: source }] }),
+    backendShortcodes,
   );
 test("preview overrides a name with a temporary identity and retains other custom containers", () => {
   const notice = builtinShortcodes().find((item) => item.name === "notice")!;
@@ -112,7 +115,8 @@ test("protected code, comments, attribute strings and escaped native calls stay 
       source,
     );
     assert.equal(
-      renderNativeShortcodes(source, true, [], (text) => text).html,
+      renderNativeShortcodes(source, true, backendShortcodes, (text) => text)
+        .html,
       source,
     );
   }
@@ -170,4 +174,64 @@ test("leaf calls have no closing marker and gallery resolves only provided media
   assert.equal(result.diagnostics.length, 0);
   assert.match(result.html, /class="ef-gallery ef-gallery-2"/);
   assert.match(result.html, /src="https:\/\/example.test\/photo.jpg"/);
+});
+
+test("backend templates are runtime data and disappear when their applied catalog is removed", () => {
+  const template = {
+    ...backendShortcodes[0],
+    id: "eaaa1111-1111-4111-8111-111111111111",
+    name: "new-plugin:card",
+    html: '<section class="dynamic-card"><strong>{{title}}</strong>{{content}}</section>',
+  };
+  const article = content({
+    content: [
+      {
+        id: "dynamic",
+        type: "markdown",
+        content:
+          '{{< new-plugin:card title="Dynamic definition" >}}\n**Runtime body**\n{{< /new-plugin:card >}}',
+      },
+    ],
+  });
+  const active = renderContent(article, [template]);
+  assert.deepEqual(active.diagnostics, []);
+  assert.match(active.html, /Dynamic definition/);
+  assert.match(active.html, /<strong>Runtime body<\/strong>/);
+  const disabled = renderContent(article, []);
+  assert.ok(disabled.diagnostics.length);
+  assert.doesNotMatch(disabled.html, /class="dynamic-card"/);
+  assert.match(disabled.html, /new-plugin:card/);
+});
+
+test("an applied backend definition keeps template ownership when a frontend name collides", () => {
+  const gallery = frontendShortcodes().find((item) => item.name === "gallery")!;
+  const definition = {
+    ...gallery,
+    html: "<p>Backend-owned template</p>",
+    parameters: [],
+  };
+  const result = renderContent(
+    content({
+      content: [{ id: "owner", type: "markdown", content: "{{< gallery >}}" }],
+    }),
+    [definition],
+  );
+  assert.deepEqual(result.diagnostics, []);
+  assert.match(result.html, /Backend-owned template/);
+  assert.doesNotMatch(result.html, /class="ef-gallery/);
+});
+
+test("catalog preview preserves a frontend plugin's sample renderer", () => {
+  const gallery = frontendShortcodes().find((item) => item.name === "gallery")!;
+  const result = renderContent(
+    content({
+      content: [
+        { id: "preview", type: "markdown", content: "{{< gallery >}}" },
+      ],
+    }),
+    previewShortcodeDefinitions(gallery, backendShortcodes),
+    { shortcodePreview: true },
+  );
+  assert.deepEqual(result.diagnostics, []);
+  assert.match(result.html, /class="ef-gallery ef-gallery-sample"/);
 });

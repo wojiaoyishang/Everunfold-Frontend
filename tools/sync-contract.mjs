@@ -353,12 +353,6 @@ if (settings) {
       { parser: "json" },
     ),
   );
-  await writeArtifact(
-    path.join(output, "shortcode-builtins.json"),
-    await format(JSON.stringify(schema["x-everunfold-shortcodes"] ?? []), {
-      parser: "json",
-    }),
-  );
 }
 if (captcha)
   await generateSettingsClient(schema, output, {

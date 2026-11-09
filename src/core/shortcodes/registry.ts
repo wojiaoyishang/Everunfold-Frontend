@@ -1,4 +1,3 @@
-import registrations from "@/core/contracts/shortcode-builtins";
 import { pluginRegistry } from "@/core/plugins/registry";
 import type { PublicShortcode, ShortcodeItem } from "@/core/contracts/settings";
 
@@ -28,15 +27,18 @@ export const frontendShortcodes = (): readonly CatalogItem[] =>
     versions: [],
   }));
 export const builtinShortcodes = (): readonly PublicShortcode[] => [
-  ...registrations.map((item) => item.compiled as PublicShortcode),
   ...pluginRegistry.shortcodes.map((item) => item.definition),
 ];
 
-export function shortcodeDefinitions(custom: readonly PublicShortcode[] = []) {
+export function shortcodeDefinitions(applied: readonly PublicShortcode[] = []) {
   const names = new Set<string>();
+  const reservedNames = new Set(applied.map((item) => item.name));
+  const reservedIds = new Set(applied.map((item) => item.id));
   return [
-    ...builtinShortcodes(),
-    ...custom.filter((item) => item.name.startsWith("custom:")),
+    ...applied,
+    ...builtinShortcodes().filter(
+      (item) => !reservedNames.has(item.name) && !reservedIds.has(item.id),
+    ),
   ].map((item) => {
     if (names.has(item.name))
       throw new Error("Duplicate shortcode registration: " + item.name);
@@ -50,10 +52,19 @@ export function previewShortcodeDefinitions(
   definition: PublicShortcode,
   applied: readonly PublicShortcode[] = [],
 ) {
+  // Frontend contributions must retain their renderer and optional sample view.
+  // A persisted backend definition with the same identity remains authoritative.
+  if (
+    pluginRegistry.shortcode(definition) &&
+    !applied.some(
+      (item) => item.id === definition.id || item.name === definition.name,
+    )
+  )
+    return applied;
   return [
     ...applied.filter(
       (item) => item.id !== definition.id && item.name !== definition.name,
     ),
-    ...(definition.name.startsWith("custom:") ? [definition] : []),
+    definition,
   ];
 }

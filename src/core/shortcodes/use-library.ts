@@ -36,6 +36,7 @@ export function useShortcodeLibrary() {
   const { baseUrl } = useAdminRequest();
   const canReadSettings = can(useAdminAccount(), "settings:read");
   const [items, setItems] = useState<CatalogItem[]>([]);
+  const [applied, setApplied] = useState<PublicShortcode[]>([]);
   const [settings, setSettings] = useState<SettingsState | null>(null);
   const [loading, setLoading] = useState(true),
     [error, setError] = useState("");
@@ -52,6 +53,7 @@ export function useShortcodeLibrary() {
       ]);
       if (mounted.current && request.current === id) {
         setItems(catalog.data.items);
+        setApplied(catalog.data.applied ?? []);
         setSettings(state?.data ?? null);
       }
     } catch (error) {
@@ -96,8 +98,21 @@ export function useShortcodeLibrary() {
     };
   }, [baseUrl, pending, settings?.revision]);
   return {
-    items: [...items, ...(runtime.loading ? [] : frontendShortcodes())],
+    items: [
+      ...items,
+      ...(runtime.loading
+        ? []
+        : frontendShortcodes().filter(
+            (entry) =>
+              !items.some(
+                (item) =>
+                  item.id === entry.id ||
+                  item.source.name === entry.source.name,
+              ),
+          )),
+    ],
     settings,
+    applied,
     loading,
     error,
     reload,
@@ -160,8 +175,8 @@ export function useAppliedShortcodes() {
   const [definitions, setDefinitions] = useState<PublicShortcode[]>([]);
   useEffect(() => {
     const controller = new AbortController();
-    void readSettings(baseUrl, { signal: controller.signal })
-      .then(({ data }) => setDefinitions(data.value.shortcodes ?? []))
+    void readShortcodes(baseUrl, { signal: controller.signal })
+      .then(({ data }) => setDefinitions(data.applied ?? []))
       .catch(() => {});
     return () => controller.abort();
   }, [baseUrl]);

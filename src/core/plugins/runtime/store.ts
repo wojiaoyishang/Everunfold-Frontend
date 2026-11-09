@@ -1,4 +1,3 @@
-import builtins from "@/core/contracts/shortcode-builtins";
 import { createPluginRegistry } from "../create-registry";
 import type { FrontendPlugin } from "../types";
 
@@ -27,11 +26,9 @@ export function installRuntimePlugins(
 ) {
   const current = runtimeStore();
   if (current.key === key) return;
-  const reserved = builtins.map((item) => item.compiled);
-  const all = createPluginRegistry(plugins, reserved);
+  const all = createPluginRegistry(plugins);
   const active = createPluginRegistry(
     plugins.filter((plugin) => !disabled.includes(plugin.id)),
-    reserved,
   );
   root.__everunfoldPluginStore = {
     key,

@@ -15,7 +15,12 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { tmpdir } from "node:os";
 import { readInstalledPlugins } from "../src/server/plugins/packages";
-import { installRuntimePlugins } from "../src/core/plugins/runtime/store";
+import {
+  installRuntimePlugins,
+  runtimeStore,
+} from "../src/core/plugins/runtime/store";
+import { renderContent } from "../src/core/rendering/content";
+import type { FrontendPlugin } from "../src/core/plugins/types";
 import {
   isPluginEditingRoute,
   packageSetChanged,
@@ -212,4 +217,48 @@ test("production editors defer replacements on actual page, new-content and embe
     }),
     true,
   );
+});
+
+test("late shortcode registration and disabling update the sanitizer's class allowlist", () => {
+  const previous = { ...runtimeStore() };
+  const plugin: FrontendPlugin = {
+    id: "test.late-style",
+    version: "1.0.0",
+    setup({ shortcodes }) {
+      shortcodes.register({
+        definition: {
+          id: "12345678-1234-4234-8234-123456789abc",
+          name: "late-style",
+          title: "Late style",
+          description: "",
+          kind: "leaf",
+          revision: 1,
+          scope: "ef-sc-12345678123442348234123456789abc",
+          parameters: [],
+          html: "",
+          css: "",
+        },
+        classNames: ["late-shortcode-style"],
+        render: () =>
+          '<aside class="late-shortcode-style">Late content</aside>',
+      });
+    },
+  };
+  const render = (source: string) =>
+    renderContent({
+      id: "late-style-test",
+      content: [{ id: "body", type: "html", content: source }],
+      media_urls: {},
+    }).html;
+  try {
+    installRuntimePlugins([plugin], [], "late-shortcode-active");
+    assert.match(render("{{< late-style >}}"), /class="late-shortcode-style"/);
+    installRuntimePlugins([plugin], [plugin.id], "late-shortcode-disabled");
+    assert.doesNotMatch(
+      render('<aside class="late-shortcode-style">Old content</aside>'),
+      /class="late-shortcode-style"/,
+    );
+  } finally {
+    Object.assign(runtimeStore(), previous);
+  }
 });

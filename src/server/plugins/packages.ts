@@ -16,7 +16,6 @@ import {
   packageFontsMatch,
 } from "@/core/plugins/runtime/manifest";
 import { createPluginRegistry } from "@/core/plugins/create-registry";
-import builtins from "@/core/contracts/shortcode-builtins";
 import type { FrontendPlugin } from "@/core/plugins/types";
 import type {
   PluginPackage,
@@ -138,10 +137,7 @@ async function scanInstalledPlugins(directory: string, cacheDirectory: string) {
         }
       ).default;
       delete nativeModuleCache[nodeFile];
-      const registry = createPluginRegistry(
-        [plugin],
-        builtins.map((item) => item.compiled),
-      );
+      const registry = createPluginRegistry([plugin], []);
       if (
         plugin.id !== manifest.id ||
         !packageFontsMatch(registry.fonts, manifest) ||
@@ -161,10 +157,7 @@ async function scanInstalledPlugins(directory: string, cacheDirectory: string) {
       const proposed = [...state.accepted]
         .filter(([name]) => name !== entry.name)
         .map(([, item]) => item.plugin);
-      createPluginRegistry(
-        [...proposed, plugin],
-        builtins.map((item) => item.compiled),
-      );
+      createPluginRegistry([...proposed, plugin], []);
       state.accepted.set(entry.name, candidate);
       state.signatures.set(entry.name, signature);
     } catch (error) {

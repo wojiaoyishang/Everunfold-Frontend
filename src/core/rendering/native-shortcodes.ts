@@ -93,7 +93,9 @@ export function renderNativeShortcodes(
           definition.kind === "container"
             ? render(node.bodyFrom, node.bodyTo, node.children)
             : "";
-        const plugin = pluginRegistry.shortcode(definition);
+        const plugin = custom.some((item) => item.id === definition.id)
+          ? undefined
+          : pluginRegistry.shortcode(definition);
         const sample = preview
           ? plugin?.preview?.({
               parameters: node.attributes,

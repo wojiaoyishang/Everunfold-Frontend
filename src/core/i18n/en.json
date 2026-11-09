@@ -1490,5 +1490,10 @@
   "每个 Key 每分钟最多请求": "Maximum requests per key per minute",
   "阅读解锁、评论提交和验证码请求共用此额度；达到上限返回 429，不影响其他 Key。": "Content unlocks, comment submissions and CAPTCHA requests share this budget. Exceeding it returns 429 without affecting other keys.",
   "机器读取或评论需要免验证码时，单独勾选对应权限。仍遵守站点的验证码豁免开关、请求限额、文章密码和评论审核。": "Select the corresponding permission when machine reads or comments need to bypass CAPTCHA. Site exemption settings, rate limits, content passwords and moderation still apply.",
-  "请检查验证码配置和请求频率。当前输入已保留。": "Check the CAPTCHA settings and request limit. Your input has been kept."
+  "请检查验证码配置和请求频率。当前输入已保留。": "Check the CAPTCHA settings and request limit. Your input has been kept.",
+  "后端插件目录有变更，完成部署同步后生效。": "The backend plugin catalog has changed. Synchronize the deployment to apply it.",
+  "后端插件": "Backend plugin",
+  "前后端插件": "Frontend and backend plugin",
+  "后端插件尚未完成部署登记，请先同步插件目录": "Synchronize the backend plugin catalog before enabling it.",
+  "后端插件需要完成部署同步后才能启用。": "Synchronize the backend deployment before enabling this plugin."
 }

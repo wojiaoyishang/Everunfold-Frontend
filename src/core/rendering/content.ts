@@ -149,7 +149,6 @@ const options: sanitizeHtml.IOptions = {
   allowedClasses: {
     "*": [
       "ef-shortcode",
-      ...pluginRegistry.classNames,
       /^ef-sc-[a-f0-9]{32}(?:-[a-zA-Z_][a-zA-Z0-9_-]{0,63})?$/,
     ],
     code: [/^language-[a-zA-Z0-9_-]+$/, "hljs"],
@@ -189,6 +188,19 @@ export function renderContent(
   features: ContentFeatures;
   diagnostics: ShortcodeDiagnostic[];
 } {
+  // Packages can arrive after this module was imported, or be replaced/disabled.
+  // Derive the allowlist from the same active registry as this render.
+  const baseClasses = options.allowedClasses?.["*"];
+  const sanitizeOptions: sanitizeHtml.IOptions = {
+    ...options,
+    allowedClasses: {
+      ...options.allowedClasses,
+      "*": [
+        ...(Array.isArray(baseClasses) ? baseClasses : []),
+        ...pluginRegistry.classNames,
+      ],
+    },
+  };
   const toc: TableOfContentsItem[] = [];
   const seenHeadings = new Map<string, number>();
   const shortcodeStyles = new Set<string>();
@@ -218,7 +230,7 @@ export function renderContent(
       // Permit the storage-only scheme in this intermediate tree, then resolve actual nodes.
       // Code text never participates in URL replacement.
       const clean = sanitizeHtml(raw, {
-        ...options,
+        ...sanitizeOptions,
         allowedSchemes: ["http", "https", "mailto", "site"],
       });
       const document = parseDocument(clean);
@@ -299,7 +311,7 @@ export function renderContent(
       }
       visit(document.children);
       return frameCodeHtml(
-        sanitizeHtml(DomUtils.getOuterHTML(document), options),
+        sanitizeHtml(DomUtils.getOuterHTML(document), sanitizeOptions),
       );
     })
     .join("\n");

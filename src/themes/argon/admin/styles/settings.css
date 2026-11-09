@@ -397,6 +397,8 @@
   font-weight: 600;
 }
 .admin-extension-card > small {
+  display: block;
+  margin-top: 0.4rem;
   color: var(--admin-muted);
   overflow-wrap: anywhere;
 }

@@ -55,6 +55,8 @@ export function useExtensionCatalog() {
     nodes,
     themes,
     plugins,
+    backendPlugins: catalog?.backend_plugins ?? [],
+    backendInSync: catalog?.backend_in_sync ?? false,
     error,
     reload,
     loading: !catalog && !error,
