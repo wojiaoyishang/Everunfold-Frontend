@@ -1,5 +1,15 @@
 # 前端交接状态
 
+## 最新交付：统一任务进度与SMTP诊断（2026-11-09）
+
+- 后端21a60c1/8aec05e/7f2d791、前端f66ce9e；统一POST /v1/admin/tasks/watch、后端SDK task_progress、前端useTaskProgress及主题面板。Worker/常驻上下文、核心同步/鉴权回调/排期与邮件测试接入；游标分页、租约围栏、未知总量不伪造百分比。见[规范](../development/task-progress.md)、[ADR0093](../decisions/0093-unified-task-progress-and-smtp-transcripts.md)、[验收](task-progress-verification.md)。
+- 邮件测试可查看连接/能力/TLS/认证/信封/DATA/MIME及响应，认证对话和编码凭据脱敏；诊断失败不覆盖业务结果。持续监控支持断线退避、隐藏暂停/恢复、刷新同一任务，日志只在内存、ID按账号/后端存sessionStorage；运行记录只展开一个任务。
+- settings1.21.0固定21a60c1及SHA，0034_task_progress显式迁移，随后重启服务。完整后端真实库288项/284.93秒、Ruff/349格式/mypy207通过，SMTP实际AUTH及持久游标测试通过。最后排队10分钟过期/发送租约过期一致性修正另做真实隔离库整项、Ruff/格式/mypy12定向通过，未重复全套。
+- 前端完整check330、隔离生产矩阵通过；最后隐藏重复终态文案后另做类型/lint/格式及实页重验。桌面/390/深色、网络失败续读、终态分页、刷新不重发、未知进度、20%→100%、隐藏暂停、纯文本报文均通过，脚本错误0/原生弹窗0。浏览器发送使用夹具；真实协议另在本地SMTP服务验证，未向外部发信或改主站邮件配置。
+- 当前真实HTTP进度200且private/no-store、有持久事件，匿名401；API Key权限上限/撤销由隔离真实API验证。六服务、四端口0.0.0.0和HTTP200保持；共享规范和摘要双仓一致，实际设备/密钥/截图/缓存不提交，本地存档不push。
+- 未做全浏览器、长期负载、主机断电及实际供应商TLS/送达矩阵；当前传输为HTTP长轮询，非SSE/WS。历史任务不能补造报文，日志有大小/保留限制，通用邮件通知/重试等继续后续。
+
+
 ## 最新交付：设置归类、悬停固定与测试发件（2026-11-09）
 
 - 后端37c6a62/398b36f、前端81fd5ee。主题设置独立；站点、验证码、邮件、系统和运行任务归入设置父级。桌面悬停显示顶层子菜单，点击固定左侧，当前父级不重复悬浮；手机手风琴保持。见[指南](../development/mail.md)、[ADR0092](../decisions/0092-settings-hover-and-test-mail.md)和[验收](navigation-mail-verification.md)。

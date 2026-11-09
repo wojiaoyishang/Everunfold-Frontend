@@ -1,6 +1,6 @@
 # Scheduler、Worker 与运行管理
 
-版本：runtime-tasks-2；2026-11-09。状态：第一阶段已实现；具体已执行检查及未覆盖项目见[验收](../handoff/runtime-tasks-verification.md)。开发前先登记的规划由本版补充实际接口，不把后续能力标为交付。
+版本：runtime-tasks-3；2026-11-09。状态：第一阶段已实现；具体已执行检查及未覆盖项目见[验收](../handoff/runtime-tasks-verification.md)。开发前先登记的规划由本版补充实际接口，不把后续能力标为交付。
 
 ## 产品与进程归属
 
@@ -30,27 +30,34 @@ from app.plugin_sdk import PluginRegistry, TaskDefinition, define_plugin
 
 
 def setup(registry: PluginRegistry) -> None:
-    registry.tasks.register(TaskDefinition(
-        id="example.sync.refresh",
-        title="刷新外部目录",
-        handler="app.plugins.my_sync.jobs:refresh",
-        interval=60,
-        timeout=120,
-        manual=True,
-        enabled=False,
-    ))
-    registry.tasks.register(TaskDefinition(
-        id="example.sync.subscription",
-        title="事件订阅",
-        handler="app.plugins.my_sync.jobs:listen",
-        kind="resident",
-        interval=15,
-        enabled=False,
-    ))
+    registry.tasks.register(
+        TaskDefinition(
+            id="example.sync.refresh",
+            title="刷新外部目录",
+            handler="app.plugins.my_sync.jobs:refresh",
+            interval=60,
+            timeout=120,
+            manual=True,
+            enabled=False,
+        )
+    )
+    registry.tasks.register(
+        TaskDefinition(
+            id="example.sync.subscription",
+            title="事件订阅",
+            handler="app.plugins.my_sync.jobs:listen",
+            kind="resident",
+            interval=15,
+            enabled=False,
+        )
+    )
 
 
 plugin = define_plugin(
-    id="example.sync", title="目录同步", version="1.0.0", setup=setup,
+    id="example.sync",
+    title="目录同步",
+    version="1.0.0",
+    setup=setup,
 )
 ```
 
@@ -75,12 +82,12 @@ plugin = define_plugin(
 
 GET /v1/admin/runtime 要求 settings:read；POST /v1/admin/runtime/control 要求 settings:write 和原浏览器 CSRF，body 为 {task_id, action}，action 支持 enable/disable/run。所有操作写审计；仅注册任务可用，manual=false 拒绝手动派发。沿用 success/code/msg/data 外壳、no-store 和权限体系。返回 DTO 不含原始任务参数、检查点、消息正文或连接凭据。
 
-1. 显式运行迁移至 0032_runtime_tasks，服务启动不自动迁移。
+1. 显式运行迁移至 0034_task_progress，服务启动不自动迁移。
 2. 部署后端代码，受控重启 API、Worker、Scheduler；显式执行 uv run python -m tools.register_backend_plugins --config config.toml --apply。
 3. 保持原 Scheduler 和 Celery Worker 启动命令，无额外 runner 命令；检查后台最近心跳/扫描及三项核心任务。
-4. 前端固定 settings 1.18.1 的精确契约提交与 SHA，生成客户端只放忽略的 var/cache。修改插件构建工具后重启开发协调进程；普通插件源码编辑继续自动编译。
+4. 前端固定 settings 1.21.0 的精确契约提交与 SHA，生成客户端只放忽略的 var/cache。修改插件构建工具后重启开发协调进程；普通插件源码编辑继续自动编译。
 
-当前阶段只提供固定间隔声明和启停、执行历史，不提供任意命令/任务参数编辑、Cron 日历、拖动流程图、跨地域分布式锁或无限时间序列监控。日志仍使用现有进程管理器。Python 插件更新需要受控部署，不是在线热安装 Python 包。
+当前阶段只提供固定间隔声明和启停、执行历史，不提供任意命令/任务参数编辑、Cron 日历、拖动流程图、跨地域分布式锁或无限时间序列监控。任务阶段/增量日志已由统一进度接口提供，进程标准输出仍使用现有进程管理器。Python 插件更新需要受控部署，不是在线热安装 Python 包。
 
 ## 同期界面调整
 
@@ -89,3 +96,9 @@ GET /v1/admin/runtime 要求 settings:read；POST /v1/admin/runtime/control 要�
 插件停用影响检查加入正在排队/执行的任务数量。仍由原确认弹窗确认，取消还原开关；普通任务启停在运行页立即生效。
 
 登录无错误和无验证码时不再保留空消息高度。公开标签页面按当前语言的真实公开文章计数生成词云：字体随权重变化，测量文本后无重叠排列，最多放置 80 个常用标签；查看全部显示所有标签与数量，窄屏重新布局，服务端和无脚本保持可用列表。
+
+## 持续任务进度（2026-11-09）
+
+Worker与常驻执行上下文绑定统一 `task_progress`，从app.plugin_sdk导出；有限任务可调用 `await task_progress(stage="fetch", message="正在读取目录", completed=3, total=10, unit="items")`。未绑定上下文时返回False，持久诊断失败不阻断业务；参数错误仍拒绝。业务提交和外部幂等仍由任务负责。核心设置同步、鉴权回调和排期发布已经报告实际完成条数。
+
+运行记录可展开当前执行，使用与邮件测试相同的 `/v1/admin/tasks/watch`、增量游标、状态和主题进度面板。有限总量有百分比，未知总量只有阶段。常驻任务可沿相同上下文报告，不要求结束才显示。每任务最多1000事件，单条8192字符，no-op核心扫描一小时清理时联动删除事件。邮件空扫描也纳入清理。详见[统一进度规范](task-progress.md)。

@@ -1,0 +1,60 @@
+# 统一任务进度与持续监控
+
+版本：task-progress-1；2026-11-09。用于 Worker/后台任务的进度与增量日志；当前实现与检查结果见[验收](../handoff/task-progress-verification.md)。
+
+## 统一口径
+
+进度以业务任务或执行ID为单位，状态由后端事实记录派生：queued、running、succeeded、failed、unknown、cancelled。连接中断仅表示监控暂时断开，不能把任务改为失败。未知执行结果继续显示unknown，不自动重新执行。
+
+阶段stage描述当前步骤。completed/total/unit表达可计量工作量，percent仅在有有效总量时计算；未知总量为null，前端显示不定进度和阶段。SMTP步骤是阶段提示，不能当作投递完成百分比；服务商接受也不等于邮件进入收件箱。
+
+事件有递增sequence、时间at、level(info/warning/error)、kind(stage/request/response/message)、message。后台主题共享同一进度/日志组件，其他业务通过同一接口和hook复用，不另写有限次数的轮询。
+
+## 读取接口
+
+`POST /v1/admin/tasks/watch` 沿用标准JSON外壳、真实HTTP状态、私有no-store和原有鉴权/CSRF。settings契约1.21.0从锁定后端提交生成客户端。
+
+```json
+{"resource":"mail-test","id":"任务UUID","after_sequence":0,"wait_seconds":15}
+```
+
+- resource支持runtime（任务执行）和mail-test（邮件测试）；后续资源须在后端显式适配，不能按任意表名查询。
+- runtime要求settings:read，mail-test要求settings:write且只允许发起者读取。不在公开SSR或共享缓存中保存结果。
+- 返回state、stage、计量、开始/更新/结束时间、events、cursor、has_more。每页最多100条事件；下一次将cursor传回after_sequence，有has_more立即续读，不能直接跳到数据库最大序号。
+- 无新事件时最多等待20秒；事务在每次读后释放，不持有行锁等待。终态及时返回，日志分页读完后才停止监控。
+- 任务不存在、已清理或属于其他用户返回404；权限失败停止跟踪。邮件排队超过10分钟投影failed，发送租约过期投影unknown，与原状态接口一致；状态接口或Worker负责持久化过期业务状态。API不会执行或重试业务任务。
+
+## 执行端上报
+
+由执行上下文提供统一 `task_progress`，有限任务可在实际步骤或批量处理完成后上报。Worker包装器登记开始/完成，调用方无需传浏览器回调地址；前端通过任务ID连续读取。插件可复用相同SDK。
+
+```python
+from app.plugin_sdk import task_progress
+
+
+async def refresh(config):
+    await task_progress(stage="fetch", message="开始读取目录")
+    # 这里执行真实业务；未知工作量不传total。
+    await task_progress(stage="apply", message="已处理目录", completed=20, total=50, unit="items")
+    return {"completed": 20}
+```
+
+进度独立提交，不替代业务事务的持久完成回执。上报使用执行所有者与租约围栏，旧执行不能覆盖新执行进度；单任务事件和消息有上限。任务清理联动删除事件。插件只应上报可展示诊断，不上报凭据、令牌、原始异常或私密业务正文。
+
+## 前端连接与恢复
+
+共享hook连续长轮询，读取超时大于后端等待预算。失败使用退避重连，重复事件按序号去重；切换任务、卸载或失去权限取消旧请求。隐藏页面暂停监控，恢复可见后从原游标续读。没有固定60次停止限制。
+
+邮件测试将任务ID按后端及账号隔离保存在sessionStorage，刷新当前会话可继续读取；不持久化日志、目标邮箱、SMTP参数或密码。创建响应丢失继续使用原创建编号确认，恢复监控不会再发信。日志支持展开、滚动及跟随最新，用户滚回旧日志时停止强制跟随。
+
+## 邮件报文
+
+测试发件记录连接、EHLO/HELO、STARTTLS、认证、信封、DATA和结束结果，允许查看测试MIME头和固定测试正文，以及安全响应码。认证对话始终脱敏，不记录用户名、密码、授权码、AUTH载荷、base64凭据或认证挑战原文。网络异常只展示安全错误类别。
+
+报文文本按普通文本渲染并限制大小，移除危险控制字符；响应中的已知凭据及编码形式进一步替换。详细日志只给有权读取该测试的发起者；后台运行执行只显示通用阶段和数量，不公开邮件报文。历史已完成任务不会凭空补造协议日志。
+
+## 部署与边界
+
+显式升级0034任务进度迁移后再重启API/Worker/Scheduler；不自动建表。进度事件存PostgreSQL，Redis继续负责队列/短期心跳。当前使用HTTP长轮询，没有新增SSE/WebSocket服务；可按同一游标协议后续扩展传输。
+
+仅任务ID恢复不是无限保留承诺；任务/日志受清理和数量上限约束。业务通知、通用邮件重试、跨项目回调订阅等仍由各自功能负责。验收使用隔离库和本地SMTP服务，不向外部邮箱发信。

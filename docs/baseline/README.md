@@ -1235,3 +1235,17 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/mail.md` | `mail-2` | `de5ac034dc6a2d08d91b2008f63007ca3fc3e28fbde231fc0cb016f3ba0830c0` |
 | `docs/decisions/0092-settings-hover-and-test-mail.md` | `ADR0092-1` | `a4c0e18ceb3d891a60c61236d2af1b99382bb984c625ef1d47d6c9b6aaa61699` |
 | `docs/handoff/navigation-mail-verification.md` | `navigation-mail-verification-2` | `f964a3aeec12c99481c278b0ad28ebcd051adfc3f4ce90cdc0072e0f2db74f15` |
+
+
+## 统一任务进度与SMTP报文（2026-11-09）
+
+后端21a60c1/8aec05e/7f2d791、前端f66ce9e；settings1.21.0固定21a60c1及精确SHA。0034显式部署，最后过期边界仅定向重验；以下替代对应旧摘要，原始基线不变，STATUS分别维护，检查与未覆盖见验收。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-task-progress-1` | `8baa6d9d06d483377a26bafae60ca39243ec3ccfa47a8af70cb679a99616d4c9` |
+| `docs/development/task-progress.md` | `task-progress-1` | `fccc5d6cea7c2d7f4baa1005d29b44a7b12898a959098be816741f97e10a23dd` |
+| `docs/development/runtime-tasks.md` | `runtime-tasks-3` | `e50c79372a67b083dc57d4d9520cbbeb137a2a12204b046b944919eff91761d9` |
+| `docs/development/mail.md` | `mail-3` | `8d7e7f694610b050a86bfba4abcb6328fdb3f2294ea347338b6871d116d829a3` |
+| `docs/decisions/0093-unified-task-progress-and-smtp-transcripts.md` | `ADR0093-1` | `24c3f011afa0cd780fcaab655b6dfa8d0bb2e53443c9f1ee258eb7819631bcf6` |
+| `docs/handoff/task-progress-verification.md` | `task-progress-verification-1` | `f4c8073a59ac97b1e205c904e7fd0b917c9c23d54d395e066f848825b9a8de4e` |

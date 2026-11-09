@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[统一任务进度与邮件诊断](development/task-progress.md)、[ADR0093](decisions/0093-unified-task-progress-and-smtp-transcripts.md)及[验收](handoff/task-progress-verification.md)：Worker/插件统一进度上报、游标长轮询、断线与刷新恢复；运行记录和邮件测试复用监控面板，SMTP命令/响应/MIME可查看，认证报文脱敏。
+
 [设置导航与邮件测试](development/mail.md)、[ADR0092](decisions/0092-settings-hover-and-test-mail.md)及[验收](handoff/navigation-mail-verification.md)：主题独立、其余配置归类；桌面悬停与点击固定、手机手风琴。SMTP私有配置、必填标记和Worker测试发件已实现，保存不发送，未知结果不自动重发；通用通知仍按指南推进。
 
 [Scheduler、Worker与运行管理](development/runtime-tasks.md)、[ADR0090](decisions/0090-scheduler-owned-residents-and-runtime-monitoring.md)及[验收](handoff/runtime-tasks-verification.md)：Scheduler统一指派常驻子进程，插件任务SDK、可靠执行与后台存活状态；同期完善插件来源/详情、标签词云和登录留白。
