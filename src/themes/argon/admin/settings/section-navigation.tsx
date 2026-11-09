@@ -4,6 +4,7 @@ import { UiText, useT } from "@/core/i18n/provider";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { TextLink } from "../../components/ui/primitives";
 import styles from "./section-navigation.module.css";
+import { adminScrollBehavior } from "@/core/admin/scroll";
 
 type SectionLink = { id: string; title: string };
 
@@ -111,18 +112,11 @@ export function SettingsLayout({ children }: { children: ReactNode }) {
                 const target = document.getElementById(section.id);
                 if (!target) return;
                 event.preventDefault();
-                const preference =
-                  root.current?.closest<HTMLElement>(".admin-root")?.dataset
-                    .adminMotion;
-                const reduced =
-                  preference === "reduced" ||
-                  (preference !== "full" &&
-                    matchMedia("(prefers-reduced-motion: reduce)").matches);
                 history.replaceState(history.state, "", `#${section.id}`);
                 target.focus({ preventScroll: true });
                 target.scrollIntoView({
                   block: "start",
-                  behavior: reduced ? "instant" : "smooth",
+                  behavior: adminScrollBehavior(root.current),
                 });
               }}
             >

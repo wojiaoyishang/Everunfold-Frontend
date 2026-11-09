@@ -26,6 +26,7 @@ import {
   pluginNeedsConfirmation,
   restorePluginChoices,
 } from "./plugin-impact";
+import { mergeActivatedTheme, themeActivationInput } from "./theme-activation";
 
 export function settingsFailure(error: unknown) {
   if (error instanceof RequestError) {
@@ -149,6 +150,34 @@ function useEditor() {
       return false;
     }
   }
+  async function activateTheme(theme: string) {
+    if (!saved || !draft || inFlight.current || pluginImpact) return false;
+    inFlight.current = true;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await saveSettings(
+        baseUrl,
+        themeActivationInput(saved, theme),
+        csrfToken,
+      );
+      if (!mounted.current) return false;
+      setSaved(response.data);
+      setDraft((current) =>
+        current ? mergeActivatedTheme(current, response.data.value) : current,
+      );
+      window.dispatchEvent(new Event("everunfold-language-catalog"));
+      setMessage("主题已启用，节点同步后生效。其他未保存的设置仍保留。");
+      return true;
+    } catch (error) {
+      if (mounted.current) setError(settingsFailure(error));
+      return false;
+    } finally {
+      inFlight.current = false;
+      if (mounted.current) setBusy(false);
+    }
+  }
   async function save() {
     if (!saved || !draft || inFlight.current || pluginImpact) return;
     if (!pluginChangeTrigger.current?.isConnected)
@@ -247,6 +276,7 @@ function useEditor() {
     loading,
     dirty,
     save,
+    activateTheme,
     reload,
     refreshDelivery,
     reset: () => {

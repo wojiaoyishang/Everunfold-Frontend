@@ -1,0 +1,147 @@
+.dialog {
+  position: fixed;
+  inset: 0;
+  width: min(820px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  color: var(--admin-text);
+  background: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: 12px;
+  box-shadow: 0 24px 80px #0003;
+  animation: enter 200ms ease both;
+}
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.dialog::backdrop {
+  background: rgb(15 20 32 / 32%);
+  backdrop-filter: blur(3px);
+  animation: fade 180ms ease both;
+}
+.dialog[data-state="closing"] {
+  animation: leave 160ms ease both;
+}
+.dialog[data-state="closing"]::backdrop {
+  animation: fade 160ms ease reverse both;
+}
+.header {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.header small {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.header h2 {
+  margin: 4px 0 0;
+  font-size: 22px;
+  overflow-wrap: anywhere;
+}
+.body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.preview {
+  display: flex;
+  aspect-ratio: 8 / 5;
+  max-height: 46dvh;
+  background: var(--admin-subtle);
+}
+.preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.description {
+  margin: 0;
+  padding: 22px 24px 8px;
+  font-size: 14px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.body .hint {
+  margin: 12px 24px 22px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--admin-muted);
+}
+.body .error {
+  margin: 12px 24px 22px;
+  padding: 12px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--admin-danger) 8%, var(--admin-canvas));
+  color: var(--admin-danger);
+  font-size: 13px;
+}
+.footer {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid var(--admin-border);
+  background: var(--admin-canvas);
+}
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes leave {
+  to {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+}
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+:global(.admin-root[data-admin-motion="reduced"]) .dialog,
+:global(.admin-root[data-admin-motion="reduced"]) .dialog::backdrop {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(.admin-root:not([data-admin-motion="full"])) .dialog,
+  :global(.admin-root:not([data-admin-motion="full"])) .dialog::backdrop {
+    animation: none;
+  }
+}
+@media (max-width: 640px) {
+  .header {
+    padding: 16px;
+  }
+  .header h2 {
+    font-size: 19px;
+  }
+  .footer {
+    padding: 14px 16px;
+  }
+  .description {
+    padding: 16px 16px 8px;
+  }
+  .body .hint,
+  .body .error {
+    margin-inline: 16px;
+  }
+}
