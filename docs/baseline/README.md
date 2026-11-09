@@ -1195,3 +1195,17 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/content-management.md` | `content-management-10` | `7175e2e2ee54c19c69f39f38b0edb471a8a960d499f1f768334bb3374de9a69a` |
 | `docs/development/operations-and-search.md` | `operations-search-4` | `0394d9c8a28b541c364fd93c3f869de53a30fcd673781b8f79e0d6236cc57be4` |
 | `docs/handoff/content-operations-verification.md` | `content-operations-verification-1` | `119be469dc31aa2312f9e94f47b7781ff61e0219e266dbe59ffd0b86388a0d21` |
+
+
+## Scheduler所属常驻任务与运行管理（2026-11-09）
+
+先登记开发规划，后实施任务SDK与管理界面。settings1.18.1固定284d82c及精确SHA；以下版本替代对应旧摘要，原始基线不变，STATUS各自维护。真实验证及未执行边界见验收。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-runtime-tasks-1` | `342876cf3c45393bc8a3c06258525d19eba08371dd970b7a4cac305b4dee052d` |
+| `docs/development/runtime-tasks.md` | `runtime-tasks-2` | `0902bda597f2caba7dff512ff1bf05d91e04479975129eff9c9282334ef11479` |
+| `docs/decisions/0090-scheduler-owned-residents-and-runtime-monitoring.md` | `ADR0090-1` | `45ef33d3722cc343d55355344ea246ed7a4dca9f6aeb83120e5c9a529316502c` |
+| `docs/development/backend-plugins.md` | `backend-plugins-2` | `2d68adf02f63b6084e419fc9fb926ea16ad2d18fe10f3bbea21abc2c4ab609b6` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-10` | `ffded62cccfa34f7f060bb36c3bb65a3ac3104a90a46e162d5436be8239d8d60` |
+| `docs/handoff/runtime-tasks-verification.md` | `runtime-tasks-verification-1` | `51fb52aa696854a711c58d96e741996b7cf5c4bd5e0c176b97f6ec2db79cc435` |

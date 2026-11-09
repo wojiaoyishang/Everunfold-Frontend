@@ -9,7 +9,13 @@ import { adminScrollBehavior } from "@/core/admin/scroll";
 type SectionLink = { id: string; title: string };
 
 /** Builds a local directory from the sections actually mounted in this page. */
-export function SettingsLayout({ children }: { children: ReactNode }) {
+export function SettingsLayout({
+  children,
+  fullWidth = false,
+}: {
+  children: ReactNode;
+  fullWidth?: boolean;
+}) {
   const t = useT();
   const root = useRef<HTMLDivElement>(null);
   const [sections, setSections] = useState<SectionLink[]>([]);
@@ -88,9 +94,13 @@ export function SettingsLayout({ children }: { children: ReactNode }) {
     };
   }, []);
   return (
-    <div ref={root} className={`admin-settings-page ${styles.layout}`}>
+    <div
+      ref={root}
+      className={`admin-settings-page ${styles.layout}`}
+      data-full-width={fullWidth}
+    >
       <div className={styles.main}>{children}</div>
-      {sections.length > 1 && (
+      {!fullWidth && sections.length > 1 && (
         <nav className={styles.navigation} aria-label={t("设置分区导航")}>
           <strong>
             <UiText text="快速导航" />

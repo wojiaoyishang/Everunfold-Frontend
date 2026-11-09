@@ -1,0 +1,83 @@
+.row {
+  width: 100%;
+  min-width: 0;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+}
+.row:last-child {
+  border-bottom: 0;
+}
+.row small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 13px;
+}
+.meta > button {
+  margin-left: auto;
+}
+.origin {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 5px 9px;
+}
+.dialog {
+  width: min(760px, calc(100vw - 32px)) !important;
+  max-height: 85dvh;
+  overflow: hidden;
+}
+.body {
+  overflow: auto;
+  padding: 24px;
+  min-height: 0;
+  line-height: 1.7;
+}
+.body img {
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.body dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 20px;
+  margin: 20px 0;
+}
+.body dt,
+.body small {
+  color: var(--muted);
+}
+.body dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.markdown {
+  margin: 24px 0;
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+  overflow-wrap: anywhere;
+}
+.markdown pre {
+  overflow: auto;
+}
+.markdown img {
+  max-width: 100%;
+  height: auto;
+}
+.markdown p {
+  margin: 12px 0;
+}
+.markdown li + li {
+  margin-top: 6px;
+}

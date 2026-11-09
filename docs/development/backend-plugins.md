@@ -1,6 +1,6 @@
 # 后端插件开发
 
-版本：backend-plugins-1，2026-11-09。决定见[ADR0087](../decisions/0087-single-entry-backend-plugins.md)。
+版本：backend-plugins-2，2026-11-09。决定见[ADR0087](../decisions/0087-single-entry-backend-plugins.md)。
 
 ## 唯一入口
 
@@ -40,7 +40,7 @@ plugin = MyPlugin()
 | registry.captcha.register(provider) | CaptchaProvider(id,title,widget,verify)，verify为真实异步服务端校验 |
 | registry.locales.register(locale, messages) | 任意来源的字典；key自动加插件ID前缀，不规定语言文件位置 |
 
-当前宿主界面提供zh-CN/en语言包；插件可登记其他字典，但不会自行扩展宿主界面语言列表。文案通过i18n.t("插件ID.key", locale=...)读取。未来路由、任务、资源接口尚未交付，不提供无效占位方法。
+当前宿主界面提供zh-CN/en语言包；插件可登记其他字典，但不会自行扩展宿主界面语言列表。文案通过i18n.t("插件ID.key", locale=...)读取。任务通过registry.tasks.register(TaskDefinition)登记，包含Worker有限任务及Scheduler所属常驻子进程，见[任务指南](runtime-tasks.md)。通用路由、资源接口仍未交付。
 
 单体kind="leaf"不需结束标记；容器必须有唯一正文插槽。参数用ShortcodeParameter，支持text/url/select/number/boolean。调用名不能使用为用户保留的custom:前缀，所有代码贡献跨插件检查重名。模板遵守[原生短代码](../architecture/shortcodes.md)的转义、HTML/CSS和按需样式边界；数据库用户模板仍可编辑，代码模板在后台只读。
 
@@ -78,4 +78,8 @@ uv run --locked python -m tools.register_backend_plugins --config config.toml --
 
 Python代码更新需要受控重启，不声称同进程热替换。插件内部资源计入构建摘要（隐藏文件和__pycache__除外）；不要把凭据、日志或运行文件写进插件目录。配置沿现有专有服务保存；当前没有通用插件配置/元数据写入API。
 
-不包含在线安装包、第三方Python依赖安装、自动迁移、通用任务/路由SDK或跨后端节点部署控制器。多副本部署须统一代码后同步；验证码在摘要不匹配时拒绝服务，模板阅读使用持久化的已应用版本。缓存与构建产物继续放忽略的var目录，后端根plugins目录不恢复。
+不包含在线安装包、第三方Python依赖安装、自动迁移、通用路由SDK或跨后端节点部署控制器。多副本部署须统一代码后同步；验证码在摘要不匹配时拒绝服务，模板阅读使用持久化的已应用版本。缓存与构建产物继续放忽略的var目录，后端根plugins目录不恢复。
+
+## 部署目录展示元数据
+
+Plugin类或define_plugin可提供homepage、license、preview、readme，原version/author继续使用。preview为安全URL，readme为Markdown正文；缺省不影响加载。后台统一详情弹窗不执行介绍中的HTML/脚本。任务注册方法、生命周期和检查点见[任务指南](runtime-tasks.md)。

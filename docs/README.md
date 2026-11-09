@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[Scheduler、Worker与运行管理](development/runtime-tasks.md)、[ADR0090](decisions/0090-scheduler-owned-residents-and-runtime-monitoring.md)及[验收](handoff/runtime-tasks-verification.md)：Scheduler统一指派常驻子进程，插件任务SDK、可靠执行与后台存活状态；同期完善插件来源/详情、标签词云和登录留白。
+
 [内容运营与拖拽上传](development/content-operations.md)、[ADR0089](decisions/0089-content-management-workflows.md)及[验收](handoff/content-operations-verification.md)：列表精确筛选/排序、协作快速编辑、原子批量操作、分类标签管理；统一拖放进入原上传队列，并补齐验证码页面解锁后的评论和点赞。
 
 [评论管理、工作台与SEO](development/operations-and-search.md)、[ADR0088](decisions/0088-operations-workflows-and-search-discovery.md)及[验收](handoff/operations-search-verification.md)：正式评论审核/回复/回收与可靠投递、按权限裁剪的真实待办；全站/单篇收录、站点地图、RSS/Atom、canonical/hreflang、分享图/JSON-LD与站长验证。批量编辑已由 ADR0089 交付，通知邮件和迁移恢复演练仍留在后续。

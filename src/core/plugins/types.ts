@@ -26,6 +26,11 @@ export interface PluginShortcode {
 }
 
 export interface FrontendPlugin {
+  author?: string;
+  homepage?: string;
+  license?: string;
+  preview?: string;
+  readme?: string;
   title?: string;
   description?: string;
   id: string;

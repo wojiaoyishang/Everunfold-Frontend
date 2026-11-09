@@ -163,6 +163,9 @@
   font-size: 12px;
   line-height: 1.6;
 }
+.login-message:empty {
+  display: none;
+}
 .login-message:not(:empty) {
   padding: 10px 12px;
   border: 1px solid color-mix(in srgb, var(--management-error) 24%, transparent);

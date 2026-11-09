@@ -1,6 +1,6 @@
 # 独立插件、页面与短代码开发
 
-版本：frontend-plugins-9，2026-11-09。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
+版本：frontend-plugins-10，2026-11-09。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
 
 ## 源码和命令
 
@@ -197,3 +197,7 @@ npm run check覆盖类型、格式、注册不变量和包完整性/回退检查
 ## 后端模板协作
 
 后端注册的纯HTML/CSS模板通过可靠设置流的PublicSettings.shortcodes抵达节点，前端按当前应用目录解析，不在contracts缓存生成已安装短代码清单。前端贡献继续负责自定义渲染和交互，后端模板只读。管理端ShortcodeCatalog.applied提供编辑器所需的已应用模板，普通编辑者无需settings:read权限；草稿模板不会提前影响插入和预览。运行时类名白名单与当前插件目录同步更新，避免晚加载、热替换或停用后使用过期清单。
+
+## 插件详情元数据
+
+definePlugin允许author、homepage、license、preview、readme；版本继续使用version。preview填写安全HTTP(S)或同源资源URL，readme直接提供Markdown字符串。独立构建、运行清单和后端登记保留这些字段，管理页以全宽列表显示来源，点击详情打开主题弹窗。旧包缺失字段时正常显示占位，不执行原始HTML/脚本。修改宿主构建/清单工具需要重启dev协调进程，普通插件声明仍自动重编译。常驻/有限任务由[后端SDK](runtime-tasks.md)贡献，不在浏览器运行。

@@ -3,6 +3,12 @@ import type { PluginShortcode } from "@/core/plugins/types";
 import type { FontDefinition } from "@/core/fonts/types";
 
 export interface PluginPackage {
+  author?: string;
+  homepage?: string;
+  license?: string;
+  preview?: string;
+  readme?: string;
+  version?: string;
   protocol: "plugin-package-1";
   sdk: 1;
   directory: string;

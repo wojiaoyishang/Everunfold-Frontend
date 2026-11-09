@@ -142,16 +142,18 @@ export function DeliveryBadge({ value }: { value: DeliveryState }) {
 export function SettingsFrame({
   title,
   description,
+  fullWidth,
   children,
 }: {
   title: string;
   description?: string;
+  fullWidth?: boolean;
   children: ReactNode;
 }) {
   const editor = useSettingsEditor();
   const editable = can(useAdminAccount(), "settings:write");
   return (
-    <SettingsLayout>
+    <SettingsLayout fullWidth={fullWidth}>
       <AdminPageHeading title={title} description={description} />
       {editor.loading ? (
         <div className="admin-settings-loading" role="status">

@@ -9,6 +9,14 @@ export const builtinAdminModule = {
   ],
   pages: [
     {
+      id: "core.settings.runtime",
+      href: "/admin/settings/runtime",
+      label: "运行与任务",
+      description: "Scheduler、Worker 与常驻任务",
+      icon: "system",
+      menu: { group: "core.settings", order: 35 },
+    },
+    {
       id: "core.comments",
       href: "/admin/comments",
       label: "评论管理",

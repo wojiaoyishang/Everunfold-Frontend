@@ -1,3 +1,4 @@
+import { TagWordCloud } from "./tag-word-cloud";
 import { UiText } from "@/core/i18n/provider";
 import { AppLink as Link } from "./navigation-link";
 import type { PublicSnapshot, Taxonomy } from "@/core/content/types";
@@ -36,29 +37,33 @@ export function TaxonomyIndex({
           </p>
         </div>
       </header>
-      <section
-        className={`surface taxonomy-index ${kind === "tag" ? "tag-cloud" : "category-grid"}`}
-        aria-label={title}
-      >
-        {terms.map((term) => (
-          <Link href={taxonomyHref(term)} key={term.id}>
-            <Icon name={kind === "category" ? "folder" : "tag"} />
-            <span>{term.name}</span>
-            <small>{term.count}</small>
-          </Link>
-        ))}
-        {!terms.length && (
-          <p>
-            <UiText text="暂时还没有" />
-            {kind === "category" ? (
-              <UiText text="分类" />
-            ) : (
-              <UiText text="标签" />
-            )}
-            。
-          </p>
-        )}
-      </section>
+      {kind === "tag" ? (
+        <TagWordCloud terms={terms} />
+      ) : (
+        <section
+          className="surface taxonomy-index category-grid"
+          aria-label={title}
+        >
+          {terms.map((term) => (
+            <Link href={taxonomyHref(term)} key={term.id}>
+              <Icon name={kind === "category" ? "folder" : "tag"} />
+              <span>{term.name}</span>
+              <small>{term.count}</small>
+            </Link>
+          ))}
+          {!terms.length && (
+            <p>
+              <UiText text="暂时还没有" />
+              {kind === "category" ? (
+                <UiText text="分类" />
+              ) : (
+                <UiText text="标签" />
+              )}
+              。
+            </p>
+          )}
+        </section>
+      )}
     </>
   );
 }

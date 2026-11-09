@@ -58,3 +58,8 @@
     border-inline-start-color: var(--admin-accent);
   }
 }
+
+.layout:global(.admin-settings-page)[data-full-width="true"] {
+  display: block;
+  max-width: none;
+}

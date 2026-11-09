@@ -1,10 +1,16 @@
 "use client";
+import { useState } from "react";
+import type { InstalledPlugin } from "@/core/contracts/settings";
+import { PluginDetails } from "./plugin-details";
+import { Icon } from "../../components/icon";
+import styles from "./plugins.module.css";
 import { UiText } from "@/core/i18n/provider";
 import { useSettingsEditor } from "@/core/settings/editor";
 import { useExtensionCatalog } from "@/core/plugins/use-catalog";
 import { SettingsFrame, SettingsSection, SettingsToggle } from "./shared";
 import { Button } from "../../components/ui/primitives";
 export function PluginsSettingsPage() {
+  const [detail, setDetail] = useState<InstalledPlugin | null>(null);
   const { draft, setDraft, pluginChangeTrigger } = useSettingsEditor();
   const deployed = useExtensionCatalog();
   const disabled = draft?.extensions?.disabled_plugins ?? [];
@@ -17,6 +23,7 @@ export function PluginsSettingsPage() {
   ];
   return (
     <SettingsFrame
+      fullWidth
       title="插件管理"
       description="启用或禁用已部署插件；页面配置和历史内容会保留。"
     >
@@ -26,7 +33,8 @@ export function PluginsSettingsPage() {
         description="插件由部署目录提供。停用后隐藏插件页面及插入入口，正文保留原始调用。"
       >
         <Button className="admin-button" onClick={() => void deployed.reload()}>
-          刷新部署清单
+          <Icon name="refresh" />
+          <UiText text="刷新部署清单" />
         </Button>
         {deployed.error && (
           <p role="alert">
@@ -64,7 +72,7 @@ export function PluginsSettingsPage() {
                 ))),
           );
           return (
-            <section key={id} className="admin-extension-card">
+            <section key={id} className={styles.row}>
               <SettingsToggle
                 label={plugin?.title ?? id}
                 hint={
@@ -91,6 +99,31 @@ export function PluginsSettingsPage() {
                   );
                 }}
               />
+              <div className={styles.meta}>
+                <span className={styles.origin}>
+                  <UiText
+                    text={
+                      frontend && backend
+                        ? "前后端插件"
+                        : backend
+                          ? "后端插件"
+                          : "前端插件"
+                    }
+                  />
+                </span>
+                <span>
+                  {plugin?.version} {plugin?.author && ` · ${plugin.author}`}
+                </span>
+                {plugin && (
+                  <Button
+                    className="admin-button"
+                    onClick={() => setDetail(plugin)}
+                  >
+                    <Icon name="eye" />
+                    <UiText text="查看详情" />
+                  </Button>
+                )}
+              </div>
               <small>
                 {id}
                 {plugin
@@ -125,6 +158,9 @@ export function PluginsSettingsPage() {
             </section>
           );
         })}
+        {detail && (
+          <PluginDetails plugin={detail} onClose={() => setDetail(null)} />
+        )}
         <details>
           <summary>
             <UiText text="节点部署记录" />

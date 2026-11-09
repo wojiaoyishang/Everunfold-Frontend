@@ -1,0 +1,120 @@
+.page {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+.toolbar,
+.tabs,
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.toolbar {
+  justify-content: space-between;
+}
+.sample {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.instances {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 0;
+}
+.card h2 {
+  font-size: 18px;
+  margin: 0 0 20px;
+}
+.instance + .instance {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.instance dl {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px 20px;
+  font-size: 13px;
+  margin: 16px 0 0;
+}
+.instance dt {
+  color: var(--muted);
+}
+.instance dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.plan {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.plan:last-child {
+  border: 0;
+  padding-bottom: 0;
+}
+.plan small {
+  display: block;
+  color: var(--muted);
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+.plan p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 10px 0 0;
+}
+.actions {
+  flex-shrink: 0;
+}
+.page [data-state="online"],
+.page [data-state="succeeded"] {
+  color: var(--accent);
+}
+.page [data-state="failed"],
+.page [data-state="degraded"] {
+  color: var(--management-error);
+}
+@media (max-width: 760px) {
+  .instances {
+    grid-template-columns: 1fr;
+  }
+  .card {
+    padding: 18px;
+  }
+  .plan {
+    gap: 12px;
+  }
+  .tabs {
+    gap: 4px;
+  }
+  .toolbar {
+    align-items: stretch;
+  }
+}
+.tabs button {
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+}
+.tabs button[aria-pressed="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.page :global(.admin-page-heading) {
+  margin-bottom: 0;
+}

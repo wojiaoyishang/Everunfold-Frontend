@@ -49,6 +49,7 @@ export function PluginImpactDialog() {
                   ["已发布内容", plugin.published_contents],
                   ["定时发布内容", plugin.scheduled_contents],
                   ["验证码配置", plugin.captcha_references],
+                  ["运行中的任务", plugin.active_tasks],
                 ] as const
               )
                 .filter(([, count]) => (count ?? 0) > 0)
