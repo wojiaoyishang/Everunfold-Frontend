@@ -1,6 +1,6 @@
 # Scheduler、Worker 与运行管理
 
-版本：runtime-tasks-4；2026-11-10。状态：第一阶段已实现；具体已执行检查及未覆盖项目见[验收](../handoff/runtime-tasks-verification.md)。开发前先登记的规划由本版补充实际接口，不把后续能力标为交付。
+版本：runtime-tasks-5；2026-11-10。状态：第一阶段已实现；具体已执行检查及未覆盖项目见[验收](../handoff/runtime-tasks-verification.md)。开发前先登记的规划由本版补充实际接口，不把后续能力标为交付。
 
 ## 产品与进程归属
 
@@ -85,7 +85,7 @@ GET /v1/admin/runtime 要求 settings:read；POST /v1/admin/runtime/control 要�
 1. 显式运行迁移至 0034_task_progress，服务启动不自动迁移。
 2. 部署后端代码，受控重启 API、Worker、Scheduler；显式执行 uv run python -m tools.register_backend_plugins --config config.toml --apply。
 3. 保持原 Scheduler 和 Celery Worker 启动命令，无额外 runner 命令；检查后台最近心跳/扫描及三项核心任务。
-4. 前端固定 settings 1.22.0 的精确契约提交与 SHA，生成客户端只放忽略的 var/cache。修改插件构建工具后重启开发协调进程；普通插件源码编辑继续自动编译。
+4. 前端固定 settings 1.23.0 的精确契约提交与 SHA，生成客户端只放忽略的 var/cache。修改插件构建工具后重启开发协调进程；普通插件源码编辑继续自动编译。
 
 当前阶段只提供固定间隔声明和启停、执行历史，不提供任意命令/任务参数编辑、Cron 日历、拖动流程图、跨地域分布式锁或无限时间序列监控。任务阶段/增量日志已由统一进度接口提供，进程标准输出仍使用现有进程管理器。Python 插件更新需要受控部署，不是在线热安装 Python 包。
 
@@ -112,3 +112,50 @@ Worker与常驻执行上下文绑定统一 `task_progress`，从app.plugin_sdk�
 后端锁TaskPlan并检查已部署可用、已启用、periodic；有queued/running时复用原执行，否则持久登记一次queued，再由原Scheduler派发给Worker。返回RuntimeOverview，前端退出弹窗后切到执行记录并展开对应统一进度；入队不等于执行完成。审计保存debug_run/run_id/reused。操作不改变enabled、next_at或周期，不自动重试未知请求结果。
 
 开发测试可能执行任务本身真实业务；无可用任务时应先由开发者正常注册/启用，不提供任意命令或未登记函数执行。并发触发会复用活动执行，已完成之后再次明确触发属于新执行，不宣称跨所有外部副作用永久去重。无新增迁移/依赖；后端e3da550、前端1714eb4，检查见[验收](../handoff/admin-cloud-manual-verification.md)。
+
+## 带参数的 Worker 执行（2026-11-10）
+
+“手动触发”与刷新位于同一按钮组。有参数声明的任务显示参数表单：字符串、整数/数值、布尔和枚举直接编辑，必填、说明、默认值及范围来自后端Schema；对象/数组及复杂类型可填JSON，也可切换完整JSON对象模式。切换任务重新初始化，不沿用上一任务的输入；参数不写浏览器持久存储。
+
+任务注册使用Pydantic模型，不从函数签名猜参数。其余文件仍自由组织：
+
+```python
+from pydantic import BaseModel, Field
+from app.plugin_sdk import TaskDefinition
+
+
+class Parameters(BaseModel):
+    count: int = Field(ge=1, le=20, title="处理次数")
+    dry_run: bool = Field(default=True, title="试运行")
+
+
+async def execute(config, parameters: Parameters):
+    return {"completed": parameters.count if not parameters.dry_run else 0}
+
+
+# 在插件setup(registry)中登记；仅示例，handler指向实际模块。
+definition = TaskDefinition(
+    id="example.work.calculate",
+    title="参数计算",
+    handler="app.plugins.work.jobs:execute",
+    parameters=Parameters,
+    default_parameters={"count": 3},
+    enabled=False,
+)
+```
+
+`parameters`为BaseModel类；未声明仍调用原handler(config)，声明后调用handler(config, validated_model)，参数是第二个位置参数，不要求函数形参固定名称。注册时default_parameters必须通过模型完整校验，防止自动周期执行缺少必填值；Scheduler登记自动执行时保存这份默认参数快照。常驻任务不接此调用参数，继续使用ResidentContext。
+
+RuntimePlan新增parameters_schema、parameter_defaults；Schema从模型生成，前端只映射展示，API和Worker都严格校验JSON、模型及未知字段。RuntimeCommand的debug_run可带parameters对象，其他action不能带非空调用参数，无参数任务拒绝非空对象。参数最多32KiB、深度16，数字必须有限。
+
+```json
+{"task_id":"example.work.calculate","action":"debug_run","parameters":{"count":5,"dry_run":true}}
+```
+
+API成功后在0035_task_parameters新增的TaskRun.parameters私有JSONB持久化；队列仍只带执行ID。Worker再次按当前注册模型验证，非法或声明变化不执行handler。参数值不出现在RuntimeRun、任务进度、审计或通用错误；审计只记录parameter_keys。插件handler自身不要主动把私密参数写到返回值或日志。
+
+活动执行必须参数相同才复用；比较采用排序的规范JSON，嵌套对象键顺序不影响一致性，布尔值与数字不混为同参。异参返回409，必须等待原执行完成或改回相同参数；422保留表单供修正。手动提交不自动重试未知结果。
+
+普通字符串字段可用writeOnly或format=password声明，前端隐藏输入；公开Schema/defaults剔除其默认值及示例，私有执行保存实际输入。拒绝SecretStr/SecretBytes模型类型（含嵌套），避免模型序列化后把掩码当成真实参数；此类凭据优先在服务端通过配置引用。该私有JSONB未新增字段加密。
+
+既有example.runtime插件增加默认关闭的参数计算示例，只有本地运算和进度，不连接外部服务。部署先显式升级0035，再同步插件目录并重启API/Worker/Scheduler；不自动改变原启停。settings1.23.0固定4a81d6d，隐私修正224be3c；前端845a99f，详见[参数验收](../handoff/worker-parameters-verification.md)。

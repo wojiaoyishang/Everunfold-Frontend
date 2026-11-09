@@ -1273,3 +1273,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/runtime-tasks.md` | `runtime-tasks-4` | `e24961dc10617cb2efc79eaabfc2b87757cf1f0accc05604bab45b305cfb7ce2` |
 | `docs/decisions/0094-manual-worker-dispatch.md` | `ADR0094-1` | `f7a51f96e6c4e1800eb4d32cfb52067e03960af9737e7bc817b02126dedbf383` |
 | `docs/handoff/admin-cloud-manual-verification.md` | `admin-cloud-manual-verification-1` | `38ad0cca2965fd31187a511bd816ac17bb202f0190e3cf259d72a1f664a0adcd` |
+
+
+## Worker参数声明与私有执行（2026-11-10）
+
+后端4a81d6d/224be3c、前端845a99f；settings1.23.0固定4a81d6d及精确SHA，0035显式部署。以下替代对应旧摘要，原始基线不变，检查与限制见验收，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-worker-parameters-1` | `4026b0b8998547f9a55bd5c8f605b063090b3607b525557dfbacef5287d6bc87` |
+| `docs/development/runtime-tasks.md` | `runtime-tasks-5` | `0e78f7a9f7ed4257442289bf3b6180731bd73a851ba490f4821ca0e6c22dbce8` |
+| `docs/development/backend-plugins.md` | `backend-plugins-3` | `9c814b56261fbad12e5556e7d92c00b892cb33236f2a38a10ef6f03575afe2b7` |
+| `docs/decisions/0095-typed-worker-invocation-parameters.md` | `ADR0095-1` | `9c46745f452dde2471bcb14e833baf4e1e6e9bee346abc73f81d420b9bc89ba5` |
+| `docs/handoff/worker-parameters-verification.md` | `worker-parameters-verification-1` | `027097ebc8acac6d75914a8f5f63067ff48df89c10333e2c5ef5483a4e9b57d9` |

@@ -1,6 +1,6 @@
 # 后端插件开发
 
-版本：backend-plugins-2，2026-11-09。决定见[ADR0087](../decisions/0087-single-entry-backend-plugins.md)。
+版本：backend-plugins-3，2026-11-10。决定见[ADR0087](../decisions/0087-single-entry-backend-plugins.md)。
 
 ## 唯一入口
 
@@ -83,3 +83,7 @@ Python代码更新需要受控重启，不声称同进程热替换。插件内�
 ## 部署目录展示元数据
 
 Plugin类或define_plugin可提供homepage、license、preview、readme，原version/author继续使用。preview为安全URL，readme为Markdown正文；缺省不影响加载。后台统一详情弹窗不执行介绍中的HTML/脚本。任务注册方法、生命周期和检查点见[任务指南](runtime-tasks.md)。
+
+## 任务参数声明
+
+Worker有限任务可在TaskDefinition提供parameters=PydanticModel、default_parameters={...}，函数接收(config, validated_model)；未声明参数的既有函数不变。默认值须通过模型校验，传参严格JSON且私有持久；公开展示Schema和可展示默认值，Worker重新校验。同参活动任务复用、异参409；具体字段、敏感默认处理与部署见[任务参数指南](runtime-tasks.md)。可参考runtime_example/parameter_task.py及plugin.py登记，示例默认关闭，不要求作者采用固定文件名。

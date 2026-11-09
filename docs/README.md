@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[Worker参数与触发按钮](handoff/worker-parameters-verification.md)、[任务开发](development/runtime-tasks.md)及[ADR0095](decisions/0095-typed-worker-invocation-parameters.md)：注册参数模型，表单/JSON填写，私有持久化并由Worker二次校验；同参复用、异参冲突，手动触发与刷新并排。
+
 [后台标签词云与手动Worker测试](handoff/admin-cloud-manual-verification.md)：标签管理的最多100词密排、少词放大、旋转及搜索/列表切换，菜单背景统一；[任务指南](development/runtime-tasks.md)与[ADR0094](decisions/0094-manual-worker-dispatch.md)说明按已注册名称/函数手动入队并展开进度。
 
 [统一任务进度与邮件诊断](development/task-progress.md)、[ADR0093](decisions/0093-unified-task-progress-and-smtp-transcripts.md)及[验收](handoff/task-progress-verification.md)：Worker/插件统一进度上报、游标长轮询、断线与刷新恢复；运行记录和邮件测试复用监控面板，SMTP命令/响应/MIME可查看，认证报文脱敏。

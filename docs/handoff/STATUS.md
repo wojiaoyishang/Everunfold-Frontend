@@ -1,5 +1,14 @@
 # 前端交接状态
 
+## 最新交付：Worker任务参数与按钮位置（2026-11-10）
+
+- 后端4a81d6d/224be3c、前端845a99f；“手动触发”移至刷新旁。TaskDefinition可声明Pydantic参数模型及有效默认值，自动发布Schema/defaults，界面支持基本字段/必填/范围/枚举与复杂JSON；切换任务不沿用旧参数。见[任务指南](../development/runtime-tasks.md)、[ADR0095](../decisions/0095-typed-worker-invocation-parameters.md)、[验收](worker-parameters-verification.md)。
+- API严格校验后写私有TaskRun.parameters，Worker再次校验并传handler第二个位置参数，无参handler兼容。相同规范JSON参数复用活动任务，异参409；32KiB/深度16/有限数限制、审计仅键名，输入不进入运行投影/进度/队列或浏览器持久存储。公开默认剔除writeOnly/password值，拒绝Secret模型掩码失真。
+- settings1.23.0固定4a81d6d及SHA，0035显式迁移当前/测试库，插件目录显式同步后API/Worker/Scheduler受控重启；原插件/计划启停逐项对比一致，新增参数示例默认关闭。无新依赖，既有六服务/四端口0.0.0.0/HTTP200正常。
+- 后端完整真实库315项/295.92秒、Ruff/357格式/mypy210通过；新API/并发/同异参/类型/自动默认/Worker重验和敏感元数据边界通过。前端完整check335和隔离生产矩阵通过，桌面/631/390/深色实页已看图；参数类型/JSON错误/422与409/成功进度/切任务重置/存储无私有值，pageerror0。
+- 主站未触发实际测试任务或修改用户内容/SMTP；真实执行在隔离库和Worker验证，浏览器写入使用夹具。全浏览器/长期负载及额外生产插件安装矩阵未重跑；私有JSONB未新增字段加密，handler仍需自行避免输出私密实参。共享文档/SHA双仓一致，截图/凭据只在忽略目录，本地存档未push。
+
+
 ## 最新交付：后台密集词云与Worker手动测试（2026-11-10）
 
 - 后端e3da550、前端1714eb4。标签管理加入全目录词云/列表，按已发布引用权重稳定选择最多100词，旋转/密排/少词放大、尺寸/字体测量适配；点击复用编辑，搜索联动。菜单父级默认/hover/current与普通链接统一，搜索复用带图标输入样式。见[验收](admin-cloud-manual-verification.md)、[标签指南](../development/content-operations.md)。
