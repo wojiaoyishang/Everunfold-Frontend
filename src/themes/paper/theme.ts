@@ -1,4 +1,5 @@
 import type { ThemeDefinition } from "@/core/extensions/types";
+import { defineFont } from "@/core/fonts";
 
 /** A CSS-only starting point: inherit Argon's components, templates and hooks. */
 export default {
@@ -11,7 +12,21 @@ export default {
     url: "https://github.com/wojiaoyishang",
   },
   repository: "https://github.com/wojiaoyishang/Everunfold-Frontend",
-  version: "2.0.0",
+  version: "2.0.1",
   parent: "argon",
   styles: true,
+  fonts: [
+    defineFont({
+      id: "paper.ui",
+      label: "Paper UI",
+      fallbacks: [
+        "system-ui",
+        "Segoe UI",
+        "PingFang SC",
+        "Microsoft YaHei",
+        "sans-serif",
+      ],
+    }),
+  ],
+  typography: { body: "paper.ui", heading: "paper.ui", code: "system.mono" },
 } satisfies ThemeDefinition;
