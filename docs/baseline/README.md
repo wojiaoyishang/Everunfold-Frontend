@@ -1436,3 +1436,17 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/architecture/frontend-ui.md` | `frontend-ui-static-seo-1` | `4566ee929c19d2cdd1196b0925e0e2d9211392383ccc8be93aa94e036a4a2acc` |
 | `docs/development/operations-and-search.md` | `operations-search-5` | `0293b4efd217a08b8410ee80c8f5222837ad71ae9804c6bc127b9b545201271f` |
 | `docs/decisions/0102-static-seo-content-and-dynamic-enhancements.md` | `ADR0102-1` | `2507d75df89db83b4283ff938b11d464a0484275deb85cc77f2bc5ba58f5f196` |
+
+
+## 静态内容载荷瘦身与 UTF-8（2026-11-10）
+
+前端本轮代码提交见 STATUS；后端业务、契约与迁移不变。静态主题注册和客户端水合注册分离，文章/列表原始正文块与渲染HTML不再重复进入客户端props；Unicode正文直接以UTF-8输出。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-static-seo-2` | `2121992a8b72506063867af279dffff79f60d9b2f9acec6bdec9dcdf27e7c4e2` |
+| `docs/architecture/frontend-ui.md` | `frontend-ui-static-seo-2` | `c7a1e30a38afc1f0d1f28d4e209907f63e97fe83d5f927b78d2823fe4875db26` |
+| `docs/architecture/frontend-themes.md` | `frontend-themes-6` | `4aeb6fd44d4ca0e5a2bdc45c55c26520d93851e9dd0d2438b13b719f6338c648` |
+| `docs/development/child-themes.md` | `child-themes-7` | `d36ca2ecc97c48ffd6a9b800ec0a693b1fb8f96e6a9c56bd6df7655ec28a0e66` |
+| `docs/development/operations-and-search.md` | `operations-search-6` | `25bdd236a877956e9255ffa414052dfa5a7978e0335793dc5d8d84c02870a714` |
+| `docs/decisions/0102-static-seo-content-and-dynamic-enhancements.md` | `ADR0102-2` | `80e1ea59c08c302b6630bd3adc160850d1a0f3d4cefb3aa035305ffb2a6d12a3` |

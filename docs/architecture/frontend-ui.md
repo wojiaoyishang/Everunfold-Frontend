@@ -64,9 +64,11 @@ src/themes/argon/
 
 ## 静态正文与动态增强（2026-11-10）
 
-公开文章的标题、摘要、正文和阅读表面必须在首次 HTML 响应中直接输出。主题具名组件随公开组件注册表同步解析，不能在该路径使用带“正在加载组件…”占位的 `React.lazy`/`Suspense`；文章正文继续由 Server 的 `renderContentForReader` 生成，也不得改由 `useEffect` 或水合后的客户端脚本拼装。父子主题继承、局部错误边界和缺失实现回退仍保留，详见 [ADR0102](../decisions/0102-static-seo-content-and-dynamic-enhancements.md)。
+公开文章、列表卡片、标题、摘要、正文和阅读表面必须在首次 HTML 响应中直接输出。静态主题实现从 `components.tsx` 经 `ServerThemeComponent`/`ServerThemeTemplate` 解析；仅供水合的组件从 `client-components.tsx` 进入客户端注册表。不能在 SEO 路径使用带“正在加载组件…”占位的 `React.lazy`/`Suspense`；文章正文继续由 Server 的 `renderContentForReader` 生成，也不得改由 `useEffect` 或水合后的客户端脚本拼装。父子主题继承、局部错误边界和缺失实现回退仍保留，详见 [ADR0102](../decisions/0102-static-seo-content-and-dynamic-enhancements.md)。
 
-术语 Tooltip 和查阅量属于阅读增强，不进入首屏 SEO 内容。术语组件在页面空闲后另行加载，只请求当前文章实际命中的词条并复用 5 分钟客户端缓存；浏览量只在指标接近视口时请求，失败时保持指标隐藏。身份、临时指标和交互状态不得写入公开快照、结构化数据或服务端正文 HTML。新增主题的阅读组件必须能在没有 `window`、`IntersectionObserver` 和浏览器定位 API 时完成服务端预渲染。
+正文 HTML 由服务端直接写入带稳定 ID 的 `.article-content` 容器；`ContentMarkupEnhancer` 只接收内容 ID、修订、特性开关和术语选项，在 DOM 已存在后按 ID 接管表格滚动、按需代码/公式增强和 CodeTools。原始 Markdown/HTML 区块、渲染 HTML 字符串和完整内容对象不得作为客户端 props。列表与说说同理只跨边界传递展示 DTO。
+
+术语 Tooltip 和查阅量属于阅读增强，不进入首屏 SEO 内容。术语组件在页面空闲后另行加载，只请求当前文章实际命中的词条并复用 5 分钟客户端缓存；浏览量只在指标接近视口时请求，失败时保持指标隐藏。身份、临时指标和交互状态不得写入公开快照、结构化数据或服务端正文 HTML。新增主题的阅读组件必须能在没有 `window`、`IntersectionObserver` 和浏览器定位 API 时完成服务端预渲染。中文、日文和 emoji 正文直接使用 UTF-8；只有 `&`、`<`、`>` 和引号等 HTML 语法字符保持实体转义。
 
 ## 客户端导航与目录
 

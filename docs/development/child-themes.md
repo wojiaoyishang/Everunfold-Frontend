@@ -1,6 +1,6 @@
 # 子主题开发与启用
 
-版本：child-themes-6，2026-11-10。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。主题自己的后台设置面板现也归属主题目录，见[主题设置指南](theme-settings.md)与ADR0100。
+版本：child-themes-7，2026-11-10。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。主题自己的后台设置面板现也归属主题目录，见[主题设置指南](theme-settings.md)与ADR0100。
 
 ## 主题卡片与开发者信息
 
@@ -75,14 +75,18 @@ Paper不再提供public.hero包装、paper.people模板和paper.footer-note钩�
 
 ## 覆盖组件、复用父组件
 
-在theme.ts的components中列出要提供或覆盖的名称，并在components.tsx的default对象导出同名组件。未知组件显示占位；模板缺失时同时保留父结果。React组件定义在模块顶层，不能在渲染过程中临时声明。
+在theme.ts的components中列出要提供或覆盖的名称，并在components.tsx的default对象导出同名服务端静态组件。需要事件、状态或浏览器 API 的组件同时在自己的client-components.tsx导出同名实现；只有服务端展示、无水合需求的文章/正文实现不应进入客户端注册表。未知组件显示占位；模板缺失时同时保留父结果。React组件定义在模块顶层，不能在渲染过程中临时声明。
 
 ```tsx
 "use client";
 import { ParentThemeComponent } from "@/core/extensions/components";
 import type { Site } from "@/core/content/types";
 function Hero({ site }: { site: Site }) {
-  return <div className="my-hero"><ParentThemeComponent name="public.hero" site={site}/></div>;
+  return (
+    <div className="my-hero">
+      <ParentThemeComponent name="public.hero" site={site} />
+    </div>
+  );
 }
 const components = { "public.hero": Hero };
 export default components;
@@ -90,18 +94,20 @@ export default components;
 
 ParentThemeComponent沿当前实现的父级查找，支持多级继承；不要在覆盖public.hero时再次调用同名ExtensionComponent，否则会递归。完整替换public.shell时仍保留BlogShell宿主的数据/导航上下文；自行提供布局及主内容容器。通常覆盖横幅、页眉、页脚或卡片即可。
 
-| 默认组件名 | 接收数据 |
-| --- | --- |
-| public.shell | children；站点/导航/阅读数据通过现有上下文读取 |
-| public.header / public.hero / public.footer | site |
-| public.sidebar | site、toc、contentKey |
-| public.tools | 无业务props |
-| public.article.card / public.article.body | content、rendered、interactive |
-| public.article.header | content、interactive、liveMetrics |
-| public.post.card | content（列表展示模型） |
-| public.shuoshuo.card | entry、rendered、detail、interactive |
-| public.page.surface | page、translations、onReady |
-| public.page.heading | page、translations |
+上述交互型覆盖还应在 `client-components.tsx` 导出相同组件，供公开壳、设置表单和运行时页面解析。文章卡、文章标题和正文已由宿主服务端输出，只有需要水合时才在客户端文件重复导出；客户端实现只接收展示 DTO，不能要求原始正文块或整份快照。
+
+| 默认组件名                                  | 接收数据                                       |
+| ------------------------------------------- | ---------------------------------------------- |
+| public.shell                                | children；站点/导航/阅读数据通过现有上下文读取 |
+| public.header / public.hero / public.footer | site                                           |
+| public.sidebar                              | site、toc、contentKey                          |
+| public.tools                                | 无业务props                                    |
+| public.article.card / public.article.body   | content、rendered、interactive                 |
+| public.article.header                       | content、interactive、liveMetrics              |
+| public.post.card                            | content（列表展示模型）                        |
+| public.shuoshuo.card                        | entry、rendered、detail、interactive           |
+| public.page.surface                         | page、translations、onReady                    |
+| public.page.heading                         | page、translations                             |
 
 页面/短代码/插件控件的具名实现也可覆盖；仍按子→父→插件解析。表单默认保持后台Argon上下文；局部ThemeComponentsProvider可以显式选择其他主题。
 
@@ -133,11 +139,11 @@ slots: {
 }
 ```
 
-| 区域 | 可用位置 |
-| --- | --- |
-| Shell | shell.header.before/after、shell.hero.before/after、shell.content.before/after、shell.footer.before/after |
-| 文章卡片 | article.header.before/after、article.body.before/after |
-| 管理页面的前台展示 | page.header.before/after、page.body.before/after |
+| 区域               | 可用位置                                                                                                  |
+| ------------------ | --------------------------------------------------------------------------------------------------------- |
+| Shell              | shell.header.before/after、shell.hero.before/after、shell.content.before/after、shell.footer.before/after |
+| 文章卡片           | article.header.before/after、article.body.before/after                                                    |
+| 管理页面的前台展示 | page.header.before/after、page.body.before/after                                                          |
 
 Shell的content位置位于路由切换容器之外，适合全站说明；正文插入使用文章/页面位置。自定义组件也可以声明自己的ThemeSlot，不存在贡献时不产生空容器。
 
