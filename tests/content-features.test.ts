@@ -40,7 +40,7 @@ test("plain articles and literal code do not request unused feature assets", () 
   assert.deepEqual(literal.features, { code: true, math: false });
 });
 test("Markdown formulas and HTML formulas use the same accessible renderer", async () => {
-  const md = render("行内 $a^2$。\n\n$$\n\\frac{1}{3}\n$$");
+  const md = render("假设行内 $a^2$。\n\n$$\n\\frac{1}{3}\n$$");
   assert.deepEqual(md.features, { code: false, math: true });
   const html = render(
     featureSource(
@@ -54,6 +54,8 @@ test("Markdown formulas and HTML formulas use the same accessible renderer", asy
     enhanceContentHtml(md.html),
     enhanceContentHtml(html.html),
   ]);
+  assert.match(first, /假设行内/);
+  assert.doesNotMatch(first, /&#x(?:5047|8bbe|884c|5185);/);
   assert.match(first, /<math .*MathML/);
   assert.match(
     second,

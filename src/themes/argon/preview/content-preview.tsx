@@ -10,7 +10,8 @@ import { useContentPreview } from "@/core/content-management/use-content-preview
 import { presentLegacyContent } from "@/core/content/presentation";
 import { renderContent } from "@/core/rendering/content";
 import { BlogShell } from "../components/shell";
-import { ExtensionComponent } from "@/core/extensions/components";
+import { ArticleCard } from "../components/article-card";
+import { ShuoshuoCardView } from "../components/shuoshuo-card";
 import { ThemeTemplate } from "@/core/themes/presentation";
 import { PagePresentation } from "../components/route-state";
 import { Button } from "../components/ui/primitives";
@@ -171,8 +172,7 @@ export function ContentPreview({
             }}
           >
             {type === "shuoshuo" ? (
-              <ExtensionComponent
-                name="public.shuoshuo.card"
+              <ShuoshuoCardView
                 entry={{
                   content: presentLegacyContent(presentation.content),
                   example: false,
@@ -182,8 +182,8 @@ export function ContentPreview({
                 interactive={false}
               />
             ) : (
-              <ExtensionComponent
-                name="public.article.card"
+              <ArticleCard
+                theme={runtime.catalog?.theme ?? "argon"}
                 content={presentation.content}
                 rendered={presentation.rendered}
                 interactive={false}

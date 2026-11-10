@@ -15,6 +15,7 @@ import type { ContentFeatures } from "./features/model";
 import { codeHtml, parseCodeInfo } from "./features/code-options";
 import { frameCodeHtml } from "./features/code-frame";
 import { pluginRegistry } from "@/core/plugins/registry";
+import { literalUnicodeEntities } from "./literal-unicode";
 
 export interface TableOfContentsItem {
   id: string;
@@ -311,7 +312,10 @@ export function renderContent(
       }
       visit(document.children);
       return frameCodeHtml(
-        sanitizeHtml(DomUtils.getOuterHTML(document), sanitizeOptions),
+        sanitizeHtml(
+          literalUnicodeEntities(DomUtils.getOuterHTML(document)),
+          sanitizeOptions,
+        ),
       );
     })
     .join("\n");

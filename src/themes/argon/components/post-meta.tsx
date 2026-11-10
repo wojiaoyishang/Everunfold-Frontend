@@ -1,5 +1,5 @@
 import { UiText } from "@/core/i18n/provider";
-import type { ReadableContent } from "@/core/content/types";
+import type { ReadableContentMetadata } from "@/core/content/types";
 import { displayDate } from "@/core/content/query";
 import { taxonomyHref } from "@/core/content/urls";
 import { AppLink as Link } from "./navigation-link";
@@ -15,7 +15,7 @@ export function PostMeta({
   interactive = true,
   display,
 }: {
-  content: ReadableContent;
+  content: ReadableContentMetadata;
   article?: boolean;
   liveMetrics?: boolean;
   interactive?: boolean;

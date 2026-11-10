@@ -15,6 +15,9 @@ export type Site = StoredSnapshot["site"] & {
 };
 export type PublicSnapshot = Omit<StoredSnapshot, "site"> & { site: Site };
 export type Content = PublicSnapshot["contents"][number];
+/** Presentation metadata safe to cross a server/client boundary without source blocks. */
+export type ContentMetadata = Omit<Content, "content">;
 export type ReadableContent = Omit<Content, "kind">;
+export type ReadableContentMetadata = Omit<ReadableContent, "content">;
 export type Taxonomy = PublicSnapshot["taxonomies"][number];
 export type PublicComment = PublicSnapshot["comments"][string][number];

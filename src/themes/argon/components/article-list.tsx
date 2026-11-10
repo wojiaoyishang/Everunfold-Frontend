@@ -1,5 +1,6 @@
 import type { PublicSnapshot } from "@/core/content/types";
 import { queryContents, type ContentFilter } from "@/core/content/query";
+import { contentMetadata } from "@/core/content/client-data";
 import { PagePresentation } from "./route-state";
 import { PostCard } from "./post-card";
 import { Pagination } from "./pagination";
@@ -46,7 +47,7 @@ export function ArticleList({
       <div className="article-list">
         {result.items.length ? (
           result.items.map((content) => (
-            <PostCard key={content.id} content={content} />
+            <PostCard key={content.id} content={contentMetadata(content)} />
           ))
         ) : (
           <EmptyState

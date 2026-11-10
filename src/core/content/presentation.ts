@@ -6,6 +6,7 @@ import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";
 export type { ContentPresentation };
 export type ContentType = ContentPresentation["type"];
 export type FeedType = ContentType | "all";
+export type ContentPresentationMetadata = Omit<ContentPresentation, "content">;
 /** Origin is UI state, deliberately outside the business DTO. */
 export interface FeedEntry {
   content: ContentPresentation;

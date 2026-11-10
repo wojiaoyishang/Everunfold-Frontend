@@ -1,7 +1,8 @@
 import { readConfiguration } from "@/core/config/server";
 import { feedAlternates } from "@/core/seo/discovery";
 import { localizeHref } from "@/core/i18n/locale";
-import { ThemeTemplate } from "@/core/themes/presentation";
+import { ServerThemeTemplate } from "@/core/extensions/server-components";
+import { readActiveTheme } from "@/core/themes/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { PublicSnapshot } from "@/core/content/types";
@@ -75,9 +76,10 @@ type CodePageProps = {
   parameters?: PageParameters;
 };
 
-export function CodePage(props: CodePageProps) {
+export async function CodePage(props: CodePageProps) {
   const { snapshot, path, parameters = {} } = props;
-  const output = renderCodePage(props);
+  const theme = await readActiveTheme();
+  const output = renderCodePage(props, theme);
   const query = parameters.q || parameters.s;
   const name =
     path === "/" && !query
@@ -90,21 +92,28 @@ export function CodePage(props: CodePageProps) {
             ? "feed"
             : "taxonomy";
   return (
-    <ThemeTemplate name={name} context={{ site: snapshot.site, path }}>
+    <ServerThemeTemplate
+      theme={theme}
+      name={name}
+      context={{ site: snapshot.site, path }}
+    >
       {output}
-    </ThemeTemplate>
+    </ServerThemeTemplate>
   );
 }
 
-function renderCodePage({
-  snapshot,
-  path,
-  parameters = {},
-}: {
-  snapshot: PublicSnapshot;
-  path: string;
-  parameters?: PageParameters;
-}) {
+function renderCodePage(
+  {
+    snapshot,
+    path,
+    parameters = {},
+  }: {
+    snapshot: PublicSnapshot;
+    path: string;
+    parameters?: PageParameters;
+  },
+  theme: string,
+) {
   const page = pageNumber(parameters.page),
     type = feedType(parameters.type);
   const query =
@@ -116,6 +125,7 @@ function renderCodePage({
   if (path === "/search" || (path === "/" && query))
     return (
       <SearchResults
+        theme={theme}
         snapshot={snapshot}
         query={query.trim().slice(0, 160)}
         type={type}
@@ -133,6 +143,7 @@ function renderCodePage({
   if (path === "/" || path === "/ss" || path === "/article")
     return (
       <Feed
+        theme={theme}
         snapshot={snapshot}
         page={page}
         type={

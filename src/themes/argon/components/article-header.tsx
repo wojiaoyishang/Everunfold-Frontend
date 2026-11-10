@@ -1,5 +1,5 @@
 import Image from "next/image";
-import type { Content } from "@/core/content/types";
+import type { ContentMetadata } from "@/core/content/types";
 import { resourceUrl, taxonomyHref } from "@/core/content/urls";
 import { AppLink as Link } from "./navigation-link";
 import { PostMeta } from "./post-meta";
@@ -12,7 +12,7 @@ export function ArticleHeader({
   interactive = true,
   display,
 }: {
-  content: Content;
+  content: ContentMetadata;
   liveMetrics?: boolean;
   interactive?: boolean;
   display?: ArticleDisplayPreferences;
@@ -48,7 +48,13 @@ export function ArticleHeader({
           interactive={interactive}
           display={display}
         />
-        <ContentLanguages content={content} />
+        <ContentLanguages
+          content={{
+            id: content.id,
+            language: content.language,
+            translations: content.translations,
+          }}
+        />
       </div>
     </header>
   );

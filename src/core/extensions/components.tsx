@@ -18,7 +18,7 @@ export { useThemeId } from "./theme-context";
 type UIComponent = ComponentType<Record<string, unknown>>;
 type ComponentModule = { default: Record<string, UIComponent> };
 const modules = {
-  ...import.meta.glob<ComponentModule>("/src/themes/*/components.tsx", {
+  ...import.meta.glob<ComponentModule>("/src/themes/*/client-components.tsx", {
     eager: true,
   }),
 };
@@ -75,14 +75,14 @@ class ComponentBoundary extends Component<
 }
 
 function componentPath(name: string, theme: string) {
-  const selected = themes.owner(theme, name);
-  if (selected)
-    return {
-      owner: selected,
-      path: Object.entries(themeModules)
-        .find(([, value]) => value.id === selected)?.[0]
-        .replace(/theme\.ts$/, "components.tsx"),
-    };
+  for (const selected of themes.chain(theme)) {
+    if (!selected.components?.includes(name)) continue;
+    const path = Object.entries(themeModules)
+      .find(([, value]) => value.id === selected.id)?.[0]
+      .replace(/theme\.ts$/, "client-components.tsx");
+    if (path && modules[path]?.default?.[name])
+      return { owner: selected.id, path };
+  }
   return { owner: null, path: undefined };
 }
 

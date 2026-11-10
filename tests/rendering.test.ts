@@ -6,6 +6,7 @@ import { renderContent } from "../src/core/rendering/content";
 import { CommentText } from "../src/themes/argon/components/comment-text";
 import { content } from "./fixtures";
 import { DomUtils, parseDocument } from "htmlparser2";
+import { literalUnicodeEntities } from "../src/core/rendering/literal-unicode";
 
 test("mixed HTML and Markdown are sanitized without executing legacy active content", () => {
   const result = renderContent(
@@ -89,6 +90,29 @@ test("missing and unsafe mapped media cannot become active URLs", () => {
   );
   assert.doesNotMatch(result.html, /site:|javascript:|autoplay/);
   assert.match(result.html, /preload="none"/);
+});
+
+test("rendered HTML keeps Unicode literal while escaping markup characters", () => {
+  const result = renderContent(
+    content({
+      content: [
+        {
+          id: "unicode",
+          type: "html",
+          content: "<p>假设 · ⚡ 中文</p><p>&lt;safe&gt; &amp;</p>",
+        },
+      ],
+    }),
+  );
+  assert.match(result.html, /<p>假设 · ⚡ 中文<\/p>/);
+  assert.match(result.html, /&lt;safe&gt; &amp;/);
+  assert.doesNotMatch(result.html, /&#x(?:5047|8bbe|4e2d|6587);/);
+  assert.doesNotMatch(
+    literalUnicodeEntities(
+      '<div data-code="&quot;&lt;script&gt;&quot;">假设</div>',
+    ),
+    /<script>/,
+  );
 });
 
 test("plain historical comments preserve literal tags, entities and line breaks", () => {

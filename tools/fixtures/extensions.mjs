@@ -22,11 +22,32 @@ export default {
   "verification-parent.people":function People({children}:ThemeTemplateProps){return <section data-parent-page-template="true">{children}</section>;},
   "verification-parent.footer-note":function Note(){return <p>Parent fixture hook</p>;}
 };`,
+    "src/themes/verification-parent/client-components.tsx": `
+import type {Site} from "@/core/content/types";
+import type {ThemeTemplateProps} from "@/core/extensions/types";
+import {ParentThemeComponent} from "@/core/extensions/components";
+export default {
+  "public.hero":function Hero({site}:{site:Site}){return <div data-parent-theme-hero="true"><ParentThemeComponent name="public.hero" site={site}/></div>;},
+  "verification-parent.people":function People({children}:ThemeTemplateProps){return <section data-parent-page-template="true">{children}</section>;},
+  "verification-parent.footer-note":function Note(){return <p>Parent fixture hook</p>;}
+};`,
     "src/themes/verification/theme.ts":
       'export default {id:"verification",version:"1.0.0",parent:"verification-parent",components:["verification.theme-control","public.hero","verification.layout","verification.page","verification.note","verification-parent.footer-note"],templates:{home:"verification.layout","page:core.people":"verification.page",article:"verification.missing-template"},slots:{"shell.footer.after":["verification.note"]},styles:true};',
     "src/themes/verification/styles.ts":
       'const css=".public-theme[data-theme-chain~=verification] { --verification-style: 1; }";export default css;',
     "src/themes/verification/components.tsx": `
+import type {ThemeTemplateProps} from "@/core/extensions/types";
+import type {Site} from "@/core/content/types";
+import {ParentThemeComponent} from "@/core/extensions/components";
+const components={
+  "verification.theme-control":function Control(){return <div data-extension-theme="true">Discovered theme component</div>;},
+  "public.hero":function Hero({site}:{site:Site}){return <div data-grandchild-hero="true"><ParentThemeComponent name="public.hero" site={site}/></div>;},
+  "verification.layout":function Layout({children}:ThemeTemplateProps){return <section data-child-template="true">{children}</section>;},
+  "verification.page":function Layout({children}:ThemeTemplateProps){return <section data-child-page="true">{children}</section>;},
+  "verification.note":function Note(){return <p data-child-hook="true">Child hook</p>;},
+  "verification-parent.footer-note":function Note(){return <p data-overridden-inherited-hook="true">Overridden inherited hook</p>;}
+};export default components;`,
+    "src/themes/verification/client-components.tsx": `
 import type {ThemeTemplateProps} from "@/core/extensions/types";
 import type {Site} from "@/core/content/types";
 import {ParentThemeComponent} from "@/core/extensions/components";

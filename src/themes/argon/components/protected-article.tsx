@@ -6,7 +6,7 @@ import type { Content, Site } from "@/core/content/types";
 import { useProtectedContent } from "@/core/content/use-protected-content";
 import { renderContent } from "@/core/rendering/content";
 import { ContentMarkup } from "./content-markup";
-import { ExtensionComponent } from "@/core/extensions/components";
+import { ArticleHeader } from "./article-header";
 import { ArticleMedia } from "./article-media";
 import { PagePresentation } from "./route-state";
 import { useCaptcha } from "@/core/captcha/use-captcha";
@@ -40,11 +40,7 @@ export function ProtectedArticle({
     <>
       <PagePresentation id={content.id} site={site} toc={rendered.toc} />
       <article className="surface article-card" data-theme-content={content.id}>
-        <ExtensionComponent
-          name="public.article.header"
-          content={readable}
-          liveMetrics={false}
-        />
+        <ArticleHeader content={readable} liveMetrics={false} />
         {access.content ? (
           <div className={`article-body ${styles.revealed}`}>
             <ArticleMedia>

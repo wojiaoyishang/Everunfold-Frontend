@@ -1,26 +1,33 @@
 import type { Content, PublicSnapshot } from "@/core/content/types";
+import { contentMetadata } from "@/core/content/client-data";
 import { renderContentForReader } from "@/core/rendering/render-content-server";
 import { CommentSection } from "./comments/comment-section";
 import { PagePresentation } from "./route-state";
-import { ExtensionComponent } from "@/core/extensions/components";
-import { ThemeTemplate } from "@/core/themes/presentation";
+import {
+  ServerThemeComponent,
+  ServerThemeTemplate,
+} from "@/core/extensions/server-components";
 import { RelatedArticles } from "./related-articles";
 import { ArticleNeighbors } from "./article-neighbors";
 import { ReaderPreviewRegistration } from "./reader-preview";
 import { themeProfile } from "@/core/settings/theme-options";
 
 export async function Article({
+  theme,
   snapshot,
   content,
   commentsPage = 1,
 }: {
+  theme: string;
   snapshot: PublicSnapshot;
   content: Content;
   commentsPage?: number;
 }) {
   const rendered = await renderContentForReader(content);
-  const display = themeProfile(snapshot.site.settings)?.article;
+  const profile = themeProfile(snapshot.site.settings);
+  const display = profile?.article;
   const glossary = snapshot.site.settings?.site.glossary;
+  const presentation = contentMetadata(content);
   return (
     <>
       <PagePresentation
@@ -29,13 +36,15 @@ export async function Article({
         id={content.id}
       />
       {content.kind === "article" && <ReaderPreviewRegistration />}
-      <ThemeTemplate
+      <ServerThemeTemplate
+        theme={theme}
         name={content.kind === "page" ? "page" : "article"}
         context={{ site: snapshot.site, content, path: content.path }}
       >
-        <ExtensionComponent
+        <ServerThemeComponent
+          theme={theme}
           name="public.article.card"
-          content={content}
+          content={presentation}
           rendered={rendered}
           glossary={{
             auto_match: glossary?.auto_match ?? true,
@@ -43,6 +52,7 @@ export async function Article({
             popup_source: glossary?.popup_source ?? "content",
           }}
           articleDisplay={display}
+          code={profile?.code}
         />
         {content.kind === "article" && (
           <div className="article-followup">
@@ -69,7 +79,7 @@ export async function Article({
             initialPage={commentsPage}
           />
         )}
-      </ThemeTemplate>
+      </ServerThemeTemplate>
     </>
   );
 }

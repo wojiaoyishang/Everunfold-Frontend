@@ -23,6 +23,7 @@ import { readConfiguration } from "@/core/config/server";
 import { ProtectedArticle } from "@/themes/argon/components/protected-article";
 import { localizedCodePath } from "@/core/i18n/routes";
 import { CodePage, codePageMetadata } from "../code-page";
+import { readActiveTheme } from "@/core/themes/server";
 type Parameters = {
   params: Promise<{ contentPath: string[] }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -178,7 +179,11 @@ export default async function ContentPage({
             readConfiguration().publicSiteUrl,
           )}
         />
-        <ShuoshuoDetail snapshot={snapshot} entry={presented} />
+        <ShuoshuoDetail
+          theme={await readActiveTheme()}
+          snapshot={snapshot}
+          entry={presented}
+        />
       </>
     );
   const content = resolveContent(snapshot, `/${contentPath.join("/")}`);
@@ -195,6 +200,7 @@ export default async function ContentPage({
         />
       )}
       <Article
+        theme={await readActiveTheme()}
         snapshot={snapshot}
         content={content}
         commentsPage={pageNumber(parameters.comments_page)}

@@ -199,6 +199,18 @@ export async function verifyReaderRuntime({
           /正在加载组件…|组件暂不可用/,
           "SEO content must not be replaced by extension loading placeholders",
         );
+        const han = content.title.match(/\p{Script=Han}/u)?.[0];
+        if (han) {
+          assert.ok(
+            html.includes(han),
+            "Unicode article text must stay literal",
+          );
+          assert.doesNotMatch(
+            html,
+            new RegExp(`&#x${han.codePointAt(0).toString(16)};`, "i"),
+            "Unicode article text must not be inflated into numeric entities",
+          );
+        }
       }
       assert.ok(
         visibleText(html).includes(content.title) || route === "/?type=article",

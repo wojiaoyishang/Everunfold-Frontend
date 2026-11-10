@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ReadableContent, Site } from "@/core/content/types";
+import type { ReadableContentMetadata, Site } from "@/core/content/types";
 import type { PublicManagedPage } from "@/core/contracts/pages";
 import type { InstalledTheme } from "@/core/contracts/settings";
 import type { FontDefinition, ThemeTypography } from "@/core/fonts/types";
@@ -33,7 +33,7 @@ export interface ThemeDefinition extends ThemeMetadata {
 /** Per-view data only. Never pass a full public snapshot or private account state. */
 export interface ThemeViewContext {
   site?: Site;
-  content?: ReadableContent;
+  content?: ReadableContentMetadata;
   page?: PublicManagedPage;
   path?: string;
   preview?: boolean;

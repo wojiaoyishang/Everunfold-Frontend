@@ -1,7 +1,10 @@
 import { UiText } from "@/core/i18n/provider";
-import type { FeedEntry } from "@/core/content/presentation";
+import type {
+  ContentPresentationMetadata,
+  FeedEntry,
+} from "@/core/content/presentation";
 import type { ContentFeatures } from "@/core/rendering/features/model";
-import { ContentMarkup } from "./content-markup";
+import { StaticContentMarkup } from "./content-markup-static";
 import { AppLink as Link } from "./navigation-link";
 import { ArticleMedia } from "./article-media";
 import { CollapsibleContent } from "./collapsible-content";
@@ -18,7 +21,7 @@ export function ShuoshuoCardView({
   detail = false,
   interactive = true,
 }: {
-  entry: FeedEntry;
+  entry: Omit<FeedEntry, "content"> & { content: ContentPresentationMetadata };
   rendered: { html: string; features: ContentFeatures };
   detail?: boolean;
   interactive?: boolean;
@@ -26,10 +29,12 @@ export function ShuoshuoCardView({
   const { content, example } = entry;
   const body = (
     <ArticleMedia>
-      <ContentMarkup
+      <StaticContentMarkup
         className="article-content shuoshuo-content"
         html={rendered.html}
         features={rendered.features}
+        contentId={content.id}
+        contentRevision={content.updated_at}
       />
     </ArticleMedia>
   );
@@ -55,7 +60,13 @@ export function ShuoshuoCardView({
           </span>
         )}
       </header>
-      <ContentLanguages content={content} />
+      <ContentLanguages
+        content={{
+          id: content.id,
+          language: content.language,
+          translations: content.translations,
+        }}
+      />
       {content.title &&
         (detail ? (
           <h1>{content.title}</h1>

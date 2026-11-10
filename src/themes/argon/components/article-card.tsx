@@ -1,64 +1,80 @@
 import { UiText } from "@/core/i18n/provider";
 import { AppLink as Link } from "./navigation-link";
-import type { Content } from "@/core/content/types";
+import type { ContentMetadata } from "@/core/content/types";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import { displayDate } from "@/core/content/query";
 import { taxonomyHref } from "@/core/content/urls";
-import { ContentMarkup } from "./content-markup";
-import { ExtensionComponent } from "@/core/extensions/components";
-import { ThemeSlot } from "@/core/themes/presentation";
+import { StaticContentMarkup } from "./content-markup-static";
+import {
+  ServerThemeComponent,
+  ServerThemeSlot,
+} from "@/core/extensions/server-components";
 import { ArticleActions } from "./article-actions";
 import { ArticleMedia } from "./article-media";
 import { Icon } from "./icon";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
-import type { ArticleDisplayPreferences } from "@/core/contracts/settings";
+import type {
+  ArticleDisplayPreferences,
+  CodePreferences,
+} from "@/core/contracts/settings";
 
 type ArticleCardProps = {
-  content: Content;
+  theme: string;
+  content: ContentMetadata;
   rendered: { html: string; features: ContentFeatures };
   interactive?: boolean;
   glossary?: GlossaryRuntimeOptions;
   articleDisplay?: ArticleDisplayPreferences;
+  code?: CodePreferences;
 };
 
 /** The reading surface is shared by publication and authorized draft previews. */
 export function ArticleCard({
+  theme,
   content,
   rendered,
   interactive = true,
   glossary,
   articleDisplay,
+  code,
 }: ArticleCardProps) {
   return (
     <article className="surface article-card" lang={content.language}>
-      <ThemeSlot
+      <ServerThemeSlot
+        theme={theme}
         name="article.header.before"
         context={{ content, preview: !interactive }}
       />
-      <ExtensionComponent
+      <ServerThemeComponent
+        theme={theme}
         name="public.article.header"
         content={content}
         interactive={interactive}
         liveMetrics={interactive}
         display={articleDisplay}
       />
-      <ThemeSlot
+      <ServerThemeSlot
+        theme={theme}
         name="article.header.after"
         context={{ content, preview: !interactive }}
       />
-      <ThemeSlot
+      <ServerThemeSlot
+        theme={theme}
         name="article.body.before"
         context={{ content, preview: !interactive }}
       />
-      <ExtensionComponent
+      <ServerThemeComponent
+        theme={theme}
         name="public.article.body"
         content={content}
         rendered={rendered}
         interactive={interactive}
         glossary={glossary}
         articleDisplay={articleDisplay}
+        code={code}
       />
-      <ThemeSlot
+      <ServerThemeSlot
+        theme={theme}
         name="article.body.after"
         context={{ content, preview: !interactive }}
       />
@@ -72,17 +88,19 @@ export function ArticleBody({
   interactive = true,
   glossary,
   articleDisplay,
+  code,
 }: ArticleCardProps) {
   return (
     <div className="article-body">
       <ArticleMedia>
-        <ContentMarkup
+        <StaticContentMarkup
           className="article-content"
           html={rendered.html}
           features={rendered.features}
           contentId={content.id}
           contentRevision={content.updated_at}
           glossary={interactive ? glossary : undefined}
+          code={code}
         />
       </ArticleMedia>
       <footer className="article-footer">

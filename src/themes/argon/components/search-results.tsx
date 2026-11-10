@@ -13,6 +13,7 @@ import { SearchLanguages } from "./search-languages";
 import { GlossarySearchResults } from "./glossary-search-results";
 
 export function SearchResults({
+  theme,
   snapshot,
   query,
   type,
@@ -20,6 +21,7 @@ export function SearchResults({
   allLanguages = false,
   language,
 }: {
+  theme: string;
   snapshot: PublicSnapshot;
   query: string;
   type: FeedType;
@@ -86,7 +88,11 @@ export function SearchResults({
           <div className="article-list">
             {result.items.length ? (
               result.items.map((entry) => (
-                <ContentCard key={entry.content.id} entry={entry} />
+                <ContentCard
+                  key={entry.content.id}
+                  entry={entry}
+                  theme={theme}
+                />
               ))
             ) : (
               <EmptyState

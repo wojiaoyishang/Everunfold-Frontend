@@ -5,7 +5,8 @@ import {
   type FeedEntry,
   type FeedType,
 } from "@/core/content/presentation";
-import { ExtensionComponent } from "@/core/extensions/components";
+import { ServerThemeComponent } from "@/core/extensions/server-components";
+import { contentMetadata } from "@/core/content/client-data";
 import { ShuoshuoCard } from "./shuoshuo";
 import { PagePresentation } from "./route-state";
 import { Pagination } from "./pagination";
@@ -14,20 +15,32 @@ import { SiteNotice } from "./site-notice";
 import { Icon } from "./icon";
 import { themeProfile } from "@/core/settings/theme-options";
 
-export function ContentCard({ entry }: { entry: FeedEntry }) {
+export function ContentCard({
+  entry,
+  theme,
+}: {
+  entry: FeedEntry;
+  theme: string;
+}) {
   return entry.content.type === "shuoshuo" ? (
-    <ShuoshuoCard entry={entry} />
+    <ShuoshuoCard entry={entry} theme={theme} />
   ) : (
-    <ExtensionComponent name="public.post.card" content={entry.content} />
+    <ServerThemeComponent
+      theme={theme}
+      name="public.post.card"
+      content={contentMetadata(entry.content)}
+    />
   );
 }
 
 export function Feed({
+  theme,
   snapshot,
   page = 1,
   type = "all",
   pathname = "/",
 }: {
+  theme: string;
   snapshot: PublicSnapshot;
   page?: number;
   type?: FeedType;
@@ -61,7 +74,7 @@ export function Feed({
       <div className="article-list">
         {result.items.length ? (
           result.items.map((entry) => (
-            <ContentCard key={entry.content.id} entry={entry} />
+            <ContentCard key={entry.content.id} entry={entry} theme={theme} />
           ))
         ) : (
           <EmptyState title="这里还很安静" />

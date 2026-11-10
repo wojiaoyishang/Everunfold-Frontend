@@ -1,6 +1,7 @@
 import { parseDocument, DomUtils } from "htmlparser2";
 import type { ContentFeatures } from "./model";
 import { codeLineMarkup } from "./code-frame";
+import { literalUnicodeEntities } from "../literal-unicode";
 
 type Element = ReturnType<typeof DomUtils.findAll>[number];
 function isFormula(node: Element) {
@@ -95,5 +96,5 @@ export async function enhanceContentHtml(html: string) {
       }
     }),
   );
-  return DomUtils.getOuterHTML(document);
+  return literalUnicodeEntities(DomUtils.getOuterHTML(document));
 }

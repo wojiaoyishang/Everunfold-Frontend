@@ -1,25 +1,34 @@
 import { UiText } from "@/core/i18n/provider";
 import type { FeedEntry } from "@/core/content/presentation";
 import type { PublicSnapshot } from "@/core/content/types";
+import { contentMetadata } from "@/core/content/client-data";
 import { renderContentForReader } from "@/core/rendering/render-content-server";
-import { ExtensionComponent } from "@/core/extensions/components";
-import { ThemeTemplate } from "@/core/themes/presentation";
+import {
+  ServerThemeComponent,
+  ServerThemeTemplate,
+} from "@/core/extensions/server-components";
 import { PagePresentation } from "./route-state";
 import { CommentSection } from "./comments/comment-section";
 import { ArticleActions } from "./article-actions";
 
 export async function ShuoshuoCard({
+  theme,
   entry,
   detail = false,
 }: {
+  theme: string;
   entry: FeedEntry;
   detail?: boolean;
 }) {
   const rendered = await renderContentForReader(entry.content);
   return (
-    <ExtensionComponent
+    <ServerThemeComponent
+      theme={theme}
       name="public.shuoshuo.card"
-      entry={entry}
+      entry={{
+        ...entry,
+        content: contentMetadata(entry.content),
+      }}
       detail={detail}
       rendered={rendered}
     />
@@ -27,16 +36,19 @@ export async function ShuoshuoCard({
 }
 
 export function ShuoshuoDetail({
+  theme,
   entry,
   snapshot,
 }: {
+  theme: string;
   entry: FeedEntry;
   snapshot: PublicSnapshot;
 }) {
   return (
     <>
       <PagePresentation site={snapshot.site} id={entry.content.id} />
-      <ThemeTemplate
+      <ServerThemeTemplate
+        theme={theme}
         name="shuoshuo"
         context={{
           site: snapshot.site,
@@ -49,7 +61,7 @@ export function ShuoshuoDetail({
             <UiText text="说说效果预览 · 以下内容为虚构样例，正式内容将在后续导入。" />
           </p>
         )}
-        <ShuoshuoCard entry={entry} detail />
+        <ShuoshuoCard theme={theme} entry={entry} detail />
         <div className="surface shuoshuo-share">
           <ArticleActions
             path={entry.content.path}
@@ -63,7 +75,7 @@ export function ShuoshuoDetail({
           comments={snapshot.comments[entry.content.id] ?? []}
           path={entry.content.path}
         />
-      </ThemeTemplate>
+      </ServerThemeTemplate>
     </>
   );
 }
