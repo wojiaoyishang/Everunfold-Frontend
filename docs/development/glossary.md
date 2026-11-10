@@ -1,6 +1,6 @@
 # 术语表与文章按需 Tooltip
 
-版本：glossary-runtime-9，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md) 与 [ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
+版本：glossary-runtime-10，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md) 与 [ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
 
 ## 管理入口
 
@@ -41,7 +41,7 @@ GET /v1/plugins/everunfold.glossary/for-content/{content_id}
 - 同一页面最多提示 `site.glossary.max_matches_per_page` 个，默认 20。
 - 同起点先比较规则优先级、再比较文字长度，区间不重叠；完整英文单词匹配会检查 ASCII 边界。
 - 链接、按钮、代码、公式、脚本、隐藏文本和已有提示节点不装饰。
-- Tooltip 支持点击/触屏打开、Enter/空格、Escape 关闭并回到触发词；桌面悬停先停留260ms再打开，定位完成后的下一帧以320ms淡入、240ms淡出，悬停离开保留短暂进入时间。
+- Tooltip 支持点击/触屏打开、Enter/空格、Escape 关闭并回到触发词；桌面悬停先停留180ms再打开，定位完成并绘制透明首帧后，以双帧触发320ms淡入、240ms淡出。减少动态偏好下保留160ms纯透明度淡入和120ms淡出，不移动位置。
 - 首级 Tooltip 使用紧凑主题卡片：摘要非空时显示摘要；摘要为空时只渲染第一个非空正文区块。完整正文仍通过「查看详情」打开原生 dialog，「打开词条页面」继续进入独立详情页。
 - 卡片按实际尺寸选择触发词上方或下方，并限制在视口边界内；内容在卡片内部滚动，操作栏固定在底部。超长标题使用省略号并保留原生 `title`；别名为正文顶部可换行标签，最多展示四个并用 `+N` 汇总其余别名。
 - Tooltip、完整说明 dialog 和术语目录卡片均提供进入/退出或入场动画，并遵循减少动态偏好。

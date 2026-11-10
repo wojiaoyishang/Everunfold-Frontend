@@ -193,8 +193,14 @@ export default function GlossaryTooltips({
 
   useEffect(() => {
     if (!active || !placement || closing) return;
-    const frame = requestAnimationFrame(() => setEntered(true));
-    return () => cancelAnimationFrame(frame);
+    let second = 0;
+    const first = requestAnimationFrame(() => {
+      second = requestAnimationFrame(() => setEntered(true));
+    });
+    return () => {
+      cancelAnimationFrame(first);
+      if (second) cancelAnimationFrame(second);
+    };
   }, [active, closing, placement]);
 
   useEffect(() => {
@@ -253,7 +259,7 @@ export default function GlossaryTooltips({
       )
         return;
       if (closeTimer.current) clearTimeout(closeTimer.current);
-      openTimer.current = setTimeout(() => open(item), 260);
+      openTimer.current = setTimeout(() => open(item), 180);
     };
     const pointerOut = (event: PointerEvent) => {
       const item = trigger(event);

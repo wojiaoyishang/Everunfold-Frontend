@@ -342,12 +342,25 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .glossary-tooltip,
-  .glossary-tooltip[data-state="open"][data-entered="true"],
-  .glossary-tooltip[data-state="closing"],
   .glossary-expanded-dialog,
   .glossary-expanded-dialog[data-state="closing"] {
     animation: none;
-    transition: none;
+  }
+
+  .glossary-tooltip {
+    opacity: 0;
+    transform: none;
+    transition: opacity 160ms linear;
+  }
+
+  .glossary-tooltip[data-state="open"][data-entered="true"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  .glossary-tooltip[data-state="closing"] {
+    opacity: 0;
+    transform: none;
+    transition-duration: 120ms;
   }
 }
