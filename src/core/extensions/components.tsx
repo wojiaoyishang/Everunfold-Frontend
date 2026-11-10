@@ -1,10 +1,8 @@
 "use client";
 import {
   Component,
-  Suspense,
   createContext,
   createElement,
-  lazy,
   useContext,
   useEffect,
   type ComponentType,
@@ -20,7 +18,9 @@ export { useThemeId } from "./theme-context";
 type UIComponent = ComponentType<Record<string, unknown>>;
 type ComponentModule = { default: Record<string, UIComponent> };
 const modules = {
-  ...import.meta.glob<ComponentModule>("/src/themes/*/components.tsx"),
+  ...import.meta.glob<ComponentModule>("/src/themes/*/components.tsx", {
+    eager: true,
+  }),
 };
 const ImplementationThemeContext = createContext<string | null>(null);
 const cache = new Map<string, UIComponent>();
@@ -97,23 +97,16 @@ function MissingAdapter(props: Record<string, unknown>) {
 }
 function prepareComponent(name: string, theme: string): UIComponent {
   const { path, owner } = componentPath(name, theme);
-  const load = path ? modules[path] : undefined;
-  const Impl = load
-    ? lazy(async () => {
-        const source = await load();
-        const component =
-          source.default && Object.hasOwn(source.default, name)
-            ? source.default[name]
-            : undefined;
-        return {
-          default:
-            typeof component === "function" ||
-            (component && typeof component === "object")
-              ? component
-              : MissingAdapter,
-        };
-      })
-    : MissingAdapter;
+  const source = path ? modules[path] : undefined;
+  const component =
+    source?.default && Object.hasOwn(source.default, name)
+      ? source.default[name]
+      : undefined;
+  const Impl =
+    typeof component === "function" ||
+    (component && typeof component === "object")
+      ? component
+      : MissingAdapter;
   return function RegisteredComponent(props) {
     return (
       <ComponentBoundary
@@ -121,14 +114,12 @@ function prepareComponent(name: string, theme: string): UIComponent {
         inherited={props.children as ReactNode}
         onReady={props.onReady}
       >
-        <Suspense fallback={<ExtensionPlaceholder name={name} loading />}>
-          <ImplementationThemeContext.Provider value={owner}>
-            {createElement(Impl, { ...props, componentName: name })}
-          </ImplementationThemeContext.Provider>
-          <Ready
-            callback={props.notifyReady === false ? undefined : props.onReady}
-          />
-        </Suspense>
+        <ImplementationThemeContext.Provider value={owner}>
+          {createElement(Impl, { ...props, componentName: name })}
+        </ImplementationThemeContext.Provider>
+        <Ready
+          callback={props.notifyReady === false ? undefined : props.onReady}
+        />
       </ComponentBoundary>
     );
   };

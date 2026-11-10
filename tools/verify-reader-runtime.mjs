@@ -184,6 +184,22 @@ export async function verifyReaderRuntime({
       assert.match(html, /data-page-ready="true"/);
       assert.match(html, /backend-status/);
       assert.match(html, /data-ready="false"/);
+      if (route === content.path) {
+        assert.equal(
+          classCount(html, "article-card"),
+          1,
+          "Article SSR must include one reading surface",
+        );
+        assert.ok(
+          classCount(html, "article-content") > 0,
+          "Article body must be embedded in the initial HTML",
+        );
+        assert.doesNotMatch(
+          html,
+          /正在加载组件…|组件暂不可用/,
+          "SEO content must not be replaced by extension loading placeholders",
+        );
+      }
       assert.ok(
         visibleText(html).includes(content.title) || route === "/?type=article",
       );
