@@ -32,6 +32,7 @@ export function adminRoutePermission(path: string): string | null {
   if (/^\/admin\/(?:media|icons|fonts)(?:\/|$)/.test(path)) return "media:read";
   if (path.startsWith("/admin/shortcodes")) return "shortcodes:read";
   if (path.startsWith("/admin/pages")) return "pages:read";
+  if (path === "/admin/glossary") return "content:read";
   if (path.startsWith("/admin/content")) return "content:read";
   return "unregistered";
 }

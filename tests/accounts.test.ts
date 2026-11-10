@@ -57,6 +57,7 @@ test("scoped editor capabilities neither imply media access nor authorize other 
     "applications:manage",
   );
   assert.equal(adminRoutePermission("/admin/users/new"), "users:manage");
+  assert.equal(adminRoutePermission("/admin/glossary"), "content:read");
   assert.ok(!can({ ...user, role: "admin" }, "unregistered"));
 });
 
