@@ -1,6 +1,6 @@
 # 术语表与文章按需 Tooltip
 
-版本：glossary-runtime-12，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)、[ADR0103](../decisions/0103-dynamic-glossary-footnotes.md) 与 [ADR0104](../decisions/0104-localized-navigation-and-glossary-hooks.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
+版本：glossary-runtime-13，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)、[ADR0103](../decisions/0103-dynamic-glossary-footnotes.md) 与 [ADR0104](../decisions/0104-localized-navigation-and-glossary-hooks.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
 
 ## 管理入口
 
@@ -57,6 +57,8 @@ GET /v1/plugins/everunfold.glossary/for-content/{content_id}
 ## 页面触发钩子
 
 术语编辑页的“页面触发”分组属于当前术语，不在后台单独占据一级入口。每条规则可选择所有公开页面或多达32个指定文章/说说/页面目标，并可设置启用状态和0~100优先级。CSS选择器支持`#id`、类、属性、后代和组合选择器；拒绝伪元素、`html/body/*`、危险字符及超长规则。每页最多连接20个元素，指定内容优先于全站规则。
+
+新建术语时“页面触发”同样可用。触发先以稳定触发ID和操作ID暂存在浏览器，待术语首次保存成功后一并创建；保存栏会报告实际成功数量，部分失败时保留明确提示。点击“新建页面触发”会滚动到展开的编辑区，避免长表单中误以为按钮无响应。
 
 公开页面等待`PagePresentation`就绪后，在空闲时请求只与当前surface、内容/页面ID和语言相关的启用钩子，缓存60秒。MutationObserver对后续生成的元素重新绑定，客户端路由切换清理后重跑。Tooltip与正文关键词提示共用；已有链接/按钮保持原生点击，键盘聚焦和Escape行为相同。
 

@@ -1472,3 +1472,26 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/glossary.md` | `glossary-runtime-11` | `756e216cb3106974f8c6955d95f58d4ed6eae5b4c79e657818863838a9482daf` |
 | `docs/decisions/0103-dynamic-glossary-footnotes.md` | `ADR0103-1` | `bcb3429d68a152891ade45ef3a963157b87153cea377f52edd4b613c44d377a7` |
 | `contracts/settings-v1.schema.json` | `settings-v1-1.27.0` | `d743d103ee1a76394bfad5f42f0af937ed86d1800e0215ed7206be0babba8fb0` |
+
+
+## 多语言导航、术语钩子与逐内容设置（2026-11-10）
+
+后端`121c85b`/`951e3f6`/`a4abcf2`/`c660b76`、前端`1885d42`/`a0fb842`/`cb27731`。导航菜单支持语言覆盖；术语逐内容Tooltip/脚注、页面选择器/脚本钩子、新建术语暂存触发、原生DOM挂载与代码复制降级已完成。完整测试、视觉检查及安全边界见两仓STATUS和ADR0104；原始基线不改写，以下版本替代对应旧摘要。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-glossary-i18n-hooks-1` | `12db0124597a02c0542c3d01f96699349c6d50d44b73de03c6643461f7740613` |
+| `docs/decisions/0103-dynamic-glossary-footnotes.md` | `ADR0103-2` | `5217469068e211478c1a88bc40b402412191489a7a2c7c1399d4c58546375d80` |
+| `docs/decisions/0104-localized-navigation-and-glossary-hooks.md` | `ADR0104-2` | `d99a2a3d058dbf467a2a7f410c8ca3bdb2db03f1beb151b0fb4d2c5263032548` |
+| `docs/development/code-blocks.md` | `code-blocks-2` | `d5e791f5552c7108dab2d9c95b3dfa077e5f26a4de4a9853db0f707d62c5f754` |
+| `docs/development/content-management.md` | `content-management-11` | `3729c3eae34eec7c0435e17b5b385e8d2f0bb844041c94beaac0c405eb99aea3` |
+| `docs/development/glossary.md` | `glossary-runtime-13` | `e0bb0ea28f2d781d562679cdb00adae93ee8fe97d8d9b0db6ebe61e510ad1394` |
+| `docs/development/pages.md` | `pages-runtime-12` | `0c9ba4a45950d63f724b9a04d205a3e3c63fbf1453a163e7a53372349514e741` |
+| `contracts/content-admin-v1.schema.json` | `content-admin-v1-1.19.0` | `ffa05a7e56235d93b0330ee9b5dd0b03d0e9a10535f88e37d78a0e4485cb4757` |
+| `contracts/captcha-v1.schema.json` | `captcha-v1-1.4.0` | `a7669f3e287653cb475dce53252a1ead9fd3c4e8eb16088f8e927dc84bdd131a` |
+| `contracts/collaboration-v1.schema.json` | `collaboration-v1-2.6.0` | `69e83542be70bb09099c45a3bcc23d671cc131cda32616accace380b8a2c870c` |
+| `contracts/glossary-v1.schema.json` | `glossary-v1-3.4.0` | `3fcae7a2c503293c006316c3aeeef3f1122dbb55497e5241348c7afabf295623` |
+| `contracts/pages-v1.schema.json` | `pages-v1-1.9.0` | `c2bd97dbf7ac8bbae5067bf6d53f604d16cc3846e7db5ee4e7261c208765fbd6` |
+| `contracts/presentation-v0.2.schema.json` | `presentation-v0.2-0.2.0-preview.4` | `17637bff33e4c958b955530604eb761d2e90e1e740cb57d6851a0b1ee42015dc` |
+| `contracts/public-v0.1.schema.json` | `public-v0.1-0.13.0` | `9dbd07574aed7c1b5bcf97e85e3ced85522a6ecc2dbad6a806b49534c59bb4e0` |
+| `contracts/settings-v1.schema.json` | `settings-v1-1.28.0` | `4a238a2c73783013aaee8950d29cc031fe6516185c1209b9ae2a7929f49465dc` |

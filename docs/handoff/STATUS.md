@@ -2,12 +2,13 @@
 
 ## 最新交付：多语言导航、术语钩子与逐内容设置（2026-11-10）
 
-- 后端`121c85b`/`951e3f6`、前端`1885d42`。导航菜单支持稀疏`labels`覆盖，精确语言→基础语言→默认名称回退；设置使用添加式语言行、现有旗帜/Select/TextField，`CN`/`GB`规范化为emoji。公开header/sidebar/mobile/children/aria使用同一本地化结果。
-- 正文Tooltip/脚注改为每篇文章、说说、页面自己的两个独立设置，随草稿/协同/版本/发布快照保存；站点设置只保留匹配总开关、上限和提示来源。`content-admin1.18.0`、`pages1.9.0`、`public0.13.0`、`presentation preview.4`，无迁移。
+- 后端`121c85b`/`951e3f6`/`a4abcf2`/`c660b76`、前端`1885d42`/`a0fb842`/`cb27731`。导航菜单支持稀疏`labels`覆盖，精确语言→基础语言→默认名称回退；设置使用添加式语言行、现有旗帜/Select/TextField，`CN`/`GB`规范化为emoji。公开header/sidebar/mobile/children/aria使用同一本地化结果。
+- 正文Tooltip/脚注改为每篇文章、说说、页面自己的两个独立设置，随草稿/协同/版本/发布快照保存；站点设置只保留匹配总开关、上限和提示来源。`content-admin1.19.0`、`captcha1.4.0`、`collaboration2.6.0`、`settings1.28.0`、`pages1.9.0`、`public0.13.0`、`presentation preview.4`，无迁移。
 - 搜索新增“术语”类型，只加载术语结果；中英文均验证，空结果有明确状态。术语详情正文与基础信息间距加大约20px。
 - 术语触发并入词条编辑页：支持所有页面/指定内容、最多32目标、常见CSS选择器、启用与优先级，自动避开链接点击破坏；当前页面只按article/shuoshuo/page/code target和语言加载，60秒缓存并在DOM变化/路由切换重算。管理员可用现有JavaScript CodeMirror写危险挂载脚本，UI常驻警告，后端只允许admin。
-- 术语插件`glossary-v1 3.4.0`、插件1.5.0，迁移0039/0040已显式应用并同步；公开钩子API200。后端设置/术语/展示定向23 passed、1 skipped（专用PG库未配置），Ruff/format/alembic check通过。
-- 实页验证：1440/390菜单多语言弹窗无横向溢出，旗帜与语言/输入框垂直居中；语言名称输入框统一为后台表单的40px高度、白色/深色表面、细边框、占位色和强调色焦点环，添加语言正常；术语专搜中英文只显示术语；词条内“页面触发”空态/新建/JS警告编辑器实看；CSS钩子和JS挂载均实际弹出同款Tooltip，脚本错误0。
+- 新建术语同样展示页面触发：触发以稳定触发/操作ID先本地暂存并显示“待保存”，术语首次保存后一并幂等创建；部分失败明确报告实际数量。点击“新建页面触发”会展开并定位编辑区。`glossary.mount(element)`既接受`glossary.select()`结果，也接受`document.querySelector()`等原生DOM对象。
+- 术语插件`glossary-v1 3.4.0`、插件1.5.0，迁移0039/0040已显式应用并同步；公开钩子API200。后端真实库完整341项通过（含双API/Worker/Scheduler/Node投递），Ruff/636文件格式、223文件mypy、`alembic check`通过。
+- 实页验证：1440/390菜单多语言弹窗无横向溢出，旗帜与语言/输入框垂直居中；语言名称输入框统一为后台表单的40px高度、白色/深色表面、细边框、占位色和强调色焦点环，添加语言正常；术语专搜中英文只显示术语；新建术语可暂存页面触发且保存时实际发出一次创建请求，已有术语新建按钮会自动定位编辑区；CSS钩子、`glossary.select()`和原生`document.querySelector()`节点均实际弹出同款Tooltip，脚本错误0。
 - 另修复代码复制：Clipboard API失败后使用textarea/execCommand降级，双失败才手动复制，保留源码/焦点/选区。前端完整检查357项、读者端与管理端隔离生产验收通过。
 - 仅本地提交，未push；未迁移文章/WordPress，未修改主站真实内容与设置。JavaScript钩子仍是管理员同源可信代码，不是沙箱；页面iframe/Shadow DOM内元素不由宿主跨域挂载。
 

@@ -1,6 +1,6 @@
 # 文章与说说管理
 
-版本：content-management-10，2026-11-09。当前：文章/说说、多块协同实时保存、版本/离线合并、发布同步、定时发布、密码访问、定时开放及多语言关联。基础决定为 ADR0030–0035，最新多语言规则见[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)及[当前指南](../architecture/multilingual-content.md)。历史验收不替代[本轮检查](../handoff/multilingual-verification.md)。
+版本：content-management-11，2026-11-10。当前：文章/说说、多块协同实时保存、版本/离线合并、发布同步、定时发布、密码访问、定时开放、多语言关联及逐内容术语设置。基础决定为 ADR0030–0035，最新多语言规则见[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)及[当前指南](../architecture/multilingual-content.md)。历史验收不替代[本轮检查](../handoff/multilingual-verification.md)。
 
 ## 数据范围
 

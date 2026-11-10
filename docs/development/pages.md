@@ -1,6 +1,6 @@
 # 页面管理与实时预览指南
 
-版本：pages-runtime-11，2026-11-10。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
+版本：pages-runtime-12，2026-11-10。产品边界见[页面架构](../architecture/registered-pages.md)和[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)。
 
 ## 管理页面
 

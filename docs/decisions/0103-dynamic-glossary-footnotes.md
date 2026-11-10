@@ -1,6 +1,6 @@
 # ADR0103：按需术语脚注与文章/说说独立开关
 
-版本：ADR0103-1。状态：已实现并验证。日期：2026-11-10。补充 [ADR0099](0099-article-scoped-glossary-tooltips.md) 与 [ADR0101](0101-glossary-rules-and-reader-ui.md)。
+版本：ADR0103-2。状态：已实现并验证。日期：2026-11-10。补充 [ADR0099](0099-article-scoped-glossary-tooltips.md) 与 [ADR0101](0101-glossary-rules-and-reader-ui.md)。
 
 ## 背景
 

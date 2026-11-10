@@ -1,6 +1,6 @@
 # 代码块编辑与展示
 
-版本：code-blocks-1，2026-11-04。见 [ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)。
+版本：code-blocks-2，2026-11-10。见 [ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)。
 
 ## 使用
 
