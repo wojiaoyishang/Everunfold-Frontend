@@ -62,6 +62,12 @@ src/themes/argon/
 
 新增页面应复用现有布局，**不要再次包裹 BlogShell**。背景视频、移动侧栏和导航状态留在常驻壳内；RouteContent 按 pathname + query 更换正文及入场状态，hash 定位不重新播放整个界面。
 
+## 静态正文与动态增强（2026-11-10）
+
+公开文章的标题、摘要、正文和阅读表面必须在首次 HTML 响应中直接输出。主题具名组件随公开组件注册表同步解析，不能在该路径使用带“正在加载组件…”占位的 `React.lazy`/`Suspense`；文章正文继续由 Server 的 `renderContentForReader` 生成，也不得改由 `useEffect` 或水合后的客户端脚本拼装。父子主题继承、局部错误边界和缺失实现回退仍保留，详见 [ADR0102](../decisions/0102-static-seo-content-and-dynamic-enhancements.md)。
+
+术语 Tooltip 和查阅量属于阅读增强，不进入首屏 SEO 内容。术语组件在页面空闲后另行加载，只请求当前文章实际命中的词条并复用 5 分钟客户端缓存；浏览量只在指标接近视口时请求，失败时保持指标隐藏。身份、临时指标和交互状态不得写入公开快照、结构化数据或服务端正文 HTML。新增主题的阅读组件必须能在没有 `window`、`IntersectionObserver` 和浏览器定位 API 时完成服务端预渲染。
+
 ## 客户端导航与目录
 
 - AppLink 保留 Next 预取和浏览器默认手势，并共享 React transition；SearchForm 保留 GET 可分享地址和无 JS 时的原生能力。

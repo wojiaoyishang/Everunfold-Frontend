@@ -1,6 +1,6 @@
 # 评论运营与搜索发现
 
-版本：operations-search-4，2026-11-09。对应 ADR0088 第一批及评论界面、加载后定位补充交付。
+版本：operations-search-5，2026-11-10。对应 ADR0088 第一批、评论界面、加载后定位与静态正文 SEO 补充交付。
 
 ## 使用入口
 
@@ -29,13 +29,13 @@
 
 读取使用 comments:read，修改使用 comments:moderate，均为全站范围。管理员拥有全部权限，普通账户和已有 API Key 不自动增权；需要在用户授权与 Key 权限中显式添加。浏览器仍使用当前 Session、精确 Origin 与 CSRF；API Key 遵循所属用户的权限交集、应用范围和撤销围栏。后台工作台当前仅供浏览器会话使用。
 
-| 接口 | 用途 |
-| --- | --- |
-| POST /v1/admin/comments/query | status/search/content_id/page/page_size 查询，最多每页100条 |
-| POST /v1/admin/comments/moderate | operation_id、action、items[{id,revision}]，每批1至100条 |
-| POST /v1/admin/comments/edit | operation_id、id、revision、body |
-| POST /v1/admin/comments/reply | 同编辑参数；仅回复当前已通过审核的评论 |
-| GET /v1/admin/workspace | 只返回当前用户可见的数量和内容标题 |
+| 接口                             | 用途                                                        |
+| -------------------------------- | ----------------------------------------------------------- |
+| POST /v1/admin/comments/query    | status/search/content_id/page/page_size 查询，最多每页100条 |
+| POST /v1/admin/comments/moderate | operation_id、action、items[{id,revision}]，每批1至100条    |
+| POST /v1/admin/comments/edit     | operation_id、id、revision、body                            |
+| POST /v1/admin/comments/reply    | 同编辑参数；仅回复当前已通过审核的评论                      |
+| GET /v1/admin/workspace          | 只返回当前用户可见的数量和内容标题                          |
 
 修改先核对整批 revision，任一过期返回409且整批回滚；重试使用原 operation_id。状态、审计、操作回执和公开快照 Outbox 在同一个事务提交，前端不把HTTP成功误当成所有节点已应用。回收保留 previous_status，恢复回收前的审核状态。编辑/恢复不会绕过原文可见性。父评论不可见时，可见回复作为顶层显示，不输出隐藏父正文。
 
@@ -45,22 +45,28 @@ Comment 以 content_id/page_id 二选一关联原文。历史评论保持身份�
 
 ## 站点地图、订阅与元数据
 
-| 设置或入口 | 行为 |
-| --- | --- |
-| site.allow_indexing | 全站关闭时输出 noindex, follow 和相应 X-Robots-Tag；地图为空、订阅404 |
-| site.discovery.sitemap_enabled | 默认开启；/sitemap.xml 包含语言首页、文章、说说和有可用实现的启用页面 |
-| site.discovery.feeds_enabled | 默认开启；/feed.xml 为 RSS 2.0，/atom.xml 为 Atom |
-| site.discovery.feed_limit | 默认30，允许1至100；按发布时间倒序输出标题、摘要、原文链接 |
-| language 查询参数 | 例如 /feed.xml?language=en；使用配置中的语言代码，无效或禁用语言返回404 |
-| site.discovery.structured_data | 默认开启；可收录文章输出 BlogPosting，说说输出 CreativeWork JSON-LD |
-| site.discovery.share_image | 默认分享图；文章优先使用自身封面，页面使用站点默认图 |
-| google_verification / bing_verification | 只填站长验证标签的 content 值，禁止整段HTML；输出标准meta标签 |
+| 设置或入口                              | 行为                                                                    |
+| --------------------------------------- | ----------------------------------------------------------------------- |
+| site.allow_indexing                     | 全站关闭时输出 noindex, follow 和相应 X-Robots-Tag；地图为空、订阅404   |
+| site.discovery.sitemap_enabled          | 默认开启；/sitemap.xml 包含语言首页、文章、说说和有可用实现的启用页面   |
+| site.discovery.feeds_enabled            | 默认开启；/feed.xml 为 RSS 2.0，/atom.xml 为 Atom                       |
+| site.discovery.feed_limit               | 默认30，允许1至100；按发布时间倒序输出标题、摘要、原文链接              |
+| language 查询参数                       | 例如 /feed.xml?language=en；使用配置中的语言代码，无效或禁用语言返回404 |
+| site.discovery.structured_data          | 默认开启；可收录文章输出 BlogPosting，说说输出 CreativeWork JSON-LD     |
+| site.discovery.share_image              | 默认分享图；文章优先使用自身封面，页面使用站点默认图                    |
+| google_verification / bing_verification | 只填站长验证标签的 content 值，禁止整段HTML；输出标准meta标签           |
 
 发现入口只读取已应用的公开快照，不查询草稿，不解锁受保护内容。验证码/密码/未列出内容、撤回内容、禁止收录的内容及不可用插件页面不会被列入。hreflang 仅引用真实可收录的语言版本。文章 lastmod 来自实际内容更新时间；管理页面没有可信更新时间时省略 lastmod。RSS/Atom 使用稳定内容ID，XML及JSON-LD按上下文转义。
 
 canonical、站点地图和分享地址使用前端服务端部署配置 publicSiteUrl 对应的公开站点地址，不使用任意请求 Host。缺少该配置时不伪造正式域名。后台、登录、账号与内部地址由 robots.txt 排除；全站禁止收录时仍允许爬虫读取 noindex，robots.txt 本身不承担权限控制。每个页面保留 RSS/Atom 自动发现链接，避免子页面 alternates 覆盖布局而丢失订阅入口。
 
 没有自动向搜索引擎提交站点地图或验证网站所有权。配置后在搜索引擎站长平台提交 /sitemap.xml；收录/展示由搜索引擎决定。本轮不引入排名分数、虚构统计、重定向历史或关键词堆砌。当前是单份站点地图，大体量站点的拆分索引与压力验收另行推进。
+
+## 首屏正文与按需增强
+
+文章、说说和页面的公开阅读页面先把正文 HTML 直接输出到首次响应，搜索引擎和禁用 JavaScript 的读者不需要等待主题组件或客户端脚本生成内容。公开阅读表面不得出现扩展加载占位，也不得把标题、摘要或正文迁移到 `useEffect` 后拼装；主题组件、父子继承和局部缺失回退仍按[前台组件架构](../architecture/frontend-ui.md)执行。决定与验证见[ADR0102](../decisions/0102-static-seo-content-and-dynamic-enhancements.md)。
+
+术语提示、浏览量、评论交互和其他阅读增强仍只在浏览器按需运行。术语只请求当前文章实际命中的已发布词条，并按 API、内容 ID 和修订缓存；浏览量只在指标接近视口后请求。两类数据都不得进入公开内容快照、首屏正文或结构化数据，也不能因接口失败阻塞正文。部署前至少检查首次 HTML 含文章语义正文、无加载占位，并分别在 JavaScript 开启/关闭时确认标题与正文可见。
 
 ## 开发位置与发布
 

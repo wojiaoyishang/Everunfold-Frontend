@@ -247,3 +247,5 @@
 当前交付：[统一插件与主题运行规范](architecture/frontend-plugin-runtime.md)、[插件/模型控件开发](development/frontend-plugins.md)、[数据拉取与Callback接口](development/plugin-data-protocol.md)及[ADR0077](decisions/0077-unified-plugin-theme-schema-and-artifact-boundaries.md)：页面/短代码由插件贡献，原生目录发现主题/插件，具名控件与占位、开放JSON、精确锁文件与忽略产物。
 
 本轮完整检查与部署边界见[统一插件验收](handoff/plugin-runtime-verification.md)。
+
+最新 SEO 交付：[ADR0102](decisions/0102-static-seo-content-and-dynamic-enhancements.md)、[前台组件架构](architecture/frontend-ui.md)与[搜索发现指南](development/operations-and-search.md)：文章标题、摘要与正文直接进入首次 HTML；术语 Tooltip、浏览量及其他交互继续按需加载，正文缓存和文章级术语边界不变。

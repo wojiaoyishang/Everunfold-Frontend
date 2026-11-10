@@ -1424,3 +1424,15 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/README.md` | `index-glossary-detail-hover-2` | `43b60481d60bb4d6f3ec3c19daa426ccfc586476b2c5e4111ad88c31df2123b7` |
 | `docs/development/glossary.md` | `glossary-runtime-10` | `eb7eac4e7b71eac5de292a3a92ea2637beb9256dfed4e9ba8480fc978f4bce49` |
 | `docs/decisions/0101-glossary-rules-and-reader-ui.md` | `ADR0101-8` | `8ba572c4f8ded980849f2be9be10f37046c58889af3d1a18bae818afdba3c5cb` |
+
+
+## 静态 SEO 正文与按需增强（2026-11-10）
+
+前端`cd3ce09`；后端业务、契约与迁移不变。文章标题、摘要和正文进入首次 HTML，术语 Tooltip 与浏览量继续按需加载；实现、实页与剩余边界见 ADR0102 和前端 STATUS。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-static-seo-1` | `74bd4595ff57d59634de83db9fe23a8a2e0a1d8d14e18ad06a1378646e0f9184` |
+| `docs/architecture/frontend-ui.md` | `frontend-ui-static-seo-1` | `4566ee929c19d2cdd1196b0925e0e2d9211392383ccc8be93aa94e036a4a2acc` |
+| `docs/development/operations-and-search.md` | `operations-search-5` | `0293b4efd217a08b8410ee80c8f5222837ad71ae9804c6bc127b9b545201271f` |
+| `docs/decisions/0102-static-seo-content-and-dynamic-enhancements.md` | `ADR0102-1` | `2507d75df89db83b4283ff938b11d464a0484275deb85cc77f2bc5ba58f5f196` |
