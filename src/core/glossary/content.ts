@@ -15,6 +15,13 @@ export type GlossaryRenderable = {
   media_urls?: Content["media_urls"];
 };
 
+function renderableBlocks(term: GlossaryRenderable) {
+  return term.body.map((block) => ({
+    ...block,
+    type: block.type ?? "markdown",
+  }));
+}
+
 export function renderGlossaryContent(
   term: GlossaryRenderable,
   shortcodes: readonly PublicShortcode[] = [],
@@ -23,10 +30,7 @@ export function renderGlossaryContent(
     {
       id: term.id,
       content: term.body.some((block) => block.content.trim())
-        ? term.body.map((block) => ({
-            ...block,
-            type: block.type ?? "markdown",
-          }))
+        ? renderableBlocks(term)
         : [
             {
               id: `${term.id}-summary`,
@@ -34,6 +38,22 @@ export function renderGlossaryContent(
               content: term.summary,
             },
           ],
+      media_urls: term.media_urls ?? {},
+    },
+    shortcodes,
+  );
+}
+
+export function renderGlossaryPreview(
+  term: GlossaryRenderable,
+  shortcodes: readonly PublicShortcode[] = [],
+) {
+  const first = renderableBlocks(term).find((block) => block.content.trim());
+  if (!first) return null;
+  return renderContent(
+    {
+      id: term.id,
+      content: [first],
       media_urls: term.media_urls ?? {},
     },
     shortcodes,

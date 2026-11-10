@@ -1,6 +1,6 @@
 # ADR0101：术语匹配规则与分级阅读弹层
 
-版本：ADR0101-4。日期：2026-11-10。状态：代码、隔离 PostgreSQL 写入测试及本地 Chromium UI 测试通过；真实管理员会话与深色/触屏/减少动态验收待完成。补充 [ADR0099](0099-article-scoped-glossary-tooltips.md)。
+版本：ADR0101-5。日期：2026-11-10。状态：代码、主库显式迁移、隔离写入测试及本地 Chromium UI 测试通过；真实触屏、读屏器与减少动态验收待完成。补充 [ADR0099](0099-article-scoped-glossary-tooltips.md)。
 
 ## 决定
 
@@ -13,9 +13,10 @@
 7. 新增显式迁移 `0038_glossary_matching_rules` 与插件契约 `glossary-v1 3.1.0`；站点设置契约升至 `1.26.0`，默认提示来源改为正文。不修改文章快照、原 WordPress 数据或其他业务模型；未经迁移不得部署新服务。
 8. SQLAlchemy 的可空 JSONB `match_rules` 使用 `JSONB(none_as_null=True)`，使 Python `None` 写入 SQL NULL，满足 `match_rules IS NULL OR jsonb_typeof(match_rules) = 'array'` 检查约束。否则更新旧词条时会把 Python `None` 编码为 JSONB `null`，触发数据库 IntegrityError 并使保存返回 503。
 9. 必填提示只由控件的原生 `required` 语义和共享 CSS 生成一次星号，页面级 `SettingsText` 不再重复渲染标记。空摘要不输出空段落：公开目录、词条详情和 Tooltip 均只在摘要有内容时显示。
+10. 首级 Tooltip 使用主题色紧凑卡片，不再直接塞入整篇正文：摘要非空时显示摘要，为空时只渲染第一个非空正文区块；完整正文通过「查看详情」打开，独立页面继续由「打开词条页面」进入。定位按实际卡片尺寸选择上下方向并夹在视口内，正文内部滚动、操作栏固定；长标题和别名单行省略，完整文字保留在 `title`。
 
 ## 限制与后续验证
 
 - 文章命中来源是 Markdown/HTML 的安全文本近似；内联拆分、全文规格化导致的字形差异和短代码动态输出，仍可能使浏览器装饰与后端筛选存在偏差。不得称作完整 DOM 正则扫描。
 - 规则冲突只对普通字面值执行静态重复校验；无法预判两条任意正则是否相交。执行时以优先级与最长结果决定。
-- 后端隔离 PostgreSQL 测试库执行了迁移、创建（摘要空白且 match_rules 为 SQL NULL）、默认标题预览、文章命中、更新、冲突及归档流程，术语测试 3 项通过。Playwright Chromium 在 1440×1000 和 390×844 的 mock admin session 下确认两个必填标签各只有一个星号、原生 required 正确、摘要不 required、编辑器内预览按钮、标题命中高亮及语言图标对齐；另在示例文章中验证空摘要术语悬浮时直接显示正文并可放大阅读。真实账号登录页含 CAPTCHA，未绕过验证码。真实会话、320、深色主题、触屏、Tab/Escape/焦点恢复仍需实页验收。
+- 后端隔离 PostgreSQL 测试库执行了迁移、创建（摘要空白且 match_rules 为 SQL NULL）、默认标题预览、文章命中、更新、冲突及归档流程，术语测试 3 项通过；核心开发库已显式升级到 `0038` 并同步插件 1.2.0。Playwright Chromium 在 1440×1000 和 390×844 验证必填单星号、编辑器预览按钮、主题卡片、首区块回退、固定操作栏、长标题/别名省略、上下边缘定位和深色主题；`alembic check`、Ruff 与定向 mypy 通过。真实账号登录页含 CAPTCHA，未绕过验证码；真实触屏、读屏器、320 和减少动态仍需实页验收。

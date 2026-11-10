@@ -5,7 +5,10 @@ import {
   matchGlossaryText,
   type GlossaryMatchTerm,
 } from "@/core/glossary/match";
-import { renderGlossaryContent } from "@/core/glossary/content";
+import {
+  renderGlossaryContent,
+  renderGlossaryPreview,
+} from "@/core/glossary/content";
 import {
   clearGlossaryCache,
   loadGlossaryMatches,
@@ -152,6 +155,28 @@ test("glossary detail content uses the article rich-text renderer", () => {
   assert.match(rendered.html, /diagram\.png/);
   assert.equal(rendered.features.code, true);
   assert.equal(rendered.features.math, true);
+});
+
+test("glossary preview renders only the first non-empty content block", () => {
+  const rendered = renderGlossaryPreview({
+    ...term("preview", "预览词条"),
+    body: [
+      {
+        id: "opening",
+        type: "markdown",
+        content: "## 首段说明\n\n**只看第一个区块**",
+      },
+      {
+        id: "later",
+        type: "markdown",
+        content: "第二个区块不应出现在首级提示中。",
+      },
+    ],
+  });
+  assert.ok(rendered);
+  assert.match(rendered.html, /首段说明/);
+  assert.match(rendered.html, /只看第一个区块/);
+  assert.doesNotMatch(rendered.html, /第二个区块/);
 });
 
 test("glossary rich content falls back to a safe summary when the body is blank", () => {

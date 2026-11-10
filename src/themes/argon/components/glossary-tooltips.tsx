@@ -3,9 +3,11 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
@@ -19,7 +21,10 @@ import {
   matchGlossaryText,
   type GlossaryMatchTerm,
 } from "@/core/glossary/match";
-import { renderGlossaryContent } from "@/core/glossary/content";
+import {
+  renderGlossaryContent,
+  renderGlossaryPreview,
+} from "@/core/glossary/content";
 import { surfacePortalTarget } from "@/core/themes/portal";
 import { useReaderBaseUrl } from "./reader-data";
 import { AppLink } from "./navigation-link";
@@ -35,6 +40,12 @@ interface ActiveTooltip {
   rect: DOMRect;
   term: GlossaryMatchTerm;
   trigger: HTMLElement;
+}
+
+interface TooltipPlacement {
+  above: boolean;
+  maxHeight: number;
+  top: number;
 }
 
 const ignoredSelector = [
@@ -102,6 +113,7 @@ export default function GlossaryTooltips({
   const [index, setIndex] = useState<MatchIndex | null>(null);
   const [active, setActive] = useState<ActiveTooltip | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [placement, setPlacement] = useState<TooltipPlacement | null>(null);
   const expandedRef = useRef(false);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -112,14 +124,19 @@ export default function GlossaryTooltips({
     () => new Map((index?.terms ?? []).map((term) => [term.id, term])),
     [index?.terms],
   );
-  const richContent = useMemo(
+  const fullContent = useMemo(
     () =>
-      active &&
-      options.popup_source === "content" &&
-      active.term.body.some((block) => block.content.trim())
+      active && active.term.body.some((block) => block.content.trim())
         ? renderGlossaryContent(active.term, site.settings?.shortcodes ?? [])
         : null,
-    [active, options.popup_source, site.settings?.shortcodes],
+    [active, site.settings?.shortcodes],
+  );
+  const previewContent = useMemo(
+    () =>
+      active && !active.term.summary.trim()
+        ? renderGlossaryPreview(active.term, site.settings?.shortcodes ?? [])
+        : null,
+    [active, site.settings?.shortcodes],
   );
 
   const clearTimers = useCallback(() => {
@@ -145,6 +162,7 @@ export default function GlossaryTooltips({
       clearTimers();
       expandedRef.current = false;
       setExpanded(false);
+      setPlacement(null);
       lastOpened.current = Date.now();
       trigger.setAttribute("aria-expanded", "true");
       setActive({ rect: trigger.getBoundingClientRect(), term, trigger });
@@ -314,8 +332,39 @@ export default function GlossaryTooltips({
     };
   }, [active, close]);
 
+  useLayoutEffect(() => {
+    const element = popup.current;
+    if (!active || !element) return;
+    const boundary = 12;
+    const gap = 10;
+    const maxViewportHeight = Math.max(80, window.innerHeight - boundary * 2);
+    const desiredHeight = Math.min(360, element.scrollHeight);
+    const belowTop = active.rect.bottom + gap;
+    const belowSpace = window.innerHeight - boundary - belowTop;
+    const aboveSpace = active.rect.top - gap - boundary;
+    const above = belowSpace < desiredHeight && aboveSpace > belowSpace;
+    const available = Math.max(80, above ? aboveSpace : belowSpace);
+    const maxHeight = Math.min(360, maxViewportHeight, available);
+    const renderedHeight = Math.min(desiredHeight, maxHeight);
+    const preferredTop = above
+      ? active.rect.top - gap - renderedHeight
+      : belowTop;
+    const top = Math.max(
+      boundary,
+      Math.min(preferredTop, window.innerHeight - boundary - renderedHeight),
+    );
+    setPlacement((current) =>
+      current &&
+      current.above === above &&
+      Math.abs(current.maxHeight - maxHeight) < 0.5 &&
+      Math.abs(current.top - top) < 0.5
+        ? current
+        : { above, maxHeight, top },
+    );
+  }, [active]);
+
   if (!active || typeof window === "undefined") return null;
-  const width = Math.min(380, window.innerWidth - 24);
+  const width = Math.min(400, window.innerWidth - 24);
   const left = Math.max(
     12,
     Math.min(
@@ -323,10 +372,18 @@ export default function GlossaryTooltips({
       window.innerWidth - width - 12,
     ),
   );
-  const above = window.innerHeight - active.rect.bottom < 260;
-  const position = above
-    ? { bottom: window.innerHeight - active.rect.top + 10 }
-    : { top: active.rect.bottom + 10 };
+  const arrowLeft = Math.max(
+    14,
+    Math.min(width - 14, active.rect.left + active.rect.width / 2 - left),
+  );
+  const style = {
+    left,
+    width,
+    top: placement?.top ?? Math.max(12, active.rect.bottom + 10),
+    maxHeight: placement?.maxHeight ?? 360,
+    visibility: placement ? "visible" : "hidden",
+    "--glossary-arrow-left": `${arrowLeft}px`,
+  } as CSSProperties;
   return createPortal(
     <>
       <div
@@ -335,8 +392,8 @@ export default function GlossaryTooltips({
         className="glossary-tooltip"
         role="dialog"
         aria-label={`术语：${active.term.title}`}
-        data-above={above}
-        style={{ left, width, ...position }}
+        data-above={placement?.above ?? false}
+        style={style}
         onPointerEnter={() => {
           if (closeTimer.current) clearTimeout(closeTimer.current);
         }}
@@ -353,10 +410,15 @@ export default function GlossaryTooltips({
       >
         <header>
           <div className="glossary-tooltip-heading">
-            <small>术语解释</small>
-            <strong>{active.term.title}</strong>
+            <span className="glossary-tooltip-kicker">术语</span>
+            <strong title={active.term.title}>{active.term.title}</strong>
             {active.term.aliases.length > 0 && (
-              <small>也称：{active.term.aliases.slice(0, 3).join(" · ")}</small>
+              <span
+                className="glossary-tooltip-alias"
+                title={active.term.aliases.join(" · ")}
+              >
+                也称：{active.term.aliases.slice(0, 3).join(" · ")}
+              </span>
             )}
           </div>
           <Button
@@ -368,40 +430,47 @@ export default function GlossaryTooltips({
             <Icon name="close" />
           </Button>
         </header>
-        {richContent ? (
-          <ContentMarkupView
-            className="article-content glossary-tooltip-content"
-            data-glossary-ignore
-            html={richContent.html}
-            features={richContent.features}
-            codeTools={false}
-          />
-        ) : active.term.summary.trim() ? (
-          <p>{active.term.summary}</p>
-        ) : null}
-        <div className="glossary-tooltip-actions">
-          <AppLink href={active.term.path}>查看词条</AppLink>
-          {options.popup_source === "content" &&
-            active.term.body.some((block) => block.content.trim()) && (
+        <div className="glossary-tooltip-body">
+          <div className="glossary-tooltip-scroll">
+            {active.term.summary.trim() ? (
+              <p className="glossary-tooltip-summary">{active.term.summary}</p>
+            ) : previewContent ? (
+              <ContentMarkupView
+                className="article-content glossary-tooltip-content"
+                data-glossary-ignore
+                html={previewContent.html}
+                features={previewContent.features}
+                codeTools={false}
+              />
+            ) : null}
+          </div>
+          <div className="glossary-tooltip-actions">
+            <AppLink href={active.term.path}>
+              打开词条页面 <Icon name="external" />
+            </AppLink>
+            {fullContent && (
               <Button
                 className="glossary-tooltip-expand"
+                aria-haspopup="dialog"
                 onClick={() => {
                   clearTimers();
                   expandedRef.current = true;
                   setExpanded(true);
                 }}
               >
-                放大阅读 <Icon name="external" />
+                <Icon name="book" />
+                查看详情
               </Button>
             )}
+          </div>
         </div>
       </div>
-      {expanded && richContent && (
+      {expanded && fullContent && (
         <GlossaryExpandedDialog
           title={active.term.title}
           path={active.term.path}
-          html={richContent.html}
-          features={richContent.features}
+          html={fullContent.html}
+          features={fullContent.features}
           onDismiss={() => {
             const trigger = active.trigger;
             expandedRef.current = false;

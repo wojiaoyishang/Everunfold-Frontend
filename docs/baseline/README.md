@@ -1413,3 +1413,14 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/README.md` | `index-glossary-rules-2` | `e6b345ce61198f7958229a34bd03742b93ad5e5bf5f41bb3df94c34798b6e22b` |
 | `docs/development/glossary.md` | `glossary-runtime-6` | `396636cf66c77261f6c83780d71e0dda75a84bee23afc985d004761b86e4a2c8` |
 | `docs/decisions/0101-glossary-rules-and-reader-ui.md` | `ADR0101-4` | `a492c35f4689680d591a3355a6d17a0770de34d528f94bfbb6a54876cfa3fe71` |
+
+
+## 术语紧凑主题 Tooltip（2026-11-10）
+
+首级 Tooltip 改为主题色紧凑卡片：摘要优先，摘要为空时只显示第一个非空正文区块；完整说明与词条页面入口固定保留。卡片按实际尺寸定位在视口内，正文内部滚动，长标题和别名省略。测试与边界见 ADR0101 和前端 STATUS。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-glossary-compact-tooltip-1` | `66224ba2001df73f4579def5664ce5327197372c455414762d2e927bfd352f8b` |
+| `docs/development/glossary.md` | `glossary-runtime-7` | `98f819e9b0530e89b397dd9304ab79a31188eb1e755995e1fc3b6d3710154d35` |
+| `docs/decisions/0101-glossary-rules-and-reader-ui.md` | `ADR0101-5` | `da3885d8b610700520522e39689d8b50701fcf131887388a45fa22c02a777f44` |
