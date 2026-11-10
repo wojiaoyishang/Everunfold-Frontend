@@ -39,6 +39,7 @@ import {
   TextField,
 } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
+import { TokenField } from "../../components/ui/token-field";
 import { Icon } from "../../components/icon";
 import { MatchingRulesEditor } from "./matching-rules";
 import styles from "./glossary.module.css";
@@ -580,6 +581,21 @@ export function GlossaryAdminPage() {
               />
             </SettingsSection>
             <SettingsSection
+              id="glossary-aliases"
+              title="术语别名"
+              description="别名独立于匹配规则，会参与正文命中、全局搜索和公开词条展示。"
+            >
+              <TokenField
+                label="术语别名"
+                value={fields.aliases ?? []}
+                onChange={(aliases) => update({ aliases })}
+                multiple
+                limit={20}
+                compactLabel
+                disabled={!writable || saving}
+              />
+            </SettingsSection>
+            <SettingsSection
               id="glossary-body"
               title="术语正文"
               description="与文章共用富文本区块、格式、代码、公式、媒体和预览能力。"
@@ -633,7 +649,7 @@ export function GlossaryAdminPage() {
             <SettingsSection
               id="glossary-matching"
               title="匹配规则"
-              description="分别控制术语标题、普通匹配与受限正则，并在保存前验证匹配结果。"
+              description="在标题和别名之外补充普通匹配或受限正则，并在保存前验证匹配结果。"
             >
               <MatchingRulesEditor
                 fields={fields}

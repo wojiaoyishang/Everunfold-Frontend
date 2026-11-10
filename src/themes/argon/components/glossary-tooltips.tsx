@@ -26,6 +26,7 @@ import {
   renderGlossaryPreview,
 } from "@/core/glossary/content";
 import { surfacePortalTarget } from "@/core/themes/portal";
+import { afterDialogMotion } from "../hooks/dialog-motion";
 import { useReaderBaseUrl } from "./reader-data";
 import { AppLink } from "./navigation-link";
 import { Icon } from "./icon";
@@ -113,8 +114,10 @@ export default function GlossaryTooltips({
   const [index, setIndex] = useState<MatchIndex | null>(null);
   const [active, setActive] = useState<ActiveTooltip | null>(null);
   const [expanded, setExpanded] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [placement, setPlacement] = useState<TooltipPlacement | null>(null);
   const expandedRef = useRef(false);
+  const closingRef = useRef(false);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPointerActivation = useRef(0);
@@ -147,12 +150,10 @@ export default function GlossaryTooltips({
   }, []);
 
   const close = useCallback(() => {
-    if (expandedRef.current) return;
+    if (expandedRef.current || closingRef.current) return;
     clearTimers();
-    setActive((current) => {
-      current?.trigger.setAttribute("aria-expanded", "false");
-      return null;
-    });
+    closingRef.current = true;
+    setClosing(true);
   }, [clearTimers]);
 
   const open = useCallback(
@@ -161,7 +162,9 @@ export default function GlossaryTooltips({
       if (!term) return;
       clearTimers();
       expandedRef.current = false;
+      closingRef.current = false;
       setExpanded(false);
+      setClosing(false);
       setPlacement(null);
       lastOpened.current = Date.now();
       trigger.setAttribute("aria-expanded", "true");
@@ -169,6 +172,18 @@ export default function GlossaryTooltips({
     },
     [clearTimers, terms],
   );
+
+  useEffect(() => {
+    if (!closing) return;
+    return afterDialogMotion(popup.current, () => {
+      setActive((current) => {
+        current?.trigger.setAttribute("aria-expanded", "false");
+        return null;
+      });
+      closingRef.current = false;
+      setClosing(false);
+    });
+  }, [closing]);
 
   useEffect(() => {
     let active = true;
@@ -393,6 +408,7 @@ export default function GlossaryTooltips({
         role="dialog"
         aria-label={`术语：${active.term.title}`}
         data-above={placement?.above ?? false}
+        data-state={closing ? "closing" : "open"}
         style={style}
         onPointerEnter={() => {
           if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -425,6 +441,7 @@ export default function GlossaryTooltips({
             type="button"
             className="icon-button glossary-tooltip-close"
             aria-label="关闭术语提示"
+            disabled={closing}
             onClick={close}
           >
             <Icon name="close" />

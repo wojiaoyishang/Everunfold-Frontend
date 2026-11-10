@@ -37,6 +37,10 @@
     0 18px 42px rgb(14 18 30 / 22%);
   animation: glossary-tooltip-in 160ms ease-out;
 }
+.glossary-tooltip[data-state="closing"] {
+  pointer-events: none;
+  animation: glossary-tooltip-out 150ms ease-in forwards;
+}
 .glossary-tooltip::before {
   position: absolute;
   left: var(--glossary-arrow-left, 50%);
@@ -284,6 +288,14 @@
   from {
     opacity: 0;
     translate: 0 4px;
+    scale: 0.985;
+  }
+}
+@keyframes glossary-tooltip-out {
+  to {
+    opacity: 0;
+    translate: 0 4px;
+    scale: 0.985;
   }
 }
 @keyframes glossary-dialog-in {
@@ -324,6 +336,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .glossary-tooltip,
+  .glossary-tooltip[data-state="closing"],
   .glossary-expanded-dialog,
   .glossary-expanded-dialog[data-state="closing"] {
     animation: none;

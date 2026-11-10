@@ -371,6 +371,16 @@
   .search-form .primary-button {
     padding: 9px 16px;
   }
+  .search-form > .search-filter-group {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .glossary-search-results {
+    padding: 20px;
+  }
+  .glossary-search-grid {
+    grid-template-columns: 1fr;
+  }
   .standalone-state {
     margin: 12vh 18px;
     padding: 36px 25px;

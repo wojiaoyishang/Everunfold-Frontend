@@ -76,8 +76,22 @@
 .search-dialog-form > div {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 14px;
+}
+.search-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.search-filter-group .ui-select-trigger {
+  white-space: nowrap;
+}
+.search-dialog-controls .primary-button {
+  margin-inline-start: auto;
 }
 .search-dialog > p {
   font-size: 11px;
@@ -316,5 +330,18 @@ a.related-card:hover {
   }
   .search-dialog {
     padding: 22px;
+  }
+
+  .search-dialog-controls,
+  .search-filter-group {
+    width: 100%;
+  }
+
+  .search-filter-group {
+    flex-wrap: wrap;
+  }
+
+  .search-dialog-controls .primary-button {
+    margin-inline-start: auto;
   }
 }

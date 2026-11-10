@@ -13,6 +13,7 @@ import {
   clearGlossaryCache,
   loadGlossaryMatches,
 } from "@/core/glossary/runtime";
+import { filterGlossaryTerms } from "@/core/glossary/search";
 
 function term(
   id: string,
@@ -177,6 +178,29 @@ test("glossary preview renders only the first non-empty content block", () => {
   assert.match(rendered.html, /首段说明/);
   assert.match(rendered.html, /只看第一个区块/);
   assert.doesNotMatch(rendered.html, /第二个区块/);
+});
+
+test("global glossary search matches title, summary and aliases with a bounded set", () => {
+  const terms = [
+    { title: "代码", summary: "程序说明", aliases: ["源代码"] },
+    { title: "篝火", summary: "夜的回忆", aliases: ["营火"] },
+    { title: "文章", summary: "内容载体", aliases: [] },
+  ];
+  assert.deepEqual(
+    filterGlossaryTerms(terms, "源代").map((term) => term.title),
+    ["代码"],
+  );
+  assert.deepEqual(
+    filterGlossaryTerms(terms, "回忆").map((term) => term.title),
+    ["篝火"],
+  );
+  assert.deepEqual(
+    filterGlossaryTerms([...terms, ...terms], "文", 3),
+    [...terms, ...terms]
+      .filter((term) => term.title === "文章" || term.summary.includes("文"))
+      .slice(0, 3),
+  );
+  assert.deepEqual(filterGlossaryTerms(terms, "   "), []);
 });
 
 test("glossary rich content falls back to a safe summary when the body is blank", () => {

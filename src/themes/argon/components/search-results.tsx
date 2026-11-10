@@ -10,6 +10,7 @@ import { Pagination } from "./pagination";
 import { EmptyState } from "./empty-state";
 import { Icon } from "./icon";
 import { SearchLanguages } from "./search-languages";
+import { GlossarySearchResults } from "./glossary-search-results";
 
 export function SearchResults({
   snapshot,
@@ -43,13 +44,15 @@ export function SearchResults({
           <TextField
             name="q"
             aria-label="搜索关键词"
-            placeholder="寻找文章、说说或页面…"
+            placeholder="搜索文章、说说、术语或页面…"
             defaultValue={query}
             maxLength={160}
             autoFocus
           />
-          <SearchContentType key={type} defaultValue={type} />
-          <SearchLanguages key={String(allLanguages)} all={allLanguages} />
+          <div className="search-filter-group">
+            <SearchContentType key={type} defaultValue={type} />
+            <SearchLanguages key={String(allLanguages)} all={allLanguages} />
+          </div>
           <Button className="primary-button" type="submit">
             <UiText text="搜索" />
           </Button>
@@ -65,6 +68,11 @@ export function SearchResults({
           )}
         </p>
       </section>
+      <GlossarySearchResults
+        query={query}
+        type={type}
+        allLanguages={allLanguages}
+      />
       {query && (
         <>
           <div className="article-list">

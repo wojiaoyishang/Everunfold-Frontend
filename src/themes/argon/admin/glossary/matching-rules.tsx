@@ -19,16 +19,7 @@ type MatchRule = NonNullable<Fields["match_rules"]>[number];
 type Preview = NonNullable<GlossaryContract["preview_output"]["data"]>;
 
 function configuredRules(fields: Fields): MatchRule[] {
-  if (fields.match_rules !== null && fields.match_rules !== undefined)
-    return fields.match_rules;
-  return (fields.aliases ?? []).map((pattern) => ({
-    kind: "literal",
-    pattern,
-    enabled: true,
-    case_sensitive: false,
-    whole_word: true,
-    priority: 0,
-  }));
+  return fields.match_rules ?? [];
 }
 
 function newRule(): MatchRule {
@@ -64,14 +55,6 @@ export function MatchingRulesEditor({
   function changeRules(next: MatchRule[]) {
     onChange({
       match_rules: next,
-      aliases: [
-        ...new Set(
-          next
-            .filter((rule) => rule.kind === "literal")
-            .map((rule) => rule.pattern.trim())
-            .filter(Boolean),
-        ),
-      ].slice(0, 20),
     });
   }
 
@@ -307,7 +290,7 @@ export function MatchingRulesEditor({
           <Icon name="plus" /> 添加匹配规则
         </Button>
         <small>
-          普通匹配也会作为公开词条的别名；正则仅用于正文命中，不会公开其表达式。
+          这里只添加标题和别名之外的额外匹配方式；正则表达式不会公开。
         </small>
       </div>
       <div className={styles.test}>

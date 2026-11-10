@@ -347,6 +347,8 @@
 }
 .search-form {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
 }
 .search-form > .ui-input {
@@ -362,6 +364,93 @@
   color: var(--muted);
   font-size: 13px;
   margin: 16px 0 0;
+}
+.search-form > .search-filter-group {
+  gap: 8px;
+}
+.search-form > .primary-button {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
+.glossary-search-results {
+  margin-bottom: 25px;
+  padding: 24px 28px;
+}
+.glossary-search-results > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.glossary-search-results > header > div > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+.glossary-search-results h2 {
+  margin: 4px 0 0;
+  color: var(--text-strong);
+  font-size: 18px;
+}
+.glossary-search-results > header small {
+  color: var(--muted);
+}
+.glossary-search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 10px;
+}
+.glossary-search-grid > a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface-soft);
+  color: var(--text);
+  transition:
+    transform var(--motion-fast) var(--motion-ease),
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease;
+}
+.glossary-search-grid > a:is(:hover, :focus-visible) {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 28%, var(--line));
+  background: var(--accent-soft);
+}
+.glossary-search-grid > a > .icon:first-child {
+  color: var(--accent);
+}
+.glossary-search-grid > a > .icon:last-child {
+  color: var(--muted);
+}
+.glossary-search-grid > a > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.glossary-search-grid strong,
+.glossary-search-grid small,
+.glossary-search-grid em {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.glossary-search-grid strong {
+  color: var(--text-strong);
+}
+.glossary-search-grid small,
+.glossary-search-grid em {
+  color: var(--muted);
+  font-size: 12px;
+  font-style: normal;
 }
 .taxonomy-index {
   padding: 30px;

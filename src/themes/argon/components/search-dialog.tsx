@@ -65,13 +65,15 @@ export function SearchDialog() {
             <TextField
               name="q"
               autoFocus
-              placeholder="文章、说说，或者记忆中的几个字…"
+              placeholder="搜索文章、说说或术语…"
               maxLength={160}
             />
           </label>
-          <div>
-            <SearchContentType />
-            <SearchLanguages />
+          <div className="search-dialog-controls">
+            <div className="search-filter-group">
+              <SearchContentType />
+              <SearchLanguages />
+            </div>
             <Button className="primary-button" type="submit">
               <UiText text="开始寻找" />
               <Icon name="arrow" />
