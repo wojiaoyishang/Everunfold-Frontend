@@ -1495,3 +1495,18 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `contracts/presentation-v0.2.schema.json` | `presentation-v0.2-0.2.0-preview.4` | `17637bff33e4c958b955530604eb761d2e90e1e740cb57d6851a0b1ee42015dc` |
 | `contracts/public-v0.1.schema.json` | `public-v0.1-0.13.0` | `9dbd07574aed7c1b5bcf97e85e3ced85522a6ecc2dbad6a806b49534c59bb4e0` |
 | `contracts/settings-v1.schema.json` | `settings-v1-1.28.0` | `4a238a2c73783013aaee8950d29cc031fe6516185c1209b9ae2a7929f49465dc` |
+
+
+## 后台信息架构、主题导航与术语特色图片（2026-11-10）
+
+后端`e904723`、前端`42ba9d5`。后台按概览、内容、内容工具、资源、外观、成员与互动、设置重组；当前主题独立保存导航，旧站点导航只作兼容回退。自定义语言标志使用固定槽及溢出滚动，术语新增媒体库特色图片和0041迁移。多语言自定义字符串与邮件模板只记录后续架构，没有创建空入口。以下版本替代对应旧摘要，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-admin-ia-theme-navigation-1` | `a65afd637df26fc79df6e8b08e1feab15f3bac0194096db3db75e0ea7bb894ac` |
+| `docs/architecture/constraints.md` | `constraints-bootstrap-24` | `d28f251ab43bdbc8da78cf2b755c654a44c97991c2addd03509c52474cd1f868` |
+| `docs/decisions/0105-admin-navigation-and-glossary-media.md` | `ADR0105-1` | `1a30703c8bfe228efce789b792d6ed207a4aaac7aef2fd01eebadd80e2339a19` |
+| `docs/development/glossary.md` | `glossary-runtime-14` | `51db95ab458c04f8e9b4d37e87bec5b86308e4a46626d9f1d1e765bf20a6d142` |
+| `docs/development/settings.md` | `settings-runtime-16` | `2550a250f0b51fe7e874a87b69b830e5cf611768820249f46c63e12267470f4f` |
+| `contracts/glossary-v1.schema.json` | `glossary-v1-3.5.0` | `068801018aee5de95716db897f537b956fdc20d29e2e0a1eb82a4393ec1ed353` |
+| `contracts/settings-v1.schema.json` | `settings-v1-1.29.0` | `813999809afb42a9c6bee4b75e54cb33d91e541a1461971b911ed72fa3e67840` |

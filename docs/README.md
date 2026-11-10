@@ -253,3 +253,5 @@
 最新术语交付：[ADR0103](decisions/0103-dynamic-glossary-footnotes.md)与[术语表指南](development/glossary.md)：文章/说说正文结束后按需加载本页命中的术语脚注，摘要优先、富文本首块回退、单行省略；两类脚注可分别关闭并复用同一匹配缓存。
 
 最新多语言与钩子交付：[ADR0104](decisions/0104-localized-navigation-and-glossary-hooks.md)与[术语表指南](development/glossary.md)：导航名称可按语言稀疏覆盖并使用旗帜；术语专搜、逐内容 Tooltip/脚注开关、术语内页面选择器钩子及管理员 JavaScript 挂载已接通。新建术语可暂存页面触发并在首次保存时一并创建，`glossary.mount(element)`接受原生 DOM 节点。
+
+最新后台结构交付：[ADR0105](decisions/0105-admin-navigation-and-glossary-media.md)：后台按概览、内容、内容工具、资源、外观、成员与互动、设置重排；导航归当前主题并保留旧站点导航回退，长自定义标志使用固定槽内滚动，术语新增媒体库特色图片。

@@ -1,21 +1,23 @@
 # 基本设置运行指南
 
-版本：settings-runtime-15，2026-11-10。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)与[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-16，2026-11-10。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)与[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
 管理员登录后在侧栏「设置」进入：
 
-| 页面 | 已实现 |
-| --- | --- |
-| `/admin/settings` | 站点名称/简介/作者/作者格言/头像/公告；版权与结构化页脚链接；术语自动匹配、提示数和内容来源；语言目录/默认语言/标志/前缀/界面回退；递归导航结构树/父级调整/排序/删除；SEO 描述、标题模板、允许索引 |
-| `/admin/icons` | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用 |
-| `/admin/media` | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取 |
-| `/admin/settings/theme` | 公共宿主保留已安装主题切换；具体设置由当前主题目录的 `theme-settings.tsx` 动态提供。Argon 包含外观/横幅/字体/首页/文章显示/代码/背景，Paper 包含自己的纸张底色；不同主题分别保存 |
-| `/admin/settings/captcha` | 本地图片/Google/Turnstile、登录与阅读/评论全局规则、API Key明确授权豁免和阅读侧请求限额；单篇覆盖见各编辑器 |
-| `/admin/settings/system` | 按稳定节点 ID 保存动态请求刷新间隔、超时、重试间隔、批处理窗口；查看期望/确认版本、重新同步；部署来源脱敏展示 |
+| 页面                      | 已实现                                                                                                                                                                                             |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/admin/settings`         | 站点名称/简介/作者/作者格言/头像/公告；版权与结构化页脚链接；术语自动匹配、提示数和内容来源；语言目录/默认语言/标志/前缀/界面回退；递归导航结构树/父级调整/排序/删除；SEO 描述、标题模板、允许索引 |
+| `/admin/icons`            | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用                                                                                                                                          |
+| `/admin/media`            | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取                                                                                                |
+| `/admin/settings/theme`   | 公共宿主保留已安装主题切换；具体设置由当前主题目录的 `theme-settings.tsx` 动态提供。Argon 包含外观/横幅/字体/首页/文章显示/代码/背景，Paper 包含自己的纸张底色；不同主题分别保存                   |
+| `/admin/settings/captcha` | 本地图片/Google/Turnstile、登录与阅读/评论全局规则、API Key明确授权豁免和阅读侧请求限额；单篇覆盖见各编辑器                                                                                        |
+| `/admin/settings/system`  | 按稳定节点 ID 保存动态请求刷新间隔、超时、重试间隔、批处理窗口；查看期望/确认版本、重新同步；部署来源脱敏展示                                                                                      |
 
 settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码与背景的主题 profile、`site.footer`、`site.author_tagline`和`site.glossary`，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON在读取时补默认值，文章内容和术语匹配结果不进入设置或正文快照。顶层`theme`是活动主题的兼容投影，权威分主题值在`theme_options[themeId]`。主题表单见[主题设置指南](theme-settings.md)，代码字体继续只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL。参数和加载规则见[代码指南](code-blocks.md)。
+
+现导航菜单也归主题 profile：`theme_options[themeId].navigation` 是当前主题的独立菜单；`site.navigation` 仅为旧数据兼容回退。外观分组中的“导航菜单”页面编辑当前主题，保存空数组也会作为明确选择保留，不退回到旧导航。后台设置入口按站点、连接与安全、系统拆分，媒体/图标/字体归资源，术语和短代码归内容工具。
 
 语言分区支持默认语言和中文前缀修改；标志小按钮打开可搜索国旗/自定义标志弹窗，“添加语言”分备选和自定义。只有默认语言可留空前缀，更换默认值不批量修改已有文章地址。已有本语言程序包显示“本语言界面”，只有缺包项选择界面回退。被内容使用的语言不可删除，可禁用；新增语言不自动翻译正文。完整约束见[多语言指南](../architecture/multilingual-content.md)，更改后仍需点击“保存更改”并等待节点确认。
 
@@ -29,14 +31,14 @@ settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码�
 
 全部浏览器管理请求直达配置的 FastAPI，使用已有 HttpOnly 会话；写请求附 `X-CSRF-Token`，不在 URL 传凭据。
 
-| 方法与路径 | 作用 |
-| --- | --- |
-| GET/PATCH `/v1/admin/captcha` | 独立验证码修订、提供方与写入式密钥、用途规则、API Key策略，见[指南](captcha.md) |
-| GET `/v1/admin/settings` | 当前站点/主题值、source_epoch、revision、节点状态 |
-| PATCH `/v1/admin/settings` | `{expected_revision, value: {site, theme, theme_options}}` 保存整份配置；活动主题投影由后端按 `extensions.theme` 重算 |
-| GET `/v1/admin/frontend-nodes` | 已配置的节点、各自策略与状态 |
-| GET/PATCH `/v1/admin/frontend-nodes/{node_id}/cache-policy` | 读取/以 expected_revision 保存该节点策略 |
-| POST `/v1/admin/frontend-nodes/{node_id}/sync` | 重发当前版本；若派生媒体 URL 变化则发布新的公共设置修订 |
+| 方法与路径                                                  | 作用                                                                                                                  |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| GET/PATCH `/v1/admin/captcha`                               | 独立验证码修订、提供方与写入式密钥、用途规则、API Key策略，见[指南](captcha.md)                                       |
+| GET `/v1/admin/settings`                                    | 当前站点/主题值、source_epoch、revision、节点状态                                                                     |
+| PATCH `/v1/admin/settings`                                  | `{expected_revision, value: {site, theme, theme_options}}` 保存整份配置；活动主题投影由后端按 `extensions.theme` 重算 |
+| GET `/v1/admin/frontend-nodes`                              | 已配置的节点、各自策略与状态                                                                                          |
+| GET/PATCH `/v1/admin/frontend-nodes/{node_id}/cache-policy` | 读取/以 expected_revision 保存该节点策略                                                                              |
+| POST `/v1/admin/frontend-nodes/{node_id}/sync`              | 重发当前版本；若派生媒体 URL 变化则发布新的公共设置修订                                                               |
 
 公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以当前settings1.25.0生成契约为准；被内容使用的语言移除为42292，导航路径冲突为42294。公共value包含site、活动 theme、theme_options 与后端派生的icon_urls；客户端映射不作为保存事实源。Node内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
 
@@ -90,7 +92,6 @@ settings.directory/
 
 链接使用稳定hash，可复制带分区的地址、刷新及前进后退，键盘Enter可定位并把焦点移到目标。导航不会保存设置或清空未保存输入；离开页面继续沿原有修改保护。新增分区需在SettingsSection提供唯一且稳定的id。具体展示、顶栏留白和页底短分区处理见[ADR0064](../decisions/0064-desktop-settings-section-navigation.md)，实页范围见[验收](../handoff/settings-section-navigation-verification.md)。
 
-
 ## 按内容关联菜单
 
 菜单编辑的“链接类型”可选手动链接、关联文章、关联说说、关联页面。资源选择器支持搜索与翻页，只显示已发布文章/说说和已启用页面；选择后显示当前关联标题与应用路径，也可重新选择。修改设置仍需点击保存，可撤销未保存的选择。
@@ -98,7 +99,6 @@ settings.directory/
 关联保存资源类型与稳定ID，链接随目标发布/应用后的路径变化。当前阅读语言有同组公开版本时优先使用该版本，否则使用关联项；注册页面使用实现显式声明的语言路由。目标未发布、停用、撤回、转私有或回收后隐藏该菜单及其子树，不能回退到旧URL。手动链接不自动跟随。
 
 后端`POST /v1/admin/settings/navigation-resources`要求`settings:read`，浏览器仍检查精确Origin/CSRF。请求含kind、可选id、search、page、page_size，返回最小ID/标题/当前公开路径/语言，不返回草稿、正文或内部元数据。允许管理员和被明确授予读取设置能力的调用方选择已公开资源；此接口不授予页面或内容写入权限。
-
 
 ## 后端插件目录
 

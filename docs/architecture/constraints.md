@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-23，2026-11-10（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
+版本：bootstrap-24，2026-11-10（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
 
 ## 已确认的范围
 
@@ -53,6 +53,7 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 - 同语言内容一个共享工作草稿、一个 Y.Doc/WS 房间；标题、摘要、分类/标签、SEO 与正文协同。发布审核/权限通过独立业务 API，不实时覆盖已发布版本。
 - Yjs 更新须在 PostgreSQL 提交后才确认；同更新去重落库，ACK 可重发；Redis 漏消息从权威持久状态恢复。浏览器 IndexedDB 保留未确认更新，恢复先重新鉴权；Awareness 是临时在线身份/光标状态。
 - 各语言内容独立ID、审核及发布历史，通过翻译关联；URL语言决定SSR。只展示真实已发布译文，无译文回原文。2026-11-06已实施初始zh-CN/en、可扩展语言目录/默认语言/中文前缀和标志，原文一行管理各语言，界面包独立且缺包时回退；已有内容URL不批量改写，见[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)及[实际范围](multilingual-content.md)。
+- 2026-11-10起，站点导航写入当前主题的`theme_options[themeId].navigation`，不同主题各自维护；旧`site.navigation`只作兼容回退，显式空菜单不得回退。语言目录、内容语言与主题导航名称仍为不同概念，见[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)。
 - 代码路由优先，冲突阻止发布；草稿 URL 发布时才激活。改址后旧地址失效，不维护历史别名或自动 301/308；首次迁移尽量直接保留旧路径，不能保留则出差异报告。
 - 原媒体不可变，新文件新 ID，WebP 是同媒体的派生表示；默认本地文件系统、公开静态分发。正文保存虚拟 URI，FastAPI 随内容返回映射，Next.js 按节点/属性渲染替换，不猜桶路径或逐图回源。
 - 2026-10-31 新要求：业务媒体经后端媒体库上传/登记，无 CDN 时由后端提供；规划静态 Base URL 与支持相对/绝对路径的 Uploads Path，并预留云端接管上传能力。[媒体存储设计](media-storage.md) 给出目录、列表、适配接口和缓存切换建议；本地上传、Base URL、Uploads Path、元数据/编辑和安全删除已实现，远端提供器与完整引用图仍未交付；前端现有媒体目录是试导入过渡。
