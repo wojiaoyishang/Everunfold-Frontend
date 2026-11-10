@@ -1,5 +1,9 @@
 # Everunfold 文档入口
 
+[术语表与文章级 Tooltip](development/glossary.md)、[ADR0099](decisions/0099-article-scoped-glossary-tooltips.md)：后端按文章可见正文匹配并只返回实际命中的已发布词条，未命中文章返回空数组；正文继续缓存，前端空闲懒加载术语组件，命中/空结果均按内容修订缓存 5 分钟。后台可维护标题、别名、提示、Markdown 详情和发布状态，公开提供 `/glossary` 与详情页。
+
+[主题私有设置](development/theme-settings.md)、[ADR0100](decisions/0100-theme-owned-settings-profiles.md)：`/admin/settings/theme` 只负责主题切换和宿主，Argon、Paper 的表单分别位于各自主题目录；`theme_options` 为每个主题保存独立 profile，顶层 `theme` 保留活动主题兼容投影。站点级页脚、作者格言和术语提示仍在站点设置。
+
 [后端插件 HTTP 路由](development/backend-plugin-routes.md)、[ADR0098](decisions/0098-backend-plugin-http-routes.md)及[验收](handoff/backend-plugin-routes-verification.md)：原生FastAPI路由、命名空间、Session/Key授权、请求事务和动态启停，以及独立OpenAPI导出。
 
 [评论发送时验证与账号弹窗](decisions/0097-demand-comment-verification-and-account-dialogs.md)、[验证码指南](development/captcha.md)及[验收](handoff/comment-submit-verification.md)：发送后按需验证小窗、颜文字结果横幅、离线保留输入，以及账号共享确认和同步菜单退出。

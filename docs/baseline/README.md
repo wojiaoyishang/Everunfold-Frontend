@@ -1340,3 +1340,21 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/backend-plugin-routes.md` | `backend-plugin-routes-1` | `2793d0389129ceb7f318ffec8710109a44492d09772b68ebac1e9536a72c5e6f` |
 | `docs/decisions/0098-backend-plugin-http-routes.md` | `ADR0098-1` | `58a75759718dbfdf56b051726ed1b8398935e37c9d3dafe69a73646cd728b066` |
 | `docs/handoff/backend-plugin-routes-verification.md` | `backend-plugin-routes-verification-1` | `9457762edbf6200390a96fe6fabb1c9be494bc66cee1e9215a7c021743f219dc` |
+
+
+## 术语 Tooltip 与主题私有设置（2026-11-10）
+
+后端f276040/2fe2b4b、前端0a82fce；settings 1.25.0、glossary 1.0.0和0036迁移。文章级术语匹配、公开目录/Tooltip、`theme_options`和各主题表单已实现；实际检查与限制见验收，原始基线和STATUS分别维护。以下版本替代对应旧摘要。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-glossary-theme-settings-1` | `3beb7eae3b5c5c827b4ba78540822c5be4b3f10513013e9fbbced8d8dad667ac` |
+| `docs/architecture/constraints.md` | `constraints-glossary-theme-settings-1` | `cfc2a4ccd6ab4f2cf5db47fb03fcefdc0a2eab2ec7468114e14adf88c1a9062e` |
+| `docs/architecture/theme-configuration.md` | `theme-configuration-owner-profiles-1` | `0b2e497f304fd3398a6f2dac4326e49d74a45183073d3f947dc0bcad849ef910` |
+| `docs/development/settings.md` | `settings-runtime-15` | `56f5149ad29f44dfabc17c1419b37eaa8640f60bb0caecc37a33a08477a354a7` |
+| `docs/development/child-themes.md` | `child-themes-6` | `18d26ba5a57c4480e0b5d5de654e43cebeb80cc550a8ebe2aa2a197ea263081d` |
+| `docs/development/glossary.md` | `glossary-runtime-1` | `7d7c7b765b7caefabd894d447db11161b9d3a6b9c4db003dfaf571416f92ca93` |
+| `docs/development/theme-settings.md` | `theme-settings-runtime-1` | `f75e9d04bfa7732bc0abbd16395f9d21c7a74b7f5ccee1e008334ff616e5a3da` |
+| `docs/decisions/0099-article-scoped-glossary-tooltips.md` | `ADR0099-1` | `b19a33b15c842d72c4496b2a5c819d9dc33fd85ff6fd8ba6bb3114a2f1f21541` |
+| `docs/decisions/0100-theme-owned-settings-profiles.md` | `ADR0100-1` | `4a466f1c5b58c362659e53b7900793dcb365f0f5a6d9acd139a79610124192e2` |
+| `docs/handoff/glossary-theme-settings-verification.md` | `glossary-theme-settings-verification-1` | `395abb97f5ec669ba24ac8d26d4b45b83906471df91f54f1f4b07225facd780a` |

@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-14，2026-11-09。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0052](../decisions/0052-shared-code-frames-and-source-options.md)与[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-15，2026-11-10。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)与[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -8,14 +8,14 @@
 
 | 页面 | 已实现 |
 | --- | --- |
-| `/admin/settings` | 站点名称、简介、作者、头像地址、公告；语言目录/默认语言/标志/前缀/界面回退；递归导航结构树/父级调整/排序/删除，复用图标库选择；SEO 描述、标题模板、允许索引 |
+| `/admin/settings` | 站点名称/简介/作者/作者格言/头像/公告；版权与结构化页脚链接；术语自动匹配、提示数和内容来源；语言目录/默认语言/标志/前缀/界面回退；递归导航结构树/父级调整/排序/删除；SEO 描述、标题模板、允许索引 |
 | `/admin/icons` | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用 |
 | `/admin/media` | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取 |
-| `/admin/settings/theme` | 默认主题色/显示模式、首页横幅文字、背景图片/视频地址、默认播放；代码深浅配色、行号/折行/折叠、字号/行高/tab-size、代码字体与实际阅读框预览 |
+| `/admin/settings/theme` | 公共宿主保留已安装主题切换；具体设置由当前主题目录的 `theme-settings.tsx` 动态提供。Argon 包含外观/横幅/字体/首页/文章显示/代码/背景，Paper 包含自己的纸张底色；不同主题分别保存 |
 | `/admin/settings/captcha` | 本地图片/Google/Turnstile、登录与阅读/评论全局规则、API Key明确授权豁免和阅读侧请求限额；单篇覆盖见各编辑器 |
 | `/admin/settings/system` | 按稳定节点 ID 保存动态请求刷新间隔、超时、重试间隔、批处理窗口；查看期望/确认版本、重新同步；部署来源脱敏展示 |
 
-settings契约1.10.0新增site.language_catalog，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON补默认值，目录字段无需SQL迁移。历史1.8.0的theme.code继续保留，代码字体只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL；沿既有可靠投递及媒体引用保护处理CDN改址。参数和加载规则见[代码指南](code-blocks.md)。
+settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码与背景的主题 profile、`site.footer`、`site.author_tagline`和`site.glossary`，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON在读取时补默认值，文章内容和术语匹配结果不进入设置或正文快照。顶层`theme`是活动主题的兼容投影，权威分主题值在`theme_options[themeId]`。主题表单见[主题设置指南](theme-settings.md)，代码字体继续只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL。参数和加载规则见[代码指南](code-blocks.md)。
 
 语言分区支持默认语言和中文前缀修改；标志小按钮打开可搜索国旗/自定义标志弹窗，“添加语言”分备选和自定义。只有默认语言可留空前缀，更换默认值不批量修改已有文章地址。已有本语言程序包显示“本语言界面”，只有缺包项选择界面回退。被内容使用的语言不可删除，可禁用；新增语言不自动翻译正文。完整约束见[多语言指南](../architecture/multilingual-content.md)，更改后仍需点击“保存更改”并等待节点确认。
 
@@ -33,12 +33,12 @@ settings契约1.10.0新增site.language_catalog，沿用PATCH /v1/admin/settings
 | --- | --- |
 | GET/PATCH `/v1/admin/captcha` | 独立验证码修订、提供方与写入式密钥、用途规则、API Key策略，见[指南](captcha.md) |
 | GET `/v1/admin/settings` | 当前站点/主题值、source_epoch、revision、节点状态 |
-| PATCH `/v1/admin/settings` | `{expected_revision, value: {site, theme}}` 保存整份配置 |
+| PATCH `/v1/admin/settings` | `{expected_revision, value: {site, theme, theme_options}}` 保存整份配置；活动主题投影由后端按 `extensions.theme` 重算 |
 | GET `/v1/admin/frontend-nodes` | 已配置的节点、各自策略与状态 |
 | GET/PATCH `/v1/admin/frontend-nodes/{node_id}/cache-policy` | 读取/以 expected_revision 保存该节点策略 |
 | POST `/v1/admin/frontend-nodes/{node_id}/sync` | 重发当前版本；若派生媒体 URL 变化则发布新的公共设置修订 |
 
-公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以当前settings1.15.0生成契约为准；被内容使用的语言移除为42292，导航路径冲突为42294。公共value包含site/theme与后端派生的icon_urls；客户端映射不作为保存事实源。Node内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
+公开响应保持 success/code/msg/data 和真实状态码。401/403 表示身份/权限/CSRF，409 表示修订冲突，422 表示字段无效。完整字段/约束以当前settings1.25.0生成契约为准；被内容使用的语言移除为42292，导航路径冲突为42294。公共value包含site、活动 theme、theme_options 与后端派生的icon_urls；客户端映射不作为保存事实源。Node内部接收路径为 `POST /internal/settings/apply`，不供浏览器使用。
 
 ## 初次启动与配置
 
@@ -105,6 +105,12 @@ settings.directory/
 插件管理合并已登记前端包与后端单入口插件，展示来源、版本和作者，使用同一extensions.disabled_plugins保存启停偏好。后端目录由部署命令写入私有_backend_plugins，不能由浏览器设置修改；PublicSettings.shortcodes仅投影启用的代码模板及用户已应用模板。普通设置保存由服务端按开关重算目录，拒绝伪造代码模板。
 
 后端代码与登记目录不一致时显示部署提示；重新启用需先完成同步，依赖须同时满足。验证码提供方也纳入引用提示和实际服务端启停守卫。操作流程和开发接口见[后端插件](backend-plugins.md)，实际验收见[本轮记录](../handoff/backend-plugins-verification.md)。
+
+## 页脚、作者格言与术语提示（2026-11-10）
+
+站点设置新增版权说明、最多 8 个有稳定 ID 的页脚链接和作者格言。链接只接受站内/HTTP(S) 安全地址，空名称或空地址在后端校验时拒绝；页脚不执行自定义 HTML。作者格言留空时沿用站点简介，页脚版权留空时使用“© 年份 作者 · 站点名称”。
+
+“术语提示”只控制正文中的提示行为：自动匹配开关、每页最多提示数（1 至 100）和弹层内容来源（简短提示或完整词条说明）。词条本身在 `/admin/glossary` 维护，文章接口只返回实际命中的已发布词条；未命中文章返回空数组。正文仍是原缓存，空闲后才按内容 ID 和修订加载，详见[术语表指南](glossary.md)。
 
 ## 搜索发现设置（2026-11-09）
 

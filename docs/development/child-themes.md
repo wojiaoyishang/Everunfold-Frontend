@@ -1,6 +1,6 @@
 # 子主题开发与启用
 
-版本：child-themes-5，2026-11-09。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。
+版本：child-themes-6，2026-11-10。规范见[父子主题](../architecture/frontend-themes.md)；可直接参考src/themes/paper。默认主题始终为argon。主题自己的后台设置面板现也归属主题目录，见[主题设置指南](theme-settings.md)与ADR0100。
 
 ## 主题卡片与开发者信息
 
@@ -58,15 +58,18 @@ export default css;
 
 ## 从Paper开始
 
-Paper 2.0.0是纯CSS子主题，只有两个源文件：
+Paper 是纯CSS子主题，前台展示源文件很小；2026-11-10 起另有自己的后台设置面板：
 
 ```text
 src/themes/paper/
-  theme.ts    # 身份、版本、父主题及样式声明
-  styles.ts   # 背景、导航、短横幅、细边框和正文行距
+  theme.ts             # 身份、版本、父主题及样式声明
+  styles.ts            # 背景、导航、短横幅、细边框和正文行距
+  theme-settings.tsx   # Paper 自己的后台设置，当前为纸张底色
 ```
 
-复制这个目录为src/themes/my-theme/，把theme.ts的id和styles.ts选择器中的paper一并改成my-theme，即可开始二次开发；parent继续使用argon。颜色、圆角、深浅色和动效偏好沿用父主题变量，无需复制完整布局或注册组件。只想叠加Paper样式时，也可以新建主题并声明parent: "paper"。
+复制这个目录为src/themes/my-theme/，把theme.ts的id、styles.ts选择器中的paper和theme-settings.tsx的字段命名一并改成my-theme，即可开始二次开发；parent继续使用argon。颜色、圆角、深浅色和动效偏好沿用父主题变量，无需复制完整布局或注册组件。只想叠加Paper样式时，也可以新建主题并声明parent: "paper"。
+
+主题表现默认值和阅读选项必须保存在自己的 `theme_options[id]` profile，不要写回站点全局字段。公共宿主 `/admin/settings/theme` 负责主题切换和动态加载 `src/themes/<id>/theme-settings.tsx`；没有该文件的主题显示明确不可用提示。主题设置保存仍走现有设置修订、媒体校验和可靠投递。
 
 Paper不再提供public.hero包装、paper.people模板和paper.footer-note钩子组件。若其他子主题引用了这些旧实现，应改为继承Argon，或在自己的目录提供需要的实现；因此版本升为2.0.0。组件、模板和插入钩子的扩展方式见下文，生产构建中的多级组合测试放在tools/fixtures/extensions.mjs，不作为Paper的启动代码。实际效果与检查见[精简验收](../handoff/paper-starter-verification.md)。
 
@@ -165,7 +168,7 @@ npm start从var/cache/build/theme-catalog.json报告部署元数据。发布时�
 
 ## Paper 2.0.1与字体
 
-Paper仍只有theme.ts和styles.ts，完整继承组件、模板和钩子。以特色图中的纸白卡片、浅灰背景、左正文右侧栏、对齐的左侧横幅和清楚留白为实际布局；颜色随继承的color-scheme切换，保留主题色和阅读偏好，支持深色/纯黑。桌面工具合为小竖栏，手机使用底部横向工具条；阅读设置在上方打开，进度使用同一灰色表面填充。相邻/相关文章改为文字卡片，去除背景图覆盖，封面和标题分开呈现。
+Paper的展示仍由theme.ts和styles.ts构成，完整继承组件、模板和钩子；theme-settings.tsx 只提供自己的纸张底色，不复制 Argon 表单。以特色图中的纸白卡片、浅灰背景、左正文右侧栏、对齐的左侧横幅和清楚留白为实际布局；颜色随继承的color-scheme切换，保留主题色和阅读偏好，支持深色/纯黑。桌面工具合为小竖栏，手机使用底部横向工具条；阅读设置在上方打开，进度使用同一灰色表面填充。相邻/相关文章改为文字卡片，去除背景图覆盖，封面和标题分开呈现。
 
 字体通过src/core/fonts的defineFont注册，不限定由插件提供。ThemeDefinition.fonts与typography分别声明字体和正文/标题/代码角色，父子继承和上传字体优先级见[统一字体指南](font-registration.md)。Paper实际注册paper.ui系统栈，代码使用system.mono，没有附带额外下载。
 

@@ -1,5 +1,14 @@
 # 前端交接状态
 
+## 最新交付：术语 Tooltip、公开术语表与主题私有设置（2026-11-10）
+
+- 后端 f276040/2fe2b4b、前端 0a82fce。新增 `everunfold.glossary` 插件、glossary 1.0.0、settings 1.25.0 和 `0036_glossary_plugin`；文章级接口只返回对应公开文章实际命中的已发布词条，未命中返回空数组。正文继续使用原缓存，前端空闲时才加载术语组件，按 API/内容 ID/修订缓存命中与空结果 5 分钟；代码、链接、公式、隐藏文字不装饰。见[指南](../development/glossary.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)与[验收](glossary-theme-settings-verification.md)。
+- `/admin/glossary` 支持标题/别名/语言/简短提示/Markdown 详情/草稿发布归档、幂等和修订冲突；公开 `/glossary` 可搜索，详情为 `/glossary/{slug}`。Tooltip 支持点击、悬停、键盘和 Escape 回焦，最多提示数默认 20。
+- 主题设置宿主只保留主题切换；Argon 表单迁到 `src/themes/argon/theme-settings.tsx`，Paper 使用自己的 `src/themes/paper/theme-settings.tsx`。`theme_options[themeId]` 独立保存，顶层 `theme` 为活动兼容投影。站点设置新增作者格言/结构化页脚/术语提示；文章显示、首页默认类型与数量、目录序号、Paper 底色已接前台。见[主题设置指南](../development/theme-settings.md)与[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)。
+- 后端完整真实库 337 项/416.03 秒、术语专项 2 项/5.68 秒、Ruff 与 338 文件格式检查通过，生产代码 mypy 222 文件通过；全仓 mypy 仍有既有测试类型债务，未伪报通过。前端 `npm run check` 345 项通过，隔离生产构建和后台路由检查通过。
+- 远程文章命中“代码”时装饰 20 项，无命中文章装饰 0；API 分别返回命中词条与空数组。桌面/390px 提示和术语目录已实际看图，Escape 回焦及手机无横向溢出通过。QA 词条已归档，文章未改；当前内置浏览器没有 Everunfold 管理会话，因此登录态后台表单的实页视觉检查留给下一次会话。
+- 插件目录已同步，公开 API 200；迁移主库/测试库已应用。仅本地提交，未 push；未做文章迁移、长期负载、全浏览器/读屏器全矩阵或超大术语库压测。
+
 ## 最新交付：后端插件 HTTP 路由（2026-11-10）
 
 - 后端2f6ae8b；新增registry.routes.register(APIRouter)，保留plugin.py单入口、自由文件布局和原生路径/查询/请求模型/依赖，统一/v1/plugins/<插件ID>。默认Session，可显式公开或现有权限/Key保护，all默认范围；SDK提供PluginRequest和标准响应。见[指南](../development/backend-plugin-routes.md)、[ADR0098](../decisions/0098-backend-plugin-http-routes.md)与[验收](backend-plugin-routes-verification.md)。
