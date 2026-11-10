@@ -1,0 +1,190 @@
+.banner {
+  --feedback-tint: var(--accent);
+  position: fixed;
+  inset-inline: 0;
+  top: var(--header-block-size, var(--header-height, 71px));
+  z-index: 70;
+  overflow: hidden;
+  color: var(--text-strong);
+  background: color-mix(in srgb, var(--surface) 97%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 16%, var(--line));
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+  animation: feedback-in 240ms var(--motion-ease, ease-out) both;
+}
+.banner[data-status="error"] {
+  --feedback-tint: var(--danger, #b54343);
+}
+.banner[data-state="closing"] {
+  pointer-events: none;
+  animation: feedback-out 170ms ease-in both;
+}
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  box-sizing: border-box;
+  min-height: 54px;
+  max-width: 1200px;
+  padding: 10px 22px 12px;
+  margin-inline: auto;
+}
+.face {
+  flex-shrink: 0;
+  color: var(--feedback-tint);
+  font-size: 20px;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.message {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.65;
+}
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+}
+.actions:empty {
+  display: none;
+}
+.retry,
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+}
+.retry {
+  gap: 6px;
+  padding: 5px 9px;
+  font: inherit;
+  font-size: 12px;
+}
+.close {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+  color: var(--muted);
+}
+.retry:hover,
+.close:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.retry:focus-visible,
+.close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.retry svg,
+.close svg {
+  width: 16px;
+  height: 16px;
+}
+.progress {
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--feedback-tint) 10%, transparent);
+}
+.progress > span {
+  display: block;
+  height: 100%;
+  background: var(--feedback-tint);
+  transform-origin: left;
+}
+.banner[data-status="checking"] .progress > span,
+.banner[data-status="sending"] .progress > span {
+  width: 38%;
+  animation: feedback-progress 1400ms ease-in-out infinite;
+}
+.banner[data-status="error"] .progress > span {
+  opacity: 0.65;
+}
+.banner[data-status="success"] .progress > span {
+  animation: feedback-complete 260ms ease-out both;
+}
+@keyframes feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes feedback-out {
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@keyframes feedback-progress {
+  from {
+    transform: translateX(-110%);
+  }
+  to {
+    transform: translateX(375%);
+  }
+}
+@keyframes feedback-complete {
+  from {
+    transform: scaleX(0.65);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.banner[data-motion="reduced"],
+.banner[data-motion="reduced"] .progress > span {
+  animation: none;
+}
+.banner[data-motion="reduced"][data-state="closing"] {
+  opacity: 0;
+}
+.banner[data-motion="reduced"][data-status="checking"] .progress > span,
+.banner[data-motion="reduced"][data-status="sending"] .progress > span {
+  width: 100%;
+  opacity: 0.5;
+  background: repeating-linear-gradient(
+    120deg,
+    var(--feedback-tint) 0 7px,
+    transparent 7px 12px
+  );
+}
+@media (max-width: 600px) {
+  .inner {
+    gap: 9px;
+    min-height: 50px;
+    padding: 9px 12px 11px;
+  }
+  .face {
+    font-size: 15px;
+  }
+  .message {
+    flex: 1;
+    font-size: 12px;
+  }
+  .actions {
+    gap: 2px;
+  }
+  .retry {
+    gap: 4px;
+    padding-inline: 5px;
+  }
+  .close {
+    width: 28px;
+    height: 28px;
+  }
+}

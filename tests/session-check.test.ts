@@ -30,6 +30,42 @@ function deferred<T>() {
 }
 const flush = () => new Promise<void>((resolve) => setImmediate(resolve));
 
+test("logout invalidation cancels stale checks and clears offline identity recovery", async () => {
+  const states: SessionView[] = [];
+  const stale = deferred<AuthSessionState>();
+  const fresh = deferred<AuthSessionState>();
+  let reads = 0;
+  const checker = createSessionCheck(
+    async () => {
+      reads++;
+      if (reads === 1)
+        return {
+          ...admin,
+          expires_at: new Date(Date.now() + 60000).toISOString(),
+        };
+      return reads === 2 ? stale.promise : fresh.promise;
+    },
+    (state) => states.push(state),
+  );
+  await checker.check();
+  const old = checker.check(true);
+  await flush();
+  checker.invalidate();
+  const boundary = states.length;
+  const next = checker.check();
+  await flush();
+  assert.equal(reads, 3);
+  stale.resolve(admin);
+  await old;
+  fresh.reject(new RequestError("network"));
+  await next;
+  assert.ok(states.slice(boundary).every((state) => state.phase !== "ready"));
+  const latest = states.at(-1);
+  assert.equal(latest?.phase, "failed");
+  if (latest?.phase === "failed") assert.equal(latest.previous, undefined);
+  checker.dispose();
+});
+
 test("offline revalidation keeps an already-open private editor until expiry; new access and explicit revocation fail closed", async () => {
   const states: SessionView[] = [];
   let failure: RequestError | null = null;

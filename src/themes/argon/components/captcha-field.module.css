@@ -41,6 +41,7 @@
   height: auto;
 }
 .field input {
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
   padding: 10px 12px;

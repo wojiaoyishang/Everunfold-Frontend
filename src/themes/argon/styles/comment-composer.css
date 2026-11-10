@@ -3,10 +3,6 @@
   padding: 30px 38px 22px;
   scroll-margin-top: 95px;
 }
-.composer-captcha {
-  margin-top: 22px;
-  max-width: 360px;
-}
 .composer-heading {
   display: flex;
   gap: 13px;
@@ -196,6 +192,7 @@
 }
 .composer-identity input,
 .composer-extra-fields input {
+  box-sizing: border-box;
   width: 100%;
   margin-top: 8px;
   padding: 10px 12px;
@@ -241,12 +238,6 @@
 }
 .composer-submit-row button:disabled {
   opacity: 0.5;
-}
-.composer-status {
-  min-height: 16px;
-  margin: 12px 0 0;
-  color: var(--accent);
-  font-size: 12px;
 }
 .form-error {
   display: block;

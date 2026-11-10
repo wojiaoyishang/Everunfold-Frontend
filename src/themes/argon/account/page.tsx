@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/core/auth/use-session";
+import { authFailureMessage } from "@/core/auth/session";
 import { canAccessAdmin } from "@/core/accounts/permissions";
 import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
 import {
@@ -23,6 +24,7 @@ import { Icon } from "../components/icon";
 import { AccountProfileEditor } from "./profile";
 import { AccountSecurity } from "./security";
 import { AccountKeys } from "./keys";
+import { AccountNavigationProvider, useAccountNavigation } from "./unsaved";
 
 export function AccountPage({ baseUrl }: { baseUrl: string }) {
   const { state, check, accept } = useSession(baseUrl);
@@ -90,7 +92,9 @@ function ConfirmedAccount({
   const preferences = useAdminPreferences(
     adminPreferencesKey(baseUrl, user.id),
   );
-  const action = useAccountAction();
+  const action = useAccountAction((failure) =>
+    authFailureMessage(failure, "logout"),
+  );
   useEffect(() => {
     const controller = new AbortController();
     readAccountProfile(baseUrl, { signal: controller.signal })
@@ -109,128 +113,184 @@ function ConfirmedAccount({
     <AdminRequestContext value={{ baseUrl, csrfToken: session.csrf_token }}>
       <AdminAccountContext value={user}>
         <AdminLanguageCatalog>
-          <div
-            className="admin-root account-root"
-            data-surface="admin"
-            data-admin-mode={preferences.preferences.mode}
-            data-admin-motion={preferences.preferences.motion}
-          >
-            <header className="account-header">
-              <RouteLink href="/" className="account-brand">
-                <Icon name="leaf" /> Everunfold
-              </RouteLink>
-              <nav className="account-site-actions" aria-label={t("站点导航")}>
-                <RouteLink href="/" className="admin-button">
-                  <Icon name="arrow-left" />
-                  <UiText text="返回站点" />
+          <AccountNavigationProvider>
+            <div
+              className="admin-root account-root"
+              data-surface="admin"
+              data-admin-mode={preferences.preferences.mode}
+              data-admin-motion={preferences.preferences.motion}
+            >
+              <header className="account-header">
+                <RouteLink href="/" className="account-brand">
+                  <Icon name="leaf" /> Everunfold
                 </RouteLink>
-                {canAccessAdmin(user) && (
-                  <RouteLink href="/admin" className="admin-button">
-                    <UiText text="管理后台" />
+                <nav
+                  className="account-site-actions"
+                  aria-label={t("站点导航")}
+                >
+                  <RouteLink href="/" className="admin-button">
+                    <Icon name="arrow-left" />
+                    <UiText text="返回站点" />
                   </RouteLink>
-                )}
-              </nav>
-              <nav
-                className="account-personal-actions"
-                aria-label={t("账号导航")}
-              >
-                <InterfaceLanguage />
-                <Button
-                  className="admin-icon-button"
-                  aria-label={t("退出登录")}
-                  disabled={action.busy}
-                  onClick={() =>
-                    void action.run(async (signal) => {
-                      const response = await logout(
-                        baseUrl,
-                        session.csrf_token,
-                        { signal },
-                      );
-                      if (!signal.aborted) onSession(response.data);
-                    })
-                  }
+                  {canAccessAdmin(user) && (
+                    <RouteLink href="/admin" className="admin-button">
+                      <UiText text="管理后台" />
+                    </RouteLink>
+                  )}
+                </nav>
+                <nav
+                  className="account-personal-actions"
+                  aria-label={t("账号导航")}
                 >
-                  <Icon name="logout" />
-                </Button>
-              </nav>
-            </header>
-            <main className="account-container">
-              <div className="account-page-heading">
-                <h1>
-                  <UiText text="账号中心" />
-                </h1>
-                <p>{user.display_name || user.username}</p>
-              </div>
-              <nav className="account-tabs" aria-label={t("账号设置")}>
-                <Button
-                  aria-pressed={tab === "profile"}
-                  onClick={() => setTab("profile")}
-                >
-                  <UiText text="个人资料" />
-                </Button>
-                <Button
-                  aria-pressed={tab === "security"}
-                  onClick={() => setTab("security")}
-                >
-                  <UiText text="账号安全" />
-                </Button>
-                <Button
-                  aria-pressed={tab === "keys"}
-                  onClick={() => setTab("keys")}
-                >
-                  API Key
-                </Button>
-              </nav>
-              {error ? (
-                <div className="account-card" role="alert">
-                  <UiText text={error} />
-                  <Button
-                    className="admin-button"
-                    onClick={() => setReload((value) => value + 1)}
-                  >
-                    <UiText text="重新读取" />
-                  </Button>
+                  <InterfaceLanguage />
+                  <AccountLogoutControl
+                    busy={action.busy}
+                    onLogout={() =>
+                      void action.run(async (signal) => {
+                        const response = await logout(
+                          baseUrl,
+                          session.csrf_token,
+                          { signal },
+                        );
+                        if (!signal.aborted) onSession(response.data);
+                      })
+                    }
+                  />
+                </nav>
+              </header>
+              <main className="account-container">
+                <div className="account-page-heading">
+                  <h1>
+                    <UiText text="账号中心" />
+                  </h1>
+                  <p>{user.display_name || user.username}</p>
                 </div>
-              ) : profile ? (
-                <>
-                  <div className="account-panel" hidden={tab !== "profile"}>
-                    <AccountProfileEditor
-                      profile={profile}
-                      onSaved={(value) => {
-                        setProfile(value);
-                        onRefresh();
-                      }}
-                    />
+                <nav className="account-tabs" aria-label={t("账号设置")}>
+                  <AccountTab
+                    active={tab === "profile"}
+                    onSelect={() => setTab("profile")}
+                  >
+                    <UiText text="个人资料" />
+                  </AccountTab>
+                  <AccountTab
+                    active={tab === "security"}
+                    onSelect={() => setTab("security")}
+                  >
+                    <UiText text="账号安全" />
+                  </AccountTab>
+                  <AccountTab
+                    active={tab === "keys"}
+                    onSelect={() => setTab("keys")}
+                  >
+                    API Key
+                  </AccountTab>
+                </nav>
+                {error ? (
+                  <div className="account-card" role="alert">
+                    <UiText text={error} />
+                    <Button
+                      className="admin-button"
+                      onClick={() => setReload((value) => value + 1)}
+                    >
+                      <UiText text="重新读取" />
+                    </Button>
                   </div>
-                  <div className="account-panel" hidden={tab !== "security"}>
-                    <AccountSecurity
-                      profile={profile}
-                      onChanged={(value) => {
-                        onSession(value);
-                        setReload((revision) => revision + 1);
-                      }}
-                    />
-                  </div>
-                  <div className="account-panel" hidden={tab !== "keys"}>
-                    <AccountKeys
-                      forcedPassword={profile.must_change_password}
-                    />
-                  </div>
-                </>
-              ) : (
-                <p role="status">
-                  <UiText text="正在读取资料…" />
-                </p>
-              )}
-              {action.message && (
-                <p role="status">
-                  <UiText text={action.message} />
-                </p>
-              )}
-            </main>
-          </div>
+                ) : profile ? (
+                  <>
+                    {tab === "profile" && (
+                      <div className="account-panel">
+                        <AccountProfileEditor
+                          profile={profile}
+                          onSaved={(value) => {
+                            setProfile(value);
+                            onRefresh();
+                          }}
+                        />
+                      </div>
+                    )}
+                    {tab === "security" && (
+                      <div className="account-panel">
+                        <AccountSecurity
+                          profile={profile}
+                          onChanged={(value) => {
+                            onSession(value);
+                            setReload((revision) => revision + 1);
+                          }}
+                        />
+                      </div>
+                    )}
+                    {tab === "keys" && (
+                      <div className="account-panel">
+                        <AccountKeys
+                          forcedPassword={profile.must_change_password}
+                        />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p role="status">
+                    <UiText text="正在读取资料…" />
+                  </p>
+                )}
+                {action.message && (
+                  <p role="status">
+                    <UiText text={action.message} />
+                  </p>
+                )}
+              </main>
+            </div>
+          </AccountNavigationProvider>
         </AdminLanguageCatalog>
       </AdminAccountContext>
     </AdminRequestContext>
+  );
+}
+
+function AccountLogoutControl({
+  busy,
+  onLogout,
+}: {
+  busy: boolean;
+  onLogout: () => void;
+}) {
+  const t = useT();
+  const navigation = useAccountNavigation();
+  return (
+    <Button
+      className="admin-icon-button"
+      aria-label={t("退出登录")}
+      disabled={busy || navigation?.busy}
+      onClick={() => {
+        if (navigation) navigation.request(onLogout);
+        else onLogout();
+      }}
+    >
+      <Icon name="logout" />
+    </Button>
+  );
+}
+
+function AccountTab({
+  active,
+  onSelect,
+  children,
+}: {
+  active: boolean;
+  onSelect: () => void;
+  children: ReactNode;
+}) {
+  const navigation = useAccountNavigation();
+  return (
+    <Button
+      aria-pressed={active}
+      disabled={navigation?.busy}
+      onClick={() => {
+        if (active) return;
+        if (navigation) navigation.request(onSelect);
+        else onSelect();
+      }}
+    >
+      {children}
+    </Button>
   );
 }

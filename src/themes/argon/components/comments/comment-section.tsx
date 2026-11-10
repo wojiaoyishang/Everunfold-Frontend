@@ -12,9 +12,13 @@ import { Icon } from "../icon";
 import { CommentComposer } from "./comment-composer";
 import { CommentItem } from "./comment-item";
 import { exampleComments } from "./examples";
-import { useCaptcha, captchaFailure } from "@/core/captcha/use-captcha";
-import { submitReaderComment } from "@/core/contracts/captcha";
+import { useCaptcha } from "@/core/captcha/use-captcha";
+import {
+  submitReaderComment,
+  type CaptchaAnswer,
+} from "@/core/contracts/captcha";
 import { RequestError } from "@/core/http/request";
+import { commentSubmissionFailure } from "./submission";
 import { useReaderData } from "../reader-data";
 import { useCommentLikes } from "./use-comment-likes";
 import {
@@ -51,6 +55,7 @@ export function CommentSection({
     "comment",
     contentId,
     Boolean(contentId && open && interactive),
+    { lazy: true },
   );
   const submission = useRef<{ fingerprint: string; id: string } | null>(null);
   const [local, setLocal] = useState<CommentEntry[]>([]);
@@ -62,7 +67,6 @@ export function CommentSection({
   const [requestedPage, setRequestedPage] = useState(initialPage);
   const [continuous, setContinuous] = useState(false);
   const [target, setTarget] = useState<{ id: string } | null>(null);
-  const [notice, setNotice] = useState("");
   const initialAnchor = useRef(false);
   const entries = useMemo(
     () =>
@@ -111,8 +115,12 @@ export function CommentSection({
     setRequestedPage(destination);
     setTarget({ id: `comment-${id}` });
   }
-  async function add(draft: Omit<CommentDraft, "email">) {
-    if (!interactive || !open) return false;
+  async function add(
+    draft: Omit<CommentDraft, "email">,
+    answer?: CaptchaAnswer,
+    signal?: AbortSignal,
+  ) {
+    if (!interactive || !open) throw new RequestError("http", 403, 40388);
     if (contentId) {
       const parentId =
         reply.active && reply.entry?.origin === "history"
@@ -122,32 +130,29 @@ export function CommentSection({
       if (submission.current?.fingerprint !== fingerprint)
         submission.current = { fingerprint, id: randomUUID() };
       try {
-        await submitReaderComment(store.baseUrl, {
-          operation_id: submission.current.id,
-          content_id: contentId,
-          client_id: captcha.clientId,
-          parent_id: parentId,
-          author: draft.author,
-          body: draft.body,
-          captcha: captcha.response,
-          read_receipt: readReceipt,
-        });
-        setNotice("评论已提交，等待审核。通过审核后会公开显示。");
+        await submitReaderComment(
+          store.baseUrl,
+          {
+            operation_id: submission.current.id,
+            content_id: contentId,
+            client_id: captcha.clientId,
+            parent_id: parentId,
+            author: draft.author,
+            body: draft.body,
+            captcha: answer,
+            read_receipt: readReceipt,
+          },
+          { signal },
+        );
+        if (signal?.aborted) throw new RequestError("cancelled");
         setReply((current) => ({ ...current, active: false }));
         submission.current = null;
-        void captcha.refresh();
-        return true;
+        return {
+          accepted: true,
+          message: "评论已提交，等待审核。通过审核后会公开显示。",
+        };
       } catch (reason) {
-        setNotice(
-          reason instanceof RequestError && reason.code === 40388
-            ? "此内容已关闭评论或阅读验证已过期，请刷新页面。"
-            : reason instanceof RequestError &&
-                [40386, 40387, 40986, 50386, 42986].includes(reason.code ?? 0)
-              ? captchaFailure(reason)
-              : "暂时无法确认提交结果。输入已保留，可以重试。",
-        );
-        void captcha.refresh();
-        return false;
+        return { accepted: false, message: commentSubmissionFailure(reason) };
       }
     }
     const entry: CommentEntry = {
@@ -167,8 +172,10 @@ export function CommentSection({
     );
     setTarget({ id: `comment-${entry.id}` });
     setReply((current) => ({ ...current, active: false }));
-    setNotice("已加入本页预览。这条留言没有发布到网站。");
-    return true;
+    return {
+      accepted: true,
+      message: "已加入本页预览。这条留言没有发布到网站。",
+    };
   }
   return (
     <>
@@ -290,7 +297,6 @@ export function CommentSection({
                   ? () => {
                       setReply({ entry, active: true });
                       setTarget({ id: "comment-composer" });
-                      setNotice("");
                     }
                   : undefined
               }
@@ -357,7 +363,6 @@ export function CommentSection({
             setReply((current) => ({ ...current, active: false }))
           }
           onAdd={add}
-          notice={notice}
         />
       )}
     </>

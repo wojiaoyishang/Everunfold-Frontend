@@ -28,6 +28,8 @@ export interface ConfirmDialogProps {
   busyLabel?: string;
   busy?: boolean;
   confirmDisabled?: boolean;
+  /** Opt in for data-entry dialogs; destructive confirmations keep explicit buttons. */
+  submitOnEnter?: boolean;
   error?: string;
   /** Preserve the initiating control when an async preflight temporarily disabled it. */
   returnFocus?: RefObject<HTMLElement | null>;
@@ -63,6 +65,7 @@ function ConfirmDialogSurface({
   busyLabel = "正在处理…",
   busy = false,
   confirmDisabled = false,
+  submitOnEnter = false,
   error,
   returnFocus,
   auxiliaryAction,
@@ -123,6 +126,18 @@ function ConfirmDialogSurface({
         event.preventDefault();
         event.stopPropagation();
         dismiss();
+      }}
+      onKeyDown={(event) => {
+        if (
+          submitOnEnter &&
+          event.key === "Enter" &&
+          !event.nativeEvent.isComposing &&
+          event.target instanceof HTMLInputElement
+        ) {
+          event.preventDefault();
+          event.stopPropagation();
+          void confirm();
+        }
       }}
       onClick={(event) => {
         // Portal events must never dismiss the underlying attachment dialog.

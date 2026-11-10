@@ -26,15 +26,16 @@ export function useCaptcha(
   action: ChallengeRequest["action"],
   contentId?: string,
   enabled = true,
+  { lazy = false }: { lazy?: boolean } = {},
 ) {
   const [clientId] = useState(randomUUID);
   const [challenge, setChallenge] = useState<CaptchaChallenge | null>(null);
   const [answer, setAnswer] = useState("");
-  const [pending, setPending] = useState(true);
+  const [pending, setPending] = useState(!lazy && enabled);
   const [error, setError] = useState("");
   const request = useRef<AbortController | null>(null);
-  const refresh = useCallback(async () => {
-    if (!enabled) return;
+  const prepare = useCallback(async () => {
+    if (!enabled) throw new RequestError("cancelled");
     request.current?.abort();
     const controller = new AbortController();
     request.current = controller;
@@ -47,26 +48,44 @@ export function useCaptcha(
         { action, content_id: contentId, client_id: clientId },
         { signal: controller.signal },
       );
-      if (!controller.signal.aborted) setChallenge(response.data);
+      if (controller.signal.aborted) throw new RequestError("cancelled");
+      setChallenge(response.data);
+      return response.data;
     } catch (reason) {
       if (!controller.signal.aborted) {
         setChallenge(null);
         setError(captchaFailure(reason));
       }
+      throw reason;
     } finally {
       if (!controller.signal.aborted) setPending(false);
     }
   }, [baseUrl, action, contentId, clientId, enabled]);
+  const refresh = useCallback(async () => {
+    try {
+      return await prepare();
+    } catch {
+      // Existing inline widgets render the controller error rather than reject.
+      return undefined;
+    }
+  }, [prepare]);
+  const reset = useCallback(() => {
+    request.current?.abort();
+    setChallenge(null);
+    setAnswer("");
+    setPending(false);
+    setError("");
+  }, []);
   useEffect(() => {
     let disposed = false;
     queueMicrotask(() => {
-      if (!disposed) void refresh();
+      if (!disposed && !lazy && enabled) void refresh();
     });
     return () => {
       disposed = true;
       request.current?.abort();
     };
-  }, [refresh]);
+  }, [refresh, lazy, enabled]);
   useEffect(() => {
     if (!enabled || !challenge?.required) return;
     const timer = setTimeout(
@@ -95,9 +114,17 @@ export function useCaptcha(
     error,
     setError,
     refresh,
+    /** Explicit demand loading rejects failures; an absent challenge is never a pass. */
+    prepare,
+    /** Dismissed challenges and answers do not survive in the background. */
+    reset,
     response,
     ready:
-      !pending && !error && !!challenge && (!challenge.required || !!response),
+      enabled &&
+      !pending &&
+      !error &&
+      !!challenge &&
+      (!challenge.required || !!response),
   };
 }
 export type CaptchaController = ReturnType<typeof useCaptcha>;

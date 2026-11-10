@@ -33,9 +33,10 @@ export function createSessionCheck(
         if (controller.signal.aborted) return;
         try {
           const session = checkedSession(await read(controller.signal), admin);
-          lastReady = session;
-          if (!disposed && !controller.signal.aborted)
+          if (!disposed && !controller.signal.aborted) {
+            lastReady = session;
             publish({ phase: "ready", session });
+          }
         } catch (error) {
           // Keep an already-open editor available for local recovery on a network outage.
           // No cached identity authorizes a new page or a server write; 401/403 still fail closed.
@@ -75,6 +76,11 @@ export function createSessionCheck(
           error: error ?? new RequestError("network"),
           previous: lastReady ?? undefined,
         });
+    },
+    invalidate() {
+      cancel();
+      lastReady = null;
+      if (!disposed) publish({ phase: "checking" });
     },
     dispose() {
       disposed = true;

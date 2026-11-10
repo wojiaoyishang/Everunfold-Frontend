@@ -14,6 +14,7 @@ import { loginReturnPath } from "@/core/auth/routes";
 import { RequestError } from "@/core/http/request";
 import { logout } from "@/core/contracts/auth";
 import { clearRecentTaskIds } from "@/core/tasks/recent-task";
+import { announceSessionChange } from "@/core/auth/session-events";
 
 /** One authenticated session owner for the persistent private workspace. */
 export function useAdminAccess(baseUrl: string) {
@@ -76,7 +77,10 @@ export function useAdminAccess(baseUrl: string) {
         throw new RequestError("invalid");
       clearRecovery();
       clearRecentTaskIds(baseUrl, state.session.user?.id);
-      if (!controller.signal.aborted) router.replace("/login");
+      if (!controller.signal.aborted) {
+        announceSessionChange(baseUrl, true);
+        router.replace("/login");
+      }
     } catch (error) {
       if (!controller.signal.aborted) {
         fail(error);
