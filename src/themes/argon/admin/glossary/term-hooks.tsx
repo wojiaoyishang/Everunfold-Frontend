@@ -37,6 +37,21 @@ type HookItem = HookList["items"][number];
 type HookFields = GlossaryContract["hook_create"]["fields"];
 type Target = NonNullable<HookFields["targets"]>[number];
 
+export type PendingGlossaryHook = {
+  hookId: string;
+  operationId: string;
+  fields: HookFields;
+};
+
+type HookEntry = {
+  id: string;
+  revision: number | null;
+  status: HookItem["status"];
+  fields: HookFields;
+  operationId?: string;
+  pending: boolean;
+};
+
 const blankFields = (): HookFields => ({
   mode: "selector",
   selector: "#avatar",
@@ -46,6 +61,18 @@ const blankFields = (): HookFields => ({
   enabled: true,
   priority: 0,
 });
+
+function entryFields(item: HookItem): HookFields {
+  return {
+    mode: item.mode,
+    selector: item.selector,
+    script: item.script,
+    scope: item.scope,
+    targets: item.targets,
+    enabled: item.enabled,
+    priority: item.priority,
+  };
+}
 
 function failure(error: unknown, t: ReturnType<typeof useT>) {
   if (error instanceof RequestError) {
@@ -58,16 +85,18 @@ function failure(error: unknown, t: ReturnType<typeof useT>) {
 export function GlossaryTermHooks({
   termId,
   writable,
+  onPendingHooksChange,
 }: {
-  termId: string;
+  termId: string | null;
   writable: boolean;
+  onPendingHooksChange?: (hooks: PendingGlossaryHook[]) => void;
 }) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const actor = useAdminAccount();
   const canUseScript = actor?.role === "admin";
   const t = useT();
-  const [items, setItems] = useState<HookItem[]>([]);
-  const [selected, setSelected] = useState<HookItem | null>(null);
+  const [items, setItems] = useState<HookEntry[]>([]);
+  const [selected, setSelected] = useState<HookEntry | null>(null);
   const [creating, setCreating] = useState(false);
   const [fields, setFields] = useState<HookFields>(blankFields);
   const [baseline, setBaseline] = useState(() => JSON.stringify(blankFields()));
@@ -81,8 +110,13 @@ export function GlossaryTermHooks({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const operation = useRef<{ fingerprint: string; id: string } | null>(null);
+  const editor = useRef<HTMLDivElement>(null);
 
   const load = async (signal?: AbortSignal) => {
+    if (!termId) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const response = await queryGlossaryHooks(
@@ -97,7 +131,15 @@ export function GlossaryTermHooks({
         csrfToken,
         { signal },
       );
-      setItems(response.data.items);
+      setItems(
+        response.data.items.map((item) => ({
+          id: item.id,
+          revision: item.revision,
+          status: item.status,
+          fields: entryFields(item),
+          pending: false,
+        })),
+      );
       setError("");
     } catch (cause) {
       if (!signal?.aborted) setError(failure(cause, t));
@@ -162,27 +204,59 @@ export function GlossaryTermHooks({
     setError("");
     setMessage("");
     operation.current = null;
+    requestAnimationFrame(() => {
+      editor.current?.scrollIntoView({ block: "nearest" });
+    });
   };
-  const edit = async (item: HookItem) => {
+  const publishPending = (next: HookEntry[]) => {
+    onPendingHooksChange?.(
+      next
+        .filter((item) => item.pending)
+        .map((item) => ({
+          hookId: item.id,
+          operationId: item.operationId ?? randomUUID(),
+          fields: item.fields,
+        })),
+    );
+  };
+  const edit = async (item: HookEntry) => {
+    if (item.pending) {
+      setSelected(item);
+      setCreating(false);
+      setFields(item.fields);
+      setBaseline(JSON.stringify(item.fields));
+      setError("");
+      setMessage("");
+      operation.current = null;
+      requestAnimationFrame(() => {
+        editor.current?.scrollIntoView({ block: "nearest" });
+      });
+      return;
+    }
     setSaving(true);
     try {
       const response = await readGlossaryHook(baseUrl, item.id);
-      const next = {
-        mode: response.data.mode,
-        selector: response.data.selector,
-        script: response.data.script,
-        scope: response.data.scope,
-        targets: response.data.targets,
-        enabled: response.data.enabled,
-        priority: response.data.priority,
-      } satisfies HookFields;
-      setSelected(response.data);
+      const next = entryFields(response.data);
+      const entry: HookEntry = {
+        id: response.data.id,
+        revision: response.data.revision,
+        status: response.data.status,
+        fields: next,
+        pending: false,
+      };
+      setItems((current) =>
+        current.map((value) => (value.id === entry.id ? entry : value)),
+      );
+      setSelected(entry);
       setCreating(false);
       setFields(next);
       setBaseline(JSON.stringify(next));
       setError("");
       setMessage("");
       operation.current = null;
+      requestAnimationFrame(() => {
+        editor.current?.scrollIntoView({ block: "nearest" });
+      });
     } catch (cause) {
       setError(failure(cause, t));
     } finally {
@@ -215,42 +289,73 @@ export function GlossaryTermHooks({
     ]);
     if (operation.current?.fingerprint !== fingerprint)
       operation.current = { fingerprint, id: randomUUID() };
+    if (!termId) {
+      const entry: HookEntry = {
+        id: selected?.id ?? randomUUID(),
+        revision: null,
+        status: "active",
+        fields: value,
+        operationId: selected?.operationId ?? randomUUID(),
+        pending: true,
+      };
+      const nextItems = selected
+        ? items.map((item) => (item.id === entry.id ? entry : item))
+        : [...items, entry];
+      setItems(nextItems);
+      setSelected(entry);
+      setCreating(false);
+      setFields(value);
+      setBaseline(JSON.stringify(value));
+      operation.current = null;
+      setMessage(t("页面触发将在保存术语时一并保存。"));
+      publishPending(nextItems);
+      return;
+    }
     setSaving(true);
     setError("");
     setMessage("");
     try {
-      const response = selected
-        ? await updateGlossaryHook(
-            baseUrl,
-            selected.id,
-            {
-              operation_id: operation.current.id,
-              expected_revision: selected.revision,
-              term_id: termId,
-              fields: value,
-            },
-            csrfToken,
-          )
-        : await createGlossaryHook(
-            baseUrl,
-            {
-              operation_id: operation.current.id,
-              hook_id: randomUUID(),
-              term_id: termId,
-              fields: value,
-            },
-            csrfToken,
-          );
-      const next = {
-        mode: response.data.mode,
-        selector: response.data.selector,
-        script: response.data.script,
-        scope: response.data.scope,
-        targets: response.data.targets,
-        enabled: response.data.enabled,
-        priority: response.data.priority,
-      } satisfies HookFields;
-      setSelected(response.data);
+      let response;
+      if (selected) {
+        if (selected.revision === null) {
+          setError(t("请先保存术语，再保存这条页面触发。"));
+          return;
+        }
+        response = await updateGlossaryHook(
+          baseUrl,
+          selected.id,
+          {
+            operation_id: operation.current.id,
+            expected_revision: selected.revision,
+            term_id: termId,
+            fields: value,
+          },
+          csrfToken,
+        );
+      } else {
+        response = await createGlossaryHook(
+          baseUrl,
+          {
+            operation_id: operation.current.id,
+            hook_id: randomUUID(),
+            term_id: termId,
+            fields: value,
+          },
+          csrfToken,
+        );
+      }
+      const next = entryFields(response.data);
+      const entry: HookEntry = {
+        id: response.data.id,
+        revision: response.data.revision,
+        status: response.data.status,
+        fields: next,
+        pending: false,
+      };
+      setItems((current) =>
+        current.map((item) => (item.id === entry.id ? entry : item)),
+      );
+      setSelected(entry);
       setCreating(false);
       setFields(next);
       setBaseline(JSON.stringify(next));
@@ -266,13 +371,32 @@ export function GlossaryTermHooks({
 
   const archive = async () => {
     if (!selected) return false;
+    if (!termId) {
+      const nextItems = items.filter((item) => item.id !== selected.id);
+      setItems(nextItems);
+      setSelected(null);
+      setCreating(false);
+      setFields(blankFields());
+      setBaseline(JSON.stringify(blankFields()));
+      setMessage(t("已移除待保存的页面触发。"));
+      publishPending(nextItems);
+      return true;
+    }
+    if (selected.revision === null) return false;
     const response = await archiveGlossaryHook(
       baseUrl,
       selected.id,
       { operation_id: randomUUID(), expected_revision: selected.revision },
       csrfToken,
     );
-    setSelected(response.data);
+    const next = entryFields(response.data);
+    setSelected({
+      id: response.data.id,
+      revision: response.data.revision,
+      status: response.data.status,
+      fields: next,
+      pending: false,
+    });
     setMessage(t("页面触发已归档。"));
     await load();
     return true;
@@ -286,7 +410,12 @@ export function GlossaryTermHooks({
         description="用 CSS 选择器把这个术语连接到页面元素；与正文关键词匹配相互独立。"
         action={
           writable ? (
-            <AdminActionButton icon="plus" onClick={begin}>
+            <AdminActionButton
+              icon="plus"
+              aria-controls="glossary-hook-editor"
+              aria-expanded={Boolean(selected || creating || dirty)}
+              onClick={begin}
+            >
               <UiText text="新建页面触发" />
             </AdminActionButton>
           ) : undefined
@@ -307,26 +436,34 @@ export function GlossaryTermHooks({
                     <Icon name="glossary" />
                   </span>
                   <span>
-                    <strong>{item.selector}</strong>
+                    <strong>
+                      {item.fields.mode === "selector"
+                        ? item.fields.selector
+                        : t("JavaScript 挂载")}
+                    </strong>
                     <small>
-                      {item.scope === "all"
+                      {item.fields.scope === "all"
                         ? t("所有页面")
-                        : `${item.targets.length}${t("个指定内容")}`}
+                        : `${item.fields.targets?.length ?? 0}${t("个指定内容")}`}
                     </small>
                   </span>
                   <span
                     className="admin-badge"
                     data-tone={
-                      item.enabled && item.status === "active"
-                        ? "positive"
-                        : "warning"
+                      item.pending
+                        ? "warning"
+                        : item.fields.enabled && item.status === "active"
+                          ? "positive"
+                          : "warning"
                     }
                   >
                     <UiText
                       text={
-                        item.enabled && item.status === "active"
-                          ? "启用"
-                          : "停用"
+                        item.pending
+                          ? "待保存"
+                          : item.fields.enabled && item.status === "active"
+                            ? "启用"
+                            : "停用"
                       }
                     />
                   </span>
@@ -338,7 +475,12 @@ export function GlossaryTermHooks({
             <p className={styles.empty}>还没有页面触发。</p>
           )}
           {(selected || creating || dirty) && (
-            <div className={styles.hookEditor}>
+            <div
+              ref={editor}
+              id="glossary-hook-editor"
+              className={styles.hookEditor}
+              tabIndex={-1}
+            >
               <div className="admin-settings-field">
                 <label>
                   <UiText text="作用范围" />
@@ -473,7 +615,7 @@ export function GlossaryTermHooks({
                 <div className={styles.scriptEditor}>
                   <AdminWarning text="JavaScript 会在所有命中页面的访客浏览器主线程执行，可读取和修改公开页面 DOM。错误的脚本可能破坏页面；仅管理员可保存，请先预览并确认来源可信。" />
                   <p>
-                    <UiText text="可用 glossary.select(selector) 查找元素，glossary.mount(element) 绑定术语提示。" />
+                    <UiText text="可用 glossary.select(selector) 查找元素，也可把 document.querySelector 等原生 DOM 对象直接传给 glossary.mount(element)。" />
                   </p>
                   <ScriptEditor
                     kind="javascript"

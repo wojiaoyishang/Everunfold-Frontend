@@ -60,7 +60,7 @@ GET /v1/plugins/everunfold.glossary/for-content/{content_id}
 
 公开页面等待`PagePresentation`就绪后，在空闲时请求只与当前surface、内容/页面ID和语言相关的启用钩子，缓存60秒。MutationObserver对后续生成的元素重新绑定，客户端路由切换清理后重跑。Tooltip与正文关键词提示共用；已有链接/按钮保持原生点击，键盘聚焦和Escape行为相同。
 
-JavaScript挂载是仅管理员可保存的危险模式。它使用共享JavaScript CodeMirror编辑器，限制20KB，并提供`glossary.root`、`glossary.term`、`glossary.select(selector)`、`glossary.mount(element)`；保存区域常驻风险警告。脚本在公开页面主线程运行，不等同于自定义页面iframe沙箱，执行异常只跳过当前钩子。
+JavaScript挂载是仅管理员可保存的危险模式。它使用共享JavaScript CodeMirror编辑器，限制20KB，并提供`glossary.root`、`glossary.term`、`glossary.select(selector)`、`glossary.mount(element)`；`element`可直接使用`document.querySelector()`等原生DOM对象，只要求节点位于当前公开主题根内。保存区域常驻风险警告。脚本在公开页面主线程运行，不等同于自定义页面iframe沙箱，执行异常只跳过当前钩子。
 
 ## 发布与排错
 

@@ -132,6 +132,9 @@
   border-radius: 9px;
   background: var(--admin-canvas);
 }
+.hookEditor:focus {
+  outline: none;
+}
 .scriptEditor {
   display: grid;
   gap: 10px;

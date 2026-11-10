@@ -26,7 +26,7 @@
 8. 首批支持常见 CSS 选择器，包括 `#id`、class、属性、后代和组合选择器；拒绝伪元素、`html/body/*`、危险字符及超过 256 字符的规则。每页最多连接 20 个元素，指定内容优先于全站规则，再按优先级和稳定 ID 决胜。
 9. 公开接口只返回当前 surface、内容/页面 ID 和语言命中的启用钩子，最多 50 条；不下载无关钩子。前端在页面 presentation 就绪且空闲后加载，按 60 秒缓存；MutationObserver 处理后续 DOM，SPA 切页重新解析。
 10. 钩子与关键词 Tooltip 共用弹层、动画、详情、词条链接、键盘和触屏行为。同一元素只挂一个钩子；链接、按钮等原生交互元素首次点击保持原行为，悬停和键盘聚焦仍能打开提示。
-11. 管理员可选用“JavaScript 挂载”作为危险触发方式，使用现有 JavaScript CodeMirror 编辑器；普通内容编辑者不能创建或保存。脚本最多 20KB，运行在公开页面主线程，提供便捷 API `glossary.select(selector)` 和 `glossary.mount(element)`。保存区始终显示明确安全警告，脚本异常只禁用该条触发，不阻塞页面或其他钩子。
+11. 管理员可选用“JavaScript 挂载”作为危险触发方式，使用现有 JavaScript CodeMirror 编辑器；普通内容编辑者不能创建或保存。脚本最多 20KB，运行在公开页面主线程，提供便捷 API `glossary.select(selector)` 和 `glossary.mount(element)`；`element`接受`document.querySelector()`等原生DOM对象。保存区始终显示明确安全警告，脚本异常只禁用该条触发，不阻塞页面或其他钩子。
 12. 钩子使用 `glossary_hooks`、`glossary_hook_operations` 与显式 `0039_glossary_hooks`、`0040_glossary_hook_scripts`；支持操作幂等、修订冲突、归档和术语停用后的自动失效。`glossary-v1` 升至 `3.4.0`，插件升至 `1.5.0`。
 
 ### 搜索与复制
@@ -44,7 +44,7 @@
 
 - 1440/390 实页检查：多语言菜单只显示已有覆盖，中文/英文旗帜与文本垂直居中；语言名称字段在浅色/深色下均为 40px 表单高度，旗帜、输入框和删除按钮同行居中，键盘焦点环与占位颜色正常；添加语言后即时出现新行。
 - 术语专搜中英文均只显示术语结果，不加载内容卡；无匹配时显示明确空状态。术语详情分隔线后正文间距增加约 20px。
-- 拦截公开钩子响应验证 `#id`/class 目标可获得同款 Tooltip；路由分别发送 article 和 code surface、内容 ID 与站点语言。脚本模式 `glossary.mount(glossary.select(".site-brand")[0])` 实页成功。
+- 拦截公开钩子响应验证 `#id`/class 目标可获得同款 Tooltip；路由分别发送 article 和 code surface、内容 ID 与站点语言。脚本模式同时覆盖 `glossary.mount(glossary.select(".site-brand")[0])` 与原生 `document.querySelector()` 节点传参。
 - 术语编辑页在 1440/390 实际打开“页面触发”空态、新建表单和 JavaScript 危险编辑器，无脚本错误；脚本模式显示警告且仅管理员可选择。
 - 前端完整检查 357 项、读者端/管理端隔离生产验收通过；代码复制定向 4 项通过。后端设置/术语/展示定向 23 passed、1 skipped（专用 PostgreSQL 库未配置）；`alembic check` 无模型差异。
 

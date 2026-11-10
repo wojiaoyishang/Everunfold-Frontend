@@ -4,6 +4,7 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import {
+  createGlossaryHook,
   createGlossaryTerm,
   queryGlossaryTerms,
   readGlossaryTerm,
@@ -11,7 +12,7 @@ import {
 } from "@/core/contracts/glossary";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { randomUUID } from "@/core/browser/crypto";
-import { UiText, useLanguageCatalog } from "@/core/i18n/provider";
+import { UiText, useLanguageCatalog, useT } from "@/core/i18n/provider";
 import { can } from "@/core/accounts/permissions";
 import { RequestError } from "@/core/http/request";
 import type {
@@ -42,7 +43,7 @@ import { Select } from "../../components/ui/select";
 import { TokenField } from "../../components/ui/token-field";
 import { Icon } from "../../components/icon";
 import { MatchingRulesEditor } from "./matching-rules";
-import { GlossaryTermHooks } from "./term-hooks";
+import { GlossaryTermHooks, type PendingGlossaryHook } from "./term-hooks";
 import styles from "./glossary.module.css";
 
 type List = NonNullable<GlossaryContract["list"]["data"]>;
@@ -128,6 +129,7 @@ export function GlossaryAdminPage() {
   const { baseUrl, csrfToken } = useAdminRequest();
   const user = useAdminAccount();
   const writable = can(user, "content:write", null);
+  const t = useT();
   const languages = useLanguageCatalog();
   const languageId = useId();
   const languageHintId = useId();
@@ -150,7 +152,9 @@ export function GlossaryAdminPage() {
   const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
+  const [newTermSession, setNewTermSession] = useState(() => randomUUID());
   const slugTouched = useRef(false);
+  const pendingHooks = useRef<PendingGlossaryHook[]>([]);
   const operation = useRef<{ fingerprint: string; id: string } | null>(null);
   const transformBlock = useCallback(
     (id: string, change: (block: DraftBlock) => string) =>
@@ -231,6 +235,8 @@ export function GlossaryAdminPage() {
     setMessage("");
     setPreviewing(false);
     slugTouched.current = false;
+    pendingHooks.current = [];
+    setNewTermSession(randomUUID());
     operation.current = null;
   };
 
@@ -261,6 +267,10 @@ export function GlossaryAdminPage() {
     setFields(baselineFields);
     setError("");
     setMessage("");
+    if (!selected) {
+      pendingHooks.current = [];
+      setNewTermSession(randomUUID());
+    }
   };
 
   async function save() {
@@ -305,14 +315,54 @@ export function GlossaryAdminPage() {
             },
             csrfToken,
           );
+      let hookError = "";
+      let savedHooks = 0;
+      if (!selected && pendingHooks.current.length) {
+        for (const hook of pendingHooks.current) {
+          try {
+            await createGlossaryHook(
+              baseUrl,
+              {
+                operation_id: hook.operationId,
+                hook_id: hook.hookId,
+                term_id: response.data.id,
+                fields: hook.fields,
+              },
+              csrfToken,
+            );
+            savedHooks += 1;
+          } catch {
+            hookError =
+              savedHooks > 0
+                ? t(
+                    "术语已保存，但只成功保存 {saved}/{total} 个页面触发。未成功的触发请重新添加。",
+                    {
+                      saved: savedHooks,
+                      total: pendingHooks.current.length,
+                    },
+                  )
+                : t("术语已保存，但页面触发暂未保存。请在新词条中重新添加。");
+            break;
+          }
+        }
+      }
+      const pendingCount = pendingHooks.current.length;
+      pendingHooks.current = [];
       setSelected(response.data);
       const savedValue = detailFields(response.data);
       setFields(savedValue);
       setBaselineFields(savedValue);
       operation.current = null;
       setMessage(
-        response.data.status === "published" ? "术语已发布。" : "术语已保存。",
+        hookError
+          ? ""
+          : pendingCount
+            ? t("术语与 {count} 个页面触发已保存。", { count: savedHooks })
+            : response.data.status === "published"
+              ? "术语已发布。"
+              : "术语已保存。",
       );
+      if (hookError) setError(hookError);
       await load();
     } catch (cause) {
       setError(failureMessage(cause));
@@ -660,13 +710,14 @@ export function GlossaryAdminPage() {
                 disabled={!writable || saving}
               />
             </SettingsSection>
-            {selected && (
-              <GlossaryTermHooks
-                key={selected.id}
-                termId={selected.id}
-                writable={writable}
-              />
-            )}
+            <GlossaryTermHooks
+              key={selected?.id ?? newTermSession}
+              termId={selected?.id ?? null}
+              writable={writable}
+              onPendingHooksChange={(hooks) => {
+                pendingHooks.current = hooks;
+              }}
+            />
             <SettingsSection
               id="glossary-content"
               title="悬浮提示"
