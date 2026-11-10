@@ -28,6 +28,9 @@
   width: 16px;
   height: 16px;
 }
+:global(html[data-motion="full"]) .refresh[data-loading="true"] svg {
+  animation: captcha-spin 900ms linear infinite;
+}
 .image {
   width: fit-content;
   max-width: 100%;
@@ -39,6 +42,154 @@
   display: block;
   max-width: 100%;
   height: auto;
+}
+.answerBody {
+  display: contents;
+}
+.login {
+  gap: 8px;
+}
+.login .heading {
+  min-height: 30px;
+  padding-inline: 2px;
+}
+.login .heading label {
+  color: var(--text-strong);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.login .refresh {
+  min-height: 30px;
+  padding: 4px 8px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition:
+    color 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+.login .refresh:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 15%, transparent);
+  background: var(--accent-soft);
+}
+.login .refresh:disabled {
+  opacity: 0.58;
+}
+.loginBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(100px, 1fr);
+  box-sizing: border-box;
+  width: 100%;
+  height: 50px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--text) 10%, var(--line));
+  border-radius: 10px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text) 4%, transparent);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+.loginBody:focus-within {
+  border-color: color-mix(in srgb, var(--accent) 72%, var(--line));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.field[data-invalid="true"] .loginBody {
+  border-color: color-mix(
+    in srgb,
+    var(--danger-color, #b44545) 62%,
+    var(--line)
+  );
+}
+.login .image {
+  position: relative;
+  box-sizing: border-box;
+  align-self: stretch;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--surface-soft) 72%, var(--surface));
+  box-shadow: none;
+}
+.login .image img {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  object-fit: cover;
+}
+.login .answer {
+  align-self: stretch;
+  width: 100%;
+  height: 100%;
+}
+.login [data-captcha-answer] input {
+  box-sizing: border-box;
+  height: 100%;
+  padding-inline: 8px;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--text) 12%, var(--line));
+  border-radius: 0;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  background: var(--surface);
+}
+.login [data-captcha-answer] input::placeholder {
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  opacity: 0.72;
+}
+.login [data-captcha-answer] input:focus {
+  border-left-color: color-mix(in srgb, var(--accent) 42%, var(--line));
+  box-shadow: none;
+}
+.login .hint {
+  padding-inline: 2px;
+  font-size: 11px;
+  line-height: 1.65;
+}
+.login[aria-busy="true"] .image img {
+  opacity: 0.22;
+  filter: blur(2px);
+}
+.login > p[role="status"] {
+  display: grid;
+  height: 50px;
+  place-items: center;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--text) 10%, var(--line));
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+.login > p[role="alert"] {
+  padding: 8px 10px;
+  border: 1px solid
+    color-mix(in srgb, var(--danger-color, #b44545) 24%, transparent);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--danger-color, #b44545) 6%, transparent);
+  font-size: 12px;
+  line-height: 1.6;
+}
+@media (max-width: 600px) {
+  .loginBody,
+  .login > p[role="status"] {
+    height: 54px;
+  }
 }
 .field input {
   box-sizing: border-box;
@@ -59,6 +210,25 @@
 }
 .field .error {
   color: var(--danger-color, #b44545);
+}
+.field[data-invalid="true"] .image {
+  border-color: color-mix(
+    in srgb,
+    var(--danger-color, #b44545) 55%,
+    var(--line)
+  );
+}
+.field input[aria-invalid="true"] {
+  border-color: color-mix(
+    in srgb,
+    var(--danger-color, #b44545) 62%,
+    var(--line)
+  );
+  background: color-mix(
+    in srgb,
+    var(--danger-color, #b44545) 4%,
+    var(--surface)
+  );
 }
 .answer {
   display: grid;
@@ -194,4 +364,14 @@
   place-items: center;
   color: var(--text);
   font-size: 12px;
+}
+@keyframes captcha-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(html[data-motion="full"]) .refresh[data-loading="true"] svg {
+    animation: none;
+  }
 }

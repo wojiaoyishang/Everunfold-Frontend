@@ -158,7 +158,7 @@ export function LoginPage({
               aria-invalid={passwordError}
             />
           </FormField>
-          <CaptchaField control={captcha} />
+          <CaptchaField control={captcha} appearance="login" disabled={busy} />
           <div
             className="login-message"
             id="login-error"
