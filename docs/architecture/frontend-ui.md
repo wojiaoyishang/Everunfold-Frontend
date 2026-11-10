@@ -101,7 +101,7 @@ ArticleHeader 在服务端分有图/无图展示，ArticleActions 负责留言�
 
 文章/说说顶层 type 的展示草案来自后端，见 [内容类型衔接](content-types.md)。legacy kind 只在 core/content/presentation.ts 适配，样例集中在 examples.ts；不修改在线 0.1 快照和生成文件。正式迁移仍待后端版本化发布。
 
-外观偏好由 core/browser/appearance-policy、appearance 和 use-appearance 统一校验、订阅和应用；ThemeToggle 与设置共用。主题色自动派生适合深浅背景的文字色，模式与纯黑偏好跨刷新保存，保留旧 everunfold.theme 选择。右侧设置仍用非模态 popover；搜索使用原生 dialog，复用稳定滚动条与焦点处理。阅读进度仅在确需滚动的文章/说说详情正文内显示，列表和评论区域隐藏。
+外观偏好由 core/browser/appearance-policy、appearance 和 use-appearance 统一校验、订阅和应用；ThemeToggle 与设置共用。主题色自动派生适合深浅背景的文字色，模式与纯黑偏好跨刷新保存，保留旧 everunfold.theme 选择。右侧设置仍用非模态 popover；搜索使用原生 dialog，复用稳定滚动条与焦点处理。阅读进度位于右下角固定工具组最上方，仅在确需滚动的文章/说说详情正文进入视口后显示；正文底部经过视口顶部安全边界后淡出并收起，向上返回正文时恢复。列表和评论区域始终隐藏。
 
 补充：品牌填充使用 --brand-accent，与深色模式的浅色文字强调色区分；顶栏、侧栏标题/底色和进度条同步变色。首页筛选的纯 URL 策略和存储在 core/browser/home-feed-*，use-home-feed 为主题桥接；RouteState 在普通首页导航前应用偏好。公共 SSR 只按显式参数渲染，直接访问的本机偏好在水合后恢复。详细缓存责任见 [主题配置与缓存边界](theme-configuration.md)，本轮没有实现后台配置同步。
 

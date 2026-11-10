@@ -1450,3 +1450,13 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/child-themes.md` | `child-themes-7` | `d36ca2ecc97c48ffd6a9b800ec0a693b1fb8f96e6a9c56bd6df7655ec28a0e66` |
 | `docs/development/operations-and-search.md` | `operations-search-6` | `25bdd236a877956e9255ffa414052dfa5a7978e0335793dc5d8d84c02870a714` |
 | `docs/decisions/0102-static-seo-content-and-dynamic-enhancements.md` | `ADR0102-2` | `80e1ea59c08c302b6630bd3adc160850d1a0f3d4cefb3aa035305ffb2a6d12a3` |
+
+
+## 阅读进度位置与结束淡出（2026-11-10）
+
+前端阅读百分比移至右下工具组顶部，正文离开视口后淡出并收起。以下版本替代对应旧摘要；后端业务不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/architecture/frontend-ui.md` | `frontend-ui-reading-progress-1` | `aab3fdf306047e5174f938d3c1336c0174449732c7782b71c772973ee01ad776` |
+| `docs/decisions/0073-scheduled-content-publication.md` | `ADR0073-2` | `4074a885bfa8b5a25feea260af165e621b1b86f4790fcd781d4e93e026c9c075` |
