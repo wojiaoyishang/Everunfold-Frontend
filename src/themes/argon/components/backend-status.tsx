@@ -132,28 +132,29 @@ export function BackendStatus() {
               ),
             );
           }}
-        />
-        {user && (
-          <Button
-            className="backend-account-entry backend-account-logout"
-            disabled={signout.busy}
-            aria-busy={signout.busy}
-            onClick={() => {
-              if (account.phase !== "ready") return;
-              void signout.run(async (signal) => {
-                const response = await logout(
-                  store.baseUrl,
-                  account.session.csrf_token,
-                  { signal },
-                );
-                if (!signal.aborted) accept(response.data);
-              }, "已退出登录。");
-            }}
-          >
-            <UiText text={signout.busy ? "正在退出…" : "退出登录"} />
-            <Icon name="logout" />
-          </Button>
-        )}
+        >
+          {user && (
+            <Button
+              className="backend-account-entry"
+              disabled={signout.busy}
+              aria-busy={signout.busy}
+              onClick={() => {
+                if (account.phase !== "ready") return;
+                void signout.run(async (signal) => {
+                  const response = await logout(
+                    store.baseUrl,
+                    account.session.csrf_token,
+                    { signal },
+                  );
+                  if (!signal.aborted) accept(response.data);
+                }, "已退出登录。");
+              }}
+            >
+              <UiText text={signout.busy ? "正在退出…" : "退出登录"} />
+              <Icon name="logout" />
+            </Button>
+          )}
+        </BackendAccount>
         {signout.message && (
           <p
             className="backend-account-result"

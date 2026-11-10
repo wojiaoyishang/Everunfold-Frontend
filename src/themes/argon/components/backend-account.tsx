@@ -1,5 +1,6 @@
 "use client";
 import type { SessionView } from "@/core/auth/session-check";
+import type { ReactNode } from "react";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Avatar } from "./ui/avatar";
 import { Button } from "./ui/primitives";
@@ -10,10 +11,12 @@ export function BackendAccount({
   state,
   onRetry,
   onNavigate,
+  children,
 }: {
   state: SessionView;
   onRetry: () => void;
   onNavigate: (event: { preventDefault: () => void }) => void;
+  children?: ReactNode;
 }) {
   const user = state.phase === "ready" ? state.session.user : null;
   const t = useT();
@@ -52,21 +55,24 @@ export function BackendAccount({
           </small>
         </div>
       </div>
-      {state.phase === "failed" ? (
-        <Button className="backend-account-entry" onClick={onRetry}>
-          <UiText text="重新检查登录状态" />
-          <Icon name="refresh" />
-        </Button>
-      ) : (
-        <RouteLink
-          href="/account"
-          className="backend-account-entry"
-          onNavigate={onNavigate}
-        >
-          <UiText text={user ? "进入账号中心" : "登录账号"} />
-          <Icon name="arrow" />
-        </RouteLink>
-      )}
+      <div className="backend-account-actions">
+        {state.phase === "failed" ? (
+          <Button className="backend-account-entry" onClick={onRetry}>
+            <UiText text="重新检查登录状态" />
+            <Icon name="refresh" />
+          </Button>
+        ) : (
+          <RouteLink
+            href="/account"
+            className="backend-account-entry"
+            onNavigate={onNavigate}
+          >
+            <UiText text={user ? "进入账号中心" : "登录账号"} />
+            <Icon name="arrow" />
+          </RouteLink>
+        )}
+        {children}
+      </div>
     </section>
   );
 }

@@ -18,6 +18,7 @@ import { Button, Dialog } from "./primitives";
 export interface ConfirmDialogProps {
   open: boolean;
   title: string;
+  className?: string;
   description?: ReactNode;
   children?: ReactNode;
   icon?: IconName;
@@ -55,6 +56,7 @@ export function ConfirmDialog({ open, ...props }: ConfirmDialogProps) {
 
 function ConfirmDialogSurface({
   title,
+  className = "",
   description,
   children,
   icon,
@@ -115,7 +117,7 @@ function ConfirmDialogSurface({
   return createPortal(
     <Dialog
       ref={dialog}
-      className="ui-confirm-dialog"
+      className={`ui-confirm-dialog ${className}`}
       role="alertdialog"
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}

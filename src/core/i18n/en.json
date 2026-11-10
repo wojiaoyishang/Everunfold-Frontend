@@ -1854,5 +1854,12 @@
   "内容已不可用。输入已保留，请刷新页面核对。": "This content is unavailable. Your input is kept; refresh to check its status.",
   "后端暂不可用。输入已保留，请稍后重试。": "The server is temporarily unavailable. Your input is kept; please try again later.",
   "已退出登录。": "You have signed out.",
-  "正在退出…": "Signing out…"
+  "正在退出…": "Signing out…",
+  "最后一步，完成验证即可发送留言。": "One last step: verify to send your comment.",
+  "识别图中字符": "Read the characters below",
+  "完成下方验证": "Complete the check below",
+  "换一张": "New image",
+  "输入验证码": "Verification code",
+  "不区分大小写": "Not case-sensitive",
+  "输入图片中的 5 位字符，验证后即可发送。": "Enter the 5 characters in the image to send your comment."
 }

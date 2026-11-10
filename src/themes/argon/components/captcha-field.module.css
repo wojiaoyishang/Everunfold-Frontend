@@ -60,3 +60,138 @@
 .field .error {
   color: var(--danger-color, #b44545);
 }
+.answer {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.dialog {
+  gap: 0;
+}
+.dialog .heading {
+  padding: 12px 14px 0;
+  border: 1px solid var(--line);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: var(--surface-soft);
+}
+.dialog .heading > span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.dialog .refresh {
+  gap: 5px;
+  padding: 4px 0 4px 8px;
+  color: var(--accent);
+  font-size: 12px;
+}
+.dialog .refresh svg {
+  width: 14px;
+  height: 14px;
+}
+.dialog .image {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100px;
+  padding: 10px 14px 14px;
+  box-sizing: border-box;
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  background: var(--surface-soft);
+}
+.dialog .image img {
+  width: 220px;
+  border: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+  border-radius: 8px;
+}
+.dialog .answer {
+  margin-top: 20px;
+}
+.answerHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+.answerHeading label {
+  color: var(--text-strong);
+  font-size: 13px;
+  font-weight: 500;
+}
+.dialog .answerHeading small {
+  font-size: 11px;
+}
+.dialog input {
+  height: 54px;
+  padding: 8px 12px 8px 20px;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 23px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.35em;
+  border-radius: 10px;
+  background: var(--surface);
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.dialog input::placeholder {
+  color: var(--muted);
+  opacity: 0.55;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+}
+.dialog input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.dialog .hint {
+  margin-top: 9px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.dialog > p {
+  padding: 16px 14px;
+  border-radius: 0 0 12px 12px;
+  border: 1px solid var(--line);
+  border-top: 0;
+  background: var(--surface-soft);
+}
+.dialog > p.error {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  color: var(--danger-color, #b44545);
+}
+.dialog .widget {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+  padding: 18px 12px;
+  border: 1px solid var(--line);
+  border-top: 0;
+  border-radius: 0 0 12px 12px;
+  background: var(--surface-soft);
+}
+.dialog .image {
+  position: relative;
+}
+.dialog .image[aria-busy="true"] img {
+  opacity: 0.25;
+  filter: blur(3px);
+}
+.imageLoading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  font-size: 12px;
+}

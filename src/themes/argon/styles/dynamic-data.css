@@ -134,8 +134,10 @@
   padding: 10px 12px;
   color: var(--accent);
   background: var(--accent-soft);
+  border: 0;
   border-radius: 8px;
   font-size: 13px;
+  line-height: 1.5;
   text-decoration: none;
   transition: background-color var(--motion-fast) ease;
 }
@@ -146,16 +148,9 @@
   width: 16px;
   height: 16px;
 }
-.backend-account-logout {
-  margin-top: -6px;
-  margin-bottom: 16px;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid var(--line);
-}
-.backend-account-logout:hover {
-  color: var(--accent);
-  background: var(--accent-soft);
+.backend-account-actions {
+  display: grid;
+  gap: 8px;
 }
 .backend-account-result {
   padding: 10px 12px;
@@ -166,8 +161,8 @@
   font-size: 12px;
   overflow-wrap: anywhere;
 }
-.backend-status-panel {
-  padding: 18px;
+.backend-status-panel.ui-anchored-panel {
+  padding: 16px;
   color: var(--text);
   font-size: 14px;
   line-height: 1.5;
