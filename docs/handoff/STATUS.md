@@ -1,5 +1,10 @@
 # 前端交接状态
 
+## 最新修复：登录验证码紧凑布局（2026-11-10）
+
+- 前端1e5d732。登录页验证码改为共享外框的同行双段控件，图片与输入严格等高并分别匹配桌面50px/手机54px的账号字段高度；刷新收为“换一张”轻量操作，刷新时保留图片、输入和整体高度。错误/禁用和减少动态沿用共享状态。评论按需验证弹窗保持原布局，后端契约与验证码规则未改。
+- 实际查看1280/390/320px，320px `scrollWidth=clientWidth=308`；刷新后新挑战落位且输入恢复。`npm run check`与隔离生产登录页构建通过，未提交真实账号登录或修改服务端配置。详见[验收](login-captcha-verification.md)。
+
 ## 最新交付：术语 Tooltip、公开术语表与主题私有设置（2026-11-10）
 
 - 后端 f276040/2fe2b4b、前端 0a82fce。新增 `everunfold.glossary` 插件、glossary 1.0.0、settings 1.25.0 和 `0036_glossary_plugin`；文章级接口只返回对应公开文章实际命中的已发布词条，未命中返回空数组。正文继续使用原缓存，前端空闲时才加载术语组件，按 API/内容 ID/修订缓存命中与空结果 5 分钟；代码、链接、公式、隐藏文字不装饰。见[指南](../development/glossary.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)与[验收](glossary-theme-settings-verification.md)。

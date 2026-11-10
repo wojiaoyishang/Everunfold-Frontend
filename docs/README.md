@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[登录验证码布局验收](handoff/login-captcha-verification.md)：登录页把图片与输入合并为一个同行、等高的双段验证控件，刷新期间保留原布局并显示真实加载状态；桌面、390px 和 320px 实页检查通过，评论验证码弹窗保持原布局。
+
 [术语表与文章级 Tooltip](development/glossary.md)、[ADR0099](decisions/0099-article-scoped-glossary-tooltips.md)：后端按文章可见正文匹配并只返回实际命中的已发布词条，未命中文章返回空数组；正文继续缓存，前端空闲懒加载术语组件，命中/空结果均按内容修订缓存 5 分钟。后台可维护标题、别名、提示、Markdown 详情和发布状态，公开提供 `/glossary` 与详情页。
 
 [主题私有设置](development/theme-settings.md)、[ADR0100](decisions/0100-theme-owned-settings-profiles.md)：`/admin/settings/theme` 只负责主题切换和宿主，Argon、Paper 的表单分别位于各自主题目录；`theme_options` 为每个主题保存独立 profile，顶层 `theme` 保留活动主题兼容投影。站点级页脚、作者格言和术语提示仍在站点设置。

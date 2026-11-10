@@ -1358,3 +1358,13 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/decisions/0099-article-scoped-glossary-tooltips.md` | `ADR0099-1` | `b19a33b15c842d72c4496b2a5c819d9dc33fd85ff6fd8ba6bb3114a2f1f21541` |
 | `docs/decisions/0100-theme-owned-settings-profiles.md` | `ADR0100-1` | `4a466f1c5b58c362659e53b7900793dcb365f0f5a6d9acd139a79610124192e2` |
 | `docs/handoff/glossary-theme-settings-verification.md` | `glossary-theme-settings-verification-1` | `395abb97f5ec669ba24ac8d26d4b45b83906471df91f54f1f4b07225facd780a` |
+
+
+## 登录验证码同行等高（2026-11-10）
+
+前端1e5d732；后端业务、验证码契约与迁移不变。登录验证码图片和输入改为共享外框的同行等高控件，刷新保留布局；实页与构建范围见验收，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-login-captcha-1` | `87226780f0fab2f95258ed2d46ef2e8c3a618385b3330fefa1ef6c3f09c00390` |
+| `docs/handoff/login-captcha-verification.md` | `login-captcha-verification-1` | `b9cf557ca07253d0081565b1b35f96fb959ac677b9e1ba02a64e2c322dedda5c` |
