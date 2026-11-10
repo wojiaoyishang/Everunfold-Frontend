@@ -1,6 +1,6 @@
 # 自定义页面评论与插件 SDK
 
-版本：page-comments-1，2026-11-10。适用于后台创建的 HTML 页面与插件注册页面；决策见 [ADR0096](../decisions/0096-managed-page-comments-and-plugin-sdk.md)。页面编辑、应用和沙箱规则沿用[页面指南](pages.md)，验证码规则沿用[验证码指南](captcha.md)。
+版本：page-comments-2，2026-11-10。适用于后台创建的 HTML 页面与插件注册页面；决策见 [ADR0096](../decisions/0096-managed-page-comments-and-plugin-sdk.md)。页面编辑、应用和沙箱规则沿用[页面指南](pages.md)，验证码规则沿用[验证码指南](captcha.md)。
 
 ## 后台与发布行为
 
@@ -65,6 +65,8 @@ export default function GuestbookPage() {
 ```
 
 `PageComments` 只提供锚点，实际 UI 由宿主的 `public.page.comments` 组件提供。它必须位于宿主托管的页面上下文内，不能拿到普通后台或任意 React 根节点单独使用。
+
+标准主题评论表单在点击发送后才按需加载验证，必要时使用项目小窗；不在页内预留验证码空间。成功/失败/发送中使用颜文字横幅，失败保留输入。该流程同用于文章、说说与页面；自行实现UI的插件仍自行决定视觉流程，见[验证码指南](captcha.md)。
 
 ## 自行实现评论 UI
 

@@ -1302,3 +1302,17 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/page-comments.md` | `page-comments-1` | `de49df9f78e008e8aa6e72ae1f812ca1bd639def5773c7745a08dcefaab9b4a3` |
 | `docs/decisions/0096-managed-page-comments-and-plugin-sdk.md` | `ADR0096-1` | `21b5b6d66d12b26f731dd4a18e731a174b272160d1e0a6cfb7928988a327f442` |
 | `docs/handoff/page-comments-verification.md` | `page-comments-verification-1` | `292cf3892fdb9cdb1aa248f90270fbc2f5f28629584feb58cc1b9ffd4c4167cf` |
+
+
+## 评论发送时验证、反馈横幅与账号确认（2026-11-10）
+
+前端ef44aa2；后端业务/契约/迁移不变。规则和检查见验收，以下替代相应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-comment-submit-1` | `8f2bf6e08e9eaf0dda8306daee84627f63cc596d9b0949771d961caa0d2b66d9` |
+| `docs/development/accounts.md` | `accounts-runtime-9` | `4eaa4a4a256198e3067b2860ca4a6f5385e6e96221d2599454e7d299793e93f1` |
+| `docs/development/captcha.md` | `captcha-4` | `cc1f3d8ed21295a16e54d28aa0c47350d2ed4d203ecc0e8eee30858bbe51505e` |
+| `docs/development/page-comments.md` | `page-comments-2` | `b5b187493f62eeea5eee6b940f3e6d4bb943c4e2b67741236f12c8fbb8ef800b` |
+| `docs/decisions/0097-demand-comment-verification-and-account-dialogs.md` | `ADR0097-1` | `0c07c9e4a18bd3e97eace26665b03f69035494eb079f7529dd92d24d05aec260` |
+| `docs/handoff/comment-submit-verification.md` | `comment-submit-verification-1` | `892525698fb2675ca48effb24a8c75e8f362aad3e91576d16a4f71d075dd44a3` |

@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[评论发送时验证与账号弹窗](decisions/0097-demand-comment-verification-and-account-dialogs.md)、[验证码指南](development/captcha.md)及[验收](handoff/comment-submit-verification.md)：发送后按需验证小窗、颜文字结果横幅、离线保留输入，以及账号共享确认和同步菜单退出。
+
 [页面评论与插件 SDK](development/page-comments.md)、[ADR0096](decisions/0096-managed-page-comments-and-plugin-sdk.md)及[验收](handoff/page-comments-verification.md)：HTML/注册页面独立评论开关、通用组件/正文定位、自定义评论客户端，以及验证码阅读回执和预览隔离。
 
 [Worker参数与触发按钮](handoff/worker-parameters-verification.md)、[任务开发](development/runtime-tasks.md)及[ADR0095](decisions/0095-typed-worker-invocation-parameters.md)：注册参数模型，表单/JSON填写，私有持久化并由Worker二次校验；同参复用、异参冲突，手动触发与刷新并排。

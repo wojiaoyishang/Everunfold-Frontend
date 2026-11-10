@@ -1,6 +1,6 @@
 # 账号中心与用户管理
 
-版本：accounts-runtime-8，2026-11-09。基础检查见[验收记录](../handoff/accounts-verification.md)，入口与头像动效见[最新验收](../handoff/header-account-entry-verification.md)；身份预设见[本轮验收](../handoff/user-presets-verification.md)，协议见[API Key接入指南](api-key-applications.md)。
+版本：accounts-runtime-9，2026-11-10。基础检查见[验收记录](../handoff/accounts-verification.md)，入口与头像动效见[最新验收](../handoff/header-account-entry-verification.md)；身份预设见[本轮验收](../handoff/user-presets-verification.md)，协议见[API Key接入指南](api-key-applications.md)。
 
 ## 使用入口
 
@@ -82,3 +82,10 @@ Key只在生成成功当次显示，数据库仅存摘要。相同操作重试�
 ## API Key的验证码权限
 
 面向博客的Key创建表单增加“阅读免验证码”“评论免验证码”，两项默认不选，只有已获对应权限的用户可签发。站点验证码设置还可禁止豁免及调整每Key阅读侧请求额度；授权并不跳过文章密码或直接公开评论。失效Key不回退匿名，签名查询/Callback仍沿原协议。完整使用与限制见[验证码指南](captcha.md)。
+
+
+## 前台确认与退出
+
+账号中心的站内离开、资料标签切换和退出均使用项目共享ConfirmDialog；取消保留当前标签与输入，确认后才丢弃并离开。账号中心不再注册浏览器beforeunload原生提示，后台原有保护保留；浏览器系统关闭/刷新不属于可用站内弹窗同步拦截的操作。
+
+前台右上角同步展开面板为登录用户提供“退出登录”。CSRF logout回执成功才更新匿名状态，失败保留身份并提示结果未确认；重试不会手工删Cookie。已确认会话变化通过同页事件与BroadcastChannel发送无凭据失效提示，其他标签向后端重新确认；签出后断网也不再保留旧身份展示。消息不含用户/CSRF，不写浏览器持久存储。检查见[本轮验收](../handoff/comment-submit-verification.md)。
