@@ -11,6 +11,7 @@ export type GlossaryRuntimeOptions = {
   auto_match: boolean;
   max_matches_per_page: number;
   popup_source: "summary" | "content";
+  show_footnotes: boolean;
 };
 
 type CacheEntry = {

@@ -276,6 +276,26 @@ export function SiteSettingsPage() {
                 })
               }
             />
+            <SettingsToggle
+              label="文章末尾显示术语脚注"
+              hint="只列出文章实际命中的术语；页面空闲后加载，不影响正文首屏。"
+              value={site.glossary?.article_footnotes ?? true}
+              onChange={(article_footnotes) =>
+                update({
+                  glossary: { ...site.glossary, article_footnotes },
+                })
+              }
+            />
+            <SettingsToggle
+              label="说说末尾显示术语脚注"
+              hint="只列出说说实际命中的术语；与文章脚注分别控制。"
+              value={site.glossary?.shuoshuo_footnotes ?? true}
+              onChange={(shuoshuo_footnotes) =>
+                update({
+                  glossary: { ...site.glossary, shuoshuo_footnotes },
+                })
+              }
+            />
             <div className="admin-settings-field">
               <label>每页最多提示数</label>
               <TextField

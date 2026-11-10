@@ -14,17 +14,20 @@ import { Icon } from "./icon";
 import { ViewMetric } from "./reader-data";
 import { ContentEditLink } from "./content-edit-link";
 import { ContentLanguages } from "./content-languages";
+import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 
 export function ShuoshuoCardView({
   entry,
   rendered,
   detail = false,
   interactive = true,
+  glossary,
 }: {
   entry: Omit<FeedEntry, "content"> & { content: ContentPresentationMetadata };
   rendered: { html: string; features: ContentFeatures };
   detail?: boolean;
   interactive?: boolean;
+  glossary?: GlossaryRuntimeOptions;
 }) {
   const { content, example } = entry;
   const body = (
@@ -35,6 +38,7 @@ export function ShuoshuoCardView({
         features={rendered.features}
         contentId={content.id}
         contentRevision={content.updated_at}
+        glossary={interactive ? glossary : undefined}
       />
     </ArticleMedia>
   );

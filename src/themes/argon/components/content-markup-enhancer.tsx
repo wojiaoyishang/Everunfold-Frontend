@@ -18,6 +18,7 @@ import {
 import { ThemeCodeFont } from "@/core/fonts/provider";
 
 const GlossaryTooltips = lazy(() => import("./glossary-tooltips"));
+const GlossaryFootnotes = lazy(() => import("./glossary-footnotes"));
 
 export function ContentMarkupEnhancer({
   targetId,
@@ -143,7 +144,13 @@ export function ContentMarkupEnhancer({
   }, [features.code, features.math, revision, target]);
 
   useEffect(() => {
-    if (!target || !glossary?.auto_match || !contentId || !revision) return;
+    if (
+      !target ||
+      (!glossary?.auto_match && !glossary?.show_footnotes) ||
+      !contentId ||
+      !revision
+    )
+      return;
     let frame = 0;
     let timer: number | null = null;
     const start = () => setLoadGlossary(true);
@@ -159,7 +166,13 @@ export function ContentMarkupEnhancer({
     return () => {
       if (timer !== null) window.clearTimeout(timer);
     };
-  }, [contentId, glossary?.auto_match, revision, target]);
+  }, [
+    contentId,
+    glossary?.auto_match,
+    glossary?.show_footnotes,
+    revision,
+    target,
+  ]);
 
   useEffect(() => {
     const node = document.getElementById(targetId);
@@ -175,12 +188,17 @@ export function ContentMarkupEnhancer({
       {codeTools ? tools : null}
       {loadGlossary && glossary && contentId && revision && (
         <Suspense fallback={null}>
-          <GlossaryTooltips
-            root={root}
-            contentId={contentId}
-            revision={revision}
-            options={glossary}
-          />
+          {glossary.auto_match && (
+            <GlossaryTooltips
+              root={root}
+              contentId={contentId}
+              revision={revision}
+              options={glossary}
+            />
+          )}
+          {glossary.show_footnotes && (
+            <GlossaryFootnotes contentId={contentId} revision={revision} />
+          )}
         </Suspense>
       )}
     </>

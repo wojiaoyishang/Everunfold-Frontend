@@ -10,15 +10,18 @@ import {
 import { PagePresentation } from "./route-state";
 import { CommentSection } from "./comments/comment-section";
 import { ArticleActions } from "./article-actions";
+import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 
 export async function ShuoshuoCard({
   theme,
   entry,
   detail = false,
+  glossary,
 }: {
   theme: string;
   entry: FeedEntry;
   detail?: boolean;
+  glossary?: GlossaryRuntimeOptions;
 }) {
   const rendered = await renderContentForReader(entry.content);
   return (
@@ -31,6 +34,7 @@ export async function ShuoshuoCard({
       }}
       detail={detail}
       rendered={rendered}
+      glossary={glossary}
     />
   );
 }
@@ -44,6 +48,7 @@ export function ShuoshuoDetail({
   entry: FeedEntry;
   snapshot: PublicSnapshot;
 }) {
+  const glossary = snapshot.site.settings?.site.glossary;
   return (
     <>
       <PagePresentation site={snapshot.site} id={entry.content.id} />
@@ -61,7 +66,17 @@ export function ShuoshuoDetail({
             <UiText text="说说效果预览 · 以下内容为虚构样例，正式内容将在后续导入。" />
           </p>
         )}
-        <ShuoshuoCard theme={theme} entry={entry} detail />
+        <ShuoshuoCard
+          theme={theme}
+          entry={entry}
+          detail
+          glossary={{
+            auto_match: glossary?.auto_match ?? true,
+            max_matches_per_page: glossary?.max_matches_per_page ?? 20,
+            popup_source: glossary?.popup_source ?? "content",
+            show_footnotes: glossary?.shuoshuo_footnotes ?? true,
+          }}
+        />
         <div className="surface shuoshuo-share">
           <ArticleActions
             path={entry.content.path}
