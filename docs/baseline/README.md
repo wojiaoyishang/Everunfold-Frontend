@@ -1368,3 +1368,13 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | --- | --- | --- |
 | `docs/README.md` | `index-login-captcha-1` | `87226780f0fab2f95258ed2d46ef2e8c3a618385b3330fefa1ef6c3f09c00390` |
 | `docs/handoff/login-captcha-verification.md` | `login-captcha-verification-1` | `b9cf557ca07253d0081565b1b35f96fb959ac677b9e1ba02a64e2c322dedda5c` |
+
+
+## 术语管理菜单入口（2026-11-10）
+
+前端6b2f03e；后端业务、术语路由与数据不变。`/admin/glossary`补齐`content:read`权限映射，不再被后台导航当作未注册路径过滤。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-glossary-menu-1` | `5321aac6d19eca01dcf7df08ad498b83d6ad452f3535264a9f0f0b8783dadac8` |
+| `docs/handoff/admin-glossary-menu-verification.md` | `admin-glossary-menu-verification-1` | `54988de78b0ce384de4c7959d536ba1834624730ad37f2bdbb2a1b91fb849ba9` |
