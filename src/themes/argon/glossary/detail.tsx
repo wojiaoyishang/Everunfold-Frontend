@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import { readGlossaryDetail } from "@/core/contracts/glossary";
 import { useLocale } from "@/core/i18n/provider";
-import { renderContent } from "@/core/rendering/content";
+import { renderGlossaryContent } from "@/core/glossary/content";
 import { PagePresentation, useRouteState } from "../components/route-state";
 import { ContentMarkup } from "../components/content-markup";
 import { useReaderBaseUrl } from "../components/reader-data";
@@ -37,20 +37,8 @@ export function GlossaryDetailPage({ slug }: { slug: string }) {
   }, [baseUrl, locale, site.name, slug]);
   const rendered = useMemo(
     () =>
-      term
-        ? renderContent({
-            id: term.id,
-            content: [
-              {
-                id: "definition",
-                type: "markdown",
-                content: term.body_markdown || term.summary,
-              },
-            ],
-            media_urls: {},
-          })
-        : null,
-    [term],
+      term ? renderGlossaryContent(term, site.settings?.shortcodes) : null,
+    [site.settings?.shortcodes, term],
   );
   return (
     <>

@@ -8,7 +8,10 @@
 @import "./styles/confirm-dialog.css";
 
 .ui-language-flag {
-  display: inline-block;
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
   margin-inline-end: 6px;
   font-family: var(--language-flag-font);
   font-weight: 400;
@@ -16,5 +19,5 @@
   font-synthesis: none;
   font-size: 18px;
   line-height: 1;
-  vertical-align: middle;
+  vertical-align: 0;
 }

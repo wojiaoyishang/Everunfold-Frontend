@@ -203,7 +203,15 @@
   line-height: 1.75;
 }
 
-.editorHeader > :global(.admin-status-badge) {
+.editorActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.editorActions > :global(.admin-status-badge) {
   margin-top: 4px;
 }
 
@@ -220,8 +228,25 @@
   resize: vertical;
 }
 
-.form :global(textarea[rows="12"]) {
-  min-height: 220px;
+.richEditor {
+  min-width: 0;
+}
+
+.preview {
+  padding: 22px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+}
+
+.preview :global(.admin-draft-preview h1) {
+  margin-bottom: 12px;
+  font-size: 22px;
+}
+
+.preview :global(.admin-draft-preview > p) {
+  margin-bottom: 20px;
+  color: var(--admin-muted);
 }
 
 .form :global(.admin-settings-message) {
@@ -289,6 +314,7 @@
   }
 
   .editorHeader {
+    flex-wrap: wrap;
     gap: 10px;
   }
 
@@ -296,7 +322,12 @@
     font-size: 19px;
   }
 
-  .editorHeader > :global(.admin-status-badge) {
+  .editorActions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .editorActions > :global(.admin-status-badge) {
     margin-top: 2px;
   }
 }

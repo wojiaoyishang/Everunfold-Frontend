@@ -57,6 +57,30 @@
   line-height: 1.7;
 }
 
+.glossary-tooltip-content {
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-wrap: anywhere;
+}
+
+.glossary-tooltip-content > :first-child {
+  margin-top: 0;
+}
+
+.glossary-tooltip-content > :last-child {
+  margin-bottom: 0;
+}
+
+.glossary-tooltip-content :is(h1, h2, h3, h4, h5, h6) {
+  margin-top: 1em;
+  margin-bottom: 0.45em;
+  font-size: 1.05rem;
+}
+
+.glossary-tooltip-content :is(pre, table) {
+  max-width: 100%;
+}
+
 .glossary-tooltip > a {
   width: fit-content;
   color: var(--accent);

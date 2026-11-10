@@ -252,6 +252,8 @@
   background: var(--accent-soft);
 }
 .ui-select-trigger > span {
+  display: flex;
+  align-items: center;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -354,6 +356,11 @@ html[data-motion="reduced"]
   text-align: left;
   font: inherit;
   font-size: 13px;
+}
+.ui-select-options > button > span {
+  display: flex;
+  align-items: center;
+  min-width: 0;
 }
 .ui-select-options > button[aria-selected="true"] {
   color: var(--accent);

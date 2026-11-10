@@ -19,12 +19,14 @@ import {
   matchGlossaryText,
   type GlossaryMatchTerm,
 } from "@/core/glossary/match";
-import { renderContent } from "@/core/rendering/content";
+import { renderGlossaryContent } from "@/core/glossary/content";
 import { surfacePortalTarget } from "@/core/themes/portal";
 import { useReaderBaseUrl } from "./reader-data";
 import { AppLink } from "./navigation-link";
 import { Icon } from "./icon";
 import { Button } from "./ui/primitives";
+import { useRouteState } from "./route-state";
+import { ContentMarkupView } from "./content-markup-view";
 
 type MatchIndex = NonNullable<GlossaryContract["content_matches"]["data"]>;
 
@@ -83,14 +85,6 @@ function decorateTextNode(
   return matches.length;
 }
 
-function markdownFor(term: GlossaryMatchTerm) {
-  return renderContent({
-    id: term.id,
-    content: [{ id: "summary", type: "markdown", content: term.body_markdown }],
-    media_urls: {},
-  }).html;
-}
-
 export default function GlossaryTooltips({
   root,
   contentId,
@@ -103,6 +97,7 @@ export default function GlossaryTooltips({
   options: GlossaryRuntimeOptions;
 }) {
   const baseUrl = useReaderBaseUrl();
+  const { site } = useRouteState();
   const [index, setIndex] = useState<MatchIndex | null>(null);
   const [active, setActive] = useState<ActiveTooltip | null>(null);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -113,6 +108,13 @@ export default function GlossaryTooltips({
   const terms = useMemo(
     () => new Map((index?.terms ?? []).map((term) => [term.id, term])),
     [index?.terms],
+  );
+  const richContent = useMemo(
+    () =>
+      active && options.popup_source === "content"
+        ? renderGlossaryContent(active.term, site.settings?.shortcodes ?? [])
+        : null,
+    [active, options.popup_source, site.settings?.shortcodes],
   );
 
   const clearTimers = useCallback(() => {
@@ -317,8 +319,6 @@ export default function GlossaryTooltips({
   const position = above
     ? { bottom: window.innerHeight - active.rect.top + 10 }
     : { top: active.rect.bottom + 10 };
-  const content =
-    options.popup_source === "content" ? markdownFor(active.term) : "";
   return createPortal(
     <div
       ref={popup}
@@ -353,11 +353,13 @@ export default function GlossaryTooltips({
           <Icon name="close" />
         </Button>
       </header>
-      {options.popup_source === "content" ? (
-        <div
+      {richContent ? (
+        <ContentMarkupView
           className="article-content glossary-tooltip-content"
           data-glossary-ignore
-          dangerouslySetInnerHTML={{ __html: content }}
+          html={richContent.html}
+          features={richContent.features}
+          codeTools={false}
         />
       ) : (
         <p>{active.term.summary}</p>

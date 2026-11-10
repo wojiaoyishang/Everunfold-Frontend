@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import {
@@ -14,9 +14,24 @@ import { randomUUID } from "@/core/browser/crypto";
 import { UiText, useLanguageCatalog } from "@/core/i18n/provider";
 import { can } from "@/core/accounts/permissions";
 import { RequestError } from "@/core/http/request";
+import type {
+  ContentTypeDefinition,
+  DraftBlock,
+  DraftFields,
+} from "@/core/contracts/content-admin";
+import { commandBody, type BlockCommand } from "@/core/editor/block-commands";
+import { hasUploadMarkers } from "@/core/editor/upload-placeholders";
+import { useEditorResources } from "@/core/content-management/use-editor-resources";
+import { useInlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
+import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { AdminPageHeading } from "../components/page-heading";
 import { AdminActionButton } from "../components/action-button";
 import { SettingsSection, SettingsText } from "../settings/shared";
+import { BlockComposer } from "../content/block-composer";
+import { DraftPreview } from "../content/draft-preview";
+import { EditorBody } from "../content/editor-body";
+import { CodePreferencesProvider } from "../../components/code-preferences";
+import { RouteLink } from "../../components/ui/route-link";
 import {
   Button,
   Form,
@@ -32,18 +47,37 @@ type ListItem = List["items"][number];
 type Detail = NonNullable<GlossaryContract["detail"]["data"]>;
 type Fields = GlossaryContract["create"]["fields"];
 
+const glossaryContentType = {
+  id: "glossary",
+  owner: "everunfold.glossary",
+  label: "术语",
+  description: "文章正文中的名词、别名与说明。",
+  icon: "glossary",
+  order: 0,
+  title_required: true,
+  supports_excerpt: false,
+  editor: "core.markdown",
+  panels: [],
+} satisfies ContentTypeDefinition;
+
 const statusMeta = {
   draft: { label: "草稿", icon: "edit", tone: "neutral" },
   published: { label: "已发布", icon: "check", tone: "positive" },
   archived: { label: "已归档", icon: "archive", tone: "warning" },
 } as const;
 
-const blankFields = (language: string): Fields => ({
-  language,
+const blankFields = (): Fields => ({
+  language: "*",
   slug: "",
   title: "",
   summary: "",
-  body_markdown: "",
+  body: [
+    {
+      id: randomUUID(),
+      type: "markdown",
+      content: "",
+    },
+  ],
   aliases: [],
   status: "draft",
 });
@@ -75,7 +109,7 @@ function detailFields(value: Detail): Fields {
     slug: value.slug,
     title: value.title,
     summary: value.summary,
-    body_markdown: value.body_markdown,
+    body: value.body.map((block) => ({ ...block })),
     aliases: value.aliases,
     status: value.status,
   };
@@ -102,25 +136,63 @@ export function GlossaryAdminPage() {
   const languageHintId = useId();
   const summaryId = useId();
   const aliasesId = useId();
-  const bodyId = useId();
   const statusId = useId();
   const statusHintId = useId();
+  const resources = useEditorResources();
+  const shortcodes = useAppliedShortcodes();
   const [catalog, setCatalog] = useState<List | null>(null);
   const [selected, setSelected] = useState<Detail | null>(null);
-  const [fields, setFields] = useState<Fields>(() =>
-    blankFields(languages.default_code),
-  );
+  const [fields, setFields] = useState<Fields>(() => blankFields());
+  const [baselineFields, setBaselineFields] = useState<Fields>(() => fields);
   const [aliasText, setAliasText] = useState("");
+  const [baselineAliases, setBaselineAliases] = useState("");
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [status, setStatus] =
     useState<GlossaryContract["query"]["status"]>("all");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const slugTouched = useRef(false);
   const operation = useRef<{ fingerprint: string; id: string } | null>(null);
+  const transformBlock = useCallback(
+    (id: string, change: (block: DraftBlock) => string) =>
+      setFields((current) => ({
+        ...current,
+        body: current.body.map((block) =>
+          block.id === id
+            ? { ...block, content: change(block as DraftBlock) }
+            : block,
+        ),
+      })),
+    [],
+  );
+  const updateBlockContent = useCallback(
+    (id: string, content: string) =>
+      setFields((current) => ({
+        ...current,
+        body: current.body.map((block) =>
+          block.id === id ? { ...block, content } : block,
+        ),
+      })),
+    [],
+  );
+  const uploads = useInlineImageUploads({
+    onTransform: transformBlock,
+    onMedia: resources.remember,
+  });
+  const media = {
+    ...selected?.media_urls,
+    ...resources.media,
+  };
+  const richValue = {
+    title: fields.title,
+    excerpt: fields.summary,
+    body: fields.body,
+  } as DraftFields;
 
   const load = async (signal?: AbortSignal) => {
     setLoading(true);
@@ -157,11 +229,15 @@ export function GlossaryAdminPage() {
   }, [appliedSearch, baseUrl, csrfToken, status]);
 
   const startNew = () => {
+    const value = blankFields();
     setSelected(null);
-    setFields(blankFields(languages.default_code));
+    setFields(value);
+    setBaselineFields(value);
     setAliasText("");
+    setBaselineAliases("");
     setError("");
     setMessage("");
+    setPreviewing(false);
     slugTouched.current = false;
     operation.current = null;
   };
@@ -173,8 +249,13 @@ export function GlossaryAdminPage() {
     try {
       const response = await readGlossaryTerm(baseUrl, item.id);
       setSelected(response.data);
-      setFields(detailFields(response.data));
-      setAliasText(response.data.aliases.join("\n"));
+      const savedValue = detailFields(response.data);
+      const aliases = response.data.aliases.join("\n");
+      setFields(savedValue);
+      setBaselineFields(savedValue);
+      setAliasText(aliases);
+      setBaselineAliases(aliases);
+      setPreviewing(false);
       slugTouched.current = true;
       operation.current = null;
     } catch (cause) {
@@ -186,9 +267,16 @@ export function GlossaryAdminPage() {
 
   const update = (patch: Partial<Fields>) =>
     setFields((current) => ({ ...current, ...patch }));
+  const uploading = hasUploadMarkers(fields.body as DraftBlock[]);
+  const reset = () => {
+    setFields(baselineFields);
+    setAliasText(baselineAliases);
+    setError("");
+    setMessage("");
+  };
 
   async function save() {
-    if (saving) return;
+    if (saving || dragging || uploading) return;
     const value: Fields = {
       ...fields,
       aliases: aliasesOf(aliasText),
@@ -230,8 +318,12 @@ export function GlossaryAdminPage() {
             csrfToken,
           );
       setSelected(response.data);
-      setFields(detailFields(response.data));
-      setAliasText(response.data.aliases.join("\n"));
+      const savedValue = detailFields(response.data);
+      const aliases = response.data.aliases.join("\n");
+      setFields(savedValue);
+      setBaselineFields(savedValue);
+      setAliasText(aliases);
+      setBaselineAliases(aliases);
       operation.current = null;
       setMessage(
         response.data.status === "published" ? "术语已发布。" : "术语已保存。",
@@ -245,6 +337,15 @@ export function GlossaryAdminPage() {
   }
 
   const items = catalog?.items ?? [];
+  const dirty =
+    JSON.stringify(fields) !== JSON.stringify(baselineFields) ||
+    aliasText !== baselineAliases;
+  const command = (change: BlockCommand) => {
+    const body = commandBody(fields.body as DraftBlock[], change);
+    if (!body) return false;
+    update({ body });
+    return true;
+  };
   return (
     <div className={`admin-settings-page ${styles.page}`}>
       <AdminPageHeading
@@ -407,15 +508,35 @@ export function GlossaryAdminPage() {
                 />
               </p>
             </div>
-            {selected && (
-              <span
-                className="admin-badge admin-status-badge"
-                data-tone={statusMeta[selected.status].tone}
+            <div className={styles.editorActions}>
+              <AdminActionButton
+                icon={previewing ? "edit" : "eye"}
+                aria-pressed={previewing}
+                onClick={() => setPreviewing((value) => !value)}
               >
-                <Icon name={statusMeta[selected.status].icon} />
-                <UiText text={statusMeta[selected.status].label} />
-              </span>
-            )}
+                <UiText text={previewing ? "返回编辑" : "正文预览"} />
+              </AdminActionButton>
+              {selected?.status === "published" && (
+                <RouteLink
+                  className="admin-button admin-action-button"
+                  href={`/glossary/${selected.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Icon name="external" />
+                  <UiText text="查看词条" />
+                </RouteLink>
+              )}
+              {selected && (
+                <span
+                  className="admin-badge admin-status-badge"
+                  data-tone={statusMeta[selected.status].tone}
+                >
+                  <Icon name={statusMeta[selected.status].icon} />
+                  <UiText text={statusMeta[selected.status].label} />
+                </span>
+              )}
+            </div>
           </header>
           <fieldset
             className={`admin-settings-form ${styles.form}`}
@@ -432,7 +553,7 @@ export function GlossaryAdminPage() {
                   hint="标题本身会自动参与正文匹配。"
                   value={fields.title}
                   maxLength={120}
-                  placeholder="例如：金灵"
+                  placeholder="例如：专有名词"
                   onChange={(title) =>
                     setFields((current) => ({
                       ...current,
@@ -451,14 +572,22 @@ export function GlossaryAdminPage() {
                     label="内容语言"
                     aria-describedby={languageHintId}
                     value={fields.language}
-                    options={languages.languages.map((item) => ({
-                      value: item.code,
-                      label: item.name,
-                    }))}
+                    options={[
+                      {
+                        value: "*",
+                        label: "全部语言匹配",
+                        flag: "🌐",
+                      },
+                      ...languages.languages.map((item) => ({
+                        value: item.code,
+                        label: item.name,
+                        flag: item.flag,
+                      })),
+                    ]}
                     onValueChange={(language) => update({ language })}
                   />
                   <small id={languageHintId}>
-                    <UiText text="只有与文章语言相同的词条会参与匹配。" />
+                    <UiText text="选择具体语言时只匹配该语言；全部语言会对任意文章生效。" />
                   </small>
                 </div>
               </div>
@@ -467,12 +596,54 @@ export function GlossaryAdminPage() {
                 hint={`公开地址：/glossary/${fields.slug || "term-slug"}`}
                 value={fields.slug}
                 maxLength={120}
-                placeholder="例如：jin-ling"
+                placeholder="例如：proper-noun"
                 onChange={(slug) => {
                   slugTouched.current = true;
                   update({ slug });
                 }}
               />
+            </SettingsSection>
+            <SettingsSection
+              id="glossary-body"
+              title="术语正文"
+              description="与文章共用富文本区块、格式、代码、公式、媒体和预览能力。"
+            >
+              <CodePreferencesProvider value={resources.codePreferences}>
+                {previewing ? (
+                  <div className={styles.preview}>
+                    <DraftPreview
+                      fields={richValue}
+                      media={media}
+                      shortcodes={shortcodes}
+                    />
+                  </div>
+                ) : (
+                  <div className={styles.richEditor}>
+                    <BlockComposer
+                      body={fields.body as DraftBlock[]}
+                      disabled={!writable || saving || loading}
+                      command={command}
+                      onBusyChange={setDragging}
+                    >
+                      <EditorBody
+                        session={null}
+                        type={glossaryContentType}
+                        value={richValue}
+                        onChange={(value) =>
+                          update({ body: value.body as Fields["body"] })
+                        }
+                        disabled={!writable || saving || loading}
+                        onMedia={resources.remember}
+                        media={media}
+                        onBlockChange={updateBlockContent}
+                        stagedBlocks={[]}
+                        uploads={uploads}
+                        locked={() => false}
+                      />
+                    </BlockComposer>
+                  </div>
+                )}
+              </CodePreferencesProvider>
             </SettingsSection>
             <SettingsSection
               id="glossary-matching"
@@ -488,7 +659,7 @@ export function GlossaryAdminPage() {
                   value={aliasText}
                   rows={4}
                   placeholder={
-                    "每行一个别名，也可用逗号分隔\n例如：金灵\njinling"
+                    "每行一个别名，也可用逗号分隔\n例如：另一个名称\nalternate-name"
                   }
                   onChange={(event) => setAliasText(event.target.value)}
                 />
@@ -499,8 +670,8 @@ export function GlossaryAdminPage() {
             </SettingsSection>
             <SettingsSection
               id="glossary-content"
-              title="提示内容"
-              description="简短提示用于默认弹层，完整说明用于详情页或展开阅读。"
+              title="悬浮提示"
+              description="默认弹层使用的简短说明；完整内容由上方术语正文提供。"
             >
               <div className="admin-settings-field">
                 <label htmlFor={summaryId}>
@@ -516,24 +687,6 @@ export function GlossaryAdminPage() {
                 />
                 <small>
                   <UiText text="建议用一句或两句话说明这个词在本站语境中的含义。" />
-                </small>
-              </div>
-              <div className="admin-settings-field">
-                <label htmlFor={bodyId}>
-                  <UiText text="完整说明（Markdown）" />
-                </label>
-                <TextArea
-                  id={bodyId}
-                  value={fields.body_markdown}
-                  rows={12}
-                  maxLength={20000}
-                  placeholder="补充词条的背景、来源或相关故事。"
-                  onChange={(event) =>
-                    update({ body_markdown: event.target.value })
-                  }
-                />
-                <small>
-                  <UiText text="支持安全 Markdown；留空时公开详情页回退到悬浮提示。" />
                 </small>
               </div>
             </SettingsSection>
@@ -582,32 +735,45 @@ export function GlossaryAdminPage() {
             <div>
               <span>
                 {selected
-                  ? `修订 ${selected.revision} · 最后更新 ${new Date(selected.updated_at).toLocaleString("zh-CN")}`
+                  ? `已读取版本 ${selected.revision}`
                   : writable
                     ? "新术语尚未保存"
                     : "当前账号只有读取权限"}
               </span>
+              <div className="admin-settings-delivery">
+                {selected ? (
+                  <span
+                    className="admin-badge admin-status-badge"
+                    data-tone={statusMeta[selected.status].tone}
+                  >
+                    <Icon name={statusMeta[selected.status].icon} />
+                    <UiText text={statusMeta[selected.status].label} />
+                  </span>
+                ) : (
+                  <span className="admin-badge">
+                    <UiText text="新词条" />
+                  </span>
+                )}
+              </div>
             </div>
             <div className="admin-settings-actions">
-              <AdminActionButton
-                icon="undo"
-                disabled={!writable || saving}
-                onClick={startNew}
+              <Button
+                className="admin-button"
+                disabled={!writable || saving || !dirty}
+                onClick={reset}
               >
-                <UiText text="清空" />
-              </AdminActionButton>
-              <AdminActionButton
+                <UiText text="撤销修改" />
+              </Button>
+              <Button
+                className="admin-button admin-button-primary"
                 type="submit"
-                icon={saving ? "refresh" : "save"}
-                tone="accent"
-                disabled={!writable || saving}
+                disabled={
+                  !writable || saving || !dirty || uploading || dragging
+                }
               >
-                <UiText
-                  text={
-                    saving ? "正在保存" : selected ? "保存更改" : "创建术语"
-                  }
-                />
-              </AdminActionButton>
+                <Icon name="check" />
+                <UiText text={saving ? "正在保存" : "保存更改"} />
+              </Button>
             </div>
           </div>
         </Form>
