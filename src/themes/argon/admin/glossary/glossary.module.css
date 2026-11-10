@@ -1,141 +1,242 @@
-.layout {
-  display: grid;
-  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.5fr);
-  gap: 18px;
-  align-items: start;
+.page {
+  min-width: 0;
 }
 
-.catalog,
-.editor {
-  padding: 18px;
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(270px, 330px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
 }
 
 .catalog {
   position: sticky;
   top: 84px;
-  display: grid;
-  gap: 14px;
+  overflow: hidden;
 }
 
-.catalog form {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-}
-
-.filters {
+.catalogHeader {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 68px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--admin-border);
+  background: color-mix(in srgb, var(--admin-subtle) 55%, var(--admin-canvas));
+}
+
+.catalogHeader h2 {
+  margin-top: 4px;
+  color: var(--admin-text);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.catalogActions {
+  display: flex;
+  align-items: center;
   gap: 6px;
 }
 
-.filters button[aria-pressed="true"] {
-  color: var(--admin-on-accent);
-  background: var(--admin-accent);
+.catalogActions :global(.admin-icon-button) {
+  width: 32px;
+  height: 32px;
+}
+
+.catalogTools {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  min-width: 0;
+}
+
+.search :global(.admin-search) {
+  width: 100%;
+  min-width: 0;
+}
+
+.filters {
+  flex-wrap: wrap;
+  gap: 3px;
 }
 
 .list {
   display: grid;
-  gap: 6px;
-  max-height: 65vh;
+  gap: 4px;
+  max-height: calc(100dvh - 292px);
+  padding: 8px;
   overflow: auto;
 }
 
-.list > p {
-  margin: 0;
-  padding: 20px 8px;
-  color: var(--admin-muted);
-  text-align: center;
+.list[aria-busy="true"] {
+  opacity: 0.62;
+}
+
+.list > :global(.admin-draft-empty) {
+  min-height: 220px;
 }
 
 .row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
   gap: 10px;
   align-items: center;
   width: 100%;
-  padding: 11px 12px;
+  padding: 11px;
   border: 1px solid transparent;
+  border-radius: 8px;
   color: var(--admin-text);
   text-align: start;
+  transition:
+    border-color 150ms,
+    background-color 150ms;
+}
+
+.row:hover {
+  background: var(--admin-subtle);
 }
 
 .row[aria-current="true"] {
   border-color: color-mix(
     in srgb,
-    var(--admin-accent) 42%,
+    var(--admin-accent) 38%,
     var(--admin-border)
   );
   background: var(--admin-accent-soft);
 }
 
-.row span {
-  display: grid;
-  min-width: 0;
-  gap: 3px;
+.row > :global(.icon) {
+  width: 16px;
+  height: 16px;
+  color: var(--admin-muted);
 }
 
-.row strong,
-.row small {
+.rowGlyph {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  color: var(--admin-accent);
+  background: color-mix(in srgb, var(--admin-accent) 8%, var(--admin-subtle));
+}
+
+.rowGlyph :global(.icon) {
+  width: 17px;
+  height: 17px;
+}
+
+.rowCopy {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.rowHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.rowHeading strong,
+.rowCopy small {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.row small {
+.rowHeading strong {
+  min-width: 0;
+  color: var(--admin-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.rowHeading :global(.admin-status-badge) {
+  flex: none;
+  padding: 2px 5px;
+  font-size: 10px;
+}
+
+.rowCopy small {
   color: var(--admin-muted);
+  font-size: 11px;
 }
 
 .editor {
   display: grid;
-  gap: 18px;
+  gap: 16px;
+  min-width: 0;
 }
 
-.editor > header,
-.editor > footer {
+.editorHeader {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 18px;
+  padding: 0 2px 2px;
 }
 
-.editor h2 {
-  margin: 0 0 4px;
+.editorHeader h2 {
+  margin: 4px 0 5px;
+  color: var(--admin-text);
+  font-size: 21px;
+  font-weight: 620;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
-.editor header small {
+.editorHeader p {
+  max-width: 680px;
   color: var(--admin-muted);
-}
-
-.badge {
-  flex: 0 0 auto;
-  padding: 5px 9px;
-  border-radius: 999px;
-  color: var(--admin-accent);
-  background: var(--admin-accent-soft);
   font-size: 12px;
-  font-weight: 700;
+  line-height: 1.75;
 }
 
-.error,
-.message {
-  margin: 0;
-  padding: 10px 12px;
-  border-radius: 8px;
+.editorHeader > :global(.admin-status-badge) {
+  margin-top: 4px;
 }
 
-.error {
-  color: var(--admin-danger);
-  background: color-mix(in srgb, var(--admin-danger) 10%, transparent);
+.form {
+  display: block;
 }
 
-.message {
-  color: var(--admin-positive);
-  background: color-mix(in srgb, var(--admin-positive) 10%, transparent);
+.form :global(.admin-settings-section:last-child) {
+  margin-bottom: 0;
 }
 
-@media (max-width: 900px) {
-  .layout {
+.form :global(.ui-textarea) {
+  min-height: 86px;
+  resize: vertical;
+}
+
+.form :global(textarea[rows="12"]) {
+  min-height: 220px;
+}
+
+.form :global(.admin-settings-message) {
+  margin-top: 14px;
+}
+
+@media (max-width: 1050px) {
+  .workspace {
+    grid-template-columns: minmax(250px, 290px) minmax(0, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 860px) {
+  .workspace {
     grid-template-columns: 1fr;
   }
 
@@ -144,6 +245,58 @@
   }
 
   .list {
-    max-height: 40vh;
+    max-height: 360px;
+  }
+
+  .editor :global(.admin-settings-savebar) {
+    position: static;
+    bottom: auto;
+  }
+}
+
+@media (max-width: 580px) {
+  .search {
+    grid-template-columns: 1fr;
+  }
+
+  .search :global(.admin-action-button) {
+    width: 100%;
+  }
+
+  .catalogHeader,
+  .catalogTools {
+    padding-inline: 14px;
+  }
+
+  .list {
+    padding: 6px;
+  }
+
+  .row {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    padding: 10px 8px;
+  }
+
+  .rowGlyph {
+    width: 32px;
+    height: 32px;
+  }
+
+  .rowHeading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .editorHeader {
+    gap: 10px;
+  }
+
+  .editorHeader h2 {
+    font-size: 19px;
+  }
+
+  .editorHeader > :global(.admin-status-badge) {
+    margin-top: 2px;
   }
 }

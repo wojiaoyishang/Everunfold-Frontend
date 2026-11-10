@@ -54,6 +54,8 @@ test("search selection preserves the default GET value before hydration without 
       name: "type",
       label: "内容类型",
       defaultValue: "article",
+      id: "content-type",
+      "aria-describedby": "content-type-hint",
       options,
     }),
   );
@@ -73,6 +75,12 @@ test("search selection preserves the default GET value before hydration without 
   const hidden = controls.find((node) => node.attribs.type === "hidden")!;
   assert.equal(hidden.attribs.name, undefined);
   assert.equal(hidden.attribs.value, "article");
+  const trigger = DomUtils.findOne(
+    (node) => node.attribs?.role === "combobox",
+    document.children,
+  );
+  assert.equal(trigger?.attribs.id, "content-type");
+  assert.equal(trigger?.attribs["aria-describedby"], "content-type-hint");
   assert.ok(!html.includes("<select"));
 });
 

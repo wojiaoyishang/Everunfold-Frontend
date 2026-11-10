@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import {
@@ -9,11 +9,14 @@ import {
   readGlossaryTerm,
   updateGlossaryTerm,
 } from "@/core/contracts/glossary";
-import { useAdminRequest } from "@/core/admin/account-context";
+import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { randomUUID } from "@/core/browser/crypto";
-import { useLanguageCatalog } from "@/core/i18n/provider";
+import { UiText, useLanguageCatalog } from "@/core/i18n/provider";
+import { can } from "@/core/accounts/permissions";
 import { RequestError } from "@/core/http/request";
 import { AdminPageHeading } from "../components/page-heading";
+import { AdminActionButton } from "../components/action-button";
+import { SettingsSection, SettingsText } from "../settings/shared";
 import {
   Button,
   Form,
@@ -28,6 +31,12 @@ type List = NonNullable<GlossaryContract["list"]["data"]>;
 type ListItem = List["items"][number];
 type Detail = NonNullable<GlossaryContract["detail"]["data"]>;
 type Fields = GlossaryContract["create"]["fields"];
+
+const statusMeta = {
+  draft: { label: "草稿", icon: "edit", tone: "neutral" },
+  published: { label: "已发布", icon: "check", tone: "positive" },
+  archived: { label: "已归档", icon: "archive", tone: "warning" },
+} as const;
 
 const blankFields = (language: string): Fields => ({
   language,
@@ -86,7 +95,16 @@ function failureMessage(error: unknown) {
 
 export function GlossaryAdminPage() {
   const { baseUrl, csrfToken } = useAdminRequest();
+  const user = useAdminAccount();
+  const writable = can(user, "content:write", null);
   const languages = useLanguageCatalog();
+  const languageId = useId();
+  const languageHintId = useId();
+  const summaryId = useId();
+  const aliasesId = useId();
+  const bodyId = useId();
+  const statusId = useId();
+  const statusHintId = useId();
   const [catalog, setCatalog] = useState<List | null>(null);
   const [selected, setSelected] = useState<Detail | null>(null);
   const [fields, setFields] = useState<Fields>(() =>
@@ -227,220 +245,373 @@ export function GlossaryAdminPage() {
   }
 
   const items = catalog?.items ?? [];
-  const statusLabel = useMemo(
-    () => ({ draft: "草稿", published: "已发布", archived: "已归档" }),
-    [],
-  );
   return (
-    <>
+    <div className={`admin-settings-page ${styles.page}`}>
       <AdminPageHeading
         title="术语表"
         description="维护正文自动命中的术语、别名与提示内容。"
         action={
-          <Button
-            className="admin-button admin-button-primary"
-            onClick={startNew}
-          >
-            <Icon name="plus" />
-            新建术语
-          </Button>
+          writable ? (
+            <AdminActionButton icon="plus" tone="accent" onClick={startNew}>
+              <UiText text="新建术语" />
+            </AdminActionButton>
+          ) : undefined
         }
       />
-      <div className={styles.layout}>
+      <div className={styles.workspace}>
         <section
-          className={`admin-surface ${styles.catalog}`}
+          className={`admin-panel ${styles.catalog}`}
           aria-label="术语目录"
         >
-          <Form
-            role="search"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setAppliedSearch(search.trim());
-            }}
-          >
-            <TextField
-              type="search"
-              aria-label="搜索术语"
-              placeholder="标题、路径或说明"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-            <Button type="submit" className="admin-button">
-              搜索
-            </Button>
-          </Form>
-          <div className={styles.filters}>
-            {(["all", "draft", "published", "archived"] as const).map(
-              (value) => (
-                <Button
-                  key={value}
-                  aria-pressed={status === value}
-                  onClick={() => setStatus(value)}
-                >
-                  {value === "all" ? "全部" : statusLabel[value]}
-                </Button>
-              ),
-            )}
+          <header className={styles.catalogHeader}>
+            <div>
+              <span className="admin-eyebrow">
+                <UiText text="术语目录" />
+              </span>
+              <h2>
+                <UiText text="已维护词条" />
+              </h2>
+            </div>
+            <div className={styles.catalogActions}>
+              <span className="admin-badge">
+                {catalog?.total ?? 0} <UiText text="项" />
+              </span>
+              <Button
+                className="admin-icon-button"
+                aria-label="刷新术语目录"
+                title="刷新术语目录"
+                disabled={loading}
+                onClick={() => void load()}
+              >
+                <Icon
+                  name="refresh"
+                  className={loading ? "admin-draft-spin" : ""}
+                />
+              </Button>
+            </div>
+          </header>
+          <div className={styles.catalogTools}>
+            <Form
+              className={styles.search}
+              role="search"
+              onSubmit={(event) => {
+                event.preventDefault();
+                setAppliedSearch(search.trim());
+              }}
+            >
+              <label className="admin-search">
+                <Icon name="search" />
+                <TextField
+                  type="search"
+                  aria-label="搜索术语"
+                  placeholder="标题、路径或说明"
+                  maxLength={200}
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                />
+              </label>
+              <AdminActionButton type="submit" icon="search">
+                <UiText text="搜索" />
+              </AdminActionButton>
+            </Form>
+            <div
+              className={`admin-draft-tabs ${styles.filters}`}
+              aria-label="术语状态"
+            >
+              {(["all", "draft", "published", "archived"] as const).map(
+                (value) => (
+                  <Button
+                    key={value}
+                    aria-pressed={status === value}
+                    onClick={() => setStatus(value)}
+                  >
+                    <UiText
+                      text={value === "all" ? "全部" : statusMeta[value].label}
+                    />
+                  </Button>
+                ),
+              )}
+            </div>
           </div>
           <div className={styles.list} aria-busy={loading}>
-            {loading && !catalog ? <p role="status">正在读取术语…</p> : null}
-            {!loading && items.length === 0 ? <p>还没有匹配的术语。</p> : null}
-            {items.map((item) => (
-              <Button
-                key={item.id}
-                className={styles.row}
-                aria-current={selected?.id === item.id ? "true" : undefined}
-                onClick={() => void edit(item)}
-              >
-                <span>
-                  <strong>{item.title}</strong>
-                  <small>
-                    /glossary/{item.slug} · {statusLabel[item.status]}
-                  </small>
-                </span>
-                <Icon name="chevron" />
-              </Button>
-            ))}
+            {loading && !catalog ? (
+              <div className="admin-draft-empty" role="status">
+                <Icon name="refresh" className="admin-draft-spin" />
+                <p>
+                  <UiText text="正在读取术语…" />
+                </p>
+              </div>
+            ) : null}
+            {!loading && items.length === 0 ? (
+              <div className="admin-draft-empty">
+                <Icon name="glossary" />
+                <h2>
+                  <UiText text="还没有匹配的术语" />
+                </h2>
+                <p>
+                  <UiText text="新建词条后，正文中命中的文字会自动出现提示。" />
+                </p>
+              </div>
+            ) : null}
+            {items.map((item) => {
+              const meta = statusMeta[item.status];
+              return (
+                <Button
+                  key={item.id}
+                  className={styles.row}
+                  aria-current={selected?.id === item.id ? "true" : undefined}
+                  onClick={() => void edit(item)}
+                >
+                  <span className={styles.rowGlyph}>
+                    <Icon name="glossary" />
+                  </span>
+                  <span className={styles.rowCopy}>
+                    <span className={styles.rowHeading}>
+                      <strong>{item.title}</strong>
+                      <span
+                        className="admin-badge admin-status-badge"
+                        data-tone={meta.tone}
+                      >
+                        <Icon name={meta.icon} />
+                        <UiText text={meta.label} />
+                      </span>
+                    </span>
+                    <small>/glossary/{item.slug}</small>
+                  </span>
+                  <Icon name="chevron" />
+                </Button>
+              );
+            })}
           </div>
         </section>
         <Form
-          className={`admin-surface ${styles.editor}`}
+          className={styles.editor}
           onSubmit={(event) => {
             event.preventDefault();
             void save();
           }}
         >
-          <header>
+          <header className={styles.editorHeader}>
             <div>
-              <h2>{selected ? `编辑「${selected.title}」` : "新建术语"}</h2>
-              <small>
-                {selected
-                  ? `修订 ${selected.revision} · 最后更新 ${new Date(selected.updated_at).toLocaleString("zh-CN")}`
-                  : "标题和别名会在文章正文中自动匹配。"}
-              </small>
+              <span className="admin-eyebrow">
+                <UiText text={selected ? "词条编辑" : "新词条"} />
+              </span>
+              <h2>{selected ? selected.title : "新建术语"}</h2>
+              <p>
+                <UiText
+                  text={
+                    selected
+                      ? "修改会作用于后续文章匹配；已打开页面的本地缓存到期后更新。"
+                      : "标题会作为默认匹配词，别名可以补充不同写法。"
+                  }
+                />
+              </p>
             </div>
             {selected && (
-              <span className={styles.badge}>
-                {statusLabel[selected.status]}
+              <span
+                className="admin-badge admin-status-badge"
+                data-tone={statusMeta[selected.status].tone}
+              >
+                <Icon name={statusMeta[selected.status].icon} />
+                <UiText text={statusMeta[selected.status].label} />
               </span>
             )}
           </header>
-          <div className="admin-settings-two-col">
-            <label className="admin-field">
-              <span>术语标题</span>
-              <TextField
-                value={fields.title}
+          <fieldset
+            className={`admin-settings-form ${styles.form}`}
+            disabled={!writable || saving}
+          >
+            <SettingsSection
+              id="glossary-basics"
+              title="基本信息"
+              description="标题、地址和语言共同确定词条的公开身份。"
+            >
+              <div className="admin-settings-two-col">
+                <SettingsText
+                  label="术语标题"
+                  hint="标题本身会自动参与正文匹配。"
+                  value={fields.title}
+                  maxLength={120}
+                  placeholder="例如：金灵"
+                  onChange={(title) =>
+                    setFields((current) => ({
+                      ...current,
+                      title,
+                      slug: slugTouched.current ? current.slug : slugify(title),
+                    }))
+                  }
+                />
+                <div className="admin-settings-field">
+                  <label htmlFor={languageId}>
+                    <UiText text="内容语言" />
+                  </label>
+                  <Select
+                    id={languageId}
+                    name="glossary-language"
+                    label="内容语言"
+                    aria-describedby={languageHintId}
+                    value={fields.language}
+                    options={languages.languages.map((item) => ({
+                      value: item.code,
+                      label: item.name,
+                    }))}
+                    onValueChange={(language) => update({ language })}
+                  />
+                  <small id={languageHintId}>
+                    <UiText text="只有与文章语言相同的词条会参与匹配。" />
+                  </small>
+                </div>
+              </div>
+              <SettingsText
+                label="路径片段"
+                hint={`公开地址：/glossary/${fields.slug || "term-slug"}`}
+                value={fields.slug}
                 maxLength={120}
-                onChange={(event) => {
-                  const title = event.target.value;
-                  setFields((current) => ({
-                    ...current,
-                    title,
-                    slug: slugTouched.current ? current.slug : slugify(title),
-                  }));
+                placeholder="例如：jin-ling"
+                onChange={(slug) => {
+                  slugTouched.current = true;
+                  update({ slug });
                 }}
               />
-            </label>
-            <label className="admin-field">
-              <span>内容语言</span>
-              <Select
-                name="glossary-language"
-                label="内容语言"
-                value={fields.language}
-                options={languages.languages.map((item) => ({
-                  value: item.code,
-                  label: item.name,
-                }))}
-                onValueChange={(language) => update({ language })}
-              />
-            </label>
-          </div>
-          <label className="admin-field">
-            <span>路径片段</span>
-            <TextField
-              value={fields.slug}
-              maxLength={120}
-              onChange={(event) => {
-                slugTouched.current = true;
-                update({ slug: event.target.value });
-              }}
-            />
-            <small>公开地址：/glossary/{fields.slug || "term-slug"}</small>
-          </label>
-          <label className="admin-field">
-            <span>悬浮提示</span>
-            <TextArea
-              value={fields.summary}
-              rows={3}
-              maxLength={500}
-              placeholder="鼠标悬停、键盘聚焦或触屏点按时显示。"
-              onChange={(event) => update({ summary: event.target.value })}
-            />
-          </label>
-          <label className="admin-field">
-            <span>匹配文字</span>
-            <TextArea
-              value={aliasText}
-              rows={4}
-              placeholder={"每行一个别名，也可用逗号分隔\n例如：金灵\njinling"}
-              onChange={(event) => setAliasText(event.target.value)}
-            />
-            <small>
-              术语标题本身也会参与匹配；同一语言内不能与其他词条重复。
-            </small>
-          </label>
-          <label className="admin-field">
-            <span>完整说明（Markdown）</span>
-            <TextArea
-              value={fields.body_markdown}
-              rows={10}
-              maxLength={20000}
-              onChange={(event) =>
-                update({ body_markdown: event.target.value })
-              }
-            />
-          </label>
-          <label className="admin-field">
-            <span>发布状态</span>
-            <Select
-              name="glossary-status"
-              label="发布状态"
-              value={fields.status}
-              options={[
-                { value: "draft", label: "草稿" },
-                { value: "published", label: "已发布" },
-                { value: "archived", label: "已归档" },
-              ]}
-              onValueChange={(value) =>
-                update({ status: value as Fields["status"] })
-              }
-            />
-          </label>
+            </SettingsSection>
+            <SettingsSection
+              id="glossary-matching"
+              title="匹配规则"
+              description="标题始终参与匹配；这里补充其他常见写法。"
+            >
+              <div className="admin-settings-field">
+                <label htmlFor={aliasesId}>
+                  <UiText text="匹配文字" />
+                </label>
+                <TextArea
+                  id={aliasesId}
+                  value={aliasText}
+                  rows={4}
+                  placeholder={
+                    "每行一个别名，也可用逗号分隔\n例如：金灵\njinling"
+                  }
+                  onChange={(event) => setAliasText(event.target.value)}
+                />
+                <small>
+                  <UiText text="同一语言内不能与其他词条的标题或别名重复。" />
+                </small>
+              </div>
+            </SettingsSection>
+            <SettingsSection
+              id="glossary-content"
+              title="提示内容"
+              description="简短提示用于默认弹层，完整说明用于详情页或展开阅读。"
+            >
+              <div className="admin-settings-field">
+                <label htmlFor={summaryId}>
+                  <UiText text="悬浮提示" />
+                </label>
+                <TextArea
+                  id={summaryId}
+                  value={fields.summary}
+                  rows={3}
+                  maxLength={500}
+                  placeholder="鼠标悬停、键盘聚焦或触屏点按时显示。"
+                  onChange={(event) => update({ summary: event.target.value })}
+                />
+                <small>
+                  <UiText text="建议用一句或两句话说明这个词在本站语境中的含义。" />
+                </small>
+              </div>
+              <div className="admin-settings-field">
+                <label htmlFor={bodyId}>
+                  <UiText text="完整说明（Markdown）" />
+                </label>
+                <TextArea
+                  id={bodyId}
+                  value={fields.body_markdown}
+                  rows={12}
+                  maxLength={20000}
+                  placeholder="补充词条的背景、来源或相关故事。"
+                  onChange={(event) =>
+                    update({ body_markdown: event.target.value })
+                  }
+                />
+                <small>
+                  <UiText text="支持安全 Markdown；留空时公开详情页回退到悬浮提示。" />
+                </small>
+              </div>
+            </SettingsSection>
+            <SettingsSection
+              id="glossary-publication"
+              title="发布状态"
+              description="草稿不会公开；归档会保留记录，但停止出现在目录和正文提示中。"
+            >
+              <div className="admin-settings-field">
+                <label htmlFor={statusId}>
+                  <UiText text="状态" />
+                </label>
+                <Select
+                  id={statusId}
+                  name="glossary-status"
+                  label="发布状态"
+                  aria-describedby={statusHintId}
+                  value={fields.status}
+                  options={Object.entries(statusMeta).map(([value, item]) => ({
+                    value,
+                    label: item.label,
+                  }))}
+                  onValueChange={(value) =>
+                    update({ status: value as Fields["status"] })
+                  }
+                />
+                <small id={statusHintId}>
+                  <UiText text="发布后会进入公开术语目录，并在命中的文章中显示提示。" />
+                </small>
+              </div>
+            </SettingsSection>
+          </fieldset>
           {error && (
-            <p className={styles.error} role="alert">
-              {error}
-            </p>
+            <div className="admin-settings-message is-error" role="alert">
+              <Icon name="warning" />
+              <span>{error}</span>
+            </div>
           )}
           {message && (
-            <p className={styles.message} role="status">
-              {message}
+            <p className="admin-settings-message" role="status">
+              <Icon name="check" />
+              <span>{message}</span>
             </p>
           )}
-          <footer>
-            <Button type="button" className="admin-button" onClick={startNew}>
-              清空
-            </Button>
-            <Button
-              type="submit"
-              className="admin-button admin-button-primary"
-              disabled={saving}
-            >
-              <Icon name={saving ? "refresh" : "check"} />
-              {saving ? "正在保存" : selected ? "保存更改" : "创建术语"}
-            </Button>
-          </footer>
+          <div className="admin-settings-savebar">
+            <div>
+              <span>
+                {selected
+                  ? `修订 ${selected.revision} · 最后更新 ${new Date(selected.updated_at).toLocaleString("zh-CN")}`
+                  : writable
+                    ? "新术语尚未保存"
+                    : "当前账号只有读取权限"}
+              </span>
+            </div>
+            <div className="admin-settings-actions">
+              <AdminActionButton
+                icon="undo"
+                disabled={!writable || saving}
+                onClick={startNew}
+              >
+                <UiText text="清空" />
+              </AdminActionButton>
+              <AdminActionButton
+                type="submit"
+                icon={saving ? "refresh" : "save"}
+                tone="accent"
+                disabled={!writable || saving}
+              >
+                <UiText
+                  text={
+                    saving ? "正在保存" : selected ? "保存更改" : "创建术语"
+                  }
+                />
+              </AdminActionButton>
+            </div>
+          </div>
         </Form>
       </div>
-    </>
+    </div>
   );
 }

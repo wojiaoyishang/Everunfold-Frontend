@@ -24,6 +24,8 @@ export function Select({
   disabled = false,
   className,
   programOptions = false,
+  id: providedId,
+  "aria-describedby": describedBy,
 }: {
   name: string;
   label: string;
@@ -34,13 +36,16 @@ export function Select({
   disabled?: boolean;
   className?: string;
   programOptions?: boolean;
+  id?: string;
+  "aria-describedby"?: string;
 }) {
   const t = useT();
   const label = t(sourceLabel);
   const options = programOptions
     ? sourceOptions.map((item) => ({ ...item, label: t(item.label) }))
     : sourceOptions;
-  const id = useId();
+  const generatedId = useId();
+  const id = providedId ?? generatedId;
   const {
     trigger,
     panel,
@@ -143,6 +148,7 @@ export function Select({
         disabled={disabled}
       />
       <Button
+        id={id}
         ref={trigger}
         className="ui-select-trigger"
         role="combobox"
@@ -150,6 +156,7 @@ export function Select({
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-controls={`${id}-options`}
+        aria-describedby={describedBy}
         aria-activedescendant={
           open && active >= 0 ? `${id}-option-${active}` : undefined
         }
