@@ -1,18 +1,18 @@
 # 术语表与文章按需 Tooltip
 
-版本：glossary-runtime-2，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
+版本：glossary-runtime-3，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
 
 ## 管理入口
 
 管理员在「内容 → 术语表」打开 `/admin/glossary`：
 
 - 标题和别名都会参与正文匹配；同一语言内不能与其他非归档词条重复。
-- 简短提示用于默认 Tooltip，完整说明是安全 Markdown，用于详情页或选择“完整词条说明”时。
+- 简短提示用于默认 Tooltip；完整正文与文章相同，是带稳定块 ID 的安全 Markdown/HTML 区块列表，用于详情页或选择“完整词条说明”时。
 - 草稿不进入公开目录和文章匹配；发布后进入；归档后保留记录但不再公开。
 - 保存使用 `operation_id` 幂等和 `expected_revision` 冲突保护。冲突时保留当前输入，刷新词条后再合并。
 - 公开路径为 `/glossary/{slug}`。路径是稳定公开标识，修改已有词条的 slug 会改变旧链接。
 
-后台采用与其他系统设置一致的布局：页面接入 `admin-settings-page`，编辑区用 `SettingsSection` / `SettingsText` / `admin-settings-field`，目录与状态使用共享的后台按钮、搜索、徽标和空状态。术语页面不应重新用裸标签和浏览器默认控件拼装表单。默认弹层使用简短提示，完整 Markdown 说明在详情页或选择“完整词条说明”时使用。
+后台采用与其他系统设置一致的布局：页面接入 `admin-settings-page`，编辑区用 `SettingsSection` / `SettingsText` / `admin-settings-field`，目录与状态使用共享的后台按钮、搜索、徽标和空状态。术语正文复用文章 `EditorBody`、`BlockComposer`、`DraftPreview`、格式/代码/公式/媒体工具和统一上传队列；默认弹层使用简短提示，完整正文在详情页或选择“完整词条说明”时使用。术语页面不应重新用裸标签和浏览器默认控件拼装表单。
 
 ## 后端匹配与缓存边界
 
@@ -36,7 +36,8 @@ GET /v1/plugins/everunfold.glossary/for-content/{content_id}
 - 长别名优先，区间不重叠；ASCII 词不能命中更长英文单词内部。
 - 链接、按钮、代码、公式、脚本、隐藏文本和已有提示节点不装饰。
 - Tooltip 支持点击/触屏打开、Enter/空格、Escape 关闭并回到触发词；悬停离开有短暂延迟，便于进入弹层。
-- `summary` 只显示简短提示；`content` 使用现有安全 Markdown 渲染器显示详情。
+- `summary` 只显示简短提示；`content` 把 `body` 区块交给与文章相同的共享安全渲染入口，保留代码、公式、媒体、HTML 和已应用短代码，正文为空时回退到 `summary`。
+- 弹层只在展开完整内容时渲染富文本，宽度受视口约束，内部滚动且不产生横向溢出；代码和公式资源继续按需加载。
 
 关闭 `site.glossary.auto_match` 后，文章不再加载术语组件，正文缓存仍正常工作。提示的最大值只限制当前页面，不删除目录或词条。
 
@@ -51,6 +52,7 @@ GET /v1/plugins/everunfold.glossary/for-content/{content_id}
 2. 保持 Receiver、Worker 和 Scheduler 正常，确认插件状态为已同步；`50389` 表示插件部署清单尚未应用到节点。
 3. 访问含术语的文章，等待空闲术语请求；若正文有词但没有提示，检查文章语言、词条是否为发布状态、正文是否在链接/代码/公式中，以及页面大小限制。
 4. 访问不含术语的文章，确认接口 `terms` 为空且页面没有 `.glossary-term`；不要用公开 `/glossary` 全量列表填充文章 Tooltip。
+5. 若配置为 `popup_source=content` 但只显示简短提示，检查设置投递是否已应用，以及词条 `body` 是否至少有一个非空块。
 
 ## 当前边界
 

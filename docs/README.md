@@ -1,12 +1,14 @@
 # Everunfold 文档入口
 
+[术语富文本编辑与弹层验收](handoff/glossary-rich-editor-verification.md)：术语后台接入文章式区块编辑器，保存栏与系统设置统一；Tooltip 和公开详情复用文章的安全 Markdown/HTML、代码、公式、媒体与短代码渲染。
+
 [登录验证码布局验收](handoff/login-captcha-verification.md)：登录页把图片与输入合并为一个同行、等高的双段验证控件，刷新期间保留原布局并显示真实加载状态；桌面、390px 和 320px 实页检查通过，评论验证码弹窗保持原布局。
 
 [术语管理菜单可见性修复](handoff/admin-glossary-menu-verification.md)：`/admin/glossary` 补齐 `content:read` 权限映射，术语页不再被后台导航当作未注册页面过滤。
 
 [术语管理后台视觉重构](handoff/glossary-admin-workspace-verification.md)：编辑区改用设置分组和共享表单控件，目录增加搜索、状态筛选、徽标与选中态；浅色、深色、桌面和 390px 已实页检查。
 
-[术语表与文章级 Tooltip](development/glossary.md)、[ADR0099](decisions/0099-article-scoped-glossary-tooltips.md)：后端按文章可见正文匹配并只返回实际命中的已发布词条，未命中文章返回空数组；正文继续缓存，前端空闲懒加载术语组件，命中/空结果均按内容修订缓存 5 分钟。后台可维护标题、别名、提示、Markdown 详情和发布状态，公开提供 `/glossary` 与详情页。
+[术语表与文章级 Tooltip](development/glossary.md)、[ADR0099](decisions/0099-article-scoped-glossary-tooltips.md)：后端按文章可见正文匹配并只返回实际命中的已发布词条，未命中文章返回空数组；正文继续缓存，前端空闲懒加载术语组件，命中/空结果均按内容修订缓存 5 分钟。后台以文章式区块维护 Markdown/HTML 正文，公开提供 `/glossary` 与详情页。
 
 [主题私有设置](development/theme-settings.md)、[ADR0100](decisions/0100-theme-owned-settings-profiles.md)：`/admin/settings/theme` 只负责主题切换和宿主，Argon、Paper 的表单分别位于各自主题目录；`theme_options` 为每个主题保存独立 profile，顶层 `theme` 保留活动主题兼容投影。站点级页脚、作者格言和术语提示仍在站点设置。
 
@@ -150,14 +152,14 @@
 
 最新认证交付：后端记录见 [认证后端验收](handoff/authentication-verification.md)，前端记录见 [登录与空后台验收](handoff/authentication-frontend-verification.md)。登录现为通用账号入口，未指定返回地址时管理员回后台、普通账号回前台，成功反馈完成后再切换；认证等待态复用宽松的响应式卡片，背景为等比自适应的柔焦星空营地；管理员验证后进入独立后台工作台。2026-11-01 用户批准样例后已按 ADR 0021 拆分 auth/admin，后台拥有独立配色与偏好；文章/说说基础 CRUD、发布/撤回与完整快照同步已由 ADR 0031 接通；媒体库上传、资料和基本图片编辑已由 ADR 0025/0026 实施。
 
-| 目录 | 内容与维护时机 |
-| --- | --- |
-| `baseline/` | 两份原始附件的逐字节副本、来源和 SHA256；保留历史依据，不直接改写原件 |
-| `architecture/` | 已落实的架构边界、模块与数据设计；明确区分已实现和计划 |
-| `design/` | 官方参考调研与视觉方向；区分外部观察、建议和已验收界面 |
-| `development/` | 开发协议、本地运行和检查方法；随工具或流程变化更新 |
-| `decisions/` | 编号 ADR，记录决定、原因、后果和替代关系 |
-| `handoff/` | 当前状态、验证记录和下一步；每次有意义交付更新 |
+| 目录            | 内容与维护时机                                                        |
+| --------------- | --------------------------------------------------------------------- |
+| `baseline/`     | 两份原始附件的逐字节副本、来源和 SHA256；保留历史依据，不直接改写原件 |
+| `architecture/` | 已落实的架构边界、模块与数据设计；明确区分已实现和计划                |
+| `design/`       | 官方参考调研与视觉方向；区分外部观察、建议和已验收界面                |
+| `development/`  | 开发协议、本地运行和检查方法；随工具或流程变化更新                    |
+| `decisions/`    | 编号 ADR，记录决定、原因、后果和替代关系                              |
+| `handoff/`      | 当前状态、验证记录和下一步；每次有意义交付更新                        |
 
 后续可新增 `api/`、`database/`、`migration/`、`operations/` 等子目录。只有实际产生对应文档时才扩展索引，避免大量没有内容的占位文档。
 
@@ -214,7 +216,6 @@
 - [编辑留白与十行高度](decisions/0040-source-editor-spacing-and-minimum-height.md)：用户最新排版要求、CSS规则、浏览器检查与截图。
 
 - [添加区块反馈修复](decisions/0041-block-insert-picker-feedback.md)：所有添加入口弹出类型选择、明确插入位置与浏览器验收。
-
 
 - [可视化编辑器与字体库](decisions/0042-visual-editors-and-font-library.md)、[字体按需加载指南](development/font-library.md) 与 [本轮验收](handoff/visual-editor-font-verification.md)：HTML默认可视化/受保护源码、Markdown预览分屏、轻量工具栏及字体注册/上传/选择。
 

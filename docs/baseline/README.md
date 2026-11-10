@@ -1389,3 +1389,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/README.md` | `index-glossary-admin-workspace-1` | `1c311153bdeec22857bd2b29218b8c845a96f950206914d4f94919b329774c9d` |
 | `docs/development/glossary.md` | `glossary-runtime-2` | `1ce962e2a2e29b34a970f0def31ff610260e3a2627a5243c5d38b0023f6ff56a` |
 | `docs/handoff/glossary-admin-workspace-verification.md` | `glossary-admin-workspace-verification-1` | `ae1a8fae8a3ca0982aa643ec7059cabebdb904dd81d493d5bb7dcdcfffd48378` |
+
+
+## 术语富文本编辑与弹层（2026-11-10）
+
+后端2d5fe5c/e7b8219、前端f444034；glossary-v1 2.0.0和0037迁移。术语改为文章式Markdown/HTML正文块，后台编辑器、公开详情与Tooltip复用共享安全渲染；实际数据和检查见验收，原始基线与STATUS分别维护。以下版本替代对应旧摘要。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-glossary-rich-editor-1` | `7262d8207e90b7dcf904ddc9ddcfbcd3ff54dd7f5f1153324bdc4de8769c9fb0` |
+| `docs/architecture/constraints.md` | `constraints-glossary-rich-editor-1` | `a006304da335d23d3e5edbde542af379e62faa3a48874474e9465bb1d2b79da5` |
+| `docs/development/glossary.md` | `glossary-runtime-3` | `64b21a12dfd7807f83a46bbd70e56c47f5268223faa7bbb16fc5fffbc4f86151` |
+| `docs/decisions/0099-article-scoped-glossary-tooltips.md` | `ADR0099-2` | `a5a3efd5d7670dfa0d9ed60e4919fad3be818c83e460daff655cefd0cc4af141` |
+| `docs/handoff/glossary-rich-editor-verification.md` | `glossary-rich-editor-verification-1` | `5850abe40b7513d4056a1a82d8f6af62d50946af3bb94b45492ab926d0dddf53` |
