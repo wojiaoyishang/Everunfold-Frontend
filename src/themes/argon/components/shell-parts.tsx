@@ -1,4 +1,6 @@
 import type { Site } from "@/core/content/types";
+import { publicHref } from "@/core/content/urls";
+import { AppLink } from "./navigation-link";
 
 export function SiteHero({ site }: { site: Site }) {
   return (
@@ -14,12 +16,26 @@ export function SiteHero({ site }: { site: Site }) {
 }
 
 export function SiteFooter({ site }: { site: Site }) {
+  const footer = site.settings?.site.footer;
+  const links = (footer?.links ?? []).filter(
+    (link) => link.label.trim() && publicHref(link.href),
+  );
   return (
     <footer className="site-footer">
       <p>
-        © {new Date().getFullYear()} {site.author} ·{" "}
-        {site.hero_title || site.name}
+        {footer?.copyright ||
+          `© ${new Date().getFullYear()} ${site.author} · ${site.hero_title || site.name}`}
       </p>
+      {links.length > 0 && (
+        <p className="footer-links">
+          {links.map((link, index) => (
+            <span key={link.id}>
+              {index > 0 && <span className="footer-separator">·</span>}
+              <AppLink href={link.href}>{link.label}</AppLink>
+            </span>
+          ))}
+        </p>
+      )}
       <p>
         Every story is still unfolding.{" "}
         <span className="footer-separator">·</span> Powered by Everunfold

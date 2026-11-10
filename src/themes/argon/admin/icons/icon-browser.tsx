@@ -29,6 +29,7 @@ const labels: Record<string, string> = {
   trash: "垃圾桶",
   leaf: "叶片",
   book: "书本",
+  glossary: "术语表",
   folder: "文件夹",
   tag: "标签",
   link: "链接",

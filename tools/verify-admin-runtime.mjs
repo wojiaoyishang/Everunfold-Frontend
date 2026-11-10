@@ -133,6 +133,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/settings/api-keys",
       "/admin",
       "/admin/content",
+      "/admin/glossary",
       "/admin/taxonomies",
       "/admin/content/article",
       "/admin/content/shuoshuo",

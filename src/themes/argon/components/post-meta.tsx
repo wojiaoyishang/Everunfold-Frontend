@@ -6,31 +6,36 @@ import { AppLink as Link } from "./navigation-link";
 import { Icon } from "./icon";
 import { ViewMetric } from "./reader-data";
 import { ContentEditLink } from "./content-edit-link";
+import type { ArticleDisplayPreferences } from "@/core/contracts/settings";
 
 export function PostMeta({
   content,
   article = false,
   liveMetrics = true,
   interactive = true,
+  display,
 }: {
   content: ReadableContent;
   article?: boolean;
   liveMetrics?: boolean;
   interactive?: boolean;
+  display?: ArticleDisplayPreferences;
 }) {
   const locked = Boolean(content.access && content.access !== "public");
   return (
     <div className="post-meta">
-      {article && (
+      {article && display?.show_author !== false && (
         <span>
           <Icon name="user" />
           {content.author}
         </span>
       )}
-      <time dateTime={content.published_at}>
-        <Icon name="calendar" />
-        {displayDate(content.published_at)}
-      </time>
+      {display?.show_date !== false && (
+        <time dateTime={content.published_at}>
+          <Icon name="calendar" />
+          {displayDate(content.published_at)}
+        </time>
+      )}
       {locked ? (
         <span>
           <Icon name={content.opens_at ? "clock" : "lock"} />
@@ -42,7 +47,7 @@ export function PostMeta({
             <UiText text="密码保护" />
           )}
         </span>
-      ) : article ? (
+      ) : article && display?.show_word_count !== false ? (
         <span>
           <Icon name="book" />
           {content.word_count.toLocaleString("zh-CN")} <UiText text="字" />
@@ -55,7 +60,7 @@ export function PostMeta({
           </Link>
         ))
       )}
-      {!locked && (
+      {!locked && display?.show_reading_time !== false && (
         <span>
           <Icon name="clock" />
           {content.reading_minutes} <UiText text="分钟" />
@@ -63,6 +68,7 @@ export function PostMeta({
       )}
       {interactive &&
         !locked &&
+        display?.show_comments !== false &&
         (content.comments_open !== false || content.comment_count > 0) && (
           <Link
             href={article ? "#comments" : `${content.path}#comments`}
@@ -72,7 +78,9 @@ export function PostMeta({
             {content.comment_count}
           </Link>
         )}
-      {!locked && liveMetrics && <ViewMetric contentId={content.id} />}
+      {!locked && liveMetrics && display?.show_views !== false && (
+        <ViewMetric contentId={content.id} />
+      )}
       {article && interactive && <ContentEditLink contentId={content.id} />}
     </div>
   );

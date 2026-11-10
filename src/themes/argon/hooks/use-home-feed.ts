@@ -12,19 +12,21 @@ import {
   subscribeHomeFeedPreference,
 } from "@/core/browser/home-feed-preference";
 import { useRouteState } from "../components/route-state";
+import { themeProfile } from "@/core/settings/theme-options";
 
 export function useHomeFeed() {
   const saved = useSyncExternalStore(
     subscribeHomeFeedPreference,
     readHomeFeedPreference,
-    () => "all" as const,
+    () => null,
   );
-  const { route, navigate } = useRouteState();
+  const { route, navigate, site } = useRouteState();
+  const siteDefault = themeProfile(site.settings)?.feed.default_type ?? "all";
   const url = new URL(route, "https://route.invalid");
   const value =
     isHomeFeed(url) && url.searchParams.has("type")
       ? homeFeedType(url.searchParams.get("type"))
-      : saved;
+      : (saved ?? siteDefault);
   function setValue(next: HomeFeedType) {
     setHomeFeedPreference(next);
     const destination = changedHomeFeedHref(window.location.href, next);

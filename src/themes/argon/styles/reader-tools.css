@@ -266,6 +266,12 @@
   display: block;
   margin: 20px auto 0;
 }
+.toc-number {
+  display: inline-block;
+  min-width: 1.8em;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
 @media (max-width: 600px) {
   .enhanced-viewer {
     padding: 12px 8px;

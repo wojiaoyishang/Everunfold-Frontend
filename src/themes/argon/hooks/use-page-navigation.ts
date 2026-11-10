@@ -26,7 +26,10 @@ export interface NavigateOptions {
   expectedContent?: boolean;
 }
 
-export function usePageNavigation(route: string) {
+export function usePageNavigation(
+  route: string,
+  defaultHomeFeed: "all" | "article" | "shuoshuo" = "all",
+) {
   const router = useRouter();
   const [transaction] = useState(
     () =>
@@ -94,7 +97,7 @@ export function usePageNavigation(route: string) {
       const href = preferredHomeHref(
         requestedHref,
         window.location.href,
-        readHomeFeedPreference(),
+        readHomeFeedPreference() ?? defaultHomeFeed,
       );
       const destination = new URL(href, window.location.href);
       if (destination.href === window.location.href) {
@@ -108,7 +111,7 @@ export function usePageNavigation(route: string) {
         ...options,
       });
     },
-    [transaction],
+    [defaultHomeFeed, transaction],
   );
   return {
     feedback,

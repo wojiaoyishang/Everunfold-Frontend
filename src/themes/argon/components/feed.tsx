@@ -12,6 +12,7 @@ import { Pagination } from "./pagination";
 import { EmptyState } from "./empty-state";
 import { SiteNotice } from "./site-notice";
 import { Icon } from "./icon";
+import { themeProfile } from "@/core/settings/theme-options";
 
 export function ContentCard({ entry }: { entry: FeedEntry }) {
   return entry.content.type === "shuoshuo" ? (
@@ -32,7 +33,11 @@ export function Feed({
   type?: FeedType;
   pathname?: string;
 }) {
-  const result = queryFeed(snapshot, { page, type });
+  const result = queryFeed(snapshot, {
+    page,
+    type,
+    pageSize: themeProfile(snapshot.site.settings)?.feed.page_size ?? 10,
+  });
   return (
     <>
       <PagePresentation site={snapshot.site} />

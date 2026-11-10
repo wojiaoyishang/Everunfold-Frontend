@@ -7,6 +7,7 @@ import { ThemeTemplate } from "@/core/themes/presentation";
 import { RelatedArticles } from "./related-articles";
 import { ArticleNeighbors } from "./article-neighbors";
 import { ReaderPreviewRegistration } from "./reader-preview";
+import { themeProfile } from "@/core/settings/theme-options";
 
 export async function Article({
   snapshot,
@@ -18,6 +19,8 @@ export async function Article({
   commentsPage?: number;
 }) {
   const rendered = await renderContentForReader(content);
+  const display = themeProfile(snapshot.site.settings)?.article;
+  const glossary = snapshot.site.settings?.site.glossary;
   return (
     <>
       <PagePresentation
@@ -34,21 +37,38 @@ export async function Article({
           name="public.article.card"
           content={content}
           rendered={rendered}
+          glossary={{
+            auto_match: glossary?.auto_match ?? true,
+            max_matches_per_page: glossary?.max_matches_per_page ?? 20,
+            popup_source: glossary?.popup_source ?? "summary",
+          }}
+          articleDisplay={display}
         />
         {content.kind === "article" && (
           <div className="article-followup">
-            <ArticleNeighbors snapshot={snapshot} content={content} />
-            <RelatedArticles snapshot={snapshot} content={content} />
+            {display?.show_neighbors !== false && (
+              <ArticleNeighbors snapshot={snapshot} content={content} />
+            )}
+            {display?.show_related !== false &&
+              (display?.related_count ?? 6) > 0 && (
+                <RelatedArticles
+                  snapshot={snapshot}
+                  content={content}
+                  limit={display?.related_count ?? 6}
+                />
+              )}
           </div>
         )}
-        <CommentSection
-          contentId={content.id}
-          open={content.comments_open ?? true}
-          key={content.id}
-          comments={snapshot.comments[content.id] ?? []}
-          path={content.path}
-          initialPage={commentsPage}
-        />
+        {display?.show_comments !== false && (
+          <CommentSection
+            contentId={content.id}
+            open={content.comments_open ?? true}
+            key={content.id}
+            comments={snapshot.comments[content.id] ?? []}
+            path={content.path}
+            initialPage={commentsPage}
+          />
+        )}
       </ThemeTemplate>
     </>
   );

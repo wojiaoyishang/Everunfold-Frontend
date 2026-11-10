@@ -20,6 +20,7 @@ import { FeedbackProvider } from "./ui/feedback";
 import { CodePreferencesProvider } from "./code-preferences";
 import { ExtensionComponent } from "@/core/extensions/components";
 import { ThemeSlot } from "@/core/themes/presentation";
+import { themeProfile } from "@/core/settings/theme-options";
 
 export function BlogShell({
   site,
@@ -49,15 +50,15 @@ export function BlogShell({
 
 export function ShellFrame({ children }: { children: ReactNode }) {
   const { site, toc, presentationId } = useRouteState();
+  const theme = themeProfile(site.settings);
   useEffect(() => {
     setSiteAppearance({
-      mode: site.settings?.theme.mode ?? "system",
-      accent: site.settings?.theme.accent ?? "#673bb7",
+      mode: theme?.mode ?? "system",
+      accent: theme?.accent ?? "#673bb7",
     });
-  }, [site.settings?.theme.mode, site.settings?.theme.accent]);
+  }, [theme?.mode, theme?.accent]);
   const background =
     resourceUrl(site.hero_url) ?? "/reference/campfire-background.webp";
-  const theme = site.settings?.theme;
   const themeFont =
     theme?.font_media_id && theme.font_url && theme.font_info
       ? fontFace(theme.font_media_id, {
@@ -70,6 +71,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
       <div
         className="blog-shell"
         data-surface="public"
+        data-paper-tone={theme?.paper_tone ?? "ivory"}
         style={
           {
             "--site-background": `url(${JSON.stringify(background)})`,
@@ -89,10 +91,10 @@ export function ShellFrame({ children }: { children: ReactNode }) {
           />
         )}
         <BackgroundVideoProvider
-          key={site.settings?.theme.background_video_url}
+          key={theme?.background_video_url}
           poster={background}
-          source={site.settings?.theme.background_video_url}
-          defaultPlay={site.settings?.theme.background_play}
+          source={theme?.background_video_url}
+          defaultPlay={theme?.background_play}
         >
           <HomeFeedPreference />
           <TextLink className="skip-link" href="#main-content">

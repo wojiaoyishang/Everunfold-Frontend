@@ -8,11 +8,13 @@ import { HorizontalRail } from "./ui/horizontal-rail";
 export function RelatedArticles({
   snapshot,
   content,
+  limit = 6,
 }: {
   snapshot: PublicSnapshot;
   content: Content;
+  limit?: number;
 }) {
-  const items = relatedArticles(snapshot, content, 6);
+  const items = relatedArticles(snapshot, content, limit);
   if (!items.length) return null;
   return (
     <section

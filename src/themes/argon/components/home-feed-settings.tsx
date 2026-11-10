@@ -50,15 +50,15 @@ export function HomeFeedSettings({
 
 /** Restore direct visits after hydration; server output always follows the explicit public URL. */
 export function HomeFeedPreference() {
-  const { saved } = useHomeFeed();
+  const { value } = useHomeFeed();
   const { route, navigate, pending } = useRouteState();
   useEffect(() => {
     if (pending) return;
     const { pathname, search, hash, href } = window.location;
     const current = `${pathname}${search}${hash}`;
-    const destination = preferredHomeHref(current, href, saved);
+    const destination = preferredHomeHref(current, href, value);
     if (destination !== current)
       navigate(destination, { replace: true, scroll: false });
-  }, [route, navigate, pending, saved]);
+  }, [route, navigate, pending, value]);
   return null;
 }

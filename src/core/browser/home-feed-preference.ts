@@ -4,12 +4,13 @@ import {
   type HomeFeedType,
 } from "./home-feed-policy";
 const changeEvent = "everunfold:home-feed";
-let memory: HomeFeedType = "all";
+let memory: HomeFeedType | null = null;
 let memoryOnly = false;
-export function readHomeFeedPreference(): HomeFeedType {
+export function readHomeFeedPreference(): HomeFeedType | null {
   if (!memoryOnly) {
     try {
-      memory = homeFeedType(localStorage.getItem(HOME_FEED_KEY));
+      const value = localStorage.getItem(HOME_FEED_KEY);
+      memory = value ? homeFeedType(value) : null;
     } catch {
       memoryOnly = true;
     }
@@ -29,7 +30,7 @@ export function setHomeFeedPreference(value: HomeFeedType) {
 export function subscribeHomeFeedPreference(listener: () => void) {
   const storage = (event: StorageEvent) => {
     if (event.key === null || event.key === HOME_FEED_KEY) {
-      memory = homeFeedType(event.newValue);
+      memory = event.newValue ? homeFeedType(event.newValue) : null;
       listener();
     }
   };

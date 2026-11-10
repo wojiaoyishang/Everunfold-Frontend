@@ -1,5 +1,6 @@
 import { writeArtifact } from "./write-artifact.mjs";
 import { generateSettingsClient } from "./settings-contract-client.mjs";
+import { generateGlossaryClient } from "./glossary-contract-client.mjs";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { readFile, mkdir } from "node:fs/promises";
@@ -105,6 +106,7 @@ const operations =
   path.basename(absoluteSource) === "operations-v1.schema.json";
 const captcha = path.basename(absoluteSource) === "captcha-v1.schema.json";
 const pages = path.basename(absoluteSource) === "pages-v1.schema.json";
+const glossary = path.basename(absoluteSource) === "glossary-v1.schema.json";
 const settings = path.basename(absoluteSource) === "settings-v1.schema.json";
 const contentAdmin =
   path.basename(absoluteSource) === "content-admin-v1.schema.json";
@@ -112,56 +114,60 @@ const contentAccess =
   path.basename(absoluteSource) === "content-access-v1.schema.json";
 const collaboration =
   path.basename(absoluteSource) === "collaboration-v1.schema.json";
-const rootName = operations
-  ? "OperationsContract"
-  : captcha
-    ? "CaptchaAPIContract"
-    : pages
-      ? "PagesContract"
-      : accounts
-        ? "AccountContract"
-        : collaboration
-          ? "CollaborationContract"
-          : contentAccess
-            ? "ContentAccessContract"
-            : contentAdmin
-              ? "ContentAdminContract"
-              : settings
-                ? "SettingsContract"
-                : auth
-                  ? "AuthContract"
-                  : likes
-                    ? "CommentLikesContract"
-                    : reader
-                      ? "ReaderPreviewContract"
-                      : presentation
-                        ? "ContentPresentation"
-                        : "PublicSnapshot";
-const outputName = operations
-  ? "operations-contract"
-  : captcha
-    ? "captcha-contract"
-    : pages
-      ? "pages-contract"
-      : accounts
-        ? "accounts-contract"
-        : collaboration
-          ? "collaboration-contract"
-          : contentAccess
-            ? "content-access-contract"
-            : contentAdmin
-              ? "content-admin-contract"
-              : settings
-                ? "settings-contract"
-                : auth
-                  ? "auth-contract"
-                  : likes
-                    ? "comment-likes-contract"
-                    : reader
-                      ? "reader-preview-contract"
-                      : presentation
-                        ? "presentation-contract"
-                        : "public-contract";
+const rootName = glossary
+  ? "GlossaryContract"
+  : operations
+    ? "OperationsContract"
+    : captcha
+      ? "CaptchaAPIContract"
+      : pages
+        ? "PagesContract"
+        : accounts
+          ? "AccountContract"
+          : collaboration
+            ? "CollaborationContract"
+            : contentAccess
+              ? "ContentAccessContract"
+              : contentAdmin
+                ? "ContentAdminContract"
+                : settings
+                  ? "SettingsContract"
+                  : auth
+                    ? "AuthContract"
+                    : likes
+                      ? "CommentLikesContract"
+                      : reader
+                        ? "ReaderPreviewContract"
+                        : presentation
+                          ? "ContentPresentation"
+                          : "PublicSnapshot";
+const outputName = glossary
+  ? "glossary-contract"
+  : operations
+    ? "operations-contract"
+    : captcha
+      ? "captcha-contract"
+      : pages
+        ? "pages-contract"
+        : accounts
+          ? "accounts-contract"
+          : collaboration
+            ? "collaboration-contract"
+            : contentAccess
+              ? "content-access-contract"
+              : contentAdmin
+                ? "content-admin-contract"
+                : settings
+                  ? "settings-contract"
+                  : auth
+                    ? "auth-contract"
+                    : likes
+                      ? "comment-likes-contract"
+                      : reader
+                        ? "reader-preview-contract"
+                        : presentation
+                          ? "presentation-contract"
+                          : "public-contract";
 const output = process.env.EVERUNFOLD_CONTRACT_OUTPUT
   ? path.resolve(process.env.EVERUNFOLD_CONTRACT_OUTPUT)
   : path.join(projectRoot, "var/cache/contracts");
@@ -171,6 +177,7 @@ const types = await compile(schema, rootName, {
     "/* Generated from the backend public contract. Do not edit by hand. */",
   additionalProperties: false,
   ignoreMinAndMaxItems:
+    glossary ||
     operations ||
     captcha ||
     pages ||
@@ -195,31 +202,33 @@ await writeArtifact(path.join(output, path.basename(absoluteSource)), source);
 await writeArtifact(
   path.join(
     output,
-    operations
-      ? "operations-source.json"
-      : captcha
-        ? "captcha-source.json"
-        : pages
-          ? "pages-source.json"
-          : accounts
-            ? "accounts-source.json"
-            : collaboration
-              ? "collaboration-source.json"
-              : contentAccess
-                ? "content-access-source.json"
-                : contentAdmin
-                  ? "content-admin-source.json"
-                  : settings
-                    ? "settings-source.json"
-                    : auth
-                      ? "auth-source.json"
-                      : likes
-                        ? "comment-likes-source.json"
-                        : reader
-                          ? "reader-preview-source.json"
-                          : presentation
-                            ? "presentation-source.json"
-                            : "contract-source.json",
+    glossary
+      ? "glossary-source.json"
+      : operations
+        ? "operations-source.json"
+        : captcha
+          ? "captcha-source.json"
+          : pages
+            ? "pages-source.json"
+            : accounts
+              ? "accounts-source.json"
+              : collaboration
+                ? "collaboration-source.json"
+                : contentAccess
+                  ? "content-access-source.json"
+                  : contentAdmin
+                    ? "content-admin-source.json"
+                    : settings
+                      ? "settings-source.json"
+                      : auth
+                        ? "auth-source.json"
+                        : likes
+                          ? "comment-likes-source.json"
+                          : reader
+                            ? "reader-preview-source.json"
+                            : presentation
+                              ? "presentation-source.json"
+                              : "contract-source.json",
   ),
   `${JSON.stringify(
     {
@@ -353,6 +362,7 @@ ${functions}\n`,
 }
 console.log(`Generated contract from backend ${commit.slice(0, 7)}`);
 
+if (glossary) await generateGlossaryClient(schema, output);
 if (settings) {
   await generateSettingsClient(schema, output);
   await writeArtifact(

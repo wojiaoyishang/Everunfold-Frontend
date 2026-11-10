@@ -1,4 +1,4 @@
-import { ThemeSettingsPage } from "@/themes/argon/admin/settings/theme";
+import { ThemeSettingsHost } from "@/core/settings/theme-settings-host";
 export default function Page() {
-  return <ThemeSettingsPage />;
+  return <ThemeSettingsHost />;
 }

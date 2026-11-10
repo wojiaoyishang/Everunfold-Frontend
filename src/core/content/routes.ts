@@ -12,6 +12,7 @@ export const publicCodePaths = new Set([
   "/tags",
   "/ss",
   "/article",
+  "/glossary",
 ]);
 
 /** Resolve before streaming so a genuinely missing page retains its HTTP 404. */
@@ -27,6 +28,7 @@ export function hasPublicRoute(
     return true;
   }
   if (publicCodePaths.has(path)) return true;
+  if (/^\/glossary\/[^/]+$/.test(path)) return true;
   const taxonomy = /^\/(category|tag)\/([^/]+)$/.exec(
     requestedPath.replace(/\/$/, ""),
   );

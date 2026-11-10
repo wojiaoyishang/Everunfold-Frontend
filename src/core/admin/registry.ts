@@ -4,6 +4,7 @@ export type AdminPageIcon =
   | "lock"
   | "users"
   | "book"
+  | "glossary"
   | "font"
   | "leaf"
   | "overview"

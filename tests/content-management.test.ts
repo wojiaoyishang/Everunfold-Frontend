@@ -41,6 +41,7 @@ test("registered content types own separate entries and pages remain code-owned"
     [
       "/admin/content/article",
       "/admin/content/shuoshuo",
+      "/admin/glossary",
       "/admin/pages",
       "/admin/taxonomies",
     ],

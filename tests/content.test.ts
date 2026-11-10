@@ -65,6 +65,8 @@ test("URLs reject active schemes and preserve unrelated external origins", () =>
 test("known routes and real content are distinguishable before streamed rendering", () => {
   const data = snapshot();
   assert.equal(hasPublicRoute(data, "/archives"), true);
+  assert.equal(hasPublicRoute(data, "/glossary"), true);
+  assert.equal(hasPublicRoute(data, "/glossary/jin-ling"), true);
   assert.equal(hasPublicRoute(data, "/category/notes"), true);
   assert.equal(hasPublicRoute(data, "/tag/code"), true);
   assert.equal(hasPublicRoute(data, "/category/absent"), false);

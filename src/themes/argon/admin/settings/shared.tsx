@@ -96,7 +96,7 @@ export function SettingsToggle({
   onChange,
 }: {
   label: string;
-  hint: string;
+  hint?: string;
   value: boolean;
   onChange: (value: boolean) => void;
 }) {
@@ -107,9 +107,11 @@ export function SettingsToggle({
         <label id={id}>
           <UiText text={label} />
         </label>
-        <small>
-          <UiText text={hint} />
-        </small>
+        {hint && (
+          <small>
+            <UiText text={hint} />
+          </small>
+        )}
       </div>
       <Switch checked={value} onCheckedChange={onChange} aria-labelledby={id} />
     </div>

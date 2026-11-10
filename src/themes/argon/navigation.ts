@@ -140,7 +140,8 @@ export function campfireIdentity(site: Site) {
     title: site.hero_title || site.name,
     alias: campfire ? "(梦吃丘)" : "",
     subtitle:
-      campfire && !site.settings ? "等待着、探索着、期待着" : site.description,
+      site.settings?.site.author_tagline ||
+      (campfire ? "等待着、探索着、期待着" : site.description),
     social: campfire
       ? [
           { label: "BiliBili", href: "https://space.bilibili.com/197741923" },

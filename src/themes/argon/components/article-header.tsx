@@ -4,15 +4,18 @@ import { resourceUrl, taxonomyHref } from "@/core/content/urls";
 import { AppLink as Link } from "./navigation-link";
 import { PostMeta } from "./post-meta";
 import { ContentLanguages } from "./content-languages";
+import type { ArticleDisplayPreferences } from "@/core/contracts/settings";
 
 export function ArticleHeader({
   content,
   liveMetrics = true,
   interactive = true,
+  display,
 }: {
   content: Content;
   liveMetrics?: boolean;
   interactive?: boolean;
+  display?: ArticleDisplayPreferences;
 }) {
   const cover = resourceUrl(content.cover_url);
   return (
@@ -43,6 +46,7 @@ export function ArticleHeader({
           article
           liveMetrics={liveMetrics}
           interactive={interactive}
+          display={display}
         />
         <ContentLanguages content={content} />
       </div>

@@ -1,0 +1,149 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.5fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.catalog,
+.editor {
+  padding: 18px;
+}
+
+.catalog {
+  position: sticky;
+  top: 84px;
+  display: grid;
+  gap: 14px;
+}
+
+.catalog form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.filters button[aria-pressed="true"] {
+  color: var(--admin-on-accent);
+  background: var(--admin-accent);
+}
+
+.list {
+  display: grid;
+  gap: 6px;
+  max-height: 65vh;
+  overflow: auto;
+}
+
+.list > p {
+  margin: 0;
+  padding: 20px 8px;
+  color: var(--admin-muted);
+  text-align: center;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid transparent;
+  color: var(--admin-text);
+  text-align: start;
+}
+
+.row[aria-current="true"] {
+  border-color: color-mix(
+    in srgb,
+    var(--admin-accent) 42%,
+    var(--admin-border)
+  );
+  background: var(--admin-accent-soft);
+}
+
+.row span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.row strong,
+.row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row small {
+  color: var(--admin-muted);
+}
+
+.editor {
+  display: grid;
+  gap: 18px;
+}
+
+.editor > header,
+.editor > footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.editor h2 {
+  margin: 0 0 4px;
+}
+
+.editor header small {
+  color: var(--admin-muted);
+}
+
+.badge {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  border-radius: 999px;
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.error,
+.message {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.error {
+  color: var(--admin-danger);
+  background: color-mix(in srgb, var(--admin-danger) 10%, transparent);
+}
+
+.message {
+  color: var(--admin-positive);
+  background: color-mix(in srgb, var(--admin-positive) 10%, transparent);
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog {
+    position: static;
+  }
+
+  .list {
+    max-height: 40vh;
+  }
+}

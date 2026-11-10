@@ -16,6 +16,18 @@ const css = `
   --surface-soft: light-dark(#f5f5f4, #141419);
   --line: light-dark(#dededc, #25252b);
 }
+.public-theme[data-theme-chain~="paper"] .blog-shell[data-paper-tone="ivory"] {
+  --surface: light-dark(#fbf8f0, #1f1d18);
+  --surface-soft: light-dark(#f4f1e8, #171612);
+}
+.public-theme[data-theme-chain~="paper"] .blog-shell[data-paper-tone="white"] {
+  --surface: light-dark(#ffffff, #1d2025);
+  --surface-soft: light-dark(#f5f5f4, #15171b);
+}
+.public-theme[data-theme-chain~="paper"] .blog-shell[data-paper-tone="gray"] {
+  --surface: light-dark(#f3f4f5, #1b1e22);
+  --surface-soft: light-dark(#e9ebee, #14171a);
+}
 
 /* light-dark follows the inherited color-scheme, including the reader's system mode. */
 .public-theme[data-theme-chain~="paper"] .page-background::after {

@@ -19,6 +19,7 @@ import { useRouteState } from "./route-state";
 import { Icon } from "./icon";
 
 const ReaderContext = createContext<ReaderStore | null>(null);
+const ReaderBaseUrlContext = createContext<string | null>(null);
 interface StatusSlot {
   route: string;
   component: ComponentType;
@@ -98,12 +99,21 @@ export function ReaderDataProvider({
     };
   }, [store]);
   return (
-    <ReaderContext.Provider value={store}>
-      <StatusSlotsContext.Provider value={{ slots, register }}>
-        {children}
-      </StatusSlotsContext.Provider>
-    </ReaderContext.Provider>
+    <ReaderBaseUrlContext.Provider value={baseUrl}>
+      <ReaderContext.Provider value={store}>
+        <StatusSlotsContext.Provider value={{ slots, register }}>
+          {children}
+        </StatusSlotsContext.Provider>
+      </ReaderContext.Provider>
+    </ReaderBaseUrlContext.Provider>
   );
+}
+
+export function useReaderBaseUrl() {
+  const value = useContext(ReaderBaseUrlContext);
+  if (!value)
+    throw new Error("Reader endpoint requires the shared public shell");
+  return value;
 }
 
 export function useStatusSlot(key: string, component: ComponentType) {

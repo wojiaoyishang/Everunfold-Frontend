@@ -10,11 +10,15 @@ import { ThemeSlot } from "@/core/themes/presentation";
 import { ArticleActions } from "./article-actions";
 import { ArticleMedia } from "./article-media";
 import { Icon } from "./icon";
+import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
+import type { ArticleDisplayPreferences } from "@/core/contracts/settings";
 
 type ArticleCardProps = {
   content: Content;
   rendered: { html: string; features: ContentFeatures };
   interactive?: boolean;
+  glossary?: GlossaryRuntimeOptions;
+  articleDisplay?: ArticleDisplayPreferences;
 };
 
 /** The reading surface is shared by publication and authorized draft previews. */
@@ -22,6 +26,8 @@ export function ArticleCard({
   content,
   rendered,
   interactive = true,
+  glossary,
+  articleDisplay,
 }: ArticleCardProps) {
   return (
     <article className="surface article-card" lang={content.language}>
@@ -34,6 +40,7 @@ export function ArticleCard({
         content={content}
         interactive={interactive}
         liveMetrics={interactive}
+        display={articleDisplay}
       />
       <ThemeSlot
         name="article.header.after"
@@ -48,6 +55,8 @@ export function ArticleCard({
         content={content}
         rendered={rendered}
         interactive={interactive}
+        glossary={glossary}
+        articleDisplay={articleDisplay}
       />
       <ThemeSlot
         name="article.body.after"
@@ -61,6 +70,8 @@ export function ArticleBody({
   content,
   rendered,
   interactive = true,
+  glossary,
+  articleDisplay,
 }: ArticleCardProps) {
   return (
     <div className="article-body">
@@ -69,6 +80,9 @@ export function ArticleBody({
           className="article-content"
           html={rendered.html}
           features={rendered.features}
+          contentId={content.id}
+          contentRevision={content.updated_at}
+          glossary={interactive ? glossary : undefined}
         />
       </ArticleMedia>
       <footer className="article-footer">
@@ -87,7 +101,7 @@ export function ArticleBody({
           </time>
         </p>
       </footer>
-      {interactive && (
+      {interactive && articleDisplay?.show_share !== false && (
         <ArticleActions
           path={content.path}
           title={content.title}

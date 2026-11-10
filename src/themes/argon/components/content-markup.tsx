@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import { ContentResources } from "./content-resources";
 import {
@@ -9,17 +9,27 @@ import {
 } from "./code-preferences";
 import { useCodeTools } from "../hooks/use-code-tools";
 import { ThemeCodeFont } from "@/core/fonts/provider";
+import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
+
+const GlossaryTooltips = lazy(() => import("./glossary-tooltips"));
 
 export function ContentMarkup({
   html,
   features,
   className = "",
+  contentId,
+  contentRevision,
+  glossary,
 }: {
   html: string;
   features: ContentFeatures;
   className?: string;
+  contentId?: string;
+  contentRevision?: string;
+  glossary?: GlossaryRuntimeOptions;
 }) {
   const root = useRef<HTMLDivElement>(null);
+  const [loadGlossary, setLoadGlossary] = useState(false);
   const preferences = useCodePreferences();
   const tools = useCodeTools(root, html, preferences);
   const font = features.code ? codeFontFace(preferences) : "";
@@ -84,6 +94,24 @@ export function ContentMarkup({
       active = false;
     };
   }, [html, features.code, features.math]);
+  useEffect(() => {
+    if (!glossary?.auto_match || !contentId || !contentRevision) return;
+    let frame = 0;
+    let timer: number | null = null;
+    const start = () => setLoadGlossary(true);
+    const idleWindow = window as Window & {
+      requestIdleCallback?: Window["requestIdleCallback"];
+      cancelIdleCallback?: Window["cancelIdleCallback"];
+    };
+    if (typeof idleWindow.requestIdleCallback === "function") {
+      frame = idleWindow.requestIdleCallback(start, { timeout: 1200 });
+      return () => idleWindow.cancelIdleCallback?.(frame);
+    }
+    timer = window.setTimeout(start, 350);
+    return () => {
+      if (timer !== null) window.clearTimeout(timer);
+    };
+  }, [contentId, contentRevision, glossary?.auto_match]);
   return (
     <>
       <ContentResources features={features} />
@@ -95,6 +123,8 @@ export function ContentMarkup({
         ref={root}
         className={className}
         data-content-features
+        data-glossary-enabled={Boolean(glossary?.auto_match && contentId)}
+        data-glossary-loaded={loadGlossary}
         data-code-light={preferences.light_scheme ?? "paper"}
         data-code-dark={preferences.dark_scheme ?? "slate"}
         data-code-numbers={preferences.line_numbers !== false}
@@ -102,6 +132,16 @@ export function ContentMarkup({
         style={features.code ? codePreferenceStyle(preferences) : undefined}
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      {loadGlossary && glossary && contentId && contentRevision && (
+        <Suspense fallback={null}>
+          <GlossaryTooltips
+            root={root}
+            contentId={contentId}
+            revision={contentRevision}
+            options={glossary}
+          />
+        </Suspense>
+      )}
       {tools}
     </>
   );

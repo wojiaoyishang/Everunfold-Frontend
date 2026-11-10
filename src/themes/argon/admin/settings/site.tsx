@@ -13,6 +13,10 @@ import { SettingsMediaField } from "./media-field";
 import { MenuEditor } from "./menu-editor";
 import { SettingsLanguages } from "./languages";
 import { normalizeCatalog } from "@/core/i18n/catalog";
+import { randomUUID } from "@/core/browser/crypto";
+import { Button, TextField } from "../../components/ui/primitives";
+import { Select } from "../../components/ui/select";
+import { Icon } from "../../components/icon";
 export function SiteSettingsPage() {
   const { draft, setDraft } = useSettingsEditor();
   const site = draft?.site;
@@ -49,6 +53,13 @@ export function SiteSettingsPage() {
               maxLength={300}
               onChange={(description) => update({ description })}
             />
+            <SettingsText
+              label="作者格言"
+              hint="显示在侧栏作者名称下方；留空时使用站点简介。"
+              value={site.author_tagline ?? ""}
+              maxLength={160}
+              onChange={(author_tagline) => update({ author_tagline })}
+            />
             <SettingsMediaField
               label="头像地址"
               hint="选择媒体库中的图片，或填写可访问的地址。"
@@ -74,6 +85,113 @@ export function SiteSettingsPage() {
               multiline
               onChange={(notice) => update({ notice })}
             />
+          </SettingsSection>
+          <SettingsSection
+            id="settings-footer"
+            title="页脚"
+            description="版权说明和备案、友链等结构化链接；不执行自定义 HTML。"
+          >
+            <SettingsText
+              label="版权说明"
+              hint="留空时显示“© 年份 作者 · 站点名称”。"
+              value={site.footer?.copyright ?? ""}
+              maxLength={300}
+              onChange={(copyright) =>
+                update({
+                  footer: {
+                    ...site.footer,
+                    copyright,
+                  },
+                })
+              }
+            />
+            <div className="admin-settings-field">
+              <label>页脚链接</label>
+              <div className="admin-settings-list-editor">
+                {(site.footer?.links ?? []).map((link, index) => (
+                  <div key={link.id} className="admin-settings-list-row">
+                    <TextField
+                      aria-label={`页脚链接 ${index + 1} 名称`}
+                      placeholder="名称"
+                      value={link.label}
+                      maxLength={60}
+                      onChange={(event) =>
+                        update({
+                          footer: {
+                            ...site.footer,
+                            links: (site.footer?.links ?? []).map((item) =>
+                              item.id === link.id
+                                ? { ...item, label: event.target.value }
+                                : item,
+                            ),
+                          },
+                        })
+                      }
+                    />
+                    <TextField
+                      aria-label={`页脚链接 ${index + 1} 地址`}
+                      placeholder="https://… 或 /站内路径"
+                      value={link.href}
+                      maxLength={2048}
+                      onChange={(event) =>
+                        update({
+                          footer: {
+                            ...site.footer,
+                            links: (site.footer?.links ?? []).map((item) =>
+                              item.id === link.id
+                                ? { ...item, href: event.target.value }
+                                : item,
+                            ),
+                          },
+                        })
+                      }
+                    />
+                    <Button
+                      type="button"
+                      className="admin-icon-button"
+                      aria-label={`移除页脚链接 ${link.label || index + 1}`}
+                      onClick={() =>
+                        update({
+                          footer: {
+                            ...site.footer,
+                            links: (site.footer?.links ?? []).filter(
+                              (item) => item.id !== link.id,
+                            ),
+                          },
+                        })
+                      }
+                    >
+                      <Icon name="trash" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  className="admin-button"
+                  disabled={(site.footer?.links ?? []).length >= 8}
+                  onClick={() =>
+                    update({
+                      footer: {
+                        ...site.footer,
+                        links: [
+                          ...(site.footer?.links ?? []),
+                          {
+                            id: `footer-${randomUUID()}`,
+                            label: "",
+                            href: "",
+                            icon: "link",
+                          },
+                        ],
+                      },
+                    })
+                  }
+                >
+                  <Icon name="plus" />
+                  添加页脚链接
+                </Button>
+              </div>
+              <small>最多 8 个链接；空名称或地址会在保存时被拒绝。</small>
+            </div>
           </SettingsSection>
           <SettingsLanguages
             value={normalizeCatalog(site.language_catalog)}
@@ -143,6 +261,66 @@ export function SiteSettingsPage() {
             />
           </SettingsSection>
           <DiscoverySettings />
+          <SettingsSection
+            id="settings-glossary"
+            title="术语提示"
+            description="文章只请求自己实际命中的词条；文章内容继续使用现有缓存。"
+          >
+            <SettingsToggle
+              label="自动匹配正文术语"
+              hint="只处理文章正文中的普通文字，不处理代码、链接和公式。"
+              value={site.glossary?.auto_match ?? true}
+              onChange={(auto_match) =>
+                update({
+                  glossary: { ...site.glossary, auto_match },
+                })
+              }
+            />
+            <div className="admin-settings-field">
+              <label>每页最多提示数</label>
+              <TextField
+                type="number"
+                min={1}
+                max={100}
+                value={String(site.glossary?.max_matches_per_page ?? 20)}
+                onChange={(event) =>
+                  update({
+                    glossary: {
+                      ...site.glossary,
+                      max_matches_per_page: Math.max(
+                        1,
+                        Math.min(100, Number(event.target.value) || 1),
+                      ),
+                    },
+                  })
+                }
+              />
+            </div>
+            <div className="admin-settings-field">
+              <label>提示内容</label>
+              <Select
+                programOptions
+                name="glossary-popup-source"
+                label="提示内容"
+                value={site.glossary?.popup_source ?? "summary"}
+                options={[
+                  { value: "summary", label: "简短提示" },
+                  { value: "content", label: "完整词条说明" },
+                ]}
+                onValueChange={(popup_source) =>
+                  update({
+                    glossary: {
+                      ...site.glossary,
+                      popup_source: popup_source as "summary" | "content",
+                    },
+                  })
+                }
+              />
+              <small>
+                完整说明只随命中的文章一起加载，不会发送整份术语索引。
+              </small>
+            </div>
+          </SettingsSection>
         </>
       )}
     </SettingsFrame>

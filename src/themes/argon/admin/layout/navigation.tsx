@@ -23,6 +23,7 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   lock: "lock",
   font: "type",
   book: "book",
+  glossary: "glossary",
   leaf: "leaf",
   settings: "settings",
   theme: "sun",

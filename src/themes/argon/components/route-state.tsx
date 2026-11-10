@@ -16,6 +16,7 @@ import {
   type NavigateOptions,
 } from "../hooks/use-page-navigation";
 import type { NavigationFeedback } from "@/core/navigation/transaction";
+import { themeProfile } from "@/core/settings/theme-options";
 import {
   reducePagePresentation,
   type PagePresentationData,
@@ -44,7 +45,12 @@ export function RouteStateProvider({
   const pathname = usePathname();
   const parameters = useSearchParams().toString();
   const route = `${pathname}${parameters ? `?${parameters}` : ""}`;
-  const { pending, feedback, navigate } = usePageNavigation(route);
+  const defaultHomeFeed =
+    themeProfile(site.settings)?.feed.default_type ?? "all";
+  const { pending, feedback, navigate } = usePageNavigation(
+    route,
+    defaultHomeFeed,
+  );
   const [presentation, dispatchPresentation] = useReducer(
     reducePagePresentation,
     { site, current: null },

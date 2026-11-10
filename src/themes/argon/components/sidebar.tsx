@@ -20,6 +20,7 @@ import { SidebarNavigation } from "./sidebar-navigation";
 import { useReadingState } from "./reading-state";
 import { useNavigation } from "./navigation-state";
 import { TransitionPanel } from "./transition-panel";
+import { themeProfile } from "@/core/settings/theme-options";
 
 export function Sidebar({
   site,
@@ -88,6 +89,8 @@ export function Sidebar({
   }, [open, setOpen, triggerRef]);
   const avatar = resourceUrl(site.avatar_url);
   const identity = campfireIdentity(site);
+  const profile = themeProfile(site.settings);
+  const numberedToc = profile?.article.toc_numbered ?? false;
   const { activeId } = useReadingState();
   useEffect(() => {
     const current = sidebarRef.current?.querySelector<HTMLElement>(
@@ -183,7 +186,7 @@ export function Sidebar({
               labelledBy="toc-tab"
             >
               <nav className="table-of-contents" aria-label="文章目录">
-                {toc.map((entry) => (
+                {toc.map((entry, index) => (
                   <TextLink
                     key={entry.id}
                     href={`#${entry.id}`}
@@ -195,6 +198,9 @@ export function Sidebar({
                     }}
                     onClick={() => setOpen(false)}
                   >
+                    {numberedToc && (
+                      <span className="toc-number">{index + 1}.</span>
+                    )}
                     {entry.text}
                   </TextLink>
                 ))}
@@ -223,7 +229,7 @@ export function Sidebar({
                 </div>
               )}
               <h2 id="profile-title">{site.author}</h2>
-              <p>{site.description}</p>
+              <p>{site.settings?.site.author_tagline || site.description}</p>
               <div className="site-stats">
                 <Link href="/archives">
                   <strong>{site.stats.articles}</strong>
