@@ -115,6 +115,7 @@ export default function GlossaryTooltips({
   const [active, setActive] = useState<ActiveTooltip | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [closing, setClosing] = useState(false);
+  const [entered, setEntered] = useState(false);
   const [placement, setPlacement] = useState<TooltipPlacement | null>(null);
   const expandedRef = useRef(false);
   const closingRef = useRef(false);
@@ -168,6 +169,7 @@ export default function GlossaryTooltips({
       closingRef.current = false;
       setExpanded(false);
       setClosing(false);
+      setEntered(false);
       setPlacement(null);
       lastOpened.current = Date.now();
       trigger.setAttribute("aria-expanded", "true");
@@ -185,8 +187,15 @@ export default function GlossaryTooltips({
       });
       closingRef.current = false;
       setClosing(false);
+      setEntered(false);
     });
   }, [closing]);
+
+  useEffect(() => {
+    if (!active || !placement || closing) return;
+    const frame = requestAnimationFrame(() => setEntered(true));
+    return () => cancelAnimationFrame(frame);
+  }, [active, closing, placement]);
 
   useEffect(() => {
     let active = true;
@@ -411,6 +420,7 @@ export default function GlossaryTooltips({
         role="dialog"
         aria-label={`术语：${active.term.title}`}
         data-above={placement?.above ?? false}
+        data-entered={entered}
         data-state={closing ? "closing" : "open"}
         style={style}
         onPointerEnter={() => {

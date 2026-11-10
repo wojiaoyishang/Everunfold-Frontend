@@ -1422,5 +1422,5 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/README.md` | `index-glossary-detail-hover-1` | `43b60481d60bb4d6f3ec3c19daa426ccfc586476b2c5e4111ad88c31df2123b7` |
-| `docs/development/glossary.md` | `glossary-runtime-9` | `857317eb34d5961ebe9caef956bd7c653c1bf929b312bf15e60e257aaae8f6df` |
-| `docs/decisions/0101-glossary-rules-and-reader-ui.md` | `ADR0101-7` | `b848e0a2c941e24fa612f31187955d4819a007ffc44f7628ddd336b74645723a` |
+| `docs/development/glossary.md` | `glossary-runtime-9` | `2d56c39e5ecb4893af63cc236d087ad16bc4d2049ea7c4e0546f76abc5712437` |
+| `docs/decisions/0101-glossary-rules-and-reader-ui.md` | `ADR0101-7` | `2addddbf7a9df8d32493fe11a072da0213993dfd152947436997e3b4e260ca5e` |
