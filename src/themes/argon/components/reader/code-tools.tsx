@@ -1,7 +1,8 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { copyText } from "@/core/browser/clipboard";
 import { Button } from "../ui/primitives";
 import { Icon } from "../icon";
 export function CodeTools({
@@ -14,11 +15,27 @@ export function CodeTools({
   wrapped: boolean;
 }) {
   const [result, setResult] = useState<"copied" | "error">();
+  const [copying, setCopying] = useState(false);
+  const request = useRef(0);
   useEffect(() => {
     if (!result) return;
     const timeout = window.setTimeout(() => setResult(undefined), 2500);
     return () => window.clearTimeout(timeout);
   }, [result]);
+  async function copy() {
+    if (copying) return;
+    const current = ++request.current;
+    setCopying(true);
+    setResult(undefined);
+    try {
+      await copyText(code);
+      if (request.current === current) setResult("copied");
+    } catch {
+      if (request.current === current) setResult("error");
+    } finally {
+      if (request.current === current) setCopying(false);
+    }
+  }
   return (
     <div className="content-code-tools" role="group" aria-label="代码操作">
       <Button
@@ -30,16 +47,10 @@ export function CodeTools({
         <Icon name="wrap" />
       </Button>
       <Button
+        aria-busy={copying}
         aria-label={result === "copied" ? "代码已复制" : "复制代码"}
         title={result === "copied" ? "已复制" : "复制代码"}
-        onClick={async () => {
-          try {
-            await navigator.clipboard.writeText(code);
-            setResult("copied");
-          } catch {
-            setResult("error");
-          }
-        }}
+        onClick={() => void copy()}
       >
         <Icon name={result === "copied" ? "check" : "copy"} />
       </Button>
