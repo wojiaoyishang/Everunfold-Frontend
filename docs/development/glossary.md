@@ -1,6 +1,6 @@
 # 术语表与文章按需 Tooltip
 
-版本：glossary-runtime-1，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
+版本：glossary-runtime-2，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
 
 ## 管理入口
 
@@ -11,6 +11,8 @@
 - 草稿不进入公开目录和文章匹配；发布后进入；归档后保留记录但不再公开。
 - 保存使用 `operation_id` 幂等和 `expected_revision` 冲突保护。冲突时保留当前输入，刷新词条后再合并。
 - 公开路径为 `/glossary/{slug}`。路径是稳定公开标识，修改已有词条的 slug 会改变旧链接。
+
+后台采用与其他系统设置一致的布局：页面接入 `admin-settings-page`，编辑区用 `SettingsSection` / `SettingsText` / `admin-settings-field`，目录与状态使用共享的后台按钮、搜索、徽标和空状态。术语页面不应重新用裸标签和浏览器默认控件拼装表单。默认弹层使用简短提示，完整 Markdown 说明在详情页或选择“完整词条说明”时使用。
 
 ## 后端匹配与缓存边界
 

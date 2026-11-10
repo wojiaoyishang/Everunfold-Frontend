@@ -1378,3 +1378,14 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | --- | --- | --- |
 | `docs/README.md` | `index-glossary-menu-1` | `5321aac6d19eca01dcf7df08ad498b83d6ad452f3535264a9f0f0b8783dadac8` |
 | `docs/handoff/admin-glossary-menu-verification.md` | `admin-glossary-menu-verification-1` | `54988de78b0ce384de4c7959d536ba1834624730ad37f2bdbb2a1b91fb849ba9` |
+
+
+## 术语管理后台视觉重构（2026-11-10）
+
+前端403eb62；后端业务、术语API和匹配规则不变。后台改用现有设置分组和共享控件，浅色/深色/390px实际验收；原摘要版本由以下替代。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-glossary-admin-workspace-1` | `1c311153bdeec22857bd2b29218b8c845a96f950206914d4f94919b329774c9d` |
+| `docs/development/glossary.md` | `glossary-runtime-2` | `1ce962e2a2e29b34a970f0def31ff610260e3a2627a5243c5d38b0023f6ff56a` |
+| `docs/handoff/glossary-admin-workspace-verification.md` | `glossary-admin-workspace-verification-1` | `ae1a8fae8a3ca0982aa643ec7059cabebdb904dd81d493d5bb7dcdcfffd48378` |
