@@ -210,9 +210,10 @@
 .admin-menu-language-add > :first-child {
   min-width: 0;
 }
-.admin-menu-label-editor .ui-input {
+.admin-menu-label-editor .admin-menu-language-input {
+  box-sizing: border-box;
   width: 100%;
-  min-height: 38px;
+  min-height: 40px;
   padding: 9px 11px;
   border: 1px solid var(--admin-border);
   border-radius: 6px;
@@ -220,8 +221,24 @@
   background: var(--admin-canvas);
   font: inherit;
   font-size: 13px;
+  line-height: 1.5;
+  transition:
+    border-color 160ms,
+    box-shadow 160ms,
+    background-color 160ms;
 }
-.admin-menu-label-editor .ui-input:focus-visible {
+.admin-menu-label-editor .admin-menu-language-input::placeholder {
+  color: var(--admin-muted);
+  opacity: 0.72;
+}
+.admin-menu-label-editor .admin-menu-language-input:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--admin-accent) 38%,
+    var(--admin-border)
+  );
+}
+.admin-menu-label-editor .admin-menu-language-input:focus-visible {
   border-color: var(--admin-accent);
   box-shadow: 0 0 0 3px var(--admin-accent-soft);
   outline: none;

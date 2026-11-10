@@ -39,6 +39,8 @@ JavaScript仅在独立沙箱内运行；启用后显示脚本提示，维护启�
 
 预览窗口内编辑涉及离线、合并或权限变化时遵循原文章流程；预览不绕过只读/合并锁，不自动发布、不提交浏览/点赞/评论。主编辑页不再嵌入页面的即时预览或双栏，复杂内容保持隔离。
 
+页面编辑设置保存 `show_glossary_tooltips` 与 `show_glossary_footnotes`，默认开启。它们属于当前页面配置并随 revision/应用快照保存；站点总设置只控制正文关键词识别能力。跨页面钩子可在术语编辑页把词条绑定到该页面的 CSS 选择器。
+
 ## 登记新的可信组件
 
 1. 在`src/plugins/<插件>/plugin.ts`的同步setup调用`pages.register`，页面配置、schema、渲染和样式保留在同一插件目录。主题/插件具名组件在`components.tsx`导出；固定目录原生自动发现，不编辑中央列表，不生成组件文件。详见[插件开发指南](frontend-plugins.md)。
@@ -56,15 +58,14 @@ npm run extensions:register -- --node-id web-main
 
 表单与JSON修改同一options对象，未知键和嵌套值保留。无效JSON保留输入并阻止保存/应用，预览维持最后有效值；项目内离开使用主题确认。配置可含嵌套对象、数组、null、布尔与有限数字，最多32层/256KiB，整页仍512KiB。配置和页面源码只在显式应用后影响公开副本；内部元数据不公开。
 
-
 ## 内部元数据接口
 
 自pages1.1.0起提供管理Session专用接口：
 
-| 方法/路径 | 权限与行为 |
-| --- | --- |
-| GET `/v1/admin/pages/{page_id}/metadata` | pages:read；返回page_id、独立revision、JSON对象value；初值revision0/空对象 |
-| PATCH 同路径 | pages:write、精确Origin/CSRF；请求expected_revision、operation_id、value；成功递增内部revision，来源页面修订保持 |
+| 方法/路径                                | 权限与行为                                                                                                       |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| GET `/v1/admin/pages/{page_id}/metadata` | pages:read；返回page_id、独立revision、JSON对象value；初值revision0/空对象                                       |
+| PATCH 同路径                             | pages:write、精确Origin/CSRF；请求expected_revision、operation_id、value；成功递增内部revision，来源页面修订保持 |
 
 请求包含JSON封装的HTTP上限64KiB；非有限数值拒绝，元数据不是源码执行入口。相同操作ID/载荷重试返回原回执；过期修订返回40999，输入应保留、重读、合并后用新操作ID提交。更新与回执、审计同事务，不发布公开快照。回收保留元数据，但须恢复页面才能修改。
 
@@ -74,15 +75,20 @@ npm run extensions:register -- --node-id web-main
 import { readPageMetadata, savePageMetadata } from "@/core/contracts/pages";
 
 const current = await readPageMetadata(baseUrl, pageId, { signal });
-await savePageMetadata(baseUrl, pageId, {
-  expected_revision: current.data.revision,
-  operation_id: crypto.randomUUID(),
-  value: { ...current.data.value, import_cursor: "next-record" },
-}, csrfToken, { signal });
+await savePageMetadata(
+  baseUrl,
+  pageId,
+  {
+    expected_revision: current.data.revision,
+    operation_id: crypto.randomUUID(),
+    value: { ...current.data.value, import_cursor: "next-record" },
+  },
+  csrfToken,
+  { signal },
+);
 ```
 
 客户端供已授权管理表单使用；普通访客和自定义iframe脚本不能调用此管理能力。私有元数据不包含在页面目录/详情或公开DTO中，不存公开前端副本；需要时单独私有读取。现有页面设置只在应用后进入公开`public-content`完整快照，继续由已有接收器及文件存储维护版本、失效与离线读取。无需新增“任意缓存键/任意后端URL”接口。
-
 
 ## 语言版本与列表启停
 

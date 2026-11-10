@@ -381,6 +381,7 @@ export function MenuEditor({
                   <div className="admin-menu-language-row" key={language.code}>
                     <LanguageLabel code={language.code} />
                     <TextField
+                      className="admin-menu-language-input"
                       aria-label={t("{language} 菜单名称", {
                         language: language.name,
                       })}

@@ -1,6 +1,6 @@
 # 术语表与文章按需 Tooltip
 
-版本：glossary-runtime-11，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md) 与 [ADR0103](../decisions/0103-dynamic-glossary-footnotes.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
+版本：glossary-runtime-12，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)、[ADR0103](../decisions/0103-dynamic-glossary-footnotes.md) 与 [ADR0104](../decisions/0104-localized-navigation-and-glossary-hooks.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
 
 ## 管理入口
 
@@ -16,7 +16,7 @@
 
 后台采用与其他系统设置一致的布局：页面接入 `admin-settings-page`，编辑区用 `SettingsSection` / `SettingsText` / `admin-settings-field`，目录与状态使用共享的后台按钮、搜索、徽标和空状态。术语正文复用文章 `EditorBody`、`BlockComposer`、`DraftPreview`、格式/代码/公式/媒体工具和统一上传队列；正文预览按钮通过 `SettingsSection` 的头部操作位放在“术语正文”标题右侧。默认 Tooltip 直接渲染正文，简短摘要可选；必要字段由原生 `required` 和共享 CSS 显示单个星号，页面组件不再重复添加。术语页面不应重新用裸标签和浏览器默认控件拼装表单。
 
-站点设置“术语提示”还提供两个独立开关：文章末尾脚注、说说末尾脚注，对应 `site.glossary.article_footnotes` 与 `site.glossary.shuoshuo_footnotes`，默认开启。两者互不联动，也不与正文自动匹配绑定；可以关闭 Tooltip 而保留脚注。设置契约 `1.27.0` 只增加已有 JSON 的布尔字段，无数据库迁移。
+站点设置只保留正文关键词识别总开关、每页提示上限和提示来源。文章/说说的编辑设置新增独立的“术语提示”面板，分别保存 `show_glossary_tooltips` 与 `show_glossary_footnotes`；自定义/注册页面也在页面编辑设置中保存同名两项。开关随各自草稿、版本和发布投影保存，无数据库迁移。
 
 术语别名在独立分组使用共享 `TokenField` 维护，不再由匹配规则自动生成。`/glossary` 目录只负责浏览公开词条，不提供独立搜索框；站内全局搜索按标题、摘要和别名检索公开术语，并在“全部内容”结果中展示术语分组。搜索语言列表来自站点已配置语言目录并带旗帜，另保留“所有语言”图标；默认选择当前语言，类型与语言控件保持紧凑间距。
 
@@ -52,7 +52,15 @@ GET /v1/plugins/everunfold.glossary/for-content/{content_id}
 - 主题共享 `.article-content` 表格样式覆盖文章、说说、术语详情、完整弹层及统一草稿预览。表格默认铺满阅读容器，宽表在局部可聚焦滚动区域内滚动；管理数据列表不继承文章排版。
 - 正文后的术语脚注同样在空闲后加载，只列出本页命中项。脚注在 `.article-content` 后、页脚/分享区前，以无序列表显示标题和简要提示；摘要为空时从首个非空富文本区块提取纯文本。标题和提示保持单行并使用省略号，点击进入新窗口的词条页。脚注与 Tooltip 共用同一文章级 pending请求和5分钟缓存。
 
-关闭 `site.glossary.auto_match` 后不再显示正文内 Tooltip，但脚注仍可按各自开关加载。若 `article_footnotes`/`shuoshuo_footnotes` 也关闭，则对应页面不加载术语增强。提示的最大值只限制正文内装饰，不删除目录或词条。
+关闭 `site.glossary.auto_match` 后不再执行正文关键词增强。总开关开启时，每篇内容/页面再按自己的 Tooltip 和脚注设置决定是否加载；两项均关闭时不对应内容请求匹配。提示的最大值只限制正文内装饰，不删除目录或词条。
+
+## 页面触发钩子
+
+术语编辑页的“页面触发”分组属于当前术语，不在后台单独占据一级入口。每条规则可选择所有公开页面或多达32个指定文章/说说/页面目标，并可设置启用状态和0~100优先级。CSS选择器支持`#id`、类、属性、后代和组合选择器；拒绝伪元素、`html/body/*`、危险字符及超长规则。每页最多连接20个元素，指定内容优先于全站规则。
+
+公开页面等待`PagePresentation`就绪后，在空闲时请求只与当前surface、内容/页面ID和语言相关的启用钩子，缓存60秒。MutationObserver对后续生成的元素重新绑定，客户端路由切换清理后重跑。Tooltip与正文关键词提示共用；已有链接/按钮保持原生点击，键盘聚焦和Escape行为相同。
+
+JavaScript挂载是仅管理员可保存的危险模式。它使用共享JavaScript CodeMirror编辑器，限制20KB，并提供`glossary.root`、`glossary.term`、`glossary.select(selector)`、`glossary.mount(element)`；保存区域常驻风险警告。脚本在公开页面主线程运行，不等同于自定义页面iframe沙箱，执行异常只跳过当前钩子。
 
 ## 发布与排错
 

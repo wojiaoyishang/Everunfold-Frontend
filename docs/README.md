@@ -251,3 +251,5 @@
 最新 SEO 交付：[ADR0102](decisions/0102-static-seo-content-and-dynamic-enhancements.md)、[前台组件架构](architecture/frontend-ui.md)与[搜索发现指南](development/operations-and-search.md)：文章标题、摘要与正文直接进入首次 HTML；静态主题注册与客户端水合注册分离，原始正文块不再重复进入 RSC props，中文以 UTF-8 输出；术语 Tooltip、浏览量及其他交互继续按需加载。
 
 最新术语交付：[ADR0103](decisions/0103-dynamic-glossary-footnotes.md)与[术语表指南](development/glossary.md)：文章/说说正文结束后按需加载本页命中的术语脚注，摘要优先、富文本首块回退、单行省略；两类脚注可分别关闭并复用同一匹配缓存。
+
+最新多语言与钩子交付：[ADR0104](decisions/0104-localized-navigation-and-glossary-hooks.md)与[术语表指南](development/glossary.md)：导航名称可按语言稀疏覆盖并使用旗帜；术语专搜、逐内容 Tooltip/脚注开关、术语内页面选择器钩子及管理员 JavaScript 挂载已接通。
