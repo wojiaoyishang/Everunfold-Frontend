@@ -82,6 +82,47 @@ test("glossary matching honors the page-wide limit", () => {
   assert.equal(matches.length, 2);
 });
 
+test("article-scoped regex results honor case, boundaries and priority", () => {
+  const sensitive = {
+    ...term("ai", "AI"),
+    matched_patterns: [
+      { text: "AI", case_sensitive: true, whole_word: true, priority: 15 },
+    ],
+  };
+  const sensitiveHits = matchGlossaryText("AI ai AIS", [sensitive], 10);
+  assert.deepEqual(
+    sensitiveHits.map((match) => match.text),
+    ["AI"],
+  );
+
+  const partial = {
+    ...term("partial", "code"),
+    matched_patterns: [
+      { text: "code", case_sensitive: false, whole_word: false, priority: 1 },
+    ],
+  };
+  assert.deepEqual(
+    matchGlossaryText("encode", [partial], 10).map((match) => match.text),
+    ["code"],
+  );
+  const high = {
+    ...term("high", "AI"),
+    matched_patterns: [
+      { text: "AI", case_sensitive: false, whole_word: true, priority: 80 },
+    ],
+  };
+  const long = {
+    ...term("long", "AI技术"),
+    matched_patterns: [
+      { text: "AI技术", case_sensitive: false, whole_word: true, priority: 10 },
+    ],
+  };
+  assert.equal(
+    matchGlossaryText("AI技术", [long, high], 10)[0]?.term.id,
+    "high",
+  );
+});
+
 test("glossary detail content uses the article rich-text renderer", () => {
   const rendered = renderGlossaryContent(
     {

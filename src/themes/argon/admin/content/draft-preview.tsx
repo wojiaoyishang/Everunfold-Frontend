@@ -38,7 +38,11 @@ export function DraftPreview({
         <p className="admin-draft-excerpt">{fields.excerpt}</p>
       )}
       {fields.body.some((block) => block.content.trim()) ? (
-        <ContentMarkup html={rendered.html} features={rendered.features} />
+        <ContentMarkup
+          className="article-content"
+          html={rendered.html}
+          features={rendered.features}
+        />
       ) : (
         <p className="admin-draft-empty">
           <UiText text="写一点正文后，就能在这里预览。" />

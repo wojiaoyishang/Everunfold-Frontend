@@ -1,0 +1,124 @@
+.rules {
+  display: grid;
+  gap: 15px;
+  min-width: 0;
+}
+.titleRule {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+}
+.titleRule > div,
+.ruleActions {
+  display: grid;
+  gap: 4px;
+}
+.rules small {
+  color: var(--admin-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.titleRule strong {
+  display: block;
+  color: var(--admin-text);
+  font-size: 14px;
+}
+.ruleRow {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 10px;
+}
+.ruleMain {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.ruleKind {
+  flex: 0 0 150px;
+}
+.ruleMain > :global(.ui-input) {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.ruleOptions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.ruleOptions > :global(.ui-button) {
+  padding: 7px 10px;
+  font-size: 12px;
+}
+.ruleOptions [aria-pressed="true"] {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+}
+.priority :global(.ui-input) {
+  width: 68px;
+}
+.ruleActions {
+  justify-items: start;
+}
+.test {
+  display: grid;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--admin-border);
+}
+.test > label {
+  color: var(--admin-text);
+  font-weight: 600;
+}
+.preview {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: var(--admin-subtle);
+}
+.preview span {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.preview p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.8;
+}
+.preview mark {
+  padding: 1px 2px;
+  border-radius: 3px;
+  color: var(--admin-text);
+  background: var(--admin-accent-soft);
+  box-shadow: 0 1px 0 var(--admin-accent);
+}
+.error {
+  color: var(--admin-danger, #c44);
+}
+@media (max-width: 690px) {
+  .ruleMain {
+    flex-wrap: wrap;
+  }
+  .ruleKind {
+    flex-basis: 100%;
+  }
+  .ruleMain > :global(.ui-input) {
+    flex-basis: calc(100% - 54px);
+  }
+}

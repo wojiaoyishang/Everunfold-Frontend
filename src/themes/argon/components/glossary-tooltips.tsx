@@ -26,7 +26,7 @@ import { AppLink } from "./navigation-link";
 import { Icon } from "./icon";
 import { Button } from "./ui/primitives";
 import { useRouteState } from "./route-state";
-import { ContentMarkupView } from "./content-markup-view";
+import { GlossaryExpandedDialog } from "./glossary-expanded-dialog";
 
 type MatchIndex = NonNullable<GlossaryContract["content_matches"]["data"]>;
 
@@ -100,6 +100,8 @@ export default function GlossaryTooltips({
   const { site } = useRouteState();
   const [index, setIndex] = useState<MatchIndex | null>(null);
   const [active, setActive] = useState<ActiveTooltip | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const expandedRef = useRef(false);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastPointerActivation = useRef(0);
@@ -111,10 +113,10 @@ export default function GlossaryTooltips({
   );
   const richContent = useMemo(
     () =>
-      active && options.popup_source === "content"
+      active && expanded && options.popup_source === "content"
         ? renderGlossaryContent(active.term, site.settings?.shortcodes ?? [])
         : null,
-    [active, options.popup_source, site.settings?.shortcodes],
+    [active, expanded, options.popup_source, site.settings?.shortcodes],
   );
 
   const clearTimers = useCallback(() => {
@@ -125,6 +127,7 @@ export default function GlossaryTooltips({
   }, []);
 
   const close = useCallback(() => {
+    if (expandedRef.current) return;
     clearTimers();
     setActive((current) => {
       current?.trigger.setAttribute("aria-expanded", "false");
@@ -137,6 +140,8 @@ export default function GlossaryTooltips({
       const term = terms.get(trigger.dataset.glossaryTerm ?? "");
       if (!term) return;
       clearTimers();
+      expandedRef.current = false;
+      setExpanded(false);
       lastOpened.current = Date.now();
       trigger.setAttribute("aria-expanded", "true");
       setActive({ rect: trigger.getBoundingClientRect(), term, trigger });
@@ -320,52 +325,82 @@ export default function GlossaryTooltips({
     ? { bottom: window.innerHeight - active.rect.top + 10 }
     : { top: active.rect.bottom + 10 };
   return createPortal(
-    <div
-      ref={popup}
-      id="glossary-tooltip"
-      className="glossary-tooltip"
-      role="dialog"
-      aria-label={`术语：${active.term.title}`}
-      data-above={above}
-      style={{ left, width, ...position }}
-      onPointerEnter={() => {
-        if (closeTimer.current) clearTimeout(closeTimer.current);
-      }}
-      onPointerLeave={() => {
-        closeTimer.current = setTimeout(close, 180);
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          const trigger = active.trigger;
-          close();
-          trigger.focus();
-        }
-      }}
-    >
-      <header>
-        <strong>{active.term.title}</strong>
-        <Button
-          type="button"
-          className="icon-button glossary-tooltip-close"
-          aria-label="关闭术语提示"
-          onClick={close}
-        >
-          <Icon name="close" />
-        </Button>
-      </header>
-      {richContent ? (
-        <ContentMarkupView
-          className="article-content glossary-tooltip-content"
-          data-glossary-ignore
+    <>
+      <div
+        ref={popup}
+        id="glossary-tooltip"
+        className="glossary-tooltip"
+        role="dialog"
+        aria-label={`术语：${active.term.title}`}
+        data-above={above}
+        style={{ left, width, ...position }}
+        onPointerEnter={() => {
+          if (closeTimer.current) clearTimeout(closeTimer.current);
+        }}
+        onPointerLeave={() => {
+          closeTimer.current = setTimeout(close, 180);
+        }}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") {
+            const trigger = active.trigger;
+            close();
+            trigger.focus();
+          }
+        }}
+      >
+        <header>
+          <div className="glossary-tooltip-heading">
+            <small>术语解释</small>
+            <strong>{active.term.title}</strong>
+            {active.term.aliases.length > 0 && (
+              <small>也称：{active.term.aliases.slice(0, 3).join(" · ")}</small>
+            )}
+          </div>
+          <Button
+            type="button"
+            className="icon-button glossary-tooltip-close"
+            aria-label="关闭术语提示"
+            onClick={close}
+          >
+            <Icon name="close" />
+          </Button>
+        </header>
+        <p>{active.term.summary}</p>
+        <div className="glossary-tooltip-actions">
+          <AppLink href={active.term.path}>查看词条</AppLink>
+          {options.popup_source === "content" &&
+            active.term.body.some((block) => block.content.trim()) && (
+              <Button
+                className="glossary-tooltip-expand"
+                onClick={() => {
+                  clearTimers();
+                  expandedRef.current = true;
+                  setExpanded(true);
+                }}
+              >
+                完整说明 <Icon name="external" />
+              </Button>
+            )}
+        </div>
+      </div>
+      {expanded && richContent && (
+        <GlossaryExpandedDialog
+          title={active.term.title}
+          path={active.term.path}
           html={richContent.html}
           features={richContent.features}
-          codeTools={false}
+          onDismiss={() => {
+            const trigger = active.trigger;
+            expandedRef.current = false;
+            setExpanded(false);
+            close();
+            queueMicrotask(() => {
+              if (trigger.isConnected) trigger.focus({ preventScroll: true });
+            });
+          }}
         />
-      ) : (
-        <p>{active.term.summary}</p>
       )}
-      <AppLink href={active.term.path}>查看词条</AppLink>
-    </div>,
+    </>,
     surfacePortalTarget(),
   );
 }

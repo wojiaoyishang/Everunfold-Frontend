@@ -39,6 +39,21 @@ export function ContentMarkupView({
   const font = features.code ? codeFontFace(preferences) : "";
 
   useEffect(() => {
+    const container = root.current;
+    if (!container) return;
+    for (const table of container.querySelectorAll<HTMLTableElement>("table")) {
+      if (table.closest(".rich-table-scroll")) continue;
+      const scroll = document.createElement("div");
+      scroll.className = "rich-table-scroll";
+      scroll.setAttribute("role", "region");
+      scroll.setAttribute("aria-label", "可横向滚动的正文表格");
+      scroll.tabIndex = 0;
+      table.before(scroll);
+      scroll.append(table);
+    }
+  }, [html, root]);
+
+  useEffect(() => {
     if (!features.code && !features.math) return;
     let active = true;
     const targets =

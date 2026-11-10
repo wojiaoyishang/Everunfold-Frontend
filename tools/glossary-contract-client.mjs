@@ -50,6 +50,9 @@ const listValidator = ajv.compile<GlossaryContract["list"]>({
 const detailValidator = ajv.compile<GlossaryContract["detail"]>({
   $ref: "glossary#/properties/detail",
 });
+const previewValidator = ajv.compile<GlossaryContract["preview_output"]>({
+  $ref: "glossary#/properties/preview_output",
+});
 
 export function readGlossaryIndex(
   baseUrl: string,
@@ -124,6 +127,25 @@ export function readGlossaryTerm(
     {},
     detailValidator,
     { ...options, credentials: "include" },
+  );
+}
+
+export function previewGlossary(
+  baseUrl: string,
+  input: GlossaryContract["preview_input"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/plugins/everunfold.glossary/admin/preview",
+    input,
+    previewValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
   );
 }
 

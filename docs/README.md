@@ -8,7 +8,7 @@
 
 [术语管理后台视觉重构](handoff/glossary-admin-workspace-verification.md)：编辑区改用设置分组和共享表单控件，目录增加搜索、状态筛选、徽标与选中态；浅色、深色、桌面和 390px 已实页检查。
 
-[术语表与文章级 Tooltip](development/glossary.md)、[ADR0099](decisions/0099-article-scoped-glossary-tooltips.md)：后端按文章可见正文匹配并只返回实际命中的已发布词条，未命中文章返回空数组；正文继续缓存，前端空闲懒加载术语组件，命中/空结果均按内容修订缓存 5 分钟。后台以文章式区块维护 Markdown/HTML 正文，公开提供 `/glossary` 与详情页。
+[术语表与文章级 Tooltip](development/glossary.md)、[ADR0099](decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](decisions/0101-glossary-rules-and-reader-ui.md)：后端按文章可见正文匹配并只返回实际命中的已发布词条，未命中文章返回空数组；正文继续缓存，前端空闲懒加载术语组件，命中/空结果均按内容修订缓存 5 分钟。后台以文章式区块维护 Markdown/HTML 正文，并支持正则和规则预览；公开提供 `/glossary` 与详情页，弹层分为摘要和按需展开的完整阅读。
 
 [主题私有设置](development/theme-settings.md)、[ADR0100](decisions/0100-theme-owned-settings-profiles.md)：`/admin/settings/theme` 只负责主题切换和宿主，Argon、Paper 的表单分别位于各自主题目录；`theme_options` 为每个主题保存独立 profile，顶层 `theme` 保留活动主题兼容投影。站点级页脚、作者格言和术语提示仍在站点设置。
 

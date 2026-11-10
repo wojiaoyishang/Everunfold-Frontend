@@ -40,6 +40,7 @@ import {
 } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
+import { MatchingRulesEditor } from "./matching-rules";
 import styles from "./glossary.module.css";
 
 type List = NonNullable<GlossaryContract["list"]["data"]>;
@@ -79,6 +80,8 @@ const blankFields = (): Fields => ({
     },
   ],
   aliases: [],
+  auto_match_title: true,
+  match_rules: [],
   status: "draft",
 });
 
@@ -92,17 +95,6 @@ function slugify(value: string) {
     .slice(0, 120);
 }
 
-function aliasesOf(value: string) {
-  return [
-    ...new Set(
-      value
-        .split(/[\n,，]/u)
-        .map((item) => item.trim())
-        .filter(Boolean),
-    ),
-  ].slice(0, 20);
-}
-
 function detailFields(value: Detail): Fields {
   return {
     language: value.language,
@@ -111,6 +103,8 @@ function detailFields(value: Detail): Fields {
     summary: value.summary,
     body: value.body.map((block) => ({ ...block })),
     aliases: value.aliases,
+    auto_match_title: value.auto_match_title,
+    match_rules: value.match_rules,
     status: value.status,
   };
 }
@@ -135,7 +129,6 @@ export function GlossaryAdminPage() {
   const languageId = useId();
   const languageHintId = useId();
   const summaryId = useId();
-  const aliasesId = useId();
   const statusId = useId();
   const statusHintId = useId();
   const resources = useEditorResources();
@@ -144,8 +137,6 @@ export function GlossaryAdminPage() {
   const [selected, setSelected] = useState<Detail | null>(null);
   const [fields, setFields] = useState<Fields>(() => blankFields());
   const [baselineFields, setBaselineFields] = useState<Fields>(() => fields);
-  const [aliasText, setAliasText] = useState("");
-  const [baselineAliases, setBaselineAliases] = useState("");
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [status, setStatus] =
@@ -233,8 +224,6 @@ export function GlossaryAdminPage() {
     setSelected(null);
     setFields(value);
     setBaselineFields(value);
-    setAliasText("");
-    setBaselineAliases("");
     setError("");
     setMessage("");
     setPreviewing(false);
@@ -250,11 +239,8 @@ export function GlossaryAdminPage() {
       const response = await readGlossaryTerm(baseUrl, item.id);
       setSelected(response.data);
       const savedValue = detailFields(response.data);
-      const aliases = response.data.aliases.join("\n");
       setFields(savedValue);
       setBaselineFields(savedValue);
-      setAliasText(aliases);
-      setBaselineAliases(aliases);
       setPreviewing(false);
       slugTouched.current = true;
       operation.current = null;
@@ -270,7 +256,6 @@ export function GlossaryAdminPage() {
   const uploading = hasUploadMarkers(fields.body as DraftBlock[]);
   const reset = () => {
     setFields(baselineFields);
-    setAliasText(baselineAliases);
     setError("");
     setMessage("");
   };
@@ -279,7 +264,6 @@ export function GlossaryAdminPage() {
     if (saving || dragging || uploading) return;
     const value: Fields = {
       ...fields,
-      aliases: aliasesOf(aliasText),
       slug: fields.slug.trim() || slugify(fields.title),
     };
     if (!value.title.trim() || !value.summary.trim() || !value.slug) {
@@ -319,11 +303,8 @@ export function GlossaryAdminPage() {
           );
       setSelected(response.data);
       const savedValue = detailFields(response.data);
-      const aliases = response.data.aliases.join("\n");
       setFields(savedValue);
       setBaselineFields(savedValue);
-      setAliasText(aliases);
-      setBaselineAliases(aliases);
       operation.current = null;
       setMessage(
         response.data.status === "published" ? "术语已发布。" : "术语已保存。",
@@ -337,9 +318,7 @@ export function GlossaryAdminPage() {
   }
 
   const items = catalog?.items ?? [];
-  const dirty =
-    JSON.stringify(fields) !== JSON.stringify(baselineFields) ||
-    aliasText !== baselineAliases;
+  const dirty = JSON.stringify(fields) !== JSON.stringify(baselineFields);
   const command = (change: BlockCommand) => {
     const body = commandBody(fields.body as DraftBlock[], change);
     if (!body) return false;
@@ -550,7 +529,7 @@ export function GlossaryAdminPage() {
               <div className="admin-settings-two-col">
                 <SettingsText
                   label="术语标题"
-                  hint="标题本身会自动参与正文匹配。"
+                  hint="标题默认参与匹配，可在下方规则中关闭。"
                   value={fields.title}
                   maxLength={120}
                   placeholder="例如：专有名词"
@@ -648,25 +627,15 @@ export function GlossaryAdminPage() {
             <SettingsSection
               id="glossary-matching"
               title="匹配规则"
-              description="标题始终参与匹配；这里补充其他常见写法。"
+              description="分别控制术语标题、普通匹配与受限正则，并在保存前验证匹配结果。"
             >
-              <div className="admin-settings-field">
-                <label htmlFor={aliasesId}>
-                  <UiText text="匹配文字" />
-                </label>
-                <TextArea
-                  id={aliasesId}
-                  value={aliasText}
-                  rows={4}
-                  placeholder={
-                    "每行一个别名，也可用逗号分隔\n例如：另一个名称\nalternate-name"
-                  }
-                  onChange={(event) => setAliasText(event.target.value)}
-                />
-                <small>
-                  <UiText text="同一语言内不能与其他词条的标题或别名重复。" />
-                </small>
-              </div>
+              <MatchingRulesEditor
+                fields={fields}
+                onChange={update}
+                baseUrl={baseUrl}
+                csrfToken={csrfToken}
+                disabled={!writable || saving}
+              />
             </SettingsSection>
             <SettingsSection
               id="glossary-content"
