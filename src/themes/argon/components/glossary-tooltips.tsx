@@ -244,7 +244,7 @@ export default function GlossaryTooltips({
       )
         return;
       if (closeTimer.current) clearTimeout(closeTimer.current);
-      openTimer.current = setTimeout(() => open(item), 140);
+      openTimer.current = setTimeout(() => open(item), 260);
     };
     const pointerOut = (event: PointerEvent) => {
       const item = trigger(event);
@@ -480,7 +480,11 @@ export default function GlossaryTooltips({
             ) : null}
           </div>
           <div className="glossary-tooltip-actions">
-            <AppLink href={active.term.path}>
+            <AppLink
+              href={active.term.path}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               打开词条页面 <Icon name="external" />
             </AppLink>
             {fullContent && (

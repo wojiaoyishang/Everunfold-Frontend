@@ -79,7 +79,7 @@ export function GlossaryExpandedDialog({
           />
         </div>
         <footer>
-          <AppLink href={path}>
+          <AppLink href={path} target="_blank" rel="noopener noreferrer">
             打开词条页面 <Icon name="external" />
           </AppLink>
         </footer>

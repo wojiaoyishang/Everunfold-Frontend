@@ -125,13 +125,30 @@
 
 .detail {
   display: grid;
-  gap: 28px;
+  gap: 12px;
   animation: glossary-panel-in 360ms var(--motion-ease) both;
 }
 
 .detail header {
-  padding-bottom: 22px;
-  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+}
+
+.detailDivider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--accent) 42%, var(--line)),
+    var(--line) 30%,
+    var(--line)
+  );
+}
+
+.detailBody {
+  min-width: 0;
+}
+
+.detailBody :global(.article-content) > :first-child {
+  margin-top: 0;
 }
 
 @keyframes glossary-spin {

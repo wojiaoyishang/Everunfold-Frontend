@@ -74,11 +74,14 @@ export function GlossaryDetailPage({ slug }: { slug: string }) {
               <small>也称为：{term.aliases.join(" · ")}</small>
             )}
           </header>
-          <ContentMarkup
-            className="article-content"
-            html={rendered.html}
-            features={rendered.features}
-          />
+          <div className={styles.detailDivider} role="separator" />
+          <div className={styles.detailBody}>
+            <ContentMarkup
+              className="article-content"
+              html={rendered.html}
+              features={rendered.features}
+            />
+          </div>
         </article>
       )}
     </>

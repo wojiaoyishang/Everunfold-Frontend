@@ -35,11 +35,11 @@
   box-shadow:
     0 0 0 4px color-mix(in srgb, var(--accent) 12%, transparent),
     0 18px 42px rgb(14 18 30 / 22%);
-  animation: glossary-tooltip-in 160ms ease-out;
+  animation: glossary-tooltip-in 220ms ease-out;
 }
 .glossary-tooltip[data-state="closing"] {
   pointer-events: none;
-  animation: glossary-tooltip-out 150ms ease-in forwards;
+  animation: glossary-tooltip-out 180ms ease-in forwards;
 }
 .glossary-tooltip::before {
   position: absolute;
