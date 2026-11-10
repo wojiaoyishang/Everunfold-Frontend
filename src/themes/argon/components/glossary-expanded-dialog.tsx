@@ -9,6 +9,7 @@ import { AppLink } from "./navigation-link";
 import { Icon } from "./icon";
 import { Button, Dialog } from "./ui/primitives";
 import { ContentMarkupView } from "./content-markup-view";
+import { useT } from "@/core/i18n/provider";
 
 /** A native top-layer dialog avoids trapping an entire article inside a tiny tooltip. */
 export function GlossaryExpandedDialog({
@@ -26,6 +27,7 @@ export function GlossaryExpandedDialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const heading = useId();
+  const t = useT();
   const [closing, setClosing] = useState(false);
   useDialogSurface(ref);
   useEffect(() => {
@@ -57,12 +59,12 @@ export function GlossaryExpandedDialog({
       <div className="glossary-expanded-panel">
         <header>
           <div>
-            <small>术语 · 完整说明</small>
+            <small>{t("术语 · 完整说明")}</small>
             <h2 id={heading}>{title}</h2>
           </div>
           <Button
             className="icon-button"
-            aria-label="关闭完整术语说明"
+            aria-label={t("关闭完整术语说明")}
             disabled={closing}
             onClick={dismiss}
           >
@@ -80,7 +82,7 @@ export function GlossaryExpandedDialog({
         </div>
         <footer>
           <AppLink href={path} target="_blank" rel="noopener noreferrer">
-            打开词条页面 <Icon name="external" />
+            {t("打开词条页面")} <Icon name="external" />
           </AppLink>
         </footer>
       </div>

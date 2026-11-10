@@ -1,9 +1,11 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 
 import { randomUUID } from "@/core/browser/crypto";
 import { useState, type CSSProperties } from "react";
 import type { MenuItem, NavigationReference } from "@/core/contracts/settings";
+import { useSettingsEditor } from "@/core/settings/editor";
+import { normalizeCatalog } from "@/core/i18n/catalog";
 import {
   flattenMenu,
   updateMenu,
@@ -11,7 +13,7 @@ import {
   moveMenu,
   reparentMenu,
 } from "@/core/settings/menu-tree";
-import { Button } from "../../components/ui/primitives";
+import { Button, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import { Modal } from "../../components/ui/modal";
 import { Icon } from "../../components/icon";
@@ -20,6 +22,7 @@ import { IconBrowser } from "../icons/icon-browser";
 import { SettingsText } from "./shared";
 import { NavigationPicker } from "./navigation-picker";
 import { NavigationReferenceField } from "./navigation-reference";
+import { LanguageLabel } from "../../components/language-label";
 export function MenuEditor({
   value,
   iconUrls = {},
@@ -31,9 +34,14 @@ export function MenuEditor({
   onChange: (items: MenuItem[]) => void;
   onIconUrl: (id: string, url: string) => void;
 }) {
+  const { draft } = useSettingsEditor();
+  const languageCatalog = normalizeCatalog(draft?.site.language_catalog);
+  const t = useT();
   const [selection, setSelection] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [picker, setPicker] = useState(false);
+  const [labelsOpen, setLabelsOpen] = useState(false);
+  const [newLabelLanguage, setNewLabelLanguage] = useState("");
   const [resourcePicker, setResourcePicker] = useState<
     NavigationReference["kind"] | null
   >(null);
@@ -50,6 +58,38 @@ export function MenuEditor({
         updateMenu(value, item.id, (current) => ({ ...current, ...data })),
       );
   };
+  const patchLabel = (language: string, label: string) => {
+    if (!item) return;
+    const labels = { ...(item.labels ?? {}) };
+    if (label.trim()) labels[language] = label;
+    else delete labels[language];
+    patch({ labels });
+  };
+  const enabledLanguages = languageCatalog.languages.filter(
+    (language) => language.enabled !== false,
+  );
+  const configuredLanguages = Object.keys(item?.labels ?? {});
+  const labelLanguages = [
+    ...enabledLanguages.filter((language) =>
+      configuredLanguages.includes(language.code),
+    ),
+    ...configuredLanguages
+      .filter(
+        (code) => !enabledLanguages.some((language) => language.code === code),
+      )
+      .sort()
+      .map((code) => ({
+        code,
+        name: code,
+        flag: "",
+        prefix: "",
+        enabled: true,
+        ui_locale: "en" as const,
+      })),
+  ];
+  const availableLabelLanguages = enabledLanguages.filter(
+    (language) => !configuredLanguages.includes(language.code),
+  );
   const add = (parentId: string | null) => {
     if (entries.length >= 256) return;
     const next: MenuItem = {
@@ -160,6 +200,7 @@ export function MenuEditor({
             </div>
             <SettingsText
               label="菜单名称"
+              hint="默认名称；语言专属名称为空时显示这里的文字。"
               value={item.label}
               maxLength={60}
               onChange={(label) => patch({ label })}
@@ -265,6 +306,16 @@ export function MenuEditor({
                 </Button>
               </span>
               <Button
+                className="admin-button"
+                onClick={() => {
+                  setNewLabelLanguage("");
+                  setLabelsOpen(true);
+                }}
+              >
+                <Icon name="languages" />
+                <UiText text="多语言名称" />
+              </Button>
+              <Button
                 className="admin-button admin-menu-delete"
                 onClick={() => {
                   onChange(removeMenu(value, item.id));
@@ -311,6 +362,94 @@ export function MenuEditor({
             });
           }}
         />
+      )}
+      {labelsOpen && item && (
+        <Modal title={t("多语言菜单名称")} onClose={() => setLabelsOpen(false)}>
+          <div className="admin-menu-label-editor">
+            <p className="admin-settings-hint">
+              <UiText text="默认名称始终保留。只为需要不同显示文字的语言添加覆盖；未添加的语言自动回退默认名称。" />
+            </p>
+            <div className="admin-menu-label-default">
+              <span>
+                <UiText text="默认名称" />
+              </span>
+              <strong>{item.label}</strong>
+            </div>
+            {labelLanguages.length ? (
+              <div className="admin-menu-language-list">
+                {labelLanguages.map((language) => (
+                  <div className="admin-menu-language-row" key={language.code}>
+                    <LanguageLabel code={language.code} />
+                    <TextField
+                      aria-label={t("{language} 菜单名称", {
+                        language: language.name,
+                      })}
+                      value={item.labels?.[language.code] ?? ""}
+                      placeholder={item.label}
+                      maxLength={60}
+                      onChange={(event) =>
+                        patchLabel(language.code, event.target.value)
+                      }
+                    />
+                    <Button
+                      type="button"
+                      className="admin-icon-button"
+                      aria-label={t("移除 {language} 菜单名称", {
+                        language: language.name,
+                      })}
+                      onClick={() => {
+                        const labels = { ...(item.labels ?? {}) };
+                        delete labels[language.code];
+                        patch({ labels });
+                      }}
+                    >
+                      <Icon name="trash" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="admin-menu-language-empty">
+                <UiText text="还没有语言专属名称。" />
+              </p>
+            )}
+            {availableLabelLanguages.length > 0 && (
+              <div className="admin-menu-language-add">
+                <Select
+                  programOptions
+                  name="new-menu-label-language"
+                  label="添加语言名称"
+                  value={newLabelLanguage || availableLabelLanguages[0].code}
+                  options={availableLabelLanguages.map((language) => ({
+                    value: language.code,
+                    label: language.name,
+                    flag: language.flag,
+                  }))}
+                  onValueChange={setNewLabelLanguage}
+                />
+                <Button
+                  type="button"
+                  className="admin-button"
+                  onClick={() => {
+                    const code =
+                      newLabelLanguage || availableLabelLanguages[0]?.code;
+                    if (!code || !item) return;
+                    patch({
+                      labels: {
+                        ...(item.labels ?? {}),
+                        [code]: item.label,
+                      },
+                    });
+                    setNewLabelLanguage("");
+                  }}
+                >
+                  <Icon name="plus" />
+                  <UiText text="添加语言名称" />
+                </Button>
+              </div>
+            )}
+          </div>
+        </Modal>
       )}
     </div>
   );

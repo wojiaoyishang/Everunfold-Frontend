@@ -20,6 +20,13 @@
   border-radius: 2px;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 32%, transparent);
 }
+.glossary-hook-target {
+  cursor: help;
+}
+.glossary-hook-target:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 62%, transparent);
+  outline-offset: 3px;
+}
 .glossary-footnotes {
   margin: 34px 0 0;
   padding: 18px 20px 16px;

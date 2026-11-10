@@ -5,6 +5,8 @@ import type { GlossaryContract } from "@/core/contracts/glossary";
 import type { PublicShortcode } from "@/core/contracts/settings";
 import { loadGlossaryMatches } from "@/core/glossary/runtime";
 import { renderGlossaryPreview } from "@/core/glossary/content";
+import { translate } from "@/core/i18n/messages";
+import { useLocale, useT } from "@/core/i18n/provider";
 import { AppLink } from "./navigation-link";
 import { Icon } from "./icon";
 import { useReaderBaseUrl } from "./reader-data";
@@ -25,7 +27,7 @@ function richTextExcerpt(
   shortcodes: readonly PublicShortcode[] = [],
 ) {
   const preview = renderGlossaryPreview(term, shortcodes);
-  if (!preview || typeof DOMParser === "undefined") return "查看词条了解详情";
+  if (!preview || typeof DOMParser === "undefined") return "";
   const document = new DOMParser().parseFromString(preview.html, "text/html");
   for (const ignored of document.querySelectorAll("script,style"))
     ignored.remove();
@@ -38,7 +40,7 @@ function richTextExcerpt(
     groups.set(block, `${groups.get(block) ?? ""}${node.data}`);
   }
   const text = normalizeText([...groups.values()].join(" "));
-  return text || "查看词条了解详情";
+  return text;
 }
 
 export default function GlossaryFootnotes({
@@ -50,6 +52,8 @@ export default function GlossaryFootnotes({
 }) {
   const baseUrl = useReaderBaseUrl();
   const { site } = useRouteState();
+  const { uiLocale } = useLocale();
+  const t = useT();
   const [index, setIndex] = useState<MatchIndex | null>(null);
 
   useEffect(() => {
@@ -73,9 +77,9 @@ export default function GlossaryFootnotes({
         hint:
           normalizeText(term.summary) ||
           richTextExcerpt(term, site.settings?.shortcodes ?? []) ||
-          "查看词条了解详情",
+          translate("查看词条了解详情", uiLocale),
       })),
-    [index?.terms, site.settings?.shortcodes],
+    [index?.terms, site.settings?.shortcodes, uiLocale],
   );
 
   if (!index?.terms.length) return null;
@@ -89,8 +93,8 @@ export default function GlossaryFootnotes({
       <header>
         <Icon name="book" />
         <div>
-          <h2 id={titleId}>术语脚注</h2>
-          <p>本篇出现过的词条，按实际匹配结果列出。</p>
+          <h2 id={titleId}>{t("术语脚注")}</h2>
+          <p>{t("本篇出现过的词条，按实际匹配结果列出。")}</p>
         </div>
       </header>
       <ul>
@@ -100,7 +104,7 @@ export default function GlossaryFootnotes({
               href={term.path}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`打开术语：${term.title}`}
+              aria-label={t("打开术语：{title}", { title: term.title })}
             >
               <strong title={term.title}>{term.title}</strong>
               <span title={hint}>{hint}</span>

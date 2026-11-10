@@ -21,6 +21,7 @@ import { CodePreferencesProvider } from "./code-preferences";
 import { ExtensionComponent } from "@/core/extensions/components";
 import { ThemeSlot } from "@/core/themes/presentation";
 import { themeProfile } from "@/core/settings/theme-options";
+import { GlossaryHooks } from "./glossary-hooks";
 
 export function BlogShell({
   site,
@@ -123,6 +124,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
           <ExtensionComponent name="public.footer" site={site} />
           <ThemeSlot name="shell.footer.after" context={{ site }} />
           <ExtensionComponent name="public.tools" />
+          <GlossaryHooks />
         </BackgroundVideoProvider>
       </div>
     </CodePreferencesProvider>

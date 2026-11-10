@@ -145,6 +145,7 @@
 
 .detailBody {
   min-width: 0;
+  padding-top: 20px;
 }
 
 .detailBody :global(.article-content) > :first-child {

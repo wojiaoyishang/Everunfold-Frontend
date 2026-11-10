@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import { readGlossaryDetail } from "@/core/contracts/glossary";
-import { useLocale } from "@/core/i18n/provider";
+import { UiText, useLocale, useT } from "@/core/i18n/provider";
+import { translate } from "@/core/i18n/messages";
 import { renderGlossaryContent } from "@/core/glossary/content";
 import { PagePresentation, useRouteState } from "../components/route-state";
 import { ContentMarkup } from "../components/content-markup";
@@ -17,7 +18,8 @@ type Detail = NonNullable<GlossaryContract["public_detail"]["data"]>;
 
 export function GlossaryDetailPage({ slug }: { slug: string }) {
   const baseUrl = useReaderBaseUrl();
-  const { locale } = useLocale();
+  const { locale, uiLocale } = useLocale();
+  const t = useT();
   const { site } = useRouteState();
   const [term, setTerm] = useState<Detail | null>(null);
   const [error, setError] = useState("");
@@ -28,13 +30,14 @@ export function GlossaryDetailPage({ slug }: { slug: string }) {
     })
       .then((response) => {
         setTerm(response.data);
-        document.title = `${response.data.title} · 术语表 · ${site.name}`;
+        document.title = `${response.data.title} · ${translate("术语表", uiLocale)} · ${site.name}`;
       })
       .catch(() => {
-        if (!controller.signal.aborted) setError("词条不存在或暂时不可用。");
+        if (!controller.signal.aborted)
+          setError(translate("词条不存在或暂时不可用。", uiLocale));
       });
     return () => controller.abort();
-  }, [baseUrl, locale, site.name, slug]);
+  }, [baseUrl, locale, site.name, slug, uiLocale]);
   const rendered = useMemo(
     () =>
       term ? renderGlossaryContent(term, site.settings?.shortcodes) : null,
@@ -43,16 +46,16 @@ export function GlossaryDetailPage({ slug }: { slug: string }) {
   return (
     <>
       <PagePresentation site={site} id={`glossary:${slug}`} />
-      <nav className={styles.breadcrumb} aria-label="返回术语表">
+      <nav className={styles.breadcrumb} aria-label={t("返回术语表")}>
         <AppLink href="/glossary">
           <Icon name="arrow" />
-          术语表
+          <UiText text="术语表" />
         </AppLink>
       </nav>
       {!term && !error && (
         <div className={`surface ${styles.state}`} role="status">
           <Icon name="refresh" className={styles.spin} />
-          正在读取词条…
+          <UiText text="正在读取词条…" />
         </div>
       )}
       {error && (
@@ -66,12 +69,17 @@ export function GlossaryDetailPage({ slug }: { slug: string }) {
           <header>
             <span className={styles.kicker}>
               <Icon name="book" />
-              术语
+              <UiText text="术语" />
             </span>
             <h1>{term.title}</h1>
             {term.summary.trim() && <p>{term.summary}</p>}
             {term.aliases.length > 0 && (
-              <small>也称为：{term.aliases.join(" · ")}</small>
+              <small>
+                <UiText
+                  text="也称为：{aliases}"
+                  values={{ aliases: term.aliases.join(" · ") }}
+                />
+              </small>
             )}
           </header>
           <div className={styles.detailDivider} role="separator" />

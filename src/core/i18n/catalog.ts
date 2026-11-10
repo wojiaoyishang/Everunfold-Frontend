@@ -8,6 +8,11 @@ export type Language = Required<LanguageDefinition>;
 export type LanguageCatalog = Omit<Required<StoredCatalog>, "languages"> & {
   languages: Language[];
 };
+function regionalFlag(region: string) {
+  return [...region.toUpperCase()]
+    .map((char) => String.fromCodePoint(0x1f1e6 + char.charCodeAt(0) - 65))
+    .join("");
+}
 export function defaultFlag(code: string) {
   const parts = code.split("-");
   const region =
@@ -16,11 +21,12 @@ export function defaultFlag(code: string) {
       .find((part) => /^[A-Za-z]{2}$/.test(part))
       ?.toUpperCase() ??
     (regions as Record<string, string>)[parts[0].toLowerCase()];
-  return region
-    ? [...region]
-        .map((char) => String.fromCodePoint(0x1f1e6 + char.charCodeAt(0) - 65))
-        .join("")
-    : "🏳️";
+  return region ? regionalFlag(region) : "🏳️";
+}
+export function normalizedFlag(code: string, value?: string) {
+  const flag = value?.trim();
+  if (flag && /^[A-Za-z]{2}$/.test(flag)) return regionalFlag(flag);
+  return flag || defaultFlag(code);
 }
 /** Initial data and offline fallback only; all runtime choices come from site settings. */
 export const initialCatalog: LanguageCatalog = {
@@ -51,7 +57,7 @@ export function normalizeCatalog(
     default_code: value?.default_code ?? initialCatalog.default_code,
     languages: (value?.languages ?? initialCatalog.languages).map((item) => ({
       ...item,
-      flag: item.flag || defaultFlag(item.code),
+      flag: normalizedFlag(item.code, item.flag),
       prefix: item.prefix ?? "",
       enabled: item.enabled ?? true,
       ui_locale: item.ui_locale ?? "en",

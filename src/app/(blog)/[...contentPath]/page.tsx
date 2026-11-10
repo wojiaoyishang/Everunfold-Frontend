@@ -13,6 +13,7 @@ import { normalizeCatalog } from "@/core/i18n/catalog";
 import { PagePresentation } from "@/themes/argon/components/route-state";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { pageNumber, resolveContent } from "@/core/content/query";
 import { Article } from "@/themes/argon/components/article";
@@ -24,6 +25,10 @@ import { ProtectedArticle } from "@/themes/argon/components/protected-article";
 import { localizedCodePath } from "@/core/i18n/routes";
 import { CodePage, codePageMetadata } from "../code-page";
 import { readActiveTheme } from "@/core/themes/server";
+import { GlossaryDirectory } from "@/themes/argon/glossary/directory";
+import { GlossaryDetailPage } from "@/themes/argon/glossary/detail";
+import { translate } from "@/core/i18n/messages";
+import { messageLocale } from "@/core/i18n/locale";
 type Parameters = {
   params: Promise<{ contentPath: string[] }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -105,6 +110,16 @@ export async function generateMetadata({
     };
   }
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
+  if (codePath?.startsWith("/glossary")) {
+    const request = await headers();
+    return {
+      title: translate(
+        "术语表",
+        messageLocale(request.get("x-everunfold-ui-locale")),
+      ),
+      robots: { index: true, follow: true },
+    };
+  }
   if (codePath) return codePageMetadata(snapshot, codePath);
   const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
   return presented
@@ -147,6 +162,13 @@ export default async function ContentPage({
       </>
     );
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
+  if (codePath === "/glossary") return <GlossaryDirectory />;
+  if (codePath?.startsWith("/glossary/"))
+    return (
+      <GlossaryDetailPage
+        slug={decodeURIComponent(codePath.slice("/glossary/".length))}
+      />
+    );
   if (codePath)
     return (
       <CodePage snapshot={snapshot} path={codePath} parameters={parameters} />

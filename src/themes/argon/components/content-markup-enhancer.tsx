@@ -146,7 +146,8 @@ export function ContentMarkupEnhancer({
   useEffect(() => {
     if (
       !target ||
-      (!glossary?.auto_match && !glossary?.show_footnotes) ||
+      !glossary?.auto_match ||
+      (!glossary.show_tooltips && !glossary.show_footnotes) ||
       !contentId ||
       !revision
     )
@@ -170,6 +171,7 @@ export function ContentMarkupEnhancer({
     contentId,
     glossary?.auto_match,
     glossary?.show_footnotes,
+    glossary?.show_tooltips,
     revision,
     target,
   ]);
@@ -188,7 +190,7 @@ export function ContentMarkupEnhancer({
       {codeTools ? tools : null}
       {loadGlossary && glossary && contentId && revision && (
         <Suspense fallback={null}>
-          {glossary.auto_match && (
+          {glossary.show_tooltips && (
             <GlossaryTooltips
               root={root}
               contentId={contentId}

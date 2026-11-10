@@ -8,7 +8,7 @@ import {
   customLanguage,
   searchText,
 } from "../src/core/i18n/choices";
-import { defaultFlag } from "../src/core/i18n/catalog";
+import { defaultFlag, normalizedFlag } from "../src/core/i18n/catalog";
 import { nativeMessageLocale } from "../src/core/i18n/locale";
 import { languageSearchText } from "../src/core/i18n/search";
 
@@ -61,6 +61,9 @@ test("language suggestions are conveniences while custom tags, prefixes and flag
   });
   assert.equal(defaultFlag("en-US"), "🇺🇸");
   assert.equal(defaultFlag("zh-Hans-CN"), "🇨🇳");
+  assert.equal(normalizedFlag("zh-CN", "CN"), "🇨🇳");
+  assert.equal(normalizedFlag("en", "GB"), "🇬🇧");
+  assert.equal(normalizedFlag("en", "🇺🇸"), "🇺🇸");
   assert.equal(nativeMessageLocale("en"), "en");
   assert.equal(nativeMessageLocale("ja"), undefined);
 });

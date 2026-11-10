@@ -42,6 +42,7 @@ import { Select } from "../../components/ui/select";
 import { TokenField } from "../../components/ui/token-field";
 import { Icon } from "../../components/icon";
 import { MatchingRulesEditor } from "./matching-rules";
+import { GlossaryTermHooks } from "./term-hooks";
 import styles from "./glossary.module.css";
 
 type List = NonNullable<GlossaryContract["list"]["data"]>;
@@ -659,6 +660,13 @@ export function GlossaryAdminPage() {
                 disabled={!writable || saving}
               />
             </SettingsSection>
+            {selected && (
+              <GlossaryTermHooks
+                key={selected.id}
+                termId={selected.id}
+                writable={writable}
+              />
+            )}
             <SettingsSection
               id="glossary-content"
               title="悬浮提示"

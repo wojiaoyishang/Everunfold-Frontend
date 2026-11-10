@@ -263,36 +263,16 @@ export function SiteSettingsPage() {
           <DiscoverySettings />
           <SettingsSection
             id="settings-glossary"
-            title="术语提示"
-            description="文章只请求自己实际命中的词条；文章内容继续使用现有缓存。"
+            title="正文术语识别"
+            description="这里是全站匹配总开关；每篇文章、说说和页面可在各自设置中关闭悬浮提示或脚注。"
           >
             <SettingsToggle
-              label="自动匹配正文术语"
-              hint="只处理文章正文中的普通文字，不处理代码、链接和公式。"
+              label="启用正文术语识别"
+              hint="只处理正文中的普通文字，不处理代码、链接和公式；逐内容显示设置在此开关启用后生效。"
               value={site.glossary?.auto_match ?? true}
               onChange={(auto_match) =>
                 update({
                   glossary: { ...site.glossary, auto_match },
-                })
-              }
-            />
-            <SettingsToggle
-              label="文章末尾显示术语脚注"
-              hint="只列出文章实际命中的术语；页面空闲后加载，不影响正文首屏。"
-              value={site.glossary?.article_footnotes ?? true}
-              onChange={(article_footnotes) =>
-                update({
-                  glossary: { ...site.glossary, article_footnotes },
-                })
-              }
-            />
-            <SettingsToggle
-              label="说说末尾显示术语脚注"
-              hint="只列出说说实际命中的术语；与文章脚注分别控制。"
-              value={site.glossary?.shuoshuo_footnotes ?? true}
-              onChange={(shuoshuo_footnotes) =>
-                update({
-                  glossary: { ...site.glossary, shuoshuo_footnotes },
                 })
               }
             />

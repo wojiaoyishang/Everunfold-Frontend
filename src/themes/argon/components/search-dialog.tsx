@@ -1,5 +1,5 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 
 import {
   Button,
@@ -15,6 +15,7 @@ import { Icon } from "./icon";
 import { SearchLanguages } from "./search-languages";
 export function SearchDialog() {
   const { dialog, open, close } = useModalDialog();
+  const t = useT();
   const id = useId();
   return (
     <>
@@ -65,7 +66,7 @@ export function SearchDialog() {
             <TextField
               name="q"
               autoFocus
-              placeholder="搜索文章、说说或术语…"
+              placeholder={t("搜索文章、说说或术语…")}
               maxLength={160}
             />
           </label>

@@ -337,6 +337,41 @@ function DiscussionPanel({ settings, update, disabled }: PanelProps) {
     </Panel>
   );
 }
+function GlossaryPanel({ settings, update, disabled }: PanelProps) {
+  return (
+    <Panel title="术语提示" initialOpen={false}>
+      <div className={styles.switchRow}>
+        <span>
+          <UiText text="正文内术语悬浮提示" />
+        </span>
+        <Switch
+          aria-label="正文内术语悬浮提示"
+          checked={settings.show_glossary_tooltips !== false}
+          disabled={disabled}
+          onCheckedChange={(show_glossary_tooltips) =>
+            update({ show_glossary_tooltips })
+          }
+        />
+      </div>
+      <div className={styles.switchRow}>
+        <span>
+          <UiText text="正文末尾术语脚注" />
+        </span>
+        <Switch
+          aria-label="正文末尾术语脚注"
+          checked={settings.show_glossary_footnotes !== false}
+          disabled={disabled}
+          onCheckedChange={(show_glossary_footnotes) =>
+            update({ show_glossary_footnotes })
+          }
+        />
+      </div>
+      <small>
+        <UiText text="仅控制当前内容的术语展示；两项互相独立，并按需加载。" />
+      </small>
+    </Panel>
+  );
+}
 function CaptchaPanel({ settings, update, disabled }: PanelProps) {
   return (
     <Panel title="验证码" initialOpen={false}>
@@ -402,6 +437,7 @@ const panels: Readonly<Record<string, ComponentType<PanelProps>>> =
     taxonomy: CategoryPanel,
     tags: TagsPanel,
     discussion: DiscussionPanel,
+    glossary: GlossaryPanel,
     captcha: CaptchaPanel,
     seo: SeoPanel,
   });
@@ -431,7 +467,9 @@ export function EditorPanels({
             ? ["taxonomy", "tags"]
             : id === "publication"
               ? ["publication", "access", "captcha", "opening"]
-              : [id],
+              : id === "discussion"
+                ? ["discussion", "glossary"]
+                : [id],
         )
         .filter((id, index, all) => all.indexOf(id) === index)
         .map((id) => {

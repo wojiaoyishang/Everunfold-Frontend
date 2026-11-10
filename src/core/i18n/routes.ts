@@ -22,7 +22,9 @@ export function localizedCodePath(
   );
   if (!prefix) return null;
   const base = normalizePath(unprefixedPath(path, catalog));
-  return (publicCodePaths.has(base) || /^\/(category|tag)\//.test(base)) &&
+  return (publicCodePaths.has(base) ||
+    /^\/(?:category|tag)\//.test(base) ||
+    /^\/glossary\/[^/]+$/.test(base)) &&
     hasPublicRoute(snapshot, base)
     ? base
     : null;

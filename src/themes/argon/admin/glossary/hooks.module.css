@@ -1,0 +1,227 @@
+.page {
+  min-width: 0;
+}
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+.catalog {
+  position: sticky;
+  top: 84px;
+  overflow: hidden;
+}
+.catalogHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.catalogHeader h2 {
+  margin: 4px 0 0;
+  font-size: 16px;
+  color: var(--admin-text);
+}
+.tools {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.search {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.list {
+  display: grid;
+  gap: 5px;
+  padding: 8px;
+  max-height: calc(100dvh - 300px);
+  overflow: auto;
+}
+.row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--admin-text);
+  text-align: left;
+}
+.row:hover {
+  background: var(--admin-subtle);
+}
+.row[aria-current="true"] {
+  border-color: color-mix(
+    in srgb,
+    var(--admin-accent) 38%,
+    var(--admin-border)
+  );
+  background: var(--admin-accent-soft);
+}
+.rowIcon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  color: var(--admin-accent);
+  background: color-mix(in srgb, var(--admin-accent) 8%, var(--admin-subtle));
+}
+.row > span:nth-child(2) {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+.row strong,
+.row code,
+.row small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.row code,
+.row small {
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+.empty {
+  margin: 0;
+  padding: 22px 12px;
+  color: var(--admin-muted);
+  text-align: center;
+}
+.editor {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.editorHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: flex-start;
+  padding: 0 2px;
+}
+.editorHeader h2 {
+  margin: 4px 0 6px;
+  color: var(--admin-text);
+  font-size: 22px;
+}
+.editorHeader p {
+  max-width: 700px;
+  color: var(--admin-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.embedded {
+  display: grid;
+  gap: 12px;
+}
+.hookEditor {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--admin-border);
+  border-radius: 9px;
+  background: var(--admin-canvas);
+}
+.scriptEditor {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+.scriptEditor > p {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.scriptEditor code {
+  color: var(--admin-text);
+  font-family: ui-monospace, monospace;
+}
+.targets {
+  display: grid;
+  gap: 12px;
+}
+.targetActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.targetList {
+  display: grid;
+  gap: 6px;
+}
+.target {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+}
+.target span,
+.target small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.target small {
+  color: var(--admin-muted);
+}
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--admin-border);
+}
+.footer > span {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.footer > div {
+  display: flex;
+  gap: 8px;
+}
+.inlineActions {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  gap: 8px;
+  align-items: center;
+  padding-top: 2px;
+}
+@media (max-width: 960px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+  .catalog {
+    position: static;
+  }
+  .list {
+    max-height: 340px;
+  }
+  .target {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .target small {
+    display: none;
+  }
+  .inlineActions {
+    grid-template-columns: 1fr 1fr;
+  }
+  .inlineActions > span {
+    display: none;
+  }
+}

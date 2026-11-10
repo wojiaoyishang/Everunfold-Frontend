@@ -42,7 +42,11 @@ export function StaticContentMarkup({
         data-code-dark={code.dark_scheme ?? "slate"}
         data-code-numbers={String(code.line_numbers !== false)}
         data-code-wrap-default={String(code.wrap ?? false)}
-        data-glossary-enabled={Boolean(glossary?.auto_match && contentId)}
+        data-glossary-enabled={Boolean(
+          glossary?.auto_match &&
+          (glossary.show_tooltips || glossary.show_footnotes) &&
+          contentId,
+        )}
         data-glossary-loaded="false"
         style={features.code ? codePreferenceStyle(code) : undefined}
         dangerouslySetInnerHTML={{ __html: html }}

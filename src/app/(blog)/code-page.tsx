@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { PublicSnapshot } from "@/core/content/types";
 import { pageNumber, resolveTaxonomy } from "@/core/content/query";
-import { feedType } from "@/core/content/presentation";
+import { feedType, searchType } from "@/core/content/presentation";
 import { taxonomyHref } from "@/core/content/urls";
 import { normalizeCatalog } from "@/core/i18n/catalog";
 import { translate } from "@/core/i18n/messages";
@@ -114,8 +114,11 @@ function renderCodePage(
   },
   theme: string,
 ) {
-  const page = pageNumber(parameters.page),
-    type = feedType(parameters.type);
+  const page = pageNumber(parameters.page);
+  const type =
+    path === "/" || path === "/search"
+      ? searchType(parameters.type)
+      : feedType(parameters.type);
   const query =
     typeof parameters.q === "string"
       ? parameters.q
@@ -151,7 +154,7 @@ function renderCodePage(
             ? "shuoshuo"
             : path === "/article"
               ? "article"
-              : type === "page"
+              : type === "glossary" || type === "page"
                 ? "all"
                 : type
         }

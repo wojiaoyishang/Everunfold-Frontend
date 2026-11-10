@@ -4,6 +4,8 @@ import {
   clientNavigationHref,
   searchHref,
 } from "../src/core/navigation/targets";
+import { localizedMenuLabel } from "../src/core/navigation/labels";
+import { siteNavigation } from "../src/themes/argon/navigation";
 
 const current = "http://127.0.0.1:3000/first.html?comments_page=2";
 
@@ -60,4 +62,58 @@ test("search navigation has one shareable GET destination and bounds query input
     new URL(searchHref("a".repeat(200)), current).searchParams.get("q")?.length,
     160,
   );
+});
+
+test("navigation labels resolve exact locale before language fallback", () => {
+  const item = {
+    label: "首页",
+    labels: {
+      en: "Home",
+      "zh-Hant": "首頁",
+      zh: "首页",
+    },
+  };
+  assert.equal(localizedMenuLabel(item, "en"), "Home");
+  assert.equal(localizedMenuLabel(item, "en-GB"), "Home");
+  assert.equal(localizedMenuLabel(item, "zh-TW"), "首页");
+  assert.equal(localizedMenuLabel(item, "zh-Hant"), "首頁");
+  assert.equal(localizedMenuLabel(item, "fr"), "首页");
+  assert.equal(
+    localizedMenuLabel({ label: "首页", labels: { en: "  " } }, "en"),
+    "首页",
+  );
+});
+
+test("public navigation recursively uses labels for the active locale", () => {
+  const site = {
+    locale: "en",
+    navigation: [],
+    settings: {
+      icon_urls: {},
+      site: {
+        navigation: [
+          {
+            id: "home",
+            label: "首页",
+            labels: { en: "Home", "zh-CN": "首页" },
+            href: "/",
+            icon: "home",
+            children: [
+              {
+                id: "archive",
+                label: "归档",
+                labels: { en: "Archive" },
+                href: "/archives",
+                icon: "archive",
+              },
+            ],
+          },
+        ],
+      },
+    },
+    navigationResources: {},
+  } as never;
+  const [home] = siteNavigation(site);
+  assert.equal(home.label, "Home");
+  assert.equal(home.children?.[0].label, "Archive");
 });

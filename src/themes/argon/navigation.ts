@@ -1,6 +1,7 @@
 import type { Site } from "@/core/content/types";
 import { normalizePath, publicHref } from "@/core/content/urls";
 import type { MenuItem } from "@/core/contracts/settings";
+import { localizedMenuLabel } from "@/core/navigation/labels";
 
 export interface NavigationItem {
   id?: string;
@@ -98,7 +99,7 @@ export function siteNavigation(site: Site): NavigationItem[] {
       return [
         {
           id: item.id,
-          label: item.label,
+          label: localizedMenuLabel(item, site.locale ?? "zh-CN"),
           href,
           icon: item.icon ?? "link",
           iconUrl: site.settings?.icon_urls?.[item.icon ?? ""],
@@ -128,7 +129,7 @@ export function siteNavigation(site: Site): NavigationItem[] {
           : ("link" as const),
         ...reference,
         // Public labels are authoritative; legacy hints only supply missing presentation.
-        label: item.label,
+        label: localizedMenuLabel(item, site.locale ?? "zh-CN"),
       },
     ];
   });

@@ -74,7 +74,8 @@ export function ShuoshuoDetail({
             auto_match: glossary?.auto_match ?? true,
             max_matches_per_page: glossary?.max_matches_per_page ?? 20,
             popup_source: glossary?.popup_source ?? "content",
-            show_footnotes: glossary?.shuoshuo_footnotes ?? true,
+            show_tooltips: entry.content.show_glossary_tooltips ?? true,
+            show_footnotes: entry.content.show_glossary_footnotes ?? true,
           }}
         />
         <div className="surface shuoshuo-share">

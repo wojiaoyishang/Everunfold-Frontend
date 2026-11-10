@@ -166,6 +166,82 @@
   color: var(--admin-danger);
   margin-left: auto;
 }
+.admin-menu-label-editor {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.admin-menu-label-default {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 11px 13px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-subtle);
+}
+.admin-menu-label-default span {
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.admin-menu-label-default strong {
+  overflow: hidden;
+  color: var(--admin-text);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.admin-menu-language-list {
+  display: grid;
+  gap: 8px;
+}
+.admin-menu-language-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.45fr) minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+}
+.admin-menu-language-row > :first-child,
+.admin-menu-language-add > :first-child {
+  min-width: 0;
+}
+.admin-menu-label-editor .ui-input {
+  width: 100%;
+  min-height: 38px;
+  padding: 9px 11px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  color: var(--admin-text);
+  background: var(--admin-canvas);
+  font: inherit;
+  font-size: 13px;
+}
+.admin-menu-label-editor .ui-input:focus-visible {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 3px var(--admin-accent-soft);
+  outline: none;
+}
+.admin-menu-language-empty {
+  margin: 0;
+  padding: 22px 14px;
+  border: 1px dashed var(--admin-border);
+  border-radius: 8px;
+  color: var(--admin-muted);
+  text-align: center;
+}
+.admin-menu-language-add {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--admin-border);
+}
 .admin-library-page {
   max-width: 1080px;
 }
@@ -411,6 +487,15 @@
   }
   .admin-menu-detail {
     padding: 16px;
+  }
+  .admin-menu-language-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .admin-menu-language-row > :first-child {
+    grid-column: 1 / -1;
+  }
+  .admin-menu-language-add {
+    grid-template-columns: 1fr;
   }
   .admin-icon-grid {
     grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));

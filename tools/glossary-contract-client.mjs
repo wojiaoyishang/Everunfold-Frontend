@@ -53,6 +53,15 @@ const detailValidator = ajv.compile<GlossaryContract["detail"]>({
 const previewValidator = ajv.compile<GlossaryContract["preview_output"]>({
   $ref: "glossary#/properties/preview_output",
 });
+const publicHooksValidator = ajv.compile<GlossaryContract["public_hooks"]>({
+  $ref: "glossary#/properties/public_hooks",
+});
+const hookListValidator = ajv.compile<GlossaryContract["hooks_query"]>({
+  $ref: "glossary#/properties/hooks_query",
+});
+const hookItemValidator = ajv.compile<GlossaryContract["hook_detail"]>({
+  $ref: "glossary#/properties/hook_detail",
+});
 
 export function readGlossaryIndex(
   baseUrl: string,
@@ -93,6 +102,25 @@ export function readContentGlossaryMatches(
     \`/v1/plugins/everunfold.glossary/for-content/\${encodeURIComponent(contentId)}\`,
     {},
     contentMatchesValidator,
+    { ...options, credentials: "omit" },
+  );
+}
+
+export function readGlossaryHooksForTarget(
+  baseUrl: string,
+  query: {
+    surface: "article" | "shuoshuo" | "page" | "code";
+    content_id?: string;
+    page_id?: string;
+    language?: string;
+  },
+  options: RequestOptions = {},
+) {
+  return requestJSON(
+    baseUrl,
+    "/v1/plugins/everunfold.glossary/hooks/for-target",
+    query,
+    publicHooksValidator,
     { ...options, credentials: "omit" },
   );
 }
@@ -180,6 +208,98 @@ export function updateGlossaryTerm(
     \`/v1/plugins/everunfold.glossary/admin/terms/\${encodeURIComponent(termId)}\`,
     input,
     detailValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+export function queryGlossaryHooks(
+  baseUrl: string,
+  input: GlossaryContract["hook_query"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/plugins/everunfold.glossary/admin/hooks/query",
+    input,
+    hookListValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+export function readGlossaryHook(
+  baseUrl: string,
+  hookId: string,
+  options: RequestOptions = {},
+) {
+  return requestJSON(
+    baseUrl,
+    \`/v1/plugins/everunfold.glossary/admin/hooks/\${encodeURIComponent(hookId)}\`,
+    {},
+    hookItemValidator,
+    { ...options, credentials: "include" },
+  );
+}
+
+export function createGlossaryHook(
+  baseUrl: string,
+  input: GlossaryContract["hook_create"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    "/v1/plugins/everunfold.glossary/admin/hooks",
+    input,
+    hookItemValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+export function updateGlossaryHook(
+  baseUrl: string,
+  hookId: string,
+  input: GlossaryContract["hook_update"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return patchJSON(
+    baseUrl,
+    \`/v1/plugins/everunfold.glossary/admin/hooks/\${encodeURIComponent(hookId)}\`,
+    input,
+    hookItemValidator,
+    {
+      ...options,
+      credentials: "include",
+      headers: { ...options.headers, "X-CSRF-Token": csrfToken },
+    },
+  );
+}
+
+export function archiveGlossaryHook(
+  baseUrl: string,
+  hookId: string,
+  input: GlossaryContract["hook_archive"],
+  csrfToken: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    \`/v1/plugins/everunfold.glossary/admin/hooks/\${encodeURIComponent(hookId)}/archive\`,
+    input,
+    hookItemValidator,
     {
       ...options,
       credentials: "include",

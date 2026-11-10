@@ -56,6 +56,8 @@ const blank: PageValue = {
   enabled: false,
   allow_indexing: true,
   comments_open: true,
+  show_glossary_tooltips: true,
+  show_glossary_footnotes: true,
   options: {},
 };
 export function ManagedPageEditor({ id }: { id?: string }) {
@@ -388,6 +390,26 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                           checked={value.comments_open ?? true}
                           onCheckedChange={(comments_open) =>
                             setValue({ ...value, comments_open })
+                          }
+                        />
+                      </span>
+                      <span>
+                        <UiText text="正文内术语悬浮提示" />
+                        <Switch
+                          aria-label={t("正文内术语悬浮提示")}
+                          checked={value.show_glossary_tooltips !== false}
+                          onCheckedChange={(show_glossary_tooltips) =>
+                            setValue({ ...value, show_glossary_tooltips })
+                          }
+                        />
+                      </span>
+                      <span>
+                        <UiText text="正文末尾术语脚注" />
+                        <Switch
+                          aria-label={t("正文末尾术语脚注")}
+                          checked={value.show_glossary_footnotes !== false}
+                          onCheckedChange={(show_glossary_footnotes) =>
+                            setValue({ ...value, show_glossary_footnotes })
                           }
                         />
                       </span>

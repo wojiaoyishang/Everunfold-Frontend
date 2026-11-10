@@ -34,12 +34,14 @@ import { Button } from "./ui/primitives";
 import { useRouteState } from "./route-state";
 import { ContentMarkupView } from "./content-markup-view";
 import { GlossaryExpandedDialog } from "./glossary-expanded-dialog";
+import { useLocale, useT } from "@/core/i18n/provider";
+import { translate } from "@/core/i18n/messages";
 
 type MatchIndex = NonNullable<GlossaryContract["content_matches"]["data"]>;
 
 interface ActiveTooltip {
   rect: DOMRect;
-  term: GlossaryMatchTerm;
+  term: PopoverTerm;
   trigger: HTMLElement;
 }
 
@@ -48,6 +50,11 @@ interface TooltipPlacement {
   maxHeight: number;
   top: number;
 }
+
+type PopoverTerm = Omit<
+  GlossaryMatchTerm,
+  "matched_patterns" | "matched_texts"
+>;
 
 const ignoredSelector = [
   "a",
@@ -70,6 +77,7 @@ function decorateTextNode(
   node: Text,
   terms: readonly GlossaryMatchTerm[],
   limit: number,
+  label: (title: string) => string,
 ) {
   if (limit <= 0 || node.parentElement?.closest(ignoredSelector)) return 0;
   const matches = matchGlossaryText(node.data, terms, limit);
@@ -88,7 +96,7 @@ function decorateTextNode(
     shell.setAttribute("aria-haspopup", "dialog");
     shell.setAttribute("aria-controls", "glossary-tooltip");
     shell.setAttribute("aria-expanded", "false");
-    shell.setAttribute("aria-label", `术语：${match.term.title}`);
+    shell.setAttribute("aria-label", label(match.term.title));
     shell.textContent = match.text;
     fragment.append(shell);
     offset = match.end;
@@ -103,14 +111,24 @@ export default function GlossaryTooltips({
   contentId,
   revision,
   options,
+  terms: providedTerms,
+  triggerSelector = ".glossary-term[data-glossary-term]",
+  preserveNativeClick = false,
+  popupId = "glossary-tooltip",
 }: {
-  root: RefObject<HTMLDivElement | null>;
-  contentId: string;
-  revision: string;
+  root: RefObject<HTMLElement | null>;
+  contentId?: string;
+  revision?: string;
   options: GlossaryRuntimeOptions;
+  terms?: readonly PopoverTerm[];
+  triggerSelector?: string;
+  preserveNativeClick?: boolean;
+  popupId?: string;
 }) {
   const baseUrl = useReaderBaseUrl();
   const { site } = useRouteState();
+  const { uiLocale } = useLocale();
+  const t = useT();
   const [index, setIndex] = useState<MatchIndex | null>(null);
   const [active, setActive] = useState<ActiveTooltip | null>(null);
   const [expanded, setExpanded] = useState(false);
@@ -124,10 +142,10 @@ export default function GlossaryTooltips({
   const lastPointerActivation = useRef(0);
   const lastOpened = useRef(0);
   const popup = useRef<HTMLDivElement>(null);
-  const terms = useMemo(
-    () => new Map((index?.terms ?? []).map((term) => [term.id, term])),
-    [index?.terms],
-  );
+  const terms = useMemo(() => {
+    const source: readonly PopoverTerm[] = providedTerms ?? index?.terms ?? [];
+    return new Map(source.map((term) => [term.id, term]));
+  }, [index?.terms, providedTerms]);
   const fullContent = useMemo(
     () =>
       active && active.term.body.some((block) => block.content.trim())
@@ -204,6 +222,7 @@ export default function GlossaryTooltips({
   }, [active, closing, placement]);
 
   useEffect(() => {
+    if (providedTerms || !contentId || !revision) return;
     let active = true;
     void loadGlossaryMatches(baseUrl, contentId, revision)
       .then((value) => {
@@ -215,11 +234,11 @@ export default function GlossaryTooltips({
     return () => {
       active = false;
     };
-  }, [baseUrl, contentId, revision]);
+  }, [baseUrl, contentId, providedTerms, revision]);
 
   useEffect(() => {
     const target = root.current;
-    if (!target || !index) return;
+    if (!target || !index || providedTerms) return;
     let remaining = options.max_matches_per_page;
     const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
     const nodes: Text[] = [];
@@ -228,7 +247,9 @@ export default function GlossaryTooltips({
       if (node.data.trim()) nodes.push(node);
     }
     for (const node of nodes) {
-      remaining -= decorateTextNode(node, index.terms, remaining);
+      remaining -= decorateTextNode(node, index.terms, remaining, (title) =>
+        translate("术语：{title}", uiLocale, { title }),
+      );
       if (remaining <= 0) break;
     }
     return () => {
@@ -238,16 +259,14 @@ export default function GlossaryTooltips({
         term.replaceWith(document.createTextNode(term.textContent ?? ""));
       }
     };
-  }, [index, options.max_matches_per_page, root]);
+  }, [index, options.max_matches_per_page, providedTerms, root, uiLocale]);
 
   useEffect(() => {
     const target = root.current;
-    if (!target || !index?.terms.length) return;
+    if (!target || (!index?.terms.length && !providedTerms?.length)) return;
     const trigger = (event: Event) =>
       event.target instanceof Element
-        ? event.target.closest<HTMLElement>(
-            ".glossary-term[data-glossary-term]",
-          )
+        ? event.target.closest<HTMLElement>(triggerSelector)
         : null;
     const pointerOver = (event: PointerEvent) => {
       const item = trigger(event);
@@ -293,6 +312,13 @@ export default function GlossaryTooltips({
     const click = (event: MouseEvent) => {
       const item = trigger(event);
       if (!item) return;
+      if (
+        preserveNativeClick &&
+        item.matches(
+          "a[href],button,input,select,textarea,summary,[role='button'],[role='link'],[contenteditable='true']",
+        )
+      )
+        return;
       lastPointerActivation.current = Date.now();
       event.preventDefault();
       if (active?.trigger === item && Date.now() - lastOpened.current > 300)
@@ -342,7 +368,17 @@ export default function GlossaryTooltips({
       document.removeEventListener("pointerdown", outside);
       clearTimers();
     };
-  }, [active?.trigger, clearTimers, close, index?.terms.length, open, root]);
+  }, [
+    active?.trigger,
+    clearTimers,
+    close,
+    index?.terms.length,
+    open,
+    preserveNativeClick,
+    providedTerms,
+    root,
+    triggerSelector,
+  ]);
 
   useEffect(() => {
     if (!active) return;
@@ -421,10 +457,10 @@ export default function GlossaryTooltips({
     <>
       <div
         ref={popup}
-        id="glossary-tooltip"
+        id={popupId}
         className="glossary-tooltip"
         role="dialog"
-        aria-label={`术语：${active.term.title}`}
+        aria-label={t("术语：{title}", { title: active.term.title })}
         data-above={placement?.above ?? false}
         data-entered={entered}
         data-state={closing ? "closing" : "open"}
@@ -445,13 +481,13 @@ export default function GlossaryTooltips({
       >
         <header>
           <div className="glossary-tooltip-heading">
-            <span className="glossary-tooltip-kicker">术语</span>
+            <span className="glossary-tooltip-kicker">{t("术语")}</span>
             <strong title={active.term.title}>{active.term.title}</strong>
           </div>
           <Button
             type="button"
             className="icon-button glossary-tooltip-close"
-            aria-label="关闭术语提示"
+            aria-label={t("关闭术语提示")}
             disabled={closing}
             onClick={close}
           >
@@ -464,9 +500,9 @@ export default function GlossaryTooltips({
               <div
                 className="glossary-tooltip-aliases"
                 role="list"
-                aria-label="术语别名"
+                aria-label={t("术语别名")}
               >
-                <span>也称</span>
+                <span>{t("也称")}</span>
                 {visibleAliases.map((alias) => (
                   <span key={alias} role="listitem" title={alias}>
                     {alias}
@@ -501,7 +537,7 @@ export default function GlossaryTooltips({
               target="_blank"
               rel="noopener noreferrer"
             >
-              打开词条页面 <Icon name="external" />
+              {t("打开词条页面")} <Icon name="external" />
             </AppLink>
             {fullContent && (
               <Button
@@ -514,7 +550,7 @@ export default function GlossaryTooltips({
                 }}
               >
                 <Icon name="book" />
-                查看详情
+                {t("查看详情")}
               </Button>
             )}
           </div>

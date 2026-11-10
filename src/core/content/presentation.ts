@@ -6,6 +6,7 @@ import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";
 export type { ContentPresentation };
 export type ContentType = ContentPresentation["type"];
 export type FeedType = ContentType | "all";
+export type SearchType = FeedType | "glossary";
 export type ContentPresentationMetadata = Omit<ContentPresentation, "content">;
 /** Origin is UI state, deliberately outside the business DTO. */
 export interface FeedEntry {
@@ -49,6 +50,10 @@ export function feedType(value: unknown): FeedType {
   return value === "article" || value === "shuoshuo" || value === "page"
     ? value
     : "all";
+}
+
+export function searchType(value: unknown): SearchType {
+  return value === "glossary" ? "glossary" : feedType(value);
 }
 
 export function queryFeed(

@@ -28,6 +28,7 @@ interface RouteState {
   site: Site;
   toc: TableOfContentsItem[];
   presentationId: string;
+  presentationReady: boolean;
   pending: boolean;
   feedback: NavigationFeedback;
   navigate: (href: string, options?: NavigateOptions) => void;
@@ -69,6 +70,7 @@ export function RouteStateProvider({
         site: presentation.site,
         toc: current?.toc ?? noHeadings,
         presentationId: current?.id ?? route,
+        presentationReady: Boolean(current),
         pending,
         feedback,
         navigate,

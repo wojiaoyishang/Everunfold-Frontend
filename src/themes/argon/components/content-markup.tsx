@@ -24,7 +24,13 @@ export function ContentMarkup({
   const root = useRef<HTMLDivElement>(null);
   const [loadGlossary, setLoadGlossary] = useState(false);
   useEffect(() => {
-    if (!glossary?.auto_match || !contentId || !contentRevision) return;
+    if (
+      !glossary?.auto_match ||
+      !glossary.show_tooltips ||
+      !contentId ||
+      !contentRevision
+    )
+      return;
     let frame = 0;
     let timer: number | null = null;
     const start = () => setLoadGlossary(true);
@@ -40,7 +46,12 @@ export function ContentMarkup({
     return () => {
       if (timer !== null) window.clearTimeout(timer);
     };
-  }, [contentId, contentRevision, glossary?.auto_match]);
+  }, [
+    contentId,
+    contentRevision,
+    glossary?.auto_match,
+    glossary?.show_tooltips,
+  ]);
   return (
     <>
       <ContentMarkupView
@@ -48,7 +59,9 @@ export function ContentMarkup({
         html={html}
         features={features}
         className={className}
-        data-glossary-enabled={Boolean(glossary?.auto_match && contentId)}
+        data-glossary-enabled={Boolean(
+          glossary?.auto_match && glossary.show_tooltips && contentId,
+        )}
         data-glossary-loaded={loadGlossary}
       />
       {loadGlossary && glossary && contentId && contentRevision && (

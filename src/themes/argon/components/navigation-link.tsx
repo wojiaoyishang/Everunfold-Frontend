@@ -128,7 +128,12 @@ export function SearchForm({
       window.location.origin,
     );
     const type = values.get("type");
-    if (type === "article" || type === "shuoshuo" || type === "page")
+    if (
+      type === "article" ||
+      type === "shuoshuo" ||
+      type === "page" ||
+      type === "glossary"
+    )
       url.searchParams.set("type", type);
     const languages = values.get("languages");
     if (typeof languages === "string" && languages && languages !== locale)

@@ -404,6 +404,12 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 10px;
 }
+.glossary-search-state {
+  margin: 0;
+  padding: 24px 20px;
+  color: var(--muted);
+  text-align: center;
+}
 .glossary-search-grid > a {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;

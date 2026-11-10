@@ -1,7 +1,9 @@
 import { UiText } from "@/core/i18n/provider";
+import { messageLocale } from "@/core/i18n/locale";
+import { translate } from "@/core/i18n/messages";
 import { Button, TextField } from "@/themes/argon/components/ui/primitives";
 import type { PublicSnapshot } from "@/core/content/types";
-import { queryFeed, type FeedType } from "@/core/content/presentation";
+import { queryFeed, type SearchType } from "@/core/content/presentation";
 import { PagePresentation } from "./route-state";
 import { SearchContentType } from "./search-content-type";
 import { SearchForm } from "./navigation-link";
@@ -24,19 +26,23 @@ export function SearchResults({
   theme: string;
   snapshot: PublicSnapshot;
   query: string;
-  type: FeedType;
+  type: SearchType;
   page: number;
   allLanguages?: boolean;
   language?: string;
 }) {
-  const result = queryFeed(snapshot, {
-    query,
-    type,
-    page,
-    includePages: true,
-    allLanguages,
-    language,
-  });
+  const uiLocale = messageLocale(snapshot.site.locale ?? "zh-CN");
+  const glossaryOnly = type === "glossary";
+  const result = glossaryOnly
+    ? { items: [], total: 0, page: 1, pages: 0 }
+    : queryFeed(snapshot, {
+        query,
+        type,
+        page,
+        includePages: true,
+        allLanguages,
+        language,
+      });
   return (
     <>
       <PagePresentation site={snapshot.site} />
@@ -49,7 +55,7 @@ export function SearchResults({
           <TextField
             name="q"
             aria-label="搜索关键词"
-            placeholder="搜索文章、说说、术语或页面…"
+            placeholder={translate("搜索文章、说说、术语或页面…", uiLocale)}
             defaultValue={query}
             maxLength={160}
             autoFocus
@@ -68,10 +74,14 @@ export function SearchResults({
         </SearchForm>
         <p>
           {query ? (
-            <UiText
-              text="“{query}” 找到 {count} 条内容"
-              values={{ query, count: result.total }}
-            />
+            glossaryOnly ? (
+              <UiText text="“{query}”的术语匹配结果" values={{ query }} />
+            ) : (
+              <UiText
+                text="“{query}” 找到 {count} 条内容"
+                values={{ query, count: result.total }}
+              />
+            )
           ) : (
             <UiText text="在这里，寻找某一段故事。" />
           )}
@@ -83,7 +93,7 @@ export function SearchResults({
         allLanguages={allLanguages}
         language={language}
       />
-      {query && (
+      {query && !glossaryOnly && (
         <>
           <div className="article-list">
             {result.items.length ? (
