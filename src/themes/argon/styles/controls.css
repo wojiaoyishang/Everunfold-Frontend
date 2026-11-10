@@ -40,6 +40,24 @@
   transform: translateY(8px);
   pointer-events: none;
 }
+.reading-progress-slot {
+  margin-top: 0;
+}
+.reading-progress-slot[data-visible="false"] {
+  transform: translateY(4px) scale(0.96);
+  transition:
+    grid-template-rows 420ms var(--motion-ease),
+    margin-top 420ms var(--motion-ease),
+    opacity 360ms ease,
+    transform 420ms var(--motion-ease);
+}
+html[data-motion="reduced"] .reading-progress-slot {
+  transform: none;
+  transition:
+    grid-template-rows 120ms ease,
+    margin-top 120ms ease,
+    opacity 120ms ease;
+}
 .tool-slot-inner {
   min-height: 0;
   overflow: hidden;

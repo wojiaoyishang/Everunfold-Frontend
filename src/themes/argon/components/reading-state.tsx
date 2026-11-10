@@ -45,7 +45,9 @@ export function ReadingStateProvider({ children }: { children: ReactNode }) {
         next = {
           article: true,
           showProgress:
-            bounds.height > window.innerHeight - 100 && bounds.top <= 100,
+            bounds.height > window.innerHeight - 100 &&
+            bounds.top <= 100 &&
+            bounds.bottom > 100,
           comments: !!document.getElementById("comments"),
           activeId,
           progress: Math.round(
