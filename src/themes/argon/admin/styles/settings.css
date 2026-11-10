@@ -19,10 +19,21 @@
   outline-offset: 3px;
 }
 .admin-settings-section-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: flex-start;
+  gap: 12px 20px;
   padding: 16px 22px;
   border-bottom: 1px solid var(--admin-border);
   background: color-mix(in srgb, var(--admin-subtle) 55%, var(--admin-canvas));
   border-radius: 8px 8px 0 0;
+}
+.admin-settings-section-heading > div:first-child {
+  min-width: 0;
+}
+.admin-settings-section-action {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
 }
 .admin-settings-section-heading h2 {
   font-size: 15px;

@@ -1402,3 +1402,14 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/glossary.md` | `glossary-runtime-3` | `64b21a12dfd7807f83a46bbd70e56c47f5268223faa7bbb16fc5fffbc4f86151` |
 | `docs/decisions/0099-article-scoped-glossary-tooltips.md` | `ADR0099-2` | `a5a3efd5d7670dfa0d9ed60e4919fad3be818c83e460daff655cefd0cc4af141` |
 | `docs/handoff/glossary-rich-editor-verification.md` | `glossary-rich-editor-verification-1` | `5850abe40b7513d4056a1a82d8f6af62d50946af3bb94b45492ab926d0dddf53` |
+
+
+## 术语匹配规则与默认正文提示（2026-11-10）
+
+后端2c5a163/838ea19、前端本轮术语规则与阅读弹层；glossary-v1 3.1.0、settings-v1 1.26.0和0038迁移。标题默认规则、普通/受限正则、匹配预览、可选摘要、默认正文 Tooltip 与放大阅读已实现；必填标签只保留原生 required 的单个共享星号。实际检查与剩余边界见 ADR 和 STATUS。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-glossary-rules-2` | `e6b345ce61198f7958229a34bd03742b93ad5e5bf5f41bb3df94c34798b6e22b` |
+| `docs/development/glossary.md` | `glossary-runtime-6` | `396636cf66c77261f6c83780d71e0dda75a84bee23afc985d004761b86e4a2c8` |
+| `docs/decisions/0101-glossary-rules-and-reader-ui.md` | `ADR0101-4` | `a492c35f4689680d591a3355a6d17a0770de34d528f94bfbb6a54876cfa3fe71` |

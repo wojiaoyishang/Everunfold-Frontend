@@ -26,6 +26,7 @@ import { AppLink } from "./navigation-link";
 import { Icon } from "./icon";
 import { Button } from "./ui/primitives";
 import { useRouteState } from "./route-state";
+import { ContentMarkupView } from "./content-markup-view";
 import { GlossaryExpandedDialog } from "./glossary-expanded-dialog";
 
 type MatchIndex = NonNullable<GlossaryContract["content_matches"]["data"]>;
@@ -113,10 +114,12 @@ export default function GlossaryTooltips({
   );
   const richContent = useMemo(
     () =>
-      active && expanded && options.popup_source === "content"
+      active &&
+      options.popup_source === "content" &&
+      active.term.body.some((block) => block.content.trim())
         ? renderGlossaryContent(active.term, site.settings?.shortcodes ?? [])
         : null,
-    [active, expanded, options.popup_source, site.settings?.shortcodes],
+    [active, options.popup_source, site.settings?.shortcodes],
   );
 
   const clearTimers = useCallback(() => {
@@ -365,7 +368,17 @@ export default function GlossaryTooltips({
             <Icon name="close" />
           </Button>
         </header>
-        <p>{active.term.summary}</p>
+        {richContent ? (
+          <ContentMarkupView
+            className="article-content glossary-tooltip-content"
+            data-glossary-ignore
+            html={richContent.html}
+            features={richContent.features}
+            codeTools={false}
+          />
+        ) : active.term.summary.trim() ? (
+          <p>{active.term.summary}</p>
+        ) : null}
         <div className="glossary-tooltip-actions">
           <AppLink href={active.term.path}>查看词条</AppLink>
           {options.popup_source === "content" &&
@@ -378,7 +391,7 @@ export default function GlossaryTooltips({
                   setExpanded(true);
                 }}
               >
-                完整说明 <Icon name="external" />
+                放大阅读 <Icon name="external" />
               </Button>
             )}
         </div>

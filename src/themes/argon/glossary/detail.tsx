@@ -69,7 +69,7 @@ export function GlossaryDetailPage({ slug }: { slug: string }) {
               术语
             </span>
             <h1>{term.title}</h1>
-            <p>{term.summary}</p>
+            {term.summary.trim() && <p>{term.summary}</p>}
             {term.aliases.length > 0 && (
               <small>也称为：{term.aliases.join(" · ")}</small>
             )}

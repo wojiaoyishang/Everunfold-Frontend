@@ -302,7 +302,7 @@ export function SiteSettingsPage() {
                 programOptions
                 name="glossary-popup-source"
                 label="提示内容"
-                value={site.glossary?.popup_source ?? "summary"}
+                value={site.glossary?.popup_source ?? "content"}
                 options={[
                   { value: "summary", label: "简短提示" },
                   { value: "content", label: "完整词条说明" },

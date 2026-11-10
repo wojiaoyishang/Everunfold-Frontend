@@ -21,11 +21,13 @@ export function SettingsSection({
   id,
   title,
   description,
+  action,
   children,
 }: {
   id: string;
   title: string;
   description: string;
+  action?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -36,12 +38,17 @@ export function SettingsSection({
       tabIndex={-1}
     >
       <div className="admin-settings-section-heading">
-        <h2>
-          <UiText text={title} />
-        </h2>
-        <p>
-          <UiText text={description} />
-        </p>
+        <div>
+          <h2>
+            <UiText text={title} />
+          </h2>
+          <p>
+            <UiText text={description} />
+          </p>
+        </div>
+        {action && (
+          <div className="admin-settings-section-action">{action}</div>
+        )}
       </div>
       <div className="admin-settings-fields">{children}</div>
     </section>
@@ -55,6 +62,7 @@ export function SettingsText({
   maxLength = 2048,
   multiline = false,
   placeholder,
+  required = false,
 }: {
   label: string;
   hint?: string;
@@ -63,6 +71,7 @@ export function SettingsText({
   maxLength?: number;
   multiline?: boolean;
   placeholder?: string;
+  required?: boolean;
 }) {
   const id = useId();
   const props = {
@@ -73,6 +82,7 @@ export function SettingsText({
     ) => onChange(event.target.value),
     maxLength,
     placeholder,
+    required,
     "aria-describedby": hint ? `${id}-hint` : undefined,
   };
   return (

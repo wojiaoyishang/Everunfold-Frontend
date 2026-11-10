@@ -90,7 +90,7 @@ export function GlossaryDirectory() {
               </span>
               <div>
                 <h2>{term.title}</h2>
-                <p>{term.summary}</p>
+                {term.summary.trim() && <p>{term.summary}</p>}
                 {term.aliases.length > 0 && (
                   <small>别名：{term.aliases.join(" · ")}</small>
                 )}

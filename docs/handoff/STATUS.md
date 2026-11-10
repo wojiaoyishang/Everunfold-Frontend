@@ -1,5 +1,16 @@
 # 前端交接状态
 
+## 最新修复：术语表单与默认正文提示（2026-11-10）
+
+- 修复摘要必填阻止保存：`summary` 在 glossary-v1 3.1.0 中改为可选，空值提交为 `""`；仅术语标题、路径片段显示单个 `*`。`SettingsText` 只传递原生 required，星号统一由共享 CSS 生成；390 和 1440 已复核，空摘要也不再在公开目录/详情生成空段落。
+- 术语提示默认来源改为正文（site settings fallback、文章 runtime fallback 和后端 GlossaryPreferences 默认值一致）。Tooltip 在 `popup_source=content` 时直接渲染正文，简短摘要可留空；正文较长时仍可「放大阅读」。
+- 术语标题本身作为固定默认匹配规则展示，默认启用；预览请求包含标题规则，输入样本文字会实际高亮。正文预览按钮通过共享`SettingsSection`头部操作位放到“术语正文”标题右侧，移动端也与标题顶部对齐。语言旗帜统一固定宽度，避免不同 emoji 字宽导致文本起点不一致。
+- Chromium / Playwright 本地容器 UI 回归（1440×1000、390×844）通过：两个必填标签各只有一个共享 CSS 星号；标题 required、摘要不 required；正文预览按钮位于 `#glossary-body` 卡片头右侧并与标题顶部对齐，点击后切换为「返回编辑」；默认标题命中 `AI` 并高亮；保存请求提交 `summary=""`、`auto_match_title=true`；语言下拉三项旗帜宽度均 27px、文本起点均为 51.19px、垂直中心差约 0.85px。另在真实示例文章 `/paper-demo-code.html` 中注入空摘要术语，悬浮提示直接显示正文内容，且「放大阅读」Dialog 正常。
+- 浏览器 UI 测试使用本地 mock admin session/API，以避免绕过登录页 CAPTCHA；后端另以隔离 PostgreSQL 测试库执行真实 API 创建（空摘要）、默认标题预览、更新、冲突和归档，3 passed。当前运行环境主数据库尚未应用迁移 0038（readiness 503），没有迁移或写入真实词条。
+- 契约锁定到 Backend `838ea19`：glossary-v1 3.1.0、settings-v1 1.26.0。尚未推送；本地管理员真实账号登录与生产数据库迁移待用户授权/验证码后验收。
+
+- 最终 `npm run check` 348 项通过，含 ESLint、严格 TypeScript、插件类型、Prettier、契约/插件构建和测试；`git diff --check` 通过。
+
 ## 最新改造：术语规则、表格与两级弹层（2026-11-10）
 
 - 前端针对术语页面与阅读端的代码改造完成，`glossary-v1` 契约固定到后端 `2c5a163` / 3.0.0，新增后台匹配规则组件（普通匹配/受限正则、标题开关、大小写/整词/优先级、禁用与后端样本预览），旧词条别名以兼容模式回填；文章级返回 `matched_patterns` 并优先用其实际字面值标注，同时兼容旧 `matched_texts`。

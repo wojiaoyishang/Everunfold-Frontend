@@ -61,6 +61,23 @@
   line-height: 1.7;
   font-size: 0.93rem;
 }
+
+.glossary-tooltip-content {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.glossary-tooltip-content > :first-child {
+  margin-top: 0;
+}
+.glossary-tooltip-content > :last-child {
+  margin-bottom: 0;
+}
+.glossary-tooltip-content :is(pre, table, img, video) {
+  max-width: 100%;
+}
 .glossary-tooltip-actions {
   display: flex;
   justify-content: space-between;

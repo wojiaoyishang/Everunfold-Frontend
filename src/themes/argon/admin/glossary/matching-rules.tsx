@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import { previewGlossary } from "@/core/contracts/glossary";
+import { RequestError } from "@/core/http/request";
 import {
   matchGlossaryText,
   type GlossaryMatchTerm,
@@ -112,11 +113,17 @@ export function MatchingRulesEditor({
         .then((response) => {
           if (!controller.signal.aborted) setPreview(response.data);
         })
-        .catch(() => {
+        .catch((cause) => {
           if (!controller.signal.aborted) {
             setPreview(null);
             setPreviewError(
-              "匹配测试失败。请检查正则语法；仅支持有限重复 {0,32}，不支持无限重复、断言和反向引用。",
+              cause instanceof RequestError && cause.status === 503
+                ? "匹配测试服务暂不可用（HTTP 503）。请确认后端数据库迁移已完成、术语插件已同步。"
+                : cause instanceof RequestError && cause.status
+                  ? `匹配测试请求失败（HTTP ${cause.status}）。请检查登录状态、权限和后端响应。`
+                  : cause instanceof RequestError && cause.kind === "invalid"
+                    ? "匹配测试响应与当前术语契约不一致，请同步 glossary-v1 契约。"
+                    : "匹配测试失败。请检查正则语法；仅支持有限重复 {0,32}，不支持无限重复、断言和反向引用。",
             );
           }
         })
@@ -171,9 +178,10 @@ export function MatchingRulesEditor({
     <div className={styles.rules}>
       <div className={styles.titleRule}>
         <div>
-          <strong>自动匹配术语标题</strong>
+          <strong>默认规则 · 术语标题本身</strong>
+          <code>{fields.title.trim() || "请先填写术语标题"}</code>
           <small>
-            词条的显示标题和匹配开关独立。旧词条仍保留原有标题与别名匹配行为。
+            默认将当前标题作为匹配词；标题修改后自动更新。此规则与下方补充规则独立。
           </small>
         </div>
         <Button

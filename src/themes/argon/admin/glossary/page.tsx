@@ -115,7 +115,8 @@ function failureMessage(error: unknown) {
       return error.code === 40936
         ? "标题或别名与其他词条冲突。"
         : "内容已在其他窗口更新，请刷新词条后重试。";
-    if (error.status === 422) return "请检查标题、路径、别名和长度限制。";
+    if (error.status === 422)
+      return "请检查带 * 标记的必填项、匹配规则和长度限制。";
     if (error.status === 404) return "术语插件未启用或词条已不存在。";
   }
   return "暂时无法确认保存结果，当前输入已保留。";
@@ -264,10 +265,11 @@ export function GlossaryAdminPage() {
     if (saving || dragging || uploading) return;
     const value: Fields = {
       ...fields,
+      summary: (fields.summary ?? "").trim(),
       slug: fields.slug.trim() || slugify(fields.title),
     };
-    if (!value.title.trim() || !value.summary.trim() || !value.slug) {
-      setError("标题、路径和提示说明不能为空。");
+    if (!value.title.trim() || !value.slug) {
+      setError("请填写带 * 标记的必填项：术语标题和路径片段。");
       return;
     }
     const fingerprint = JSON.stringify([
@@ -329,7 +331,7 @@ export function GlossaryAdminPage() {
     <div className={`admin-settings-page ${styles.page}`}>
       <AdminPageHeading
         title="术语表"
-        description="维护正文自动命中的术语、别名与提示内容。"
+        description="维护正文自动命中的术语、标题规则、别名与正文提示。"
         action={
           writable ? (
             <AdminActionButton icon="plus" tone="accent" onClick={startNew}>
@@ -482,19 +484,12 @@ export function GlossaryAdminPage() {
                   text={
                     selected
                       ? "修改会作用于后续文章匹配；已打开页面的本地缓存到期后更新。"
-                      : "标题会作为默认匹配词，别名可以补充不同写法。"
+                      : "术语标题默认作为第一条匹配规则，别名与其他规则可补充不同写法。"
                   }
                 />
               </p>
             </div>
             <div className={styles.editorActions}>
-              <AdminActionButton
-                icon={previewing ? "edit" : "eye"}
-                aria-pressed={previewing}
-                onClick={() => setPreviewing((value) => !value)}
-              >
-                <UiText text={previewing ? "返回编辑" : "正文预览"} />
-              </AdminActionButton>
               {selected?.status === "published" && (
                 <RouteLink
                   className="admin-button admin-action-button"
@@ -529,6 +524,7 @@ export function GlossaryAdminPage() {
               <div className="admin-settings-two-col">
                 <SettingsText
                   label="术语标题"
+                  required
                   hint="标题默认参与匹配，可在下方规则中关闭。"
                   value={fields.title}
                   maxLength={120}
@@ -572,6 +568,7 @@ export function GlossaryAdminPage() {
               </div>
               <SettingsText
                 label="路径片段"
+                required
                 hint={`公开地址：/glossary/${fields.slug || "term-slug"}`}
                 value={fields.slug}
                 maxLength={120}
@@ -586,6 +583,15 @@ export function GlossaryAdminPage() {
               id="glossary-body"
               title="术语正文"
               description="与文章共用富文本区块、格式、代码、公式、媒体和预览能力。"
+              action={
+                <AdminActionButton
+                  icon={previewing ? "edit" : "eye"}
+                  aria-pressed={previewing}
+                  onClick={() => setPreviewing((value) => !value)}
+                >
+                  <UiText text={previewing ? "返回编辑" : "正文预览"} />
+                </AdminActionButton>
+              }
             >
               <CodePreferencesProvider value={resources.codePreferences}>
                 {previewing ? (
@@ -640,22 +646,22 @@ export function GlossaryAdminPage() {
             <SettingsSection
               id="glossary-content"
               title="悬浮提示"
-              description="默认弹层使用的简短说明；完整内容由上方术语正文提供。"
+              description="简短摘要可留空；默认悬浮内容直接使用上方术语正文。"
             >
               <div className="admin-settings-field">
                 <label htmlFor={summaryId}>
-                  <UiText text="悬浮提示" />
+                  <UiText text="简短提示（可选）" />
                 </label>
                 <TextArea
                   id={summaryId}
-                  value={fields.summary}
+                  value={fields.summary ?? ""}
                   rows={3}
                   maxLength={500}
-                  placeholder="鼠标悬停、键盘聚焦或触屏点按时显示。"
+                  placeholder="可留空；默认直接使用上方术语正文作为悬浮内容。"
                   onChange={(event) => update({ summary: event.target.value })}
                 />
                 <small>
-                  <UiText text="建议用一句或两句话说明这个词在本站语境中的含义。" />
+                  <UiText text="可选。仅在站点提示内容来源设为“简短提示”时使用。" />
                 </small>
               </div>
             </SettingsSection>

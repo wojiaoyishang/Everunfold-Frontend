@@ -9,15 +9,17 @@
 
 .ui-language-flag {
   display: inline-flex;
-  flex: 0 0 auto;
+  flex: 0 0 1.5em;
+  width: 1.5em;
+  height: 1.35em;
   align-items: center;
   justify-content: center;
-  margin-inline-end: 6px;
+  margin-inline-end: 0.4em;
   font-family: var(--language-flag-font);
   font-weight: 400;
   font-style: normal;
   font-synthesis: none;
   font-size: 18px;
   line-height: 1;
-  vertical-align: 0;
+  vertical-align: middle;
 }

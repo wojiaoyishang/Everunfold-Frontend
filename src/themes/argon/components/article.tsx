@@ -40,7 +40,7 @@ export async function Article({
           glossary={{
             auto_match: glossary?.auto_match ?? true,
             max_matches_per_page: glossary?.max_matches_per_page ?? 20,
-            popup_source: glossary?.popup_source ?? "summary",
+            popup_source: glossary?.popup_source ?? "content",
           }}
           articleDisplay={display}
         />
