@@ -95,6 +95,21 @@
   background: var(--accent-soft);
 }
 
+.termImage {
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 72px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--line));
+  border-radius: 10px;
+  background: var(--accent-soft);
+}
+
+.termImage img {
+  object-fit: cover;
+}
+
 .state {
   display: flex;
   gap: 10px;
@@ -131,6 +146,29 @@
 
 .detail header {
   padding-bottom: 12px;
+}
+
+.detail .detailHeaderWithImage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
+  gap: clamp(18px, 4vw, 36px);
+  align-items: center;
+}
+
+.detailFeature {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+  border-radius: 12px;
+  background: var(--accent-soft);
+  box-shadow: 0 12px 30px rgb(20 20 40 / 12%);
+}
+
+.detailFeature img {
+  object-fit: cover;
 }
 
 .detailDivider {
@@ -179,6 +217,15 @@
 
   .card > svg {
     display: none;
+  }
+
+  .termImage {
+    width: 72px;
+    height: 60px;
+  }
+
+  .detail .detailHeaderWithImage {
+    grid-template-columns: 1fr;
   }
 }
 

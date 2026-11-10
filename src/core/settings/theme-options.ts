@@ -37,10 +37,13 @@ const feedDefaults: Required<FeedPreferences> = {
   default_type: "all",
   page_size: 10,
 };
-export type RuntimeThemePreferences = Required<ThemePreferences> & {
+export type RuntimeThemePreferences = Required<
+  Omit<ThemePreferences, "navigation">
+> & {
   article: Required<ArticleDisplayPreferences>;
   code: Required<CodePreferences>;
   feed: Required<FeedPreferences>;
+  navigation?: ThemePreferences["navigation"];
 };
 const defaults: RuntimeThemePreferences = {
   article: articleDefaults,

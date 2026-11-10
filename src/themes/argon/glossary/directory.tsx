@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import { loadGlossaryIndex } from "@/core/glossary/runtime";
@@ -70,9 +71,21 @@ export function GlossaryDirectory() {
               href={term.path}
               key={term.id}
             >
-              <span className={styles.termIcon}>
-                <Icon name="book" />
-              </span>
+              {term.feature_image ? (
+                <span className={styles.termImage}>
+                  <Image
+                    src={term.feature_image.original}
+                    alt=""
+                    fill
+                    sizes="(max-width: 640px) 72px, 96px"
+                    unoptimized
+                  />
+                </span>
+              ) : (
+                <span className={styles.termIcon}>
+                  <Icon name="book" />
+                </span>
+              )}
               <div>
                 <h2>{term.title}</h2>
                 {term.summary.trim() && <p>{term.summary}</p>}

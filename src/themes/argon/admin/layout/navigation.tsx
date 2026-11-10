@@ -37,6 +37,7 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   icons: "shapes",
   shortcode: "shortcode",
   applications: "plug",
+  navigation: "link",
   taxonomy: "tag",
   mail: "mail",
 };

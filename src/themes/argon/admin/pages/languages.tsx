@@ -260,7 +260,8 @@ export function PageLanguages({
                 value={chosen}
                 options={available.map((item) => ({
                   value: item.code,
-                  label: `${item.flag} ${item.name}`,
+                  label: item.name,
+                  flag: item.flag,
                 }))}
                 onValueChange={(value) => {
                   setLanguage(value);

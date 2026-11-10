@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   adminDestination,
   adminNavigation,
+  adminNavigationGroups,
 } from "../src/core/admin/navigation";
 import {
   adminPreferencesKey,
@@ -43,6 +44,28 @@ test("registered admin destinations bypass public snapshots and survive a safe l
     "/admin/media\\evil.example",
   ])
     assert.equal(loginReturnPath(path), "/");
+});
+
+test("admin navigation separates primary content, tools, appearance and system settings", () => {
+  assert.deepEqual(
+    adminNavigationGroups.map((group) => group.label),
+    ["概览", "内容", "内容工具", "资源", "外观", "成员与互动", "设置"],
+  );
+  const ids = (label: string) =>
+    adminNavigationGroups
+      .find((group) => group.label === label)
+      ?.items.map((item) => item.id);
+  assert.deepEqual(ids("内容工具"), ["content.glossary", "core.shortcodes"]);
+  assert.deepEqual(ids("外观"), [
+    "core.settings.theme",
+    "core.settings.navigation",
+  ]);
+  assert.deepEqual(
+    adminNavigationGroups
+      .find((group) => group.label === "设置")
+      ?.branches.map((branch) => branch.label),
+    ["站点", "连接与安全", "系统"],
+  );
 });
 
 test("corrupt or outdated admin appearance cannot import permissions or public reader settings", () => {

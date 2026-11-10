@@ -175,17 +175,6 @@
   gap: 6px;
   min-width: 0;
 }
-.flag {
-  font-family: var(--language-flag-font);
-  font-weight: 400;
-  font-style: normal;
-  font-synthesis: none;
-  font-size: 18px;
-  line-height: 1;
-  flex: none;
-  max-width: 2em;
-  overflow: hidden;
-}
 @media (max-width: 600px) {
   .moreText {
     display: none;

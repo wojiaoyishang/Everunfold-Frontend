@@ -13,6 +13,7 @@ import { Icon } from "../icon";
 import { Button, Popover } from "./primitives";
 import { matchOption, moveOption, type SelectOption } from "./select-model";
 import { useAnchoredPopover } from "./use-anchored-popover";
+import { LanguageFlag } from "../language-flag";
 
 export function Select({
   name,
@@ -167,9 +168,7 @@ export function Select({
       >
         <span>
           {options[selectedIndex]?.flag && (
-            <span className="ui-language-flag" aria-hidden="true">
-              {options[selectedIndex].flag}
-            </span>
+            <LanguageFlag value={options[selectedIndex].flag ?? ""} />
           )}
           {options[selectedIndex]?.label ?? <UiText text="请选择" />}
         </span>
@@ -202,11 +201,7 @@ export function Select({
             onClick={() => choose(index)}
           >
             <span>
-              {option.flag && (
-                <span className="ui-language-flag" aria-hidden="true">
-                  {option.flag}
-                </span>
-              )}
+              {option.flag && <LanguageFlag value={option.flag} />}
               {option.label}
             </span>
             {selected === option.value && <Icon name="check" />}

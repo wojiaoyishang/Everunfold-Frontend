@@ -85,26 +85,24 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.emoji,
-.largeEmoji,
 .customFlag :global(.ui-input) {
   font-family: var(--language-flag-font);
   font-weight: 400;
   font-style: normal;
   font-synthesis: none;
 }
-.emoji,
-.largeEmoji {
-  line-height: 1;
+.inlineFlag {
+  vertical-align: -0.2em;
 }
-.emoji {
-  font-size: 26px;
-  flex: none;
-}
-.largeEmoji {
-  font-size: 64px;
-  text-align: center;
-  padding: 24px;
+.largePreview {
+  box-sizing: border-box;
+  flex-basis: 100%;
+  width: 100%;
+  max-width: 100%;
+  padding: 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-subtle);
 }
 .footer {
   display: flex;

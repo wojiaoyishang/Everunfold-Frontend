@@ -9,7 +9,7 @@ export const contentType = (id: string) =>
   registeredContentTypes.find((item) => item.id === id);
 export const contentAdminModule: AdminModuleRegistration = {
   id: "content",
-  groups: [{ id: "content.types", label: "内容", order: 15 }],
+  groups: [{ id: "content.types", label: "内容", order: 20 }],
   pages: [
     {
       id: "content.glossary",
@@ -17,7 +17,7 @@ export const contentAdminModule: AdminModuleRegistration = {
       label: "术语表",
       description: "正文术语、别名与悬浮提示",
       icon: "glossary",
-      menu: { group: "content.types", order: 25 },
+      menu: { group: "core.tools", order: 10 },
     },
     {
       id: "content.taxonomies",

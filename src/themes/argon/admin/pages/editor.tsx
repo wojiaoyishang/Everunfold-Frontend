@@ -322,7 +322,8 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                             .filter((item) => item.enabled)
                             .map((item) => ({
                               value: item.code,
-                              label: `${item.flag} ${item.name}`,
+                              label: item.name,
+                              flag: item.flag,
                             }))}
                         />
                       </label>

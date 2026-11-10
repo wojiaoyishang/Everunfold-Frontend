@@ -226,6 +226,19 @@
   overflow: auto;
   overscroll-behavior: contain;
 }
+.glossary-tooltip-feature {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 7;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--line));
+  border-radius: 8px;
+  background: var(--accent-soft);
+}
+.glossary-tooltip-feature img {
+  object-fit: cover;
+}
 .glossary-tooltip-aliases {
   display: flex;
   align-items: center;

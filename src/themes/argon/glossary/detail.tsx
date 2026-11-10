@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import { readGlossaryDetail } from "@/core/contracts/glossary";
@@ -66,20 +67,35 @@ export function GlossaryDetailPage({ slug }: { slug: string }) {
       )}
       {term && rendered && (
         <article className={`surface ${styles.detail}`}>
-          <header>
-            <span className={styles.kicker}>
-              <Icon name="book" />
-              <UiText text="术语" />
-            </span>
-            <h1>{term.title}</h1>
-            {term.summary.trim() && <p>{term.summary}</p>}
-            {term.aliases.length > 0 && (
-              <small>
-                <UiText
-                  text="也称为：{aliases}"
-                  values={{ aliases: term.aliases.join(" · ") }}
+          <header
+            className={term.feature_image ? styles.detailHeaderWithImage : ""}
+          >
+            <div>
+              <span className={styles.kicker}>
+                <Icon name="book" />
+                <UiText text="术语" />
+              </span>
+              <h1>{term.title}</h1>
+              {term.summary.trim() && <p>{term.summary}</p>}
+              {term.aliases.length > 0 && (
+                <small>
+                  <UiText
+                    text="也称为：{aliases}"
+                    values={{ aliases: term.aliases.join(" · ") }}
+                  />
+                </small>
+              )}
+            </div>
+            {term.feature_image && (
+              <span className={styles.detailFeature}>
+                <Image
+                  src={term.feature_image.original}
+                  alt=""
+                  fill
+                  sizes="(max-width: 640px) 100vw, 260px"
+                  unoptimized
                 />
-              </small>
+              </span>
             )}
           </header>
           <div className={styles.detailDivider} role="separator" />

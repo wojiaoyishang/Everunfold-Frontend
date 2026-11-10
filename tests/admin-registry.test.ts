@@ -44,20 +44,19 @@ test("admin modules compose deterministic groups and entries independently of re
   assert.deepEqual(first.navigation, reversed.navigation);
   assert.deepEqual(
     first.navigation.map((g) => g.id),
-    ["core.workspace", "core.settings", "example.tools"],
+    [
+      "core.workspace",
+      "core.tools",
+      "example.tools",
+      "core.resources",
+      "core.appearance",
+      "core.people",
+      "core.settings",
+    ],
   );
   assert.deepEqual(
     first.navigation[0].items.map((p) => p.id),
-    [
-      "core.overview",
-      "example.quick",
-      "core.media",
-      "core.icons",
-      "core.fonts",
-      "core.shortcodes",
-      "core.users",
-      "core.comments",
-    ],
+    ["core.overview", "example.quick"],
   );
   assert.equal(first.resolve("/admin/example/detail/")?.id, "example.detail");
   assert.equal(first.page("example.detail")?.menu, null);
@@ -146,7 +145,7 @@ test("submenu filtering cannot expose hidden destinations or leave an empty bran
   assert.equal(entries.length, 1);
   assert.equal(entries[0].kind, "branch");
   if (entries[0].kind !== "branch") throw new Error("missing branch");
-  assert.equal(entries[0].branch.id, "core.configuration");
+  assert.equal(entries[0].branch.id, "core.system");
   assert.deepEqual(
     entries[0].items.map((p) => p.id),
     ["core.settings.runtime"],
@@ -163,7 +162,7 @@ test("submenu filtering cannot expose hidden destinations or leave an empty bran
 });
 
 test("submenu registration rejects unknown branches and cross-group placement", () => {
-  for (const branch of ["core.missing", "core.configuration"]) {
+  for (const branch of ["core.missing", "core.system"]) {
     assert.throws(
       () =>
         createAdminRegistry([

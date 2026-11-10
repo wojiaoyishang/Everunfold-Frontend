@@ -41,10 +41,15 @@ test("registered content types own separate entries and pages remain code-owned"
     [
       "/admin/content/article",
       "/admin/content/shuoshuo",
-      "/admin/glossary",
       "/admin/pages",
       "/admin/taxonomies",
     ],
+  );
+  assert.deepEqual(
+    registry.navigation
+      .find((group) => group.id === "core.tools")
+      ?.items.map((item) => item.href),
+    ["/admin/glossary", "/admin/shortcodes"],
   );
   assert.equal(registry.resolve("/admin/content/article")?.label, "文章");
   assert.equal(registry.page("core.content")?.menu, null);

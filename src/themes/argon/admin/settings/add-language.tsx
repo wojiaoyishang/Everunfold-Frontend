@@ -10,6 +10,7 @@ import {
 } from "@/core/i18n/choices";
 import { Modal } from "../../components/ui/modal";
 import { Button, Form, TextField } from "../../components/ui/primitives";
+import { LanguageFlag } from "../../components/language-flag";
 import styles from "./language-pickers.module.css";
 
 export function AddLanguage({
@@ -93,9 +94,7 @@ export function AddLanguage({
                       disabled={added}
                       onClick={() => choose(item)}
                     >
-                      <span className={styles.emoji} aria-hidden="true">
-                        {item.flag}
-                      </span>
+                      <LanguageFlag value={item.flag} size="compact" />
                       <span>
                         <strong>{item.name}</strong>
                         <small>
@@ -159,9 +158,11 @@ export function AddLanguage({
               />
             </label>
             <p>
-              <span className={styles.emoji} aria-hidden="true">
-                {defaultFlag(code)}
-              </span>{" "}
+              <LanguageFlag
+                value={defaultFlag(code)}
+                size="compact"
+                className={styles.inlineFlag}
+              />{" "}
               <UiText text="添加后可点击标志修改，也可继续调整前缀与界面回退。" />
             </p>
             {duplicate && (

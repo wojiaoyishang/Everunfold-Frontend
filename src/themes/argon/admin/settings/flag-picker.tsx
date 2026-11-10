@@ -5,6 +5,7 @@ import { defaultFlag } from "@/core/i18n/catalog";
 import { flagChoices, searchText } from "@/core/i18n/choices";
 import { Modal } from "../../components/ui/modal";
 import { Button, TextField } from "../../components/ui/primitives";
+import { LanguageFlag } from "../../components/language-flag";
 import styles from "./language-pickers.module.css";
 
 export function FlagPicker({
@@ -79,9 +80,7 @@ export function FlagPicker({
                   className={styles.flagChoice}
                   onClick={() => choose(item.emoji)}
                 >
-                  <span className={styles.emoji} aria-hidden="true">
-                    {item.emoji}
-                  </span>
+                  <LanguageFlag value={item.emoji} size="compact" />
                   <small>
                     {/^[A-Z]{2}$/.test(item.code) ? item.code : item.label}
                   </small>
@@ -111,9 +110,11 @@ export function FlagPicker({
             <p>
               <UiText text="可填写其他 emoji 或简短标志，留空使用默认国旗。" />
             </p>
-            <span className={styles.largeEmoji} aria-hidden="true">
-              {custom || defaultFlag(code)}
-            </span>
+            <LanguageFlag
+              value={custom || defaultFlag(code)}
+              size="large"
+              className={styles.largePreview}
+            />
             <Button
               className="admin-button admin-button-primary"
               onClick={() => choose(custom || defaultFlag(code))}

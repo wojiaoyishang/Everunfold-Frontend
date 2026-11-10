@@ -16,6 +16,7 @@ import { SettingsSection } from "./shared";
 import styles from "./languages.module.css";
 import { FlagPicker } from "./flag-picker";
 import { AddLanguage } from "./add-language";
+import { LanguageFlag } from "../../components/language-flag";
 
 export function SettingsLanguages({
   value,
@@ -128,9 +129,10 @@ export function SettingsLanguages({
                   setFlagIndex(index);
                 }}
               >
-                <span className={styles.emoji} aria-hidden="true">
-                  {item.flag || defaultFlag(item.code)}
-                </span>
+                <LanguageFlag
+                  value={item.flag || defaultFlag(item.code)}
+                  size="compact"
+                />
               </Button>
             </div>
             <label className={styles.codeField}>

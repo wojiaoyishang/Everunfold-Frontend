@@ -36,6 +36,7 @@ import { ContentMarkupView } from "./content-markup-view";
 import { GlossaryExpandedDialog } from "./glossary-expanded-dialog";
 import { useLocale, useT } from "@/core/i18n/provider";
 import { translate } from "@/core/i18n/messages";
+import Image from "next/image";
 
 type MatchIndex = NonNullable<GlossaryContract["content_matches"]["data"]>;
 
@@ -496,6 +497,17 @@ export default function GlossaryTooltips({
         </header>
         <div className="glossary-tooltip-body">
           <div className="glossary-tooltip-scroll">
+            {active.term.feature_image && (
+              <span className="glossary-tooltip-feature">
+                <Image
+                  src={active.term.feature_image.original}
+                  alt=""
+                  fill
+                  sizes="400px"
+                  unoptimized
+                />
+              </span>
+            )}
             {active.term.aliases.length > 0 && (
               <div
                 className="glossary-tooltip-aliases"

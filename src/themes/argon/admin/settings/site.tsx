@@ -10,7 +10,6 @@ import {
   SettingsToggle,
 } from "./shared";
 import { SettingsMediaField } from "./media-field";
-import { MenuEditor } from "./menu-editor";
 import { SettingsLanguages } from "./languages";
 import { normalizeCatalog } from "@/core/i18n/catalog";
 import { randomUUID } from "@/core/browser/crypto";
@@ -197,27 +196,6 @@ export function SiteSettingsPage() {
             value={normalizeCatalog(site.language_catalog)}
             onChange={(language_catalog) => update({ language_catalog })}
           />
-          <SettingsSection
-            id="settings-navigation"
-            title="导航菜单"
-            description="顶栏、侧栏与移动菜单使用同一份内容。每层都可添加子菜单。"
-          >
-            <MenuEditor
-              value={site.navigation ?? []}
-              iconUrls={draft?.icon_urls}
-              onIconUrl={(id, url) =>
-                setDraft((current) =>
-                  current
-                    ? {
-                        ...current,
-                        icon_urls: { ...current.icon_urls, [id]: url },
-                      }
-                    : current,
-                )
-              }
-              onChange={(navigation) => update({ navigation })}
-            />
-          </SettingsSection>
           <SettingsSection
             id="settings-seo"
             title="搜索展示"

@@ -4,14 +4,32 @@ import type { AdminModuleRegistration } from "./registry";
 export const builtinAdminModule = {
   id: "core",
   groups: [
-    { id: "core.workspace", label: "工作空间", order: 10 },
-    { id: "core.settings", label: "管理", order: 20 },
+    { id: "core.workspace", label: "概览", order: 10 },
+    { id: "core.tools", label: "内容工具", order: 30 },
+    { id: "core.resources", label: "资源", order: 40 },
+    { id: "core.appearance", label: "外观", order: 50 },
+    { id: "core.people", label: "成员与互动", order: 60 },
+    { id: "core.settings", label: "设置", order: 70 },
   ],
   branches: [
     {
-      id: "core.configuration",
+      id: "core.site",
       group: "core.settings",
-      label: "设置",
+      label: "站点",
+      icon: "settings",
+      order: 10,
+    },
+    {
+      id: "core.connections",
+      group: "core.settings",
+      label: "连接与安全",
+      icon: "lock",
+      order: 20,
+    },
+    {
+      id: "core.system",
+      group: "core.settings",
+      label: "系统",
       icon: "system",
       order: 30,
     },
@@ -23,7 +41,7 @@ export const builtinAdminModule = {
       label: "邮件配置",
       description: "SMTP服务器与发件人资料",
       icon: "mail",
-      menu: { group: "core.settings", branch: "core.configuration", order: 40 },
+      menu: { group: "core.settings", branch: "core.connections", order: 20 },
     },
     {
       id: "core.settings.runtime",
@@ -31,7 +49,7 @@ export const builtinAdminModule = {
       label: "运行与任务",
       description: "Scheduler、Worker 与常驻任务",
       icon: "runtime",
-      menu: { group: "core.settings", branch: "core.configuration", order: 60 },
+      menu: { group: "core.settings", branch: "core.system", order: 20 },
     },
     {
       id: "core.comments",
@@ -39,7 +57,7 @@ export const builtinAdminModule = {
       label: "评论管理",
       description: "审核、回复与整理评论",
       icon: "comment",
-      menu: { group: "core.workspace", order: 45 },
+      menu: { group: "core.people", order: 10 },
     },
     {
       id: "core.settings.plugins",
@@ -47,7 +65,7 @@ export const builtinAdminModule = {
       label: "插件管理",
       description: "已部署插件与启用设置",
       icon: "extension",
-      menu: { group: "core.settings", order: 25 },
+      menu: { group: "core.settings", branch: "core.system", order: 10 },
     },
     {
       id: "core.users",
@@ -61,7 +79,7 @@ export const builtinAdminModule = {
         /^\/admin\/users\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(
           path,
         ),
-      menu: { group: "core.workspace", order: 40 },
+      menu: { group: "core.people", order: 20 },
     },
     {
       id: "core.settings.api-keys",
@@ -69,7 +87,7 @@ export const builtinAdminModule = {
       label: "应用程序接入",
       description: "应用签名、权限目录与回调投递",
       icon: "applications",
-      menu: { group: "core.settings", order: 40 },
+      menu: { group: "core.settings", branch: "core.connections", order: 30 },
     },
     {
       id: "core.shortcodes",
@@ -77,7 +95,7 @@ export const builtinAdminModule = {
       label: "短代码库",
       description: "预览和管理原生短代码模板",
       icon: "shortcode",
-      menu: { group: "core.workspace", order: 37 },
+      menu: { group: "core.tools", order: 20 },
     },
     {
       id: "core.fonts",
@@ -85,7 +103,7 @@ export const builtinAdminModule = {
       label: "字体库",
       description: "上传和预览字体",
       icon: "font",
-      menu: { group: "core.workspace", order: 36 },
+      menu: { group: "core.resources", order: 30 },
     },
     {
       id: "core.icons",
@@ -93,15 +111,15 @@ export const builtinAdminModule = {
       label: "图标库",
       description: "管理内置与上传的图标",
       icon: "icons",
-      menu: { group: "core.workspace", order: 35 },
+      menu: { group: "core.resources", order: 20 },
     },
     {
       id: "core.settings.site",
       href: "/admin/settings",
       label: "站点设置",
-      description: "站点资料、菜单与搜索展示",
+      description: "站点资料、语言与搜索展示",
       icon: "settings",
-      menu: { group: "core.settings", branch: "core.configuration", order: 10 },
+      menu: { group: "core.settings", branch: "core.site", order: 10 },
     },
     {
       id: "core.settings.theme",
@@ -109,7 +127,15 @@ export const builtinAdminModule = {
       label: "主题设置",
       description: "阅读界面的默认外观",
       icon: "theme",
-      menu: { group: "core.settings", order: 20 },
+      menu: { group: "core.appearance", order: 10 },
+    },
+    {
+      id: "core.settings.navigation",
+      href: "/admin/settings/navigation",
+      label: "导航菜单",
+      description: "当前主题的站点导航、图标和多语言名称",
+      icon: "navigation",
+      menu: { group: "core.appearance", order: 20 },
     },
     {
       id: "core.settings.system",
@@ -117,7 +143,7 @@ export const builtinAdminModule = {
       label: "系统设置",
       description: "前端节点策略与同步状态",
       icon: "node-settings",
-      menu: { group: "core.settings", branch: "core.configuration", order: 50 },
+      menu: { group: "core.settings", branch: "core.system", order: 30 },
     },
     {
       id: "core.settings.captcha",
@@ -125,7 +151,7 @@ export const builtinAdminModule = {
       label: "验证码设置",
       description: "验证码提供方与应用规则",
       icon: "lock",
-      menu: { group: "core.settings", branch: "core.configuration", order: 30 },
+      menu: { group: "core.settings", branch: "core.connections", order: 10 },
     },
     {
       id: "core.overview",
@@ -149,7 +175,7 @@ export const builtinAdminModule = {
       label: "媒体库",
       description: "整理图片与文件",
       icon: "media",
-      menu: { group: "core.workspace", order: 30 },
+      menu: { group: "core.resources", order: 10 },
     },
   ],
 } as const satisfies AdminModuleRegistration;

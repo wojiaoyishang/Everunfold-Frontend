@@ -109,7 +109,9 @@ export function siteNavigation(site: Site): NavigationItem[] {
         },
       ];
     };
-    return (site.settings.site.navigation ?? []).flatMap(map);
+    const configured =
+      site.settings.theme?.navigation ?? site.settings.site.navigation ?? [];
+    return configured.flatMap(map);
   }
   const items = site.navigation.length
     ? site.navigation

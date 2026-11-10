@@ -7,19 +7,73 @@
 @import "./styles/interaction-motion.css";
 @import "./styles/confirm-dialog.css";
 
-.ui-language-flag {
+/* Shared language mark: stable slot, with overflow panning instead of layout shift. */
+.language-flag {
+  --language-flag-width: 1.5em;
+  --language-flag-height: 1.35em;
+  --language-flag-size: 18px;
   display: inline-flex;
-  flex: 0 0 1.5em;
-  width: 1.5em;
-  height: 1.35em;
+  flex: 0 0 var(--language-flag-width);
   align-items: center;
   justify-content: center;
+  width: var(--language-flag-width);
+  max-width: var(--language-flag-width);
+  height: var(--language-flag-height);
   margin-inline-end: 0.4em;
+  overflow: hidden;
+  vertical-align: middle;
+  font-size: var(--language-flag-size);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    #000 3px,
+    #000 calc(100% - 3px),
+    transparent
+  );
+}
+
+.language-flag[data-size="compact"] {
+  --language-flag-width: 1.75em;
+  margin-inline-end: 0;
+}
+
+.language-flag[data-size="large"] {
+  --language-flag-width: min(8em, 48vw);
+  --language-flag-height: 1.4em;
+  --language-flag-size: clamp(34px, 8vw, 64px);
+  justify-content: flex-start;
+  margin-inline-end: 0;
+}
+
+.language-flag-content {
+  display: block;
+  flex: none;
   font-family: var(--language-flag-font);
-  font-weight: 400;
+  font-size: 1em;
   font-style: normal;
   font-synthesis: none;
-  font-size: 18px;
+  font-weight: 400;
   line-height: 1;
-  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.language-flag[data-scrollable="true"]:hover .language-flag-content {
+  animation: language-flag-pan 2.8s ease-in-out infinite alternate;
+}
+
+@keyframes language-flag-pan {
+  0%,
+  18% {
+    transform: translateX(0);
+  }
+  82%,
+  100% {
+    transform: translateX(calc(-1 * var(--language-flag-distance)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .language-flag[data-scrollable="true"]:hover .language-flag-content {
+    animation: none;
+  }
 }

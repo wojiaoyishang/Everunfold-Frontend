@@ -28,6 +28,7 @@ import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { AdminPageHeading } from "../components/page-heading";
 import { AdminActionButton } from "../components/action-button";
 import { SettingsSection, SettingsText } from "../settings/shared";
+import { SettingsMediaField } from "../settings/media-field";
 import { BlockComposer } from "../content/block-composer";
 import { DraftPreview } from "../content/draft-preview";
 import { EditorBody } from "../content/editor-body";
@@ -75,6 +76,7 @@ const blankFields = (): Fields => ({
   slug: "",
   title: "",
   summary: "",
+  feature_media_id: null,
   body: [
     {
       id: randomUUID(),
@@ -104,6 +106,7 @@ function detailFields(value: Detail): Fields {
     slug: value.slug,
     title: value.title,
     summary: value.summary,
+    feature_media_id: value.feature_media_id ?? null,
     body: value.body.map((block) => ({ ...block })),
     aliases: value.aliases,
     auto_match_title: value.auto_match_title,
@@ -186,6 +189,12 @@ export function GlossaryAdminPage() {
     ...selected?.media_urls,
     ...resources.media,
   };
+  const featureImage = fields.feature_media_id
+    ? (media[fields.feature_media_id]?.original ??
+      media[`media:${fields.feature_media_id}`]?.original ??
+      selected?.feature_image?.original ??
+      "")
+    : "";
   const richValue = {
     title: fields.title,
     excerpt: fields.summary,
@@ -618,6 +627,23 @@ export function GlossaryAdminPage() {
                   </small>
                 </div>
               </div>
+              <SettingsMediaField
+                allowUrl={false}
+                label="特色图片"
+                hint="可留空；从媒体库选择后会显示在术语目录和词条详情中。"
+                kind="image"
+                value={featureImage}
+                mediaId={
+                  fields.feature_media_id
+                    ? `media:${fields.feature_media_id}`
+                    : undefined
+                }
+                onChange={(_url, id) =>
+                  update({
+                    feature_media_id: id ? id.replace(/^media:/, "") : null,
+                  })
+                }
+              />
               <SettingsText
                 label="路径片段"
                 required

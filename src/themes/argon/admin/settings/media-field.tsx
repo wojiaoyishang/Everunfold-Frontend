@@ -14,6 +14,7 @@ export function SettingsMediaField({
   value,
   mediaId,
   kind,
+  allowUrl = true,
   onChange,
 }: {
   label: string;
@@ -21,6 +22,7 @@ export function SettingsMediaField({
   value: string;
   mediaId?: string;
   kind: "image" | "video";
+  allowUrl?: boolean;
   onChange: (url: string, id: string) => void;
 }) {
   const id = useId();
@@ -54,10 +56,13 @@ export function SettingsMediaField({
           id={id}
           value={value}
           maxLength={2048}
+          readOnly={!allowUrl}
           onChange={(e) => onChange(e.target.value, "")}
           placeholder={
             kind === "image"
-              ? "图片地址或从媒体库选择"
+              ? allowUrl
+                ? "图片地址或从媒体库选择"
+                : "从媒体库选择图片"
               : "视频地址或从媒体库选择"
           }
         />
