@@ -1,4 +1,4 @@
-.dialog {
+.dialog:global(.ui-confirm-dialog) {
   width: min(420px, calc(100vw - 32px));
   padding: 28px;
   border-radius: 20px;
@@ -47,13 +47,13 @@
   border-color: var(--line);
 }
 @media (max-width: 480px) {
-  .dialog {
+  .dialog:global(.ui-confirm-dialog) {
     padding: 24px 22px;
     border-radius: 18px;
   }
 }
 @media (max-width: 350px) {
-  .dialog {
+  .dialog:global(.ui-confirm-dialog) {
     padding: 22px 18px;
   }
   .dialog :global(.ui-confirm-heading) {
