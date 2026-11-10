@@ -130,8 +130,9 @@ export function SearchForm({
     const type = values.get("type");
     if (type === "article" || type === "shuoshuo" || type === "page")
       url.searchParams.set("type", type);
-    if (values.get("languages") === "all")
-      url.searchParams.set("languages", "all");
+    const languages = values.get("languages");
+    if (typeof languages === "string" && languages && languages !== locale)
+      url.searchParams.set("languages", languages);
     navigate(`${url.pathname}${url.search}`);
   }
   return (

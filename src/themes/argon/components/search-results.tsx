@@ -18,12 +18,14 @@ export function SearchResults({
   type,
   page,
   allLanguages = false,
+  language,
 }: {
   snapshot: PublicSnapshot;
   query: string;
   type: FeedType;
   page: number;
   allLanguages?: boolean;
+  language?: string;
 }) {
   const result = queryFeed(snapshot, {
     query,
@@ -31,6 +33,7 @@ export function SearchResults({
     page,
     includePages: true,
     allLanguages,
+    language,
   });
   return (
     <>
@@ -51,7 +54,11 @@ export function SearchResults({
           />
           <div className="search-filter-group">
             <SearchContentType key={type} defaultValue={type} />
-            <SearchLanguages key={String(allLanguages)} all={allLanguages} />
+            <SearchLanguages
+              key={`${allLanguages}:${language ?? "current"}`}
+              all={allLanguages}
+              value={language}
+            />
           </div>
           <Button className="primary-button" type="submit">
             <UiText text="搜索" />
@@ -72,6 +79,7 @@ export function SearchResults({
         query={query}
         type={type}
         allLanguages={allLanguages}
+        language={language}
       />
       {query && (
         <>
@@ -93,7 +101,7 @@ export function SearchResults({
             pathname="/search"
             query={query}
             type={type}
-            languages={allLanguages ? "all" : undefined}
+            languages={allLanguages ? "all" : language}
           />
         </>
       )}

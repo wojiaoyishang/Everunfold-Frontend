@@ -121,6 +121,13 @@ function renderCodePage({
         type={type}
         page={page}
         allLanguages={parameters.languages === "all"}
+        language={
+          typeof parameters.languages === "string" &&
+          parameters.languages !== "all" &&
+          parameters.languages !== "current"
+            ? parameters.languages
+            : undefined
+        }
       />
     );
   if (path === "/" || path === "/ss" || path === "/article")

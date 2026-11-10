@@ -19,16 +19,18 @@ export function GlossarySearchResults({
   query,
   type,
   allLanguages = false,
+  language: selectedLanguage,
 }: {
   query: string;
   type: FeedType;
   allLanguages?: boolean;
+  language?: string;
 }) {
   const baseUrl = useReaderBaseUrl();
   const { locale } = useLocale();
   const heading = useId();
   const needle = query.trim();
-  const language = allLanguages ? "" : locale;
+  const language = allLanguages ? "" : (selectedLanguage ?? locale);
   const queryKey = `${language}\0${needle}`;
   const [result, setResult] = useState<{ key: string; terms: PublicTerm[] }>({
     key: "",

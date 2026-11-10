@@ -141,6 +141,9 @@ export default function GlossaryTooltips({
         : null,
     [active, site.settings?.shortcodes],
   );
+  const visibleAliases = active?.term.aliases.slice(0, 4) ?? [];
+  const remainingAliases =
+    active?.term.aliases.slice(visibleAliases.length) ?? [];
 
   const clearTimers = useCallback(() => {
     if (openTimer.current) clearTimeout(openTimer.current);
@@ -428,14 +431,6 @@ export default function GlossaryTooltips({
           <div className="glossary-tooltip-heading">
             <span className="glossary-tooltip-kicker">术语</span>
             <strong title={active.term.title}>{active.term.title}</strong>
-            {active.term.aliases.length > 0 && (
-              <span
-                className="glossary-tooltip-alias"
-                title={active.term.aliases.join(" · ")}
-              >
-                也称：{active.term.aliases.slice(0, 3).join(" · ")}
-              </span>
-            )}
           </div>
           <Button
             type="button"
@@ -449,6 +444,29 @@ export default function GlossaryTooltips({
         </header>
         <div className="glossary-tooltip-body">
           <div className="glossary-tooltip-scroll">
+            {active.term.aliases.length > 0 && (
+              <div
+                className="glossary-tooltip-aliases"
+                role="list"
+                aria-label="术语别名"
+              >
+                <span>也称</span>
+                {visibleAliases.map((alias) => (
+                  <span key={alias} role="listitem" title={alias}>
+                    {alias}
+                  </span>
+                ))}
+                {remainingAliases.length > 0 && (
+                  <span
+                    className="glossary-tooltip-alias-more"
+                    role="listitem"
+                    title={remainingAliases.join(" · ")}
+                  >
+                    +{remainingAliases.length}
+                  </span>
+                )}
+              </div>
+            )}
             {active.term.summary.trim() ? (
               <p className="glossary-tooltip-summary">{active.term.summary}</p>
             ) : previewContent ? (

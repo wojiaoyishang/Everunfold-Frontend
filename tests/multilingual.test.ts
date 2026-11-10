@@ -83,6 +83,11 @@ test("search matches languages before group deduplication and paging", () => {
   });
   assert.equal(result.total, 1);
   assert.equal(result.items[0].content.id, "en-version");
+  assert.equal(
+    queryFeed(value, { query: "English needle", language: "en" }).items[0]
+      ?.content.id,
+    "en-version",
+  );
 });
 test("recommendations and chronological neighbors exclude a story's own translations", () => {
   const value = localizedSnapshot(bilingual(), "en"),

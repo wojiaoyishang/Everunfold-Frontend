@@ -100,20 +100,11 @@
   font-weight: 600;
   line-height: 1.25;
 }
-.glossary-tooltip-alias {
-  flex: 0 1 38%;
-  min-width: 0;
-  overflow: hidden;
-  color: rgb(255 255 255 / 72%);
-  font-size: 0.72rem;
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .glossary-tooltip-body {
   display: grid;
   grid-template-rows: minmax(0, 1fr) auto;
   flex: 1 1 auto;
+  gap: 12px;
   min-height: 0;
   overflow: hidden;
   border-radius: 0 0 6px 6px;
@@ -123,9 +114,29 @@
   display: grid;
   gap: 12px;
   min-height: 0;
-  padding: 13px 14px 0;
+  padding: 16px 16px 0;
   overflow: auto;
   overscroll-behavior: contain;
+}
+.glossary-tooltip-aliases {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+.glossary-tooltip-aliases > span:not(:first-child) {
+  max-width: min(100%, 180px);
+  padding: 2px 7px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--line));
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  line-height: 1.45;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .glossary-tooltip-summary {
   margin: 0;
@@ -161,8 +172,8 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-inline: 14px;
-  padding: 10px 0 12px;
+  margin-inline: 16px;
+  padding: 12px 0 14px;
   border-top: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
 }
 .glossary-tooltip-actions a,

@@ -59,6 +59,7 @@ export function queryFeed(
     pageSize?: number;
     includePages?: boolean;
     allLanguages?: boolean;
+    language?: string;
   } = {},
 ) {
   const query = options.query?.trim().slice(0, 160).toLocaleLowerCase();
@@ -66,7 +67,11 @@ export function queryFeed(
   const candidates = (
     query
       ? snapshot.contents
-          .filter((item) => options.allLanguages || item.language === locale)
+          .filter(
+            (item) =>
+              options.allLanguages ||
+              item.language === (options.language ?? locale),
+          )
           .map((content) => ({
             content: presentLegacyContent(content),
             example: false,
