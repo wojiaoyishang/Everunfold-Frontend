@@ -1,6 +1,6 @@
 # 后端插件开发
 
-版本：backend-plugins-3，2026-11-10。决定见[ADR0087](../decisions/0087-single-entry-backend-plugins.md)。
+版本：backend-plugins-4，2026-11-10。决定见[ADR0087](../decisions/0087-single-entry-backend-plugins.md)。
 
 ## 唯一入口
 
@@ -38,9 +38,10 @@ plugin = MyPlugin()
 | --- | --- |
 | registry.shortcodes.register(source, identity=None, revision=1) | ShortcodeSource模型；编译HTML和作用域CSS，可显式保留旧UUID，否则按插件ID和调用名生成稳定UUID |
 | registry.captcha.register(provider) | CaptchaProvider(id,title,widget,verify)，verify为真实异步服务端校验 |
+| registry.routes.register(router, prefix="", access="session", permission=None, scope="all") | 原生HTTP Router、插件命名空间、实时启停/鉴权及请求事务；详见[路由指南](backend-plugin-routes.md) |
 | registry.locales.register(locale, messages) | 任意来源的字典；key自动加插件ID前缀，不规定语言文件位置 |
 
-当前宿主界面提供zh-CN/en语言包；插件可登记其他字典，但不会自行扩展宿主界面语言列表。文案通过i18n.t("插件ID.key", locale=...)读取。任务通过registry.tasks.register(TaskDefinition)登记，包含Worker有限任务及Scheduler所属常驻子进程，见[任务指南](runtime-tasks.md)。通用路由、资源接口仍未交付。
+当前宿主界面提供zh-CN/en语言包；插件可登记其他字典，但不会自行扩展宿主界面语言列表。文案通过i18n.t("插件ID.key", locale=...)读取。任务通过registry.tasks.register(TaskDefinition)登记，包含Worker有限任务及Scheduler所属常驻子进程，见[任务指南](runtime-tasks.md)。HTTP路由已按[ADR0098](../decisions/0098-backend-plugin-http-routes.md)交付，通用插件资源/配置接口仍未交付。
 
 单体kind="leaf"不需结束标记；容器必须有唯一正文插槽。参数用ShortcodeParameter，支持text/url/select/number/boolean。调用名不能使用为用户保留的custom:前缀，所有代码贡献跨插件检查重名。模板遵守[原生短代码](../architecture/shortcodes.md)的转义、HTML/CSS和按需样式边界；数据库用户模板仍可编辑，代码模板在后台只读。
 
@@ -78,7 +79,7 @@ uv run --locked python -m tools.register_backend_plugins --config config.toml --
 
 Python代码更新需要受控重启，不声称同进程热替换。插件内部资源计入构建摘要（隐藏文件和__pycache__除外）；不要把凭据、日志或运行文件写进插件目录。配置沿现有专有服务保存；当前没有通用插件配置/元数据写入API。
 
-不包含在线安装包、第三方Python依赖安装、自动迁移、通用路由SDK或跨后端节点部署控制器。多副本部署须统一代码后同步；验证码在摘要不匹配时拒绝服务，模板阅读使用持久化的已应用版本。缓存与构建产物继续放忽略的var目录，后端根plugins目录不恢复。
+不包含在线安装包、第三方Python依赖安装、自动迁移或跨后端节点部署控制器。多副本部署须统一代码后同步；验证码在摘要不匹配时拒绝服务，模板阅读使用持久化的已应用版本。缓存与构建产物继续放忽略的var目录，后端根plugins目录不恢复。
 
 ## 部署目录展示元数据
 

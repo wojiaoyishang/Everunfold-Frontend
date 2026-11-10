@@ -1,5 +1,13 @@
 # 前端交接状态
 
+## 最新交付：后端插件 HTTP 路由（2026-11-10）
+
+- 后端2f6ae8b；新增registry.routes.register(APIRouter)，保留plugin.py单入口、自由文件布局和原生路径/查询/请求模型/依赖，统一/v1/plugins/<插件ID>。默认Session，可显式公开或现有权限/Key保护，all默认范围；SDK提供PluginRequest和标准响应。见[指南](../development/backend-plugin-routes.md)、[ADR0098](../decisions/0098-backend-plugin-http-routes.md)与[验收](backend-plugin-routes-verification.md)。
+- 注册快照/封闭、冲突/穿越/方法校验、唯一OpenAPI操作；请求检查启用及依赖摘要，事务持站点共享锁，错误回滚，Session写需CSRF/Origin，Key按当前权限交集及撤销。插件CORS独立，64KiB限额和private/no-store。新增example.routes及离线契约导出，缓存放忽略var/cache。
+- 完整后端真实库333项/352.50秒、Ruff/367格式/mypy216通过；定向20项含两API副本、Key上限/撤销、停用/再启用/摘要不一致、原生模型、回滚、原始体和并发停用围栏。首次深复制/夹具注解/静态问题已修复重验；主机多副本实际测试，不以单元替代。
+- API已受控重启并显式同步目录，原插件build/disabled与任务enabled逐项不变；本机hello200、匿名me401且private/no-store，六服务/四端口0.0.0.0/HTTP200正常。无迁移/依赖/宿主DTO字段变化，前端源码/构建不改。原固定OpenAPI未全量重排，插件用原生/openapi.json或独立导出契约（6路径/7操作）。
+- 仅支持HTTP，WebSocket/Mount、通用配置/新权限目录/在线热替换未做；ctx不留给后台/流式工作，不在事务内网络副作用或修改站点锁，资源own判断仍由作者负责。未做长期负载/所有代理，写入/启停/撤销只在隔离库；主站内容/账号/SMTP不改。共享文档/SHA同步，QA私有材料仅var，本地存档未push。
+
 ## 最新修订：验证码小窗与账号菜单视觉（2026-11-10）
 
 - 前端8d78fa2/c6c06cd。验证码图片/换图卡片、单一居中输入、简洁说明和等高按钮；刷新保留高度、遮盖旧图并禁用输入。CaptchaField新增可选dialog外观，默认inline保持；共享ConfirmDialog仅加可选className，无验证/提交/焦点业务变化。见[验证码指南](../development/captcha.md)与[补充验收](comment-submit-verification.md)。

@@ -1327,3 +1327,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/captcha.md` | `captcha-5` | `ba27341f7df830d2476d0b0fe8c2fb7e531c8e96825533113c0b62dc793c0ce7` |
 | `docs/development/accounts.md` | `accounts-runtime-10` | `0b7a43d659f7db7a5a4996360fc0c641a11d5ad31f241105004ed257772cf9d6` |
 | `docs/handoff/comment-submit-verification.md` | `comment-submit-verification-2` | `213bd7858e3f7cb86c71dccf86107bb83aa9aa318e6d414a94fc93eaf2e0d74b` |
+
+
+## 后端插件HTTP路由（2026-11-10）
+
+后端2f6ae8b；宿主业务契约/迁移不变，检查与限制详见验收。以下替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-backend-plugin-routes-1` | `a307716f16b6e71c77abc3c74c418ef2c9c62dd70b1fd75e92e9836d3f22ab9c` |
+| `docs/development/backend-plugins.md` | `backend-plugins-4` | `053af1f0f5d257da540390c97de93bc4e91b5afb584cbc0454d4345fcf39843f` |
+| `docs/development/backend-plugin-routes.md` | `backend-plugin-routes-1` | `2793d0389129ceb7f318ffec8710109a44492d09772b68ebac1e9536a72c5e6f` |
+| `docs/decisions/0098-backend-plugin-http-routes.md` | `ADR0098-1` | `58a75759718dbfdf56b051726ed1b8398935e37c9d3dafe69a73646cd728b066` |
+| `docs/handoff/backend-plugin-routes-verification.md` | `backend-plugin-routes-verification-1` | `9457762edbf6200390a96fe6fabb1c9be494bc66cee1e9215a7c021743f219dc` |

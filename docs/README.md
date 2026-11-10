@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[后端插件 HTTP 路由](development/backend-plugin-routes.md)、[ADR0098](decisions/0098-backend-plugin-http-routes.md)及[验收](handoff/backend-plugin-routes-verification.md)：原生FastAPI路由、命名空间、Session/Key授权、请求事务和动态启停，以及独立OpenAPI导出。
+
 [评论发送时验证与账号弹窗](decisions/0097-demand-comment-verification-and-account-dialogs.md)、[验证码指南](development/captcha.md)及[验收](handoff/comment-submit-verification.md)：发送后按需验证小窗、颜文字结果横幅、离线保留输入，以及账号共享确认和同步菜单退出。
 
 [页面评论与插件 SDK](development/page-comments.md)、[ADR0096](decisions/0096-managed-page-comments-and-plugin-sdk.md)及[验收](handoff/page-comments-verification.md)：HTML/注册页面独立评论开关、通用组件/正文定位、自定义评论客户端，以及验证码阅读回执和预览隔离。
