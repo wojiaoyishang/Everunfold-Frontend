@@ -1460,3 +1460,15 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | --- | --- | --- |
 | `docs/architecture/frontend-ui.md` | `frontend-ui-reading-progress-1` | `aab3fdf306047e5174f938d3c1336c0174449732c7782b71c772973ee01ad776` |
 | `docs/decisions/0073-scheduled-content-publication.md` | `ADR0073-2` | `4074a885bfa8b5a25feea260af165e621b1b86f4790fcd781d4e93e026c9c075` |
+
+
+## 动态术语脚注与独立开关（2026-11-10）
+
+后端`63461d3`、前端`de8ccda`；`settings-v1` 1.27.0，无数据库迁移。文章/说说脚注空闲后加载、复用文章级匹配缓存，提示支持富文本首块回退与单行省略。以下版本替代对应旧摘要，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-glossary-footnotes-1` | `ad5d206b630400c8d62a71d3150a03ce6c55da69981215f0f0f4a9ab5ab7b920` |
+| `docs/development/glossary.md` | `glossary-runtime-11` | `756e216cb3106974f8c6955d95f58d4ed6eae5b4c79e657818863838a9482daf` |
+| `docs/decisions/0103-dynamic-glossary-footnotes.md` | `ADR0103-1` | `bcb3429d68a152891ade45ef3a963157b87153cea377f52edd4b613c44d377a7` |
+| `contracts/settings-v1.schema.json` | `settings-v1-1.27.0` | `d743d103ee1a76394bfad5f42f0af937ed86d1800e0215ed7206be0babba8fb0` |

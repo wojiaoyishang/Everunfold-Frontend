@@ -1,6 +1,6 @@
 # 术语表与文章按需 Tooltip
 
-版本：glossary-runtime-10，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md) 与 [ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
+版本：glossary-runtime-11，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md) 与 [ADR0103](../decisions/0103-dynamic-glossary-footnotes.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
 
 ## 管理入口
 
@@ -15,6 +15,8 @@
 - 公开路径为 `/glossary/{slug}`。路径是稳定公开标识，修改已有词条的 slug 会改变旧链接。
 
 后台采用与其他系统设置一致的布局：页面接入 `admin-settings-page`，编辑区用 `SettingsSection` / `SettingsText` / `admin-settings-field`，目录与状态使用共享的后台按钮、搜索、徽标和空状态。术语正文复用文章 `EditorBody`、`BlockComposer`、`DraftPreview`、格式/代码/公式/媒体工具和统一上传队列；正文预览按钮通过 `SettingsSection` 的头部操作位放在“术语正文”标题右侧。默认 Tooltip 直接渲染正文，简短摘要可选；必要字段由原生 `required` 和共享 CSS 显示单个星号，页面组件不再重复添加。术语页面不应重新用裸标签和浏览器默认控件拼装表单。
+
+站点设置“术语提示”还提供两个独立开关：文章末尾脚注、说说末尾脚注，对应 `site.glossary.article_footnotes` 与 `site.glossary.shuoshuo_footnotes`，默认开启。两者互不联动，也不与正文自动匹配绑定；可以关闭 Tooltip 而保留脚注。设置契约 `1.27.0` 只增加已有 JSON 的布尔字段，无数据库迁移。
 
 术语别名在独立分组使用共享 `TokenField` 维护，不再由匹配规则自动生成。`/glossary` 目录只负责浏览公开词条，不提供独立搜索框；站内全局搜索按标题、摘要和别名检索公开术语，并在“全部内容”结果中展示术语分组。搜索语言列表来自站点已配置语言目录并带旗帜，另保留“所有语言”图标；默认选择当前语言，类型与语言控件保持紧凑间距。
 
@@ -48,8 +50,9 @@ GET /v1/plugins/everunfold.glossary/for-content/{content_id}
 - 词条详情页将基础信息与正文收紧到12px间隔，并用主题渐变分隔线区分；“打开词条页面”在 Tooltip 与完整说明层中都使用新窗口，不离开当前阅读位置。
 - 完整弹层桌面宽度最多 700px、手机使用底部阅读容器，内部独立滚动，退出动画后关闭；桌面/触屏、Tab/Escape 和焦点恢复须做实页验收。
 - 主题共享 `.article-content` 表格样式覆盖文章、说说、术语详情、完整弹层及统一草稿预览。表格默认铺满阅读容器，宽表在局部可聚焦滚动区域内滚动；管理数据列表不继承文章排版。
+- 正文后的术语脚注同样在空闲后加载，只列出本页命中项。脚注在 `.article-content` 后、页脚/分享区前，以无序列表显示标题和简要提示；摘要为空时从首个非空富文本区块提取纯文本。标题和提示保持单行并使用省略号，点击进入新窗口的词条页。脚注与 Tooltip 共用同一文章级 pending请求和5分钟缓存。
 
-关闭 `site.glossary.auto_match` 后，文章不再加载术语组件，正文缓存仍正常工作。提示的最大值只限制当前页面，不删除目录或词条。
+关闭 `site.glossary.auto_match` 后不再显示正文内 Tooltip，但脚注仍可按各自开关加载。若 `article_footnotes`/`shuoshuo_footnotes` 也关闭，则对应页面不加载术语增强。提示的最大值只限制正文内装饰，不删除目录或词条。
 
 ## 发布与排错
 
