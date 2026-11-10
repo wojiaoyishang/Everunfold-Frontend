@@ -1,6 +1,6 @@
 # 验证码配置与提供方开发
 
-版本：captcha-4，2026-11-10。决定见[ADR0086](../decisions/0086-captcha-providers-and-content-policies.md)，检查见[实际验收](../handoff/captcha-verification.md)。
+版本：captcha-5，2026-11-10。决定见[ADR0086](../decisions/0086-captcha-providers-and-content-policies.md)，检查见[实际验收](../handoff/captcha-verification.md)。
 
 ## 配置和使用
 
@@ -15,6 +15,8 @@
 ## 评论发送时验证
 
 默认主题不在评论表单下常驻验证码。填写有效评论后点击发送，才异步检查当前策略：无需验证直接提交，需要验证则打开项目主题小窗。取消保留输入且不提交，确认后发起真实POST；成功提示等待审核，断网/超时/错误不产生本地成功记录，输入和重试编号保留。状态通过页首颜文字横幅展示，不定进度不代表已保存。
+
+标准评论小窗采用独立视觉：验证码图片与“换一张”放在同一卡片，单一居中输入框保留粘贴与键盘操作；刷新期间保留原布局、遮盖旧图片并禁用输入，避免窗口跳动。`CaptchaField`可选`appearance="dialog"`，默认inline保持登录/阅读布局；其他提供方继续使用相同插件接口。共享ConfirmDialog允许className细化主题样式，专用弹层组合类保证420px宽度和圆角不被通用规则覆盖，不改变确认/退出/焦点流程。
 
 `useCaptcha`默认自动模式不变；可传第五参数`{lazy:true}`按需加载，`prepare()`返回当前挑战并在失败时拒绝，`refresh()`继续以控制器错误状态反馈，`reset()`取消/清空内存挑战。默认登录/阅读和插件已有验证码流程不改变。详细检查见[本轮验收](../handoff/comment-submit-verification.md)。
 

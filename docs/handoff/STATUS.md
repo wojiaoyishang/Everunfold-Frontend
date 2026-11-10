@@ -1,5 +1,12 @@
 # 前端交接状态
 
+## 最新修订：验证码小窗与账号菜单视觉（2026-11-10）
+
+- 前端8d78fa2/c6c06cd。验证码图片/换图卡片、单一居中输入、简洁说明和等高按钮；刷新保留高度、遮盖旧图并禁用输入。CaptchaField新增可选dialog外观，默认inline保持；共享ConfirmDialog仅加可选className，无验证/提交/焦点业务变化。见[验证码指南](../development/captcha.md)与[补充验收](comment-submit-verification.md)。
+- 同步面板入口/退出按钮样式完全一致，按钮组间距8px，分隔线在组下，面板16px内边距不再被通用6px规则覆盖。详见[账号指南](../development/accounts.md)。
+- 定向ESLint、TypeScript、Prettier、diff通过；评论真实React/HTTP夹具15组通过含320px/刷新高度/焦点，菜单1440/390/深色/320的颜色/尺寸/字体与悬停状态全等，Escape焦点恢复。账号取消/503/200/跨标签回归通过；实际看图，无溢出/pageerror/原生弹窗。
+- 仅前端视觉，无依赖/契约/迁移/后端业务变化；未重复全套/正式构建。写入/登出仅隔离夹具，主站数据/配置不改。六服务/四端口0.0.0.0/HTTP200正常，dev已热更新；共享文档/SHA双仓同步，私有材料仅忽略var，本地存档未push。
+
 ## 最新交付：评论按需验证与账号弹窗（2026-11-10）
 
 - 前端ef44aa2；后端业务/契约未改。评论表单不再常驻验证码，填写有效内容后点击发送才加载规则；必要时共享小窗验证，取消保留草稿并恢复焦点。成功须真实回执、显示待审核，失败/断网/503/超时保留输入和稳定operation_id，不降级为示例成功。页首颜文字横幅提供不定进度与结果提示，验证码/昵称输入裁边已修复。见[ADR0097](../decisions/0097-demand-comment-verification-and-account-dialogs.md)、[验证码指南](../development/captcha.md)和[验收](comment-submit-verification.md)。

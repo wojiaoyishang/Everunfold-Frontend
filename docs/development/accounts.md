@@ -1,6 +1,6 @@
 # 账号中心与用户管理
 
-版本：accounts-runtime-9，2026-11-10。基础检查见[验收记录](../handoff/accounts-verification.md)，入口与头像动效见[最新验收](../handoff/header-account-entry-verification.md)；身份预设见[本轮验收](../handoff/user-presets-verification.md)，协议见[API Key接入指南](api-key-applications.md)。
+版本：accounts-runtime-10，2026-11-10。基础检查见[验收记录](../handoff/accounts-verification.md)，入口与头像动效见[最新验收](../handoff/header-account-entry-verification.md)；身份预设见[本轮验收](../handoff/user-presets-verification.md)，协议见[API Key接入指南](api-key-applications.md)。
 
 ## 使用入口
 
@@ -89,3 +89,5 @@ Key只在生成成功当次显示，数据库仅存摘要。相同操作重试�
 账号中心的站内离开、资料标签切换和退出均使用项目共享ConfirmDialog；取消保留当前标签与输入，确认后才丢弃并离开。账号中心不再注册浏览器beforeunload原生提示，后台原有保护保留；浏览器系统关闭/刷新不属于可用站内弹窗同步拦截的操作。
 
 前台右上角同步展开面板为登录用户提供“退出登录”。CSRF logout回执成功才更新匿名状态，失败保留身份并提示结果未确认；重试不会手工删Cookie。已确认会话变化通过同页事件与BroadcastChannel发送无凭据失效提示，其他标签向后端重新确认；签出后断网也不再保留旧身份展示。消息不含用户/CSRF，不写浏览器持久存储。检查见[本轮验收](../handoff/comment-submit-verification.md)。
+
+前台同步面板的“进入账号中心”和“退出登录”使用同一backend-account-entry样式：颜色、圆角、尺寸与悬停状态一致，放在8px间距的按钮组中；分隔线在整个账号组下方，面板内边距16px，避免通用弹层6px规则覆盖。

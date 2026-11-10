@@ -1316,3 +1316,14 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/page-comments.md` | `page-comments-2` | `b5b187493f62eeea5eee6b940f3e6d4bb943c4e2b67741236f12c8fbb8ef800b` |
 | `docs/decisions/0097-demand-comment-verification-and-account-dialogs.md` | `ADR0097-1` | `0c07c9e4a18bd3e97eace26665b03f69035494eb079f7529dd92d24d05aec260` |
 | `docs/handoff/comment-submit-verification.md` | `comment-submit-verification-1` | `892525698fb2675ca48effb24a8c75e8f362aad3e91576d16a4f71d075dd44a3` |
+
+
+## 验证码小窗与账号菜单视觉（2026-11-10）
+
+前端8d78fa2/c6c06cd，后端业务/契约不变；对应旧摘要由以下替代，实际检查与限制见验收，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/development/captcha.md` | `captcha-5` | `ba27341f7df830d2476d0b0fe8c2fb7e531c8e96825533113c0b62dc793c0ce7` |
+| `docs/development/accounts.md` | `accounts-runtime-10` | `0b7a43d659f7db7a5a4996360fc0c641a11d5ad31f241105004ed257772cf9d6` |
+| `docs/handoff/comment-submit-verification.md` | `comment-submit-verification-2` | `213bd7858e3f7cb86c71dccf86107bb83aa9aa318e6d414a94fc93eaf2e0d74b` |
