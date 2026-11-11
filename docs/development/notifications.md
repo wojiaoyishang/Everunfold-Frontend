@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-3，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
+版本：notifications-4，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
 
 ## 概念
 
@@ -18,7 +18,7 @@
 - 内置平台 `in-app`、`email`；插件可注册其他平台。
 - 路由接收人支持指定用户、角色和权限。
 - 模板按事件、平台、语言保存；缺失平台变体回退到内置安全文案。
-- 模板正文使用共享编辑器。站内通知只编辑纯文本；邮件平台可分别编辑纯文本回退和可选 HTML，HTML 支持“可视化 / 源码”双视图。
+- 模板正文使用共享编辑器。站内通知只编辑纯文本；邮件平台通过独立“启用 HTML”开关控制HTML发送，开启后可切换“可视化 / 源码”，关闭时保留HTML内容。
 - 默认邮件模板采用后台一致的简约卡片：中性背景、细分隔线、小图形标识和少量主题色，不依赖外链图片。
 - 评论进入待审核状态时发布 `comment.pending_review`。
 - 站内通知写入 Inbox；邮件平台复用现有 SMTP 配置。
@@ -37,7 +37,7 @@
 
 渲染器只解析允许字段；字段缺失时渲染为空，平台模板或语言缺失时使用内置默认模板。HTML 变量先转义事件值，再清洗常见邮件标签、链接、图片和表格；脚本、表单、iframe、SVG、事件属性和活动 URL 被移除。
 
-邮件通过 `multipart/alternative` 同时发送纯文本和 HTML；纯文本始终存在，作为不支持 HTML 的客户端回退。站内 Inbox 继续只使用纯文本，不执行或展示邮件 HTML。
+邮件通过 `multipart/alternative` 同时发送纯文本和 HTML；纯文本始终存在，作为不支持 HTML 的客户端回退。HTML开关关闭时不发送HTML，即使编辑器里仍保留草稿内容。站内 Inbox 继续只使用纯文本，不执行或展示邮件 HTML。
 
 ## 平台插件
 

@@ -4,8 +4,8 @@
 
 ## 决定
 
-1. 通知模板正文使用项目共享编辑器，不再使用普通多行文本框。站内通知编辑纯文本；邮件平台额外提供“纯文本 / HTML”，HTML 内再提供“可视化 / HTML 源码”双视图。
-2. 邮件模板分别保存纯文本正文与可选 HTML 正文。发送时使用 `multipart/alternative`，纯文本始终保留为回退，HTML 作为客户端优先展示版本。
+1. 通知模板正文使用项目共享编辑器，不再使用普通多行文本框。站内通知编辑纯文本；邮件平台通过独立“启用 HTML”开关控制是否启用 HTML。
+2. 邮件模板分别保存纯文本正文、HTML 正文和HTML启用状态。关闭HTML只停止发送HTML，不删除已有内容；发送时使用 `multipart/alternative`，纯文本始终保留为回退。
 3. HTML 变量插值先转义事件值，再由后端保守清洗。允许常见排版、链接、图片和表格标签，移除脚本、表单、iframe、SVG、事件属性和活动 URL。
 4. 管理端 HTML 预览放在无 `allow-scripts`、无同源权限的沙箱 iframe 中；预览只替换示例变量，不执行作者脚本。
 5. 站内通知仍只消费纯文本，不把邮件 HTML 注入 Inbox。非邮件平台提交 HTML 正文返回422。
@@ -14,8 +14,8 @@
 
 ## 契约
 
-- `notifications-v1`升至`1.2.0`；模板视图和保存输入增加 `html`。
-- 数据库已有 `notification_templates.html`，本次不需要迁移。
+- `notifications-v1`升至`1.3.0`；模板视图和保存输入增加 `html`与`html_enabled`。
+- 迁移`0047_notification_html_toggle`增加`notification_templates.html_enabled`，并把已有非空HTML回填为启用。
 - 邮件投递继续保存纯文本和 HTML 两份已渲染内容，Worker只在 SMTP 传输层组成多部分 MIME 消息。
 
 ## 安全边界
