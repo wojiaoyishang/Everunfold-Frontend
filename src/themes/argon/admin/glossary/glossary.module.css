@@ -127,9 +127,32 @@
   place-items: center;
   width: 34px;
   height: 34px;
+  padding: 0;
+  overflow: hidden;
   border-radius: 9px;
   color: var(--admin-accent);
   background: color-mix(in srgb, var(--admin-accent) 8%, var(--admin-subtle));
+}
+
+.rowGlyph[data-has-image="true"] {
+  background: var(--admin-subtle);
+}
+
+.rowGlyph :global(.admin-media-preview) {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+}
+
+.rowGlyph :global(.admin-media-preview img) {
+  object-fit: cover;
+}
+
+.rowGlyph :global(.admin-media-preview-missing) {
+  width: 100%;
+  height: 100%;
+  gap: 0;
+  font-size: 0;
 }
 
 .rowGlyph :global(.icon) {

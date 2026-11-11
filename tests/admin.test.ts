@@ -13,6 +13,7 @@ import {
   adminSidebarScrollKey,
   parseAdminSidebarScroll,
 } from "../src/core/admin/sidebar-scroll";
+import { pluginMatchesSearch } from "../src/core/plugins/search";
 import {
   isManagementRoute,
   loginDestination,
@@ -172,4 +173,29 @@ test("sidebar scroll memory is scoped by account and canonical admin path", () =
   assert.equal(parseAdminSidebarScroll("184.9"), 184);
   for (const value of [null, "", "-1", "NaN", "Infinity"])
     assert.equal(parseAdminSidebarScroll(value), null);
+});
+
+test("plugin settings search covers identity, metadata and contributed capabilities", () => {
+  const plugin = {
+    id: "everunfold.glossary",
+    title: "术语表与悬浮提示",
+    description: "维护术语与正文提示",
+    version: "1.7.0",
+    author: "Everunfold",
+    page_ids: ["glossary"],
+    shortcodes: ["glossary:term"],
+    components: ["GlossaryCard"],
+    captcha_providers: [{}],
+  };
+  for (const query of [
+    "",
+    "术语",
+    "1.7",
+    "everunfold",
+    "GLOSSARY",
+    "glossary:term",
+    "验证码",
+  ])
+    assert.equal(pluginMatchesSearch(query, plugin), true, query);
+  assert.equal(pluginMatchesSearch("不存在的插件", plugin), false);
 });

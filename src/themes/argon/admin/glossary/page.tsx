@@ -30,6 +30,7 @@ import { AdminPageHeading } from "../components/page-heading";
 import { AdminActionButton } from "../components/action-button";
 import { SettingsSection, SettingsText } from "../settings/shared";
 import { SettingsMediaField } from "../settings/media-field";
+import { MediaPreview } from "../media/media-preview";
 import { BlockComposer } from "../content/block-composer";
 import { DraftPreview } from "../content/draft-preview";
 import { EditorBody } from "../content/editor-body";
@@ -516,6 +517,8 @@ export function GlossaryAdminPage() {
             ) : null}
             {items.map((item) => {
               const meta = statusMeta[item.status];
+              const featureImage =
+                item.feature_image?.webp || item.feature_image?.original;
               return (
                 <Button
                   key={item.id}
@@ -523,8 +526,19 @@ export function GlossaryAdminPage() {
                   aria-current={selected?.id === item.id ? "true" : undefined}
                   onClick={() => void edit(item)}
                 >
-                  <span className={styles.rowGlyph}>
-                    <Icon name="glossary" />
+                  <span
+                    className={styles.rowGlyph}
+                    data-has-image={Boolean(featureImage)}
+                  >
+                    {featureImage ? (
+                      <MediaPreview
+                        url={featureImage}
+                        kind="image"
+                        label={item.title}
+                      />
+                    ) : (
+                      <Icon name="glossary" />
+                    )}
                   </span>
                   <span className={styles.rowCopy}>
                     <span className={styles.rowHeading}>

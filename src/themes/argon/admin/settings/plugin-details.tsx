@@ -30,14 +30,16 @@ export function PluginDetails({
     >
       <div className={styles.body}>
         {preview && !broken && (
-          <Image
-            unoptimized
-            width={800}
-            height={400}
-            src={preview}
-            alt={plugin.title}
-            onError={() => setBroken(true)}
-          />
+          <div className={styles.hero}>
+            <Image
+              unoptimized
+              width={800}
+              height={400}
+              src={preview}
+              alt={plugin.title}
+              onError={() => setBroken(true)}
+            />
+          </div>
         )}
         <p>{plugin.description}</p>
         <dl>
