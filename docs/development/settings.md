@@ -17,7 +17,7 @@
 
 settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码与背景的主题 profile、`site.footer`、`site.author_tagline`和`site.glossary`，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON在读取时补默认值，文章内容和术语匹配结果不进入设置或正文快照。顶层`theme`是活动主题的兼容投影，权威分主题值在`theme_options[themeId]`。主题表单见[主题设置指南](theme-settings.md)，代码字体继续只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL。参数和加载规则见[代码指南](code-blocks.md)。
 
-现导航菜单也归主题 profile：`theme_options[themeId].navigation` 是当前主题的独立菜单；`site.navigation` 仅为旧数据兼容回退。外观分组中的“导航菜单”页面编辑当前主题，保存空数组也会作为明确选择保留，不退回到旧导航。后台设置入口按站点、连接与安全、系统拆分，媒体/图标/字体归资源，术语和短代码归内容工具。
+现导航菜单也归主题 profile：`theme_options[themeId].navigation` 是当前主题的独立菜单；`site.navigation` 仅为旧数据兼容回退。外观分组中的“导航菜单”页面编辑当前主题，保存空数组也会作为明确选择保留，不退回到旧导航。后台“设置”组直接列出站点、验证码、邮件、应用接入、插件、运行和系统设置，不再使用二级抽屉；媒体/图标/字体归资源，术语和短代码归内容工具。
 
 语言分区支持默认语言和中文前缀修改；标志小按钮打开可搜索国旗/自定义标志弹窗，“添加语言”分备选和自定义。只有默认语言可留空前缀，更换默认值不批量修改已有文章地址。已有本语言程序包显示“本语言界面”，只有缺包项选择界面回退。被内容使用的语言不可删除，可禁用；新增语言不自动翻译正文。完整约束见[多语言指南](../architecture/multilingual-content.md)，更改后仍需点击“保存更改”并等待节点确认。
 
