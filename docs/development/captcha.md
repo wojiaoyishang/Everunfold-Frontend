@@ -1,10 +1,10 @@
 # 验证码配置与提供方开发
 
-版本：captcha-6，2026-11-11。决定见[ADR0086](../decisions/0086-captcha-providers-and-content-policies.md)与[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)，检查见[实际验收](../handoff/captcha-verification.md)。
+版本：captcha-7，2026-11-11。决定见[ADR0086](../decisions/0086-captcha-providers-and-content-policies.md)与[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)，检查见[实际验收](../handoff/captcha-verification.md)。
 
 ## 配置和使用
 
-后台入口为“设置 → 系统设置 → 验证方式 / 登录验证 / 阅读验证 / 评论验证 / API Key 请求”。旧 `/admin/settings/captcha` 兼容跳转到系统设置的验证码分区。初始选择本地图片验证码，所有应用规则默认关闭。可分别开启登录、文章/说说/页面的阅读或评论验证。文章、说说的内容属性“验证码”面板，以及页面编辑器，提供“跟随全局 / 必须验证 / 无需验证”；保存草稿保留设置，发布或应用后生效。各语言内容沿既有独立发布规则，注册页面的同一配置覆盖其所有语言入口。
+后台入口为“设置 → 系统设置 → 验证方式 / 登录验证 / 阅读验证 / 评论验证 / API Key 请求”。旧 `/admin/settings/captcha` 兼容跳转到系统设置的验证码分区。验证码保存栏位于部署配置之后，部署配置作为只读说明不参与提交。初始选择本地图片验证码，所有应用规则默认关闭。可分别开启登录、文章/说说/页面的阅读或评论验证。文章、说说的内容属性“验证码”面板，以及页面编辑器，提供“跟随全局 / 必须验证 / 无需验证”；保存草稿保留设置，发布或应用后生效。各语言内容沿既有独立发布规则，注册页面的同一配置覆盖其所有语言入口。
 
 本地验证无需密钥。外部提供方目前有 Google reCAPTCHA v2 Checkbox 和 Cloudflare Turnstile，须填写对应 Site Key、Secret、允许的主机名，并启用前端“第三方验证码”插件及对应后端验证器插件。主机名每行一个，不包含协议、端口或通配符。Secret 写入后只显示“已配置”；留空保留原值，API 的 `clear_secret` 可明确清除，`remove_providers` 可移除未选中的完整配置。外部服务配置不完整不能保存；故障、插件缺失、过期或校验失败均不放行，不自动切换到本地。
 

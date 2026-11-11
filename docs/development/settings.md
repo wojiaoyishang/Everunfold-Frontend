@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-18，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)与[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-19，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)与[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -16,7 +16,7 @@
 
 settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码与背景的主题 profile、`site.footer`、`site.author_tagline`和`site.glossary`，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON在读取时补默认值，文章内容和术语匹配结果不进入设置或正文快照。顶层`theme`是活动主题的兼容投影，权威分主题值在`theme_options[themeId]`。主题表单见[主题设置指南](theme-settings.md)，代码字体继续只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL。参数和加载规则见[代码指南](code-blocks.md)。
 
-现导航菜单也归主题 profile：`theme_options[themeId].navigation` 是当前主题的独立菜单；`site.navigation` 仅为旧数据兼容回退。外观分组中的“导航菜单”页面编辑当前主题，保存空数组也会作为明确选择保留，不退回到旧导航。后台“设置”组直接列出站点、邮件、应用接入、插件、运行和系统设置，不再使用二级抽屉；验证码归入系统设置，媒体/图标/字体归资源，术语和短代码归内容工具。
+现导航菜单也归主题 profile：`theme_options[themeId].navigation` 是当前主题的独立菜单；`site.navigation` 仅为旧数据兼容回退。外观分组中的“导航菜单”页面编辑当前主题，保存空数组也会作为明确选择保留，不退回到旧导航。后台“设置”组固定按插件管理、站点设置、邮件配置、系统设置、运行与任务、应用程序接入排列，不再使用二级抽屉；验证码归入系统设置，媒体/图标/字体归资源，术语和短代码归内容工具。
 
 设置投递接收器会校验当前锁定的契约。契约字段变化后必须重启 receiver，再让 Worker 重试待发送事件；否则事件会持续以 `receiver_http_409` 失败，而数据库中的设置保存仍可能已经成功。诊断时应分别检查“设置读取 revision”和“节点 delivery 状态”。插件目录使用无缓存完整响应，开发/生产轮询间隔分别为15/60秒，不再显示304。
 
@@ -26,7 +26,7 @@ settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码�
 
 一般“保存更改”把整份站点与主题草稿作为一个版本提交。已安装主题先通过卡片/列表打开详情，右下角启用按钮只保存主题选择，并保留其他未保存输入；可从实例默认的详情中恢复部署默认。提交成功后节点状态可能仍是等待同步，收到落盘确认才显示已应用。若提示版本冲突，当前草稿仍在；先保留你的修改，再使用明确标注的「放弃本地修改并载入服务器版本」合并。写请求不自动重试，未知结果先读取核对。节点策略按节点单独保存，切换选择不会覆盖该页其它节点草稿。
 
-验证码使用独立的私有配置和修订，不把 Secret 放到普通站点设置或公开快照。首次规则全部关闭；机器调用豁免还须在Key创建时授予对应权限。见[验证码指南](captcha.md)。
+验证码使用独立的私有配置和修订，不把 Secret 放到普通站点设置或公开快照。首次规则全部关闭；机器调用豁免还须在Key创建时授予对应权限。验证码保存栏在系统设置的部署配置之后，保存仍只提交验证码配置。见[验证码指南](captcha.md)。
 
 ## 保存与读取端点
 

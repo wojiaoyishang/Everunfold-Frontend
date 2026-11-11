@@ -1518,9 +1518,9 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
-| `docs/README.md` | `index-system-captcha-navigation-1` | `337a22024e9ae984e7d6cab0de9c84620ffac31ec85936e65e410714b61486a2` |
-| `docs/development/settings.md` | `settings-runtime-18` | `c4832598a92c09b1b4744672d3226d01873977c24d306340242e5024f208bf43` |
-| `docs/development/captcha.md` | `captcha-6` | `15adf43387f52cf8cc85f2c829fc2433ef038c9a6323a2641907f86980d20d63` |
+| `docs/README.md` | `index-system-captcha-navigation-2` | `5a47d1a389b27571119b33c9e54079894aab307c535d6fdde8b91f867c7bd2fa` |
+| `docs/development/settings.md` | `settings-runtime-19` | `f70b3c240cf60e6bab510233267b59599ad0f6882e8d04d5b3c40404f18bd697` |
+| `docs/development/captcha.md` | `captcha-7` | `bd143b0448c468f94584b6e35797a82688530cd0baa41a141fa008156ead3a20` |
 | `docs/decisions/0064-desktop-settings-section-navigation.md` | `ADR0064-grouped-navigation-1` | `e07d42de5bb24d0aca8191857a807880f606f88c90db8d5435d588846443c7b4` |
-| `docs/decisions/0106-system-settings-captcha-and-grouped-navigation.md` | `ADR0106-1` | `5bffc15233927cb637c0c09c6a70ef2608144241e501a8c3908e011279c2ac3e` |
-| `docs/handoff/system-settings-captcha-navigation-verification.md` | `system-settings-captcha-navigation-verification-1` | `191160159e97837d4bcfb07d2728d79cc36e544699f8109ea6bb3034e1cf0c32` |
+| `docs/decisions/0106-system-settings-captcha-and-grouped-navigation.md` | `ADR0106-2` | `753db6ab6857f68e7f645ffb93fafaecc72acccdfa434ebab851c9a3f6d26bc2` |
+| `docs/handoff/system-settings-captcha-navigation-verification.md` | `system-settings-captcha-navigation-verification-2` | `ae825bdba4fe0dc4d1bd6a691016da855991e7d1519288e909584bdeacd2b4c3` |
