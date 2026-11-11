@@ -15,11 +15,8 @@ import { useNotificationState } from "@/core/notifications/use-notifications";
 import { Button, TextField } from "../../components/ui/primitives";
 import {
   CodeEditor,
-  type CodeEditorHandle,
   type SourceEditorHandle,
 } from "../../components/ui/code-editor";
-import { RichTextEditor } from "../../components/ui/rich-text-editor";
-import { RichToolbar } from "../content/plugins/rich-toolbar";
 import { Select } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
 import { Icon } from "../../components/icon";
@@ -141,7 +138,6 @@ export function NotificationTemplatesPage() {
   const [locale, setLocale] = useState("");
   const [htmlView, setHtmlView] = useState<"visual" | "source">("visual");
   const bodyEditor = useRef<SourceEditorHandle | null>(null);
-  const richBodyEditor = useRef<CodeEditorHandle | null>(null);
   const [draftStore, setDraftStore] = useState<{
     revision: number;
     values: DraftMap;
@@ -240,10 +236,7 @@ export function NotificationTemplatesPage() {
   const appendVariable = (variable: string) => {
     if (!draft) return;
     const token = `{{${variable}}}`;
-    const target =
-      activeBodyMode === "html" && htmlView === "visual"
-        ? richBodyEditor.current
-        : bodyEditor.current;
+    const target = bodyEditor.current;
     if (target) {
       target.insert(token);
       target.focus();
@@ -412,7 +405,7 @@ export function NotificationTemplatesPage() {
                                   onClick={() => setHtmlView("visual")}
                                 >
                                   <Icon name="eye" />
-                                  <UiText text="可视化" />
+                                  <UiText text="可视化预览" />
                                 </Button>
                                 <Button
                                   role="tab"
@@ -431,18 +424,12 @@ export function NotificationTemplatesPage() {
                         )}
                       </div>
                       {activeBodyMode === "html" && htmlView === "visual" ? (
-                        <div className={styles.bodyRichEditor}>
-                          <RichTextEditor
-                            editorRef={richBodyEditor}
-                            value={draft.html ?? ""}
-                            onChange={(html) => update({ html })}
-                            label={t("HTML 正文可视化")}
-                            disabled={!editable || editor.busy}
-                            toolbar={(current) => (
-                              <RichToolbar editor={current} compact />
-                            )}
-                          />
-                        </div>
+                        <iframe
+                          className={styles.bodyVisualPreview}
+                          title={t("邮件 HTML 可视化预览")}
+                          sandbox=""
+                          srcDoc={htmlPreviewDocument(draft.html ?? "")}
+                        />
                       ) : (
                         <CodeEditor
                           ref={bodyEditor}
@@ -489,35 +476,25 @@ export function NotificationTemplatesPage() {
                       </div>
                     </div>
                   </section>
-                  <section className={styles.panel}>
-                    <div className={styles.panelHeading}>
-                      <h2>
-                        <UiText text="安全预览" />
-                      </h2>
-                      <span>
-                        {currentLanguage?.label ?? selectedLocale}
-                        {selectedPlatform === "email"
-                          ? ` · ${activeBodyMode === "html" ? "HTML" : "纯文本"}`
-                          : ""}
-                      </span>
-                    </div>
-                    <div className={styles.previewSubject}>
-                      {interpolate(draft.subject ?? "") || t("未填写主题")}
-                    </div>
-                    {selectedPlatform === "email" &&
-                    activeBodyMode === "html" ? (
-                      <iframe
-                        className={styles.previewFrame}
-                        title={t("HTML 通知预览")}
-                        sandbox=""
-                        srcDoc={htmlPreviewDocument(draft.html ?? "")}
-                      />
-                    ) : (
+                  {activeBodyMode === "text" && (
+                    <section className={styles.panel}>
+                      <div className={styles.panelHeading}>
+                        <h2>
+                          <UiText text="安全预览" />
+                        </h2>
+                        <span>
+                          {currentLanguage?.label ?? selectedLocale}
+                          {selectedPlatform === "email" ? " · 纯文本" : ""}
+                        </span>
+                      </div>
+                      <div className={styles.previewSubject}>
+                        {interpolate(draft.subject ?? "") || t("未填写主题")}
+                      </div>
                       <pre className={styles.previewBody}>
                         {interpolate(draft.text ?? "") || t("未填写正文")}
                       </pre>
-                    )}
-                  </section>
+                    </section>
+                  )}
                 </div>
                 <aside className={styles.editorAside}>
                   <section className={styles.panel}>
