@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[自定义翻译字符串](development/translations.md)、[ADR0111](decisions/0111-sparse-custom-translation-overrides.md)：只读基础语言 JSON 保持不变，数据库只保存稀疏覆盖；前台/后台/API 消息通过统一中间层回退，并随可靠设置修订发布。
+
 [主题与插件特色图](decisions/0110-theme-and-plugin-preview-artwork.md)、[插件开发](development/frontend-plugins.md)：主题详情预览满宽等比居中，插件列表和详情均支持 `preview` 特色图；无图或加载失败时保留稳定占位。
 
 [插件管理搜索](decisions/0109-plugin-settings-search.md)与[开发指南](development/frontend-plugins.md)：按插件 ID、名称、说明、版本、作者和贡献能力即时过滤，保留原启停与详情操作。

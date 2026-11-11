@@ -1572,3 +1572,19 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/decisions/0110-theme-and-plugin-preview-artwork.md` | `ADR0110-1` | `2fc4f9edf44fdf5408abaf336966b0e958d8e59fbc428f3730c1b0c427d40ce9` |
 | `docs/development/child-themes.md` | `child-themes-8` | `7569dc3c412a4a6b4ca93ce32824bb39dd4d8ed7bb3381e70f80b7a83c859b1d` |
 | `docs/handoff/theme-plugin-preview-verification.md` | `theme-plugin-preview-verification-1` | `471613344998987fdc85bf6a2a161b1a83cf46f62c9b9e7fb203a079a8dc0b19` |
+
+
+## 自定义翻译覆盖层（2026-11-11）
+
+只读 `zh-CN`/`en` 基础词典保持不变，PostgreSQL 只保存稀疏覆盖，缓存/设置快照保存派生结果。前台、后台和 API 消息统一按数据库覆盖、当前基础包、`ui_locale` 回退和原文解析。`settings-v1` 升至 `1.30.0`，迁移 `0042_translation_overrides`。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-custom-translation-overrides-1` | `e26232161dc0f045371c7f8a505535c3d354b6d0dc9b9dfba28c944975231f50` |
+| `docs/architecture/admin-navigation.md` | `admin-navigation-8` | `d28b79a0ebd026cf29edab7c009e8398def850fb3c036e999c504cea55a5077b` |
+| `docs/architecture/multilingual-content.md` | `multilingual-content-translation-overrides-1` | `5c8145652c6c580586e4b952cbfe235bc830d5eaba8eeaaaf0a93794920e92d0` |
+| `docs/development/settings.md` | `settings-runtime-20` | `1ac0fbd109e111678a90d93c7dcc784e17ebda750fbafaecae6b613630339753` |
+| `docs/development/translations.md` | `translations-runtime-1` | `1ad498118c7084e5ee6386523f27f5af34d79b9df88132c7fdd8b6e3f0928baa` |
+| `docs/decisions/0111-sparse-custom-translation-overrides.md` | `ADR0111-1` | `3540351d77edb795e83b8f436cf2849cef4d14da11a8d5c07f89a7eeeaef298e` |
+| `docs/handoff/translation-overrides-verification.md` | `translation-overrides-verification-1` | `87be1ad185b412e4ae43a68b1395fbc694aaf18e179b1d4ab22f95bdad1f7ffe` |
+| `contracts/settings-v1.schema.json` | `settings-v1-1.30.0` | `fd1f6a0f430f035a4ec8d10956e72fe088c1a2f35396b13457161f0ba8458040` |

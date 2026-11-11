@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-19，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)与[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-20，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)、[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)与[ADR0111](../decisions/0111-sparse-custom-translation-overrides.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -13,10 +13,11 @@
 | `/admin/media`            | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取                                                                                                |
 | `/admin/settings/theme`   | 公共宿主保留已安装主题切换；具体设置由当前主题目录的 `theme-settings.tsx` 动态提供。Argon 包含外观/横幅/字体/首页/文章显示/代码/背景，Paper 包含自己的纸张底色；不同主题分别保存                   |
 | `/admin/settings/system`  | 验证码提供方与全局规则、API Key 明确授权豁免和请求限额；按稳定节点 ID 保存动态请求策略；查看期望/确认版本、重新同步；部署来源脱敏展示；旧 `/admin/settings/captcha` 跳转到验证码分区 |
+| `/admin/translations`     | 以内置 `zh-CN`/`en` 只读语言包为基础，按前台、后台和 API 消息维护数据库覆盖；搜索、状态筛选、分页、恢复默认和独立翻译修订 |
 
 settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码与背景的主题 profile、`site.footer`、`site.author_tagline`和`site.glossary`，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON在读取时补默认值，文章内容和术语匹配结果不进入设置或正文快照。顶层`theme`是活动主题的兼容投影，权威分主题值在`theme_options[themeId]`。主题表单见[主题设置指南](theme-settings.md)，代码字体继续只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL。参数和加载规则见[代码指南](code-blocks.md)。
 
-现导航菜单也归主题 profile：`theme_options[themeId].navigation` 是当前主题的独立菜单；`site.navigation` 仅为旧数据兼容回退。外观分组中的“导航菜单”页面编辑当前主题，保存空数组也会作为明确选择保留，不退回到旧导航。后台“设置”组固定按插件管理、站点设置、邮件配置、系统设置、运行与任务、应用程序接入排列，不再使用二级抽屉；验证码归入系统设置，媒体/图标/字体归资源，术语和短代码归内容工具。
+现导航菜单也归主题 profile：`theme_options[themeId].navigation` 是当前主题的独立菜单；`site.navigation` 仅为旧数据兼容回退。外观分组中的“导航菜单”页面编辑当前主题，保存空数组也会作为明确选择保留，不退回到旧导航。后台新增“多语言”分组承载翻译字符串；设置组固定按插件管理、站点设置、邮件配置、系统设置、运行与任务、应用程序接入排列，不再使用二级抽屉；验证码归入系统设置，媒体/图标/字体归资源，术语和短代码归内容工具。翻译覆盖的解析、占位符和回退规则见[自定义翻译指南](translations.md)。
 
 设置投递接收器会校验当前锁定的契约。契约字段变化后必须重启 receiver，再让 Worker 重试待发送事件；否则事件会持续以 `receiver_http_409` 失败，而数据库中的设置保存仍可能已经成功。诊断时应分别检查“设置读取 revision”和“节点 delivery 状态”。插件目录使用无缓存完整响应，开发/生产轮询间隔分别为15/60秒，不再显示304。
 
