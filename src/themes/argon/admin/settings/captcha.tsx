@@ -13,9 +13,7 @@ import {
 import { PasswordField } from "../../components/ui/password-field";
 import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
-import { SettingsLayout } from "./section-navigation";
 import { SettingsSection, SettingsToggle } from "./shared";
-import { AdminPageHeading } from "../components/page-heading";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import styles from "./captcha.module.css";
 
@@ -24,7 +22,7 @@ const contentTypes = [
   { key: "shuoshuo", label: "说说" },
   { key: "page", label: "页面" },
 ] as const;
-export function CaptchaSettingsPage() {
+export function CaptchaSettingsPanel() {
   const t = useT();
   const editor = useCaptchaSettings();
   const editable = can(useAdminAccount(), "settings:write");
@@ -48,9 +46,8 @@ export function CaptchaSettingsPage() {
         : current,
     );
   return (
-    <SettingsLayout>
+    <>
       <UnsavedAccountChanges dirty={editor.dirty} busy={editor.busy} />
-      <AdminPageHeading title="验证码设置" />
       {editor.loading ? (
         <p role="status">
           <UiText text="正在读取设置…" />
@@ -72,6 +69,7 @@ export function CaptchaSettingsPage() {
                 id="captcha-provider"
                 title="验证方式"
                 description="未配置第三方服务时使用本地图片验证码。外部服务故障时会提示重试，不自动放行。"
+                group="验证码"
               >
                 <div className="admin-settings-field">
                   <label htmlFor={`${id}-provider`}>
@@ -160,6 +158,7 @@ export function CaptchaSettingsPage() {
                 id="captcha-login"
                 title="登录验证"
                 description="所有浏览器登录均遵守此规则；已登录的会话继续有效。"
+                group="验证码"
               >
                 <SettingsToggle
                   label="登录需要验证码"
@@ -178,6 +177,7 @@ export function CaptchaSettingsPage() {
                   key={action}
                   id={`captcha-${action}`}
                   title={action === "read" ? "阅读验证" : "评论验证"}
+                  group="验证码"
                   description={
                     action === "read"
                       ? "验证码通过后才返回正文。文章、说说和页面可在各自编辑器中覆盖全局规则。"
@@ -210,6 +210,7 @@ export function CaptchaSettingsPage() {
                 id="captcha-api-keys"
                 title="API Key 请求"
                 description="机器调用使用 Key 的权限、有效期和请求频率控制。Key 无效或已撤销时直接拒绝，不降级为匿名访问。"
+                group="验证码"
               >
                 <SettingsToggle
                   label="允许明确授权的 Key 免验证码"
@@ -284,6 +285,6 @@ export function CaptchaSettingsPage() {
           </Button>
         </div>
       )}
-    </SettingsLayout>
+    </>
   );
 }

@@ -11,6 +11,7 @@ import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsSection, DeliveryBadge } from "./shared";
 import { SettingsLayout } from "./section-navigation";
+import { CaptchaSettingsPanel } from "./captcha";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 const fields = [
@@ -127,6 +128,7 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
         id="settings-nodes"
         title="节点策略"
         description="策略由后端保存，节点接收后保留本地副本。后端暂时离线时继续使用上次成功应用的版本。"
+        group="节点与发布"
       >
         {editor.loading ? (
           <p role="status">
@@ -248,6 +250,7 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
         id="settings-delivery"
         title="站点与主题发布"
         description="保存完成表示数据库已提交；节点应用完成表示整份配置已写入该节点。"
+        group="节点与发布"
       >
         <div className="admin-delivery-list">
           {siteEditor.saved?.delivery.map((item) => (
@@ -266,10 +269,12 @@ export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
           )}
         </div>
       </SettingsSection>
+      <CaptchaSettingsPanel />
       <SettingsSection
         id="settings-deployment"
         title="部署配置"
         description="这些值属于当前 Next.js 实例，通过服务器配置文件维护。"
+        group="部署信息"
       >
         <dl className="admin-runtime-list">
           <div>

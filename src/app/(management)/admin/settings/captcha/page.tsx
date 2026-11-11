@@ -1,4 +1,5 @@
-import { CaptchaSettingsPage } from "@/themes/argon/admin/settings/captcha";
+import { redirect } from "next/navigation";
+
 export default function Page() {
-  return <CaptchaSettingsPage />;
+  redirect("/admin/settings/system#captcha-provider");
 }

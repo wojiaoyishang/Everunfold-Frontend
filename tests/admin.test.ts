@@ -71,6 +71,16 @@ test("admin navigation separates primary content, tools, appearance and system s
       .find((group) => group.label === "设置")
       ?.items.map((item) => item.icon) ?? [];
   assert.equal(new Set(settingsIcons).size, settingsIcons.length);
+  assert.equal(
+    adminNavigation.some((item) => item.id === "core.settings.captcha"),
+    false,
+  );
+  assert.equal(
+    adminNavigationGroups
+      .flatMap((group) => group.items)
+      .some((item) => item.id === "core.settings.captcha"),
+    false,
+  );
 });
 
 test("corrupt or outdated admin appearance cannot import permissions or public reader settings", () => {

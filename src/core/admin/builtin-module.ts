@@ -118,7 +118,7 @@ export const builtinAdminModule = {
       id: "core.settings.system",
       href: "/admin/settings/system",
       label: "系统设置",
-      description: "前端节点策略与同步状态",
+      description: "验证码、节点策略与同步状态",
       icon: "node-settings",
       menu: { group: "core.settings", order: 70 },
     },
@@ -128,7 +128,7 @@ export const builtinAdminModule = {
       label: "验证码设置",
       description: "验证码提供方与应用规则",
       icon: "lock",
-      menu: { group: "core.settings", order: 20 },
+      menu: null,
     },
     {
       id: "core.overview",

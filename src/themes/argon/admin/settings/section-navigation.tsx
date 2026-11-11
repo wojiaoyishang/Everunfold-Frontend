@@ -6,7 +6,20 @@ import { TextLink } from "../../components/ui/primitives";
 import styles from "./section-navigation.module.css";
 import { adminScrollBehavior } from "@/core/admin/scroll";
 
-type SectionLink = { id: string; title: string };
+type SectionLink = { id: string; title: string; group?: string };
+type SectionGroup = { title?: string; items: SectionLink[] };
+
+function groupSections(sections: SectionLink[]): SectionGroup[] {
+  return sections.reduce<SectionGroup[]>((groups, section) => {
+    const current = groups.at(-1);
+    if (current && current.title === section.group) {
+      current.items.push(section);
+    } else {
+      groups.push({ title: section.group, items: [section] });
+    }
+    return groups;
+  }, []);
+}
 
 /** Builds a local directory from the sections actually mounted in this page. */
 export function SettingsLayout({
@@ -34,21 +47,26 @@ export function SettingsLayout({
       const links = nodes.map((node) => ({
         id: node.id,
         title: node.dataset.settingsSection ?? "",
+        group: node.dataset.settingsGroup || undefined,
       }));
       setSections((previous) =>
         previous.length === links.length &&
         previous.every(
           (item, index) =>
-            item.id === links[index].id && item.title === links[index].title,
+            item.id === links[index].id &&
+            item.title === links[index].title &&
+            item.group === links[index].group,
         )
           ? previous
           : links,
       );
-      if (!restored && nodes.length) {
+      const hashTarget = location.hash
+        ? nodes.find((node) => "#" + node.id === location.hash)
+        : undefined;
+      if (!restored && nodes.length && (!location.hash || hashTarget)) {
         restored = true;
-        const target = nodes.find((node) => "#" + node.id === location.hash);
-        target?.scrollIntoView({ block: "start", behavior: "instant" });
-        target?.focus({ preventScroll: true });
+        hashTarget?.scrollIntoView({ block: "start", behavior: "instant" });
+        hashTarget?.focus({ preventScroll: true });
       }
       const boundary = (header?.getBoundingClientRect().bottom ?? 56) + 24;
       const end =
@@ -93,6 +111,7 @@ export function SettingsLayout({
       window.removeEventListener("hashchange", schedule);
     };
   }, []);
+  const groups = groupSections(sections);
   return (
     <div
       ref={root}
@@ -105,33 +124,55 @@ export function SettingsLayout({
           <strong>
             <UiText text="快速导航" />
           </strong>
-          {sections.map((section) => (
-            <TextLink
-              key={section.id}
-              href={`#${section.id}`}
-              aria-current={active === section.id ? "location" : undefined}
-              onClick={(event) => {
-                if (
-                  event.button !== 0 ||
-                  event.metaKey ||
-                  event.ctrlKey ||
-                  event.shiftKey ||
-                  event.altKey
-                )
-                  return;
-                const target = document.getElementById(section.id);
-                if (!target) return;
-                event.preventDefault();
-                history.replaceState(history.state, "", `#${section.id}`);
-                target.focus({ preventScroll: true });
-                target.scrollIntoView({
-                  block: "start",
-                  behavior: adminScrollBehavior(root.current),
-                });
-              }}
+          {groups.map((group) => (
+            <div
+              className={styles.group}
+              data-labelled={Boolean(group.title)}
+              data-active={
+                group.items.some((section) => section.id === active)
+                  ? "true"
+                  : undefined
+              }
+              key={`${group.title ?? ""}:${group.items[0].id}`}
             >
-              <UiText text={section.title} />
-            </TextLink>
+              {group.title && (
+                <span className={styles.groupTitle}>
+                  <UiText text={group.title} />
+                </span>
+              )}
+              <div className={styles.links}>
+                {group.items.map((section) => (
+                  <TextLink
+                    key={section.id}
+                    href={`#${section.id}`}
+                    aria-current={
+                      active === section.id ? "location" : undefined
+                    }
+                    onClick={(event) => {
+                      if (
+                        event.button !== 0 ||
+                        event.metaKey ||
+                        event.ctrlKey ||
+                        event.shiftKey ||
+                        event.altKey
+                      )
+                        return;
+                      const target = document.getElementById(section.id);
+                      if (!target) return;
+                      event.preventDefault();
+                      history.replaceState(history.state, "", `#${section.id}`);
+                      target.focus({ preventScroll: true });
+                      target.scrollIntoView({
+                        block: "start",
+                        behavior: adminScrollBehavior(root.current),
+                      });
+                    }}
+                  >
+                    <UiText text={section.title} />
+                  </TextLink>
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
       )}

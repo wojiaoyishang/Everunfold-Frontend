@@ -21,12 +21,14 @@ export function SettingsSection({
   id,
   title,
   description,
+  group,
   action,
   children,
 }: {
   id: string;
   title: string;
   description: string;
+  group?: string;
   action?: ReactNode;
   children: ReactNode;
 }) {
@@ -35,6 +37,7 @@ export function SettingsSection({
       id={id}
       className="admin-settings-section"
       data-settings-section={title}
+      data-settings-group={group}
       tabIndex={-1}
     >
       <div className="admin-settings-section-heading">
