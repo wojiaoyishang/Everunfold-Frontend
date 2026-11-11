@@ -160,10 +160,9 @@
   gap: 9px;
   align-items: center;
   width: 100%;
-  min-height: 50px;
-  max-height: 54px;
-  padding: 7px 8px;
-  overflow: hidden;
+  min-height: 62px;
+  height: auto;
+  padding: 8px;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
@@ -198,16 +197,19 @@
 
 .option strong {
   font-size: 12px;
+  line-height: 1.35;
 }
 
 .option small {
   color: var(--admin-muted);
   font-size: 10px;
+  line-height: 1.4;
 }
 
 .option code {
   color: var(--admin-muted);
   font-size: 9px;
+  line-height: 1.4;
 }
 
 .option em {
