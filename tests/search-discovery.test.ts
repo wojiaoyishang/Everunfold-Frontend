@@ -10,6 +10,11 @@ import {
   feedAlternates,
 } from "../src/core/seo/discovery";
 import { buildFeed } from "../src/core/seo/feeds";
+import {
+  browserDiscoveryRequested,
+  renderDiscoveryPage,
+} from "../src/core/seo/discovery-page";
+import { buildSitemapXml } from "../src/core/seo/sitemap";
 import { articleSchema, StructuredData } from "../src/core/seo/structured-data";
 import { contentMetadata } from "../src/core/content/metadata";
 import { presentLegacyContent } from "../src/core/content/presentation";
@@ -75,6 +80,102 @@ test("sitemap excludes restricted and noindex pages and their alternate links", 
     (robotsRules(data.site, origin).rules as { allow: string }).allow,
     "/",
   );
+});
+
+test("sitemap XML keeps standard crawler structure and language alternates", () => {
+  const data = snapshot();
+  const sitemap = buildSitemapXml(sitemapEntries(data, origin));
+  assert.ok(sitemap.startsWith('<?xml version="1.0" encoding="UTF-8"?>'));
+  assert.match(
+    sitemap,
+    /<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9" xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml">/,
+  );
+  assert.match(sitemap, /<url><loc>https:\/\/blog\.example\/<\/loc>/);
+  assert.match(sitemap, /<lastmod>2026-10-02T00:00:00\.000Z<\/lastmod>/);
+  assert.match(sitemap, /<xhtml:link rel="alternate"/);
+});
+
+test("browser discovery view is used only for real page navigation", () => {
+  const browser = new Request(origin + "/feed.xml", {
+    headers: {
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Sec-Fetch-Dest": "document",
+      "User-Agent": "Mozilla/5.0 Chrome/140 Safari/537.36",
+    },
+  });
+  assert.equal(browserDiscoveryRequested(browser), true);
+  assert.equal(
+    browserDiscoveryRequested(
+      new Request(origin + "/sitemap.xml", {
+        headers: {
+          Accept: "text/html",
+          "User-Agent": "Mozilla/5.0 Safari/605.1.15",
+        },
+      }),
+    ),
+    true,
+  );
+  assert.equal(
+    browserDiscoveryRequested(
+      new Request(origin + "/feed.xml", {
+        headers: {
+          Accept: "text/html",
+          "Sec-Fetch-Dest": "document",
+          "User-Agent": "Googlebot/2.1 (+http://www.google.com/bot.html)",
+        },
+      }),
+    ),
+    false,
+  );
+  assert.equal(
+    browserDiscoveryRequested(
+      new Request(origin + "/feed.xml", {
+        headers: {
+          Accept: "application/rss+xml",
+          "User-Agent": "FreshRSS/1.27",
+        },
+      }),
+    ),
+    false,
+  );
+  assert.equal(
+    browserDiscoveryRequested(
+      new Request(origin + "/feed.xml?format=xml", {
+        headers: {
+          Accept: "text/html",
+          "Sec-Fetch-Dest": "document",
+          "User-Agent": "Mozilla/5.0 Chrome/140 Safari/537.36",
+        },
+      }),
+    ),
+    false,
+  );
+});
+
+test("browser discovery pages are complete, readable and escaped", () => {
+  const html = renderDiscoveryPage({
+    kind: "rss",
+    siteName: "<Everunfold>",
+    siteDescription: "公开 & 安全的站点",
+    items: [
+      {
+        title: '<script>alert("x")</script>',
+        href: "/hello.html",
+        meta: "2026-11-11",
+        summary: "A <safe> summary",
+        tags: ["随笔"],
+      },
+    ],
+    rawHref: "/feed.xml?format=xml",
+    emptyMessage: "",
+  });
+  assert.ok(html.startsWith("<!doctype html>"));
+  assert.match(html, /RSS 订阅/);
+  assert.match(html, /查看原始 XML/);
+  assert.match(html, /href="\/feed.xml\?format=xml"/);
+  assert.match(html, /&lt;Everunfold&gt;/);
+  assert.match(html, /&lt;script&gt;alert\(&quot;x&quot;\)&lt;\/script&gt;/);
+  assert.ok(!html.includes('<script>alert("x")</script>'));
 });
 
 test("feeds use stable identities, escape markup and honor locale and limit", () => {
