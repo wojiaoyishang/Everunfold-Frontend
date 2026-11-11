@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type {
   TranslationCatalogEntry,
   TranslationChange,
@@ -12,7 +13,9 @@ import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { Button, Form, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
+import { CodeEditor } from "../../components/ui/code-editor";
 import { Icon } from "../../components/icon";
+import { LanguageFlag } from "../../components/language-flag";
 import { AdminPageHeading } from "../components/page-heading";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { SettingsLayout } from "./section-navigation";
@@ -62,9 +65,101 @@ function placeholderSignature(value: string) {
     .join(",");
 }
 
+function parseScope(value: string | null): Scope | undefined {
+  return scopes.find((item) => item.value === value)?.value;
+}
+
+type TranslationRow = {
+  item: Item;
+  current: string;
+  state: "custom" | "fallback" | "missing";
+};
+
+function TranslationTable({
+  rows,
+  activeKey,
+  compact = false,
+  onOpen,
+}: {
+  rows: TranslationRow[];
+  activeKey?: string;
+  compact?: boolean;
+  onOpen: (item: Item) => void;
+}) {
+  const t = useT();
+  return (
+    <div className={`${styles.list} ${compact ? styles.compactList : ""}`}>
+      <div className={styles.columns} aria-hidden="true">
+        <span>
+          <UiText text="翻译键名" />
+        </span>
+        <span>
+          <UiText text="原文" />
+        </span>
+        <span>
+          <UiText text="译文" />
+        </span>
+      </div>
+      <div className={styles.rows}>
+        {rows.map(({ item, current, state }) => {
+          const active = item.key === activeKey;
+          return (
+            <Button
+              type="button"
+              className={styles.rowButton}
+              aria-label={t("编辑翻译：{key}", { key: item.key })}
+              aria-current={active ? "true" : undefined}
+              data-active={active || undefined}
+              key={item.key}
+              onClick={() => onOpen(item)}
+            >
+              <span className={styles.keyCell} data-label={t("翻译键名")}>
+                <code>{item.key}</code>
+                <span className="admin-badge">{item.owner}</span>
+              </span>
+              <span className={styles.originalCell} data-label={t("原文")}>
+                {item.source}
+              </span>
+              <span className={styles.translationCell} data-label={t("译文")}>
+                <span
+                  className={styles.translationValue}
+                  data-empty={current ? undefined : true}
+                >
+                  {current || t("暂无译文")}
+                </span>
+                <small>
+                  <Icon
+                    name={
+                      state === "custom"
+                        ? "check"
+                        : state === "fallback"
+                          ? "chevron"
+                          : "edit"
+                    }
+                  />
+                  {state === "custom" ? (
+                    <UiText text="已自定义" />
+                  ) : state === "fallback" ? (
+                    <UiText text="基础文本" />
+                  ) : (
+                    <UiText text="未翻译" />
+                  )}
+                </small>
+              </span>
+            </Button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export function TranslationSettingsPage() {
   const t = useT();
   const languages = useLanguageCatalog();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const editable = can(useAdminAccount(), "settings:write");
   const editor = useTranslationSettings();
   const [scope, setScope] = useState<Scope>("public");
@@ -85,29 +180,36 @@ export function TranslationSettingsPage() {
     languageOptions.find((item) => item.value === locale)?.value ??
     languageOptions[0]?.value ??
     "zh-CN";
+  const requestedDetailScope = parseScope(searchParams.get("scope"));
+  const requestedDetailLocale = searchParams.get("locale") ?? "";
+  const requestedDetailKey = searchParams.get("key") ?? "";
+  const detail =
+    requestedDetailScope && requestedDetailLocale && requestedDetailKey
+      ? {
+          scope: requestedDetailScope,
+          locale: requestedDetailLocale,
+          key: requestedDetailKey,
+        }
+      : null;
+  const viewScope = detail?.scope ?? scope;
+  const viewLocale = detail?.locale ?? selectedLocale;
   const selectedLanguage = languages.languages.find(
-    (item) => item.code === selectedLocale,
+    (item) => item.code === viewLocale,
   );
   const fallbackLocale =
     selectedLanguage?.ui_locale ??
-    (selectedLocale.toLowerCase().startsWith("en") ? "en" : "zh-CN");
-  const catalog = useMemo<Item[]>(() => {
-    if (scope === "backend") return editor.saved?.backend_catalog ?? [];
-    return frontendCatalog.map((item) => ({ ...item, scope }));
-  }, [editor.saved?.backend_catalog, scope]);
-  const overrides = useMemo(
-    () =>
-      new Map(
-        (editor.saved?.overrides ?? [])
-          .filter(
-            (item) => item.scope === scope && item.locale === selectedLocale,
-          )
-          .map((item) => [item.key, item]),
-      ),
-    [editor.saved?.overrides, scope, selectedLocale],
+    (viewLocale.toLowerCase().startsWith("en") ? "en" : "zh-CN");
+  const catalog: Item[] =
+    viewScope === "backend"
+      ? (editor.saved?.backend_catalog ?? [])
+      : frontendCatalog.map((item) => ({ ...item, scope: viewScope }));
+  const overrides = new Map(
+    (editor.saved?.overrides ?? [])
+      .filter((item) => item.scope === viewScope && item.locale === viewLocale)
+      .map((item) => [item.key, item]),
   );
   const defaultFor = (item: Item) =>
-    item.defaults?.[selectedLocale] ??
+    item.defaults?.[viewLocale] ??
     item.defaults?.[fallbackLocale] ??
     item.defaults?.["zh-CN"] ??
     item.defaults?.en ??
@@ -115,7 +217,7 @@ export function TranslationSettingsPage() {
   const needle = search.normalize("NFKC").trim().toLocaleLowerCase();
   const filtered = catalog.filter((item) => {
     const override = overrides.get(item.key);
-    const nativeDefault = item.defaults?.[selectedLocale];
+    const nativeDefault = item.defaults?.[viewLocale];
     const fallback = defaultFor(item);
     const matchesStatus =
       status === "all"
@@ -143,14 +245,26 @@ export function TranslationSettingsPage() {
     (currentPage + 1) * pageSize,
   );
   const draftFor = (item: Item) =>
-    drafts[identity(scope, selectedLocale, item.key)] ??
+    drafts[identity(viewScope, viewLocale, item.key)] ??
     overrides.get(item.key)?.value ??
     "";
+  const translationRows: TranslationRow[] = rows.map((item) => {
+    const fallback = defaultFor(item);
+    return {
+      item,
+      current: draftFor(item).trim() || fallback,
+      state: overrides.has(item.key)
+        ? "custom"
+        : fallback
+          ? "fallback"
+          : "missing",
+    };
+  });
   const setDraft = (item: Item, value: string) => {
     setValidationError("");
     setDrafts((current) => ({
       ...current,
-      [identity(scope, selectedLocale, item.key)]: value,
+      [identity(viewScope, viewLocale, item.key)]: value,
     }));
   };
   const dirtyChanges = useMemo(() => {
@@ -204,7 +318,35 @@ export function TranslationSettingsPage() {
     setValidationError("");
     if (await editor.save(dirtyChanges)) setDrafts({});
   };
-  const currentScope = scopes.find((item) => item.value === scope)!;
+  const currentScope = scopes.find((item) => item.value === viewScope)!;
+  const currentLanguage = languageOptions.find(
+    (item) => item.value === viewLocale,
+  );
+  const detailItem = detail
+    ? catalog.find((item) => item.key === detail.key)
+    : undefined;
+  const detailOverride = detailItem ? overrides.get(detailItem.key) : undefined;
+  const detailFallback = detailItem ? defaultFor(detailItem) : "";
+  const detailIndex = detailItem
+    ? filtered.findIndex((item) => item.key === detailItem.key)
+    : -1;
+  const openDetail = (item: Item) => {
+    const params = new URLSearchParams();
+    params.set("scope", detail?.scope ?? scope);
+    params.set("locale", detail?.locale ?? selectedLocale);
+    params.set("key", item.key);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+  const openAdjacent = (offset: number) => {
+    const nextItem = filtered[detailIndex + offset];
+    if (!detail || !nextItem) return;
+    const params = new URLSearchParams();
+    params.set("scope", detail.scope);
+    params.set("locale", detail.locale);
+    params.set("key", nextItem.key);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+  const closeDetail = () => router.replace(pathname);
   return (
     <SettingsLayout fullWidth>
       <UnsavedAccountChanges
@@ -221,209 +363,333 @@ export function TranslationSettingsPage() {
           void save();
         }}
       >
-        <fieldset
-          className="admin-settings-form"
-          disabled={!editable || editor.busy}
-        >
-          <SettingsSection
-            id="translation-overrides"
-            title="翻译覆盖"
-            description="筛选已注册的程序文案；留空或恢复默认时使用基础语言包。"
-          >
-            <div className={styles.workspace}>
-              <div className={styles.filters}>
-                <div className={styles.filter}>
-                  <span className={styles.fieldLabel}>
-                    <UiText text="翻译范围" />
-                  </span>
-                  <Select
-                    programOptions
-                    name="translation-scope"
-                    label="翻译范围"
-                    value={scope}
-                    options={scopes.map((item) => ({
-                      value: item.value,
-                      label: item.label,
-                    }))}
-                    onValueChange={(value) => {
-                      setScope(value as Scope);
-                      setPage(0);
-                    }}
-                  />
-                </div>
-                <div className={styles.filter}>
-                  <span className={styles.fieldLabel}>
-                    <UiText text="翻译语言" />
-                  </span>
-                  <Select
-                    programOptions
-                    name="translation-locale"
-                    label="翻译语言"
-                    value={selectedLocale}
-                    options={languageOptions}
-                    onValueChange={(value) => {
-                      setLocale(value);
-                      setPage(0);
-                    }}
-                  />
-                </div>
-                <div className={styles.filter}>
-                  <span className={styles.fieldLabel}>
-                    <UiText text="翻译状态" />
-                  </span>
-                  <Select
-                    programOptions
-                    name="translation-status"
-                    label="翻译状态"
-                    value={status}
-                    options={[
-                      { value: "all", label: "全部" },
-                      { value: "custom", label: "已自定义" },
-                      { value: "missing", label: "未翻译" },
-                      { value: "fallback", label: "使用回退" },
-                      { value: "stale", label: "原文已变化" },
-                    ]}
-                    onValueChange={(value) => {
-                      setStatus(value as Status);
-                      setPage(0);
-                    }}
-                  />
-                </div>
-                <div className={styles.filter}>
-                  <span className={styles.fieldLabel}>
-                    <UiText text="搜索" />
-                  </span>
-                  <label className="admin-search">
-                    <Icon name="search" />
-                    <TextField
-                      type="search"
-                      aria-label="搜索翻译字符串"
-                      placeholder="原文、消息键或当前翻译"
-                      value={search}
-                      onChange={(event) => {
-                        setSearch(event.target.value);
-                        setPage(0);
-                      }}
-                    />
-                  </label>
-                </div>
-              </div>
-              <p className={styles.scopeHint}>
-                <UiText text={currentScope.hint} />
-                <span>
-                  {filtered.length} / {catalog.length}
-                </span>
-              </p>
+        <fieldset className="admin-settings-form" disabled={editor.busy}>
+          {detail ? (
+            <SettingsSection
+              id="translation-detail"
+              title="编辑翻译"
+              description="检查原文和上下文，维护当前语言的译文。"
+              action={
+                <Button className="admin-button" onClick={closeDetail}>
+                  <Icon name="arrow-left" />
+                  <UiText text="返回列表" />
+                </Button>
+              }
+            >
               {editor.loading ? (
                 <p className={styles.empty} role="status">
                   <UiText text="正在读取翻译设置…" />
                 </p>
-              ) : rows.length === 0 ? (
-                <p className={styles.empty}>
-                  <UiText text="没有匹配的翻译字符串。" />
-                </p>
+              ) : !detailItem ? (
+                <div className={styles.missingDetail}>
+                  <p>
+                    <UiText text="该翻译条目已不存在。" />
+                  </p>
+                  <Button className="admin-button" onClick={closeDetail}>
+                    <UiText text="返回查看所有翻译字符串。" />
+                  </Button>
+                </div>
               ) : (
-                <div className={styles.list}>
-                  <div className={styles.columns} aria-hidden="true">
-                    <span>
-                      <UiText text="原文" />
+                <div className={styles.detail}>
+                  <div className={styles.detailBrowser}>
+                    <div className={styles.detailBrowserToolbar}>
+                      <strong>
+                        <UiText text="原文" />
+                      </strong>
+                      <label className="admin-search">
+                        <Icon name="search" />
+                        <TextField
+                          type="search"
+                          aria-label="搜索翻译字符串"
+                          placeholder="过滤翻译"
+                          value={search}
+                          onChange={(event) => setSearch(event.target.value)}
+                        />
+                      </label>
+                      <span>{filtered.length}</span>
+                    </div>
+                    <TranslationTable
+                      rows={translationRows}
+                      activeKey={detailItem.key}
+                      compact
+                      onOpen={openDetail}
+                    />
+                  </div>
+                  <div className={styles.detailMeta}>
+                    <span className={styles.metaItem}>
+                      <UiText text="翻译范围" />
+                      <strong>
+                        <UiText text={currentScope.label} />
+                      </strong>
                     </span>
-                    <span>
-                      <UiText text="自定义翻译" />
+                    <span className={styles.metaItem}>
+                      <UiText text="翻译语言" />
+                      <strong>
+                        {currentLanguage && (
+                          <LanguageFlag value={currentLanguage.flag} />
+                        )}
+                        {currentLanguage?.label ?? viewLocale}
+                      </strong>
                     </span>
-                    <span>
-                      <UiText text="状态" />
+                    <span className={styles.metaItem}>
+                      <UiText text="所有者" />
+                      <strong>{detailItem.owner}</strong>
+                    </span>
+                    <span
+                      className={`${styles.detailStatus} admin-badge admin-status-badge`}
+                      data-tone={detailOverride ? "positive" : "neutral"}
+                    >
+                      <Icon name={detailOverride ? "check" : "edit"} />
+                      {detailOverride ? (
+                        <UiText text="已自定义" />
+                      ) : (
+                        <UiText text="基础文本" />
+                      )}
                     </span>
                   </div>
-                  <div className={styles.rows}>
-                    {rows.map((item) => {
-                      const override = overrides.get(item.key);
-                      const value = draftFor(item);
-                      const fallback = defaultFor(item);
-                      return (
-                        <div className={styles.row} key={item.key}>
-                          <div className={styles.source}>
-                            <strong>{item.source}</strong>
-                            <code>{item.key}</code>
-                            <span className="admin-badge">{item.owner}</span>
-                          </div>
-                          <div className={styles.editor}>
-                            <TextField
-                              aria-label={t("翻译：{source}", {
-                                source: item.source,
-                              })}
-                              value={value}
-                              placeholder={
-                                fallback
-                                  ? t("留空使用：{value}", { value: fallback })
-                                  : "暂无基础翻译"
-                              }
-                              onChange={(event) =>
-                                setDraft(item, event.target.value)
-                              }
-                            />
-                            <small>
-                              {override ? (
-                                <UiText text="正在覆盖基础文本" />
-                              ) : fallback ? (
-                                <UiText text="当前使用基础文本" />
-                              ) : (
-                                <UiText text="当前没有可回退的基础文本" />
-                              )}
-                            </small>
-                          </div>
-                          <div className={styles.status}>
-                            <span
-                              className="admin-badge admin-status-badge"
-                              data-tone={override ? "positive" : "neutral"}
-                            >
-                              <Icon name={override ? "check" : "edit"} />
-                              {override ? (
-                                <UiText text="已自定义" />
-                              ) : (
-                                <UiText text="基础文本" />
-                              )}
-                            </span>
-                            {override && (
-                              <Button
-                                className="admin-text-action"
-                                onClick={() => setDraft(item, "")}
-                              >
-                                <UiText text="恢复默认" />
-                              </Button>
-                            )}
-                          </div>
+                  <div className={styles.detailGrid}>
+                    <section
+                      className={`${styles.detailPane} ${styles.sourcePane}`}
+                    >
+                      <div className={styles.paneHeading}>
+                        <h3>
+                          <UiText text="原文" />
+                        </h3>
+                        <span>{detailItem.owner}</span>
+                      </div>
+                      <div className={styles.codeEditorFrame}>
+                        <CodeEditor
+                          value={detailItem.source}
+                          onChange={() => undefined}
+                          label={t("原文")}
+                          language={[]}
+                          disabled
+                        />
+                      </div>
+                      <div className={styles.detailInfo}>
+                        <span>
+                          <UiText text="上下文" />
+                        </span>
+                        <div
+                          className={`${styles.codeEditorFrame} ${styles.contextEditor}`}
+                        >
+                          <CodeEditor
+                            value={currentScope.hint}
+                            onChange={() => undefined}
+                            label={t("上下文")}
+                            language={[]}
+                            disabled
+                          />
                         </div>
-                      );
-                    })}
+                      </div>
+                      <div className={styles.detailInfo}>
+                        <span>
+                          <UiText text="翻译键名" />
+                        </span>
+                        <code>{detailItem.key}</code>
+                      </div>
+                    </section>
+                    <section className={styles.detailPane}>
+                      <h3 className={styles.translationLabel}>
+                        <UiText text="译文" />
+                      </h3>
+                      <div
+                        className={`${styles.codeEditorFrame} ${styles.translationEditor}`}
+                      >
+                        <CodeEditor
+                          value={draftFor(detailItem)}
+                          onChange={(value) => setDraft(detailItem, value)}
+                          label={t("翻译：{source}", {
+                            source: detailItem.source,
+                          })}
+                          language={[]}
+                          disabled={!editable || editor.busy}
+                        />
+                      </div>
+                      <small className={styles.translationHint}>
+                        {detailOverride ? (
+                          <UiText text="正在覆盖基础文本" />
+                        ) : detailFallback ? (
+                          <UiText text="当前使用基础文本" />
+                        ) : (
+                          <UiText text="当前没有可回退的基础文本" />
+                        )}
+                      </small>
+                      <div className={styles.translationActions}>
+                        <small>
+                          <UiText text="留空并保存后恢复基础文本。" />
+                        </small>
+                        {detailOverride && (
+                          <Button
+                            className="admin-text-action"
+                            disabled={!editable}
+                            onClick={() => setDraft(detailItem, "")}
+                          >
+                            <Icon name="refresh" />
+                            <UiText text="恢复默认" />
+                          </Button>
+                        )}
+                      </div>
+                    </section>
+                  </div>
+                  <div className={styles.detailPager}>
+                    <Button
+                      className="admin-button"
+                      disabled={detailIndex <= 0}
+                      onClick={() => openAdjacent(-1)}
+                    >
+                      <Icon name="chevron-left" />
+                      <UiText text="上一条" />
+                    </Button>
+                    <span>
+                      {t("当前筛选内共 {count} 条", {
+                        count: filtered.length,
+                      })}
+                    </span>
+                    <Button
+                      className="admin-button"
+                      disabled={
+                        detailIndex < 0 || detailIndex + 1 >= filtered.length
+                      }
+                      onClick={() => openAdjacent(1)}
+                    >
+                      <UiText text="下一条" />
+                      <Icon name="chevron" />
+                    </Button>
                   </div>
                 </div>
               )}
-              <div className={styles.pagination}>
-                <Button
-                  className="admin-button"
-                  disabled={currentPage === 0}
-                  onClick={() => setPage((value) => Math.max(0, value - 1))}
-                >
-                  <Icon name="chevron-left" />
-                  <UiText text="上一页" />
-                </Button>
-                <span>
-                  {currentPage + 1} / {pageCount}
-                </span>
-                <Button
-                  className="admin-button"
-                  disabled={currentPage + 1 >= pageCount}
-                  onClick={() =>
-                    setPage((value) => Math.min(pageCount - 1, value + 1))
-                  }
-                >
-                  <UiText text="下一页" />
-                  <Icon name="chevron" />
-                </Button>
+            </SettingsSection>
+          ) : (
+            <SettingsSection
+              id="translation-overrides"
+              title="翻译覆盖"
+              description="列表提供键名、原文和译文概览；点击一行进入详情编辑。"
+            >
+              <div className={styles.workspace}>
+                <div className={styles.filters}>
+                  <div className={styles.filter}>
+                    <span className={styles.fieldLabel}>
+                      <UiText text="翻译范围" />
+                    </span>
+                    <Select
+                      programOptions
+                      name="translation-scope"
+                      label="翻译范围"
+                      value={scope}
+                      options={scopes.map((item) => ({
+                        value: item.value,
+                        label: item.label,
+                      }))}
+                      onValueChange={(value) => {
+                        setScope(value as Scope);
+                        setPage(0);
+                      }}
+                    />
+                  </div>
+                  <div className={styles.filter}>
+                    <span className={styles.fieldLabel}>
+                      <UiText text="翻译语言" />
+                    </span>
+                    <Select
+                      programOptions
+                      name="translation-locale"
+                      label="翻译语言"
+                      value={selectedLocale}
+                      options={languageOptions}
+                      onValueChange={(value) => {
+                        setLocale(value);
+                        setPage(0);
+                      }}
+                    />
+                  </div>
+                  <div className={styles.filter}>
+                    <span className={styles.fieldLabel}>
+                      <UiText text="翻译状态" />
+                    </span>
+                    <Select
+                      programOptions
+                      name="translation-status"
+                      label="翻译状态"
+                      value={status}
+                      options={[
+                        { value: "all", label: "全部" },
+                        { value: "custom", label: "已自定义" },
+                        { value: "missing", label: "未翻译" },
+                        { value: "fallback", label: "使用回退" },
+                        { value: "stale", label: "原文已变化" },
+                      ]}
+                      onValueChange={(value) => {
+                        setStatus(value as Status);
+                        setPage(0);
+                      }}
+                    />
+                  </div>
+                  <div className={styles.filter}>
+                    <span className={styles.fieldLabel}>
+                      <UiText text="搜索" />
+                    </span>
+                    <label className="admin-search">
+                      <Icon name="search" />
+                      <TextField
+                        type="search"
+                        aria-label="搜索翻译字符串"
+                        placeholder="原文、消息键或当前翻译"
+                        value={search}
+                        onChange={(event) => {
+                          setSearch(event.target.value);
+                          setPage(0);
+                        }}
+                      />
+                    </label>
+                  </div>
+                </div>
+                <p className={styles.scopeHint}>
+                  <UiText text={currentScope.hint} />
+                  <span>
+                    {filtered.length} / {catalog.length}
+                  </span>
+                </p>
+                {editor.loading ? (
+                  <p className={styles.empty} role="status">
+                    <UiText text="正在读取翻译设置…" />
+                  </p>
+                ) : rows.length === 0 ? (
+                  <p className={styles.empty}>
+                    <UiText text="没有匹配的翻译字符串。" />
+                  </p>
+                ) : (
+                  <TranslationTable
+                    rows={translationRows}
+                    onOpen={openDetail}
+                  />
+                )}
+                <div className={styles.pagination}>
+                  <Button
+                    className="admin-button"
+                    disabled={currentPage === 0}
+                    onClick={() => setPage((value) => Math.max(0, value - 1))}
+                  >
+                    <Icon name="chevron-left" />
+                    <UiText text="上一页" />
+                  </Button>
+                  <span>
+                    {currentPage + 1} / {pageCount}
+                  </span>
+                  <Button
+                    className="admin-button"
+                    disabled={currentPage + 1 >= pageCount}
+                    onClick={() =>
+                      setPage((value) => Math.min(pageCount - 1, value + 1))
+                    }
+                  >
+                    <UiText text="下一页" />
+                    <Icon name="chevron" />
+                  </Button>
+                </div>
               </div>
-            </div>
-          </SettingsSection>
+            </SettingsSection>
+          )}
         </fieldset>
         {(editor.error || validationError) && (
           <div className="admin-settings-message is-error" role="alert">

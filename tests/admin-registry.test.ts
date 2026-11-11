@@ -67,7 +67,6 @@ test("admin modules compose deterministic groups and entries independently of re
       "example.tools",
       "core.resources",
       "core.appearance",
-      "core.languages",
       "core.people",
       "core.settings",
     ],

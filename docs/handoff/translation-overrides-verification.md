@@ -1,6 +1,6 @@
 # 自定义翻译覆盖验收
 
-版本：translation-overrides-verification-1；2026-11-11（Asia/Shanghai）。对应 [ADR0111](../decisions/0111-sparse-custom-translation-overrides.md)。
+版本：translation-overrides-verification-2；2026-11-11（Asia/Shanghai）。对应 [ADR0111](../decisions/0111-sparse-custom-translation-overrides.md)。
 
 ## 检查范围
 
@@ -22,7 +22,8 @@
 
 - 自定义翻译解析覆盖英文内置值，并支持目标语言与 `ui_locale` 分离。
 - 管理页读取前端约2017条基础消息和后端消息目录；搜索、范围/语言/状态切换和分页正常。
-- 1440px和390px实际页面无横向溢出或脚本错误；验收只读，未产生真实翻译写入。
+- 翻译入口位于“外观”组；列表仅显示键名、原文与译文，点击整行进入详情。详情保留可过滤的原文列表，代码编辑器并排展示原文与译文，可查看上下文和日志键名，并用空值恢复基础文本。
+- 1440px、611px和390px实际页面无横向溢出或脚本错误；验收只读，未产生真实翻译写入。
 
 ## 范围
 
