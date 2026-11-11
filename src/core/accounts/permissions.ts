@@ -27,6 +27,7 @@ export function adminRoutePermission(path: string): string | null {
   if (path === "/admin/taxonomies") return "content:read";
   if (path === "/admin/comments") return "comments:read";
   if (path.startsWith("/admin/users")) return "users:manage";
+  if (path.startsWith("/admin/notifications")) return "settings:read";
   if (path.startsWith("/admin/settings/api-keys")) return "applications:manage";
   if (path.startsWith("/admin/settings")) return "settings:read";
   if (path.startsWith("/admin/translations")) return "settings:read";

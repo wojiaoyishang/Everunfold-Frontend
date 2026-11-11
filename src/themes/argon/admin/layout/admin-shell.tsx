@@ -21,6 +21,7 @@ import { adminRoutePermission, can } from "@/core/accounts/permissions";
 import { Avatar } from "../../components/ui/avatar";
 import { adminSidebarScrollKey } from "@/core/admin/sidebar-scroll";
 import { useSidebarScrollPosition } from "./use-sidebar-scroll-position";
+import { NotificationCenter } from "../notifications/center";
 
 export function AdminShell({
   user,
@@ -147,6 +148,7 @@ export function AdminShell({
             </div>
             <div className="admin-header-dock" data-admin-header-dock />
             <nav className="admin-header-actions" aria-label="工作空间操作">
+              <NotificationCenter />
               <InterfaceLanguage />
               <TextLink
                 href="/"

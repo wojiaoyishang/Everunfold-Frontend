@@ -41,6 +41,7 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   languages: "languages",
   taxonomy: "tag",
   mail: "mail",
+  notification: "bell",
 };
 export function AdminNavigation({
   pathname,

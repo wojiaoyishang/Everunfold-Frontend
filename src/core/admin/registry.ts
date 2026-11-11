@@ -20,6 +20,7 @@ export type AdminPageIcon =
   | "languages"
   | "taxonomy"
   | "mail"
+  | "notification"
   | "node-settings"
   | "runtime"
   | "system";

@@ -54,7 +54,16 @@ test("registered admin destinations bypass public snapshots and survive a safe l
 test("admin navigation separates primary content, tools, appearance and system settings", () => {
   assert.deepEqual(
     adminNavigationGroups.map((group) => group.label),
-    ["概览", "内容", "内容工具", "资源", "外观", "成员与互动", "设置"],
+    [
+      "概览",
+      "内容",
+      "内容工具",
+      "资源",
+      "外观",
+      "成员与互动",
+      "通知与消息",
+      "设置",
+    ],
   );
   const ids = (label: string) =>
     adminNavigationGroups
@@ -65,6 +74,12 @@ test("admin navigation separates primary content, tools, appearance and system s
     "core.settings.theme",
     "core.settings.navigation",
     "core.settings.translations",
+  ]);
+  assert.deepEqual(ids("通知与消息"), [
+    "core.notifications.policy",
+    "core.notifications.templates",
+    "core.notifications.platforms",
+    "core.notifications.deliveries",
   ]);
   assert.deepEqual(
     adminNavigationGroups
