@@ -21,6 +21,7 @@ export function RichToolbar({
   editor,
   fonts = [],
   markdown = false,
+  compact = false,
   onMedia,
   onShortcode,
   onUpload,
@@ -28,6 +29,7 @@ export function RichToolbar({
   editor: Editor;
   fonts?: FontAsset[];
   markdown?: boolean;
+  compact?: boolean;
   onMedia?: (kind: "image" | "all" | "video") => void;
   onShortcode?: () => void;
   onUpload?: (files: File[]) => void;
@@ -186,28 +188,32 @@ export function RichToolbar({
           ].map(([label, icon, run]) =>
             button(label as string, icon as IconName, run as () => void),
           )}
-          <ContentFeatureButtons
-            className={styles.toolButton}
-            prepare={(kind) => prepareVisualFeature(editor, kind)}
-          />
-          {onShortcode && (
-            <ShortcodeButton
-              className={styles.toolButton}
-              disabled={!editor.isEditable}
-              onClick={onShortcode}
-            />
-          )}
-          {button("插入视频", "video", () => onMedia?.("video"))}
-          {button("插入图片", "image", () => onMedia?.("image"))}
-          {button("插入媒体或附件", "folder", () => onMedia?.("all"))}
-          {onUpload && (
-            <FilePicker
-              className={styles.toolButton}
-              iconOnly
-              label="上传图片"
-              accept=".svg,.png,.jpg,.jpeg,.webp,image/svg+xml,image/png,image/jpeg,image/webp"
-              onFiles={onUpload}
-            />
+          {!compact && (
+            <>
+              <ContentFeatureButtons
+                className={styles.toolButton}
+                prepare={(kind) => prepareVisualFeature(editor, kind)}
+              />
+              {onShortcode && (
+                <ShortcodeButton
+                  className={styles.toolButton}
+                  disabled={!editor.isEditable}
+                  onClick={onShortcode}
+                />
+              )}
+              {button("插入视频", "video", () => onMedia?.("video"))}
+              {button("插入图片", "image", () => onMedia?.("image"))}
+              {button("插入媒体或附件", "folder", () => onMedia?.("all"))}
+              {onUpload && (
+                <FilePicker
+                  className={styles.toolButton}
+                  iconOnly
+                  label="上传图片"
+                  accept=".svg,.png,.jpg,.jpeg,.webp,image/svg+xml,image/png,image/jpeg,image/webp"
+                  onFiles={onUpload}
+                />
+              )}
+            </>
           )}
         </div>
         {state.image && (
@@ -251,20 +257,22 @@ export function RichToolbar({
       </div>
       {!markdown && (
         <div className={styles.toolbarRow}>
-          <FontField
-            className={styles.font}
-            label="文字字体"
-            value={state.font}
-            fonts={fonts}
-            onChange={(fontId, font) => {
-              if (font) void loadFont(font);
-              editor
-                .chain()
-                .focus()
-                .setMark("textStyle", { fontId: fontId || null })
-                .run();
-            }}
-          />
+          {!compact && (
+            <FontField
+              className={styles.font}
+              label="文字字体"
+              value={state.font}
+              fonts={fonts}
+              onChange={(fontId, font) => {
+                if (font) void loadFont(font);
+                editor
+                  .chain()
+                  .focus()
+                  .setMark("textStyle", { fontId: fontId || null })
+                  .run();
+              }}
+            />
+          )}
           <Select
             name="html-font-size"
             className={styles.size}

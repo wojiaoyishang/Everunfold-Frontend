@@ -302,6 +302,13 @@
   gap: 12px;
 }
 
+.bodyEditorControls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
 .bodyModeTabs {
   display: inline-flex;
   gap: 2px;
@@ -337,9 +344,21 @@
   max-height: 420px;
 }
 
+.bodyRichEditor {
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+}
+
+.bodyRichEditor :global(.tiptap) {
+  min-height: 250px;
+  max-height: 420px;
+  overflow: auto;
+}
+
 .previewFrame {
   width: 100%;
-  min-height: 190px;
+  height: 300px;
   border: 1px solid var(--admin-border);
   border-radius: 6px;
   background: white;

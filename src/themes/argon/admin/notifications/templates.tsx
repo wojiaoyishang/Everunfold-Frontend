@@ -15,8 +15,11 @@ import { useNotificationState } from "@/core/notifications/use-notifications";
 import { Button, TextField } from "../../components/ui/primitives";
 import {
   CodeEditor,
+  type CodeEditorHandle,
   type SourceEditorHandle,
 } from "../../components/ui/code-editor";
+import { RichTextEditor } from "../../components/ui/rich-text-editor";
+import { RichToolbar } from "../content/plugins/rich-toolbar";
 import { Select } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
 import { Icon } from "../../components/icon";
@@ -136,7 +139,9 @@ export function NotificationTemplatesPage() {
   const [platformId, setPlatformId] = useState("in-app");
   const [locale, setLocale] = useState("");
   const [bodyMode, setBodyMode] = useState<"text" | "html">("text");
+  const [htmlView, setHtmlView] = useState<"visual" | "source">("visual");
   const bodyEditor = useRef<SourceEditorHandle | null>(null);
+  const richBodyEditor = useRef<CodeEditorHandle | null>(null);
   const [draftStore, setDraftStore] = useState<{
     revision: number;
     values: DraftMap;
@@ -234,9 +239,13 @@ export function NotificationTemplatesPage() {
   const appendVariable = (variable: string) => {
     if (!draft) return;
     const token = `{{${variable}}}`;
-    if (bodyEditor.current) {
-      bodyEditor.current.insert(token);
-      bodyEditor.current.focus();
+    const target =
+      activeBodyMode === "html" && htmlView === "visual"
+        ? richBodyEditor.current
+        : bodyEditor.current;
+    if (target) {
+      target.insert(token);
+      target.focus();
       return;
     }
     if (activeBodyMode === "html") update({ html: (draft.html ?? "") + token });
@@ -244,6 +253,7 @@ export function NotificationTemplatesPage() {
   };
   const chooseBodyMode = (mode: "text" | "html") => {
     setBodyMode(mode);
+    if (mode === "html") setHtmlView("visual");
     if (mode === "html" && draft && !draft.html)
       update({ html: plainToEmailHtml(draft.text ?? "") });
   };
@@ -371,60 +381,107 @@ export function NotificationTemplatesPage() {
                           <UiText text="正文" />
                         </span>
                         {selectedPlatform === "email" && (
-                          <div
-                            className={styles.bodyModeTabs}
-                            role="tablist"
-                            aria-label={t("正文格式")}
-                          >
-                            <Button
-                              role="tab"
-                              aria-selected={activeBodyMode === "text"}
-                              data-current={
-                                activeBodyMode === "text" || undefined
-                              }
-                              onClick={() => chooseBodyMode("text")}
+                          <div className={styles.bodyEditorControls}>
+                            <div
+                              className={styles.bodyModeTabs}
+                              role="tablist"
+                              aria-label={t("正文格式")}
                             >
-                              <UiText text="纯文本" />
-                            </Button>
-                            <Button
-                              role="tab"
-                              aria-selected={activeBodyMode === "html"}
-                              data-current={
-                                activeBodyMode === "html" || undefined
-                              }
-                              onClick={() => chooseBodyMode("html")}
-                            >
-                              HTML
-                            </Button>
+                              <Button
+                                role="tab"
+                                aria-selected={activeBodyMode === "text"}
+                                data-current={
+                                  activeBodyMode === "text" || undefined
+                                }
+                                onClick={() => chooseBodyMode("text")}
+                              >
+                                <UiText text="纯文本" />
+                              </Button>
+                              <Button
+                                role="tab"
+                                aria-selected={activeBodyMode === "html"}
+                                data-current={
+                                  activeBodyMode === "html" || undefined
+                                }
+                                onClick={() => chooseBodyMode("html")}
+                              >
+                                HTML
+                              </Button>
+                            </div>
+                            {activeBodyMode === "html" && (
+                              <div
+                                className={styles.bodyModeTabs}
+                                role="tablist"
+                                aria-label={t("HTML 编辑视图")}
+                              >
+                                <Button
+                                  role="tab"
+                                  aria-selected={htmlView === "visual"}
+                                  data-current={
+                                    htmlView === "visual" || undefined
+                                  }
+                                  onClick={() => setHtmlView("visual")}
+                                >
+                                  <Icon name="eye" />
+                                  <UiText text="可视化" />
+                                </Button>
+                                <Button
+                                  role="tab"
+                                  aria-selected={htmlView === "source"}
+                                  data-current={
+                                    htmlView === "source" || undefined
+                                  }
+                                  onClick={() => setHtmlView("source")}
+                                >
+                                  <Icon name="code" />
+                                  <UiText text="HTML 源码" />
+                                </Button>
+                              </div>
+                            )}
                           </div>
                         )}
                       </div>
-                      <CodeEditor
-                        ref={bodyEditor}
-                        value={
-                          activeBodyMode === "html"
-                            ? (draft.html ?? "")
-                            : (draft.text ?? "")
-                        }
-                        onChange={(value) =>
-                          update(
+                      {activeBodyMode === "html" && htmlView === "visual" ? (
+                        <div className={styles.bodyRichEditor}>
+                          <RichTextEditor
+                            editorRef={richBodyEditor}
+                            value={draft.html ?? ""}
+                            onChange={(html) => update({ html })}
+                            label={t("HTML 正文可视化")}
+                            disabled={!editable || editor.busy}
+                            toolbar={(current) => (
+                              <RichToolbar editor={current} compact />
+                            )}
+                          />
+                        </div>
+                      ) : (
+                        <CodeEditor
+                          ref={bodyEditor}
+                          value={
                             activeBodyMode === "html"
-                              ? { html: value }
-                              : { text: value },
-                          )
-                        }
-                        label={
-                          activeBodyMode === "html"
-                            ? t("HTML 正文")
-                            : t("通知正文")
-                        }
-                        language={
-                          activeBodyMode === "html"
-                            ? emailHtmlLanguage
-                            : textLanguage
-                        }
-                        disabled={!editable || editor.busy}
-                      />
+                              ? (draft.html ?? "")
+                              : (draft.text ?? "")
+                          }
+                          onChange={(value) =>
+                            update(
+                              activeBodyMode === "html"
+                                ? { html: value }
+                                : { text: value },
+                            )
+                          }
+                          label={
+                            activeBodyMode === "html"
+                              ? t("HTML 正文源码")
+                              : t("通知正文")
+                          }
+                          language={
+                            activeBodyMode === "html"
+                              ? emailHtmlLanguage
+                              : textLanguage
+                          }
+                          disabled={!editable || editor.busy}
+                        />
+                      )}
                     </div>
                     <div>
                       <p className={styles.muted}>
