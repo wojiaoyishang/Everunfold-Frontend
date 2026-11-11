@@ -300,10 +300,12 @@
   background: var(--admin-canvas);
 }
 .codeEditorFrame > div {
+  min-height: 9rem;
   opacity: 1;
 }
 .codeEditorFrame :global(.cm-editor),
 .codeEditorFrame :global(.cm-scroller) {
+  min-height: 9rem;
   height: auto;
   max-height: none;
   overflow: visible;
