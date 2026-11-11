@@ -1602,3 +1602,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/translations.md`                           | `translations-runtime-5`               | `6cd4f6b2aeaf609afe4da4f36350e54a8e39947a952499f02a467297ac373cfe` |
 | `docs/decisions/0111-sparse-custom-translation-overrides.md` | `ADR0111-2`                            | `0f536d1cb8f5129e4fc4abdc37c8e0da7e9b978b3ad2d359222adde00dd36fef` |
 | `docs/handoff/translation-overrides-verification.md`         | `translation-overrides-verification-5` | `6ce25d426ce421436c9671bebc908e705e8416ccc6e785c6b7a71e15f4e4e99d` |
+
+## 通知事件、平台与通知模板（2026-11-11）
+
+业务只发布事件，核心路由接收人并按事件/平台/语言渲染模板；站内和邮件为内置平台，可信后端插件可注册短信、Webhook 或消息总线。外部结果未知不自动重发，第一版邮件为纯文本。后端`0cc5671`/`9efa412`、前端`bee1cf0`/`836f409`，迁移`0044_notifications`已应用。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件                                                              | 版本                                  | SHA256                                                             |
+| ----------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------ |
+| `docs/README.md`                                                  | `index-notifications-1`               | `d09d633b31ea4d05076e952adf319d789832b1b169338ae9e6452187efd3a117` |
+| `docs/decisions/0113-notification-events-platforms-and-templates.md` | `ADR0113-1`                        | `7f4690a422c6cc6e06c663366d1f8214bfaec83b5fb6d0d9c42ece24f64a4621` |
+| `docs/development/notifications.md`                               | `notifications-1`                     | `b9684add44cccbd8bfaacad98e7962c7d9f5a26a0b7c09a563c6e99be4454ed8` |
+| `docs/handoff/notifications-verification.md`                      | `notifications-verification-1`        | `10d7af46b2d56ff5aab5eec1dece6a571a73f3e02a8d81aa4b217f3ac5f9b655` |
+| `contracts/notifications-v1.schema.json`                            | `notifications-v1-1.0.0`              | `53d85f3924a0b7837d4eb0b3e51154a47344fe605b05eafa9fb65d483f7d1407` |
+| `contracts/settings-v1.schema.json`                                | `settings-v1-1.31.0`                  | `8394a127a60d12703ef47bfd22881050863180fb2e788b0569373418fa52607b` |
