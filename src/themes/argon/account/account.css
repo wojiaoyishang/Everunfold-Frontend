@@ -354,18 +354,6 @@
   margin: 14px 0 0;
   font-size: 13px;
 }
-.account-comparison div {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--admin-border);
-}
-.account-comparison dt {
-  color: var(--admin-muted);
-  font-size: 12px;
-}
-.account-comparison dd {
-  margin: 4px 0;
-  overflow-wrap: anywhere;
-}
 @media (max-width: 640px) {
   .account-session-state {
     padding: 16px;

@@ -1,10 +1,7 @@
 "use client";
 import { useState } from "react";
 import type { AccountProfile, ProfileFields } from "@/core/contracts/accounts";
-import {
-  readAccountProfile,
-  saveAccountProfile,
-} from "@/core/contracts/accounts";
+import { saveAccountProfile } from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { useAccountAction } from "@/core/accounts/use-action";
 import {
@@ -14,7 +11,6 @@ import {
   useT,
 } from "@/core/i18n/provider";
 import { Button, Form } from "../components/ui/primitives";
-import { ConfirmDialog } from "../components/ui/confirm-dialog";
 import { ProfileFieldsEditor, profileFields } from "./fields";
 import { UnsavedAccountChanges } from "./unsaved";
 import { AvatarPicker } from "./avatar-picker";
@@ -33,7 +29,6 @@ export function AccountProfileEditor({
   const [value, setValue] = useState<ProfileFields>(() =>
     profileFields(profile),
   );
-  const [latest, setLatest] = useState<AccountProfile | null>(null);
   const [pickingAvatar, setPickingAvatar] = useState(false);
   const action = useAccountAction();
   const t = useT();
@@ -164,19 +159,6 @@ export function AccountProfileEditor({
               >
                 <UiText text={action.busy ? "正在保存…" : "保存资料"} />
               </Button>
-              <Button
-                className="admin-button"
-                onClick={() =>
-                  void action.run(async (signal) => {
-                    const response = await readAccountProfile(baseUrl, {
-                      signal,
-                    });
-                    if (!signal.aborted) setLatest(response.data);
-                  })
-                }
-              >
-                <UiText text="读取最新资料" />
-              </Button>
             </div>
           </fieldset>
         </Form>
@@ -200,73 +182,6 @@ export function AccountProfileEditor({
         />
       )}
       <UnsavedAccountChanges dirty={dirty} busy={action.busy} />
-      <ConfirmDialog
-        open={!!latest}
-        title="合并最新资料"
-        description="没有在本地修改的字段将采用最新值；本地修改将保留，请核对后再次保存。"
-        confirmLabel="保留输入并更新基线"
-        onCancel={() => setLatest(null)}
-        onConfirm={() => true}
-        onConfirmed={() => {
-          if (!latest) return;
-          const previous = profileFields(profile),
-            next = profileFields(latest);
-          const merged = Object.fromEntries(
-            Object.entries(value).map(([key, item]) => [
-              key,
-              item === previous[key as keyof ProfileFields]
-                ? next[key as keyof ProfileFields]
-                : item,
-            ]),
-          ) as ProfileFields;
-          onSaved(latest);
-          setValue(merged);
-          setLatest(null);
-          action.setMessage("已合并未修改的字段，请检查后保存。");
-        }}
-      >
-        {latest && (
-          <dl className="account-comparison">
-            {Object.entries(profileFields(latest))
-              .filter(
-                ([key, item]) =>
-                  key !== "avatar_id" &&
-                  item !== profileFields(profile)[key as keyof ProfileFields],
-              )
-              .map(([key, item]) => (
-                <div key={key}>
-                  <dt>
-                    <UiText
-                      text={
-                        (
-                          {
-                            display_name: "显示名称",
-                            email: "邮箱",
-                            avatar_url: "头像",
-                            bio: "个人简介",
-                            website: "个人网站",
-                            preferred_locale: "偏好语言",
-                          } as Record<string, string>
-                        )[key] ?? key
-                      }
-                    />
-                  </dt>
-                  <dd>
-                    {key === "avatar_url" ? (
-                      <Avatar
-                        src={String(item)}
-                        name={latest.display_name}
-                        size={44}
-                      />
-                    ) : (
-                      String(item || "—")
-                    )}
-                  </dd>
-                </div>
-              ))}
-          </dl>
-        )}
-      </ConfirmDialog>
     </section>
   );
 }
