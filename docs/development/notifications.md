@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-5，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
+版本：notifications-6，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
 
 ## 概念
 
@@ -64,3 +64,5 @@ registry.notifications.register(
 站内通知与邮件可在同一事件上并存，但同一用户、同一平台在一次事件中至多生成一条投递。SMTP 结果未知、Worker 租约过期或插件异常都不自动重发，记录为 `unknown`。策略与模板每次保存都写设置审计。
 
 HTML“可视化预览”与最终邮件共用同一份HTML和清洗链路，使用无脚本、无同源权限的沙箱 iframe；页面下方不再维护重复预览。它不代表所有邮件客户端都支持相同 CSS。
+
+模板编辑器始终保存 `{{variable.path}}` 占位符。右侧“变量填充”是独立预览组件，可临时填写示例值、恢复默认或清空输入；这些值不进入模板草稿、保存请求或通知数据。
