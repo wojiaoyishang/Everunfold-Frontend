@@ -1649,7 +1649,7 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/architecture/constraints.md`                                    | `constraints-email-verification-1`               | `06d9904cd2e397f03713eca46256b907ec828fe6a9cc43ebd73fcedcc0250e1c` |
 | `docs/decisions/0113-notification-events-platforms-and-templates.md`   | `ADR0113-2`                                      | `5d2d5407f3a5a0750992225f2faf37470e7789d2d40eae0d6fdbb303a268c93c` |
 | `docs/decisions/0115-account-email-verification-and-admin-mutations.md` | `ADR0115-1`                                     | `7ffb166d2101fc4234bb197078bb9e69406f243b2900f25628bc010262920abd` |
-| `docs/handoff/email-verification-and-account-states-verification.md`   | `email-verification-and-account-states-verification-1` | `abbcb70bb25824d2156461ba71fd8b4c6af8b5084f8e003e9c6b000ebf3fdc5c` |
+| `docs/handoff/email-verification-and-account-states-verification.md`   | `email-verification-and-account-states-verification-2` | `d68eed2d1ea4562102be06f829de8cde107ad366ef7e045b8164b0d309120823` |
 | `docs/handoff/notifications-verification.md`                           | `notifications-verification-2`                   | `48b52d62a33c0b1572030344ad22fdd338b2427e02e5c07dc45545a41997c2a5` |
 | `contracts/accounts-v1.schema.json`                                    | `accounts-v1-1.6.0`                              | `1aa14d4cebcd41887540b2d1d7943fd3734ead1d3b67b8a4e217c40462bfa180` |
 
