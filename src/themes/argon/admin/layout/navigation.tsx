@@ -38,6 +38,7 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   shortcode: "shortcode",
   applications: "plug",
   navigation: "link",
+  languages: "languages",
   taxonomy: "tag",
   mail: "mail",
 };

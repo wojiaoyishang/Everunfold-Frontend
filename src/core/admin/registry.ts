@@ -17,6 +17,7 @@ export type AdminPageIcon =
   | "shortcode"
   | "applications"
   | "navigation"
+  | "languages"
   | "taxonomy"
   | "mail"
   | "node-settings"

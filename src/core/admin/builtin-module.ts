@@ -8,10 +8,19 @@ export const builtinAdminModule = {
     { id: "core.tools", label: "内容工具", order: 30 },
     { id: "core.resources", label: "资源", order: 40 },
     { id: "core.appearance", label: "外观", order: 50 },
+    { id: "core.languages", label: "多语言", order: 55 },
     { id: "core.people", label: "成员与互动", order: 60 },
     { id: "core.settings", label: "设置", order: 70 },
   ],
   pages: [
+    {
+      id: "core.settings.translations",
+      href: "/admin/translations",
+      label: "翻译字符串",
+      description: "以内置语言包为基础维护站点自定义翻译",
+      icon: "languages",
+      menu: { group: "core.languages", order: 10 },
+    },
     {
       id: "core.settings.mail",
       href: "/admin/settings/mail",

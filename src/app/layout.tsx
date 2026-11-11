@@ -39,11 +39,13 @@ export default async function RootLayout({
       development: process.env.NODE_ENV !== "production",
     };
   });
+  const snapshot = privateUI
+    ? await readPageSnapshot().catch(() => null)
+    : await readPageSnapshot();
   const catalog = privateUI
     ? undefined
-    : normalizeCatalog(
-        (await readPageSnapshot()).site.settings?.site.language_catalog,
-      );
+    : normalizeCatalog(snapshot?.site.settings?.site.language_catalog);
+  const translations = snapshot?.site.settings?.translations;
   return (
     <html
       lang={locale}
@@ -61,6 +63,7 @@ export default async function RootLayout({
           initial={locale}
           initialUI={uiLocale}
           catalog={catalog}
+          translations={translations}
           privateUI={privateUI}
         >
           <PluginRuntimeProvider initial={runtime}>

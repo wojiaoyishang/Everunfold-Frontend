@@ -142,6 +142,28 @@ test("program dictionaries fall back without changing source strings", () => {
   assert.equal(translate("User-written title", "en"), "User-written title");
   assert.equal(translate("语言与译文", "zh-CN"), "语言与译文");
   assert.equal(
+    translate("搜索", "fr", undefined, {
+      public: { fr: { 搜索: "Rechercher" } },
+    }),
+    "Rechercher",
+  );
+  assert.equal(
+    translate(
+      "已选 {count} 项",
+      "fr",
+      { count: 3 },
+      { admin: { fr: { "已选 {count} 项": "{count} éléments sélectionnés" } } },
+      "admin",
+    ),
+    "3 éléments sélectionnés",
+  );
+  assert.equal(
+    translate("搜索", "en", undefined, {
+      public: { en: { 搜索: "Localized find" } },
+    }),
+    "Localized find",
+  );
+  assert.equal(
     translate("“{query}” 找到 {count} 条内容", "en", {
       query: "原文",
       count: 2,

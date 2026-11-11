@@ -9,7 +9,11 @@ import {
 } from "react";
 import type { Locale, MessageLocale } from "./locale";
 import { localeOf, messageLocale } from "./locale";
-import { translate } from "./messages";
+import {
+  translate,
+  type CustomTranslations,
+  type MessageScope,
+} from "./messages";
 import { initialCatalog, type LanguageCatalog } from "./catalog";
 
 const CatalogContext = createContext<LanguageCatalog>(initialCatalog);
@@ -22,11 +26,15 @@ const LocaleContext = createContext<{
   locale: Locale;
   uiLocale: MessageLocale;
   preferred: Locale;
+  scope: MessageScope;
+  translations: CustomTranslations;
   change: (locale: Locale, uiLocale?: MessageLocale) => void;
 }>({
   locale: "zh-CN",
   uiLocale: "zh-CN",
   preferred: "zh-CN",
+  scope: "public",
+  translations: {},
   change: () => {},
 });
 export function LocaleProvider({
@@ -34,12 +42,14 @@ export function LocaleProvider({
   privateUI,
   initialUI,
   catalog = initialCatalog,
+  translations = {},
   children,
 }: {
   initial: Locale;
   privateUI: boolean;
   initialUI?: MessageLocale;
   catalog?: LanguageCatalog;
+  translations?: CustomTranslations;
   children: ReactNode;
 }) {
   const [locale, setLocale] = useState(initial);
@@ -70,6 +80,8 @@ export function LocaleProvider({
           locale,
           uiLocale,
           preferred,
+          scope: privateUI ? "admin" : "public",
+          translations,
           change: (value, fallback) => {
             document.cookie = `${privateUI ? "everunfold-admin-locale" : "everunfold-locale"}=${value}; Path=/; Max-Age=31536000; SameSite=Lax`;
             if (privateUI) {
@@ -104,10 +116,11 @@ export function UiText({
   text: string;
   values?: Record<string, string | number>;
 }) {
-  return translate(text, useLocale().uiLocale, values);
+  const { locale, uiLocale, scope, translations } = useLocale();
+  return translate(text, uiLocale, values, translations, scope, locale);
 }
 export function useT() {
-  const { uiLocale } = useLocale();
+  const { locale, uiLocale, scope, translations } = useLocale();
   return (text: string, values?: Record<string, string | number>) =>
-    translate(text, uiLocale, values);
+    translate(text, uiLocale, values, translations, scope, locale);
 }
