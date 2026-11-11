@@ -8,9 +8,17 @@ import styles from "./notifications.module.css";
 export const notificationSampleValues: Record<string, string> = {
   "actor.name": "小灵",
   "content.excerpt": "这是一条刚刚提交、正在等待审核的评论。",
+  "content.title": "如何在秋日整理一间安静的书房",
+  "content.type": "文章",
+  "content.url": "/posts/autumn-study",
   "resource.title": "示例文章",
   "resource.url": "/posts/example",
   "resource.review_url": "/admin/comments",
+  "schedule.planned_at": "2026-11-12 09:30 UTC",
+  "failure.reason": "path_conflict",
+  "admin.url": "/admin/content/article/example/edit",
+  "node.id": "web-main",
+  "settings.resource": "公共站点设置",
 };
 
 export function NotificationVariableValues({
