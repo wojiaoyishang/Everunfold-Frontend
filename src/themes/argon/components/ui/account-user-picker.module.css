@@ -6,9 +6,13 @@
 .picker > :global(.ui-button):first-child {
   display: flex;
   width: 100%;
-  min-height: 36px;
+  box-sizing: border-box;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
   align-items: center;
   padding: 5px 9px;
+  overflow: hidden;
   border: 1px solid var(--admin-border);
   border-radius: 6px;
   background: var(--admin-canvas);
@@ -105,10 +109,13 @@
 .panel {
   gap: 8px;
   padding: 10px;
+  overflow: hidden;
 }
 
 .panel:popover-open {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  max-height: min(420px, calc(100dvh - 24px));
 }
 
 .search {
@@ -141,9 +148,10 @@
 
 .results {
   display: grid;
-  max-height: 286px;
+  max-height: min(286px, calc(100dvh - 150px));
   gap: 3px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .option {
@@ -153,7 +161,9 @@
   align-items: center;
   width: 100%;
   min-height: 50px;
+  max-height: 54px;
   padding: 7px 8px;
+  overflow: hidden;
   border: 1px solid transparent;
   border-radius: 6px;
   background: transparent;
@@ -248,5 +258,9 @@
 
   .option em {
     display: none;
+  }
+
+  .results {
+    max-height: min(240px, calc(100dvh - 140px));
   }
 }

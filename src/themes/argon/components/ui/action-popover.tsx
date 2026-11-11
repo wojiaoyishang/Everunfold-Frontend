@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useId, useLayoutEffect, type ReactNode } from "react";
+import { useId, useLayoutEffect, type ReactNode } from "react";
 import { Button, Popover } from "./primitives";
 import { useAnchoredPopover } from "./use-anchored-popover";
 
@@ -42,7 +42,6 @@ export function ActionPopover({
         )
         ?.focus({ preventScroll: true });
   }, [open, panel]);
-  useEffect(() => onOpenChange?.(open), [onOpenChange, open]);
   return (
     <>
       <Button
@@ -64,7 +63,10 @@ export function ActionPopover({
         aria-label={label}
         className={`ui-anchored-panel ${panelClassName ?? ""}`}
         onBeforeToggle={onBeforeToggle}
-        onToggle={onToggle}
+        onToggle={(event) => {
+          onToggle(event);
+          onOpenChange?.(event.newState === "open");
+        }}
         onKeyDown={(event) => {
           onPanelKeyDown(event);
           if (

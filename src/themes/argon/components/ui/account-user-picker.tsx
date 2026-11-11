@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AccountProfile } from "@/core/contracts/accounts";
 import { readAccountUser, readAccountUsers } from "@/core/contracts/accounts";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
@@ -49,6 +49,8 @@ export function AccountUserPicker({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const request = useRef<AbortController | null>(null);
+  const directoryError = t("无法读取用户目录，请检查用户管理权限后重试。");
+  const chooseUserLabel = t("选择用户");
 
   useEffect(() => {
     if (!value) return;
@@ -94,7 +96,7 @@ export function AccountUserPicker({
         .then(({ data }) => data.items)
         .catch(() => {
           if (!controller.signal.aborted) {
-            setError(t("无法读取用户目录，请检查用户管理权限后重试。"));
+            setError(directoryError);
           }
           return [] as AccountProfile[];
         });
@@ -112,15 +114,19 @@ export function AccountUserPicker({
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [baseUrl, canBrowse, open, query, t]);
+  }, [baseUrl, canBrowse, directoryError, open, query]);
 
   const identity = useMemo(
     () =>
       selected && selected.id === value
         ? displayName(selected)
-        : value || t("选择用户"),
-    [selected, t, value],
+        : value || chooseUserLabel,
+    [chooseUserLabel, selected, value],
   );
+  const openChanged = useCallback((next: boolean) => {
+    setOpen(next);
+    if (next) setQuery("");
+  }, []);
 
   if (!canBrowse) {
     return (
@@ -146,10 +152,7 @@ export function AccountUserPicker({
         disabled={disabled}
         panelWidth={360}
         panelClassName={styles.panel}
-        onOpenChange={(next) => {
-          setOpen(next);
-          if (next) setQuery("");
-        }}
+        onOpenChange={openChanged}
         triggerContent={
           <span className={styles.triggerContent}>
             {selected?.id === value ? (
