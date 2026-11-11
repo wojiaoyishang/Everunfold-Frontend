@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[通知模板代码编辑器与 HTML 邮件](development/notifications.md)、[ADR0117](decisions/0117-html-notification-templates.md)及[验收](handoff/notification-html-template-verification.md)：模板正文统一使用共享代码编辑器，邮件平台可维护纯文本回退和可选 HTML。HTML 变量先转义，再按保守标签白名单清洗，并以`multipart/alternative`发送；站内通知继续使用纯文本。
+
 [多邮件发信配置](development/mail.md)、[ADR0116](decisions/0116-multiple-mail-sender-profiles.md)及[验收](handoff/multi-mail-profile-verification.md)：邮件配置并入“通知与消息 → 通知平台”，每站可维护最多20套 SMTP 发信身份；提醒规则可选择具体配置，未选择时使用默认配置。投递会快照配置身份和修订，停用、删除或配置变化不会静默换号；旧单配置自动兼容，原邮件设置入口保留隐藏跳转。
 
 [账号邮箱验证与用户管理确认](development/accounts.md)、[ADR0115](decisions/0115-account-email-verification-and-admin-mutations.md)及[验收](handoff/email-verification-and-account-states-verification.md)：账号中心通过Worker发送6位一次性邮箱验证码，成功后持久化验证状态；修改邮箱自动失活。管理员创建/编辑用户不再要求当前密码，但保留Session、CSRF、权限、事务锁、修订和审计。账号加载/失败状态改为居中状态卡。

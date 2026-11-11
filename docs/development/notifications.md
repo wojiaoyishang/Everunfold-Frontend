@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-1，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)。
+版本：notifications-2，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
 
 ## 概念
 
@@ -18,7 +18,7 @@
 - 内置平台 `in-app`、`email`；插件可注册其他平台。
 - 路由接收人支持指定用户、角色和权限。
 - 模板按事件、平台、语言保存；缺失平台变体回退到内置安全文案。
-- 第一版模板正文是纯文本，邮件发送器负责生成安全文本邮件；可编辑 HTML 尚未开放。
+- 模板正文使用共享代码编辑器。站内通知只编辑纯文本；邮件平台可分别编辑纯文本回退和可选 HTML。
 - 评论进入待审核状态时发布 `comment.pending_review`。
 - 站内通知写入 Inbox；邮件平台复用现有 SMTP 配置。
 - 投递记录区分 `pending`、`sending`、`sent`、`failed`、`unknown`、`suppressed`。
@@ -34,7 +34,9 @@
 {{resource.url}}
 ```
 
-渲染器只解析允许字段；字段缺失时渲染为空，平台模板或语言缺失时使用内置默认模板。第一版不执行模板表达式，也不发送可编辑 HTML，邮件始终按纯文本生成。
+渲染器只解析允许字段；字段缺失时渲染为空，平台模板或语言缺失时使用内置默认模板。HTML 变量先转义事件值，再清洗常见邮件标签、链接、图片和表格；脚本、表单、iframe、SVG、事件属性和活动 URL 被移除。
+
+邮件通过 `multipart/alternative` 同时发送纯文本和 HTML；纯文本始终存在，作为不支持 HTML 的客户端回退。站内 Inbox 继续只使用纯文本，不执行或展示邮件 HTML。
 
 ## 平台插件
 
@@ -59,3 +61,5 @@ registry.notifications.register(
 外部网络发送只在 Worker 中进行。SMTP 密码、插件凭据、未掩码收件地址和完整模板数据不写入普通日志或公开快照。事件模板数据只包含完成通知所需的公开或受限快照，不包含密码、令牌和完整正文。
 
 站内通知与邮件可在同一事件上并存，但同一用户、同一平台在一次事件中至多生成一条投递。SMTP 结果未知、Worker 租约过期或插件异常都不自动重发，记录为 `unknown`。策略与模板每次保存都写设置审计。
+
+HTML 管理预览使用无脚本、无同源权限的沙箱 iframe；它只用于检查排版，不代表所有邮件客户端都支持相同 CSS。

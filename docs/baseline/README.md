@@ -1667,3 +1667,17 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/design/mail-profiles-notification-platform.png`              | `mail-profiles-notification-platform-1` | `84dfae53f098775c7173cd3704366b8854aa63bf8e1d0769e92b688b96d637e9` |
 | `contracts/notifications-v1.schema.json`                           | `notifications-v1-1.1.0`              | `2f494b50fce802e0af12b6b7d30db7a9bdb8f1575abe5980d1c64b42b66834bc` |
 | `contracts/settings-v1.schema.json`                                | `settings-v1-1.32.0`                  | `c890a9cd75b714ae2ff8741ac52b5ed49c69453acbc486cb189f342d8ea770b3` |
+
+## 通知模板代码编辑器与 HTML 邮件（2026-11-11）
+
+通知模板正文改用共享代码编辑器，邮件支持纯文本回退与经过转义、白名单清洗的 HTML，并以多部分邮件发送。站内通知保持纯文本。后端`2f5b335`/`572f7ec`、前端`a448254`、`notifications-v1 1.2.0`，无新增迁移。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件                                                              | 版本                                  | SHA256                                                             |
+| ----------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------ |
+| `docs/README.md`                                                  | `index-html-notifications-1`          | `dc453c4eba7fe62f44987937b1629e0ebb9713b5b3d3b5ff9cb9d34f6b467b2a` |
+| `docs/decisions/0113-notification-events-platforms-and-templates.md` | `ADR0113-3`                        | `15ce7ed33ce03e84333ce6e43659fb1cb0c49a5df01ff05a32a2d0c6fb963ed1` |
+| `docs/decisions/0117-html-notification-templates.md`              | `ADR0117-1`                           | `b2c4fec9292f1b8fc8e06d874aee7caeb6ef9f9eafe1c378f64632e16e45c927` |
+| `docs/development/notifications.md`                               | `notifications-2`                     | `43549f79012684420e26406110496def6787e72bdb32a978c21b373e6c6d6c0c` |
+| `docs/handoff/notification-html-template-verification.md`         | `notification-html-template-verification-1` | `4ca59f9fe30fed3858519ba6de6f79af949e03a307322d53c275940887b09285` |
+| `docs/design/notification-html-template-editor.png`               | `notification-html-template-editor-1` | `bde0cc1acfcf0b6e1e563f877e1db786f2d227d9ae6aa84e4e56e40d61fcbc0d` |
+| `contracts/notifications-v1.schema.json`                          | `notifications-v1-1.2.0`              | `c9cea9080f23d54404e8bdefe40e3524c9a0ab4e58d147516b7641471635c2d8` |
