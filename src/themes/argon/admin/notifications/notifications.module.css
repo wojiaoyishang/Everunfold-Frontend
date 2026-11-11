@@ -539,8 +539,46 @@
 
 .centerActions {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 6px;
+  gap: 2px;
+  min-height: 34px;
+  padding: 2px;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  background: var(--admin-canvas);
+}
+
+.centerActions .centerRefresh {
+  width: 28px;
+  height: 28px;
+  padding: 6px;
+}
+
+.centerActionsDivider {
+  width: 1px;
+  height: 18px;
+  background: var(--admin-border);
+}
+
+.centerActions .markAll {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 28px;
+  padding: 0 8px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+
+.markAll > .icon {
+  width: 13px;
+  height: 13px;
+}
+
+.markAll:hover:not(:disabled) {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
 }
 
 .centerList {
@@ -629,6 +667,11 @@
 .centerState > :global(.icon) {
   width: 26px;
   height: 26px;
+}
+
+.centerState[data-kind="empty"] {
+  align-content: end;
+  padding: 30px 20px 36px;
 }
 
 .centerFooter {

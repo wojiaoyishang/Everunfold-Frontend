@@ -37,28 +37,40 @@ export function NotificationCenter() {
               </strong>
               <span>
                 <UiText
-                  text={unread ? "{count} 条未读" : "全部已读"}
+                  text={unread ? "{count} 条未读" : "暂无未读通知"}
                   values={{ count: unread }}
                 />
               </span>
             </div>
             <div className={styles.centerActions}>
               <Button
-                className="admin-icon-button"
+                className={`admin-icon-button ${styles.centerRefresh}`}
                 aria-label="刷新通知"
                 title="刷新通知"
                 disabled={loading}
                 onClick={() => void refresh()}
               >
-                <Icon name="refresh" />
+                <Icon
+                  name="refresh"
+                  className={loading ? "admin-spinning" : ""}
+                />
               </Button>
-              <Button
-                className="admin-text-action"
-                disabled={loading || unread === 0}
-                onClick={() => void markRead()}
-              >
-                <UiText text="全部已读" />
-              </Button>
+              {unread > 0 && (
+                <>
+                  <span
+                    className={styles.centerActionsDivider}
+                    aria-hidden="true"
+                  />
+                  <Button
+                    className={`admin-text-action ${styles.markAll}`}
+                    disabled={loading}
+                    onClick={() => void markRead()}
+                  >
+                    <Icon name="check" />
+                    <UiText text="全部已读" />
+                  </Button>
+                </>
+              )}
             </div>
           </header>
           {error ? (
@@ -76,7 +88,7 @@ export function NotificationCenter() {
               </Button>
             </div>
           ) : !inbox?.items.length ? (
-            <div className={styles.centerState}>
+            <div className={styles.centerState} data-kind="empty">
               <Icon name={loading ? "refresh" : "bell"} />
               <span>
                 <UiText text={loading ? "正在读取通知…" : "暂时没有通知"} />
