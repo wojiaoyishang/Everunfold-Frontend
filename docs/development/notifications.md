@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-11，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)、[ADR0117](../decisions/0117-html-notification-templates.md)与[ADR0118](../decisions/0118-account-user-picker-and-policy-navigation.md)。
+版本：notifications-13，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)、[ADR0117](../decisions/0117-html-notification-templates.md)与[ADR0118](../decisions/0118-account-user-picker-and-policy-navigation.md)。
 
 ## 概念
 
@@ -38,6 +38,10 @@
 事件目录由后端注册，后台策略页自动出现。事件只有配置了启用的路由才会生成投递；接收人可使用用户、角色或权限，平台可使用站内、邮件或已同步的插件渠道。账号注册、找回密码和邮箱验证不属于本轮业务总线事件。
 
 “指定用户”使用共享账号用户选择器，可搜索姓名、用户名、邮箱，也可粘贴完整稳定 UUID；显示名称和头像只用于识别，保存值始终是用户 ID。目录查询沿用`users:manage`边界。没有用户目录权限但具有通知设置权限的账号仍可手工填写稳定 ID。选择结果属于本地策略草稿，点击“保存策略”后才写入。
+
+选择器只在弹层实际打开时加载目录，并在查询变化后防抖一次；单纯的界面重渲染、加载状态变化或翻译函数重建不得再次请求同一列表。
+
+触发框与相邻下拉框保持同一高度。结果列表拥有独立滚动区并设置桌面与手机最大高度；用户数量增加时弹层不会继续向下增长，且必须保持在当前视口内。
 
 桌面端右侧快速导航按事件生成，目录项与事件卡片使用同一标题；点击后定位并聚焦对应卡片。手机端不显示该目录，事件卡与接收规则改为单列。
 
