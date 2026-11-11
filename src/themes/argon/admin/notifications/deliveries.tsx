@@ -7,9 +7,13 @@ import type {
 } from "@/core/contracts/notifications";
 import { useNotificationState } from "@/core/notifications/use-notifications";
 import { UiText, useT } from "@/core/i18n/provider";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 import { Button } from "../../components/ui/primitives";
+import { RouteLink } from "../../components/ui/route-link";
 import { Select } from "../../components/ui/select";
 import { Icon, type IconName } from "../../components/icon";
+import { LanguageLabel } from "../../components/language-label";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "../settings/section-navigation";
 import styles from "./notifications.module.css";
@@ -33,11 +37,27 @@ const statusMeta: Record<
 function DeliveryRow({
   delivery,
   platform,
+  accountHref,
 }: {
   delivery: NotificationDeliveryView;
   platform?: NotificationPlatformView;
+  accountHref?: string;
 }) {
   const meta = statusMeta[delivery.status];
+  const issue =
+    delivery.error === "missing_recipient"
+      ? "接收账号尚未配置邮箱"
+      : delivery.error === "email_not_configured"
+        ? "SMTP 邮件平台尚未就绪"
+        : delivery.error === "platform_unavailable"
+          ? "通知平台当前不可用"
+          : delivery.error === "platform_not_synced"
+            ? "插件部署尚未同步"
+            : delivery.error === "execution_lease_expired"
+              ? "投递进程中断，结果未知"
+              : delivery.error
+                ? delivery.error
+                : "";
   return (
     <div className={styles.deliveryRow}>
       <div>
@@ -49,10 +69,22 @@ function DeliveryRow({
           <UiText text={delivery.user_name} />
         </strong>
         <code>{delivery.user_id}</code>
+        {issue && (
+          <span className={styles.deliveryIssue}>
+            <UiText text={issue} />
+            {delivery.error === "missing_recipient" && accountHref && (
+              <RouteLink href={accountHref} className="admin-text-action">
+                <UiText text="配置邮箱" />
+              </RouteLink>
+            )}
+          </span>
+        )}
       </div>
       <div>
         <span>{platform?.title ?? delivery.platform_id}</span>
-        <small>{delivery.locale}</small>
+        <small className={styles.languageCell}>
+          <LanguageLabel code={delivery.locale} compact />
+        </small>
       </div>
       <div
         className="admin-status-badge admin-badge"
@@ -74,6 +106,7 @@ function DeliveryRow({
 
 export function NotificationDeliveriesPage() {
   const editor = useNotificationState();
+  const actor = useAdminAccount();
   const t = useT();
   const [status, setStatus] = useState("all");
   const [platform, setPlatform] = useState("all");
@@ -179,6 +212,13 @@ export function NotificationDeliveriesPage() {
               platform={editor.state?.platforms.find(
                 (item) => item.id === delivery.platform_id,
               )}
+              accountHref={
+                delivery.user_id === actor.id
+                  ? "/account"
+                  : can(actor, "users:manage")
+                    ? `/admin/users/${delivery.user_id}`
+                    : undefined
+              }
             />
           ))}
         </div>
