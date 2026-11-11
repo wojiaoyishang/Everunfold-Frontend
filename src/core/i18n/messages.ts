@@ -6,6 +6,18 @@ export type CustomTranslations = Partial<
   Record<MessageScope, Record<string, Record<string, string>>>
 >;
 
+const placeholder = /(?<!\{)\{([^{}]+)\}(?!\})/g;
+
+function interpolate(
+  template: string,
+  values?: Record<string, string | number>,
+) {
+  if (!values) return template;
+  return template.replace(placeholder, (match, name: string) =>
+    Object.hasOwn(values, name) ? String(values[name]) : match,
+  );
+}
+
 /** Program strings only; article text and user-defined names never become keys. */
 export function translate(
   source: string,
@@ -16,13 +28,8 @@ export function translate(
   customLocale: Locale = locale,
 ): string {
   const customValue = custom?.[scope]?.[customLocale]?.[source];
-  if (customValue !== undefined) {
-    if (!values) return customValue;
-    return customValue.replace(
-      /(?<!\{)\{([a-zA-Z_]\w*)\}(?!\})/g,
-      (match, key) =>
-        Object.hasOwn(values, key) ? String(values[key]) : match,
-    );
+  if (typeof customValue === "string" && customValue.trim()) {
+    return interpolate(customValue, values);
   }
   if (values) {
     const pattern = translate(
@@ -33,9 +40,7 @@ export function translate(
       scope,
       customLocale,
     );
-    return pattern.replace(/(?<!\{)\{([a-zA-Z_]\w*)\}(?!\})/g, (match, key) =>
-      Object.hasOwn(values, key) ? String(values[key]) : match,
-    );
+    return interpolate(pattern, values);
   }
   if (locale === "zh-CN") return source;
   if (Object.hasOwn(catalog, source))

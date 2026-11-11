@@ -2059,6 +2059,6 @@
   "无法读取翻译设置，请重试。": "Could not load translation settings. Try again.",
   "翻译已在其他窗口修改。当前输入已保留，请重新读取后合并。": "Translations changed in another window. Your input was kept; reload and merge.",
   "保存结果尚未确认，当前输入已保留。": "The save result could not be confirmed. Your input was kept.",
-  "“{source}”的占位符必须与原文一致。": "The placeholders in “{source}” must match the source.",
+  "“{source}”包含原文中不存在的占位符。": "“{source}” contains placeholders that are not present in the source.",
   "已读取翻译版本 {revision}": "Translation revision {revision} loaded"
 }

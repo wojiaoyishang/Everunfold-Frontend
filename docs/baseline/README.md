@@ -1591,3 +1591,14 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `contracts/pages-v1.schema.json`                    | `pages-v1-1.10.0`                    | `e32baf32887bc38d9df94f490d4793a2a7f0564027b3caded814d6eecd7d866e` |
 | `contracts/presentation-v0.2.schema.json`           | `presentation-v0.2-0.2.0-preview.5`  | `0a9c3c40ca092b4ca1042e3a2f754f73f14be2eb6933cd9c99f22f98c521455f` |
 | `contracts/public-v0.1.schema.json`                 | `public-v0.1-0.14.0`                 | `61eb9af38cb1004cacbab18f2ccae54f6c5ef28b1c1f1170ac2a8bf4c8711824` |
+
+## 翻译模板缺省兼容（2026-11-11）
+
+翻译模板只安全替换明确提供的单花括号字段；缺字段保留占位符，前端不抛错，后端记录警告并返回可用文本。双花括号等模板语法原样保留，空白译文回退基础文本。译文可省略原文可选字段，但不得新增未知字段。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件                                                         | 版本                                   | SHA256                                                             |
+| ------------------------------------------------------------ | -------------------------------------- | ------------------------------------------------------------------ |
+| `docs/README.md`                                             | `index-translation-template-1`         | `a0a4b1463635a4303e52576091baa6c25f5fb2dadf4f489f1b54f0aa39495a69` |
+| `docs/development/translations.md`                           | `translations-runtime-5`               | `6cd4f6b2aeaf609afe4da4f36350e54a8e39947a952499f02a467297ac373cfe` |
+| `docs/decisions/0111-sparse-custom-translation-overrides.md` | `ADR0111-2`                            | `0f536d1cb8f5129e4fc4abdc37c8e0da7e9b978b3ad2d359222adde00dd36fef` |
+| `docs/handoff/translation-overrides-verification.md`         | `translation-overrides-verification-5` | `6ce25d426ce421436c9671bebc908e705e8416ccc6e785c6b7a71e15f4e4e99d` |

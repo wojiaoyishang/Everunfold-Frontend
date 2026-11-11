@@ -170,6 +170,25 @@ test("program dictionaries fall back without changing source strings", () => {
     }),
     "2 results for “原文”",
   );
+  assert.equal(
+    translate("内容 {optional}", "fr", undefined, {
+      public: { fr: { "内容 {optional}": "   " } },
+    }),
+    "内容 {optional}",
+  );
+  assert.equal(
+    translate(
+      "Hello {{name}} {count}",
+      "fr",
+      { count: 2 },
+      {
+        public: {
+          fr: { "Hello {{name}} {count}": "Bonjour {{name}} {count}" },
+        },
+      },
+    ),
+    "Bonjour {{name}} 2",
+  );
 });
 
 test("legacy snapshots retain their own published language without invented translations", () => {

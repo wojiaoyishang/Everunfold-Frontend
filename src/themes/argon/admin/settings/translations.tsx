@@ -83,11 +83,19 @@ function identity(scope: Scope, locale: string, key: string) {
   return `${scope}\0${locale}\0${key}`;
 }
 
-function placeholderSignature(value: string) {
-  return [...value.matchAll(/(?<!\{)\{([a-zA-Z_]\w*)\}(?!\})/g)]
-    .map((match) => match[1])
-    .sort()
-    .join(",");
+function unknownPlaceholders(value: string, source: string) {
+  const allowed = new Set(
+    [...source.matchAll(/(?<!\{)\{([a-zA-Z_]\w*)\}(?!\})/g)].map(
+      (match) => match[1],
+    ),
+  );
+  return [
+    ...new Set(
+      [...value.matchAll(/(?<!\{)\{([a-zA-Z_]\w*)\}(?!\})/g)]
+        .map((match) => match[1])
+        .filter((name) => !allowed.has(name)),
+    ),
+  ];
 }
 
 function parseScope(value: string | null): Scope | undefined {
@@ -559,11 +567,10 @@ export function TranslationSettingsPage() {
     for (const change of dirtyChanges) {
       if (
         change.value &&
-        placeholderSignature(change.value) !==
-          placeholderSignature(change.source)
+        unknownPlaceholders(change.value, change.source).length
       ) {
         setValidationError(
-          t("“{source}”的占位符必须与原文一致。", {
+          t("“{source}”包含原文中不存在的占位符。", {
             source: change.key,
           }),
         );
@@ -604,11 +611,8 @@ export function TranslationSettingsPage() {
         if (!source)
           throw new Error(`导入文件包含不存在的翻译键：${entry.key}`);
         const value = entry.value.trim();
-        if (
-          value &&
-          placeholderSignature(value) !== placeholderSignature(source)
-        )
-          throw new Error(`翻译“${entry.key}”的占位符与原文不一致。`);
+        if (value && unknownPlaceholders(value, source).length)
+          throw new Error(`翻译“${entry.key}”包含原文中不存在的占位符。`);
         imported[draftIdentity(entry.scope, entry.locale, entry.key)] = value;
       }
       setDrafts((current) => ({ ...current, ...imported }));
