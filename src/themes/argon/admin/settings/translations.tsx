@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type {
   TranslationCatalogEntry,
@@ -9,7 +9,7 @@ import type {
 import { useLanguageCatalog, UiText, useT } from "@/core/i18n/provider";
 import english from "@/core/i18n/en.json";
 import { useTranslationSettings } from "@/core/settings/use-translations";
-import { useAdminAccount } from "@/core/admin/account-context";
+import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { Button, Form, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
@@ -27,6 +27,11 @@ import {
   parseTranslationBundle,
   serializeTranslationBundle,
 } from "@/core/settings/translation-transfer";
+import {
+  readTranslationDrafts,
+  translationDraftKey,
+  writeTranslationDrafts,
+} from "@/core/settings/translation-draft-storage";
 import styles from "./translations.module.css";
 
 type Scope = "public" | "admin" | "backend";
@@ -358,7 +363,9 @@ export function TranslationSettingsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const editable = can(useAdminAccount(), "settings:write");
+  const account = useAdminAccount();
+  const { baseUrl } = useAdminRequest();
+  const editable = can(account, "settings:write");
   const editor = useTranslationSettings();
   const [scope, setScope] = useState<ScopeFilter>("all");
   const [locale, setLocale] = useState("");
@@ -369,6 +376,37 @@ export function TranslationSettingsPage() {
   const [validationError, setValidationError] = useState("");
   const [transferError, setTransferError] = useState("");
   const [transferMessage, setTransferMessage] = useState("");
+  const [draftStorage, setDraftStorage] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+  const draftHydrated = useRef(false);
+  const draftKey = translationDraftKey(baseUrl, account.id);
+  useEffect(() => {
+    if (!editor.saved || draftHydrated.current) return;
+    const stored = readTranslationDrafts(window.localStorage, draftKey);
+    if (!stored) {
+      draftHydrated.current = true;
+      return;
+    }
+    queueMicrotask(() => {
+      draftHydrated.current = true;
+      setDrafts((current) => (Object.keys(current).length ? current : stored));
+      setDraftStorage("saved");
+    });
+  }, [draftKey, editor.saved]);
+  useEffect(() => {
+    if (!draftHydrated.current) return;
+    setDraftStorage("saving");
+    const timer = window.setTimeout(() => {
+      try {
+        writeTranslationDrafts(window.localStorage, draftKey, drafts);
+        setDraftStorage(Object.keys(drafts).length ? "saved" : "idle");
+      } catch {
+        setDraftStorage("error");
+      }
+    }, 160);
+    return () => window.clearTimeout(timer);
+  }, [draftKey, drafts]);
   const languageOptions = languages.languages
     .filter((item) => item.enabled)
     .map((item) => ({
@@ -575,7 +613,7 @@ export function TranslationSettingsPage() {
       }
       setDrafts((current) => ({ ...current, ...imported }));
       setTransferMessage(
-        t("已导入 {count} 项翻译，保存后生效。", {
+        t("已导入 {count} 项翻译，发布后生效。", {
           count: parsed.entries.length,
         }),
       );
@@ -1009,11 +1047,23 @@ export function TranslationSettingsPage() {
         <div className="admin-settings-savebar">
           <div>
             <span>
-              {dirtyChanges.length
-                ? t("有 {count} 项尚未保存", { count: dirtyChanges.length })
-                : t("已读取翻译版本 {revision}", {
-                    revision: editor.saved?.revision ?? "",
-                  })}
+              {dirtyChanges.length ? (
+                draftStorage === "saving" ? (
+                  <UiText text="正在保存本机草稿…" />
+                ) : draftStorage === "error" ? (
+                  t("本机草稿保存失败，{count} 项仍待发布", {
+                    count: dirtyChanges.length,
+                  })
+                ) : (
+                  t("草稿已实时保存到本机 · {count} 项待发布", {
+                    count: dirtyChanges.length,
+                  })
+                )
+              ) : (
+                t("已读取翻译版本 {revision}", {
+                  revision: editor.saved?.revision ?? "",
+                })
+              )}
             </span>
           </div>
           <div className="admin-settings-actions">
@@ -1029,8 +1079,8 @@ export function TranslationSettingsPage() {
               type="submit"
               disabled={!editable || !dirtyChanges.length || editor.busy}
             >
-              <Icon name={editor.busy ? "refresh" : "save"} />
-              <UiText text={editor.busy ? "正在保存" : "保存更改"} />
+              <Icon name={editor.busy ? "refresh" : "upload"} />
+              <UiText text={editor.busy ? "正在发布" : "发布"} />
             </Button>
           </div>
         </div>

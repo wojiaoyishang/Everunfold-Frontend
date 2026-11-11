@@ -59,7 +59,7 @@ export function useTranslationSettings() {
         current = response.data;
         setSaved(current);
       }
-      setMessage("翻译设置已保存，正在等待前端节点应用。");
+      setMessage("翻译已发布，正在等待前端节点应用。");
       return true;
     } catch (reason) {
       setSaved(current);

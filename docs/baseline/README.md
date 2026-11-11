@@ -1562,3 +1562,13 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/README.md`                                     | `index-translation-transfer-1`         | `5daf1344675d1b39fd1349ef724c14ad147a811e88373a4c81c50156a41d7860` |
 | `docs/development/translations.md`                   | `translations-runtime-3`               | `83366e92b86201e02c59c6573ae1b950e845dc1b3b1592cbc6165dd26587cf96` |
 | `docs/handoff/translation-overrides-verification.md` | `translation-overrides-verification-3` | `9058e61027947e3aa7a4ef0ac2f9b73a12bb600ba2e758f70bb7fd535f8da682` |
+
+## 翻译实时草稿与发布（2026-11-11）
+
+翻译编辑和 JSON 导入先按站点、账号写入本机实时草稿，刷新可恢复；底部按钮改为“发布”，只有发布才提交数据库并触发节点同步。草稿状态明确显示保存结果，撤销修改会清除草稿。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件                                                 | 版本                                   | SHA256                                                             |
+| ---------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------ |
+| `docs/README.md`                                     | `index-translation-live-draft-1`       | `fca4a26b45d4efcd6e56c83dcd26d396ce623a53103c1245a38db489f8446b69` |
+| `docs/development/translations.md`                   | `translations-runtime-4`               | `4802997bfa8fae7942e03d5709ce6f025c01626db9aae08cde99dc141ec8bc58` |
+| `docs/handoff/translation-overrides-verification.md` | `translation-overrides-verification-4` | `4cd7306e10d0fa59d167a9dcc61fe30477f7f533fc2c8d5e666eea7ee4a6991b` |
