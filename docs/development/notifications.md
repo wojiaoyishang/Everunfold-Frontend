@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-13，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)、[ADR0117](../decisions/0117-html-notification-templates.md)与[ADR0118](../decisions/0118-account-user-picker-and-policy-navigation.md)。
+版本：notifications-14，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)、[ADR0117](../decisions/0117-html-notification-templates.md)与[ADR0118](../decisions/0118-account-user-picker-and-policy-navigation.md)。
 
 ## 概念
 
@@ -42,6 +42,8 @@
 选择器只在弹层实际打开时加载目录，并在查询变化后防抖一次；单纯的界面重渲染、加载状态变化或翻译函数重建不得再次请求同一列表。
 
 触发框与相邻下拉框保持同一高度。结果列表拥有独立滚动区并设置桌面与手机最大高度；用户数量增加时弹层不会继续向下增长，且必须保持在当前视口内。
+
+单个用户行按名称、账号信息和稳定 ID 的自然行高展开，不设置会裁切文字的固定高度；限高只作用于结果列表容器。
 
 桌面端右侧快速导航按事件生成，目录项与事件卡片使用同一标题；点击后定位并聚焦对应卡片。手机端不显示该目录，事件卡与接收规则改为单列。
 

@@ -1,6 +1,6 @@
 # 通知策略用户选择器与快速导航验收
 
-版本：notification-policy-user-picker-verification-3。日期：2026-11-11。对应[ADR0118](../decisions/0118-account-user-picker-and-policy-navigation.md)。
+版本：notification-policy-user-picker-verification-4。日期：2026-11-11。对应[ADR0118](../decisions/0118-account-user-picker-and-policy-navigation.md)。
 
 ## 交付范围
 
@@ -17,6 +17,7 @@
 - 修复用户弹层打开后重复刷新：翻译函数和打开回调不再作为不稳定的搜索副作用依赖，回调只在实际开关弹层时触发；输入不会在每次渲染后被清空。
 - 请求计数验证弹层首次打开只发送1次目录查询，输入`admin`后只新增1次过滤查询；分别等待900ms后请求数保持不变，搜索框内容保持`admin`。
 - 触发框固定为42px，与相邻下拉框实测41.69px误差小于1px；20用户夹具下桌面弹层高320px、结果区250px并独立滚动，移动端结果区不超过240px，弹层始终留在760px视口内。
+- 用户行不再设置54px最大高度或裁切内容，改为按名称、账号邮箱和稳定ID三行自然撑开；桌面与手机实测行高61px，`scrollHeight`不超过`clientHeight`，稳定ID底边保留至少5px内边距。
 - 1440px桌面显示“快速导航”，四个事件均可定位；390px无横向溢出，关闭后的用户弹层不占页面宽度。
 - 验收未点击保存策略，通知写请求为0，无`pageerror`或原生弹窗。
 - 临时QA会话已撤销。

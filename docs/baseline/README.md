@@ -1704,9 +1704,9 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/README.md` | `index-notification-user-picker-1` | `733135f1da0d9fbafc0af0a239cc32732e86ecbb7d6b06681289cf599ab4d7e7` |
-| `docs/development/notifications.md` | `notifications-13` | `e4c5fe15db1b9e207823f5a3cdfa573b9e80ae11f01aa144a95be59db2010864` |
+| `docs/development/notifications.md` | `notifications-14` | `e17353fb8c13eca9b6905bd3db80a6e6298fa99c5c7bb3d1933138692991d859` |
 | `docs/decisions/0118-account-user-picker-and-policy-navigation.md` | `ADR0118-1` | `c4ea2039373cdb95d618409abf6c5c8149c684500e565c46ba7f142f660c2e35` |
-| `docs/handoff/notification-policy-user-picker-verification.md` | `notification-policy-user-picker-verification-3` | `c36b74d7738eebce704eecc39a29e8de640024f7690636715af9ecd4e6307e45` |
-| `docs/design/notification-policy-user-picker.png` | `notification-policy-user-picker-2` | `2fd842bbc014551159c4a575b4ec21cf284d029c432e218fd0344cb0d3c171d7` |
-| `docs/design/notification-policy-user-picker-mobile.png` | `notification-policy-user-picker-mobile-1` | `489fa800e67bc013326246568f93463f917851319a564a5c2aadb7a5eb5cd7f6` |
+| `docs/handoff/notification-policy-user-picker-verification.md` | `notification-policy-user-picker-verification-4` | `a17946c2754020cafe2214be47b3ea8c9904091ebfce47f56bcdf481d7952bfe` |
+| `docs/design/notification-policy-user-picker.png` | `notification-policy-user-picker-3` | `fdec5dfaa6729bd05d13c3fdc34f6e16713242574c8c6b0ce467a6e4960c3584` |
+| `docs/design/notification-policy-user-picker-mobile.png` | `notification-policy-user-picker-mobile-2` | `7ced3e831e2a9d915f93ffbc210f36e0dd68b41c1b5041ef12b48e554073af0d` |
 | `docs/design/notification-policy-quick-navigation.png` | `notification-policy-quick-navigation-1` | `08c9f62486894fedd7e0f65c4942903a203c98eda40a5f49ff536c868bc2e1a0` |
