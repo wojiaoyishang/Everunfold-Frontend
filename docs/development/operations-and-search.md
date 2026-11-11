@@ -1,6 +1,6 @@
 # 评论运营与搜索发现
 
-版本：operations-search-6，2026-11-10。对应 ADR0088 第一批、评论界面、加载后定位与静态正文/载荷精简补充交付。
+版本：operations-search-7，2026-11-11。对应 ADR0088 第一批、评论界面、加载后定位、静态正文/载荷精简和发现文件浏览器视图补充交付。
 
 ## 使用入口
 
@@ -61,6 +61,14 @@ Comment 以 content_id/page_id 二选一关联原文。历史评论保持身份�
 canonical、站点地图和分享地址使用前端服务端部署配置 publicSiteUrl 对应的公开站点地址，不使用任意请求 Host。缺少该配置时不伪造正式域名。后台、登录、账号与内部地址由 robots.txt 排除；全站禁止收录时仍允许爬虫读取 noindex，robots.txt 本身不承担权限控制。每个页面保留 RSS/Atom 自动发现链接，避免子页面 alternates 覆盖布局而丢失订阅入口。
 
 没有自动向搜索引擎提交站点地图或验证网站所有权。配置后在搜索引擎站长平台提交 /sitemap.xml；收录/展示由搜索引擎决定。本轮不引入排名分数、虚构统计、重定向历史或关键词堆砌。当前是单份站点地图，大体量站点的拆分索引与压力验收另行推进。
+
+### 浏览器阅读视图与机器响应
+
+`/sitemap.xml`、`/feed.xml` 和 `/atom.xml` 使用同一地址做保守内容协商。普通浏览器页面导航且接受 `text/html` 时，收到无 JavaScript 的品牌说明页，可直接浏览公开地址或最近内容；RSS/Atom 阅读器、已知爬虫、`Accept` 不包含 HTML 的请求继续收到原有标准 XML。Googlebot 等已知爬虫即使同时接受 HTML 也优先返回 XML。
+
+原始 XML 可通过 `?format=xml` 强制读取；例如 `/feed.xml?format=xml`。浏览器说明页按钮链接到该地址。机器响应不增加登录、脚本或重定向。两个响应都声明`Vary: Accept, Sec-Fetch-Dest, User-Agent`，避免共享缓存把 HTML 与 XML 混用。HTML 视图使用`noindex, follow`，不改变站点正文的索引策略。
+
+站点地图由 Route Handler 输出，并保持`urlset`、`url/loc`、`lastmod`、`xhtml:link`等标准字段；RSS/Atom 的 XML 生成器、稳定 ID、语言过滤和转义逻辑保持不变。直接读取`robots.txt`仍使用标准纯文本。
 
 ## 首屏正文与按需增强
 

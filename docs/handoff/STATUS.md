@@ -1,5 +1,13 @@
 # 前端交接状态
 
+## 最新交付：发现文件浏览器视图与通知平台图标（2026-11-11）
+
+- `/sitemap.xml`、`/feed.xml`、`/atom.xml`在普通浏览器直接打开时显示无脚本响应式阅读页；RSS/Atom阅读器、Googlebot等已知爬虫继续收到原标准XML，`?format=xml`可强制读取原始文件。
+- 站点地图Route Handler保留`urlset`、语言alternates和`lastmod`；HTML与XML响应声明`Vary`，浏览器视图使用`noindex, follow`与限制性CSP。
+- 通知平台菜单改用独立`notification-platform`图标（发送），与插件管理图标不再重复。
+- 实际HTTP确认HTML/XML内容类型分流；1440px站点地图、RSS与390px RSS实页无溢出或脚本错误，后台图标路径也与插件管理不同。
+- `npm run check`373项、`npm run verify:admin`生产构建和后台隔离矩阵通过。仅前端代码与双仓共享文档变化，未push。详见[验收](discovery-browser-view-verification.md)。
+
 ## 最新交付：通知策略用户选择器与快速导航（2026-11-11）
 
 - 新增共享`AccountUserPicker`，“指定用户”可按姓名、用户名、邮箱或完整稳定 UUID 搜索；选择后显示头像、名称和 ID 前缀，保存值始终是用户 ID。

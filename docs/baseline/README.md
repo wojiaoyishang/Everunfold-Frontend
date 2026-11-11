@@ -1710,3 +1710,17 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/design/notification-policy-user-picker.png` | `notification-policy-user-picker-3` | `fdec5dfaa6729bd05d13c3fdc34f6e16713242574c8c6b0ce467a6e4960c3584` |
 | `docs/design/notification-policy-user-picker-mobile.png` | `notification-policy-user-picker-mobile-2` | `7ced3e831e2a9d915f93ffbc210f36e0dd68b41c1b5041ef12b48e554073af0d` |
 | `docs/design/notification-policy-quick-navigation.png` | `notification-policy-quick-navigation-1` | `08c9f62486894fedd7e0f65c4942903a203c98eda40a5f49ff536c868bc2e1a0` |
+
+## 发现文件浏览器视图与通知平台图标（2026-11-11）
+
+站点地图、RSS和Atom保留原地址与机器XML；普通浏览器打开时显示无脚本阅读页，爬虫和订阅器仍读取标准XML，`?format=xml`可强制原始文件。通知平台菜单改用独立发送图标。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-discovery-browser-view-1` | `2f8a184ca8c181735bf16e8cde83e6c36e8fe79ea80cab1876d5826916f5e8d4` |
+| `docs/development/operations-and-search.md` | `operations-search-7` | `50714c150d829eb636ebf73e2919bf11ce4c11b1af1f235ce4b415b1f2a8797b` |
+| `docs/decisions/0119-discovery-documents-for-browsers-and-crawlers.md` | `ADR0119-1` | `9929e2f0cb16b80f3c363e563fae3cd87f1c97c063700346954bebc7941d86ce` |
+| `docs/handoff/discovery-browser-view-verification.md` | `discovery-browser-view-verification-1` | `7cef30945039a6b314d7eb2046dedc78ad1f7282cb26ca3e1eaceb4202abbd60` |
+| `docs/design/sitemap-browser-view.png` | `sitemap-browser-view-1` | `4154a09cdfaf04ae05efbe4517d17b3929073b06d3eab3b313a417edc1803ca8` |
+| `docs/design/rss-browser-view.png` | `rss-browser-view-1` | `6b4ce766be7c0b4ad6a1c33f3d99850635a27046ad4159cf6663602c6e5299e1` |
+| `docs/design/rss-browser-mobile.png` | `rss-browser-mobile-1` | `0c8a7428790bc183860b1378fc128396ead1cef90fdf892fd0cf83b214db0aee` |
