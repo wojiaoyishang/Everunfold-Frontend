@@ -16,7 +16,7 @@ export default {
   version: "1.0.0",
   parent: "argon",
   description: "A short description of the theme.",
-  preview: "/reference/themes/my-theme.webp",
+  preview: "/themes/my-theme/preview.webp",
   author: { name: "Your name", url: "https://example.test/author" },
   homepage: "https://example.test/theme",
   repository: "https://example.test/source",
@@ -25,7 +25,7 @@ export default {
 } satisfies ThemeDefinition;
 ```
 
-title最长80字，description最长500字，开发者名称/许可证最长100字，各URL最长2048字；图片可以是站内路径或HTTP(S)地址。建议把静态图片放在public/reference/themes，引用/reference/themes/文件名；该目录走既有静态资源入口，正式部署须把图片一并复制。内置Argon/Paper提供不含业务数据的SVG示意图。未提供图片或图片不可用时显示占位，其他资料和选择按钮仍可使用；未声明许可证不推断为某个开源许可。
+title最长80字，description最长500字，开发者名称/许可证最长100字，各URL最长2048字；图片可以是站内路径或HTTP(S)地址。主题自有图片、封面、视频、动效和短代码素材统一放在 `src/themes/<主题ID>/assets`，引用 `/themes/<主题ID>/...`；`npm run themes:assets` 在开发/构建前把各主题 assets 原样派生到 Git 忽略的 `public/themes/<主题ID>`，不要直接把主题专属源文件放进全局 `public/reference`。内置Argon/Paper提供不含业务数据的SVG示意图。未提供图片或图片不可用时显示占位，其他资料和选择按钮仍可使用；未声明许可证不推断为某个开源许可。
 
 元数据经npm run themes:catalog输出到忽略的var/cache/build/theme-catalog.json，再由节点协调器向后端登记。dev启动/prepare自动导出；开发时改完声明可运行该命令或重启dev更新清单。正式部署更新主题声明仍需要主构建；主题切换本身不需要重建。各启用节点需登记一致描述，元数据是部署资料，不是另一份站点设置。协议详见[ADR0084](../decisions/0084-theme-cards-metadata-and-settings-scroll.md)。
 

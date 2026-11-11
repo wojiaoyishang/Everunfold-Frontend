@@ -1,5 +1,15 @@
 # 前端交接状态
 
+## 最新交付：通知间距、登录态评论与主题资产归属（2026-11-11）
+
+- 通知策略与通知模板的顶层内容改用统一`workspace`间距容器；事件卡与保存栏、筛选栏与平台标签/编辑面板之间增加18px节奏，解决截图中元素过近。
+- 前台评论检测当前公开站点 Session。已登录时昵称自动使用账号显示名称，隐藏昵称、邮箱和网站输入，显示“昵称已自动填写”的身份说明；匿名访客保持原表单。
+- Argon/Paper的35个主题自有文件移入各主题`assets`：篝火WebM、静态篝火图、登录夜景、30张贴纸和2个主题预览SVG，共1,997,320字节。原全局`public/reference`不再包含主题视频、贴纸或预览图。
+- 新增`tools/theme-assets.mjs`与`npm run themes:assets`：只从`src/themes/<ID>/assets`复制到Git忽略的`public/themes/<ID>`，`predev`/`prebuild`自动执行。旧设置中的`/reference/campfire-*`、`/reference/everunfold-night-camp.webp`由Argon映射到新地址；运行时6类主题资源HTTP 200/206。
+- 历史依赖扫描发现`admin/components/collection-toolbar.tsx`和`preparation-state.tsx`无任何静态入口、可信动态注册或测试引用；已删除两文件及`admin-collection-toolbar`、`admin-segmented`、`admin-preparation`、`admin-empty-icon`、`admin-media-collection`等专属残留样式。
+- `npm run check`370项通过；lint、Next/TypeScript、Prettier、扩展构建和资产准备通过。真实登录态实页检查覆盖通知两页、主题预览和文章评论区，昵称/邮箱字段计数均为0，身份提示可见，页面无`pageerror`或原生弹窗；临时会话已撤销。
+- 已重启api、worker、scheduler、receiver、proxy、frontend全部六个组件，四端口和健康检查通过。仅本地变更，未push。
+
 ## 最新交付：通知事件、平台与通知模板（2026-11-11）
 
 - 前端`bee1cf0`/`836f409`、后端`0cc5671`/`9efa412`。后台新增“通知与消息”分组：通知策略、通知模板、通知平台、投递记录；顶栏铃铛展示当前账号 Inbox，支持按需刷新、聚焦刷新、轮询、单条与全部已读。

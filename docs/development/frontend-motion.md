@@ -37,6 +37,6 @@ npm.cmd run verify:production
 
 ## 资源与架构
 
-原视频只读复制到 `public/reference/campfire-background.webm`，SHA256 与媒体信息在 sources.json；不能把 WebM 仅改后缀当 MP4。浏览器不支持或播放失败时保留已有图片背景。组件与样式分工见 [前台架构](../architecture/frontend-ui.md)。
+原视频保存在 `src/themes/argon/assets/background/campfire.webm`，SHA256 与媒体信息在同目录 sources.json；构建前由 `tools/theme-assets.mjs` 派生到受 Git 忽略的 `/public/themes/argon`，运行时 URL 为 `/themes/argon/background/campfire.webm`。不能把 WebM 仅改后缀当 MP4。浏览器不支持或播放失败时保留已有图片背景。组件与样式分工见 [前台架构](../architecture/frontend-ui.md)。
 
 截图保存在前端忽略目录 `var/qa/`，本轮包括 `frontend-article-cover.png`、`frontend-comments-preview.png`、`frontend-reading-settings.png` 及手机预览；截图不能证明时间上的运动，需同时看 video currentTime、过渡起终态和真实输入。原数据、配置和截图不提交，必要主题视频作为公开品牌资产提交。本阶段代理只做本地提交，远程推送由用户执行。

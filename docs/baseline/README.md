@@ -1615,3 +1615,15 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/handoff/notifications-verification.md`                      | `notifications-verification-1`        | `10d7af46b2d56ff5aab5eec1dece6a571a73f3e02a8d81aa4b217f3ac5f9b655` |
 | `contracts/notifications-v1.schema.json`                            | `notifications-v1-1.0.0`              | `53d85f3924a0b7837d4eb0b3e51154a47344fe605b05eafa9fb65d483f7d1407` |
 | `contracts/settings-v1.schema.json`                                | `settings-v1-1.31.0`                  | `8394a127a60d12703ef47bfd22881050863180fb2e788b0569373418fa52607b` |
+
+## 主题自有资产与历史残留清理（2026-11-11）
+
+Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主题`assets`；构建前派生到Git忽略的`public/themes/<主题ID>`，旧设置路径保持读取兼容。无引用的两个历史后台组件及其专属样式删除。以下版本替代对应旧摘要，原始基线不变，STATUS单独维护。
+
+| 文件                                                              | 版本                                  | SHA256                                                             |
+| ----------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------ |
+| `docs/README.md`                                                  | `index-theme-assets-1`                | `fef186d4ed65433187a4d1025b7cb3fb665a2d9cae574994c5a4ff7f357372db` |
+| `docs/decisions/0114-theme-owned-assets-and-legacy-cleanup.md`     | `ADR0114-1`                           | `f683f70f18429a0dd7fddbcdeae8a4f8ae9d63465addab33a00a69d3b909fa2d` |
+| `docs/development/child-themes.md`                                | `child-themes-theme-assets-1`         | `00e70a746c28d7fdda220d1d3b18382e45c496ebb1daf1d17ca685e6eb3b3213` |
+| `docs/development/frontend-motion.md`                             | `frontend-motion-theme-assets-1`      | `a194685f4418ad1636734671acb8094807579c6a08fb598e1ceb43159cde1095` |
+| `docs/handoff/theme-asset-cleanup-verification.md`                | `theme-asset-cleanup-verification-1`  | `8e8ce8d6fa7d01bc6af0ee0d2b544d76f8cf0b3a15f894053fde04dfc26f3534` |
