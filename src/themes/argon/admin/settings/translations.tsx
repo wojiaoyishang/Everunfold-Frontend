@@ -785,16 +785,6 @@ export function TranslationSettingsPage() {
                           <small>
                             <UiText text="留空并保存后恢复基础文本。" />
                           </small>
-                          {detailOverride && (
-                            <Button
-                              className="admin-text-action"
-                              disabled={!editable}
-                              onClick={() => setDraft(detailItem, "")}
-                            >
-                              <Icon name="refresh" />
-                              <UiText text="恢复默认" />
-                            </Button>
-                          )}
                         </div>
                       </section>
                     </div>
@@ -865,6 +855,14 @@ export function TranslationSettingsPage() {
                             </dd>
                           </div>
                         </dl>
+                        <Button
+                          className="admin-button metaActions"
+                          disabled={!editable || !detailOverride}
+                          onClick={() => setDraft(detailItem, "")}
+                        >
+                          <Icon name="refresh" />
+                          <UiText text="还原默认值" />
+                        </Button>
                       </section>
                     </aside>
                   </div>

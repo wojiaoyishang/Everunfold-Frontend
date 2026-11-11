@@ -346,6 +346,9 @@
 .metaList code {
   font-size: 11px;
 }
+.metaActions {
+  width: 100%;
+}
 .translationHint,
 .translationActions small {
   color: var(--admin-muted);

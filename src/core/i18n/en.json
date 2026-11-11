@@ -2031,6 +2031,7 @@
   "所有者": "Owner",
   "上下文": "Context",
   "留空并保存后恢复基础文本。": "Leave empty and save to restore the built-in text.",
+  "还原默认值": "Restore default",
   "上一条": "Previous entry",
   "下一条": "Next entry",
   "当前筛选内共 {count} 条": "{count} entries in the current filter",
