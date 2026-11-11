@@ -10,6 +10,10 @@ import {
   parseAdminPreferences,
 } from "../src/core/admin/preferences";
 import {
+  adminSidebarScrollKey,
+  parseAdminSidebarScroll,
+} from "../src/core/admin/sidebar-scroll";
+import {
   isManagementRoute,
   loginDestination,
   loginReturnPath,
@@ -150,4 +154,22 @@ test("admin motion preference persists independently and migrates older appearan
     "full",
   );
   assert.equal(parseAdminPreferences('{"mode":"dark"}').motion, "full");
+});
+
+test("sidebar scroll memory is scoped by account and canonical admin path", () => {
+  assert.equal(
+    adminSidebarScrollKey("account:1", "/admin/settings/system/"),
+    adminSidebarScrollKey("account:1", "/admin/settings/system"),
+  );
+  assert.notEqual(
+    adminSidebarScrollKey("account:1", "/admin/settings/system"),
+    adminSidebarScrollKey("account:2", "/admin/settings/system"),
+  );
+  assert.notEqual(
+    adminSidebarScrollKey("account:1", "/admin/settings/system"),
+    adminSidebarScrollKey("account:1", "/admin/settings/runtime"),
+  );
+  assert.equal(parseAdminSidebarScroll("184.9"), 184);
+  for (const value of [null, "", "-1", "NaN", "Infinity"])
+    assert.equal(parseAdminSidebarScroll(value), null);
 });

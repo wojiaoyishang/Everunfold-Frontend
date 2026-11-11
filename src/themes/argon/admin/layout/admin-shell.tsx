@@ -1,7 +1,7 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { AuthUser } from "@/core/contracts/auth";
 import type { AdminPreferences } from "@/core/admin/preferences";
@@ -19,6 +19,8 @@ import { InterfaceLanguage } from "../../components/language-switcher";
 import { AdminLanguageCatalog } from "@/core/i18n/admin-languages";
 import { adminRoutePermission, can } from "@/core/accounts/permissions";
 import { Avatar } from "../../components/ui/avatar";
+import { adminSidebarScrollKey } from "@/core/admin/sidebar-scroll";
+import { useSidebarScrollPosition } from "./use-sidebar-scroll-position";
 
 export function AdminShell({
   user,
@@ -34,6 +36,8 @@ export function AdminShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const sidebar = useRef<HTMLElement>(null);
+  useSidebarScrollPosition(sidebar, adminSidebarScrollKey(user.id, pathname));
   const [embedded] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -96,7 +100,7 @@ export function AdminShell({
         <RouteLink href="#admin-main" className="admin-skip-link">
           <UiText text="跳至主要内容" />
         </RouteLink>
-        <aside className="admin-sidebar">
+        <aside ref={sidebar} className="admin-sidebar">
           <RouteLink
             href="/admin"
             className="admin-brand"
