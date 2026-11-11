@@ -42,6 +42,7 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   taxonomy: "tag",
   mail: "mail",
   notification: "bell",
+  "notification-platform": "send",
 };
 export function AdminNavigation({
   pathname,

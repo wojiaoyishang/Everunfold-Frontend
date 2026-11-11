@@ -21,6 +21,7 @@ export type AdminPageIcon =
   | "taxonomy"
   | "mail"
   | "notification"
+  | "notification-platform"
   | "node-settings"
   | "runtime"
   | "system";

@@ -81,6 +81,16 @@ test("admin navigation separates primary content, tools, appearance and system s
     "core.notifications.platforms",
     "core.notifications.deliveries",
   ]);
+  const platform = adminNavigation.find(
+    (item) => item.id === "core.notifications.platforms",
+  );
+  assert.equal(platform?.icon, "notification-platform");
+  assert.equal(
+    adminNavigation.filter(
+      (item) => item.menu && item.icon === "notification-platform",
+    ).length,
+    1,
+  );
   assert.deepEqual(
     adminNavigationGroups
       .find((group) => group.label === "设置")

@@ -34,7 +34,7 @@ export const builtinAdminModule = {
       href: "/admin/notifications/platforms",
       label: "通知平台",
       description: "站内、邮件与插件投递渠道",
-      icon: "extension",
+      icon: "notification-platform",
       menu: { group: "core.notifications", order: 30 },
     },
     {
