@@ -1,12 +1,12 @@
 # 媒体库运行指南
 
-版本：media-library-runtime-6，2026-11-04。基础上传见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)；附件详情与图片编辑见 [ADR 0026](../decisions/0026-media-details-and-image-editing.md)。上传与删除见 [ADR 0027](../decisions/0027-shared-upload-queue-and-safe-removal.md)。完整生命周期规划见 [媒体存储设计](../architecture/media-storage.md)。
+版本：media-library-runtime-7，2026-11-11。基础上传见 [ADR 0025](../decisions/0025-recursive-menus-and-icon-library.md)；附件详情与图片编辑见 [ADR 0026](../decisions/0026-media-details-and-image-editing.md)。上传与删除见 [ADR 0027](../decisions/0027-shared-upload-queue-and-safe-removal.md)，虚拟引用见 [ADR0108](../decisions/0108-virtual-media-references.md)。完整生命周期规划见 [媒体存储设计](../architecture/media-storage.md)。
 
 ## 页面与表单
 
 管理员在 `/admin/media` 上传、按图片/视频/文件过滤，或查看回收站、按标题/文件名搜索并分页浏览。支持网格和紧凑列表；点击资源打开附件详情，可在当前查询页内切换上/下一附件。桌面分栏、手机纵向滚动，关闭和保存始终可达。窗口沿用主题动效与减少动态偏好。
 
-头像、背景图片、背景视频及编辑器的媒体入口共用大窗口 MediaPickerDialog，按目标用途过滤。桌面上传/媒体库标签下为文件与只读资料分栏，底部固定确认；手机全屏纵向排列。点击暂选，确认退场后才写入调用方，取消不修改正文或设置。侧栏不编辑资料，修改仍到独立媒体库；具体见 [ADR0047](../decisions/0047-compact-editor-views-and-media-picker.md)。图标页面仍使用独立用途/大小规则。表单 42px 缩略图与地址输入框同行，点击预览。选择只修改设置草稿，需要保存并等待节点应用；撤销草稿不会撤销已完成的上传。手填/清空地址会清空该字段媒体关联。
+头像、背景图片、背景视频及编辑器的媒体入口共用大窗口 MediaPickerDialog，按目标用途过滤。桌面上传/媒体库标签下为文件与只读资料分栏，底部固定确认；手机全屏纵向排列。点击暂选，确认退场后才写入调用方，取消不修改正文或设置。侧栏不编辑资料，修改仍到独立媒体库；具体见 [ADR0047](../decisions/0047-compact-editor-views-and-media-picker.md)。图标页面仍使用独立用途/大小规则。表单 42px 缩略图与输入框同行，点击预览。媒体库绑定展示只读 `site://media/<UUID>` 虚拟地址，实际 URL 仅用于预览/渲染；清除后可重新选择，或手动输入有效虚拟地址并重新绑定媒体 ID。允许普通 URL 的字段才接受 HTTP(S) 手填地址，且不会伪造媒体关联。选择只修改设置草稿，需要保存并等待节点应用；撤销草稿不会撤销已完成的上传。
 
 ## 多文件与重复上传
 

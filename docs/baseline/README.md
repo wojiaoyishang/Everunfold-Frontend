@@ -1522,8 +1522,8 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/settings.md` | `settings-runtime-19` | `f70b3c240cf60e6bab510233267b59599ad0f6882e8d04d5b3c40404f18bd697` |
 | `docs/development/captcha.md` | `captcha-7` | `bd143b0448c468f94584b6e35797a82688530cd0baa41a141fa008156ead3a20` |
 | `docs/decisions/0064-desktop-settings-section-navigation.md` | `ADR0064-grouped-navigation-1` | `e07d42de5bb24d0aca8191857a807880f606f88c90db8d5435d588846443c7b4` |
-| `docs/decisions/0106-system-settings-captcha-and-grouped-navigation.md` | `ADR0106-3` | `6d3772c0a05e25552d74008f6a8f166abbcf4e98f8e76cfbdc526418369a4c1c` |
-| `docs/handoff/system-settings-captcha-navigation-verification.md` | `system-settings-captcha-navigation-verification-3` | `67a310ecc0b10a0b5b22c082b681428e34c33917d450eba86ca0a2e201a2e8c0` |
+| `docs/decisions/0106-system-settings-captcha-and-grouped-navigation.md` | `ADR0106-4` | `0a7a15ccce465b16a1a3d3cc375d2e5637695971f304ba6fefcbbc6d8a0dc3f3` |
+| `docs/handoff/system-settings-captcha-navigation-verification.md` | `system-settings-captcha-navigation-verification-4` | `3eef2c7975dfe5b70438e5553115e8e27f39a180cec6207354fd0224b7625403` |
 
 
 ## 后台侧栏滚动恢复（2026-11-11）
@@ -1535,3 +1535,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/README.md` | `index-admin-sidebar-scroll-1` | `f7c4def799c160a0e3a444c66d3c43aa1830ff390f82324887456190edd1a0b6` |
 | `docs/architecture/admin-navigation.md` | `admin-navigation-7` | `b5fee55f41d1d4812ff9f4ba4a82a972365a5ac172d9ac19a0ad121a4f41c0c3` |
 | `docs/decisions/0107-admin-sidebar-scroll-restoration.md` | `ADR0107-1` | `77d37e8f1883dba9a05b3a11ba8299ebdef3c521e3e43b3c1f198788885b22ac` |
+
+
+## 媒体虚拟引用与术语特色图即时回显（2026-11-11）
+
+媒体库绑定统一显示 `site://media/<UUID>`，手填有效虚拟地址可重新绑定稳定媒体 ID；普通 URL 与媒体关联分离。术语特色图选择后立即回显，后台保持左目录/右编辑器，公开特色图布局不变。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-media-virtual-reference-1` | `1145206fca9ce68e23e438c2803ca8ee93e73cf80517f69b572b33d67293ff17` |
+| `docs/decisions/0108-virtual-media-references.md` | `ADR0108-1` | `aced1b40a06c09240dde2727137429f915c7959e72e79afa2657471388f1d45c` |
+| `docs/development/glossary.md` | `glossary-runtime-15` | `c709bf94ba7a58f21de4e94831bc0444118bb73ae91b473b4fd123141589b1a7` |
+| `docs/development/media-library.md` | `media-library-runtime-7` | `01c5992ad6fe31865ee0d29b087f3baa8878a9602fbf1ebc09f2b384cc6d6a6d` |
+| `docs/handoff/glossary-media-reference-verification.md` | `glossary-media-reference-verification-1` | `c6134b813cc51e5fba2b22417936a33ad3f3d0a1351014ef303660db2fd43e62` |

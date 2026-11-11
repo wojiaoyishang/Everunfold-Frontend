@@ -1,6 +1,6 @@
 # 术语表与文章按需 Tooltip
 
-版本：glossary-runtime-14，2026-11-10。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)、[ADR0103](../decisions/0103-dynamic-glossary-footnotes.md)、[ADR0104](../decisions/0104-localized-navigation-and-glossary-hooks.md) 与 [ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
+版本：glossary-runtime-15，2026-11-11。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)、[ADR0103](../decisions/0103-dynamic-glossary-footnotes.md)、[ADR0104](../decisions/0104-localized-navigation-and-glossary-hooks.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md) 与 [ADR0108](../decisions/0108-virtual-media-references.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
 
 ## 管理入口
 
@@ -60,7 +60,7 @@ GET /v1/plugins/everunfold.glossary/for-content/{content_id}
 
 新建术语时“页面触发”同样可用。触发先以稳定触发ID和操作ID暂存在浏览器，待术语首次保存成功后一并创建；保存栏会报告实际成功数量，部分失败时保留明确提示。点击“新建页面触发”会滚动到展开的编辑区，避免长表单中误以为按钮无响应。
 
-术语“基本信息”可选择一个媒体库特色图片。后端只接受可用图片媒体并返回解析后的公开 URL；目录卡片、词条详情和 Tooltip 使用同一图片。特色图片和术语正文媒体都参与媒体删除引用检查，引用未移除时不能删除原文件。
+术语“基本信息”可选择一个媒体库特色图片。选择确认后输入框和缩略图立即更新，输入框显示稳定的 `site://media/<UUID>` 虚拟地址；也可清除后手动输入有效虚拟地址。保存只提交 `feature_media_id`，后端验证可用图片并解析公开 URL，切换域名或媒体 Base URL 不改变词条引用。后台继续使用左侧术语目录和右侧编辑器，术语页使用完整内容区宽度，右侧编辑器填满目录以外的空间；公开词条详情的特色图片保持原右侧展示。目录卡片、词条详情和 Tooltip 使用同一图片；特色图片和术语正文媒体都参与媒体删除引用检查，引用未移除时不能删除原文件。
 
 公开页面等待`PagePresentation`就绪后，在空闲时请求只与当前surface、内容/页面ID和语言相关的启用钩子，缓存60秒。MutationObserver对后续生成的元素重新绑定，客户端路由切换清理后重跑。Tooltip与正文关键词提示共用；已有链接/按钮保持原生点击，键盘聚焦和Escape行为相同。
 
