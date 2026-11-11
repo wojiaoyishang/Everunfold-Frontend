@@ -1627,3 +1627,12 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/development/child-themes.md`                                | `child-themes-theme-assets-1`         | `00e70a746c28d7fdda220d1d3b18382e45c496ebb1daf1d17ca685e6eb3b3213` |
 | `docs/development/frontend-motion.md`                             | `frontend-motion-theme-assets-1`      | `a194685f4418ad1636734671acb8094807579c6a08fb598e1ceb43159cde1095` |
 | `docs/handoff/theme-asset-cleanup-verification.md`                | `theme-asset-cleanup-verification-1`  | `8e8ce8d6fa7d01bc6af0ee0d2b544d76f8cf0b3a15f894053fde04dfc26f3534` |
+
+## 通知投递诊断与语言旗帜（2026-11-11）
+
+评论事件与SMTP正常；管理员账号未配置邮箱使邮件投递成为`suppressed/missing_recipient`。通知记录行内显示原因与邮箱配置入口，投递语言和模板语言统一使用旗帜组件。以下版本替代对应旧摘要，原始基线不变，STATUS单独维护。
+
+| 文件                                                              | 版本                                         | SHA256                                                             |
+| ----------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------ |
+| `docs/README.md`                                                  | `index-notification-delivery-language-1`     | `e9830f1508b3e9bbd8cde23a81185cb30fa30800b61a35bd42947a4ecd189dd1` |
+| `docs/handoff/notification-delivery-language-verification.md`     | `notification-delivery-language-verification-1` | `64587601e4a53a775f426b3860fae37740d588e1ba628d83366ca4ca898a132c` |
