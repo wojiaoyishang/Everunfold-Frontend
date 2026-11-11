@@ -670,8 +670,8 @@
 }
 
 .centerState[data-kind="empty"] {
-  align-content: end;
-  padding: 30px 20px 36px;
+  align-content: center;
+  padding: 30px 20px;
 }
 
 .centerFooter {
