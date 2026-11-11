@@ -1636,3 +1636,19 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | ----------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------ |
 | `docs/README.md`                                                  | `index-notification-delivery-language-1`     | `e9830f1508b3e9bbd8cde23a81185cb30fa30800b61a35bd42947a4ecd189dd1` |
 | `docs/handoff/notification-delivery-language-verification.md`     | `notification-delivery-language-verification-1` | `64587601e4a53a775f426b3860fae37740d588e1ba628d83366ca4ca898a132c` |
+
+## 邮箱验证、用户管理确认与账号状态页（2026-11-11）
+
+账号邮箱通过Worker发送6位一次性验证码，成功写入验证状态，修改邮箱失活；管理员用户创建/编辑不再要求当前密码，但仍受登录、CSRF、权限、账号事务锁、修订和审计保护。账号加载/失败状态改为居中状态卡，评论成功提示10秒退场。后端`d76a34a`、`accounts-v1 1.6.0`、迁移`0045_email_verification`。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件                                                                  | 版本                                             | SHA256                                                             |
+| --------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------ |
+| `docs/README.md`                                                      | `index-email-verification-1`                     | `998212c93d70ae2efc4bc61540bb073c53c6dfc4f199010bea5a9d4957b508c4` |
+| `docs/development/accounts.md`                                        | `accounts-runtime-11`                            | `fbc90e58584ffe6c18b866244abfe620807c994adf2f43eae28572ad315c367f` |
+| `docs/development/mail.md`                                            | `mail-5`                                         | `0081b1aaf4997352a4f81f2609f5d357a85e97f8f16ba66814b8a6f8da3a7177` |
+| `docs/architecture/constraints.md`                                    | `constraints-email-verification-1`               | `06d9904cd2e397f03713eca46256b907ec828fe6a9cc43ebd73fcedcc0250e1c` |
+| `docs/decisions/0113-notification-events-platforms-and-templates.md`   | `ADR0113-2`                                      | `5d2d5407f3a5a0750992225f2faf37470e7789d2d40eae0d6fdbb303a268c93c` |
+| `docs/decisions/0115-account-email-verification-and-admin-mutations.md` | `ADR0115-1`                                     | `7ffb166d2101fc4234bb197078bb9e69406f243b2900f25628bc010262920abd` |
+| `docs/handoff/email-verification-and-account-states-verification.md`   | `email-verification-and-account-states-verification-1` | `abbcb70bb25824d2156461ba71fd8b4c6af8b5084f8e003e9c6b000ebf3fdc5c` |
+| `docs/handoff/notifications-verification.md`                           | `notifications-verification-2`                   | `48b52d62a33c0b1572030344ad22fdd338b2427e02e5c07dc45545a41997c2a5` |
+| `contracts/accounts-v1.schema.json`                                    | `accounts-v1-1.6.0`                              | `1aa14d4cebcd41887540b2d1d7943fd3734ead1d3b67b8a4e217c40462bfa180` |

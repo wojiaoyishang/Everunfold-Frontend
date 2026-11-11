@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[账号邮箱验证与用户管理确认](development/accounts.md)、[ADR0115](decisions/0115-account-email-verification-and-admin-mutations.md)及[验收](handoff/email-verification-and-account-states-verification.md)：账号中心通过Worker发送6位一次性邮箱验证码，成功后持久化验证状态；修改邮箱自动失活。管理员创建/编辑用户不再要求当前密码，但保留Session、CSRF、权限、事务锁、修订和审计。账号加载/失败状态改为居中状态卡。
+
 [通知投递诊断与语言旗帜](handoff/notification-delivery-language-verification.md)：投递记录直接显示抑制原因和账号邮箱配置入口；语言使用共享旗帜组件。最近一次评论邮件未发送的实际原因是`admin`账号未配置邮箱，SMTP与通知事件均正常。
 
 [主题自有资产与历史残留清理](handoff/theme-asset-cleanup-verification.md)、[ADR0114](decisions/0114-theme-owned-assets-and-legacy-cleanup.md)：Argon/Paper 的背景视频、静态封面、登录场景、贴纸和主题预览图统一移入各自`assets`；构建前派生到`public/themes/<主题ID>`，旧`/reference`主题路径继续兼容读取。已删除两个无引用的历史后台组件及其专属样式。

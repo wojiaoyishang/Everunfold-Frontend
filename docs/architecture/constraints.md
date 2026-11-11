@@ -43,7 +43,7 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 
 浏览器默认由 FastAPI 管理 HttpOnly Cookie Session；CORS 精确来源、Cookie Domain 与 CSRF 分开设计。API Key 不突破所属用户当前权限。请求身份、语言和数据库 Session 按请求/任务隔离，不共用可变全局上下文。
 
-基础浏览器认证见[ADR0018](../decisions/0018-authentication-and-admin-entry.md)。2026-11-06按[ADR0069](../decisions/0069-accounts-api-keys-and-signed-callbacks.md)完成账号中心、改密/会话、用户管理、细分本人/全部授权、个人受限头像库与API Key双向接入，见[操作指南](../development/accounts.md)。用户/可撤销Session/Key摘要与授权存PostgreSQL，密码Argon2id；登录/退出要求预会话CSRF和精确Origin，后台按当前能力授权。Key使用显式权限交集，不能借管理员角色或Cookie越权。`/v1/auth/*`、`/v1/account/*`、`/v1/admin/*`禁止共享缓存，账号资料不进入公开快照；注册、找回密码、邮箱验证和2FA仍未实现。2026-11-06按[ADR0071](../decisions/0071-user-permission-presets.md)增加可配置成员身份预设：应用时复制并校验权限，来源快照只作显示；修改/删除预设不联动既有账号，不扩大基础管理员角色。
+基础浏览器认证见[ADR0018](../decisions/0018-authentication-and-admin-entry.md)。2026-11-06按[ADR0069](../decisions/0069-accounts-api-keys-and-signed-callbacks.md)完成账号中心、改密/会话、用户管理、细分本人/全部授权、个人受限头像库与API Key双向接入，见[操作指南](../development/accounts.md)。用户/可撤销Session/Key摘要与授权存PostgreSQL，密码Argon2id；登录/退出要求预会话CSRF和精确Origin，后台按当前能力授权。Key使用显式权限交集，不能借管理员角色或Cookie越权。`/v1/auth/*`、`/v1/account/*`、`/v1/admin/*`禁止共享缓存，账号资料不进入公开快照；注册、找回密码和2FA仍未实现；账号邮箱验证已按[ADR0115](../decisions/0115-account-email-verification-and-admin-mutations.md)完成。2026-11-06按[ADR0071](../decisions/0071-user-permission-presets.md)增加可配置成员身份预设：应用时复制并校验权限，来源快照只作显示；修改/删除预设不联动既有账号，不扩大基础管理员角色。
 
 内部接口要求真实 socket 来源 IP 允许列表 AND 接收 Token，随后检查最小权限。转发头不是原始来源事实；空允许列表、未知 peer 不放行。不能假定 Next.js App Router 暴露 socket；实现须选择可验证的适配层或受控入口并阻断旁路。内部路径仍需公网隔离。Token 不进入浏览器、URL、公开配置、日志或数据库任务参数。
 

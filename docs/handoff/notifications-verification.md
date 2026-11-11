@@ -15,7 +15,7 @@
 - `0044_notifications`新增事件、策略、模板、投递、Inbox与单例修订；开发库已显式迁移到head，`alembic check`无差异。
 - 外部网络副作用只在 Worker 执行。明确失败使用指数退避，最多5次；SMTP或插件结果未知、Worker租约过期均标记`unknown`且不自动重发。
 - 模板和策略保存使用修订守卫并写`SettingsAudit`。Inbox未读数按数据库全部未读统计。
-- 邮件 Subject 对换行做清理；模板不得执行JavaScript、Jinja或任意模板代码。账号邮箱当前未验证，缺失目标时投递为`suppressed`。
+- 邮件 Subject 对换行做清理；模板不得执行JavaScript、Jinja或任意模板代码。账号邮箱验证由ADR0115交付；缺失目标时投递为`suppressed`。
 
 ## 自动检查
 
