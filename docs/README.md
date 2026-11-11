@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-[通知模板代码编辑器与 HTML 邮件](development/notifications.md)、[ADR0117](decisions/0117-html-notification-templates.md)及[验收](handoff/notification-html-template-verification.md)：邮件通过独立“启用 HTML”开关控制发送，开启后提供可视化与源码双视图，关闭时保留内容并使用纯文本回退。默认邮件模板采用后台一致的简约图形卡片。HTML变量先转义，再按保守标签白名单清洗，并以`multipart/alternative`发送。
+[通知模板代码编辑器与 HTML 邮件](development/notifications.md)、[ADR0117](decisions/0117-html-notification-templates.md)及[验收](handoff/notification-html-template-verification.md)：邮件通过独立“启用 HTML”开关控制发送，开启后提供可视化预览与源码双视图，关闭时保留内容并使用纯文本回退。默认邮件模板采用后台一致的简约图形卡片。HTML变量先转义，再按保守标签白名单清洗，并以`multipart/alternative`发送。
 
 [多邮件发信配置](development/mail.md)、[ADR0116](decisions/0116-multiple-mail-sender-profiles.md)及[验收](handoff/multi-mail-profile-verification.md)：邮件配置并入“通知与消息 → 通知平台”，每站可维护最多20套 SMTP 发信身份；提醒规则可选择具体配置，未选择时使用默认配置。投递会快照配置身份和修订，停用、删除或配置变化不会静默换号；旧单配置自动兼容，原邮件设置入口保留隐藏跳转。
 

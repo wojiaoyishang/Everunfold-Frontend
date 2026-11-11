@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-4，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
+版本：notifications-5，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
 
 ## 概念
 
@@ -18,7 +18,7 @@
 - 内置平台 `in-app`、`email`；插件可注册其他平台。
 - 路由接收人支持指定用户、角色和权限。
 - 模板按事件、平台、语言保存；缺失平台变体回退到内置安全文案。
-- 模板正文使用共享编辑器。站内通知只编辑纯文本；邮件平台通过独立“启用 HTML”开关控制HTML发送，开启后可切换“可视化 / 源码”，关闭时保留HTML内容。
+- 模板正文使用共享编辑器。站内通知只编辑纯文本；邮件平台通过独立“启用 HTML”开关控制HTML发送，开启后可切换“可视化预览 / HTML源码”，关闭时保留HTML内容。
 - 默认邮件模板采用后台一致的简约卡片：中性背景、细分隔线、小图形标识和少量主题色，不依赖外链图片。
 - 评论进入待审核状态时发布 `comment.pending_review`。
 - 站内通知写入 Inbox；邮件平台复用现有 SMTP 配置。
@@ -63,4 +63,4 @@ registry.notifications.register(
 
 站内通知与邮件可在同一事件上并存，但同一用户、同一平台在一次事件中至多生成一条投递。SMTP 结果未知、Worker 租约过期或插件异常都不自动重发，记录为 `unknown`。策略与模板每次保存都写设置审计。
 
-HTML 管理预览使用无脚本、无同源权限的沙箱 iframe；它只用于检查排版，不代表所有邮件客户端都支持相同 CSS。
+HTML“可视化预览”与最终邮件共用同一份HTML和清洗链路，使用无脚本、无同源权限的沙箱 iframe；页面下方不再维护重复预览。它不代表所有邮件客户端都支持相同 CSS。
