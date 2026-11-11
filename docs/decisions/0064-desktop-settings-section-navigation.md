@@ -19,3 +19,7 @@ SettingsSection使用显式稳定ID和实际标题，SettingsLayout从当前已�
 导航只改变当前页位置，不提交、重载或丢弃设置。原有保存/撤销、版本和投递流程保持，无后端、契约、依赖或迁移变化。没有增加设置项全文搜索、窄屏目录或逐字段目录；新增分区必须提供唯一稳定ID。
 
 实页结果与边界见[验收](../handoff/settings-section-navigation-verification.md)，使用方式见[设置指南](../development/settings.md)。
+
+## 2026-11-11 补充：可选分组
+
+系统设置归并验证码后，分区数量超过原平铺目录的清晰范围。`SettingsSection`增加可选`group`，右侧目录按DOM顺序生成一级分组标题与二级分区链接；未设置分组的页面保持原平铺样式。当前分组随二级分区高亮，首次hash恢复会等待异步目标挂载。详细决定见[ADR0106](0106-system-settings-captcha-and-grouped-navigation.md)，验收见[系统设置归并记录](../handoff/system-settings-captcha-navigation-verification.md)。

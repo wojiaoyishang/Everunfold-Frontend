@@ -1510,3 +1510,17 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/settings.md` | `settings-runtime-17` | `769cf160eb5e49e4ae5e1edeccf35982395ca9dea6cc7ecb7f50b0293a47564e` |
 | `contracts/glossary-v1.schema.json` | `glossary-v1-3.5.0` | `068801018aee5de95716db897f537b956fdc20d29e2e0a1eb82a4393ec1ed353` |
 | `contracts/settings-v1.schema.json` | `settings-v1-1.29.0` | `813999809afb42a9c6bee4b75e54cb33d91e541a1461971b911ed72fa3e67840` |
+
+
+## 系统设置归并与分组快速导航（2026-11-11）
+
+验证码嵌入系统设置，旧入口保留兼容跳转；验证码独立修订、接口与权限不变。右侧分区目录支持可选一级分组和二级锚点，并修复异步分区首次 hash 恢复。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-system-captcha-navigation-1` | `337a22024e9ae984e7d6cab0de9c84620ffac31ec85936e65e410714b61486a2` |
+| `docs/development/settings.md` | `settings-runtime-18` | `c4832598a92c09b1b4744672d3226d01873977c24d306340242e5024f208bf43` |
+| `docs/development/captcha.md` | `captcha-6` | `15adf43387f52cf8cc85f2c829fc2433ef038c9a6323a2641907f86980d20d63` |
+| `docs/decisions/0064-desktop-settings-section-navigation.md` | `ADR0064-grouped-navigation-1` | `e07d42de5bb24d0aca8191857a807880f606f88c90db8d5435d588846443c7b4` |
+| `docs/decisions/0106-system-settings-captcha-and-grouped-navigation.md` | `ADR0106-1` | `5bffc15233927cb637c0c09c6a70ef2608144241e501a8c3908e011279c2ac3e` |
+| `docs/handoff/system-settings-captcha-navigation-verification.md` | `system-settings-captcha-navigation-verification-1` | `191160159e97837d4bcfb07d2728d79cc36e544699f8109ea6bb3034e1cf0c32` |

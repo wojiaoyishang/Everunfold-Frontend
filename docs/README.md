@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[系统设置归并与分组快速导航](handoff/system-settings-captcha-navigation-verification.md)、[开发指南](development/settings.md)及[ADR0106](decisions/0106-system-settings-captcha-and-grouped-navigation.md)：验证码并入系统设置，左侧不再显示独立入口；右侧目录支持一级分组与二级分区，旧验证码地址继续定位到对应锚点。验证码仍使用独立修订和保存接口。
+
 [术语富文本编辑与弹层验收](handoff/glossary-rich-editor-verification.md)：术语后台接入文章式区块编辑器，保存栏与系统设置统一；Tooltip 和公开详情复用文章的安全 Markdown/HTML、代码、公式、媒体与短代码渲染。
 
 [登录验证码布局验收](handoff/login-captcha-verification.md)：登录页把图片与输入合并为一个同行、等高的双段验证控件，刷新期间保留原布局并显示真实加载状态；桌面、390px 和 320px 实页检查通过，评论验证码弹窗保持原布局。
@@ -234,7 +236,7 @@
 
 最新界面交付：[紧凑内容列表与编辑工具](decisions/0063-compact-content-lists-and-editor-tools.md)、[操作指南](development/content-management.md)及[实际验收](handoff/content-list-tools-verification.md)：封面缩略图、作者/分类/标签/评论/日期、明确搜索，以及链接弹层和统一短代码入口。
 
-最新设置交付：[桌面分区导航](decisions/0064-desktop-settings-section-navigation.md)、[运行指南](development/settings.md)与[实页验收](handoff/settings-section-navigation-verification.md)：站点/主题/系统设置共用右侧目录、锚点及滚动高亮。
+当前设置交付：[桌面分区导航](decisions/0064-desktop-settings-section-navigation.md)、[系统设置归并](decisions/0106-system-settings-captcha-and-grouped-navigation.md)、[运行指南](development/settings.md)与[实页验收](handoff/system-settings-captcha-navigation-verification.md)：验证码并入系统设置；站点/主题/系统设置共用右侧目录、锚点、滚动高亮及可选两级分组。
 
 最新多语言交付：[内容与设置指南](architecture/multilingual-content.md)、[ADR0066](decisions/0066-configurable-languages-and-grouped-translations.md)及[验收](handoff/multilingual-verification.md)已替代[ADR0065历史提案](decisions/0065-multilingual-content-entry-design.md)。语言数量可扩展，默认/中文前缀和标志可配置，译文与原文合并列表，前后台切换及独立发布已接通；程序包与内容语言仍分开管理。
 

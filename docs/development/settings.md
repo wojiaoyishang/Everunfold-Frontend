@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-版本：settings-runtime-17，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)与[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-18，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)与[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -12,12 +12,11 @@
 | `/admin/icons`            | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用                                                                                                                                          |
 | `/admin/media`            | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取                                                                                                |
 | `/admin/settings/theme`   | 公共宿主保留已安装主题切换；具体设置由当前主题目录的 `theme-settings.tsx` 动态提供。Argon 包含外观/横幅/字体/首页/文章显示/代码/背景，Paper 包含自己的纸张底色；不同主题分别保存                   |
-| `/admin/settings/captcha` | 本地图片/Google/Turnstile、登录与阅读/评论全局规则、API Key明确授权豁免和阅读侧请求限额；单篇覆盖见各编辑器                                                                                        |
-| `/admin/settings/system`  | 按稳定节点 ID 保存动态请求刷新间隔、超时、重试间隔、批处理窗口；查看期望/确认版本、重新同步；部署来源脱敏展示                                                                                      |
+| `/admin/settings/system`  | 验证码提供方与全局规则、API Key 明确授权豁免和请求限额；按稳定节点 ID 保存动态请求策略；查看期望/确认版本、重新同步；部署来源脱敏展示；旧 `/admin/settings/captcha` 跳转到验证码分区 |
 
 settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码与背景的主题 profile、`site.footer`、`site.author_tagline`和`site.glossary`，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON在读取时补默认值，文章内容和术语匹配结果不进入设置或正文快照。顶层`theme`是活动主题的兼容投影，权威分主题值在`theme_options[themeId]`。主题表单见[主题设置指南](theme-settings.md)，代码字体继续只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL。参数和加载规则见[代码指南](code-blocks.md)。
 
-现导航菜单也归主题 profile：`theme_options[themeId].navigation` 是当前主题的独立菜单；`site.navigation` 仅为旧数据兼容回退。外观分组中的“导航菜单”页面编辑当前主题，保存空数组也会作为明确选择保留，不退回到旧导航。后台“设置”组直接列出站点、验证码、邮件、应用接入、插件、运行和系统设置，不再使用二级抽屉；媒体/图标/字体归资源，术语和短代码归内容工具。
+现导航菜单也归主题 profile：`theme_options[themeId].navigation` 是当前主题的独立菜单；`site.navigation` 仅为旧数据兼容回退。外观分组中的“导航菜单”页面编辑当前主题，保存空数组也会作为明确选择保留，不退回到旧导航。后台“设置”组直接列出站点、邮件、应用接入、插件、运行和系统设置，不再使用二级抽屉；验证码归入系统设置，媒体/图标/字体归资源，术语和短代码归内容工具。
 
 设置投递接收器会校验当前锁定的契约。契约字段变化后必须重启 receiver，再让 Worker 重试待发送事件；否则事件会持续以 `receiver_http_409` 失败，而数据库中的设置保存仍可能已经成功。诊断时应分别检查“设置读取 revision”和“节点 delivery 状态”。插件目录使用无缓存完整响应，开发/生产轮询间隔分别为15/60秒，不再显示304。
 
@@ -90,9 +89,9 @@ settings.directory/
 
 ## 桌面分区导航（2026-11-05）
 
-站点、主题、系统三个设置页在1200px及以上提供右侧“快速导航”，点击跳到相应分区，滚动时高亮当前项。目录按页面实际分区生成；主题包含代码块。较窄屏幕隐藏目录，保留原表单。保存/撤销栏位于左侧正文列，目录不会遮挡设置。
+站点、主题、系统三个设置页在1200px及以上提供右侧“快速导航”，点击跳到相应分区，滚动时高亮当前项。目录按页面实际分区生成；主题包含代码块。系统设置按“节点与发布 / 验证码 / 部署信息”呈现一级分组和二级分区，其他未分组的页面保持平铺。较窄屏幕隐藏目录，保留原表单。保存/撤销栏位于左侧正文列，目录不会遮挡设置。
 
-链接使用稳定hash，可复制带分区的地址、刷新及前进后退，键盘Enter可定位并把焦点移到目标。导航不会保存设置或清空未保存输入；离开页面继续沿原有修改保护。新增分区需在SettingsSection提供唯一且稳定的id。具体展示、顶栏留白和页底短分区处理见[ADR0064](../decisions/0064-desktop-settings-section-navigation.md)，实页范围见[验收](../handoff/settings-section-navigation-verification.md)。
+链接使用稳定hash，可复制带分区的地址、刷新及前进后退，键盘Enter可定位并把焦点移到目标。异步分区尚未挂载时，首次 hash 恢复会等待目标出现，不会提前选中第一个分区。导航不会保存设置或清空未保存输入；离开页面继续沿原有修改保护。新增分区需在SettingsSection提供唯一且稳定的id，可选用group提供右侧一级分组。具体展示、顶栏留白和页底短分区处理见[ADR0064](../decisions/0064-desktop-settings-section-navigation.md)与[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)，实页范围见[验收](../handoff/system-settings-captcha-navigation-verification.md)。
 
 ## 按内容关联菜单
 
