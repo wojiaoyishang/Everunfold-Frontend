@@ -1584,7 +1584,7 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/architecture/admin-navigation.md` | `admin-navigation-8` | `d28b79a0ebd026cf29edab7c009e8398def850fb3c036e999c504cea55a5077b` |
 | `docs/architecture/multilingual-content.md` | `multilingual-content-translation-overrides-1` | `5c8145652c6c580586e4b952cbfe235bc830d5eaba8eeaaaf0a93794920e92d0` |
 | `docs/development/settings.md` | `settings-runtime-20` | `1ac0fbd109e111678a90d93c7dcc784e17ebda750fbafaecae6b613630339753` |
-| `docs/development/translations.md` | `translations-runtime-1` | `1ad498118c7084e5ee6386523f27f5af34d79b9df88132c7fdd8b6e3f0928baa` |
-| `docs/decisions/0111-sparse-custom-translation-overrides.md` | `ADR0111-1` | `3540351d77edb795e83b8f436cf2849cef4d14da11a8d5c07f89a7eeeaef298e` |
+| `docs/development/translations.md` | `translations-runtime-1` | `557f5205fb6f3666d41262c03c49393660b9c28f6cafb84d478124ac57e516b3` |
+| `docs/decisions/0111-sparse-custom-translation-overrides.md` | `ADR0111-1` | `736be599e8d5d380c927842666f9293d7825e7dfec8129304ea9d8c349cb953a` |
 | `docs/handoff/translation-overrides-verification.md` | `translation-overrides-verification-1` | `87be1ad185b412e4ae43a68b1395fbc694aaf18e179b1d4ab22f95bdad1f7ffe` |
 | `contracts/settings-v1.schema.json` | `settings-v1-1.30.0` | `fd1f6a0f430f035a4ec8d10956e72fe088c1a2f35396b13457161f0ba8458040` |

@@ -30,7 +30,7 @@
   → 源码默认文案
 ```
 
-前端基础 JSON 位于 `src/core/i18n/en.json` 和中文源码默认值。数据库只保存覆盖行，不重写文件。公开/后台覆盖通过 `PublicSettings.translations` 随可靠设置快照分发；节点确认新的设置修订后才应用。后端消息覆盖保存在进程缓存，每30秒与 PostgreSQL 对齐。
+前端基础 JSON 位于 `src/core/i18n/en.json` 和中文源码默认值。数据库只保存覆盖行，不重写文件。公开/后台覆盖通过 `PublicSettings.translations` 随可靠设置快照分发；节点确认新的设置修订后才应用。后端消息覆盖保存在进程缓存，每30秒与 PostgreSQL 对齐。请求同时发送实际语言 `X-Site-Locale` 和基础界面语言 `X-Site-UI-Locale`，覆盖缺失时回退到基础界面包。
 
 覆盖值最多4000字符，仅支持纯文本和当前 `{name}` 占位符，不允许 HTML 或脚本。占位符集合不一致时后端拒绝保存。
 
