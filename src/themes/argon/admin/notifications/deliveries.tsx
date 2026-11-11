@@ -106,7 +106,7 @@ export function NotificationDeliveriesPage() {
         }
       />
       {unknown > 0 && (
-        <div className={styles.message} role="status">
+        <div className={styles.message} data-tone="warning" role="status">
           <Icon name="eye-off" />
           <UiText
             text="{count} 条投递结果未知，请结合平台后台人工核对。"

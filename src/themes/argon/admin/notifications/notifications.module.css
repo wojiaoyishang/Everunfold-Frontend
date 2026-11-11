@@ -194,6 +194,11 @@
   color: var(--admin-danger);
 }
 
+.message[data-tone="warning"] {
+  background: color-mix(in srgb, var(--admin-warning) 10%, var(--admin-canvas));
+  color: var(--admin-warning);
+}
+
 .platformTabs {
   display: flex;
   flex-wrap: wrap;

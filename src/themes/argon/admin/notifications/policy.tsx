@@ -288,9 +288,9 @@ export function NotificationPolicyPage() {
         action={
           <Button
             className="admin-button"
-            disabled={editor.loading || editor.busy}
+            disabled={editor.loading || editor.busy || dirty}
             onClick={() => {
-              if (!dirty) void editor.reload();
+              void editor.reload();
             }}
           >
             <Icon name="refresh" />
