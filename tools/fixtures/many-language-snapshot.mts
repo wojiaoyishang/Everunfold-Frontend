@@ -110,7 +110,7 @@ for (const [index, kind, count] of [
         translation_group_id: `00000000-0000-0000-0000-${String(index).padStart(12, "0")}`,
         translations: members,
         cover_url:
-          kind === "article" ? "/reference/everunfold-night-camp.webp" : null,
+          kind === "article" ? "/themes/argon/auth/night-camp.webp" : null,
         content: [
           {
             id: `${member.id}-body`,

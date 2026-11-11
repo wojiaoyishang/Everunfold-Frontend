@@ -1,0 +1,10 @@
+{
+  "purpose": "Paper theme-owned visual assets",
+  "assets": [
+    {
+      "file": "preview.svg",
+      "source": "Everunfold theme metadata preview",
+      "note": "Theme-card diagram; no content data."
+    }
+  ]
+}

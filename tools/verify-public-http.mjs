@@ -197,14 +197,14 @@ assert.deepEqual((await ready.json()).data, {
   cache_receiver: false,
 });
 const background = await fetch(
-  new URL("/reference/campfire-background.webp", origin),
+  new URL("/themes/argon/background/campfire.webp", origin),
   { method: "HEAD" },
 );
 assert.equal(background.status, 200);
 assert.ok(background.headers.get("content-type")?.startsWith("image/"));
 for (const sticker of ["dinosaur/1", "dinosaur/16", "flower/1", "flower/14"]) {
   const response = await fetch(
-    new URL(`/reference/stickers/${sticker}.jpg`, origin),
+    new URL(`/themes/argon/stickers/${sticker}.jpg`, origin),
     { method: "HEAD" },
   );
   assert.equal(response.status, 200);

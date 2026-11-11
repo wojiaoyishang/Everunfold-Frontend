@@ -26,6 +26,7 @@ import { FontField } from "./admin/fonts/font-field";
 import { useFontLibrary } from "@/core/fonts/library";
 import { CodeSettingsSection } from "./admin/settings/code-settings";
 import { UiText } from "@/core/i18n/provider";
+import { argonAssetUrl } from "./assets";
 
 const palette = ["#673bb7", "#3865b9", "#397566", "#ad466f", "#a26032"];
 const articleToggles: readonly [keyof ArticleDisplayPreferences, string][] = [
@@ -48,9 +49,17 @@ export default function ArgonThemeSettings() {
   const theme = themeProfile(draft, themeId);
   if (!draft || !theme) return null;
   const update = (value: Partial<ThemePreferences>) =>
-    setDraft((current) =>
-      current ? updateThemeProfile(current, themeId, value) : current,
-    );
+    setDraft((current) => {
+      if (!current) return current;
+      const normalized = { ...value };
+      if (!("background_url" in value))
+        normalized.background_url = argonAssetUrl(theme.background_url);
+      if (!("background_video_url" in value))
+        normalized.background_video_url = argonAssetUrl(
+          theme.background_video_url,
+        );
+      return updateThemeProfile(current, themeId, normalized);
+    });
   const article = theme.article;
   const updateArticle = (patch: Partial<ArticleDisplayPreferences>) =>
     update({ article: { ...article, ...patch } });
@@ -256,7 +265,7 @@ export default function ArgonThemeSettings() {
           mediaId={theme.background_media_id}
           label="背景图片地址"
           hint="留空时使用主题内置背景。"
-          value={theme.background_url}
+          value={argonAssetUrl(theme.background_url)}
           onChange={(background_url, background_media_id) =>
             update({ background_url, background_media_id })
           }
@@ -266,7 +275,7 @@ export default function ArgonThemeSettings() {
           mediaId={theme.background_video_media_id}
           label="背景视频地址"
           hint="支持浏览器可播放的视频；留空后只显示静态背景。"
-          value={theme.background_video_url}
+          value={argonAssetUrl(theme.background_video_url)}
           onChange={(background_video_url, background_video_media_id) =>
             update({ background_video_url, background_video_media_id })
           }

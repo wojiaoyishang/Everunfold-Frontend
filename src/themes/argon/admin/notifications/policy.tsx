@@ -308,7 +308,7 @@ export function NotificationPolicyPage() {
           <UiText text={editor.error} />
         </div>
       ) : (
-        <>
+        <div className={styles.workspace}>
           {editor.error && (
             <div className={styles.message} data-error="true" role="alert">
               <Icon name="warning" />
@@ -372,7 +372,7 @@ export function NotificationPolicyPage() {
               </Button>
             </div>
           </div>
-        </>
+        </div>
       )}
     </SettingsLayout>
   );

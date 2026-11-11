@@ -324,7 +324,7 @@ export async function verifyReaderRuntime({
       );
       assert.match(
         html,
-        /\/reference\/everunfold-night-camp\.webp/,
+        /\/themes\/argon\/auth\/night-camp\.webp/,
         "Authentication gates must use the supplied night-camp background",
       );
       assert.equal(

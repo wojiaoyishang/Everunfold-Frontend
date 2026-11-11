@@ -22,6 +22,7 @@ import { ExtensionComponent } from "@/core/extensions/components";
 import { ThemeSlot } from "@/core/themes/presentation";
 import { themeProfile } from "@/core/settings/theme-options";
 import { GlossaryHooks } from "./glossary-hooks";
+import { argonAssets, argonAssetUrl } from "../assets";
 
 export function BlogShell({
   site,
@@ -58,8 +59,10 @@ export function ShellFrame({ children }: { children: ReactNode }) {
       accent: theme?.accent ?? "#673bb7",
     });
   }, [theme?.mode, theme?.accent]);
-  const background =
-    resourceUrl(site.hero_url) ?? "/reference/campfire-background.webp";
+  const background = argonAssetUrl(
+    resourceUrl(site.hero_url) ?? argonAssets.backgroundImage,
+  );
+  const backgroundVideo = argonAssetUrl(theme?.background_video_url ?? "");
   const themeFont =
     theme?.font_media_id && theme.font_url && theme.font_info
       ? fontFace(theme.font_media_id, {
@@ -92,9 +95,9 @@ export function ShellFrame({ children }: { children: ReactNode }) {
           />
         )}
         <BackgroundVideoProvider
-          key={theme?.background_video_url}
+          key={backgroundVideo}
           poster={background}
-          source={theme?.background_video_url}
+          source={backgroundVideo}
           defaultPlay={theme?.background_play}
         >
           <HomeFeedPreference />

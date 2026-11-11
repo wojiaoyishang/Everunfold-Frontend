@@ -1,10 +1,11 @@
 import type { ThemeDefinition } from "@/core/extensions/types";
+import { argonAssets } from "./assets";
 
 export default {
   id: "argon",
   title: "Argon",
   description: "博客阅读界面，包含文章、说说与插件页面。",
-  preview: "/reference/themes/argon.svg",
+  preview: argonAssets.preview,
   author: {
     name: "Everunfold contributors",
     url: "https://github.com/wojiaoyishang",

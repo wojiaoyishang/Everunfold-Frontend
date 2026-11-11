@@ -16,8 +16,9 @@ import {
   setPlaybackPreference,
   subscribePlaybackPreference,
 } from "@/core/browser/playback-preference";
+import { argonAssets } from "../assets";
 
-const VIDEO_SOURCE = "/reference/campfire-background.webm";
+const VIDEO_SOURCE = argonAssets.backgroundVideo;
 function subscribeVisibility(listener: () => void) {
   document.addEventListener("visibilitychange", listener);
   return () => document.removeEventListener("visibilitychange", listener);

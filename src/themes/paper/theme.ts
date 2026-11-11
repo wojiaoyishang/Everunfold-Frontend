@@ -6,7 +6,7 @@ export default {
   id: "paper",
   title: "Paper",
   description: "继承 Argon 的简约子主题，适合二次开发。",
-  preview: "/reference/themes/paper.svg",
+  preview: "/themes/paper/preview.svg",
   author: {
     name: "Everunfold contributors",
     url: "https://github.com/wojiaoyishang",

@@ -42,3 +42,4 @@ Thumbs.db
 
 # Installed plugin packages and all derived artifacts are local.
 /plugins/
+/public/themes/

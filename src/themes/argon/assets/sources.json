@@ -1,0 +1,255 @@
+{
+  "purpose": "Argon theme-owned visual assets",
+  "assets": [
+    {
+      "file": "background/campfire.webp",
+      "source": "https://lovepikachu.top/wp-content/uploads/2024/11/04f54fe00c879791833b92f487ba9d2f.jpg.webp",
+      "sha256": "dd7da073bb2ac0de90e3cbfee2b18f287bbd3a95d94284d6654c0c06e01e7fb1",
+      "bytes": 64310,
+      "note": "Copied byte-for-byte from the provided WordPress backup."
+    },
+    {
+      "file": "auth/night-camp.webp",
+      "source": "User-supplied deterministic Canvas scene everunfold-night-camp.html; source HTML is not committed.",
+      "sha256": "adc1e8bdc5eddb7c60a143491ec14395a12a7dbc837c98be3301c8e71e628288",
+      "bytes": 67952,
+      "media": {
+        "container": "webp",
+        "width": 2560,
+        "height": 1600
+      },
+      "note": "Exported from the supplied deterministic Canvas scene and used as the management-entry background; no external image requests."
+    },
+    {
+      "file": "background/campfire.webm",
+      "source": "Provided WordPress backup: Yishang's Campfire (梦吃丘) – 最爱皮卡丘.webm",
+      "sha256": "9b995dd979d5b7a4ab428fd5074df35ed144e58241f86c2cfeaddefd49f6cdab",
+      "bytes": 1509870,
+      "media": {
+        "container": "webm",
+        "video_codec": "vp9",
+        "width": 3200,
+        "height": 2400,
+        "frames_per_second": 25,
+        "duration_seconds": 5,
+        "audio": false
+      },
+      "note": "Original star-field background copied byte-for-byte; no transcoding or extension change."
+    },
+    {
+      "file": "stickers/dinosaur/1.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/1.jpg",
+      "sha256": "629e9124488997a81246f5a68538597cc06927c39785dfed108786bf7e4fcf51",
+      "bytes": 10072,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/10.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/10.jpg",
+      "sha256": "56ab3c2fa4fdd5cb2572eefa0c3a80d99c09cb4354e3bfdd480c1300d4dd98cc",
+      "bytes": 9251,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/11.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/11.jpg",
+      "sha256": "54b57bfbac477c149f6f6d9100c35811da18dbfc426873ef41b1adda563c7441",
+      "bytes": 8438,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/12.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/12.jpg",
+      "sha256": "f50857a9e9cb246b02b999bdd0ad5c9b3fff97a97e55930a6f963e6c53f12a2b",
+      "bytes": 8923,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/13.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/13.jpg",
+      "sha256": "6c0e222670e5e83766ea347aa286a5caf7da8a5062f923bb77e786f20bb3d89f",
+      "bytes": 8219,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/14.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/14.jpg",
+      "sha256": "461c617f8124e94db3ece905e18db976e516038fd25966f89f7a5314b8430ef1",
+      "bytes": 10158,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/15.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/15.jpg",
+      "sha256": "82e9d538a83c68e77d5740a6517edabe6f9bb0faa83185df8124b0dcc480d267",
+      "bytes": 10139,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/16.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/16.jpg",
+      "sha256": "d035deb6179c079605f615ed6832729505e094a1a57ea683d807f53a61e22edf",
+      "bytes": 9875,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/2.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/2.jpg",
+      "sha256": "956a7eaaffb7443a5b17ea94d3a8585fe4890e6656369208c6857414ab118399",
+      "bytes": 8853,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/3.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/3.jpg",
+      "sha256": "100fa6ecf8df376c2e665ced4d6135351bbd1cfdfce8599589e511fa393484a2",
+      "bytes": 10275,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/4.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/4.jpg",
+      "sha256": "82ecaf9ee6a80d949e761be76a621f65c51f0b3740dbb42dcafb55bf226d157a",
+      "bytes": 8524,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/5.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/5.jpg",
+      "sha256": "1b7a26386e4064294056c52b92d7fc13d8da0f1e1d01cc77e96b89741c5a089e",
+      "bytes": 10131,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/6.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/6.jpg",
+      "sha256": "0e93ff730ff7f75f6c827e7d4c48fbe91bd43edf3da6003fd9d64dd24669154e",
+      "bytes": 10761,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/7.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/7.jpg",
+      "sha256": "2f5757e34d0b92ed6f046b53576e17280a671d382daf7148936d1d50155df75d",
+      "bytes": 11971,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/8.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/8.jpg",
+      "sha256": "70a5660ffae1872cacf98520d9817fc80a7b534aee27d0f238871ee1beefe1dd",
+      "bytes": 10020,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/dinosaur/9.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/dinosaur/9.jpg",
+      "sha256": "1549912b71e3214032fefc5fba081d0589a8484fcf995cbde877695611a81dec",
+      "bytes": 10320,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/1.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/1.jpg",
+      "sha256": "24e2906f9ffa81326863874405e233612d8d1d3a1dfaae53d6f15c867a665c16",
+      "bytes": 16961,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/10.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/10.jpg",
+      "sha256": "11734d04a443168a7f3233ebb471811c60c03635fec228bf8c649ea5b9f7c751",
+      "bytes": 18814,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/11.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/11.jpg",
+      "sha256": "50c446f31f36c400a1d752a24940faccbe390bfa3aa26d5c994f2cb5cc33f00c",
+      "bytes": 10663,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/12.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/12.jpg",
+      "sha256": "496042fc564e8fb617c238fc894b23a37c149277c17abcc07e4cf2139ec3deb5",
+      "bytes": 13752,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/13.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/13.jpg",
+      "sha256": "f10733bddc5de84d6364e6a1a7ba944181bfe2bd2e4ff9085c1cddd9fede8d0b",
+      "bytes": 12099,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/14.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/14.jpg",
+      "sha256": "89f2172f6ef7aeeb264316f807d0e7e894f0336415719a63f0dd2e1774108d42",
+      "bytes": 11169,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/2.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/2.jpg",
+      "sha256": "c6749c1849d5f5cd083e63ba37f15fe16c01a84ac8385bec39fec5cb788503e5",
+      "bytes": 15287,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/3.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/3.jpg",
+      "sha256": "eb51d99b1243b3bf6c265db76035225bb4f2026bea71952cfd729d5e25b1edcb",
+      "bytes": 14107,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/4.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/4.jpg",
+      "sha256": "383d15652b3293c4c33bac9a75db8adc7f5302567c75c46a601c291b9eb64ce2",
+      "bytes": 12641,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/5.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/5.jpg",
+      "sha256": "842d46f0605b792528c241fb2f3a783af5e530a18178f2524577432d67c38179",
+      "bytes": 16261,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/6.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/6.jpg",
+      "sha256": "248b8fa051802cccfbec2ecbb3c5c1adb397c2d8421594893f1edae26ec4d0e5",
+      "bytes": 14075,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/7.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/7.jpg",
+      "sha256": "f91232354ba522702621ba67018579b6c7c4880dd1d39ee2c577a0047651b4b1",
+      "bytes": 11618,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/8.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/8.jpg",
+      "sha256": "d4699691b37847637fe95ee0d4d317f841f627c30da6ea732819fddc6f89e57e",
+      "bytes": 14689,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "stickers/flower/9.jpg",
+      "source": "Provided WordPress backup: wp-content/themes/argon/stickers/flower/9.jpg",
+      "sha256": "98efad478d96bf41f95235366be827ecab30cda38d47218cbe220fbd738d8bb4",
+      "bytes": 13590,
+      "note": "Copied byte-for-byte from the provided theme; original sticker attribution retained in the picker."
+    },
+    {
+      "file": "preview.svg",
+      "source": "Everunfold theme metadata preview",
+      "note": "Theme-card diagram; no content data."
+    }
+  ]
+}

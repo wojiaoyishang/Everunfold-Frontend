@@ -10,7 +10,7 @@ test("comment Markdown shares a safe, closed vocabulary for preview and display"
       Fragment,
       null,
       commentMarkdown(
-        "**文字**\n\n- 第一项\n- [链接](https://example.com)\n\n```js\nconst n = 1;\n```\n\n![微笑](/reference/stickers/flower/1.jpg)",
+        "**文字**\n\n- 第一项\n- [链接](https://example.com)\n\n```js\nconst n = 1;\n```\n\n![微笑](/themes/argon/stickers/flower/1.jpg)",
       ),
     ),
   );

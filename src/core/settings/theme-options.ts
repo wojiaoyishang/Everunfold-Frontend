@@ -59,7 +59,7 @@ const defaults: RuntimeThemePreferences = {
   background_media_id: "",
   background_video_media_id: "",
   background_url: "",
-  background_video_url: "/reference/campfire-background.webm",
+  background_video_url: "/themes/argon/background/campfire.webm",
   background_play: true,
   paper_tone: "ivory",
 };

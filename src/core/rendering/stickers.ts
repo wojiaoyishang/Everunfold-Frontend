@@ -45,7 +45,7 @@ export const stickerGroups = [
   ...group,
   items: group.names.map((name, i) => ({
     label: `${group.label}·${name}`,
-    src: `/reference/stickers/${group.id}/${i + 1}.jpg`,
+    src: `/themes/argon/stickers/${group.id}/${i + 1}.jpg`,
   })),
 }));
 export const stickerSources = new Set(

@@ -38,9 +38,10 @@
     "plugins:build": "node --import tsx tools/plugins/build.mjs",
     "plugins:typecheck": "tsc --noEmit -p tsconfig.plugins.json",
     "themes:catalog": "tsx tools/plugins/theme-catalog.mts",
+    "themes:assets": "node tools/theme-assets.mjs",
     "build:host": "npm run prepare:host && next build",
     "pretest": "npm run plugins:build",
-    "prepare:host": "npm run contracts:prepare && npm run failure:generate && npm run features:assets && npm run themes:catalog",
+    "prepare:host": "npm run contracts:prepare && npm run failure:generate && npm run features:assets && npm run themes:catalog && npm run themes:assets",
     "extensions:register": "tsx tools/register-pages.mts"
   },
   "dependencies": {

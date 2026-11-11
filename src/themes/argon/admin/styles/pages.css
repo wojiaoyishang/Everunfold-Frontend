@@ -142,12 +142,6 @@
 .admin-table-scroll {
   overflow-x: auto;
 }
-.admin-media-collection {
-  border-top: 1px solid var(--admin-border);
-}
-.admin-media-collection > .admin-preparation {
-  min-height: 330px;
-}
 .admin-access {
   display: grid;
   place-items: center;

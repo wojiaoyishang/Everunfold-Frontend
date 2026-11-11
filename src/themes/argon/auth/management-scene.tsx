@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { argonAssets } from "../assets";
 
 const stars = [
   [282, 174, 2.1, 0.2],
@@ -41,7 +42,7 @@ export function ManagementScene() {
           {/* The source Canvas already applies one uniform blur to the complete scene. */}
           <Image
             className="management-star-sky"
-            src="/reference/everunfold-night-camp.webp"
+            src={argonAssets.managementScene}
             alt=""
             fill
             priority

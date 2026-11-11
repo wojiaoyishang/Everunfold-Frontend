@@ -11,7 +11,7 @@ test("theme deployment metadata preserves authors and artwork without exporting 
     parent: "argon",
     title: "Paper",
     description: "A child theme",
-    preview: "/reference/themes/paper.svg",
+    preview: "/themes/paper/preview.svg",
     author: { name: "A developer", url: "https://example.test/author" },
     homepage: "https://example.test/theme",
     repository: "https://example.test/source",
@@ -23,7 +23,7 @@ test("theme deployment metadata preserves authors and artwork without exporting 
   const snapshot = structuredClone(source);
   const exported = themeMetadata(source);
   assert.deepEqual(exported.author, source.author);
-  assert.equal(exported.preview, "/reference/themes/paper.svg");
+  assert.equal(exported.preview, "/themes/paper/preview.svg");
   assert.equal(exported.license, "Custom license");
   assert.equal("components" in exported, false);
   assert.equal("templates" in exported, false);
