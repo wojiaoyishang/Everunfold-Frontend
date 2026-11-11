@@ -1,6 +1,6 @@
 # 通知系统与通知模板验收
 
-版本：notifications-verification-1，2026-11-11。对应[ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[开发指南](../development/notifications.md)。
+版本：notifications-verification-3，2026-11-11。对应[ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[开发指南](../development/notifications.md)。事件扩展的后续验收见[消息总线事件验收](notification-bus-events-verification.md)。
 
 ## 交付范围
 

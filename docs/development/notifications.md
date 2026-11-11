@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-9，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
+版本：notifications-10，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
 
 ## 概念
 
@@ -21,8 +21,28 @@
 - 模板正文使用共享编辑器。站内通知只编辑纯文本；邮件平台通过独立“启用 HTML”开关控制HTML发送，开启后可切换“可视化 / HTML源码”，关闭时保留HTML内容。可视化编辑器始终显示变量占位符。
 - 默认邮件模板采用后台一致的简约卡片：中性背景、细分隔线、小图形标识和少量主题色，不依赖外链图片；HTML源码按层级缩进并逐行展开，便于直接维护。
 - 评论进入待审核状态时发布 `comment.pending_review`。
+- 定时发布完成时发布 `content.scheduled_published`，计划发布失败时发布 `content.schedule_failed`；两者与发布状态、审计和去重键同事务。
+- 设置或内容快照投递在达到最大尝试次数后发布一次 `settings.delivery_failed`。中间重试不逐个发布事件，避免一次节点离线产生通知风暴。
 - 站内通知写入 Inbox；邮件平台复用现有 SMTP 配置。
 - 投递记录区分 `pending`、`sending`、`sent`、`failed`、`unknown`、`suppressed`。
+
+## 内置事件
+
+| 事件 | 时机 | 建议用途 | 去重边界 |
+| --- | --- | --- | --- |
+| `comment.pending_review` | 评论进入待审核队列 | 即时站内；需要时邮件 | 评论操作 ID |
+| `content.scheduled_published` | 定时内容成功发布 | 可选的成功确认 | 草稿、排期运行与事件类型 |
+| `content.schedule_failed` | 权限失效、路径冲突或内容校验失败 | 优先邮件或站内告警 | 草稿、排期运行与事件类型 |
+| `settings.delivery_failed` | 前端节点在最大重试次数后仍未应用快照 | 运维告警 | 单条同步投递记录 |
+
+事件目录由后端注册，后台策略页自动出现。事件只有配置了启用的路由才会生成投递；接收人可使用用户、角色或权限，平台可使用站内、邮件或已同步的插件渠道。账号注册、找回密码和邮箱验证不属于本轮业务总线事件。
+
+## 告警节奏
+
+- 即时事件用于“错过会阻碍运营”的故障，例如评论待审核、计划发布失败和节点持续同步失败。
+- 成功确认适合可选订阅，不应默认向所有成员发送。
+- 高频或可自愈的过程只记录运行状态；只有达到明确阈值后，才生成一次聚合事件。
+- 普通保存、媒体上传、浏览量变化和每一次后台重试不发送提醒。
 
 ## 模板语法
 

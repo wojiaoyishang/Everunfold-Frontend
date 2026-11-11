@@ -1682,3 +1682,17 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/design/notification-html-template-editor.png`               | `notification-html-template-editor-8` | `c010d1973a6291fd95508ada6247f250ec9300a59de102fb8c649d76d0490b5d` |
 | `docs/design/notification-default-email-template.png`             | `notification-default-email-template-2` | `6029697319b9ac7f1f6432f19155d74276590e7b60c9b8fdf55fcde3d38775ee` |
 | `contracts/notifications-v1.schema.json`                          | `notifications-v1-1.3.0`              | `fff193584b1292abc653021251bd02331ea2e0fb84444c4744f10e70b648e4ce` |
+
+## 消息总线业务事件（2026-11-11）
+
+定时发布成功/失败和前端节点最终同步失败进入统一通知事件目录；计划发布事件与内容状态、审计同事务，节点同步只在重试耗尽后告警一次。后台按事件配置接收人、平台、语言与发信配置，账号流程不并入本轮总线。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-notification-bus-events-1` | `e9c4e18f526f3bee2da1a90d31899fcd440c2d549fb08302ec566484fa53f4ae` |
+| `docs/development/notifications.md` | `notifications-10` | `3abc537f9bff02ed405049dd3f5b69fd4bd2108e03f116648ec62df828581286` |
+| `docs/decisions/0113-notification-events-platforms-and-templates.md` | `ADR0113-4` | `2dff2803799bb73b75323af096ccf41739b8a540e728d440bcfec6f8a4768c22` |
+| `docs/handoff/notifications-verification.md` | `notifications-verification-3` | `f30b4dc5c9aef7c223001ad560510ec889b5a5d1158f3e92294c2354e1b00f7d` |
+| `docs/handoff/notification-bus-events-verification.md` | `notification-bus-events-verification-1` | `c563c750abfd274b091d07d0734b47caec08f22caac33388b116ceff5bcd93cf` |
+| `docs/design/notification-bus-policy.png` | `notification-bus-policy-1` | `94ad707fae8c78a199dbacf9095afbb802ee807679856af17263d577c238e426` |
+| `docs/design/notification-bus-template-preview.png` | `notification-bus-template-preview-1` | `b49da8a62637e5c8e87993cf8a0a2454567843f04dd61506191cacbf730f5b35` |
