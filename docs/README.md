@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[多邮件发信配置](development/mail.md)、[ADR0116](decisions/0116-multiple-mail-sender-profiles.md)及[验收](handoff/multi-mail-profile-verification.md)：邮件配置并入“通知与消息 → 通知平台”，每站可维护最多20套 SMTP 发信身份；提醒规则可选择具体配置，未选择时使用默认配置。投递会快照配置身份和修订，停用、删除或配置变化不会静默换号；旧单配置自动兼容，原邮件设置入口保留隐藏跳转。
+
 [账号邮箱验证与用户管理确认](development/accounts.md)、[ADR0115](decisions/0115-account-email-verification-and-admin-mutations.md)及[验收](handoff/email-verification-and-account-states-verification.md)：账号中心通过Worker发送6位一次性邮箱验证码，成功后持久化验证状态；修改邮箱自动失活。管理员创建/编辑用户不再要求当前密码，但保留Session、CSRF、权限、事务锁、修订和审计。账号加载/失败状态改为居中状态卡。
 
 [通知投递诊断与语言旗帜](handoff/notification-delivery-language-verification.md)：投递记录直接显示抑制原因和账号邮箱配置入口；语言使用共享旗帜组件。最近一次评论邮件未发送的实际原因是`admin`账号未配置邮箱，SMTP与通知事件均正常。

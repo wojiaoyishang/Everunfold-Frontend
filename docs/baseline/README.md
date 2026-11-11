@@ -1652,3 +1652,18 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/handoff/email-verification-and-account-states-verification.md`   | `email-verification-and-account-states-verification-1` | `abbcb70bb25824d2156461ba71fd8b4c6af8b5084f8e003e9c6b000ebf3fdc5c` |
 | `docs/handoff/notifications-verification.md`                           | `notifications-verification-2`                   | `48b52d62a33c0b1572030344ad22fdd338b2427e02e5c07dc45545a41997c2a5` |
 | `contracts/accounts-v1.schema.json`                                    | `accounts-v1-1.6.0`                              | `1aa14d4cebcd41887540b2d1d7943fd3734ead1d3b67b8a4e217c40462bfa180` |
+
+## 多邮件发信配置与提醒路由（2026-11-11）
+
+邮件配置并入通知平台，支持多套 SMTP 发信身份；提醒规则可选择默认或具体配置，投递快照配置身份与修订，旧单配置兼容迁移。后端`837c8d8`、`settings-v1 1.32.0`、`notifications-v1 1.1.0`、迁移`0046_multiple_mail_profiles`。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件                                                              | 版本                                  | SHA256                                                             |
+| ----------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------ |
+| `docs/README.md`                                                  | `index-mail-profiles-1`               | `385c45461a7c2ea5e55526e418430c2d540742d77447e97e51fe92afce229762` |
+| `docs/architecture/admin-navigation.md`                           | `admin-navigation-10`                 | `4574d0dcd930347ef0838f1ee65bf25f0b8a4c33e2202cceddfd3b028bb1ca5d` |
+| `docs/development/mail.md`                                        | `mail-6`                              | `9782fba6ea2b497b705dacca38ba113b3144376c83f1adf4bb3b8aace359c987` |
+| `docs/decisions/0116-multiple-mail-sender-profiles.md`             | `ADR0116-1`                           | `f61f4c18eb342cb218de350ddbf9a3f3406c6f4bf9c5006d5c5d1e368b43bc66` |
+| `docs/handoff/multi-mail-profile-verification.md`                  | `multi-mail-profile-verification-1`   | `f995c0a2adc7b360fa2ad921af59eef52ea418631147883f81e465ef9ff84493` |
+| `docs/design/mail-profiles-notification-platform.png`              | `mail-profiles-notification-platform-1` | `84dfae53f098775c7173cd3704366b8854aa63bf8e1d0769e92b688b96d637e9` |
+| `contracts/notifications-v1.schema.json`                           | `notifications-v1-1.1.0`              | `2f494b50fce802e0af12b6b7d30db7a9bdb8f1575abe5980d1c64b42b66834bc` |
+| `contracts/settings-v1.schema.json`                                | `settings-v1-1.32.0`                  | `c890a9cd75b714ae2ff8741ac52b5ed49c69453acbc486cb189f342d8ea770b3` |
