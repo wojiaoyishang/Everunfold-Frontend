@@ -23,17 +23,14 @@ import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { SettingsLayout } from "../settings/section-navigation";
+import {
+  NotificationVariableValues,
+  notificationSampleValues,
+} from "./variable-values";
 import styles from "./notifications.module.css";
 
 type DraftMap = Record<string, SaveNotificationTemplate>;
 
-const sampleData: Record<string, string> = {
-  "actor.name": "小灵",
-  "content.excerpt": "这是一条刚刚提交、正在等待审核的评论。",
-  "resource.title": "示例文章",
-  "resource.url": "/posts/example",
-  "resource.review_url": "/admin/comments",
-};
 const textLanguage: Extension = [];
 const emailHtmlLanguage = htmlLanguage();
 
@@ -41,10 +38,10 @@ function identity(event: string, platform: string, locale: string) {
   return `${event}\0${platform}\0${locale}`;
 }
 
-function interpolate(value: string) {
+function interpolate(value: string, values: Record<string, string>) {
   return value.replace(
     /\{\{\s*([a-zA-Z_][a-zA-Z0-9_.]*)\s*\}\}/g,
-    (_match, key: string) => sampleData[key] ?? "",
+    (_match, key: string) => values[key] ?? "",
   );
 }
 
@@ -57,10 +54,10 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;");
 }
 
-function interpolateHtml(value: string) {
+function interpolateHtml(value: string, values: Record<string, string>) {
   return value.replace(
     /\{\{\s*([a-zA-Z_][a-zA-Z0-9_.]*)\s*\}\}/g,
-    (_match, key: string) => escapeHtml(sampleData[key] ?? ""),
+    (_match, key: string) => escapeHtml(values[key] ?? ""),
   );
 }
 
@@ -73,8 +70,8 @@ function plainToEmailHtml(value: string) {
     .join("\n");
 }
 
-function htmlPreviewDocument(value: string) {
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>body{margin:0;padding:14px;color:#20252d;background:#fff;font:14px/1.7 system-ui,sans-serif}img{max-width:100%;height:auto}table{max-width:100%;border-collapse:collapse}td,th{padding:6px 8px}</style></head><body>${interpolateHtml(value)}</body></html>`;
+function htmlPreviewDocument(value: string, values: Record<string, string>) {
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>body{margin:0;padding:14px;color:#20252d;background:#fff;font:14px/1.7 system-ui,sans-serif}img{max-width:100%;height:auto}table{max-width:100%;border-collapse:collapse}td,th{padding:6px 8px}</style></head><body>${interpolateHtml(value, values)}</body></html>`;
 }
 
 function draftFrom(view: NotificationTemplateView): SaveNotificationTemplate {
@@ -137,6 +134,9 @@ export function NotificationTemplatesPage() {
   const [platformId, setPlatformId] = useState("in-app");
   const [locale, setLocale] = useState("");
   const [htmlView, setHtmlView] = useState<"visual" | "source">("visual");
+  const [previewValues, setPreviewValues] = useState<Record<string, string>>({
+    ...notificationSampleValues,
+  });
   const bodyEditor = useRef<SourceEditorHandle | null>(null);
   const [draftStore, setDraftStore] = useState<{
     revision: number;
@@ -428,7 +428,10 @@ export function NotificationTemplatesPage() {
                           className={styles.bodyVisualPreview}
                           title={t("邮件 HTML 可视化预览")}
                           sandbox=""
-                          srcDoc={htmlPreviewDocument(draft.html ?? "")}
+                          srcDoc={htmlPreviewDocument(
+                            draft.html ?? "",
+                            previewValues,
+                          )}
                         />
                       ) : (
                         <CodeEditor
@@ -488,10 +491,12 @@ export function NotificationTemplatesPage() {
                         </span>
                       </div>
                       <div className={styles.previewSubject}>
-                        {interpolate(draft.subject ?? "") || t("未填写主题")}
+                        {interpolate(draft.subject ?? "", previewValues) ||
+                          t("未填写主题")}
                       </div>
                       <pre className={styles.previewBody}>
-                        {interpolate(draft.text ?? "") || t("未填写正文")}
+                        {interpolate(draft.text ?? "", previewValues) ||
+                          t("未填写正文")}
                       </pre>
                     </section>
                   )}
@@ -539,17 +544,22 @@ export function NotificationTemplatesPage() {
                   <section className={styles.panel}>
                     <div className={styles.panelHeading}>
                       <h3>
-                        <UiText text="变量预览" />
+                        <UiText text="变量填充" />
                       </h3>
                     </div>
-                    <dl className={styles.metaList}>
-                      {event.variables.map((variable) => (
-                        <div key={variable}>
-                          <dt>{`{{${variable}}}`}</dt>
-                          <dd>{sampleData[variable] || t("按事件提供")}</dd>
-                        </div>
-                      ))}
-                    </dl>
+                    <NotificationVariableValues
+                      variables={event.variables}
+                      values={previewValues}
+                      onChange={(variable, value) =>
+                        setPreviewValues((current) => ({
+                          ...current,
+                          [variable]: value,
+                        }))
+                      }
+                      onReset={() =>
+                        setPreviewValues({ ...notificationSampleValues })
+                      }
+                    />
                   </section>
                 </aside>
               </div>
