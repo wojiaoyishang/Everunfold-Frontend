@@ -62,26 +62,26 @@ export function browserDiscoveryRequested(request: Request) {
 export function renderDiscoveryPage(input: DiscoveryPageInput) {
   const meta = {
     sitemap: {
-      kicker: "SITEMAP · XML",
+      kicker: "sitemap",
       title: "站点地图",
       description:
-        "这里集中展示可以公开访问的页面、文章和说说，方便读者浏览，也方便搜索引擎理解站点结构。",
+        "公开可访问的页面、文章与说说。机器请求仍读取同一地址的标准 XML。",
       collection: "公开地址",
       empty: "当前没有可公开列出的地址。",
     },
     rss: {
-      kicker: "SYNDICATION · RSS 2.0",
+      kicker: "feed",
       title: "RSS 订阅",
       description:
-        "通过任意 RSS 阅读器订阅本站更新。你也可以继续直接读取标准 RSS 2.0 XML。",
+        "最近发布的公开内容。RSS 阅读器会读取同一地址的标准 RSS 2.0 XML。",
       collection: "最近更新",
       empty: "当前没有可订阅的公开内容。",
     },
     atom: {
-      kicker: "SYNDICATION · ATOM",
+      kicker: "feed",
       title: "Atom 订阅",
       description:
-        "通过支持 Atom 的阅读器订阅本站更新。标准 Atom XML 仍在同一地址提供。",
+        "最近发布的公开内容。Atom 阅读器会读取同一地址的标准 Atom XML。",
       collection: "最近更新",
       empty: "当前没有可订阅的公开内容。",
     },
@@ -91,7 +91,7 @@ export function renderDiscoveryPage(input: DiscoveryPageInput) {
     .map(
       (item, index) => `
         <li class="entry">
-          <span class="index">${String(index + 1).padStart(2, "0")}</span>
+          <span class="line">${String(index + 1).padStart(3, "0")}</span>
           <div class="entry-body">
             <a class="entry-title" href="${escapeHtml(item.href)}">${escapeHtml(item.title)}</a>
             ${item.summary ? `<p>${escapeHtml(item.summary)}</p>` : ""}
@@ -102,73 +102,82 @@ export function renderDiscoveryPage(input: DiscoveryPageInput) {
                 .join("")}
             </div>
           </div>
-          <span class="entry-arrow" aria-hidden="true">↗</span>
+          <span class="entry-open" aria-hidden="true">open</span>
         </li>`,
     )
     .join("");
-  const countLabel =
-    input.kind === "sitemap"
-      ? `${input.items.length} 个公开地址`
-      : `${input.items.length} 条公开内容`;
+  const languageQuery = input.language
+    ? `?language=${encodeURIComponent(input.language)}`
+    : "";
+  const tabs = [
+    { kind: "sitemap", file: "sitemap.xml", href: "/sitemap.xml" },
+    {
+      kind: "rss",
+      file: "feed.xml",
+      href: `/feed.xml${languageQuery}`,
+    },
+    {
+      kind: "atom",
+      file: "atom.xml",
+      href: `/atom.xml${languageQuery}`,
+    },
+  ] as const;
+  const rawPath = input.rawHref.split("?", 1)[0];
   return `<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, follow">
+  <meta name="description" content="${escapeHtml(input.siteDescription)}">
   <title>${escapeHtml(meta.title)} · ${escapeHtml(input.siteName)}</title>
   <style>
-    :root{color-scheme:light dark;--bg:#f4f5f7;--paper:#fff;--text:#20242c;--muted:#6d7481;--line:#e2e5ea;--soft:#f7f8fa;--accent:#3154d9;--accent-soft:#eef2ff}
-    *{box-sizing:border-box}html{background:var(--bg)}body{margin:0;color:var(--text);background:var(--bg);font:14px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif}
-    a{color:inherit;text-decoration:none}.shell{width:min(980px,calc(100% - 32px));margin:0 auto;padding:28px 0 56px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:34px}.brand{display:flex;align-items:center;gap:10px;font-weight:650;letter-spacing:.01em}
-    .mark{display:grid;width:30px;height:30px;place-items:center;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--accent)}
-    .mark svg{width:16px;height:16px}.kind{padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:var(--paper);color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.06em}
-    .hero{display:grid;grid-template-columns:minmax(0,1fr) 238px;gap:34px;align-items:end;padding:36px;border:1px solid var(--line);border-radius:12px;background:var(--paper);box-shadow:0 14px 40px #1920330a}
-    .kicker{margin:0 0 11px;color:var(--accent);font:650 11px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.08em}.hero h1{margin:0;font-size:clamp(30px,5vw,48px);line-height:1.12;letter-spacing:-.035em}.lead{max-width:640px;margin:16px 0 0;color:var(--muted);font-size:15px;line-height:1.8}
-    .actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:24px}.button{display:inline-flex;min-height:40px;align-items:center;justify-content:center;gap:8px;padding:9px 14px;border:1px solid var(--line);border-radius:6px;background:var(--paper);font-size:12px;font-weight:600;transition:border-color .16s,transform .16s}.button:hover{border-color:var(--accent);transform:translateY(-1px)}.button.primary{border-color:var(--accent);background:var(--accent);color:#fff}
-    .summary{align-self:stretch;padding:18px;border:1px solid var(--line);border-radius:9px;background:var(--soft)}.summary strong{display:block;font-size:22px;line-height:1.3}.summary span{display:block;margin-top:4px;color:var(--muted);font-size:11px}.summary dl{display:grid;gap:9px;margin:17px 0 0;padding-top:14px;border-top:1px solid var(--line)}.summary div{display:flex;justify-content:space-between;gap:12px}.summary dt{color:var(--muted);font-size:10px}.summary dd{margin:0;font-size:11px;font-weight:600;text-align:right}
-    .collection{margin-top:18px;border:1px solid var(--line);border-radius:12px;background:var(--paper);overflow:hidden}.collection-head{display:flex;align-items:end;justify-content:space-between;gap:20px;padding:20px 22px;border-bottom:1px solid var(--line)}.collection h2{margin:0;font-size:16px;line-height:1.4}.collection-head p{margin:3px 0 0;color:var(--muted);font-size:11px}.collection-head code{color:var(--muted);font:10px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
-    .entries{margin:0;padding:0;list-style:none}.entry{display:grid;grid-template-columns:32px minmax(0,1fr) 20px;gap:13px;align-items:start;padding:17px 22px;border-bottom:1px solid var(--line)}.entry:last-child{border-bottom:0}.index{padding-top:2px;color:var(--muted);font:10px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.entry-body{min-width:0}.entry-title{display:block;font-size:14px;font-weight:650;overflow-wrap:anywhere}.entry-title:hover{color:var(--accent)}.entry-body p{margin:5px 0 0;color:var(--muted);font-size:12px;line-height:1.7}.entry-meta{display:flex;flex-wrap:wrap;gap:5px 9px;margin-top:7px;color:var(--muted);font-size:10px}.entry-meta span{padding:2px 6px;border-radius:4px;background:var(--soft)}.entry-arrow{padding-top:1px;color:var(--muted);font-size:12px}.empty{padding:44px 20px;color:var(--muted);text-align:center}
-    .footer{display:flex;justify-content:space-between;gap:16px;margin-top:18px;color:var(--muted);font-size:10px}.footer a:hover{color:var(--text)}
-    @media(max-width:720px){.shell{width:min(100% - 24px,980px);padding-top:18px}.topbar{margin-bottom:20px}.hero{grid-template-columns:1fr;padding:24px;gap:24px}.summary{max-width:none}.collection-head,.footer{align-items:flex-start;flex-direction:column}.entry{grid-template-columns:24px minmax(0,1fr);padding:15px 16px}.entry-arrow{display:none}}
-    @media(prefers-color-scheme:dark){:root{--bg:#111318;--paper:#171a21;--text:#f1f3f7;--muted:#9aa2af;--line:#2b303a;--soft:#1d2129;--accent:#91a8ff;--accent-soft:#202944}}
+    :root{color-scheme:light dark;--canvas:#eef0f3;--panel:#fff;--panel-soft:#f6f7f9;--text:#20252b;--muted:#68717d;--line:#d8dde4;--rule:#e7eaee;--accent:#3154d9;--accent-soft:#eef2ff;--ok:#238636}
+    *{box-sizing:border-box}html,body{min-height:100%}body{margin:0;background:var(--canvas);color:var(--text);font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,"Liberation Mono","Microsoft YaHei",monospace}
+    a{color:inherit;text-decoration:none}code{font:inherit}.appbar{border-bottom:1px solid var(--line);background:var(--panel)}.appbar-inner{display:flex;width:min(1080px,calc(100% - 32px));min-height:46px;margin:0 auto;align-items:center;justify-content:space-between;gap:24px}
+    .brand{display:flex;min-width:0;align-items:center;gap:8px}.brand-mark{display:grid;width:22px;height:22px;place-items:center;border:1px solid var(--line);border-radius:4px;color:var(--accent);font-size:10px;font-weight:700}.brand-site{color:var(--text);font-weight:600}.brand-separator{color:var(--muted)}.brand-file{overflow:hidden;color:var(--muted);text-overflow:ellipsis;white-space:nowrap}
+    .top-actions{display:flex;flex:0 0 auto;align-items:center;gap:14px;font-size:11px}.top-actions a{color:var(--muted)}.top-actions a:hover{color:var(--accent)}
+    .shell{width:min(1080px,calc(100% - 32px));margin:0 auto;padding:24px 0 48px}.tabs{display:flex;gap:0;border:1px solid var(--line);border-bottom:0;border-radius:5px 5px 0 0;overflow:auto;background:var(--panel-soft)}.tab{display:flex;min-height:39px;flex:0 0 auto;align-items:center;gap:7px;padding:0 15px;border-right:1px solid var(--line);color:var(--muted);font-size:11px}.tab:hover{color:var(--text);background:color-mix(in srgb,var(--panel) 82%,var(--panel-soft))}.tab[data-active]{color:var(--text);background:var(--panel);box-shadow:inset 0 2px 0 var(--accent)}.tab-dot{width:6px;height:6px;border-radius:50%;background:#d29922}.tab[data-active] .tab-dot{background:var(--accent)}
+    .pane{border:1px solid var(--line);border-radius:0 0 5px 5px;background:var(--panel);overflow:hidden}.pane-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:20px 22px 17px}.eyebrow{margin:0 0 5px;color:var(--accent);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.pane h1{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;font-size:20px;line-height:1.35;letter-spacing:-.01em}.pane-head p:last-child{max-width:720px;margin:7px 0 0;color:var(--muted);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;font-size:12px;line-height:1.7}.buttons{display:flex;gap:8px}.button{display:inline-flex;min-height:32px;align-items:center;padding:5px 10px;border:1px solid var(--line);border-radius:4px;background:var(--panel-soft);color:var(--text);font-size:10px;white-space:nowrap}.button:hover{border-color:var(--accent);color:var(--accent)}.button[data-primary]{border-color:var(--accent);background:var(--accent);color:#fff}
+    .meta-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);background:var(--panel-soft)}.meta-item{display:flex;min-width:0;align-items:center;justify-content:space-between;gap:10px;padding:8px 13px;border-right:1px solid var(--rule)}.meta-item:last-child{border-right:0}.meta-item span{overflow:hidden;color:var(--muted);font-size:9px;text-transform:uppercase;text-overflow:ellipsis;white-space:nowrap}.meta-item strong{overflow:hidden;font-size:10px;font-weight:600;text-align:right;text-overflow:ellipsis;white-space:nowrap}
+    .file-head{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:10px 18px;border-bottom:1px solid var(--rule);color:var(--muted);font-size:10px}.file-head strong{color:var(--text);font-size:11px;font-weight:600}.file-head code{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .entries{margin:0;padding:0;list-style:none}.entry{display:grid;grid-template-columns:42px minmax(0,1fr) 36px;gap:0;align-items:stretch;border-bottom:1px solid var(--rule)}.entry:last-child{border-bottom:0}.entry:hover{background:var(--panel-soft)}.line{display:flex;align-items:flex-start;justify-content:flex-end;padding:12px 10px 12px 0;color:color-mix(in srgb,var(--muted) 70%,transparent);font-size:9px;user-select:none}.entry-body{min-width:0;padding:11px 14px 11px 0}.entry-title{display:block;overflow-wrap:anywhere;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;font-size:13px;font-weight:600;line-height:1.5}.entry-title:hover{color:var(--accent)}.entry-body p{display:-webkit-box;margin:4px 0 0;overflow:hidden;color:var(--muted);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei",sans-serif;font-size:11px;line-height:1.65;-webkit-box-orient:vertical;-webkit-line-clamp:2}.entry-meta{display:flex;flex-wrap:wrap;gap:5px 10px;margin-top:6px;color:var(--muted);font-size:9px}.entry-meta span:not(:first-child):before{content:"#";color:var(--accent);margin-right:2px}.entry-open{display:flex;align-items:flex-start;justify-content:center;padding-top:13px;color:var(--muted);font-size:8px;text-transform:uppercase}.entry:hover .entry-open{color:var(--accent)}.empty{padding:42px 20px;color:var(--muted);text-align:center}
+    .statusbar{display:flex;min-height:29px;align-items:center;gap:15px;padding:0 13px;border-top:1px solid var(--line);background:var(--panel-soft);color:var(--muted);font-size:9px}.statusbar .ready{display:flex;align-items:center;gap:5px;color:var(--text)}.statusbar .ready:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--ok)}.statusbar .push{margin-left:auto}
+    @media(max-width:680px){.appbar-inner,.shell{width:100%}.appbar-inner{padding:0 12px}.brand-site,.brand-separator{display:none}.top-actions{gap:10px}.shell{padding:0 0 32px}.tabs{border-radius:0;border-left:0;border-right:0}.pane{border-left:0;border-right:0;border-radius:0}.pane-head{padding:17px 14px 14px;flex-direction:column;gap:13px}.buttons{width:100%}.button{flex:1;justify-content:center}.meta-bar{grid-template-columns:repeat(2,minmax(0,1fr))}.meta-item:nth-child(2){border-right:0}.meta-item:nth-child(-n+2){border-bottom:1px solid var(--rule)}.file-head{padding:9px 12px}.entry{grid-template-columns:32px minmax(0,1fr)}.line{padding-right:8px}.entry-body{padding-right:12px}.entry-open{display:none}.statusbar .push{display:none}}
+    @media(prefers-color-scheme:dark){:root{--canvas:#1e1e1e;--panel:#252526;--panel-soft:#2d2d30;--text:#d4d4d4;--muted:#9da3ab;--line:#3e3e42;--rule:#333337;--accent:#75beff;--accent-soft:#26384a;--ok:#89d185}}
   </style>
 </head>
 <body>
+  <header class="appbar">
+    <div class="appbar-inner">
+      <a class="brand" href="/"><span class="brand-mark">E</span><span class="brand-site">${escapeHtml(input.siteName)}</span><span class="brand-separator">/</span><span class="brand-file">${escapeHtml(rawPath.replace(/^[/]/, ""))}</span></a>
+      <nav class="top-actions" aria-label="站点与原始文件"><a href="/">站点</a><a href="${escapeHtml(input.rawHref)}">原始 XML</a></nav>
+    </div>
+  </header>
   <main class="shell">
-    <header class="topbar">
-      <a class="brand" href="/"><span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 12a7 7 0 0 1 7-7m-7 12a12 12 0 0 1 12-12M5 19h.01"/></svg></span>${escapeHtml(input.siteName)}</a>
-      <span class="kind">站点发现</span>
-    </header>
-    <section class="hero">
-      <div>
-        <p class="kicker">${escapeHtml(meta.kicker)}</p>
-        <h1>${escapeHtml(meta.title)}</h1>
-        <p class="lead">${escapeHtml(meta.description)}</p>
-        <div class="actions">
-          <a class="button primary" href="${escapeHtml(input.rawHref)}">查看原始 XML <span aria-hidden="true">↗</span></a>
-          <a class="button" href="/">返回站点</a>
-        </div>
-      </div>
-      <aside class="summary">
-        <strong>${input.items.length}</strong>
-        <span>${escapeHtml(countLabel)}</span>
-        <dl>
-          <div><dt>语言</dt><dd>${escapeHtml(input.language || "全部")}</dd></div>
-          <div><dt>更新</dt><dd>${escapeHtml(formattedDate(input.updatedAt) || "暂无")}</dd></div>
-          <div><dt>读取方式</dt><dd>标准 XML</dd></div>
-        </dl>
-      </aside>
-    </section>
-    <section class="collection">
-      <header class="collection-head">
-        <div><h2>${escapeHtml(meta.collection)}</h2><p>${escapeHtml(input.siteDescription || "Everunfold 站点公开内容")}</p></div>
-        <code>${escapeHtml(input.rawHref.split("?", 1)[0])}</code>
+    <nav class="tabs" aria-label="发现文件">
+      ${tabs
+        .map(
+          (tab) =>
+            `<a class="tab" href="${escapeHtml(tab.href)}"${tab.kind === input.kind ? ' data-active="true"' : ""}><span class="tab-dot"></span>${escapeHtml(tab.file)}</a>`,
+        )
+        .join("")}
+    </nav>
+    <section class="pane">
+      <header class="pane-head">
+        <div><p class="eyebrow">${escapeHtml(meta.kicker)}</p><h1>${escapeHtml(meta.title)}</h1><p>${escapeHtml(meta.description)}</p></div>
+        <div class="buttons"><a class="button" href="/">返回站点</a><a class="button" data-primary href="${escapeHtml(input.rawHref)}">查看原始 XML</a></div>
       </header>
+      <div class="meta-bar">
+        <div class="meta-item"><span>entries</span><strong>${input.items.length}</strong></div>
+        <div class="meta-item"><span>language</span><strong>${escapeHtml(input.language || "all")}</strong></div>
+        <div class="meta-item"><span>updated</span><strong>${escapeHtml(formattedDate(input.updatedAt) || "—")}</strong></div>
+        <div class="meta-item"><span>format</span><strong>XML</strong></div>
+      </div>
+      <div class="file-head"><strong>${escapeHtml(meta.collection)}</strong><code>${escapeHtml(rawPath)}</code></div>
       ${rows ? `<ol class="entries">${rows}</ol>` : `<p class="empty">${escapeHtml(input.emptyMessage || meta.empty)}</p>`}
+      <footer class="statusbar"><span class="ready">XML ready</span><span>UTF-8</span><span>noindex</span><span class="push">crawlers receive standard XML</span></footer>
     </section>
-    <footer class="footer"><span>此页面仅供阅读，爬虫与订阅器仍会读取原始 XML。</span><a href="${escapeHtml(input.rawHref)}">XML 源文件</a></footer>
   </main>
 </body>
 </html>`;
