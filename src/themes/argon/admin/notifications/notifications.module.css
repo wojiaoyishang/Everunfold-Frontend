@@ -92,13 +92,15 @@
 
 .routeRow {
   display: grid;
-  grid-template-columns:
-    minmax(120px, 0.7fr) minmax(180px, 1fr) minmax(130px, 0.65fr)
-    auto auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: end;
   gap: 12px;
   padding: 15px 20px;
   border-bottom: 1px solid var(--admin-border);
+}
+
+.routeRow[data-mail] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .routeRow:last-child {
@@ -122,6 +124,7 @@
 
 .routeSwitch {
   display: flex;
+  grid-column: span 2;
   align-items: center;
   min-height: 36px;
   gap: 8px;
@@ -131,8 +134,13 @@
 }
 
 .routeRemove {
+  justify-self: end;
   min-width: 36px;
   padding-inline: 10px;
+}
+
+.routeRow[data-mail] .routeRemove {
+  grid-column: 4;
 }
 
 .emptyRoutes {
@@ -422,6 +430,281 @@
   gap: 10px;
 }
 
+.mailProfilesSection {
+  display: grid;
+  gap: 16px;
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: 1px solid var(--admin-border);
+}
+
+.mailProfilesHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.mailProfilesHeading > div,
+.mailEditorSectionHeading > div {
+  min-width: 0;
+}
+
+.mailProfilesHeading h2 {
+  margin: 3px 0 5px;
+  font-size: 19px;
+  line-height: 1.35;
+}
+
+.mailProfilesHeading p,
+.mailEditorSectionHeading p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.sectionEyebrow {
+  color: var(--admin-accent);
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mailProfileWorkspace {
+  display: grid;
+  grid-template-columns: minmax(230px, 0.34fr) minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.mailProfileList {
+  display: grid;
+  gap: 7px;
+  align-content: start;
+}
+
+.mailProfileCard {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+  text-align: start;
+  transition:
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.mailProfileCard:hover,
+.mailProfileCard[data-current] {
+  border-color: color-mix(
+    in srgb,
+    var(--admin-accent) 42%,
+    var(--admin-border)
+  );
+}
+
+.mailProfileCard[data-current] {
+  background: var(--admin-accent-soft);
+  box-shadow: inset 3px 0 0 var(--admin-accent);
+}
+
+.mailProfileIcon {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  background: var(--admin-subtle);
+  color: var(--admin-accent);
+}
+
+.mailProfileIdentity {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.mailProfileIdentity strong,
+.mailProfileIdentity small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailProfileIdentity strong {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.mailProfileIdentity small {
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+
+.mailProfileFlags {
+  display: flex;
+  grid-column: 2;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.mailProfileFlags :global(.admin-badge) {
+  min-height: 20px;
+  padding: 1px 6px;
+  font-size: 9px;
+}
+
+.mailProfileFlags :global(.admin-badge)[data-disabled] {
+  color: var(--admin-muted);
+}
+
+.mailProfileEmpty {
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+  padding: 22px 16px;
+  border: 1px dashed var(--admin-border);
+  border-radius: 8px;
+  color: var(--admin-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.mailProfileEmpty > :global(.icon) {
+  width: 22px;
+  height: 22px;
+  color: var(--admin-accent);
+}
+
+.mailProfileEmpty strong {
+  color: var(--admin-text);
+  font-size: 12px;
+}
+
+.mailProfileEmpty button {
+  margin-top: 6px;
+}
+
+.mailProfileEditor {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+}
+
+.mailEditorFieldset {
+  display: grid;
+  gap: 17px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.mailProfileEditor header,
+.mailEditorSectionHeading,
+.mailProfileToggles,
+.mailProfileToggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mailProfileEditor h3 {
+  margin: 2px 0 0;
+  overflow: hidden;
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mailProfileEditor h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.mailEditorActions,
+.sectionActions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex: 0 0 auto;
+}
+
+.mailProfileToggles,
+.mailProfileToggleRow {
+  min-height: 62px;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  background: var(--admin-subtle);
+}
+
+.mailProfileToggles > span,
+.mailProfileToggleRow > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.mailProfileToggles strong,
+.mailProfileToggleRow strong {
+  font-size: 12px;
+}
+
+.mailProfileToggles small,
+.mailProfileToggleRow small {
+  color: var(--admin-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.mailEditorDivider {
+  height: 1px;
+  background: var(--admin-border);
+}
+
+.mailWarning {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  color: var(--admin-warning, #9a6700);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.mailWarning > :global(.icon) {
+  flex: 0 0 16px;
+}
+
+.mailProfileSavebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 13px 16px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
 .deliveryList {
   overflow: hidden;
   border: 1px solid var(--admin-border);
@@ -706,6 +989,14 @@
 }
 
 @media (max-width: 900px) {
+  .mailProfileWorkspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mailProfileList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .editorGrid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -714,8 +1005,18 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .routeRow[data-mail] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .routeRemove {
+    grid-column: auto;
     width: 100%;
+  }
+
+  .routeSwitch,
+  .routeRow[data-mail] .routeRemove {
+    grid-column: 1 / -1;
   }
 
   .deliveryRow {
@@ -728,6 +1029,27 @@
 }
 
 @media (max-width: 600px) {
+  .mailProfilesHeading,
+  .mailProfileSavebar,
+  .mailProfileEditor header,
+  .mailEditorSectionHeading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mailProfileList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mailEditorActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mailEditorActions > button {
+    justify-content: center;
+  }
+
   .toolbar,
   .eventHeading,
   .savebar {
@@ -738,6 +1060,10 @@
   .routeRow {
     grid-template-columns: minmax(0, 1fr);
     padding: 14px 16px;
+  }
+
+  .routeRow[data-mail] {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .toolbarField {

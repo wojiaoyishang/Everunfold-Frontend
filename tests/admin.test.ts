@@ -90,7 +90,6 @@ test("admin navigation separates primary content, tools, appearance and system s
   assert.deepEqual(ids("设置"), [
     "core.settings.plugins",
     "core.settings.site",
-    "core.settings.mail",
     "core.settings.system",
     "core.settings.runtime",
     "core.settings.api-keys",

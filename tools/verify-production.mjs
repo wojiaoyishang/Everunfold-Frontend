@@ -79,6 +79,11 @@ try {
     path.join(workspace, "public/content-features"),
     { recursive: true },
   );
+  await cp(
+    path.join(projectRoot, "public/themes"),
+    path.join(workspace, "public/themes"),
+    { recursive: true },
+  );
   if (process.argv.includes("--failure-ui")) {
     // Deliberate rendering failure exists only in this disposable copy, never in the app source.
     const fixture = path.join(workspace, "src/app/health/verification-error");

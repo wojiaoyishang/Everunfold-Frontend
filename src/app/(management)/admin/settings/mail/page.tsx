@@ -1,4 +1,4 @@
-import { MailSettingsPage } from "@/themes/argon/admin/settings/mail";
+import { redirect } from "next/navigation";
 export default function Page() {
-  return <MailSettingsPage />;
+  redirect("/admin/notifications/platforms#mail-profiles");
 }

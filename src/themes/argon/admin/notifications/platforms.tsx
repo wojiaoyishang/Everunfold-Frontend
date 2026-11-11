@@ -2,12 +2,15 @@
 
 import type { NotificationPlatformView } from "@/core/contracts/notifications";
 import { useNotificationState } from "@/core/notifications/use-notifications";
+import { useMailSettings } from "@/core/settings/use-mail-settings";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "../settings/section-navigation";
+import { UnsavedAccountChanges } from "../../account/unsaved";
+import { MailProfilesPanel } from "./mail-profiles";
 import styles from "./notifications.module.css";
 
 const semantics = {
@@ -25,7 +28,13 @@ const semantics = {
   },
 };
 
-function PlatformCard({ platform }: { platform: NotificationPlatformView }) {
+function PlatformCard({
+  platform,
+  mailProfileCount,
+}: {
+  platform: NotificationPlatformView;
+  mailProfileCount?: number;
+}) {
   const t = useT();
   const state = semantics[platform.delivery_semantics];
   return (
@@ -58,7 +67,15 @@ function PlatformCard({ platform }: { platform: NotificationPlatformView }) {
         </span>
       </header>
       <p>
-        <UiText text={platform.description} />
+        <UiText
+          text={
+            platform.id === "email" && mailProfileCount !== undefined
+              ? mailProfileCount
+                ? `使用 ${mailProfileCount} 套发信配置，默认配置负责未指定的提醒。`
+                : "尚未添加邮件发信配置。"
+              : platform.description
+          }
+        />
       </p>
       <dl className={styles.metaList}>
         <div>
@@ -94,9 +111,12 @@ function PlatformCard({ platform }: { platform: NotificationPlatformView }) {
           {platform.kind === "bridge" ? "Bridge" : "Direct"}
         </span>
         {platform.id === "email" ? (
-          <RouteLink href="/admin/settings/mail" className="admin-button">
+          <RouteLink
+            href="/admin/notifications/platforms#mail-profiles"
+            className="admin-button"
+          >
             <Icon name="settings" />
-            <UiText text="邮件配置" />
+            <UiText text="管理发信配置" />
           </RouteLink>
         ) : platform.builtin ? (
           <span className="admin-badge">
@@ -114,17 +134,22 @@ function PlatformCard({ platform }: { platform: NotificationPlatformView }) {
 }
 
 export function NotificationPlatformsPage() {
-  const editor = useNotificationState();
+  const editor = useNotificationState(),
+    mailEditor = useMailSettings();
   return (
     <SettingsLayout>
+      <UnsavedAccountChanges dirty={mailEditor.dirty} busy={mailEditor.busy} />
       <AdminPageHeading
         title="通知平台"
-        description="站内和邮件由核心提供；其他渠道通过可信后端插件注册。平台停用或部署摘要不一致时，投递会标记为抑制。"
+        description="管理投递渠道与多套邮件发信身份；提醒规则可以选择具体配置，未指定时使用默认配置。"
         action={
           <Button
             className="admin-button"
-            disabled={editor.loading}
-            onClick={() => void editor.reload()}
+            disabled={editor.loading || mailEditor.loading}
+            onClick={() => {
+              void editor.reload();
+              void mailEditor.reload();
+            }}
           >
             <Icon name="refresh" />
             <UiText text="刷新状态" />
@@ -141,11 +166,22 @@ export function NotificationPlatformsPage() {
           <UiText text={editor.error} />
         </div>
       ) : editor.state ? (
-        <div className={styles.platformGrid}>
-          {editor.state.platforms.map((platform) => (
-            <PlatformCard key={platform.id} platform={platform} />
-          ))}
-        </div>
+        <>
+          <div className={styles.platformGrid}>
+            {editor.state.platforms.map((platform) => (
+              <PlatformCard
+                key={platform.id}
+                platform={platform}
+                mailProfileCount={
+                  platform.id === "email"
+                    ? mailEditor.saved?.profiles.length
+                    : undefined
+                }
+              />
+            ))}
+          </div>
+          <MailProfilesPanel editor={mailEditor} />
+        </>
       ) : null}
     </SettingsLayout>
   );

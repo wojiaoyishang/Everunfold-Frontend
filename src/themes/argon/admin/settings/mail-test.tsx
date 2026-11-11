@@ -1,6 +1,9 @@
 "use client";
 import { useId, useState } from "react";
-import type { MailSettingsState } from "@/core/contracts/settings";
+import type {
+  MailSenderProfileView,
+  MailSettingsState,
+} from "@/core/contracts/settings";
 import { useMailTest } from "@/core/settings/use-mail-test";
 import { UiText } from "@/core/i18n/provider";
 import { Button, Form, TextField } from "../../components/ui/primitives";
@@ -24,21 +27,23 @@ const failures: Record<string, string> = {
 };
 export function MailTestPanel({
   saved,
+  profile,
   dirty,
   disabled,
 }: {
   saved: MailSettingsState;
+  profile: MailSenderProfileView;
   dirty: boolean;
   disabled: boolean;
 }) {
-  const test = useMailTest(),
+  const test = useMailTest(profile.id),
     id = useId();
   const [recipient, setRecipient] = useState("");
-  const value = saved.value;
+  const value = profile.value;
   const ready = !!(
     value.host &&
     value.from_address &&
-    (!value.authenticate || (value.username && saved.password_configured))
+    (!value.authenticate || (value.username && profile.password_configured))
   );
   const taskState = test.progress.data?.state;
   const status = taskState
@@ -51,14 +56,14 @@ export function MailTestPanel({
   return (
     <SettingsSection
       id="mail-test"
-      title="测试发件"
-      description="向指定邮箱发送一封固定内容的测试邮件，使用已保存的配置；不会开启自动发送。"
+      title={`测试发件 · ${profile.name}`}
+      description="使用这套已保存的发信配置发送固定测试邮件；不会开启自动发送。"
     >
       <Form
         className={styles.testForm}
         onSubmit={(event) => {
           event.preventDefault();
-          void test.send(recipient, saved.revision);
+          void test.send(recipient, saved.revision, profile.id);
         }}
       >
         <div className="admin-settings-field">

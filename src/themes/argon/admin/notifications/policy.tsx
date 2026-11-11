@@ -10,6 +10,7 @@ import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { UiText, useT } from "@/core/i18n/provider";
 import { useNotificationState } from "@/core/notifications/use-notifications";
+import { useMailSettings } from "@/core/settings/use-mail-settings";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
@@ -40,6 +41,7 @@ function routeDraft(route: NotificationRouteView, index: number): RouteDraft {
     recipient_type: route.recipient_type,
     recipient_value: route.recipient_value,
     platform_id: route.platform_id,
+    mail_profile_id: route.mail_profile_id ?? null,
     template_key: route.template_key ?? "default",
     enabled: route.enabled,
   };
@@ -50,6 +52,7 @@ function EventRoutes({
   routes,
   platforms,
   permissionOptions,
+  mailProfiles,
   editable,
   onChange,
 }: {
@@ -61,6 +64,7 @@ function EventRoutes({
     available: boolean;
   }[];
   permissionOptions: { value: string; label: string }[];
+  mailProfiles: { value: string; label: string }[];
   editable: boolean;
   onChange: (routes: RouteDraft[]) => void;
 }) {
@@ -95,6 +99,7 @@ function EventRoutes({
                 recipient_type: "permission",
                 recipient_value: permissionOptions[0]?.value ?? "settings:read",
                 platform_id: "in-app",
+                mail_profile_id: null,
                 template_key: "default",
                 enabled: true,
               },
@@ -112,7 +117,11 @@ function EventRoutes({
           </p>
         )}
         {routes.map((route) => (
-          <div className={styles.routeRow} key={route.key}>
+          <div
+            className={styles.routeRow}
+            data-mail={route.platform_id === "email" || undefined}
+            key={route.key}
+          >
             <label className={styles.routeField}>
               <UiText text="接收人类型" />
               <Select
@@ -192,10 +201,36 @@ function EventRoutes({
                   disabled: !platform.available,
                 }))}
                 onValueChange={(value) =>
-                  update(route.key, { platform_id: value })
+                  update(route.key, {
+                    platform_id: value,
+                    mail_profile_id:
+                      value === "email"
+                        ? (mailProfiles[0]?.value ?? null)
+                        : null,
+                  })
                 }
               />
             </label>
+            {route.platform_id === "email" && (
+              <label className={styles.routeField}>
+                <UiText text="发信配置" />
+                <Select
+                  programOptions
+                  name={`${route.key}-mail-profile`}
+                  label={t("发信配置")}
+                  value={route.mail_profile_id ?? "default"}
+                  options={[
+                    { value: "default", label: "默认配置" },
+                    ...mailProfiles,
+                  ]}
+                  onValueChange={(value) =>
+                    update(route.key, {
+                      mail_profile_id: value === "default" ? null : value,
+                    })
+                  }
+                />
+              </label>
+            )}
             <span className={styles.routeSwitch}>
               <Switch
                 checked={route.enabled ?? true}
@@ -226,6 +261,7 @@ function EventRoutes({
 
 export function NotificationPolicyPage() {
   const editor = useNotificationState();
+  const mailEditor = useMailSettings();
   const user = useAdminAccount();
   const editable = can(user, "settings:write");
   const [localDrafts, setLocalDrafts] = useState<RouteDraft[] | null>(null);
@@ -254,6 +290,14 @@ export function NotificationPolicyPage() {
       })),
     [editor.state?.platforms],
   );
+  const mailProfiles = useMemo(
+    () =>
+      (mailEditor.saved?.profiles ?? []).map((profile) => ({
+        value: profile.id,
+        label: profile.is_default ? `${profile.name}（默认）` : profile.name,
+      })),
+    [mailEditor.saved?.profiles],
+  );
   const change = (routes: RouteDraft[]) => {
     setLocalDrafts(routes);
     editor.clearMessage();
@@ -273,6 +317,7 @@ export function NotificationPolicyPage() {
         recipient_type: route.recipient_type,
         recipient_value: route.recipient_value,
         platform_id: route.platform_id,
+        mail_profile_id: route.mail_profile_id ?? null,
         template_key: route.template_key,
         enabled: route.enabled ?? true,
       })),
@@ -329,6 +374,7 @@ export function NotificationPolicyPage() {
                 routes={drafts.filter((route) => route.event_type === event.id)}
                 platforms={platformOptions}
                 permissionOptions={permissionOptions}
+                mailProfiles={mailProfiles}
                 editable={editable && !editor.busy}
                 onChange={(eventRoutes) => {
                   const others = drafts.filter(

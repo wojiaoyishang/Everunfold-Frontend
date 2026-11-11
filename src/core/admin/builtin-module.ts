@@ -56,10 +56,10 @@ export const builtinAdminModule = {
     {
       id: "core.settings.mail",
       href: "/admin/settings/mail",
-      label: "邮件配置",
-      description: "SMTP服务器与发件人资料",
+      label: "邮件配置（兼容地址）",
+      description: "跳转到通知平台中的邮件发信配置",
       icon: "mail",
-      menu: { group: "core.settings", order: 30 },
+      menu: null,
     },
     {
       id: "core.settings.runtime",

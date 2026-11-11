@@ -10,9 +10,15 @@ import { useAdminRequest } from "@/core/admin/account-context";
 import { RequestError } from "@/core/http/request";
 const draftFrom = (state: MailSettingsState): SaveMailSettings => ({
   expected_revision: state.revision,
-  value: state.value,
-  password: "",
-  clear_password: false,
+  profiles: state.profiles.map((profile) => ({
+    id: profile.id,
+    name: profile.name,
+    enabled: profile.enabled,
+    is_default: profile.is_default,
+    value: profile.value,
+    password: "",
+    clear_password: false,
+  })),
 });
 export function useMailSettings() {
   const { baseUrl, csrfToken } = useAdminRequest();
@@ -69,7 +75,7 @@ export function useMailSettings() {
       if (!controller.signal.aborted) {
         setSaved(response.data);
         setDraft(draftFrom(response.data));
-        setMessage("邮件配置已保存，本次操作未发送邮件。");
+        setMessage("邮件发信配置已保存，本次操作未发送邮件。");
       }
     } catch (reason) {
       if (!controller.signal.aborted)
@@ -77,7 +83,7 @@ export function useMailSettings() {
           reason instanceof RequestError && reason.status === 409
             ? "配置已在其他地方修改，当前输入已保留。请核对后重新读取。"
             : reason instanceof RequestError && reason.status === 422
-              ? "请检查服务器、邮箱格式及认证信息；启用时须填写完整配置。"
+              ? "请检查默认配置、服务器、邮箱格式及认证信息；启用时须填写完整配置。"
               : "保存结果尚未确认，当前输入已保留。",
         );
     } finally {

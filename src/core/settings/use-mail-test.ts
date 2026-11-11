@@ -14,7 +14,7 @@ import {
   useTaskProgress,
 } from "@/core/tasks/use-task-progress";
 
-export function useMailTest() {
+export function useMailTest(profileId?: string) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const user = useAdminAccount();
   const requestScope = `${baseUrl}:${user.id}`;
@@ -29,7 +29,10 @@ export function useMailTest() {
     identity ? { resource: "mail-test", id: identity } : null,
   );
   const finalState = progress.data?.state;
-  const currentJob = job?.id === identity ? job : null;
+  const currentJob =
+    job?.id === identity && (!profileId || job.profile_id === profileId)
+      ? job
+      : null;
   const running = progress.running;
   useEffect(() => () => active.current?.abort(), []);
   useEffect(() => {
@@ -54,7 +57,11 @@ export function useMailTest() {
       });
     return () => controller.abort();
   }, [baseUrl, csrfToken, identity, finalState, remember]);
-  const send = async (recipient: string, revision: number) => {
+  const send = async (
+    recipient: string,
+    revision: number,
+    profileId: string,
+  ) => {
     if (active.current || running) return;
     const controller = new AbortController();
     active.current = controller;
@@ -63,6 +70,7 @@ export function useMailTest() {
       : null) ?? {
       request_id: randomUUID(),
       expected_revision: revision,
+      profile_id: profileId,
       recipient,
     };
     pending.current = { scope: requestScope, request };
