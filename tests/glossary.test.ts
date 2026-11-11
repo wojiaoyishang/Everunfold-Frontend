@@ -1,5 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import {
+  mediaReferenceId,
+  parseSiteMediaReference,
+  siteMediaReference,
+} from "../src/core/media/references";
 
 import {
   matchGlossaryText,
@@ -271,4 +276,20 @@ test("empty article matches are cached alongside the article revision", async ()
   assert.strictEqual(second, first);
   assert.equal(requests, 1);
   clearGlossaryCache();
+});
+
+test("media references normalize to the shared virtual address form", () => {
+  const id = "00000000-0000-4000-8000-000000000001";
+  assert.equal(mediaReferenceId(`media:${id}`), id);
+  assert.equal(mediaReferenceId(`site://media/${id}`), id);
+  assert.equal(siteMediaReference(`media:${id}`), `site://media/${id}`);
+  assert.equal(siteMediaReference(`site://media/${id}`), `site://media/${id}`);
+  assert.equal(siteMediaReference(""), "");
+  assert.equal(parseSiteMediaReference(`site://media/${id}`), id);
+  assert.equal(
+    parseSiteMediaReference(` SITE://media/${id.toUpperCase()} `),
+    id,
+  );
+  assert.equal(parseSiteMediaReference("site://media/not-a-media-id"), null);
+  assert.equal(parseSiteMediaReference(`https://example.com/${id}`), null);
 });

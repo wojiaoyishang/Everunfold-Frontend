@@ -1,5 +1,6 @@
 import type { DraftBlock } from "@/core/contracts/content-admin";
 import type { MediaItem } from "@/core/contracts/settings";
+import { siteMediaReference } from "@/core/media/references";
 
 export function titlePath(title: string): string {
   const slug = title
@@ -32,7 +33,7 @@ export function mediaMarkup(
   type: DraftBlock["type"],
   alt = "",
 ) {
-  const url = `site://media/${item.id.replace(/^media:/, "")}`;
+  const url = siteMediaReference(item.id);
   const label = item.title || item.label;
   if (item.kind === "video")
     return type === "html"

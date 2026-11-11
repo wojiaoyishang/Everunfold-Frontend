@@ -14,6 +14,7 @@ import { Select } from "../../components/ui/select";
 import { ShortcodeValues } from "./parameters";
 import { ShortcodePreview } from "./preview";
 import { EditorMediaDialog } from "../content/editor-media-dialog";
+import { siteMediaReference } from "@/core/media/references";
 import styles from "./shortcodes.module.css";
 
 export function ShortcodePicker({
@@ -181,7 +182,7 @@ export function ShortcodePicker({
           onClose={() => setImages(false)}
           onPick={(item) => {
             onMedia(item);
-            const reference = "site://media/" + item.id.replace(/^media:/, "");
+            const reference = siteMediaReference(item.id);
             setValues((current) => ({
               ...current,
               [mediaPicker.parameter]: [

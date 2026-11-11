@@ -1,12 +1,16 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Modal } from "../../components/ui/modal";
 import { Icon } from "../../components/icon";
 import { MediaPickerDialog } from "../media/media-picker-dialog";
 import { MediaPreview } from "../media/media-preview";
+import {
+  parseSiteMediaReference,
+  siteMediaReference,
+} from "@/core/media/references";
 /** Compact media field, shared by avatar, background image and background video. */
 export function SettingsMediaField({
   label,
@@ -28,16 +32,56 @@ export function SettingsMediaField({
   const id = useId();
   const [open, setOpen] = useState(false);
   const [enlarged, setEnlarged] = useState(false);
-  const [preview, setPreview] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setPreview(value), 300);
-    return () => clearTimeout(timer);
-  }, [value]);
+  const sourceKey = `${mediaId ?? ""}\n${value}`;
+  const [local, setLocal] = useState<{
+    sourceKey: string;
+    text: string;
+    previewUrl: string;
+    invalidVirtual: boolean;
+  } | null>(null);
+  const current =
+    local?.sourceKey === sourceKey
+      ? local
+      : {
+          sourceKey,
+          text: mediaId ? siteMediaReference(mediaId) : value,
+          previewUrl: value,
+          invalidVirtual: false,
+        };
+  const change = (url: string, id: string) => {
+    setLocal({
+      sourceKey,
+      previewUrl: url,
+      text: id ? siteMediaReference(id) : url,
+      invalidVirtual: false,
+    });
+    onChange(url, id);
+  };
+  const changeText = (next: string) => {
+    if (next.trim().startsWith("site://media/")) {
+      const mediaId = parseSiteMediaReference(next);
+      setLocal({
+        sourceKey,
+        text: next,
+        previewUrl: "",
+        invalidVirtual: !mediaId,
+      });
+      onChange("", mediaId ? `media:${mediaId}` : "");
+      return;
+    }
+    setLocal({
+      sourceKey,
+      text: next,
+      previewUrl: allowUrl ? next : "",
+      invalidVirtual: !allowUrl && Boolean(next),
+    });
+    onChange(allowUrl ? next : "", "");
+  };
   return (
     <div className="admin-settings-field admin-settings-media-field">
       <label htmlFor={id}>{label}</label>
       <div className="admin-media-field-input">
-        {preview && (
+        {current.previewUrl && (
           <Button
             className="admin-media-thumbnail"
             aria-label={`预览${label}`}
@@ -45,8 +89,8 @@ export function SettingsMediaField({
             onClick={() => setEnlarged(true)}
           >
             <MediaPreview
-              key={preview}
-              url={preview}
+              key={current.previewUrl}
+              url={current.previewUrl}
               kind={kind}
               label={label}
             />
@@ -54,15 +98,15 @@ export function SettingsMediaField({
         )}
         <TextField
           id={id}
-          value={value}
+          value={current.text}
           maxLength={2048}
-          readOnly={!allowUrl}
-          onChange={(e) => onChange(e.target.value, "")}
+          readOnly={Boolean(mediaId)}
+          onChange={(e) => changeText(e.target.value)}
           placeholder={
             kind === "image"
               ? allowUrl
-                ? "图片地址或从媒体库选择"
-                : "从媒体库选择图片"
+                ? "图片 URL、site://media/… 或从媒体库选择"
+                : "site://media/… 或从媒体库选择图片"
               : "视频地址或从媒体库选择"
           }
         />
@@ -74,12 +118,12 @@ export function SettingsMediaField({
           <Icon name="image" />
           <UiText text="媒体库" />
         </Button>
-        {value && (
+        {current.text && (
           <Button
             className="admin-icon-button"
             aria-label={`清除${label}`}
             title="清除选择"
-            onClick={() => onChange("", "")}
+            onClick={() => change("", "")}
           >
             <Icon name="close" />
           </Button>
@@ -90,9 +134,14 @@ export function SettingsMediaField({
           {hint}
           {mediaId && (
             <span className="admin-media-bound">
-              <UiText text="已关联媒体库" />
+              <UiText text="已关联媒体库（虚拟地址）" />
             </span>
           )}
+        </small>
+      )}
+      {current.invalidVirtual && (
+        <small className="admin-settings-message is-error" role="alert">
+          <UiText text="请输入完整有效的 site://media/<UUID> 地址。" />
         </small>
       )}
       {open && (
@@ -102,15 +151,15 @@ export function SettingsMediaField({
           kind={kind}
           value={mediaId}
           confirmLabel={kind === "image" ? "使用此图片" : "使用此视频"}
-          onPick={(item) => onChange(item.url, item.id)}
+          onPick={(item) => change(item.url, item.id)}
         />
       )}
-      {enlarged && preview && (
+      {enlarged && current.previewUrl && (
         <Modal title={label} onClose={() => setEnlarged(false)}>
           <div className="admin-media-enlarged">
             <MediaPreview
-              key={preview}
-              url={preview}
+              key={current.previewUrl}
+              url={current.previewUrl}
               kind={kind}
               label={label}
               playable

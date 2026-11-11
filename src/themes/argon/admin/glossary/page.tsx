@@ -25,6 +25,7 @@ import { hasUploadMarkers } from "@/core/editor/upload-placeholders";
 import { useEditorResources } from "@/core/content-management/use-editor-resources";
 import { useInlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
 import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
+import { mediaReferenceId } from "@/core/media/references";
 import { AdminPageHeading } from "../components/page-heading";
 import { AdminActionButton } from "../components/action-button";
 import { SettingsSection, SettingsText } from "../settings/shared";
@@ -153,6 +154,10 @@ export function GlossaryAdminPage() {
   const [saving, setSaving] = useState(false);
   const [previewing, setPreviewing] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [featurePick, setFeaturePick] = useState<{
+    id: string;
+    url: string;
+  } | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [newTermSession, setNewTermSession] = useState(() => randomUUID());
@@ -189,12 +194,21 @@ export function GlossaryAdminPage() {
     ...selected?.media_urls,
     ...resources.media,
   };
-  const featureImage = fields.feature_media_id
-    ? (media[fields.feature_media_id]?.original ??
-      media[`media:${fields.feature_media_id}`]?.original ??
-      selected?.feature_image?.original ??
-      "")
+  const normalizedFeatureId = fields.feature_media_id
+    ? mediaReferenceId(fields.feature_media_id)
     : "";
+  const pickedFeatureImage =
+    featurePick && normalizedFeatureId === mediaReferenceId(featurePick.id)
+      ? featurePick.url
+      : "";
+  const featureImage =
+    pickedFeatureImage ||
+    (fields.feature_media_id
+      ? (media[fields.feature_media_id]?.original ??
+        media[`media:${fields.feature_media_id}`]?.original ??
+        selected?.feature_image?.original ??
+        "")
+      : "");
   const richValue = {
     title: fields.title,
     excerpt: fields.summary,
@@ -243,6 +257,7 @@ export function GlossaryAdminPage() {
     setError("");
     setMessage("");
     setPreviewing(false);
+    setFeaturePick(null);
     slugTouched.current = false;
     pendingHooks.current = [];
     setNewTermSession(randomUUID());
@@ -260,6 +275,7 @@ export function GlossaryAdminPage() {
       setFields(savedValue);
       setBaselineFields(savedValue);
       setPreviewing(false);
+      setFeaturePick(null);
       slugTouched.current = true;
       operation.current = null;
     } catch (cause) {
@@ -274,6 +290,7 @@ export function GlossaryAdminPage() {
   const uploading = hasUploadMarkers(fields.body as DraftBlock[]);
   const reset = () => {
     setFields(baselineFields);
+    setFeaturePick(null);
     setError("");
     setMessage("");
     if (!selected) {
@@ -361,6 +378,7 @@ export function GlossaryAdminPage() {
       const savedValue = detailFields(response.data);
       setFields(savedValue);
       setBaselineFields(savedValue);
+      setFeaturePick(null);
       operation.current = null;
       setMessage(
         hookError
@@ -638,11 +656,19 @@ export function GlossaryAdminPage() {
                     ? `media:${fields.feature_media_id}`
                     : undefined
                 }
-                onChange={(_url, id) =>
+                onChange={(url, id) => {
+                  setFeaturePick(
+                    id
+                      ? {
+                          id: mediaReferenceId(id),
+                          url,
+                        }
+                      : null,
+                  );
                   update({
-                    feature_media_id: id ? id.replace(/^media:/, "") : null,
-                  })
-                }
+                    feature_media_id: id ? mediaReferenceId(id) : null,
+                  });
+                }}
               />
               <SettingsText
                 label="路径片段"
