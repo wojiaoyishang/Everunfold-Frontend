@@ -24,6 +24,7 @@ import { Icon } from "../components/icon";
 import { AccountProfileEditor } from "./profile";
 import { AccountSecurity } from "./security";
 import { AccountKeys } from "./keys";
+import { AccountSessionState } from "./session-state";
 import { AccountNavigationProvider, useAccountNavigation } from "./unsaved";
 
 export function AccountPage({ baseUrl }: { baseUrl: string }) {
@@ -40,23 +41,15 @@ export function AccountPage({ baseUrl }: { baseUrl: string }) {
   }, [anonymous, router]);
   if (state.phase !== "ready" || !state.session.user)
     return (
-      <div className="admin-root account-root" data-surface="admin">
-        <main className="account-container">
-          <p role="status">
-            <UiText
-              text={
-                state.phase === "failed"
-                  ? accountFailure(state.error)
-                  : "正在确认登录状态"
-              }
-            />
-          </p>
-          {state.phase === "failed" && (
-            <Button className="admin-button" onClick={() => void check()}>
-              <UiText text="重新检查" />
-            </Button>
-          )}
-        </main>
+      <div
+        className="admin-root account-root"
+        data-surface="admin"
+        data-admin-mode="system"
+      >
+        <AccountSessionState
+          error={state.phase === "failed" ? accountFailure(state.error) : ""}
+          onRetry={() => void check()}
+        />
       </div>
     );
   return (

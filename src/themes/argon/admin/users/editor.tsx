@@ -53,8 +53,7 @@ export function UserEditor({ id }: { id?: string }) {
     profileFields({ display_name: "" }),
   );
   const [username, setUsername] = useState(""),
-    [password, setPassword] = useState(""),
-    [current, setCurrent] = useState("");
+    [password, setPassword] = useState("");
   const [role, setRole] = useState<"admin" | "user">("user"),
     [active, setActive] = useState(true),
     [grants, setGrants] = useState<Record<string, PermissionValues>>({});
@@ -108,7 +107,6 @@ export function UserEditor({ id }: { id?: string }) {
     : !!username ||
       !!fields.display_name ||
       !!password ||
-      !!current ||
       preset !== undefined ||
       !!Object.keys(grants).length;
   const forbidden = saved?.role === "admin" && actor.role !== "admin";
@@ -119,7 +117,6 @@ export function UserEditor({ id }: { id?: string }) {
           username,
           display_name: fields.display_name,
           password,
-          current_password: current,
           role,
           grants,
           ...(preset !== undefined
@@ -138,7 +135,6 @@ export function UserEditor({ id }: { id?: string }) {
         );
         if (!signal.aborted) {
           setPassword("");
-          setCurrent("");
           router.replace("/admin/users/" + response.data.id);
         }
       } else if (saved) {
@@ -148,7 +144,6 @@ export function UserEditor({ id }: { id?: string }) {
           role,
           active,
           grants,
-          current_password: current,
           ...(preset !== undefined
             ? {
                 preset: preset
@@ -169,7 +164,6 @@ export function UserEditor({ id }: { id?: string }) {
           setFields(profileFields(response.data));
           setGrants(response.data.grants);
           setPreset(undefined);
-          setCurrent("");
           if (id === actor.id && authorizationChanged)
             router.replace("/login?next=%2Faccount");
         }
@@ -385,17 +379,20 @@ export function UserEditor({ id }: { id?: string }) {
                 </p>
               )}
             </section>
-            <section className="account-card">
-              <AccountField
-                label="确认操作密码"
-                value={current}
-                onChange={setCurrent}
-                secret
-                required={authorizationChanged}
-                autoComplete="current-password"
-                hint="创建用户、更改角色、授权或启停账号时，填写你的当前密码。"
-              />
-              <div className="account-actions">
+            <div className="admin-settings-savebar account-user-savebar">
+              <span>
+                {dirty ? (
+                  <UiText text="有尚未保存的用户修改" />
+                ) : saved ? (
+                  <UiText
+                    text="已读取版本 {revision}"
+                    values={{ revision: saved.revision }}
+                  />
+                ) : (
+                  <UiText text="填写用户信息后创建账号" />
+                )}
+              </span>
+              <div className="admin-settings-actions">
                 <Button
                   type="submit"
                   className="admin-button admin-button-primary"
@@ -408,10 +405,12 @@ export function UserEditor({ id }: { id?: string }) {
                   />
                 </Button>
               </div>
+            </div>
+            {action.message && (
               <p className="account-message" role="status">
                 <UiText text={action.message} />
               </p>
-            </section>
+            )}
           </fieldset>
         </Form>
       ) : (

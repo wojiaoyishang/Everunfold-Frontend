@@ -20,6 +20,7 @@ import { UnsavedAccountChanges } from "./unsaved";
 import { AvatarPicker } from "./avatar-picker";
 import { Avatar } from "../components/ui/avatar";
 import { Icon } from "../components/icon";
+import { EmailVerificationControl } from "./email-verification";
 
 export function AccountProfileEditor({
   profile,
@@ -137,7 +138,24 @@ export function AccountProfileEditor({
           }}
         >
           <fieldset disabled={action.busy} className="account-fieldset">
-            <ProfileFieldsEditor value={value} onChange={setValue} />
+            <ProfileFieldsEditor
+              value={value}
+              onChange={setValue}
+              emailAction={
+                <EmailVerificationControl
+                  email={value.email ?? ""}
+                  verified={
+                    profile.email_verified === true &&
+                    (value.email ?? "") === (profile.email ?? "")
+                  }
+                  disabled={action.busy}
+                  onVerified={(updated) => {
+                    setValue(profileFields(updated));
+                    onSaved(updated);
+                  }}
+                />
+              }
+            />
             <div className="account-actions">
               <Button
                 className="admin-button admin-button-primary"

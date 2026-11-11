@@ -259,6 +259,12 @@
 .composer-submit-row button {
   flex: 0 0 auto;
 }
+.composer-submit-row .primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
 .composer-submit-row button:disabled {
   opacity: 0.5;
 }

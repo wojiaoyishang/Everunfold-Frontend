@@ -1,5 +1,6 @@
 "use client";
 import { useId } from "react";
+import type { ReactNode } from "react";
 import type { ProfileFields } from "@/core/contracts/accounts";
 import { UiText, useLanguageCatalog } from "@/core/i18n/provider";
 import { TextArea, TextField } from "../components/ui/primitives";
@@ -22,6 +23,7 @@ export function AccountField({
   min,
   max,
   step,
+  action,
 }: {
   label: string;
   value: string;
@@ -38,6 +40,7 @@ export function AccountField({
   max?: number;
   step?: number;
   disabled?: boolean;
+  action?: ReactNode;
 }) {
   const id = useId();
   const props = {
@@ -65,6 +68,11 @@ export function AccountField({
         <PasswordField {...props} />
       ) : multiline ? (
         <TextArea {...props} rows={4} />
+      ) : action ? (
+        <div className="account-field-control">
+          <TextField {...props} type={type} />
+          {action}
+        </div>
       ) : (
         <TextField {...props} type={type} />
       )}
@@ -80,9 +88,11 @@ export function AccountField({
 export function ProfileFieldsEditor({
   value,
   onChange,
+  emailAction,
 }: {
   value: ProfileFields;
   onChange: (value: ProfileFields) => void;
+  emailAction?: ReactNode;
 }) {
   const catalog = useLanguageCatalog();
   const change = (field: keyof ProfileFields, next: string) =>
@@ -112,8 +122,9 @@ export function ProfileFieldsEditor({
         onChange={(next) => change("email", next)}
         type="email"
         autoComplete="email"
-        hint="邮箱尚未验证，不用于登录或找回密码。"
+        hint="邮箱用于接收验证码和通知；修改邮箱后需要重新验证。"
         maxLength={254}
+        action={emailAction}
       />
       <AccountField
         label="个人网站"

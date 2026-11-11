@@ -112,7 +112,7 @@
   opacity: 0.65;
 }
 .banner[data-status="success"] .progress > span {
-  animation: feedback-complete 260ms ease-out both;
+  animation: feedback-success-lifetime 10s linear both;
 }
 @keyframes feedback-in {
   from {
@@ -138,12 +138,12 @@
     transform: translateX(375%);
   }
 }
-@keyframes feedback-complete {
+@keyframes feedback-success-lifetime {
   from {
-    transform: scaleX(0.65);
+    transform: scaleX(1);
   }
   to {
-    transform: scaleX(1);
+    transform: scaleX(0);
   }
 }
 .banner[data-motion="reduced"],

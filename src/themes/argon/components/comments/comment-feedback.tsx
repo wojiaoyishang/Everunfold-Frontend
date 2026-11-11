@@ -1,6 +1,12 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { useT } from "@/core/i18n/provider";
 import { surfacePortalTarget } from "@/core/themes/portal";
@@ -38,15 +44,20 @@ function FeedbackSurface({
   const [closing, setClosing] = useState(false);
   const callback = useRef<(() => void) | null>(null);
   const pending = status === "checking" || status === "sending";
+  const finish = useCallback((action: () => void) => {
+    if (callback.current) return;
+    callback.current = action;
+    setClosing(true);
+  }, []);
+  useEffect(() => {
+    if (status !== "success" || !onDismiss) return;
+    const timer = window.setTimeout(() => finish(onDismiss), 10_000);
+    return () => window.clearTimeout(timer);
+  }, [finish, onDismiss, status]);
   useLayoutEffect(() => {
     if (closing)
       return afterDialogMotion(surface.current, () => callback.current?.());
   }, [closing]);
-  const finish = (action: () => void) => {
-    if (callback.current) return;
-    callback.current = action;
-    setClosing(true);
-  };
   return (
     <div
       ref={surface}
