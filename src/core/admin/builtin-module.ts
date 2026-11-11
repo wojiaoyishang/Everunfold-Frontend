@@ -26,7 +26,7 @@ export const builtinAdminModule = {
       label: "运行与任务",
       description: "Scheduler、Worker 与常驻任务",
       icon: "runtime",
-      menu: { group: "core.settings", order: 60 },
+      menu: { group: "core.settings", order: 50 },
     },
     {
       id: "core.comments",
@@ -42,7 +42,7 @@ export const builtinAdminModule = {
       label: "插件管理",
       description: "已部署插件与启用设置",
       icon: "extension",
-      menu: { group: "core.settings", order: 50 },
+      menu: { group: "core.settings", order: 10 },
     },
     {
       id: "core.users",
@@ -64,7 +64,7 @@ export const builtinAdminModule = {
       label: "应用程序接入",
       description: "应用签名、权限目录与回调投递",
       icon: "applications",
-      menu: { group: "core.settings", order: 40 },
+      menu: { group: "core.settings", order: 60 },
     },
     {
       id: "core.shortcodes",
@@ -96,7 +96,7 @@ export const builtinAdminModule = {
       label: "站点设置",
       description: "站点资料、语言与搜索展示",
       icon: "settings",
-      menu: { group: "core.settings", order: 10 },
+      menu: { group: "core.settings", order: 20 },
     },
     {
       id: "core.settings.theme",
@@ -120,7 +120,7 @@ export const builtinAdminModule = {
       label: "系统设置",
       description: "验证码、节点策略与同步状态",
       icon: "node-settings",
-      menu: { group: "core.settings", order: 70 },
+      menu: { group: "core.settings", order: 40 },
     },
     {
       id: "core.settings.captcha",

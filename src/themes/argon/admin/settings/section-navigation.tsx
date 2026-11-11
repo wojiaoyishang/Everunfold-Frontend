@@ -39,6 +39,7 @@ export function SettingsLayout({
     const header = page.closest(".admin-root")?.querySelector(".admin-header");
     let frame = 0;
     let restored = false;
+    let settleUntil = 0;
     const read = () => {
       frame = 0;
       const nodes = [
@@ -63,12 +64,23 @@ export function SettingsLayout({
       const hashTarget = location.hash
         ? nodes.find((node) => "#" + node.id === location.hash)
         : undefined;
+      const boundary = (header?.getBoundingClientRect().bottom ?? 56) + 24;
       if (!restored && nodes.length && (!location.hash || hashTarget)) {
         restored = true;
         hashTarget?.scrollIntoView({ block: "start", behavior: "instant" });
         hashTarget?.focus({ preventScroll: true });
+        if (hashTarget) settleUntil = performance.now() + 1500;
+      } else if (
+        settleUntil &&
+        performance.now() < settleUntil &&
+        hashTarget === document.activeElement &&
+        Math.abs(hashTarget.getBoundingClientRect().top - boundary) > 24
+      ) {
+        // Async sections above the target can change layout after the first
+        // jump. Keep the requested anchor aligned until layout settles or the
+        // user starts interacting.
+        hashTarget.scrollIntoView({ block: "start", behavior: "instant" });
       }
-      const boundary = (header?.getBoundingClientRect().bottom ?? 56) + 24;
       const end =
         window.scrollY > 0 &&
         Math.ceil(window.scrollY + window.innerHeight) >=
@@ -93,6 +105,9 @@ export function SettingsLayout({
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(read);
     };
+    const stopSettling = () => {
+      settleUntil = 0;
+    };
     const mutations = new MutationObserver(schedule);
     mutations.observe(page, { subtree: true, childList: true });
     const resize = new ResizeObserver(schedule);
@@ -101,6 +116,10 @@ export function SettingsLayout({
     window.addEventListener("scroll", schedule, { passive: true });
     window.addEventListener("resize", schedule);
     window.addEventListener("hashchange", schedule);
+    window.addEventListener("wheel", stopSettling, { passive: true });
+    window.addEventListener("touchstart", stopSettling, { passive: true });
+    window.addEventListener("pointerdown", stopSettling, { passive: true });
+    window.addEventListener("keydown", stopSettling);
     schedule();
     return () => {
       cancelAnimationFrame(frame);
@@ -109,6 +128,10 @@ export function SettingsLayout({
       window.removeEventListener("scroll", schedule);
       window.removeEventListener("resize", schedule);
       window.removeEventListener("hashchange", schedule);
+      window.removeEventListener("wheel", stopSettling);
+      window.removeEventListener("touchstart", stopSettling);
+      window.removeEventListener("pointerdown", stopSettling);
+      window.removeEventListener("keydown", stopSettling);
     };
   }, []);
   const groups = groupSections(sections);

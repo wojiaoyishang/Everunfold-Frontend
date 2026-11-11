@@ -66,6 +66,14 @@ test("admin navigation separates primary content, tools, appearance and system s
       ?.branches.map((branch) => branch.label),
     [],
   );
+  assert.deepEqual(ids("设置"), [
+    "core.settings.plugins",
+    "core.settings.site",
+    "core.settings.mail",
+    "core.settings.system",
+    "core.settings.runtime",
+    "core.settings.api-keys",
+  ]);
   const settingsIcons =
     adminNavigationGroups
       .find((group) => group.label === "设置")
