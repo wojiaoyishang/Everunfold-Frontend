@@ -658,6 +658,28 @@ export function TranslationSettingsPage() {
     params.set("key", nextItem.key);
     router.push(`${pathname}?${params.toString()}`);
   };
+  const changeDetailLocale = (value: string) => {
+    setLocale(value);
+    setPage(0);
+    if (!detail) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("scope", detail.scope);
+    params.set("filter", detail.filter);
+    params.set("locale", value);
+    params.set("key", detail.key);
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+  const changeDetailScope = (value: ScopeFilter) => {
+    setScope(value);
+    setPage(0);
+    if (!detail) return;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("scope", value === "all" ? detail.scope : value);
+    params.set("filter", value);
+    params.set("locale", detail.locale);
+    params.set("key", detail.key);
+    router.replace(`${pathname}?${params.toString()}`);
+  };
   const closeDetail = () => router.replace(pathname);
   const transferActions = editor.saved ? (
     <div className={styles.transferActions}>
@@ -737,19 +759,14 @@ export function TranslationSettingsPage() {
                     search={search}
                     languageOptions={languageOptions}
                     onScope={(value) => {
-                      setScope(value);
-                      setPage(0);
-                      closeDetail();
+                      changeDetailScope(value);
                     }}
                     onLocale={(value) => {
-                      setLocale(value);
-                      setPage(0);
-                      closeDetail();
+                      changeDetailLocale(value);
                     }}
                     onStatus={(value) => {
                       setStatus(value);
                       setPage(0);
-                      closeDetail();
                     }}
                     onSearch={(value) => {
                       setSearch(value);
