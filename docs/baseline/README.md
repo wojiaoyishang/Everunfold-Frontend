@@ -1552,3 +1552,13 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/architecture/admin-navigation.md`              | `admin-navigation-9`                   | `1149181779e95736f01377469a45b636939b7b6dd235e7973f368cbe04f41b67` |
 | `docs/development/translations.md`                   | `translations-runtime-2`               | `9de07f730ce560efee1e081922811a218aabc4bd29805a09091c3377e4ac6e5c` |
 | `docs/handoff/translation-overrides-verification.md` | `translation-overrides-verification-2` | `2e3585e8d2138dbd436c3f837b39e34eed977dc841aec16cc10afec953a049ec` |
+
+## 翻译进度、导入导出与运行时同步修复（2026-11-11）
+
+翻译范围默认全部；紧凑列表支持省略，详情工具条保留范围、语言、状态和搜索。原文与译文代码编辑器上下排列，右侧只读显示上下文与元信息。新增彩色翻译覆盖率和版本化 JSON 导入导出。设置接收器契约升级后必须重启，本次已修复实际 409 同步阻塞。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件                                                 | 版本                                   | SHA256                                                             |
+| ---------------------------------------------------- | -------------------------------------- | ------------------------------------------------------------------ |
+| `docs/README.md`                                     | `index-translation-transfer-1`         | `5daf1344675d1b39fd1349ef724c14ad147a811e88373a4c81c50156a41d7860` |
+| `docs/development/translations.md`                   | `translations-runtime-3`               | `83366e92b86201e02c59c6573ae1b950e845dc1b3b1592cbc6165dd26587cf96` |
+| `docs/handoff/translation-overrides-verification.md` | `translation-overrides-verification-3` | `9058e61027947e3aa7a4ef0ac2f9b73a12bb600ba2e758f70bb7fd535f8da682` |

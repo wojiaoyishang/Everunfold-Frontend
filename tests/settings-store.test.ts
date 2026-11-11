@@ -21,6 +21,22 @@ const policy = (epoch: string, revision: number) => ({
     retry_delay_ms: 1500,
   },
 });
+const publicSettings = (epoch: string, revision: number) => ({
+  protocol: "settings-1",
+  node_id: "test",
+  source_epoch: epoch,
+  resource: "public-settings",
+  revision,
+  value: {
+    site: { name: "Test", description: "", author: "Admin" },
+    theme: {},
+    translations: {
+      public: { "zh-CN": { 工作台: "大香蕉" } },
+      admin: { "zh-CN": { 工作台: "大香蕉" } },
+      backend: {},
+    },
+  },
+});
 
 test("settings commit is monotonic, replay safe and rejects conflicting revisions/epochs", async () => {
   const directory = await mkdtemp(
@@ -104,4 +120,20 @@ test("receiver requires actual socket IP AND token; forwarding headers do not gr
     }
   }
   assert.equal((await store.read("cache-policy"))?.revision, 1);
+});
+
+test("settings receiver accepts database-backed translation overrides", async () => {
+  const directory = await mkdtemp(
+    path.join(os.tmpdir(), "everunfold-settings-translations-"),
+  );
+  const epoch = randomUUID();
+  const store = new FileSettingsStore(directory, "test", epoch);
+  await store.apply(publicSettings(epoch, 3));
+  const saved = await store.read("public-settings");
+  assert.equal(saved?.revision, 3);
+  assert.deepEqual((saved?.value as { translations: unknown }).translations, {
+    public: { "zh-CN": { 工作台: "大香蕉" } },
+    admin: { "zh-CN": { 工作台: "大香蕉" } },
+    backend: {},
+  });
 });

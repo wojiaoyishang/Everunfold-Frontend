@@ -1,7 +1,7 @@
 "use client";
 import { useT } from "@/core/i18n/provider";
 import { useFileDrop } from "@/core/media/use-file-drop";
-import { useRef } from "react";
+import { useRef, type ReactNode } from "react";
 import { Button } from "./primitives";
 import { Icon } from "../icon";
 /** Shared file input boundary; resetting lets users retry selecting the same file. */
@@ -11,6 +11,7 @@ export function FilePicker({
   label = "上传图标",
   className = "admin-button admin-button-primary",
   iconOnly = false,
+  display,
   accept = ".svg,.png,.webp,image/svg+xml,image/png,image/webp",
 }: {
   onFiles: (files: File[]) => void;
@@ -19,6 +20,7 @@ export function FilePicker({
   accept?: string;
   className?: string;
   iconOnly?: boolean;
+  display?: ReactNode;
 }) {
   const t = useT();
   const input = useRef<HTMLInputElement>(null);
@@ -48,7 +50,7 @@ export function FilePicker({
         onClick={() => input.current?.click()}
       >
         <Icon name="upload" />
-        {!iconOnly && label}
+        {!iconOnly && (display ?? label)}
       </Button>
       {drop.message && <span role="status">{t(drop.message)}</span>}
     </>

@@ -48,16 +48,21 @@ export function useTranslationSettings() {
     setBusy(true);
     setError("");
     setMessage("");
+    let current = saved;
     try {
-      const payload: SaveTranslations = {
-        expected_revision: saved.revision,
-        changes,
-      };
-      const response = await saveTranslations(baseUrl, payload, csrfToken);
-      setSaved(response.data);
+      for (let offset = 0; offset < changes.length; offset += 500) {
+        const payload: SaveTranslations = {
+          expected_revision: current.revision,
+          changes: changes.slice(offset, offset + 500),
+        };
+        const response = await saveTranslations(baseUrl, payload, csrfToken);
+        current = response.data;
+        setSaved(current);
+      }
       setMessage("翻译设置已保存，正在等待前端节点应用。");
       return true;
     } catch (reason) {
+      setSaved(current);
       setError(
         reason instanceof RequestError && reason.status === 409
           ? "翻译已在其他窗口修改。当前输入已保留，请重新读取后合并。"

@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-[自定义翻译字符串](development/translations.md)、[ADR0111](decisions/0111-sparse-custom-translation-overrides.md)：只读基础语言 JSON 保持不变，数据库只保存稀疏覆盖；前台/后台/API 消息通过统一中间层回退，并随可靠设置修订发布。入口位于“外观”，列表展示键名、原文和译文，详情保留可过滤列表并用共享代码编辑器维护译文。
+[自定义翻译字符串](development/translations.md)、[ADR0111](decisions/0111-sparse-custom-translation-overrides.md)：只读基础语言 JSON 保持不变，数据库只保存稀疏覆盖；前台/后台/API 消息通过统一中间层回退，并随可靠设置修订发布。入口位于“外观”，默认统计全部范围；紧凑列表、彩色覆盖率、上下排列的代码编辑器和右侧元信息贯通，并支持版本化 JSON 导入导出。
 
 [主题与插件特色图](decisions/0110-theme-and-plugin-preview-artwork.md)、[插件开发](development/frontend-plugins.md)：主题详情预览满宽等比居中，插件列表和详情均支持 `preview` 特色图；无图或加载失败时保留稳定占位。
 
