@@ -47,6 +47,12 @@ export function browserLocale(): MessageLocale {
           document.documentElement.lang,
       );
 }
+
+export function browserContentLocale(): Locale {
+  return typeof document === "undefined"
+    ? "zh-CN"
+    : localeOf(document.documentElement.lang);
+}
 export function localePath(
   path: string,
   catalog: LanguageCatalog = initialCatalog,

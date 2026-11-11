@@ -1,5 +1,5 @@
 import { uploadTransport, type UploadProgress } from "./upload-transport";
-import { browserLocale } from "@/core/i18n/locale";
+import { browserContentLocale, browserLocale } from "@/core/i18n/locale";
 /** Browser JSON transport; credentials, caching and desired-state writes stay explicit. */
 export type RequestFailure =
   "cancelled" | "timeout" | "network" | "http" | "invalid";
@@ -141,7 +141,8 @@ async function sendJSON<T>(
           credentials,
           cache: "no-store",
           headers: {
-            "X-Site-Locale": browserLocale(),
+            "X-Site-Locale": browserContentLocale(),
+            "X-Site-UI-Locale": browserLocale(),
             ...headers,
             Accept: "application/json",
             ...(binary
