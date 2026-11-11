@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-10，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
+版本：notifications-11，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)、[ADR0117](../decisions/0117-html-notification-templates.md)与[ADR0118](../decisions/0118-account-user-picker-and-policy-navigation.md)。
 
 ## 概念
 
@@ -36,6 +36,10 @@
 | `settings.delivery_failed` | 前端节点在最大重试次数后仍未应用快照 | 运维告警 | 单条同步投递记录 |
 
 事件目录由后端注册，后台策略页自动出现。事件只有配置了启用的路由才会生成投递；接收人可使用用户、角色或权限，平台可使用站内、邮件或已同步的插件渠道。账号注册、找回密码和邮箱验证不属于本轮业务总线事件。
+
+“指定用户”使用共享账号用户选择器，可搜索姓名、用户名、邮箱，也可粘贴完整稳定 UUID；显示名称和头像只用于识别，保存值始终是用户 ID。目录查询沿用`users:manage`边界。没有用户目录权限但具有通知设置权限的账号仍可手工填写稳定 ID。选择结果属于本地策略草稿，点击“保存策略”后才写入。
+
+桌面端右侧快速导航按事件生成，目录项与事件卡片使用同一标题；点击后定位并聚焦对应卡片。手机端不显示该目录，事件卡与接收规则改为单列。
 
 ## 告警节奏
 

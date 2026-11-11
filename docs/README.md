@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[通知策略用户选择器与快速导航](handoff/notification-policy-user-picker-verification.md)、[ADR0118](decisions/0118-account-user-picker-and-policy-navigation.md)：指定用户可按姓名、用户名、邮箱或完整 UUID 搜索，保存值始终为稳定用户 ID；目录权限保持`users:manage`，无权限时可手填 ID。通知策略桌面端按事件生成右侧快速导航，手机端保持单列。
+
 [消息总线业务事件](development/notifications.md)及[验收](handoff/notification-bus-events-verification.md)：定时发布成功/失败和前端节点最终同步失败已接入统一事件总线。后台按事件配置接收人、站内或邮件平台、语言与发信配置；计划发布事件与内容状态同事务，节点同步只在重试耗尽后告警一次。账号注册、找回密码等账号流程暂不进入本总线。
 
 [通知模板代码编辑器与 HTML 邮件](development/notifications.md)、[ADR0117](decisions/0117-html-notification-templates.md)及[验收](handoff/notification-html-template-verification.md)：邮件通过独立“启用 HTML”开关控制发送，开启后提供保留变量占位符的可视化与源码双视图，关闭时保留内容并使用纯文本回退。右侧变量填充只影响安全预览。默认邮件模板采用后台一致的简约图形卡片，HTML源码按层级缩进。

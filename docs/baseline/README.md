@@ -1696,3 +1696,16 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/handoff/notification-bus-events-verification.md` | `notification-bus-events-verification-1` | `c563c750abfd274b091d07d0734b47caec08f22caac33388b116ceff5bcd93cf` |
 | `docs/design/notification-bus-policy.png` | `notification-bus-policy-1` | `94ad707fae8c78a199dbacf9095afbb802ee807679856af17263d577c238e426` |
 | `docs/design/notification-bus-template-preview.png` | `notification-bus-template-preview-1` | `b49da8a62637e5c8e87993cf8a0a2454567843f04dd61506191cacbf730f5b35` |
+
+## 通知策略用户选择器与快速导航（2026-11-11）
+
+指定用户改为可搜索账号选择器，支持姓名、用户名、邮箱和完整 UUID，保存稳定 ID；目录权限保持`users:manage`并提供手工 ID 降级。通知策略桌面端按事件生成快速导航，手机端保持单列。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-notification-user-picker-1` | `733135f1da0d9fbafc0af0a239cc32732e86ecbb7d6b06681289cf599ab4d7e7` |
+| `docs/development/notifications.md` | `notifications-11` | `7199546105bc8e2579181075945570731b68b1c3890fe3b716d82b19e560157a` |
+| `docs/decisions/0118-account-user-picker-and-policy-navigation.md` | `ADR0118-1` | `c4ea2039373cdb95d618409abf6c5c8149c684500e565c46ba7f142f660c2e35` |
+| `docs/handoff/notification-policy-user-picker-verification.md` | `notification-policy-user-picker-verification-1` | `3b887299b5fe7f100ac574efccde706e57bd1f4a9c22921de8aa46d94864e0b4` |
+| `docs/design/notification-policy-user-picker.png` | `notification-policy-user-picker-1` | `73fd75d993cc33a0b4dec4dd9568a585ac23f572c00a205c3db536dccd156d16` |
+| `docs/design/notification-policy-quick-navigation.png` | `notification-policy-quick-navigation-1` | `08c9f62486894fedd7e0f65c4942903a203c98eda40a5f49ff536c868bc2e1a0` |
