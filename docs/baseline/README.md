@@ -1635,7 +1635,7 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | 文件                                                              | 版本                                         | SHA256                                                             |
 | ----------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------ |
 | `docs/README.md`                                                  | `index-notification-delivery-language-1`     | `e9830f1508b3e9bbd8cde23a81185cb30fa30800b61a35bd42947a4ecd189dd1` |
-| `docs/handoff/notification-delivery-language-verification.md`     | `notification-delivery-language-verification-2` | `3cc403b5a77cb1dfe08bfa0b3bde270f51a20b61362da631aa8a413a5b1f328e` |
+| `docs/handoff/notification-delivery-language-verification.md`     | `notification-delivery-language-verification-3` | `2cd4943a5cbb0b2b8c5f5d2e1c24c465c107802f3df669e6601a4a1030c47985` |
 
 ## 邮箱验证、用户管理确认与账号状态页（2026-11-11）
 
