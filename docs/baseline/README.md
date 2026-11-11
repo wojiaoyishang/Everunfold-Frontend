@@ -1718,9 +1718,9 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/README.md` | `index-discovery-browser-view-1` | `2f8a184ca8c181735bf16e8cde83e6c36e8fe79ea80cab1876d5826916f5e8d4` |
-| `docs/development/operations-and-search.md` | `operations-search-7` | `50714c150d829eb636ebf73e2919bf11ce4c11b1af1f235ce4b415b1f2a8797b` |
-| `docs/decisions/0119-discovery-documents-for-browsers-and-crawlers.md` | `ADR0119-1` | `9929e2f0cb16b80f3c363e563fae3cd87f1c97c063700346954bebc7941d86ce` |
-| `docs/handoff/discovery-browser-view-verification.md` | `discovery-browser-view-verification-1` | `7cef30945039a6b314d7eb2046dedc78ad1f7282cb26ca3e1eaceb4202abbd60` |
-| `docs/design/sitemap-browser-view.png` | `sitemap-browser-view-1` | `4154a09cdfaf04ae05efbe4517d17b3929073b06d3eab3b313a417edc1803ca8` |
-| `docs/design/rss-browser-view.png` | `rss-browser-view-1` | `6b4ce766be7c0b4ad6a1c33f3d99850635a27046ad4159cf6663602c6e5299e1` |
-| `docs/design/rss-browser-mobile.png` | `rss-browser-mobile-1` | `0c8a7428790bc183860b1378fc128396ead1cef90fdf892fd0cf83b214db0aee` |
+| `docs/development/operations-and-search.md` | `operations-search-7` | `eacdc7f6266a188c32e153e9be993e7016250857982254bb46accc039bda5921` |
+| `docs/decisions/0119-discovery-documents-for-browsers-and-crawlers.md` | `ADR0119-1` | `6d60f5c359222102126eaf704710e966c27a49904627c8e64ad52a80042ea373` |
+| `docs/handoff/discovery-browser-view-verification.md` | `discovery-browser-view-verification-1` | `7d38880ac8243d1deda254d307c2a0bc91f84e487c29c38f60a17dcf80cc7737` |
+| `docs/design/sitemap-browser-view.png` | `sitemap-browser-view-1` | `df1dcee97c2859854b723b4382ffa6b3959c93866fe3227ddab8baa837543f27` |
+| `docs/design/rss-browser-view.png` | `rss-browser-view-1` | `aea0796d26592770b2110cef43d092cccb207f38b883dae9b7bb3eab706bb4f6` |
+| `docs/design/rss-browser-mobile.png` | `rss-browser-mobile-1` | `d12ef5dce69fe78248d208ee69f2a6f2be156c6e6ecdca1052d9f6b6997bbdab` |

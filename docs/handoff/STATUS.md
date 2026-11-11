@@ -2,7 +2,7 @@
 
 ## 最新交付：发现文件浏览器视图与通知平台图标（2026-11-11）
 
-- `/sitemap.xml`、`/feed.xml`、`/atom.xml`在普通浏览器直接打开时显示无脚本响应式阅读页；RSS/Atom阅读器、Googlebot等已知爬虫继续收到原标准XML，`?format=xml`可强制读取原始文件。
+- `/sitemap.xml`、`/feed.xml`、`/atom.xml`在普通浏览器直接打开时显示无脚本、朴素代码编辑器风格的响应式阅读页；RSS/Atom阅读器、Googlebot等已知爬虫继续收到原标准XML，`?format=xml`可强制读取原始文件。
 - 站点地图Route Handler保留`urlset`、语言alternates和`lastmod`；HTML与XML响应声明`Vary`，浏览器视图使用`noindex, follow`与限制性CSP。
 - 通知平台菜单改用独立`notification-platform`图标（发送），与插件管理图标不再重复。
 - 实际HTTP确认HTML/XML内容类型分流；1440px站点地图、RSS与390px RSS实页无溢出或脚本错误，后台图标路径也与插件管理不同。

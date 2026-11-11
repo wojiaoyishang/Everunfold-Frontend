@@ -12,7 +12,7 @@
 2. 只有普通浏览器页面导航、接受`text/html`且 User-Agent 不属于已知爬虫/订阅器时返回 HTML。已知机器人始终优先获得 XML。
 3. `?format=xml`强制返回机器 XML；HTML 页面提供“查看原始 XML”入口。
 4. XML 与 HTML 响应都声明`Vary: Accept, Sec-Fetch-Dest, User-Agent`，防止共享缓存混用表示。
-5. HTML 页面无客户端脚本、无外部资源，使用响应式静态排版和系统字体；标题、摘要、路径、语言与更新时间全部重新转义。
+5. HTML 页面无客户端脚本、无外部资源，使用克制的代码编辑器布局：文件标签、元数据状态栏、等宽路径与响应式内容行；标题、摘要、路径、语言与更新时间全部重新转义。
 6. HTML 视图使用`noindex, follow`；正文页面索引规则、权限和公开快照不改。
 7. `/sitemap.xml`由 Route Handler 生成标准`urlset`，保留语言 alternates、lastmod、changefreq和priority字段。RSS/Atom 继续复用既有稳定 ID、语言过滤和 XML 转义生成器。
 8. 订阅停用或语言无效时，爬虫仍收到404；浏览器收到同样404状态的专业空态说明，不伪装成功。

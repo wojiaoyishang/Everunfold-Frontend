@@ -64,7 +64,7 @@ canonical、站点地图和分享地址使用前端服务端部署配置 publicS
 
 ### 浏览器阅读视图与机器响应
 
-`/sitemap.xml`、`/feed.xml` 和 `/atom.xml` 使用同一地址做保守内容协商。普通浏览器页面导航且接受 `text/html` 时，收到无 JavaScript 的品牌说明页，可直接浏览公开地址或最近内容；RSS/Atom 阅读器、已知爬虫、`Accept` 不包含 HTML 的请求继续收到原有标准 XML。Googlebot 等已知爬虫即使同时接受 HTML 也优先返回 XML。
+`/sitemap.xml`、`/feed.xml` 和 `/atom.xml` 使用同一地址做保守内容协商。普通浏览器页面导航且接受 `text/html` 时，收到无 JavaScript 的代码编辑器式阅读页，可直接浏览公开地址或最近内容；RSS/Atom 阅读器、已知爬虫、`Accept` 不包含 HTML 的请求继续收到原有标准 XML。Googlebot 等已知爬虫即使同时接受 HTML 也优先返回 XML。
 
 原始 XML 可通过 `?format=xml` 强制读取；例如 `/feed.xml?format=xml`。浏览器说明页按钮链接到该地址。机器响应不增加登录、脚本或重定向。两个响应都声明`Vary: Accept, Sec-Fetch-Dest, User-Agent`，避免共享缓存把 HTML 与 XML 混用。HTML 视图使用`noindex, follow`，不改变站点正文的索引策略。
 
