@@ -64,8 +64,13 @@ test("admin navigation separates primary content, tools, appearance and system s
     adminNavigationGroups
       .find((group) => group.label === "设置")
       ?.branches.map((branch) => branch.label),
-    ["站点", "连接与安全", "系统"],
+    [],
   );
+  const settingsIcons =
+    adminNavigationGroups
+      .find((group) => group.label === "设置")
+      ?.items.map((item) => item.icon) ?? [];
+  assert.equal(new Set(settingsIcons).size, settingsIcons.length);
 });
 
 test("corrupt or outdated admin appearance cannot import permissions or public reader settings", () => {

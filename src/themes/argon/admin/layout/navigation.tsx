@@ -145,6 +145,10 @@ export function AdminNavigation({
                     aria-label={t(branch.label)}
                     title={t(branch.label)}
                     data-current={items.some((item) => item.id === current?.id)}
+                    onPointerEnter={(event) => {
+                      if (event.pointerType === "mouse" && !open)
+                        setExpansion({ pathname, branch: branch.id });
+                    }}
                     onClick={() => {
                       if (collapsed) onExpand?.();
                       setExpansion({
