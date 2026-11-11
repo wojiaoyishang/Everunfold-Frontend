@@ -70,8 +70,9 @@ function plainToEmailHtml(value: string) {
     .join("\n");
 }
 
-function htmlPreviewDocument(value: string, values: Record<string, string>) {
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>body{margin:0;padding:14px;color:#20252d;background:#fff;font:14px/1.7 system-ui,sans-serif}img{max-width:100%;height:auto}table{max-width:100%;border-collapse:collapse}td,th{padding:6px 8px}</style></head><body>${interpolateHtml(value, values)}</body></html>`;
+function htmlPreviewDocument(value: string, values?: Record<string, string>) {
+  const body = values ? interpolateHtml(value, values) : value;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>body{margin:0;padding:14px;color:#20252d;background:#fff;font:14px/1.7 system-ui,sans-serif}img{max-width:100%;height:auto}table{max-width:100%;border-collapse:collapse}td,th{padding:6px 8px}</style></head><body>${body}</body></html>`;
 }
 
 function draftFrom(view: NotificationTemplateView): SaveNotificationTemplate {
@@ -405,7 +406,7 @@ export function NotificationTemplatesPage() {
                                   onClick={() => setHtmlView("visual")}
                                 >
                                   <Icon name="eye" />
-                                  <UiText text="可视化预览" />
+                                  <UiText text="可视化" />
                                 </Button>
                                 <Button
                                   role="tab"
@@ -425,13 +426,10 @@ export function NotificationTemplatesPage() {
                       </div>
                       {activeBodyMode === "html" && htmlView === "visual" ? (
                         <iframe
-                          className={styles.bodyVisualPreview}
-                          title={t("邮件 HTML 可视化预览")}
+                          className={styles.previewFrame}
+                          title={t("HTML 正文可视化")}
                           sandbox=""
-                          srcDoc={htmlPreviewDocument(
-                            draft.html ?? "",
-                            previewValues,
-                          )}
+                          srcDoc={htmlPreviewDocument(draft.html ?? "")}
                         />
                       ) : (
                         <CodeEditor
@@ -479,27 +477,39 @@ export function NotificationTemplatesPage() {
                       </div>
                     </div>
                   </section>
-                  {activeBodyMode === "text" && (
-                    <section className={styles.panel}>
-                      <div className={styles.panelHeading}>
-                        <h2>
-                          <UiText text="安全预览" />
-                        </h2>
-                        <span>
-                          {currentLanguage?.label ?? selectedLocale}
-                          {selectedPlatform === "email" ? " · 纯文本" : ""}
-                        </span>
-                      </div>
-                      <div className={styles.previewSubject}>
-                        {interpolate(draft.subject ?? "", previewValues) ||
-                          t("未填写主题")}
-                      </div>
+                  <section className={styles.panel}>
+                    <div className={styles.panelHeading}>
+                      <h2>
+                        <UiText text="安全预览" />
+                      </h2>
+                      <span>
+                        {currentLanguage?.label ?? selectedLocale}
+                        {selectedPlatform === "email"
+                          ? ` · ${activeBodyMode === "html" ? "HTML" : "纯文本"}`
+                          : ""}
+                      </span>
+                    </div>
+                    <div className={styles.previewSubject}>
+                      {interpolate(draft.subject ?? "", previewValues) ||
+                        t("未填写主题")}
+                    </div>
+                    {activeBodyMode === "html" ? (
+                      <iframe
+                        className={styles.previewFrame}
+                        title={t("HTML 通知安全预览")}
+                        sandbox=""
+                        srcDoc={htmlPreviewDocument(
+                          draft.html ?? "",
+                          previewValues,
+                        )}
+                      />
+                    ) : (
                       <pre className={styles.previewBody}>
                         {interpolate(draft.text ?? "", previewValues) ||
                           t("未填写正文")}
                       </pre>
-                    </section>
-                  )}
+                    )}
+                  </section>
                 </div>
                 <aside className={styles.editorAside}>
                   <section className={styles.panel}>
