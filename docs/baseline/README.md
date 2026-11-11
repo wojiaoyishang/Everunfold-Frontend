@@ -1499,14 +1499,14 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 
 ## 后台信息架构、主题导航与术语特色图片（2026-11-10）
 
-后端`e904723`、前端`42ba9d5`/`3245b4d`。后台按概览、内容、内容工具、资源、外观、成员与互动、设置重组；设置组使用直属入口，避免父子菜单重复图标，其他真实子菜单进入即展开。当前主题独立保存导航，旧站点导航只作兼容回退。自定义语言标志使用固定槽及溢出滚动，术语新增媒体库特色图片和0041迁移。多语言自定义字符串与邮件模板只记录后续架构，没有创建空入口。以下版本替代对应旧摘要，STATUS分别维护。
+后端`e904723`、前端`42ba9d5`/`3245b4d`/`66bb668`。后台按概览、内容、内容工具、资源、外观、成员与互动、设置重组；设置组使用直属入口，避免父子菜单重复图标，其他真实子菜单进入即展开。当前主题独立保存导航，旧站点导航只作兼容回退。自定义语言标志使用固定槽及溢出滚动，术语新增媒体库特色图片和0041迁移。插件目录改为15/60秒轮询并以200完整响应返回，后台访问站点使用新窗口。多语言自定义字符串与邮件模板只记录后续架构，没有创建空入口。以下版本替代对应旧摘要，STATUS分别维护。
 
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/README.md` | `index-admin-ia-theme-navigation-1` | `a65afd637df26fc79df6e8b08e1feab15f3bac0194096db3db75e0ea7bb894ac` |
 | `docs/architecture/constraints.md` | `constraints-bootstrap-24` | `d28f251ab43bdbc8da78cf2b755c654a44c97991c2addd03509c52474cd1f868` |
-| `docs/decisions/0105-admin-navigation-and-glossary-media.md` | `ADR0105-1` | `08652b0ea61afba901f83c1bef101c9524d65f5fe923ff7e102082c5bf6637a9` |
+| `docs/decisions/0105-admin-navigation-and-glossary-media.md` | `ADR0105-2` | `982f510ce5c525c300a89c4129c9b315ab2de373274848dd98b08ca0c5f4a144` |
 | `docs/development/glossary.md` | `glossary-runtime-14` | `51db95ab458c04f8e9b4d37e87bec5b86308e4a46626d9f1d1e765bf20a6d142` |
-| `docs/development/settings.md` | `settings-runtime-16` | `c6d28d05be0f267feafe6e39d54aa8a4b603bed4456177862a28dfb8a27fddeb` |
+| `docs/development/settings.md` | `settings-runtime-17` | `769cf160eb5e49e4ae5e1edeccf35982395ca9dea6cc7ecb7f50b0293a47564e` |
 | `contracts/glossary-v1.schema.json` | `glossary-v1-3.5.0` | `068801018aee5de95716db897f537b956fdc20d29e2e0a1eb82a4393ec1ed353` |
 | `contracts/settings-v1.schema.json` | `settings-v1-1.29.0` | `813999809afb42a9c6bee4b75e54cb33d91e541a1461971b911ed72fa3e67840` |
