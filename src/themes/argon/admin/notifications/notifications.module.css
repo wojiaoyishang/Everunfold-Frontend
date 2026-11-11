@@ -291,14 +291,58 @@
   color: var(--admin-accent);
 }
 
-.bodyEditor :global(.ui-textarea) {
-  min-height: 220px;
-  resize: vertical;
-  font:
-    13px/1.65 ui-monospace,
-    SFMono-Regular,
-    Consolas,
-    monospace;
+.bodyEditor {
+  gap: 8px;
+}
+
+.bodyEditorHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bodyModeTabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-subtle);
+}
+
+.bodyModeTabs button {
+  min-height: 28px;
+  padding: 3px 9px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
+.bodyModeTabs button[data-current] {
+  background: var(--admin-canvas);
+  color: var(--admin-accent);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--admin-text) 10%, transparent);
+}
+
+.bodyEditor :global(.cm-editor) {
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+}
+
+.bodyEditor :global(.cm-scroller) {
+  min-height: 250px;
+  max-height: 420px;
+}
+
+.previewFrame {
+  width: 100%;
+  min-height: 190px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: white;
 }
 
 .previewSubject {
@@ -1032,7 +1076,8 @@
   .mailProfilesHeading,
   .mailProfileSavebar,
   .mailProfileEditor header,
-  .mailEditorSectionHeading {
+  .mailEditorSectionHeading,
+  .bodyEditorHeading {
     align-items: stretch;
     flex-direction: column;
   }

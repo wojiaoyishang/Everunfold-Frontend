@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { html as htmlLanguage } from "@codemirror/lang-html";
+import type { Extension } from "@codemirror/state";
 import type {
   NotificationPlatformView,
   NotificationTemplateView,
@@ -10,7 +12,11 @@ import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { useLanguageCatalog, UiText, useT } from "@/core/i18n/provider";
 import { useNotificationState } from "@/core/notifications/use-notifications";
-import { Button, TextArea, TextField } from "../../components/ui/primitives";
+import { Button, TextField } from "../../components/ui/primitives";
+import {
+  CodeEditor,
+  type SourceEditorHandle,
+} from "../../components/ui/code-editor";
 import { Select } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
 import { Icon } from "../../components/icon";
@@ -22,12 +28,14 @@ import styles from "./notifications.module.css";
 type DraftMap = Record<string, SaveNotificationTemplate>;
 
 const sampleData: Record<string, string> = {
-  "actor.name": "小林",
+  "actor.name": "小灵",
   "content.excerpt": "这是一条刚刚提交、正在等待审核的评论。",
   "resource.title": "示例文章",
   "resource.url": "/posts/example",
   "resource.review_url": "/admin/comments",
 };
+const textLanguage: Extension = [];
+const emailHtmlLanguage = htmlLanguage();
 
 function identity(event: string, platform: string, locale: string) {
   return `${event}\0${platform}\0${locale}`;
@@ -40,6 +48,35 @@ function interpolate(value: string) {
   );
 }
 
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function interpolateHtml(value: string) {
+  return value.replace(
+    /\{\{\s*([a-zA-Z_][a-zA-Z0-9_.]*)\s*\}\}/g,
+    (_match, key: string) => escapeHtml(sampleData[key] ?? ""),
+  );
+}
+
+function plainToEmailHtml(value: string) {
+  return value
+    .split(/\n{2,}/)
+    .map(
+      (paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`,
+    )
+    .join("\n");
+}
+
+function htmlPreviewDocument(value: string) {
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>body{margin:0;padding:14px;color:#20252d;background:#fff;font:14px/1.7 system-ui,sans-serif}img{max-width:100%;height:auto}table{max-width:100%;border-collapse:collapse}td,th{padding:6px 8px}</style></head><body>${interpolateHtml(value)}</body></html>`;
+}
+
 function draftFrom(view: NotificationTemplateView): SaveNotificationTemplate {
   return {
     expected_revision: 1,
@@ -48,6 +85,7 @@ function draftFrom(view: NotificationTemplateView): SaveNotificationTemplate {
     locale: view.locale,
     subject: view.subject,
     text: view.text,
+    html: view.html,
     enabled: view.enabled,
     reset: false,
   };
@@ -97,6 +135,8 @@ export function NotificationTemplatesPage() {
   const [eventType, setEventType] = useState("");
   const [platformId, setPlatformId] = useState("in-app");
   const [locale, setLocale] = useState("");
+  const [bodyMode, setBodyMode] = useState<"text" | "html">("text");
+  const bodyEditor = useRef<SourceEditorHandle | null>(null);
   const [draftStore, setDraftStore] = useState<{
     revision: number;
     values: DraftMap;
@@ -142,8 +182,11 @@ export function NotificationTemplatesPage() {
     draft &&
     (draft.subject !== view.subject ||
       draft.text !== view.text ||
+      draft.html !== view.html ||
       draft.enabled !== view.enabled)
   );
+  const activeBodyMode =
+    selectedPlatform === "email" && bodyMode === "html" ? "html" : "text";
   const update = (patch: Partial<SaveNotificationTemplate>) => {
     if (!draft) return;
     setDraftStore((current) => ({
@@ -191,14 +234,25 @@ export function NotificationTemplatesPage() {
   const appendVariable = (variable: string) => {
     if (!draft) return;
     const token = `{{${variable}}}`;
-    update({ text: draft.text + (draft.text ? " " : "") + token });
+    if (bodyEditor.current) {
+      bodyEditor.current.insert(token);
+      bodyEditor.current.focus();
+      return;
+    }
+    if (activeBodyMode === "html") update({ html: (draft.html ?? "") + token });
+    else update({ text: (draft.text ?? "") + (draft.text ? " " : "") + token });
+  };
+  const chooseBodyMode = (mode: "text" | "html") => {
+    setBodyMode(mode);
+    if (mode === "html" && draft && !draft.html)
+      update({ html: plainToEmailHtml(draft.text ?? "") });
   };
   return (
     <SettingsLayout>
       <UnsavedAccountChanges dirty={dirty} busy={editor.busy} />
       <AdminPageHeading
         title="通知模板"
-        description="模板按事件、平台和语言维护。变量只做安全文本插值，不会执行模板代码。"
+        description="正文使用代码编辑器；邮件可编辑 HTML 并保留纯文本回退，变量只做安全插值，不执行模板代码。"
         action={
           <Button
             className="admin-button"
@@ -309,20 +363,69 @@ export function NotificationTemplatesPage() {
                         }
                       />
                     </label>
-                    <label
+                    <div
                       className={`${styles.toolbarField} ${styles.bodyEditor}`}
                     >
-                      <UiText text="正文" />
-                      <TextArea
-                        value={draft.text ?? ""}
-                        maxLength={10000}
-                        rows={10}
-                        placeholder="输入通知正文，可插入右侧变量"
-                        onChange={(input) =>
-                          update({ text: input.target.value })
+                      <div className={styles.bodyEditorHeading}>
+                        <span>
+                          <UiText text="正文" />
+                        </span>
+                        {selectedPlatform === "email" && (
+                          <div
+                            className={styles.bodyModeTabs}
+                            role="tablist"
+                            aria-label={t("正文格式")}
+                          >
+                            <Button
+                              role="tab"
+                              aria-selected={activeBodyMode === "text"}
+                              data-current={
+                                activeBodyMode === "text" || undefined
+                              }
+                              onClick={() => chooseBodyMode("text")}
+                            >
+                              <UiText text="纯文本" />
+                            </Button>
+                            <Button
+                              role="tab"
+                              aria-selected={activeBodyMode === "html"}
+                              data-current={
+                                activeBodyMode === "html" || undefined
+                              }
+                              onClick={() => chooseBodyMode("html")}
+                            >
+                              HTML
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      <CodeEditor
+                        ref={bodyEditor}
+                        value={
+                          activeBodyMode === "html"
+                            ? (draft.html ?? "")
+                            : (draft.text ?? "")
                         }
+                        onChange={(value) =>
+                          update(
+                            activeBodyMode === "html"
+                              ? { html: value }
+                              : { text: value },
+                          )
+                        }
+                        label={
+                          activeBodyMode === "html"
+                            ? t("HTML 正文")
+                            : t("通知正文")
+                        }
+                        language={
+                          activeBodyMode === "html"
+                            ? emailHtmlLanguage
+                            : textLanguage
+                        }
+                        disabled={!editable || editor.busy}
                       />
-                    </label>
+                    </div>
                     <div>
                       <p className={styles.muted}>
                         <UiText text="可用变量" />
@@ -347,15 +450,27 @@ export function NotificationTemplatesPage() {
                       </h2>
                       <span>
                         {currentLanguage?.label ?? selectedLocale}
-                        {selectedPlatform === "email" ? " · 纯文本" : ""}
+                        {selectedPlatform === "email"
+                          ? ` · ${activeBodyMode === "html" ? "HTML" : "纯文本"}`
+                          : ""}
                       </span>
                     </div>
                     <div className={styles.previewSubject}>
                       {interpolate(draft.subject ?? "") || t("未填写主题")}
                     </div>
-                    <pre className={styles.previewBody}>
-                      {interpolate(draft.text ?? "") || t("未填写正文")}
-                    </pre>
+                    {selectedPlatform === "email" &&
+                    activeBodyMode === "html" ? (
+                      <iframe
+                        className={styles.previewFrame}
+                        title={t("HTML 通知预览")}
+                        sandbox=""
+                        srcDoc={htmlPreviewDocument(draft.html ?? "")}
+                      />
+                    ) : (
+                      <pre className={styles.previewBody}>
+                        {interpolate(draft.text ?? "") || t("未填写正文")}
+                      </pre>
+                    )}
                   </section>
                 </div>
                 <aside className={styles.editorAside}>
