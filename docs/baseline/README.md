@@ -1522,5 +1522,16 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/settings.md` | `settings-runtime-19` | `f70b3c240cf60e6bab510233267b59599ad0f6882e8d04d5b3c40404f18bd697` |
 | `docs/development/captcha.md` | `captcha-7` | `bd143b0448c468f94584b6e35797a82688530cd0baa41a141fa008156ead3a20` |
 | `docs/decisions/0064-desktop-settings-section-navigation.md` | `ADR0064-grouped-navigation-1` | `e07d42de5bb24d0aca8191857a807880f606f88c90db8d5435d588846443c7b4` |
-| `docs/decisions/0106-system-settings-captcha-and-grouped-navigation.md` | `ADR0106-2` | `753db6ab6857f68e7f645ffb93fafaecc72acccdfa434ebab851c9a3f6d26bc2` |
-| `docs/handoff/system-settings-captcha-navigation-verification.md` | `system-settings-captcha-navigation-verification-2` | `ae825bdba4fe0dc4d1bd6a691016da855991e7d1519288e909584bdeacd2b4c3` |
+| `docs/decisions/0106-system-settings-captcha-and-grouped-navigation.md` | `ADR0106-3` | `6d3772c0a05e25552d74008f6a8f166abbcf4e98f8e76cfbdc526418369a4c1c` |
+| `docs/handoff/system-settings-captcha-navigation-verification.md` | `system-settings-captcha-navigation-verification-3` | `67a310ecc0b10a0b5b22c082b681428e34c33917d450eba86ca0a2e201a2e8c0` |
+
+
+## 后台侧栏滚动恢复（2026-11-11）
+
+桌面侧栏按账号和规范化后台路径保存内部滚动位置，刷新后恢复并对不可见的当前入口做最小对齐；移动端抽屉不变。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-admin-sidebar-scroll-1` | `f7c4def799c160a0e3a444c66d3c43aa1830ff390f82324887456190edd1a0b6` |
+| `docs/architecture/admin-navigation.md` | `admin-navigation-7` | `b5fee55f41d1d4812ff9f4ba4a82a972365a5ac172d9ac19a0ad121a4f41c0c3` |
+| `docs/decisions/0107-admin-sidebar-scroll-restoration.md` | `ADR0107-1` | `77d37e8f1883dba9a05b3a11ba8299ebdef3c521e3e43b3c1f198788885b22ac` |

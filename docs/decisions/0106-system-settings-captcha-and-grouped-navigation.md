@@ -1,6 +1,6 @@
 # ADR0106：验证码归并系统设置与分组分区导航
 
-版本：ADR0106-2。状态：已实现并验证。日期：2026-11-11。补充 [ADR0064](0064-desktop-settings-section-navigation.md) 与 [ADR0105](0105-admin-navigation-and-glossary-media.md)。
+版本：ADR0106-3。状态：已实现并验证。日期：2026-11-11。补充 [ADR0064](0064-desktop-settings-section-navigation.md) 与 [ADR0105](0105-admin-navigation-and-glossary-media.md)。
 
 ## 背景
 
@@ -35,4 +35,4 @@
 
 真实后台数据与当前开发组件的混合实页检查确认：左侧设置顺序为插件管理、站点设置、邮件配置、系统设置、运行与任务、应用程序接入，验证码入口从左侧隐藏；系统设置显示三个分组标题和八个二级分区；验证码保存栏在部署配置之后，不再停靠在部署配置上方；旧验证码地址跳转后定位、聚焦并高亮“验证方式”；390px 不显示右侧目录且无横向溢出；视觉检查期间没有设置写请求或脚本错误。
 
-完整前端检查359项、`verify:admin`隔离生产验收通过。具体记录见[验收](../handoff/system-settings-captcha-navigation-verification.md)。
+完整前端检查360项、`verify:admin`隔离生产验收通过。具体记录见[验收](../handoff/system-settings-captcha-navigation-verification.md)。

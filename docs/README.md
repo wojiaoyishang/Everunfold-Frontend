@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[后台侧栏滚动恢复](decisions/0107-admin-sidebar-scroll-restoration.md)、[导航架构](architecture/admin-navigation.md)：桌面侧栏按账号和当前后台路径保存内部滚动位置，刷新后恢复；若当前菜单仍不可见再做最小幅度对齐，移动端抽屉保持原行为。
+
 [系统设置归并与分组快速导航](handoff/system-settings-captcha-navigation-verification.md)、[开发指南](development/settings.md)及[ADR0106](decisions/0106-system-settings-captcha-and-grouped-navigation.md)：验证码并入系统设置，左侧不再显示独立入口，设置组按插件管理、站点、邮件、系统、运行与任务、应用接入排列；右侧目录支持一级分组与二级分区，旧验证码地址继续定位到对应锚点。验证码保存栏位于部署配置之后，仍使用独立修订和保存接口。
 
 [术语富文本编辑与弹层验收](handoff/glossary-rich-editor-verification.md)：术语后台接入文章式区块编辑器，保存栏与系统设置统一；Tooltip 和公开详情复用文章的安全 Markdown/HTML、代码、公式、媒体与短代码渲染。
