@@ -100,11 +100,11 @@
       "sha256": "3dee852519a7ba39a2d7c283e7142a65486afb178216808e6c55eb2fdce6f2fb"
     },
     "notifications-v1.schema.json": {
-      "schema_version": "1.2.0",
+      "schema_version": "1.3.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/notifications-v1.schema.json",
-      "source_commit": "2f5b33509bba151ed3d6a89f355934a7295a7aea",
-      "sha256": "c9cea9080f23d54404e8bdefe40e3524c9a0ab4e58d147516b7641471635c2d8"
+      "source_commit": "a592e1c21d01f4b294a36d832d625c4cf726b3da",
+      "sha256": "fff193584b1292abc653021251bd02331ea2e0fb84444c4744f10e70b648e4ce"
     }
   }
 }

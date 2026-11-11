@@ -89,6 +89,7 @@ function draftFrom(view: NotificationTemplateView): SaveNotificationTemplate {
     subject: view.subject,
     text: view.text,
     html: view.html,
+    html_enabled: view.html_enabled,
     enabled: view.enabled,
     reset: false,
   };
@@ -138,7 +139,6 @@ export function NotificationTemplatesPage() {
   const [eventType, setEventType] = useState("");
   const [platformId, setPlatformId] = useState("in-app");
   const [locale, setLocale] = useState("");
-  const [bodyMode, setBodyMode] = useState<"text" | "html">("text");
   const [htmlView, setHtmlView] = useState<"visual" | "source">("visual");
   const bodyEditor = useRef<SourceEditorHandle | null>(null);
   const richBodyEditor = useRef<CodeEditorHandle | null>(null);
@@ -188,10 +188,11 @@ export function NotificationTemplatesPage() {
     (draft.subject !== view.subject ||
       draft.text !== view.text ||
       draft.html !== view.html ||
+      draft.html_enabled !== view.html_enabled ||
       draft.enabled !== view.enabled)
   );
   const activeBodyMode =
-    selectedPlatform === "email" && bodyMode === "html" ? "html" : "text";
+    selectedPlatform === "email" && draft?.html_enabled ? "html" : "text";
   const update = (patch: Partial<SaveNotificationTemplate>) => {
     if (!draft) return;
     setDraftStore((current) => ({
@@ -251,11 +252,14 @@ export function NotificationTemplatesPage() {
     if (activeBodyMode === "html") update({ html: (draft.html ?? "") + token });
     else update({ text: (draft.text ?? "") + (draft.text ? " " : "") + token });
   };
-  const chooseBodyMode = (mode: "text" | "html") => {
-    setBodyMode(mode);
-    if (mode === "html") setHtmlView("visual");
-    if (mode === "html" && draft && !draft.html)
-      update({ html: plainToEmailHtml(draft.text ?? "") });
+  const setHtmlEnabled = (enabled: boolean) => {
+    setHtmlView("visual");
+    if (enabled && draft && !draft.html)
+      update({
+        html_enabled: true,
+        html: plainToEmailHtml(draft.text ?? ""),
+      });
+    else update({ html_enabled: enabled });
   };
   return (
     <SettingsLayout>
@@ -382,32 +386,17 @@ export function NotificationTemplatesPage() {
                         </span>
                         {selectedPlatform === "email" && (
                           <div className={styles.bodyEditorControls}>
-                            <div
-                              className={styles.bodyModeTabs}
-                              role="tablist"
-                              aria-label={t("正文格式")}
-                            >
-                              <Button
-                                role="tab"
-                                aria-selected={activeBodyMode === "text"}
-                                data-current={
-                                  activeBodyMode === "text" || undefined
-                                }
-                                onClick={() => chooseBodyMode("text")}
-                              >
-                                <UiText text="纯文本" />
-                              </Button>
-                              <Button
-                                role="tab"
-                                aria-selected={activeBodyMode === "html"}
-                                data-current={
-                                  activeBodyMode === "html" || undefined
-                                }
-                                onClick={() => chooseBodyMode("html")}
-                              >
-                                HTML
-                              </Button>
-                            </div>
+                            <label className={styles.htmlBodyToggle}>
+                              <span>
+                                <UiText text="启用 HTML" />
+                              </span>
+                              <Switch
+                                checked={!!draft.html_enabled}
+                                disabled={!editable || editor.busy}
+                                aria-label={t("启用 HTML 正文")}
+                                onCheckedChange={setHtmlEnabled}
+                              />
+                            </label>
                             {activeBodyMode === "html" && (
                               <div
                                 className={styles.bodyModeTabs}

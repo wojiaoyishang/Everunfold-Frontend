@@ -309,6 +309,22 @@
   gap: 6px;
 }
 
+.htmlBodyToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-canvas);
+}
+
+.htmlBodyToggle > span {
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+
 .bodyModeTabs {
   display: inline-flex;
   gap: 2px;
