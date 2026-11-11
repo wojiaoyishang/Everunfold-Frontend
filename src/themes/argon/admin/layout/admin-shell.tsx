@@ -10,7 +10,7 @@ import { isLivePreviewPath } from "@/core/preview/routes";
 import { isManagedPagePreviewPath } from "@/core/pages/preview";
 import { isContentPreviewPath } from "@/core/content-management/preview";
 import { Icon } from "../../components/icon";
-import { Button } from "../../components/ui/primitives";
+import { Button, TextLink } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { AdminAppearance } from "../components/preferences";
 import { AdminNavigation } from "./navigation";
@@ -144,12 +144,18 @@ export function AdminShell({
             <div className="admin-header-dock" data-admin-header-dock />
             <nav className="admin-header-actions" aria-label="工作空间操作">
               <InterfaceLanguage />
-              <RouteLink href="/" className="admin-site-link" title="访问站点">
+              <TextLink
+                href="/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="admin-site-link"
+                title="访问站点"
+              >
                 <Icon name="external" />
                 <span>
                   <UiText text="访问站点" />
                 </span>
-              </RouteLink>
+              </TextLink>
               <AdminAppearance
                 preferences={preferences}
                 onChange={onPreferencesChange}

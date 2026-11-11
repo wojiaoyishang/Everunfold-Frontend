@@ -212,11 +212,7 @@ export function PluginRuntimeProvider({
               cache: "no-store",
               credentials: "omit",
               signal: controller.signal,
-              headers: accepted
-                ? { "If-None-Match": `"${accepted}"` }
-                : undefined,
             }).then(async (response) => {
-              if (response.status === 304) return null;
               if (!response.ok) throw new Error("插件目录暂不可用");
               return response.json();
             });
@@ -226,15 +222,14 @@ export function PluginRuntimeProvider({
       }
     };
     let timer: ReturnType<typeof setTimeout>;
+    const pollDelay = initial.development ? 15_000 : 60_000;
     const cycle = async () => {
       if (initial.development || document.visibilityState !== "hidden")
         await poll();
-      if (!stopped)
-        timer = setTimeout(cycle, initial.development ? 1500 : 10000);
+      if (!stopped) timer = setTimeout(cycle, pollDelay);
     };
     void poll(true).then(() => {
-      if (!stopped)
-        timer = setTimeout(cycle, initial.development ? 1500 : 10000);
+      if (!stopped) timer = setTimeout(cycle, pollDelay);
     });
     return () => {
       stopped = true;

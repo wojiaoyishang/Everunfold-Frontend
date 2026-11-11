@@ -158,6 +158,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/fonts",
       "/admin/shortcodes",
       "/admin/settings",
+      "/admin/settings/navigation",
       "/admin/settings/theme",
       "/admin/settings/plugins",
       "/admin/settings/captcha",
