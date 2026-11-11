@@ -220,6 +220,29 @@
 .composer-extra-toggle[aria-expanded="true"] .icon {
   transform: rotate(270deg);
 }
+.composer-signed-identity {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 18px;
+  padding: 10px 13px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent-soft) 72%, transparent);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.composer-signed-identity .icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}
+.composer-signed-identity strong {
+  color: var(--text-strong);
+  font-weight: 550;
+}
 .composer-submit-row {
   display: flex;
   align-items: center;

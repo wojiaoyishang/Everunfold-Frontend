@@ -46,6 +46,7 @@ export function CommentComposer({
   onCancelReply,
   onAdd,
   captcha,
+  signedInName,
 }: {
   reply: CommentEntry | null;
   replying: boolean;
@@ -56,10 +57,14 @@ export function CommentComposer({
     signal?: AbortSignal,
   ) => CommentSubmissionResult | Promise<CommentSubmissionResult>;
   captcha?: CaptchaController;
+  signedInName?: string | null;
 }) {
   const prefix = useId();
   const form = useRef<HTMLFormElement>(null);
-  const [draft, setDraft] = useState(initialDraft);
+  const [draft, setDraft] = useState(() => ({
+    ...initialDraft,
+    author: signedInName ?? "",
+  }));
   const [errors, setErrors] = useState<DraftErrors>({});
   const [preview, setPreview] = useState(false);
   const [extra, setExtra] = useState(false);
@@ -124,7 +129,8 @@ export function CommentComposer({
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (inFlight.current) return;
-    const nextErrors = validateDraft(draft);
+    const effectiveAuthor = signedInName?.trim() || draft.author.trim();
+    const nextErrors = validateDraft({ ...draft, author: effectiveAuthor });
     setErrors(nextErrors);
     const first = Object.keys(nextErrors)[0];
     if (first) {
@@ -163,7 +169,7 @@ export function CommentComposer({
       setFeedback({ status: "sending", message: "正在发送评论，请稍候…" });
       const result = await onAdd(
         {
-          author: draft.author.trim(),
+          author: effectiveAuthor,
           body: draft.body.trim(),
           website: draft.website.trim(),
           formatted: draft.formatted,
@@ -258,14 +264,25 @@ export function CommentComposer({
             setPreview={setPreview}
             onChange={update}
           />
-          <CommentIdentity
-            prefix={prefix}
-            draft={draft}
-            errors={errors}
-            extra={extra}
-            setExtra={setExtra}
-            update={update}
-          />
+          {signedInName ? (
+            <div className="composer-signed-identity">
+              <Icon name="user" />
+              <span>
+                <UiText text="已登录，昵称已自动填写为" />{" "}
+                <strong>{signedInName}</strong>
+                <UiText text="；邮箱和网站无需重复填写。" />
+              </span>
+            </div>
+          ) : (
+            <CommentIdentity
+              prefix={prefix}
+              draft={draft}
+              errors={errors}
+              extra={extra}
+              setExtra={setExtra}
+              update={update}
+            />
+          )}
         </div>
         <div className="composer-submit-row">
           {captcha ? (

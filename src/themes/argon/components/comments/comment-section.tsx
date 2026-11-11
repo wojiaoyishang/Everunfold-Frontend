@@ -20,6 +20,7 @@ import {
 import { RequestError } from "@/core/http/request";
 import { commentSubmissionFailure } from "./submission";
 import { useReaderData } from "../reader-data";
+import { usePublicAccount } from "@/core/auth/use-public-account";
 import { useCommentLikes } from "./use-comment-likes";
 import {
   COMMENT_PAGE_SIZE,
@@ -50,6 +51,12 @@ export function CommentSection({
   interactive?: boolean;
 }) {
   const { store } = useReaderData();
+  const account = usePublicAccount(store.baseUrl);
+  const signedInName =
+    account.state.phase === "ready" && account.state.session.user
+      ? account.state.session.user.display_name ||
+        account.state.session.user.username
+      : null;
   const captcha = useCaptcha(
     store.baseUrl,
     "comment",
@@ -359,6 +366,7 @@ export function CommentSection({
           captcha={contentId ? captcha : undefined}
           reply={reply.entry}
           replying={reply.active}
+          signedInName={signedInName}
           onCancelReply={() =>
             setReply((current) => ({ ...current, active: false }))
           }
