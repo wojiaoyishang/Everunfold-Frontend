@@ -8,6 +8,13 @@ export interface PageCommentsPlacement {
   selector?: string;
 }
 
+export interface PageImageViewerOptions {
+  /** Registered pages default to enabled; declarations can opt out. */
+  enabled?: boolean;
+  /** Optional descendant container whose images use the shared viewer. */
+  selector?: string;
+}
+
 export interface CustomPageDefinition {
   registration: PageRegistration;
   component: string;
@@ -15,6 +22,7 @@ export interface CustomPageDefinition {
   /** Share options across the configured language paths; translations stay in code. */
   localized?: boolean;
   comments?: PageCommentsPlacement;
+  imageViewer?: PageImageViewerOptions;
 }
 
 export function collectCustomPages(

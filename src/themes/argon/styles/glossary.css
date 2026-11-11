@@ -236,6 +236,9 @@
   border-radius: 8px;
   background: var(--accent-soft);
 }
+.glossary-tooltip-viewer {
+  display: contents;
+}
 .glossary-tooltip-feature img {
   object-fit: cover;
 }

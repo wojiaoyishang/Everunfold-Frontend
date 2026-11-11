@@ -9,6 +9,7 @@ import { ContentLanguages } from "../components/content-languages";
 import type { Content, PublicComment } from "@/core/content/types";
 import { ProtectedManagedPage } from "./protected-page";
 import { PageCommentsBoundary } from "@/core/pages/comments";
+import { PageImageViewerBoundary } from "./image-viewer-boundary";
 
 export function ManagedPageView({
   page,
@@ -79,13 +80,15 @@ export function ManagedPageSurface({
         name="page.body.before"
         context={{ page, preview: Boolean(onReady) }}
       />
-      <div data-managed-page-body="true">
-        {page.source === "custom" ? (
-          <PageFrame value={page} onReady={onReady} />
-        ) : (
-          <RegisteredPageView page={page} onReady={onReady} />
-        )}
-      </div>
+      <PageImageViewerBoundary page={page}>
+        <div data-managed-page-body="true">
+          {page.source === "custom" ? (
+            <PageFrame value={page} onReady={onReady} />
+          ) : (
+            <RegisteredPageView page={page} onReady={onReady} />
+          )}
+        </div>
+      </PageImageViewerBoundary>
       <ThemeSlot
         name="page.body.after"
         context={{ page, preview: Boolean(onReady) }}

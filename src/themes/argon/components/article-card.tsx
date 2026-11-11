@@ -92,7 +92,7 @@ export function ArticleBody({
 }: ArticleCardProps) {
   return (
     <div className="article-body">
-      <ArticleMedia>
+      <ArticleMedia enabled={content.show_image_viewer !== false}>
         <StaticContentMarkup
           className="article-content"
           html={rendered.html}

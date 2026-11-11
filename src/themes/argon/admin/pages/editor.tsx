@@ -56,6 +56,7 @@ const blank: PageValue = {
   enabled: false,
   allow_indexing: true,
   comments_open: true,
+  show_image_viewer: true,
   show_glossary_tooltips: true,
   show_glossary_footnotes: true,
   options: {},
@@ -391,6 +392,16 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                           checked={value.comments_open ?? true}
                           onCheckedChange={(comments_open) =>
                             setValue({ ...value, comments_open })
+                          }
+                        />
+                      </span>
+                      <span>
+                        <UiText text="正文图片点击查看" />
+                        <Switch
+                          aria-label={t("正文图片点击查看")}
+                          checked={value.show_image_viewer !== false}
+                          onCheckedChange={(show_image_viewer) =>
+                            setValue({ ...value, show_image_viewer })
                           }
                         />
                       </span>

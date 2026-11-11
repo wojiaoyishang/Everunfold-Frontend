@@ -31,7 +31,7 @@ export function ShuoshuoCardView({
 }) {
   const { content, example } = entry;
   const body = (
-    <ArticleMedia>
+    <ArticleMedia enabled={content.show_image_viewer !== false}>
       <StaticContentMarkup
         className="article-content shuoshuo-content"
         html={rendered.html}

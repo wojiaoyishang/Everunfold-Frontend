@@ -19,7 +19,19 @@ function imageTarget(image: HTMLImageElement): string | null {
   }
 }
 
-export function ArticleMedia({ children }: { children: ReactNode }) {
+export function ArticleMedia({
+  children,
+  enabled = true,
+  selector = ".article-content img[src], .comment-formatted img[src]",
+  className,
+  onOpenChange,
+}: {
+  children: ReactNode;
+  enabled?: boolean;
+  selector?: string;
+  className?: string;
+  onOpenChange?: (open: boolean) => void;
+}) {
   const container = useRef<HTMLDivElement>(null);
   const imageElements = useRef<HTMLImageElement[]>([]);
   const [failed, setFailed] = useState<number[]>([]);
@@ -30,20 +42,26 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
   useDetailsMotion(container, children);
   useEffect(() => {
     const element = container.current;
-    const images = Array.from(
-      element?.querySelectorAll<HTMLImageElement>(
-        ".article-content img[src], .comment-formatted img[src]",
-      ) ?? [],
-    ).filter(
-      (item) => !item.closest("button") && !item.hasAttribute("data-sticker"),
-    );
+    let images: HTMLImageElement[] = [];
+    try {
+      images = Array.from(
+        element?.querySelectorAll<HTMLImageElement>(selector) ?? [],
+      ).filter(
+        (item) =>
+          !item.closest("button") &&
+          !item.hasAttribute("data-sticker") &&
+          !item.hasAttribute("data-no-image-viewer"),
+      );
+    } catch {
+      // A trusted page metadata selector can be invalid while its page is edited.
+    }
     imageElements.current = images;
     const reset = requestAnimationFrame(() => setFailed([]));
     const cleanups = images.map((image, index) => {
       const previous = ["role", "tabindex", "aria-label"].map(
         (name) => [name, image.getAttribute(name)] as const,
       );
-      if (imageTarget(image)) {
+      if (enabled && imageTarget(image)) {
         image.setAttribute("role", "button");
         image.tabIndex = 0;
         image.setAttribute(
@@ -84,8 +102,20 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
       };
     });
     function show(event: Event) {
-      const image = event.target as HTMLImageElement;
-      if (!images.includes(image) || !imageTarget(image)) return;
+      if (!enabled) return;
+      const image =
+        event.target instanceof Element
+          ? event.target.closest<HTMLImageElement>("img[src]")
+          : null;
+      if (
+        !image ||
+        !element?.contains(image) ||
+        image.closest("button") ||
+        image.hasAttribute("data-sticker") ||
+        image.hasAttribute("data-no-image-viewer") ||
+        !imageTarget(image)
+      )
+        return;
       if (
         event instanceof MouseEvent &&
         (event.button ||
@@ -100,7 +130,20 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
       event.preventDefault();
       event.stopPropagation();
       image.focus({ preventScroll: true });
-      const available = images.filter((item) => imageTarget(item));
+      let available: HTMLImageElement[] = [];
+      try {
+        available = Array.from(
+          element.querySelectorAll<HTMLImageElement>(selector),
+        ).filter(
+          (item) =>
+            !item.closest("button") &&
+            !item.hasAttribute("data-sticker") &&
+            !item.hasAttribute("data-no-image-viewer") &&
+            imageTarget(item),
+        );
+      } catch {
+        return;
+      }
       setGallery({
         index: available.indexOf(image),
         items: available.map((item) => ({
@@ -110,6 +153,7 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
             item.alt,
         })),
       });
+      onOpenChange?.(true);
     }
     element?.addEventListener("click", show);
     element?.addEventListener("keydown", show);
@@ -119,9 +163,9 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
       element?.removeEventListener("click", show);
       element?.removeEventListener("keydown", show);
     };
-  }, [children]);
+  }, [children, enabled, selector, onOpenChange]);
   return (
-    <div ref={container}>
+    <div ref={container} className={className}>
       {children}
       {failed.length > 0 && (
         <div className="media-failures" role="status">
@@ -150,7 +194,10 @@ export function ArticleMedia({ children }: { children: ReactNode }) {
         <ImageViewer
           items={gallery.items}
           initialIndex={gallery.index}
-          onDismiss={() => setGallery(null)}
+          onDismiss={() => {
+            setGallery(null);
+            onOpenChange?.(false);
+          }}
         />
       )}
     </div>

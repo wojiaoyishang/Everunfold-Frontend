@@ -272,6 +272,20 @@ function CoverPanel({
           <Icon name="trash" /> <UiText text="移除封面" />
         </Button>
       )}
+      <div className={styles.switchRow}>
+        <span>
+          <UiText text="正文图片点击查看" />
+        </span>
+        <Switch
+          aria-label="正文图片点击查看"
+          checked={settings.show_image_viewer !== false}
+          disabled={disabled}
+          onCheckedChange={(show_image_viewer) => update({ show_image_viewer })}
+        />
+      </div>
+      <small>
+        <UiText text="关闭后只影响当前内容；图片仍正常显示，但不会打开查看器。" />
+      </small>
       {picker && (
         <EditorMediaDialog
           kind="image"

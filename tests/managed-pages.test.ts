@@ -13,6 +13,7 @@ import {
   pageManifest,
   hasPageImplementation,
 } from "../src/core/pages/registry";
+import { pageImageViewerSettings } from "../src/core/pages/image-viewer";
 import { checkedPreviewPage } from "../src/core/pages/preview-validation";
 import {
   managedPagePreviewPath,
@@ -92,6 +93,38 @@ test("page script placement preserves legacy ordering, script opt-in and preview
     assert.match(disabled, /script-src 'sha256-/);
     assert.match(disabled, /everunfold:page:ready/);
   }
+});
+
+test("managed page image viewer is declared in the iframe and page render identity", () => {
+  const value = {
+    html: '<img src="site://media/example">',
+    show_image_viewer: true,
+  };
+  const enabled = pageDocument(value);
+  assert.match(enabled, /data-image-viewer="true"/);
+  assert.match(enabled, /everunfold:page:image/);
+  const disabled = pageDocument({ ...value, show_image_viewer: false });
+  assert.match(disabled, /data-image-viewer="false"/);
+  assert.notEqual(
+    pageRenderId("frame", value),
+    pageRenderId("frame", { ...value, show_image_viewer: false }),
+  );
+});
+
+test("code page declarations and page settings control the shared image viewer", () => {
+  assert.deepEqual(pageImageViewerSettings({}), {
+    enabled: true,
+    selector: "[data-managed-page-body] img[src]",
+  });
+  assert.equal(pageImageViewerSettings({}, { enabled: false }).enabled, false);
+  assert.equal(
+    pageImageViewerSettings({ show_image_viewer: false }).enabled,
+    false,
+  );
+  assert.equal(
+    pageImageViewerSettings({}, { selector: ".gallery" }).selector,
+    "[data-managed-page-body] .gallery img[src]",
+  );
 });
 
 test("frontend page declarations are reproducibly exported and implementation versions are explicit", async () => {

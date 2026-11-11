@@ -33,6 +33,7 @@ import { Icon } from "./icon";
 import { Button } from "./ui/primitives";
 import { useRouteState } from "./route-state";
 import { ContentMarkupView } from "./content-markup-view";
+import { ArticleMedia } from "./article-media";
 import { GlossaryExpandedDialog } from "./glossary-expanded-dialog";
 import { useLocale, useT } from "@/core/i18n/provider";
 import { translate } from "@/core/i18n/messages";
@@ -140,6 +141,7 @@ export default function GlossaryTooltips({
   const closingRef = useRef(false);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const imageViewerOpen = useRef(false);
   const lastPointerActivation = useRef(0);
   const lastOpened = useRef(0);
   const popup = useRef<HTMLDivElement>(null);
@@ -178,6 +180,18 @@ export default function GlossaryTooltips({
     closingRef.current = true;
     setClosing(true);
   }, [clearTimers]);
+  const onImageViewerChange = useCallback(
+    (open: boolean) => {
+      imageViewerOpen.current = open;
+      if (open && closeTimer.current) {
+        clearTimeout(closeTimer.current);
+        closeTimer.current = null;
+      } else if (!open) {
+        closeTimer.current = setTimeout(close, 180);
+      }
+    },
+    [close],
+  );
 
   const open = useCallback(
     (trigger: HTMLElement) => {
@@ -470,6 +484,7 @@ export default function GlossaryTooltips({
           if (closeTimer.current) clearTimeout(closeTimer.current);
         }}
         onPointerLeave={() => {
+          if (imageViewerOpen.current) return;
           closeTimer.current = setTimeout(close, 180);
         }}
         onKeyDown={(event) => {
@@ -497,51 +512,60 @@ export default function GlossaryTooltips({
         </header>
         <div className="glossary-tooltip-body">
           <div className="glossary-tooltip-scroll">
-            {active.term.feature_image && (
-              <span className="glossary-tooltip-feature">
-                <Image
-                  src={active.term.feature_image.original}
-                  alt=""
-                  fill
-                  sizes="400px"
-                  unoptimized
+            <ArticleMedia
+              enabled={active.term.show_image_viewer !== false}
+              selector="[data-reader-image] img[src], .glossary-tooltip-content img[src]"
+              className="glossary-tooltip-viewer"
+              onOpenChange={onImageViewerChange}
+            >
+              {active.term.feature_image && (
+                <span className="glossary-tooltip-feature" data-reader-image>
+                  <Image
+                    src={active.term.feature_image.original}
+                    alt=""
+                    fill
+                    sizes="400px"
+                    unoptimized
+                  />
+                </span>
+              )}
+              {active.term.aliases.length > 0 && (
+                <div
+                  className="glossary-tooltip-aliases"
+                  role="list"
+                  aria-label={t("术语别名")}
+                >
+                  <span>{t("也称")}</span>
+                  {visibleAliases.map((alias) => (
+                    <span key={alias} role="listitem" title={alias}>
+                      {alias}
+                    </span>
+                  ))}
+                  {remainingAliases.length > 0 && (
+                    <span
+                      className="glossary-tooltip-alias-more"
+                      role="listitem"
+                      title={remainingAliases.join(" · ")}
+                    >
+                      +{remainingAliases.length}
+                    </span>
+                  )}
+                </div>
+              )}
+              {active.term.summary.trim() ? (
+                <p className="glossary-tooltip-summary">
+                  {active.term.summary}
+                </p>
+              ) : previewContent ? (
+                <ContentMarkupView
+                  className="article-content glossary-tooltip-content"
+                  data-glossary-ignore
+                  html={previewContent.html}
+                  features={previewContent.features}
+                  codeTools={false}
                 />
-              </span>
-            )}
-            {active.term.aliases.length > 0 && (
-              <div
-                className="glossary-tooltip-aliases"
-                role="list"
-                aria-label={t("术语别名")}
-              >
-                <span>{t("也称")}</span>
-                {visibleAliases.map((alias) => (
-                  <span key={alias} role="listitem" title={alias}>
-                    {alias}
-                  </span>
-                ))}
-                {remainingAliases.length > 0 && (
-                  <span
-                    className="glossary-tooltip-alias-more"
-                    role="listitem"
-                    title={remainingAliases.join(" · ")}
-                  >
-                    +{remainingAliases.length}
-                  </span>
-                )}
-              </div>
-            )}
-            {active.term.summary.trim() ? (
-              <p className="glossary-tooltip-summary">{active.term.summary}</p>
-            ) : previewContent ? (
-              <ContentMarkupView
-                className="article-content glossary-tooltip-content"
-                data-glossary-ignore
-                html={previewContent.html}
-                features={previewContent.features}
-                codeTools={false}
-              />
-            ) : null}
+              ) : null}
+            </ArticleMedia>
           </div>
           <div className="glossary-tooltip-actions">
             <AppLink

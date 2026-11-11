@@ -10,6 +10,7 @@ export type { FormFieldProps } from "@/core/forms/renderer";
 export type {
   CustomPageDefinition,
   PageCommentsPlacement,
+  PageImageViewerOptions,
 } from "@/core/pages/registration";
 export type { PageCommentsContextValue } from "@/core/pages/comments";
 export type { PageCommentInput } from "@/core/pages/comment-client";

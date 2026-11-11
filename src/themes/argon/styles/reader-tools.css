@@ -3,6 +3,9 @@
     opacity 350ms ease,
     filter 350ms ease;
 }
+.reader-image[role="button"] {
+  cursor: zoom-in;
+}
 .reader-image[data-load-state="loading"] {
   min-height: 100px;
   background: var(--surface-soft);

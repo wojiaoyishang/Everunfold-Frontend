@@ -3,9 +3,11 @@ import { digest } from "lib0/hash/sha256";
 type PageSource = Pick<
   PageValue,
   "html" | "css" | "javascript" | "javascript_enabled" | "javascript_position"
->;
+> &
+  Partial<Pick<PageValue, "show_image_viewer">>;
 export function pageRenderId(frame: string, value: PageSource): string {
-  const { html, css, javascript, javascript_enabled } = value;
+  const { html, css, javascript, javascript_enabled, show_image_viewer } =
+    value;
   return (
     frame +
     ":" +
@@ -17,6 +19,7 @@ export function pageRenderId(frame: string, value: PageSource): string {
             css,
             javascript,
             javascript_enabled,
+            show_image_viewer,
             javascript_position: value.javascript_position ?? "body_end",
           }),
         ),
@@ -26,9 +29,9 @@ export function pageRenderId(frame: string, value: PageSource): string {
   );
 }
 export const pageResizeScript =
-  "(()=>{let previous=0;const renderId=document.documentElement.dataset.everunfoldRender;const send=(force=false)=>{const height=Math.ceil(document.documentElement.getBoundingClientRect().height);if(force||height!==previous){previous=height;parent.postMessage({type:'everunfold:page:size',height,renderId},'*')}};new ResizeObserver(()=>send()).observe(document.documentElement);const loaded=()=>Promise.resolve(document.fonts?.ready).then(()=>{send(true);parent.postMessage({type:'everunfold:page:loaded',renderId},'*')});addEventListener('load',loaded);addEventListener('message',event=>{if(event.source===parent&&event.data?.type==='everunfold:page:measure'){send(true);parent.postMessage({type:'everunfold:page:ready',renderId},'*');if(document.readyState==='complete')loaded()}});send(true);requestAnimationFrame(()=>requestAnimationFrame(()=>parent.postMessage({type:'everunfold:page:ready',renderId},'*')))})()";
+  "(()=>{let previous=0;const root=document.documentElement,renderId=root.dataset.everunfoldRender,viewer=root.dataset.imageViewer==='true';const send=(force=false)=>{const height=Math.ceil(root.getBoundingClientRect().height);if(force||height!==previous){previous=height;parent.postMessage({type:'everunfold:page:size',height,renderId},'*')}};new ResizeObserver(()=>send()).observe(root);const loaded=()=>Promise.resolve(document.fonts?.ready).then(()=>{send(true);parent.postMessage({type:'everunfold:page:loaded',renderId},'*')});addEventListener('load',loaded);if(viewer)addEventListener('click',event=>{const image=event.target instanceof Element?event.target.closest('img[src]'):null;if(!image||image.closest('button')||image.hasAttribute('data-no-image-viewer'))return;event.preventDefault();event.stopPropagation();const images=[...document.querySelectorAll('img[src]')].filter(item=>!item.closest('button')&&!item.hasAttribute('data-no-image-viewer')),index=images.indexOf(image),items=images.map(item=>({src:item.currentSrc||item.src,caption:item.closest('figure')?.querySelector('figcaption')?.textContent||item.alt||''}));parent.postMessage({type:'everunfold:page:image',renderId,index,items},'*')},true);addEventListener('message',event=>{if(event.source===parent&&event.data?.type==='everunfold:page:measure'){send(true);parent.postMessage({type:'everunfold:page:ready',renderId},'*');if(document.readyState==='complete')loaded()}});send(true);requestAnimationFrame(()=>requestAnimationFrame(()=>parent.postMessage({type:'everunfold:page:ready',renderId},'*')))})()";
 export const pageResizeHash =
-  "sha256-AeuFvAIcXQyW8db/CZtrul8pB7Hf1/beuYIKB4vfGs0=";
+  "sha256-IBbYVqsQDsro9joNhNZ6raYwTCa5k85z/K1AnppTvQ4=";
 const attribute = (value: string) =>
   value
     .replaceAll("&", "&amp;")
@@ -43,5 +46,5 @@ export function pageDocument(value: PageSource, renderId = ""): string {
     ? `<script>${script}</script>`
     : "";
   const beforeBody = value.javascript_position === "head";
-  return `<!doctype html><html data-everunfold-render="${attribute(renderId)}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="${attribute(policy)}"><style>html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}body{margin:0;padding:24px;font:16px/1.8 system-ui,sans-serif;overflow-wrap:anywhere}img,video{max-width:100%;height:auto}${css}</style>${beforeBody ? authoredScript : ""}</head><body>${value.html ?? ""}<script>${pageResizeScript}</script>${beforeBody ? "" : authoredScript}</body></html>`;
+  return `<!doctype html><html data-everunfold-render="${attribute(renderId)}" data-image-viewer="${value.show_image_viewer === false ? "false" : "true"}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="${attribute(policy)}"><style>html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}body{margin:0;padding:24px;font:16px/1.8 system-ui,sans-serif;overflow-wrap:anywhere}img,video{max-width:100%;height:auto}html[data-image-viewer="true"] img{cursor:zoom-in}${css}</style>${beforeBody ? authoredScript : ""}</head><body>${value.html ?? ""}<script>${pageResizeScript}</script>${beforeBody ? "" : authoredScript}</body></html>`;
 }

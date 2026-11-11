@@ -138,6 +138,10 @@
   rotate: 180deg;
 }
 
+.imageViewerScope {
+  display: contents;
+}
+
 .detail {
   display: grid;
   gap: 12px;

@@ -10,6 +10,7 @@ import { translate } from "@/core/i18n/messages";
 import { renderGlossaryContent } from "@/core/glossary/content";
 import { PagePresentation, useRouteState } from "../components/route-state";
 import { ContentMarkup } from "../components/content-markup";
+import { ArticleMedia } from "../components/article-media";
 import { useReaderBaseUrl } from "../components/reader-data";
 import { Icon } from "../components/icon";
 import { AppLink } from "../components/navigation-link";
@@ -66,47 +67,53 @@ export function GlossaryDetailPage({ slug }: { slug: string }) {
         </div>
       )}
       {term && rendered && (
-        <article className={`surface ${styles.detail}`}>
-          <header
-            className={term.feature_image ? styles.detailHeaderWithImage : ""}
-          >
-            <div>
-              <span className={styles.kicker}>
-                <Icon name="book" />
-                <UiText text="术语" />
-              </span>
-              <h1>{term.title}</h1>
-              {term.summary.trim() && <p>{term.summary}</p>}
-              {term.aliases.length > 0 && (
-                <small>
-                  <UiText
-                    text="也称为：{aliases}"
-                    values={{ aliases: term.aliases.join(" · ") }}
+        <ArticleMedia
+          enabled={term.show_image_viewer !== false}
+          selector=".article-content img[src], [data-reader-image] img[src]"
+          className={styles.imageViewerScope}
+        >
+          <article className={`surface ${styles.detail}`}>
+            <header
+              className={term.feature_image ? styles.detailHeaderWithImage : ""}
+            >
+              <div>
+                <span className={styles.kicker}>
+                  <Icon name="book" />
+                  <UiText text="术语" />
+                </span>
+                <h1>{term.title}</h1>
+                {term.summary.trim() && <p>{term.summary}</p>}
+                {term.aliases.length > 0 && (
+                  <small>
+                    <UiText
+                      text="也称为：{aliases}"
+                      values={{ aliases: term.aliases.join(" · ") }}
+                    />
+                  </small>
+                )}
+              </div>
+              {term.feature_image && (
+                <span className={styles.detailFeature} data-reader-image>
+                  <Image
+                    src={term.feature_image.original}
+                    alt=""
+                    fill
+                    sizes="(max-width: 640px) 100vw, 260px"
+                    unoptimized
                   />
-                </small>
+                </span>
               )}
+            </header>
+            <div className={styles.detailDivider} role="separator" />
+            <div className={styles.detailBody}>
+              <ContentMarkup
+                className="article-content"
+                html={rendered.html}
+                features={rendered.features}
+              />
             </div>
-            {term.feature_image && (
-              <span className={styles.detailFeature}>
-                <Image
-                  src={term.feature_image.original}
-                  alt=""
-                  fill
-                  sizes="(max-width: 640px) 100vw, 260px"
-                  unoptimized
-                />
-              </span>
-            )}
-          </header>
-          <div className={styles.detailDivider} role="separator" />
-          <div className={styles.detailBody}>
-            <ContentMarkup
-              className="article-content"
-              html={rendered.html}
-              features={rendered.features}
-            />
-          </div>
-        </article>
+          </article>
+        </ArticleMedia>
       )}
     </>
   );

@@ -1572,3 +1572,22 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/README.md`                                     | `index-translation-live-draft-1`       | `fca4a26b45d4efcd6e56c83dcd26d396ce623a53103c1245a38db489f8446b69` |
 | `docs/development/translations.md`                   | `translations-runtime-4`               | `4802997bfa8fae7942e03d5709ce6f025c01626db9aae08cde99dc141ec8bc58` |
 | `docs/handoff/translation-overrides-verification.md` | `translation-overrides-verification-4` | `4cd7306e10d0fa59d167a9dcc61fe30477f7f533fc2c8d5e666eea7ee4a6991b` |
+
+## 统一阅读图片查看器（2026-11-11）
+
+复用既有自研查看器，不为术语单独实现 Fancybox；文章、说说、托管页面与术语默认启用并可逐项关闭，代码注册页面通过 `imageViewer` 元数据声明。术语新增显式迁移。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件                                                | 版本                                 | SHA256                                                             |
+| --------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------ |
+| `docs/README.md`                                    | `index-reader-image-viewer-1`        | `2db235dfdf6f61bc785b95cd79a6b1800620aa77a5c3855f581b0bd59c8d0119` |
+| `docs/decisions/0112-shared-reader-image-viewer.md` | `ADR0112-1`                          | `4b4999419d26dc376b8712cbb72b13850c975c863980dab28fcad7d064acf85d` |
+| `docs/development/reader-images.md`                 | `reader-images-1`                    | `4594b8d23ee1d20506adc4c624a59b784c69e0e7f540660afacd74b3fa2caf1f` |
+| `docs/handoff/reader-image-viewer-verification.md`  | `reader-image-viewer-verification-2` | `535cd0355a6186a55c2627c3c7e1b69b57a13ca2d060b75926b8b3b94e825170` |
+| `contracts/content-admin-v1.schema.json`            | `content-admin-v1-1.20.0`            | `f775b2c6138c3b7b965e7c45932987eea142ed3f63d09dfc2043e280c95f9857` |
+| `contracts/content-access-v1.schema.json`           | `content-access-v1-1.5.0`            | `ba33226e15cb25ce215668d3dfdaff2904654c219a3c7339f6a3a64b04e9ee0f` |
+| `contracts/captcha-v1.schema.json`                  | `captcha-v1-1.5.0`                   | `e380bcdc063bdbf30508806dfeacbb667be828165af069e34542de477430fbe0` |
+| `contracts/collaboration-v1.schema.json`            | `collaboration-v1-2.7.0`             | `f15cf24861d459439f2c19d60e29af6fd18e5ea82cfa0cfe8ed18ed0d3943cc6` |
+| `contracts/glossary-v1.schema.json`                 | `glossary-v1-3.7.0`                  | `3dee852519a7ba39a2d7c283e7142a65486afb178216808e6c55eb2fdce6f2fb` |
+| `contracts/pages-v1.schema.json`                    | `pages-v1-1.10.0`                    | `e32baf32887bc38d9df94f490d4793a2a7f0564027b3caded814d6eecd7d866e` |
+| `contracts/presentation-v0.2.schema.json`           | `presentation-v0.2-0.2.0-preview.5`  | `0a9c3c40ca092b4ca1042e3a2f754f73f14be2eb6933cd9c99f22f98c521455f` |
+| `contracts/public-v0.1.schema.json`                 | `public-v0.1-0.14.0`                 | `61eb9af38cb1004cacbab18f2ccae54f6c5ef28b1c1f1170ac2a8bf4c8711824` |

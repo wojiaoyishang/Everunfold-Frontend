@@ -28,7 +28,11 @@ import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { mediaReferenceId } from "@/core/media/references";
 import { AdminPageHeading } from "../components/page-heading";
 import { AdminActionButton } from "../components/action-button";
-import { SettingsSection, SettingsText } from "../settings/shared";
+import {
+  SettingsSection,
+  SettingsText,
+  SettingsToggle,
+} from "../settings/shared";
 import { SettingsMediaField } from "../settings/media-field";
 import { MediaPreview } from "../media/media-preview";
 import { BlockComposer } from "../content/block-composer";
@@ -79,6 +83,7 @@ const blankFields = (): Fields => ({
   title: "",
   summary: "",
   feature_media_id: null,
+  show_image_viewer: true,
   body: [
     {
       id: randomUUID(),
@@ -109,6 +114,7 @@ function detailFields(value: Detail): Fields {
     title: value.title,
     summary: value.summary,
     feature_media_id: value.feature_media_id ?? null,
+    show_image_viewer: value.show_image_viewer !== false,
     body: value.body.map((block) => ({ ...block })),
     aliases: value.aliases,
     auto_match_title: value.auto_match_title,
@@ -683,6 +689,12 @@ export function GlossaryAdminPage() {
                     feature_media_id: id ? mediaReferenceId(id) : null,
                   });
                 }}
+              />
+              <SettingsToggle
+                label="特色图片与正文图片点击查看"
+                hint="关闭后只影响当前术语；图片仍正常显示，但不会打开查看器。"
+                value={fields.show_image_viewer !== false}
+                onChange={(show_image_viewer) => update({ show_image_viewer })}
               />
               <SettingsText
                 label="路径片段"

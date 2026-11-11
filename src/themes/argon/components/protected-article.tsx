@@ -43,7 +43,7 @@ export function ProtectedArticle({
         <ArticleHeader content={readable} liveMetrics={false} />
         {access.content ? (
           <div className={`article-body ${styles.revealed}`}>
-            <ArticleMedia>
+            <ArticleMedia enabled={access.content.show_image_viewer !== false}>
               <ContentMarkup
                 className="article-content"
                 html={rendered.html}
