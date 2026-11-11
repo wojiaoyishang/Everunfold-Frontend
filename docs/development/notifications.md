@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-6，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
+版本：notifications-7，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
 
 ## 概念
 
@@ -19,7 +19,7 @@
 - 路由接收人支持指定用户、角色和权限。
 - 模板按事件、平台、语言保存；缺失平台变体回退到内置安全文案。
 - 模板正文使用共享编辑器。站内通知只编辑纯文本；邮件平台通过独立“启用 HTML”开关控制HTML发送，开启后可切换“可视化预览 / HTML源码”，关闭时保留HTML内容。
-- 默认邮件模板采用后台一致的简约卡片：中性背景、细分隔线、小图形标识和少量主题色，不依赖外链图片。
+- 默认邮件模板采用后台一致的简约卡片：中性背景、细分隔线、小图形标识和少量主题色，不依赖外链图片；HTML源码按层级缩进并逐行展开，便于直接维护。
 - 评论进入待审核状态时发布 `comment.pending_review`。
 - 站内通知写入 Inbox；邮件平台复用现有 SMTP 配置。
 - 投递记录区分 `pending`、`sending`、`sent`、`failed`、`unknown`、`suppressed`。
