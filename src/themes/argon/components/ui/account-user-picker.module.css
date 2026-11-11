@@ -1,0 +1,252 @@
+.picker {
+  position: relative;
+  min-width: 0;
+}
+
+.picker > :global(.ui-button):first-child {
+  display: flex;
+  width: 100%;
+  min-height: 36px;
+  align-items: center;
+  padding: 5px 9px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+  text-align: start;
+}
+
+.picker > :global(.ui-button):first-child:hover:not(:disabled) {
+  border-color: var(--admin-accent);
+}
+
+.triggerContent {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.triggerContent > :global(.icon) {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  color: var(--admin-muted);
+}
+
+.avatarFallback {
+  display: grid;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--admin-subtle);
+  color: var(--admin-muted);
+}
+
+.avatarFallback :global(.icon) {
+  width: 14px;
+  height: 14px;
+}
+
+.identity {
+  display: grid;
+  min-width: 0;
+  flex: 1;
+  gap: 1px;
+}
+
+.identity strong,
+.identity small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.identity strong {
+  color: var(--admin-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.identity small {
+  color: var(--admin-muted);
+  font-size: 9px;
+}
+
+.clear {
+  position: absolute;
+  top: 50%;
+  right: 30px;
+  display: grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--admin-muted);
+  transform: translateY(-50%);
+}
+
+.clear:hover:not(:disabled) {
+  background: var(--admin-subtle);
+  color: var(--admin-text);
+}
+
+.clear :global(.icon) {
+  width: 12px;
+  height: 12px;
+}
+
+.panel {
+  gap: 8px;
+  padding: 10px;
+}
+
+.panel:popover-open {
+  display: grid;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-subtle);
+  color: var(--admin-muted);
+}
+
+.search > :global(.icon) {
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+}
+
+.search :global(.ui-input) {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  outline: 0;
+}
+
+.results {
+  display: grid;
+  max-height: 286px;
+  gap: 3px;
+  overflow-y: auto;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto auto;
+  gap: 9px;
+  align-items: center;
+  width: 100%;
+  min-height: 50px;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--admin-text);
+  text-align: start;
+}
+
+.option:hover,
+.option:focus-visible,
+.option[aria-selected="true"] {
+  border-color: color-mix(
+    in srgb,
+    var(--admin-accent) 34%,
+    var(--admin-border)
+  );
+  background: var(--admin-accent-soft);
+}
+
+.option > span {
+  display: grid;
+  min-width: 0;
+  gap: 1px;
+}
+
+.option strong,
+.option small,
+.option code {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option strong {
+  font-size: 12px;
+}
+
+.option small {
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+
+.option code {
+  color: var(--admin-muted);
+  font-size: 9px;
+}
+
+.option em {
+  color: var(--admin-muted);
+  font-size: 9px;
+  font-style: normal;
+}
+
+.option > :global(.icon) {
+  width: 14px;
+  height: 14px;
+  color: var(--admin-accent);
+}
+
+.status,
+.error {
+  margin: 0;
+  padding: 18px 10px;
+  color: var(--admin-muted);
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.error {
+  color: var(--admin-danger);
+}
+
+.manual {
+  display: grid;
+  gap: 5px;
+}
+
+.manual small {
+  color: var(--admin-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+@media (max-width: 600px) {
+  .panel {
+    padding: 8px;
+  }
+
+  .option {
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+  }
+
+  .option em {
+    display: none;
+  }
+}

@@ -60,6 +60,19 @@
   background: color-mix(in srgb, var(--admin-subtle) 55%, var(--admin-canvas));
 }
 
+.eventCard {
+  scroll-margin-top: 8px;
+}
+
+.eventCard:focus {
+  outline: none;
+}
+
+.eventCard:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: 3px;
+}
+
 .eventHeading > div {
   display: grid;
   gap: 5px;

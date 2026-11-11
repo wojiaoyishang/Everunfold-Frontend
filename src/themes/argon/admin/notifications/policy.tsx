@@ -11,7 +11,8 @@ import { can } from "@/core/accounts/permissions";
 import { UiText, useT } from "@/core/i18n/provider";
 import { useNotificationState } from "@/core/notifications/use-notifications";
 import { useMailSettings } from "@/core/settings/use-mail-settings";
-import { Button, TextField } from "../../components/ui/primitives";
+import { Button } from "../../components/ui/primitives";
+import { AccountUserPicker } from "../../components/ui/account-user-picker";
 import { Select } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
 import { Icon } from "../../components/icon";
@@ -76,7 +77,13 @@ function EventRoutes({
       ),
     );
   return (
-    <section className={styles.eventCard}>
+    <section
+      id={`notification-event-${event.id.replace(/[^a-z0-9]+/gi, "-")}`}
+      className={styles.eventCard}
+      data-settings-section={event.title}
+      data-settings-group="通知事件"
+      tabIndex={-1}
+    >
       <header className={styles.eventHeading}>
         <div>
           <span className={styles.eventCode}>{event.id}</span>
@@ -122,7 +129,7 @@ function EventRoutes({
             data-mail={route.platform_id === "email" || undefined}
             key={route.key}
           >
-            <label className={styles.routeField}>
+            <div className={styles.routeField}>
               <UiText text="接收人类型" />
               <Select
                 programOptions
@@ -147,8 +154,8 @@ function EventRoutes({
                   });
                 }}
               />
-            </label>
-            <label className={styles.routeField}>
+            </div>
+            <div className={styles.routeField}>
               <UiText text="接收人" />
               {route.recipient_type === "role" ? (
                 <Select
@@ -176,19 +183,19 @@ function EventRoutes({
                   }
                 />
               ) : (
-                <TextField
+                <AccountUserPicker
+                  label={t("指定用户")}
                   value={route.recipient_value}
-                  placeholder="用户稳定 ID"
-                  aria-label={t("用户稳定 ID")}
-                  onChange={(event) =>
+                  disabled={!editable}
+                  onChange={(value) =>
                     update(route.key, {
-                      recipient_value: event.target.value.trim(),
+                      recipient_value: value,
                     })
                   }
                 />
               )}
-            </label>
-            <label className={styles.routeField}>
+            </div>
+            <div className={styles.routeField}>
               <UiText text="通知平台" />
               <Select
                 programOptions
@@ -210,9 +217,9 @@ function EventRoutes({
                   })
                 }
               />
-            </label>
+            </div>
             {route.platform_id === "email" && (
-              <label className={styles.routeField}>
+              <div className={styles.routeField}>
                 <UiText text="发信配置" />
                 <Select
                   programOptions
@@ -229,7 +236,7 @@ function EventRoutes({
                     })
                   }
                 />
-              </label>
+              </div>
             )}
             <span className={styles.routeSwitch}>
               <Switch

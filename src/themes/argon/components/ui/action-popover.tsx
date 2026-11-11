@@ -1,5 +1,5 @@
 "use client";
-import { useId, useLayoutEffect, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, type ReactNode } from "react";
 import { Button, Popover } from "./primitives";
 import { useAnchoredPopover } from "./use-anchored-popover";
 
@@ -11,6 +11,7 @@ export function ActionPopover({
   panelClassName,
   panelWidth = 228,
   triggerContent,
+  onOpenChange,
   children,
 }: {
   label: string;
@@ -19,6 +20,7 @@ export function ActionPopover({
   panelClassName?: string;
   panelWidth?: number;
   triggerContent: ReactNode;
+  onOpenChange?: (open: boolean) => void;
   children: (close: () => void) => ReactNode;
 }) {
   const id = useId();
@@ -40,6 +42,7 @@ export function ActionPopover({
         )
         ?.focus({ preventScroll: true });
   }, [open, panel]);
+  useEffect(() => onOpenChange?.(open), [onOpenChange, open]);
   return (
     <>
       <Button
