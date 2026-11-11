@@ -1674,10 +1674,11 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 
 | 文件                                                              | 版本                                  | SHA256                                                             |
 | ----------------------------------------------------------------- | ------------------------------------- | ------------------------------------------------------------------ |
-| `docs/README.md`                                                  | `index-html-notifications-1`          | `dc453c4eba7fe62f44987937b1629e0ebb9713b5b3d3b5ff9cb9d34f6b467b2a` |
+| `docs/README.md`                                                  | `index-html-notifications-2`          | `ac7b3977617c272e1a3e54c027c831db2a40cde8d66801c98bec328b39f30edd` |
 | `docs/decisions/0113-notification-events-platforms-and-templates.md` | `ADR0113-3`                        | `15ce7ed33ce03e84333ce6e43659fb1cb0c49a5df01ff05a32a2d0c6fb963ed1` |
-| `docs/decisions/0117-html-notification-templates.md`              | `ADR0117-1`                           | `b2c4fec9292f1b8fc8e06d874aee7caeb6ef9f9eafe1c378f64632e16e45c927` |
-| `docs/development/notifications.md`                               | `notifications-2`                     | `43549f79012684420e26406110496def6787e72bdb32a978c21b373e6c6d6c0c` |
-| `docs/handoff/notification-html-template-verification.md`         | `notification-html-template-verification-1` | `4ca59f9fe30fed3858519ba6de6f79af949e03a307322d53c275940887b09285` |
-| `docs/design/notification-html-template-editor.png`               | `notification-html-template-editor-1` | `bde0cc1acfcf0b6e1e563f877e1db786f2d227d9ae6aa84e4e56e40d61fcbc0d` |
+| `docs/decisions/0117-html-notification-templates.md`              | `ADR0117-2`                           | `10ec1cc3729a2363594c64874115999dffd8a4db4d2436fcec187b35a0ec4052` |
+| `docs/development/notifications.md`                               | `notifications-3`                     | `b49ff3cc5f271949a63eba2fdfb653929c49b3d12ce72e3a4173a65007f690a6` |
+| `docs/handoff/notification-html-template-verification.md`         | `notification-html-template-verification-2` | `201b7cb60aa0e940e80616a7911215eee9b358662909c58a272f1ed6257fbf0d` |
+| `docs/design/notification-html-template-editor.png`               | `notification-html-template-editor-2` | `195fd838901e79503f6fe7a3031a03b45300365d1893e560a35f4620c791ccc9` |
+| `docs/design/notification-default-email-template.png`             | `notification-default-email-template-1` | `9deef3f2ec89bf914dd0ac471c5c74e9ce9091f3ca765d8acbda434587dece9d` |
 | `contracts/notifications-v1.schema.json`                          | `notifications-v1-1.2.0`              | `c9cea9080f23d54404e8bdefe40e3524c9a0ab4e58d147516b7641471635c2d8` |

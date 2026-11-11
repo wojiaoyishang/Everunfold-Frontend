@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-2，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
+版本：notifications-3，2026-11-11。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)与[ADR0117](../decisions/0117-html-notification-templates.md)。
 
 ## 概念
 
@@ -18,7 +18,8 @@
 - 内置平台 `in-app`、`email`；插件可注册其他平台。
 - 路由接收人支持指定用户、角色和权限。
 - 模板按事件、平台、语言保存；缺失平台变体回退到内置安全文案。
-- 模板正文使用共享代码编辑器。站内通知只编辑纯文本；邮件平台可分别编辑纯文本回退和可选 HTML。
+- 模板正文使用共享编辑器。站内通知只编辑纯文本；邮件平台可分别编辑纯文本回退和可选 HTML，HTML 支持“可视化 / 源码”双视图。
+- 默认邮件模板采用后台一致的简约卡片：中性背景、细分隔线、小图形标识和少量主题色，不依赖外链图片。
 - 评论进入待审核状态时发布 `comment.pending_review`。
 - 站内通知写入 Inbox；邮件平台复用现有 SMTP 配置。
 - 投递记录区分 `pending`、`sending`、`sent`、`failed`、`unknown`、`suppressed`。
