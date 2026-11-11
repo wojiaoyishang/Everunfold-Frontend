@@ -1,6 +1,6 @@
 # 系统设置归并与分组快速导航验收
 
-版本：system-settings-captcha-navigation-verification-4；2026-11-11（Asia/Shanghai）。对应 [ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)。
+版本：system-settings-captcha-navigation-verification-5；2026-11-11（Asia/Shanghai）。对应 [ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)。
 
 ## 检查范围
 
@@ -14,7 +14,7 @@
 
 ## 自动化与构建
 
-- `npm run check`：ESLint、Next.js 类型生成/TypeScript、插件类型、Prettier 和361项测试全部通过。
+- `npm run check`：ESLint、Next.js 类型生成/TypeScript、插件类型、Prettier 和362项测试全部通过。
 - `npm run verify:admin`：隔离生产构建、后台私有入口、后端不可用/无公开缓存、主题与公开读取矩阵通过。
 - 后台注册测试额外固定独立验证码入口不从左侧导航出现，兼容页面路由仍可识别。
 

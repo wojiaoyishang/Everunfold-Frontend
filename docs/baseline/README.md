@@ -1522,8 +1522,8 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/settings.md` | `settings-runtime-19` | `f70b3c240cf60e6bab510233267b59599ad0f6882e8d04d5b3c40404f18bd697` |
 | `docs/development/captcha.md` | `captcha-7` | `bd143b0448c468f94584b6e35797a82688530cd0baa41a141fa008156ead3a20` |
 | `docs/decisions/0064-desktop-settings-section-navigation.md` | `ADR0064-grouped-navigation-1` | `e07d42de5bb24d0aca8191857a807880f606f88c90db8d5435d588846443c7b4` |
-| `docs/decisions/0106-system-settings-captcha-and-grouped-navigation.md` | `ADR0106-4` | `0a7a15ccce465b16a1a3d3cc375d2e5637695971f304ba6fefcbbc6d8a0dc3f3` |
-| `docs/handoff/system-settings-captcha-navigation-verification.md` | `system-settings-captcha-navigation-verification-4` | `3eef2c7975dfe5b70438e5553115e8e27f39a180cec6207354fd0224b7625403` |
+| `docs/decisions/0106-system-settings-captcha-and-grouped-navigation.md` | `ADR0106-5` | `a7359d35db94c989ad77d152ddc6320d1dd573ec3cedec9cbae6b513658e9e49` |
+| `docs/handoff/system-settings-captcha-navigation-verification.md` | `system-settings-captcha-navigation-verification-5` | `118eb7799b0f92b58e6062db752210534a4ac36c61577b3303afa2bb224953c0` |
 
 
 ## 后台侧栏滚动恢复（2026-11-11）
@@ -1543,8 +1543,32 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
-| `docs/README.md` | `index-media-virtual-reference-1` | `1145206fca9ce68e23e438c2803ca8ee93e73cf80517f69b572b33d67293ff17` |
-| `docs/decisions/0108-virtual-media-references.md` | `ADR0108-1` | `aced1b40a06c09240dde2727137429f915c7959e72e79afa2657471388f1d45c` |
+| `docs/README.md` | `index-media-virtual-reference-1` | `fabd0b68c385c57778695c596dcd2aa9fc899421901e17630fd04f5c0c8a9bbd` |
+| `docs/decisions/0108-virtual-media-references.md` | `ADR0108-1` | `f7c30dd9a702b053c03d171df5d8a121e8d427104f2a8ef9c3ef9583cb0df945` |
 | `docs/development/glossary.md` | `glossary-runtime-15` | `c709bf94ba7a58f21de4e94831bc0444118bb73ae91b473b4fd123141589b1a7` |
 | `docs/development/media-library.md` | `media-library-runtime-7` | `01c5992ad6fe31865ee0d29b087f3baa8878a9602fbf1ebc09f2b384cc6d6a6d` |
-| `docs/handoff/glossary-media-reference-verification.md` | `glossary-media-reference-verification-1` | `c6134b813cc51e5fba2b22417936a33ad3f3d0a1351014ef303660db2fd43e62` |
+| `docs/handoff/glossary-media-reference-verification.md` | `glossary-media-reference-verification-1` | `e1f38f8425908ba1750075f55d809b598dc5edcc6049d005b7313d0eadaf04da` |
+
+
+## 插件管理搜索与术语目录缩略图（2026-11-11）
+
+插件管理加入本地即时搜索；后台术语列表批量返回特色图并在左目录显示。`glossary-v1`升至`3.6.0`，术语插件升至`1.7.0`，无数据库迁移。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-plugin-settings-search-1` | `fa4a373a601289e1ad380f7245708750d67137762345b615d15b542017429a55` |
+| `docs/decisions/0109-plugin-settings-search.md` | `ADR0109-1` | `214639dbeca2013923906ddde0d96aaf0a6b802c2cc7f2c9c419e1f48a5534db` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-13` | `e7128a6d2c87a77ce19374f8a89dab87221b41a1cf81562579dee8da018e177d` |
+| `contracts/glossary-v1.schema.json` | `glossary-v1-3.6.0` | `a26a66c01f9dc17813d3a45d73abbf5ed8a6f20080378bb9f0b91cc45b6826b6` |
+
+
+## 主题与插件特色图预览（2026-11-11）
+
+主题详情满宽等比居中；插件列表和详情支持 `preview` 特色图，缺失或失败时显示占位。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-theme-plugin-preview-1` | `fa4a373a601289e1ad380f7245708750d67137762345b615d15b542017429a55` |
+| `docs/decisions/0110-theme-and-plugin-preview-artwork.md` | `ADR0110-1` | `2fc4f9edf44fdf5408abaf336966b0e958d8e59fbc428f3730c1b0c427d40ce9` |
+| `docs/development/child-themes.md` | `child-themes-8` | `7569dc3c412a4a6b4ca93ce32824bb39dd4d8ed7bb3381e70f80b7a83c859b1d` |
+| `docs/handoff/theme-plugin-preview-verification.md` | `theme-plugin-preview-verification-1` | `471613344998987fdc85bf6a2a161b1a83cf46f62c9b9e7fb203a079a8dc0b19` |

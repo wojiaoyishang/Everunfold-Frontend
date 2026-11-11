@@ -1,5 +1,9 @@
 # Everunfold 文档入口
 
+[主题与插件特色图](decisions/0110-theme-and-plugin-preview-artwork.md)、[插件开发](development/frontend-plugins.md)：主题详情预览满宽等比居中，插件列表和详情均支持 `preview` 特色图；无图或加载失败时保留稳定占位。
+
+[插件管理搜索](decisions/0109-plugin-settings-search.md)与[开发指南](development/frontend-plugins.md)：按插件 ID、名称、说明、版本、作者和贡献能力即时过滤，保留原启停与详情操作。
+
 [术语媒体虚拟引用](handoff/glossary-media-reference-verification.md)、[ADR0108](decisions/0108-virtual-media-references.md)：媒体库绑定统一展示 `site://media/<UUID>`，选择后立即回显；手动虚拟地址可重新绑定 ID，普通 URL 与媒体引用分离。后台术语保持左侧目录、右侧编辑器并填满内容区，公开特色图布局不变。
 
 [后台侧栏滚动恢复](decisions/0107-admin-sidebar-scroll-restoration.md)、[导航架构](architecture/admin-navigation.md)：桌面侧栏按账号和当前后台路径保存内部滚动位置，刷新后恢复；若当前菜单仍不可见再做最小幅度对齐，移动端抽屉保持原行为。

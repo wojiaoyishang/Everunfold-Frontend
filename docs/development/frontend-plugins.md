@@ -1,6 +1,6 @@
 # 独立插件、页面与短代码开发
 
-版本：frontend-plugins-11，2026-11-10。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
+版本：frontend-plugins-13，2026-11-11。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
 
 ## 源码和命令
 
@@ -200,7 +200,9 @@ npm run check覆盖类型、格式、注册不变量和包完整性/回退检查
 
 ## 插件详情元数据
 
-definePlugin允许author、homepage、license、preview、readme；版本继续使用version。preview填写安全HTTP(S)或同源资源URL，readme直接提供Markdown字符串。独立构建、运行清单和后端登记保留这些字段，管理页以全宽列表显示来源，点击详情打开主题弹窗。旧包缺失字段时正常显示占位，不执行原始HTML/脚本。修改宿主构建/清单工具需要重启dev协调进程，普通插件声明仍自动重编译。常驻/有限任务由[后端SDK](runtime-tasks.md)贡献，不在浏览器运行。
+definePlugin允许author、homepage、license、preview、readme；版本继续使用version。preview填写安全HTTP(S)或同源资源URL，readme直接提供Markdown字符串。独立构建、运行清单和后端登记保留这些字段。管理列表显示特色图缩略图，详情使用满宽等比居中预览；旧包缺失字段时正常显示占位，不执行原始HTML/脚本。修改宿主构建/清单工具需要重启dev协调进程，普通插件声明仍自动重编译。常驻/有限任务由[后端SDK](runtime-tasks.md)贡献，不在浏览器运行。详见[ADR0110](../decisions/0110-theme-and-plugin-preview-artwork.md)。
+
+插件管理提供即时本地搜索，覆盖 ID、名称、说明、版本、作者及页面/短代码/组件贡献；也可搜索验证码提供方能力。搜索不写设置、不改变启停草稿，无结果时显示明确空态，详见[ADR0109](../decisions/0109-plugin-settings-search.md)。
 
 
 ## 页面评论 SDK
