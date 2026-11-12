@@ -1743,8 +1743,8 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
-| `docs/README.md` | `index-task-terminal-log-2` | `cf50273772781bea9a9c1e1a8b32edba958958234e4c57d3734f13bb97d6318d` |
-| `docs/development/task-progress.md` | `task-progress-3` | `797dbda29b59a822a90bc44766f563a562b6d062888a2a6adc91500c9d7a183a` |
-| `docs/handoff/task-terminal-log-verification.md` | `task-terminal-log-verification-2` | `759cd1a0086a01382f105750c85fdc6e8d586af82ffcd48110b1b8e249d5bed3` |
-| `docs/design/task-log-terminal.png` | `task-log-terminal-2` | `d3470115838abf0bed1920ebac0223667e5b536e9a8e4cf281956150836511fc` |
-| `docs/design/task-log-terminal-mobile.png` | `task-log-terminal-mobile-2` | `8cce76d3cd3f402df8f2fe6108b1b97fbc5b8f8ee6dc1727f4fc335e5307cc6a` |
+| `docs/README.md` | `index-task-terminal-log-3` | `42f293bad1e45ff10c97cfb0c58bf51b21341d8ea67558175b03c1f568fd1cca` |
+| `docs/development/task-progress.md` | `task-progress-4` | `128c47b8fabb1bc17fcdc53499918e258cbb95ff8ec2ef5ce2db0f71e1367e39` |
+| `docs/handoff/task-terminal-log-verification.md` | `task-terminal-log-verification-3` | `a52d24b7fa5480ba21806811a24cc613cabc776017455f1953eac386a94e0b84` |
+| `docs/design/task-log-terminal.png` | `task-log-terminal-3` | `1262e775b4a5672e1c9db8fd9305541a33c785df41500bf1a959c030f839a60b` |
+| `docs/design/task-log-terminal-mobile.png` | `task-log-terminal-mobile-3` | `182a44c1599ab231869765f10f52c5be8eb339036db437238e9fcddeb07b3135` |
