@@ -224,6 +224,35 @@ test("feeds use stable identities, escape markup and honor locale and limit", ()
   assert.deepEqual(feedItems(data), []);
 });
 
+test("full feeds escape rendered article HTML and exclude locked bodies", () => {
+  const data = snapshot();
+  data.site.settings = settings();
+  data.site.settings.site.discovery = { feed_content: "full" };
+  data.contents[0].content = [
+    {
+      id: "full-feed-html",
+      type: "html",
+      content:
+        '<p onclick="unsafe()">Feed body</p><script>hiddenScript()</script>',
+    },
+  ];
+  data.contents[1].access = "password";
+  data.contents[1].content = [
+    { id: "locked", type: "markdown", content: "privateBodyMarker" },
+  ];
+  for (const format of ["rss", "atom"] as const) {
+    const feed = buildFeed(data, origin, format);
+    assert.match(feed, /&lt;p&gt;Feed body&lt;\/p&gt;/);
+    assert.doesNotMatch(
+      feed,
+      /unsafe|hiddenScript|privateBodyMarker|article-2/,
+    );
+    assert.match(feed, /xml:base="https:\/\/blog\.example\/hello\.html"/);
+  }
+  data.site.settings.site.discovery.feed_content = "excerpt";
+  assert.doesNotMatch(buildFeed(data, origin, "rss"), /Feed body|xml:base/);
+});
+
 test("article metadata honors site and content indexing with safe JSON-LD", () => {
   const data = snapshot();
   data.site.settings = settings();

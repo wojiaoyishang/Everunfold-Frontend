@@ -39,12 +39,14 @@ export function Feed({
   page = 1,
   type = "all",
   pathname = "/",
+  heading,
 }: {
   theme: string;
   snapshot: PublicSnapshot;
   page?: number;
   type?: FeedType;
   pathname?: string;
+  heading?: { title: string; description?: string };
 }) {
   const result = queryFeed(snapshot, {
     page,
@@ -58,6 +60,15 @@ export function Feed({
         title={snapshot.site.settings?.site.notice_title}
         content={snapshot.site.notice ?? ""}
       />
+      {heading && (
+        <header className="surface page-heading">
+          <Icon name="book" />
+          <div>
+            <h1>{heading.title}</h1>
+            {heading.description && <p>{heading.description}</p>}
+          </div>
+        </header>
+      )}
       {type === "shuoshuo" && (
         <header className="surface page-heading">
           <Icon name="leaf" />

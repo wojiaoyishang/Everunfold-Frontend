@@ -8,6 +8,24 @@ import type {
 
 export const fallbackThemeId = "argon";
 const articleDefaults: Required<ArticleDisplayPreferences> = {
+  show_updated: false,
+  show_toc: true,
+  meta_order: [
+    "author",
+    "published",
+    "updated",
+    "words",
+    "reading",
+    "comments",
+    "views",
+  ],
+  cover_position: "above",
+  words_per_minute: 200,
+  han_per_minute: 400,
+  stale_days: 0,
+  stale_basis: "updated",
+  related_basis: "both",
+  afterword: "",
   show_author: true,
   show_date: true,
   show_word_count: true,
@@ -46,6 +64,10 @@ export type RuntimeThemePreferences = Required<
   navigation?: ThemePreferences["navigation"];
 };
 const defaults: RuntimeThemePreferences = {
+  author_avatar_media_id: "",
+  author_avatar_url: null,
+  header_logo_media_id: "",
+  header_logo_url: "",
   article: articleDefaults,
   code: codeDefaults,
   feed: feedDefaults,

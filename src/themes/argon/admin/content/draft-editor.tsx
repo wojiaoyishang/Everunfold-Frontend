@@ -591,6 +591,11 @@ export function DraftEditor({
                 detail={editor.detail}
                 disabled={Boolean(blocked || (id && !editor.detail))}
                 terms={resources.terms}
+                newArticleDefaults={
+                  id === null && type.id === "article"
+                    ? resources.defaults
+                    : null
+                }
                 createCategory={resources.createCategory}
                 media={media}
                 onMedia={resources.remember}

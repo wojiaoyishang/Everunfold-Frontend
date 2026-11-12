@@ -5,13 +5,18 @@ import {
   readEditorOptions,
   createContentCategory,
 } from "@/core/contracts/content-admin";
-import type { EditorTerm, MediaURL } from "@/core/contracts/content-admin";
+import type {
+  EditorCatalog,
+  EditorTerm,
+  MediaURL,
+} from "@/core/contracts/content-admin";
 import type { MediaItem } from "@/core/contracts/settings";
 import type { CodePreferences } from "@/core/contracts/settings";
 import { readSettings } from "@/core/contracts/settings";
 
 export function useEditorResources() {
   const { baseUrl, csrfToken } = useAdminRequest();
+  const [defaults, setDefaults] = useState<EditorCatalog | null>(null);
   const [terms, setTerms] = useState<EditorTerm[]>([]);
   const [media, setMedia] = useState<Record<string, MediaURL>>({});
   const [codePreferences, setCodePreferences] = useState<CodePreferences>({});
@@ -27,7 +32,10 @@ export function useEditorResources() {
       });
     void readEditorOptions(baseUrl, { signal: abort.signal })
       .then((response) => {
-        if (!abort.signal.aborted) setTerms(response.data.terms ?? []);
+        if (!abort.signal.aborted) {
+          setTerms(response.data.terms ?? []);
+          setDefaults(response.data);
+        }
       })
       .catch(() => {
         /* Suggestions are optional; manual entry remains available. */
@@ -53,5 +61,5 @@ export function useEditorResources() {
           name.trim().normalize("NFC").toLocaleLowerCase(),
     );
   };
-  return { terms, media, remember, createCategory, codePreferences };
+  return { terms, defaults, media, remember, createCategory, codePreferences };
 }

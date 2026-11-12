@@ -11,27 +11,37 @@ export function ArticleHeader({
   liveMetrics = true,
   interactive = true,
   display,
+  minutes,
 }: {
   content: ContentMetadata;
   liveMetrics?: boolean;
   interactive?: boolean;
   display?: ArticleDisplayPreferences;
+  minutes?: number;
 }) {
-  const cover = resourceUrl(content.cover_url);
+  const cover =
+    display?.cover_position === "hidden"
+      ? null
+      : resourceUrl(content.cover_url);
+  const below = display?.cover_position === "below";
+  const image = cover && (
+    <div
+      className={below ? "article-cover-inline" : "article-cover"}
+      aria-hidden="true"
+    >
+      <Image
+        src={cover}
+        alt=""
+        fill
+        sizes="(max-width: 900px) 100vw, 900px"
+        unoptimized
+        preload
+      />
+    </div>
+  );
   return (
-    <header className={`article-header${cover ? " has-cover" : ""}`}>
-      {cover && (
-        <div className="article-cover" aria-hidden="true">
-          <Image
-            src={cover}
-            alt=""
-            fill
-            sizes="(max-width: 900px) 100vw, 900px"
-            unoptimized
-            preload
-          />
-        </div>
-      )}
+    <header className={`article-header${cover && !below ? " has-cover" : ""}`}>
+      {!below && image}
       <div className="article-heading">
         <div className="article-categories">
           {content.categories.map((category) => (
@@ -47,6 +57,7 @@ export function ArticleHeader({
           liveMetrics={liveMetrics}
           interactive={interactive}
           display={display}
+          minutes={minutes}
         />
         <ContentLanguages
           content={{
@@ -56,6 +67,7 @@ export function ArticleHeader({
           }}
         />
       </div>
+      {below && image}
     </header>
   );
 }

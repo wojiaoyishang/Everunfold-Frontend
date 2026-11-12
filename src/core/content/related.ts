@@ -29,12 +29,17 @@ export function relatedArticles(
   snapshot: PublicSnapshot,
   current: Content,
   limit = 3,
+  basis: "both" | "tag" | "category" | "recent" = "both",
 ) {
   const tags = new Set(current.tags.map((term) => term.id));
   const categories = new Set(current.categories.map((term) => term.id));
   const score = (entry: Content) =>
-    entry.tags.filter((term) => tags.has(term.id)).length * 3 +
-    entry.categories.filter((term) => categories.has(term.id)).length;
+    (basis === "both" || basis === "tag"
+      ? entry.tags.filter((term) => tags.has(term.id)).length * 3
+      : 0) +
+    (basis === "both" || basis === "category"
+      ? entry.categories.filter((term) => categories.has(term.id)).length
+      : 0);
   return languageContents(snapshot.contents, localeOf(current.language))
     .filter(
       (entry) =>
@@ -43,6 +48,7 @@ export function relatedArticles(
           (current.translation_group_id ?? current.id),
     )
     .map((entry) => ({ entry, score: score(entry) }))
+    .filter((item) => basis === "both" || basis === "recent" || item.score > 0)
     .sort(
       (a, b) =>
         b.score - a.score ||

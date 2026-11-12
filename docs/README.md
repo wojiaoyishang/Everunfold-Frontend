@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[站点阅读与文章显示](decisions/0125-site-reading-and-article-presentation.md)记录全站默认值、主题与单篇设置的继承方式。
+
 [账户邮件与自助找回密码](decisions/0124-account-mail-and-password-recovery.md)说明模板配置、全站开关和部署迁移。
 
 [批量邀请码与自定义有效期](decisions/0123-registration-invitation-batches.md)说明邀请码配置与部署迁移。

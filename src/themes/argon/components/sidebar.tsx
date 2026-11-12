@@ -87,9 +87,9 @@ export function Sidebar({
       trigger?.focus();
     };
   }, [open, setOpen, triggerRef]);
-  const avatar = resourceUrl(site.avatar_url);
-  const identity = campfireIdentity(site);
   const profile = themeProfile(site.settings);
+  const avatar = resourceUrl(profile?.author_avatar_url ?? site.avatar_url);
+  const identity = campfireIdentity(site);
   const numberedToc = profile?.article.toc_numbered ?? false;
   const { activeId } = useReadingState();
   useEffect(() => {

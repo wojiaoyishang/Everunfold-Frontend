@@ -30,6 +30,8 @@ import { mergeActivatedTheme, themeActivationInput } from "./theme-activation";
 
 export function settingsFailure(error: unknown) {
   if (error instanceof RequestError) {
+    if (error.code === 42236) return "首页和文章列表页须选择不同的已公开页面。";
+    if (error.code === 42237) return "请选择仍可使用的文章分类。";
     if (error.code === 42298)
       return "选中的主题或插件尚未在所有启用节点完成部署登记。当前修改已保留，请刷新部署清单。";
     if (error.code === 42292)

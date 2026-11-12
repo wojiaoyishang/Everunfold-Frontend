@@ -5,6 +5,9 @@ import {
 } from "@/core/seo/discovery";
 import { resourceUrl } from "@/core/content/urls";
 import { articleSchema, StructuredData } from "@/core/seo/structured-data";
+import { readingPage } from "@/core/pages/reading-pages";
+import { normalizePath } from "@/core/content/urls";
+import { localizeHref } from "@/core/i18n/locale";
 import { resolveManagedPage } from "@/core/pages/resolve";
 import { ManagedPageView } from "@/themes/argon/pages/view";
 import { pageLanguages } from "@/core/pages/languages";
@@ -16,6 +19,8 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { pageNumber, resolveContent } from "@/core/content/query";
+import { RelatedArticles } from "@/themes/argon/components/related-articles";
+import { themeProfile } from "@/core/settings/theme-options";
 import { Article } from "@/themes/argon/components/article";
 import { resolvePresentation } from "@/core/content/presentation";
 import { ShuoshuoDetail } from "@/themes/argon/components/shuoshuo";
@@ -40,6 +45,11 @@ export async function generateMetadata({
   const { contentPath } = await params;
   const managed = resolveManagedPage(snapshot, `/${contentPath.join("/")}`);
   if (managed) {
+    if (
+      readingPage(snapshot, "posts_page_id", managed.language ?? undefined)
+        ?.id === managed.id
+    )
+      return codePageMetadata(snapshot, "/article");
     const variants =
       managed.source === "custom"
         ? pageLanguages(snapshot, managed)
@@ -56,7 +66,14 @@ export async function generateMetadata({
       managed.source === "registered"
         ? (variants.find((item) => item.language === snapshot.site.locale)
             ?.path ?? managed.path)
-        : managed.path;
+        : readingPage(snapshot, "home_page_id", managed.language ?? undefined)
+              ?.id === managed.id
+          ? localizeHref(
+              "/",
+              managed.language ?? snapshot.site.locale ?? "zh-CN",
+              normalizeCatalog(snapshot.site.settings?.site.language_catalog),
+            )
+          : managed.path;
     const origin = readConfiguration().publicSiteUrl;
     const image = resourceUrl(discoverySettings(snapshot.site).share_image);
     const url = origin ? new URL(canonical, origin).href : undefined;
@@ -147,6 +164,17 @@ export default async function ContentPage({
     searchParams,
   ]);
   const managed = resolveManagedPage(snapshot, `/${contentPath.join("/")}`);
+  if (
+    managed &&
+    normalizePath(managed.path) ===
+      normalizePath(
+        readingPage(snapshot, "posts_page_id", managed.language ?? undefined)
+          ?.path ?? "/",
+      )
+  )
+    return (
+      <CodePage snapshot={snapshot} path="/article" parameters={parameters} />
+    );
   if (managed)
     return (
       <>
@@ -185,6 +213,20 @@ export default async function ContentPage({
   )
     return (
       <ProtectedArticle
+        recommendations={
+          protectedContent.kind === "article" && (
+            <RelatedArticles
+              snapshot={snapshot}
+              content={protectedContent}
+              limit={
+                themeProfile(snapshot.site.settings)?.article.related_count
+              }
+              basis={
+                themeProfile(snapshot.site.settings)?.article.related_basis
+              }
+            />
+          )
+        }
         key={`${protectedContent.id}:${protectedContent.updated_at}`}
         content={protectedContent}
         site={snapshot.site}

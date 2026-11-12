@@ -3,6 +3,7 @@ import { useId } from "react";
 import { UiText } from "@/core/i18n/provider";
 import { useSettingsEditor } from "@/core/settings/editor";
 import { SettingsSection, SettingsText, SettingsToggle } from "./shared";
+import { Select } from "../../components/ui/select";
 import { TextField, TextLink } from "../../components/ui/primitives";
 import type { SearchDiscovery } from "@/core/contracts/settings";
 import {
@@ -41,7 +42,7 @@ export function DiscoverySettings() {
         />
         <SettingsToggle
           label="启用 RSS / Atom 订阅"
-          hint="订阅输出标题、摘要与原文链接；关闭站点收录时也停止输出订阅。"
+          hint="关闭站点收录时也停止输出订阅。"
           value={value.feeds_enabled ?? true}
           onChange={(feeds_enabled) => update({ feeds_enabled })}
         />
@@ -64,6 +65,26 @@ export function DiscoverySettings() {
           <small>
             <UiText text="最近发布的 1 至 100 条内容；可以用 language 参数选择某种语言。" />
           </small>
+        </div>
+        <div className="admin-settings-field">
+          <label htmlFor="feed-content">
+            <UiText text="订阅正文" />
+          </label>
+          <Select
+            id="feed-content"
+            name="feed-content"
+            label="订阅正文"
+            programOptions
+            value={value.feed_content ?? "excerpt"}
+            options={[
+              { value: "excerpt", label: "仅摘要" },
+              { value: "full", label: "全文" },
+            ]}
+            onValueChange={(feed_content) => {
+              if (feed_content === "excerpt" || feed_content === "full")
+                update({ feed_content });
+            }}
+          />
         </div>
         <div className="admin-settings-actions">
           <TextLink

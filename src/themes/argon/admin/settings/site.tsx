@@ -1,4 +1,5 @@
 "use client";
+import { SitePublishingSettings } from "./site-publishing";
 import { DiscoverySettings } from "./discovery";
 import { UiText } from "@/core/i18n/provider";
 
@@ -60,13 +61,13 @@ export function SiteSettingsPage() {
               onChange={(author_tagline) => update({ author_tagline })}
             />
             <SettingsMediaField
-              label="头像地址"
-              hint="选择媒体库中的图片，或填写可访问的地址。"
+              label="站点图标"
+              hint="用于浏览器标签页，也作为邮件品牌的默认图标。"
               kind="image"
-              value={site.avatar_url ?? ""}
-              mediaId={site.avatar_media_id}
-              onChange={(avatar_url, avatar_media_id) =>
-                update({ avatar_url, avatar_media_id })
+              value={site.icon_url ?? ""}
+              mediaId={site.icon_media_id}
+              onChange={(icon_url, icon_media_id) =>
+                update({ icon_url, icon_media_id })
               }
             />
             <SettingsText
@@ -238,6 +239,7 @@ export function SiteSettingsPage() {
               onChange={(allow_indexing) => update({ allow_indexing })}
             />
           </SettingsSection>
+          <SitePublishingSettings site={site} update={update} />
           <DiscoverySettings />
           <SettingsSection
             id="settings-glossary"

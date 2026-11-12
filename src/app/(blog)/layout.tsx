@@ -15,8 +15,10 @@ export async function generateMetadata(): Promise<Metadata> {
     const seo = discoverySettings(site);
     const origin = readConfiguration().publicSiteUrl;
     const image = resourceUrl(seo.share_image);
+    const icon = resourceUrl(site.settings?.site.icon_url);
     return {
       ...(origin ? { metadataBase: new URL(origin) } : {}),
+      ...(icon ? { icons: { icon, apple: icon } } : {}),
       verification: {
         google: seo.google_verification || undefined,
         other: seo.bing_verification

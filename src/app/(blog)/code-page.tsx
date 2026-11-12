@@ -1,5 +1,9 @@
 import { readConfiguration } from "@/core/config/server";
 import { feedAlternates } from "@/core/seo/discovery";
+import { readingPage } from "@/core/pages/reading-pages";
+import { ManagedPageView } from "@/themes/argon/pages/view";
+import { PagePresentation } from "@/themes/argon/components/route-state";
+import { pageLanguages } from "@/core/pages/languages";
 import { localizeHref } from "@/core/i18n/locale";
 import { ServerThemeTemplate } from "@/core/extensions/server-components";
 import { readActiveTheme } from "@/core/themes/server";
@@ -46,25 +50,42 @@ export function codePageMetadata(
     snapshot.site.settings?.site.language_catalog,
   );
   const locale = snapshot.site.locale ?? catalog.default_code;
+  const assigned =
+    path === "/"
+      ? readingPage(snapshot, "home_page_id")
+      : path === "/article"
+        ? readingPage(snapshot, "posts_page_id")
+        : undefined;
+  const target = (language: string) =>
+    path === "/article"
+      ? (readingPage(snapshot, "posts_page_id", language)?.path ??
+        localizeHref(path, language, catalog))
+      : localizeHref(path, language, catalog);
   return {
     ...(origin
       ? {
           alternates: {
             types: feedAlternates(snapshot.site, origin),
-            canonical: new URL(localizeHref(path, locale, catalog), origin)
-              .href,
+            canonical: new URL(target(locale), origin).href,
             languages: Object.fromEntries(
               catalog.languages
                 .filter((item) => item.enabled)
                 .map((item) => [
                   item.code,
-                  new URL(localizeHref(path, item.code, catalog), origin).href,
+                  new URL(target(item.code), origin).href,
                 ]),
             ),
           },
         }
       : {}),
-    ...(title ? { title: translator(snapshot)(title) } : {}),
+    ...(assigned
+      ? { title: assigned.title, description: assigned.description }
+      : title
+        ? { title: translator(snapshot)(title) }
+        : {}),
+    ...(assigned?.allow_indexing === false
+      ? { robots: { index: false, follow: true } }
+      : {}),
     ...(path === "/search" || path === "/ss"
       ? { robots: { index: false, follow: true } }
       : {}),
@@ -143,6 +164,24 @@ function renderCodePage(
         }
       />
     );
+  const homepage =
+    path === "/" ? readingPage(snapshot, "home_page_id") : undefined;
+  if (homepage)
+    return (
+      <>
+        <PagePresentation
+          site={snapshot.site}
+          id={`home:${homepage.id}:${homepage.revision}`}
+        />
+        <ManagedPageView
+          page={homepage}
+          translations={pageLanguages(snapshot, homepage)}
+          comments={snapshot.comments[homepage.id] ?? []}
+        />
+      </>
+    );
+  const postsPage =
+    path === "/article" ? readingPage(snapshot, "posts_page_id") : undefined;
   if (path === "/" || path === "/ss" || path === "/article")
     return (
       <Feed
@@ -158,7 +197,13 @@ function renderCodePage(
                 ? "all"
                 : type
         }
-        pathname={path}
+        pathname={postsPage?.path ?? path}
+        heading={
+          postsPage && {
+            title: postsPage.title,
+            description: postsPage.description,
+          }
+        }
       />
     );
   if (path === "/archives") return <Archives snapshot={snapshot} />;

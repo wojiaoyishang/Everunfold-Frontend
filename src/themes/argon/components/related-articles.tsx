@@ -9,12 +9,15 @@ export function RelatedArticles({
   snapshot,
   content,
   limit = 6,
+  basis,
 }: {
   snapshot: PublicSnapshot;
   content: Content;
   limit?: number;
+  basis?: Parameters<typeof relatedArticles>[3];
 }) {
-  const items = relatedArticles(snapshot, content, limit);
+  if (limit <= 0) return null;
+  const items = relatedArticles(snapshot, content, limit, basis);
   if (!items.length) return null;
   return (
     <section

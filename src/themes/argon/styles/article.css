@@ -361,3 +361,37 @@
   font-size: 12px;
   margin: 17px 0 0;
 }
+
+.article-cover-inline {
+  position: relative;
+  aspect-ratio: 16 / 7;
+  overflow: hidden;
+}
+
+.article-cover-inline img {
+  object-fit: cover;
+}
+
+.article-age-notice,
+.article-afterword {
+  padding: 1rem;
+  border-inline-start: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.article-afterword {
+  margin-block: 1.5rem;
+}
+
+@media (min-width: 901px) {
+  .blog-container:has(.main-column [data-article-layout="wide"]) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .blog-container:has(.main-column [data-article-layout="wide"])
+    > .site-sidebar {
+    display: none;
+  }
+}

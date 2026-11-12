@@ -16,11 +16,11 @@
       "sha256": "b54ea2d6beeea00be71943bf8343fbf2fa7e5b6a969710500fa0c0e7d34b09ac"
     },
     "collaboration-v1.schema.json": {
-      "schema_version": "2.7.0",
+      "schema_version": "2.8.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/collaboration-v1.schema.json",
-      "source_commit": "82e18a68f3cff9a1171fb8ffce2d804518e414c4",
-      "sha256": "f15cf24861d459439f2c19d60e29af6fd18e5ea82cfa0cfe8ed18ed0d3943cc6"
+      "source_commit": "74fb0a7f608d91e3ab2b5dc29e86760d0bdb04f8",
+      "sha256": "08447fcecf2c336ef4be4bd17c0f6014609793627b95e064a080e4c8c220434e"
     },
     "comment-likes-v0.1.schema.json": {
       "schema_version": "0.2.0",
@@ -30,18 +30,18 @@
       "sha256": "04c12d5e0e8fc69a029179210422653b6911b96c01338ed5c2b15041a6402ce6"
     },
     "content-access-v1.schema.json": {
-      "schema_version": "1.5.0",
+      "schema_version": "1.6.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/content-access-v1.schema.json",
-      "source_commit": "2c6faf225108b67d32a0dcf7acae0c500e2a027f",
-      "sha256": "ba33226e15cb25ce215668d3dfdaff2904654c219a3c7339f6a3a64b04e9ee0f"
+      "source_commit": "74fb0a7f608d91e3ab2b5dc29e86760d0bdb04f8",
+      "sha256": "451a05df25e50acb3b819e1f7836ebabe2dc82a235e65c5a82f2d148fbe744df"
     },
     "content-admin-v1.schema.json": {
-      "schema_version": "1.20.0",
+      "schema_version": "1.21.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/content-admin-v1.schema.json",
-      "source_commit": "295af42f76b73e0338e9cdce0ac644c8738e3090",
-      "sha256": "f775b2c6138c3b7b965e7c45932987eea142ed3f63d09dfc2043e280c95f9857"
+      "source_commit": "74fb0a7f608d91e3ab2b5dc29e86760d0bdb04f8",
+      "sha256": "5608b73d9ff7357e7753dc1edd42963a589f459360002ee1958cdfed2868e156"
     },
     "pages-v1.schema.json": {
       "schema_version": "1.10.0",
@@ -51,18 +51,18 @@
       "sha256": "e32baf32887bc38d9df94f490d4793a2a7f0564027b3caded814d6eecd7d866e"
     },
     "presentation-v0.2.schema.json": {
-      "schema_version": "0.2.0-preview.5",
+      "schema_version": "0.2.0-preview.6",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/presentation-v0.2.schema.json",
-      "source_commit": "295af42f76b73e0338e9cdce0ac644c8738e3090",
-      "sha256": "0a9c3c40ca092b4ca1042e3a2f754f73f14be2eb6933cd9c99f22f98c521455f"
+      "source_commit": "74fb0a7f608d91e3ab2b5dc29e86760d0bdb04f8",
+      "sha256": "86204ac24b8ed65522ef4b7870f0bee909bb95770e5a225118f301c6d32fd15b"
     },
     "public-v0.1.schema.json": {
-      "schema_version": "0.14.0",
+      "schema_version": "0.15.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/public-v0.1.schema.json",
-      "source_commit": "295af42f76b73e0338e9cdce0ac644c8738e3090",
-      "sha256": "61eb9af38cb1004cacbab18f2ccae54f6c5ef28b1c1f1170ac2a8bf4c8711824"
+      "source_commit": "74fb0a7f608d91e3ab2b5dc29e86760d0bdb04f8",
+      "sha256": "006426f0f8de6d55143742c5b00d9ca8c1f79c1d7004e3067e287b7e20d11ebd"
     },
     "reader-preview-v0.1.schema.json": {
       "schema_version": "0.1.0-preview.1",
@@ -72,11 +72,11 @@
       "sha256": "9324386a70b1d3f1b657939864683926ce9dc692061499d696506bb6aaf37e7c"
     },
     "settings-v1.schema.json": {
-      "schema_version": "1.32.0",
+      "schema_version": "1.33.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/settings-v1.schema.json",
-      "source_commit": "837c8d8c0c4ba895dabbadc8a843a76556877af4",
-      "sha256": "c890a9cd75b714ae2ff8741ac52b5ed49c69453acbc486cb189f342d8ea770b3"
+      "source_commit": "74fb0a7f608d91e3ab2b5dc29e86760d0bdb04f8",
+      "sha256": "3924db0e91a6b3d0b43438ef7ac9f57e5fdde07e54c0e32c68874d4367b5bcaa"
     },
     "captcha-v1.schema.json": {
       "schema_version": "1.7.0",

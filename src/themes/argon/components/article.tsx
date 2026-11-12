@@ -8,6 +8,7 @@ import {
   ServerThemeTemplate,
 } from "@/core/extensions/server-components";
 import { RelatedArticles } from "./related-articles";
+import { articleDisplay } from "./article-reading";
 import { ArticleNeighbors } from "./article-neighbors";
 import { ReaderPreviewRegistration } from "./reader-preview";
 import { themeProfile } from "@/core/settings/theme-options";
@@ -25,14 +26,14 @@ export async function Article({
 }) {
   const rendered = await renderContentForReader(content);
   const profile = themeProfile(snapshot.site.settings);
-  const display = profile?.article;
+  const display = articleDisplay(content, profile?.article);
   const glossary = snapshot.site.settings?.site.glossary;
   const presentation = contentMetadata(content);
   return (
     <>
       <PagePresentation
         site={snapshot.site}
-        toc={rendered.toc}
+        toc={display.show_toc === false ? [] : rendered.toc}
         id={content.id}
       />
       {content.kind === "article" && <ReaderPreviewRegistration />}
@@ -66,7 +67,8 @@ export async function Article({
                 <RelatedArticles
                   snapshot={snapshot}
                   content={content}
-                  limit={display?.related_count ?? 6}
+                  limit={display.related_count ?? 6}
+                  basis={display.related_basis}
                 />
               )}
           </div>

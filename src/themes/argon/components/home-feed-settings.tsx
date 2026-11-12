@@ -51,14 +51,20 @@ export function HomeFeedSettings({
 /** Restore direct visits after hydration; server output always follows the explicit public URL. */
 export function HomeFeedPreference() {
   const { value } = useHomeFeed();
-  const { route, navigate, pending } = useRouteState();
+  const { route, navigate, pending, site } = useRouteState();
   useEffect(() => {
-    if (pending) return;
+    if (pending || site.settings?.site.reading?.home_page_id) return;
     const { pathname, search, hash, href } = window.location;
     const current = `${pathname}${search}${hash}`;
     const destination = preferredHomeHref(current, href, value);
     if (destination !== current)
       navigate(destination, { replace: true, scroll: false });
-  }, [route, navigate, pending, value]);
+  }, [
+    route,
+    navigate,
+    pending,
+    value,
+    site.settings?.site.reading?.home_page_id,
+  ]);
   return null;
 }

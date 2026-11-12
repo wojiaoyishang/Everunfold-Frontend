@@ -24,6 +24,7 @@ import { Icon } from "./components/icon";
 import { Select } from "./components/ui/select";
 import { FontField } from "./admin/fonts/font-field";
 import { useFontLibrary } from "@/core/fonts/library";
+import { ArticlePresentationSettings } from "./admin/settings/article-presentation";
 import { CodeSettingsSection } from "./admin/settings/code-settings";
 import { UiText } from "@/core/i18n/provider";
 import { argonAssetUrl } from "./assets";
@@ -129,6 +130,34 @@ export default function ArgonThemeSettings() {
             <UiText text="主题颜色预览" />
           </p>
         </div>
+      </SettingsSection>
+      <SettingsSection
+        id="settings-brand-images"
+        title="顶栏与侧栏"
+        description="选择当前主题的顶栏标识和博主头像。"
+      >
+        <SettingsMediaField
+          kind="image"
+          label="顶栏 Logo"
+          value={theme.header_logo_url}
+          mediaId={theme.header_logo_media_id}
+          onChange={(header_logo_url, header_logo_media_id) =>
+            update({ header_logo_url, header_logo_media_id })
+          }
+        />
+        <SettingsMediaField
+          kind="image"
+          label="博主头像"
+          value={theme.author_avatar_url ?? draft.site.avatar_url ?? ""}
+          mediaId={
+            theme.author_avatar_url === null
+              ? draft.site.avatar_media_id
+              : theme.author_avatar_media_id
+          }
+          onChange={(author_avatar_url, author_avatar_media_id) =>
+            update({ author_avatar_url, author_avatar_media_id })
+          }
+        />
       </SettingsSection>
       <SettingsSection
         id="settings-hero"
@@ -250,6 +279,7 @@ export default function ArgonThemeSettings() {
             }
           />
         </label>
+        <ArticlePresentationSettings value={article} onChange={updateArticle} />
       </SettingsSection>
       <CodeSettingsSection
         value={theme.code}

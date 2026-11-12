@@ -7,6 +7,7 @@ import type {
   DraftFields,
   DraftDetail,
   EditorSettings,
+  EditorCatalog,
   EditorTerm,
   MediaURL,
 } from "@/core/contracts/content-admin";
@@ -441,6 +442,130 @@ function SeoPanel({ settings, update, fields, disabled }: PanelProps) {
     </Panel>
   );
 }
+function ArticleOverridesPanel({
+  settings,
+  update,
+  disabled,
+  media,
+  onMedia,
+}: PanelProps) {
+  const [picker, setPicker] = useState(false);
+  const imageId = settings.share_image_media_id;
+  const preview = imageId ? media[imageId]?.original : null;
+  const overrides = [
+    ["show_toc", "本文目录"],
+    ["show_share", "本文分享按钮"],
+    ["show_related", "本文推荐文章"],
+    ["show_afterword", "本文文末附加内容"],
+  ] as const;
+  return (
+    <Panel title="文章显示覆盖" initialOpen={false}>
+      <label className="admin-field">
+        <UiText text="文章署名" />
+        <TextField
+          disabled={disabled}
+          value={settings.byline ?? ""}
+          maxLength={100}
+          onChange={(event) => update({ byline: event.currentTarget.value })}
+          placeholder="使用原作者名称"
+        />
+        <small>
+          <UiText text="仅更改公开署名，编辑权限按原作者保留。" />
+        </small>
+      </label>
+      <div className="admin-field">
+        <label htmlFor="article-layout">
+          <UiText text="本文布局" />
+        </label>
+        <Select
+          id="article-layout"
+          name="article-layout"
+          label="本文布局"
+          programOptions
+          disabled={disabled}
+          value={settings.article_layout ?? "inherit"}
+          options={[
+            { value: "inherit", label: "继承主题" },
+            { value: "wide", label: "通栏阅读" },
+            { value: "sidebar", label: "显示侧栏" },
+          ]}
+          onValueChange={(article_layout) => {
+            if (
+              article_layout === "inherit" ||
+              article_layout === "wide" ||
+              article_layout === "sidebar"
+            )
+              update({ article_layout });
+          }}
+        />
+      </div>
+      {overrides.map(([key, label]) => (
+        <div className="admin-field" key={key}>
+          <label htmlFor={`article-${key}`}>
+            <UiText text={label} />
+          </label>
+          <Select
+            id={`article-${key}`}
+            name={`article-${key}`}
+            label={label}
+            programOptions
+            disabled={disabled}
+            value={
+              settings[key] == null
+                ? "inherit"
+                : settings[key]
+                  ? "show"
+                  : "hide"
+            }
+            options={[
+              { value: "inherit", label: "继承主题" },
+              { value: "show", label: "显示" },
+              { value: "hide", label: "隐藏" },
+            ]}
+            onValueChange={(value) =>
+              update({ [key]: value === "inherit" ? null : value === "show" })
+            }
+          />
+        </div>
+      ))}
+      <Button
+        className={styles.cover}
+        disabled={disabled}
+        onClick={() => setPicker(true)}
+      >
+        {preview ? (
+          <MediaPreview url={preview} kind="image" label="本文分享图片" />
+        ) : (
+          <>
+            <Icon name="image" />
+            <UiText text="选择本文分享图" />
+          </>
+        )}
+      </Button>
+      {imageId && (
+        <Button
+          className="admin-button"
+          disabled={disabled}
+          onClick={() => update({ share_image_media_id: null })}
+        >
+          <UiText text="移除本文分享图" />
+        </Button>
+      )}
+      {picker && (
+        <EditorMediaDialog
+          kind="image"
+          onClose={() => setPicker(false)}
+          onPick={(item) => {
+            if (disabled) return;
+            onMedia(item);
+            update({ share_image_media_id: item.id.replace(/^media:/, "") });
+          }}
+        />
+      )}
+    </Panel>
+  );
+}
+
 /** UI panels are compiled registrations; backend declares supported IDs only. */
 const panels: Readonly<Record<string, ComponentType<PanelProps>>> =
   Object.freeze({
@@ -454,17 +579,29 @@ const panels: Readonly<Record<string, ComponentType<PanelProps>>> =
     glossary: GlossaryPanel,
     captcha: CaptchaPanel,
     seo: SeoPanel,
+    article_overrides: ArticleOverridesPanel,
   });
 export function EditorPanels({
   fields,
   onChange,
+  newArticleDefaults,
   ...props
 }: Omit<PanelProps, "settings" | "update" | "updateFields"> & {
   onChange: (fields: DraftFields) => void;
+  newArticleDefaults?: EditorCatalog | null;
 }) {
-  const settings = fields.settings ?? {};
+  const rawSettings = fields.settings ?? {};
+  const settings = newArticleDefaults
+    ? {
+        comments_open: newArticleDefaults.default_article_comments ?? true,
+        categories: newArticleDefaults.default_article_category
+          ? [newArticleDefaults.default_article_category]
+          : [],
+        ...rawSettings,
+      }
+    : rawSettings;
   const update = (patch: Partial<EditorSettings>) =>
-    onChange({ ...fields, settings: { ...settings, ...patch } });
+    onChange({ ...fields, settings: { ...rawSettings, ...patch } });
   return (
     <aside className={styles.sidebar} aria-label="内容属性">
       {(
@@ -483,7 +620,9 @@ export function EditorPanels({
               ? ["publication", "access", "captcha", "opening"]
               : id === "discussion"
                 ? ["discussion", "glossary"]
-                : [id],
+                : id === "seo" && props.type.id === "article"
+                  ? ["article_overrides", "seo"]
+                  : [id],
         )
         .filter((id, index, all) => all.indexOf(id) === index)
         .map((id) => {

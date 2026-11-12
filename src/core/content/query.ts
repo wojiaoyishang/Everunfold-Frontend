@@ -1,4 +1,4 @@
-import type { Content, PublicSnapshot, Taxonomy } from "./types";
+import type { Content, PublicSnapshot, Site, Taxonomy } from "./types";
 import { normalizePath } from "./urls";
 import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";
 
@@ -88,16 +88,72 @@ export function pageNumber(value: string | string[] | undefined): number {
     : 1;
 }
 
+type DatePreferences = NonNullable<
+  NonNullable<Site["settings"]>["site"]["reading"]
+>;
+
+export function siteDateParts(value: string, preferences?: DatePreferences) {
+  const timeZone = preferences?.time_zone ?? "Asia/Shanghai";
+  const options = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  } as const;
+  let formatter: Intl.DateTimeFormat;
+  try {
+    formatter = new Intl.DateTimeFormat("en-GB", { ...options, timeZone });
+  } catch {
+    formatter = new Intl.DateTimeFormat("en-GB", {
+      ...options,
+      timeZone: "UTC",
+    });
+  }
+  return Object.fromEntries(
+    formatter
+      .formatToParts(new Date(value))
+      .map((part) => [part.type, part.value]),
+  );
+}
+
 export function displayDate(
   value: string,
   detailed = false,
   locale = "zh-CN",
+  preferences?: DatePreferences,
 ): string {
-  return new Intl.DateTimeFormat(locale, {
-    timeZone: "Asia/Shanghai",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    ...(detailed ? { hour: "2-digit", minute: "2-digit", hour12: false } : {}),
-  }).format(new Date(value));
+  const format = preferences?.date_format;
+  if (!format || format === "localized") {
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      ...(detailed
+        ? { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }
+        : {}),
+    } as const;
+    try {
+      return new Intl.DateTimeFormat(locale, {
+        ...options,
+        timeZone: preferences?.time_zone ?? "Asia/Shanghai",
+      }).format(new Date(value));
+    } catch {
+      return new Intl.DateTimeFormat(locale, {
+        ...options,
+        timeZone: "UTC",
+      }).format(new Date(value));
+    }
+  }
+  const { year, month, day, hour, minute } = siteDateParts(value, preferences);
+  const date =
+    format === "ymd-dash"
+      ? `${year}-${month}-${day}`
+      : format === "dmy"
+        ? `${day}/${month}/${year}`
+        : format === "mdy"
+          ? `${month}/${day}/${year}`
+          : `${year}/${month}/${day}`;
+  return detailed ? `${date} ${hour}:${minute}` : date;
 }

@@ -1,8 +1,12 @@
-import { UiText } from "@/core/i18n/provider";
+import { ArticleAgeNotice } from "./article-age-notice";
 import { AppLink as Link } from "./navigation-link";
 import type { ContentMetadata } from "@/core/content/types";
 import type { ContentFeatures } from "@/core/rendering/features/model";
-import { displayDate } from "@/core/content/query";
+import {
+  ArticleAfterword,
+  articleDisplay as resolveDisplay,
+  readingMinutes,
+} from "./article-reading";
 import { taxonomyHref } from "@/core/content/urls";
 import { StaticContentMarkup } from "./content-markup-static";
 import {
@@ -38,8 +42,13 @@ export function ArticleCard({
   articleDisplay,
   code,
 }: ArticleCardProps) {
+  const display = resolveDisplay(content, articleDisplay);
   return (
-    <article className="surface article-card" lang={content.language}>
+    <article
+      className="surface article-card"
+      lang={content.language}
+      data-article-layout={content.article_layout}
+    >
       <ServerThemeSlot
         theme={theme}
         name="article.header.before"
@@ -51,7 +60,8 @@ export function ArticleCard({
         content={content}
         interactive={interactive}
         liveMetrics={interactive}
-        display={articleDisplay}
+        display={display}
+        minutes={readingMinutes(rendered.html, display)}
       />
       <ServerThemeSlot
         theme={theme}
@@ -70,7 +80,7 @@ export function ArticleCard({
         rendered={rendered}
         interactive={interactive}
         glossary={glossary}
-        articleDisplay={articleDisplay}
+        articleDisplay={display}
         code={code}
       />
       <ServerThemeSlot
@@ -92,6 +102,7 @@ export function ArticleBody({
 }: ArticleCardProps) {
   return (
     <div className="article-body">
+      <ArticleAgeNotice content={content} display={articleDisplay} />
       <ArticleMedia enabled={content.show_image_viewer !== false}>
         <StaticContentMarkup
           className="article-content"
@@ -103,27 +114,27 @@ export function ArticleBody({
           code={code}
         />
       </ArticleMedia>
-      <footer className="article-footer">
-        <div className="article-tags">
-          {content.tags.map((tag) => (
-            <Link key={tag.id} href={taxonomyHref(tag)}>
-              <Icon name="tag" />
-              {tag.name}
-            </Link>
-          ))}
-        </div>
-        <p>
-          <UiText text="最后更新于" />{" "}
-          <time dateTime={content.updated_at}>
-            {displayDate(content.updated_at)}
-          </time>
-        </p>
-      </footer>
+      <ArticleAfterword content={content} display={articleDisplay} />
+      {content.tags.length > 0 && (
+        <footer className="article-footer">
+          <div className="article-tags">
+            {content.tags.map((tag) => (
+              <Link key={tag.id} href={taxonomyHref(tag)}>
+                <Icon name="tag" />
+                {tag.name}
+              </Link>
+            ))}
+          </div>
+        </footer>
+      )}
       {interactive && articleDisplay?.show_share !== false && (
         <ArticleActions
           path={content.path}
           title={content.title}
-          commentsOpen={content.comments_open ?? true}
+          commentsOpen={
+            articleDisplay?.show_comments !== false &&
+            (content.comments_open ?? true)
+          }
         />
       )}
     </div>

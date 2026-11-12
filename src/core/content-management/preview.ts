@@ -48,7 +48,15 @@ export function previewContent(draft: DraftDetail, terms: Taxonomy[]): Content {
     published_at:
       settings?.display_published_at || draft.published_at || draft.created_at,
     updated_at: draft.updated_at,
-    author: draft.author,
+    author: settings?.byline?.trim() || draft.author,
+    article_layout: settings?.article_layout,
+    show_toc: settings?.show_toc,
+    show_share: settings?.show_share,
+    show_related: settings?.show_related,
+    show_afterword: settings?.show_afterword,
+    share_image_url: settings?.share_image_media_id
+      ? media[settings.share_image_media_id]?.original
+      : undefined,
     cover_url: cover ? (media[cover]?.original ?? null) : null,
     reading_minutes: Math.max(1, Math.ceil(length / 400)),
     word_count: length,

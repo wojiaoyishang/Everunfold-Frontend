@@ -1,7 +1,7 @@
 import { UiText } from "@/core/i18n/provider";
 import { AppLink as Link } from "./navigation-link";
 import type { PublicSnapshot } from "@/core/content/types";
-import { displayDate } from "@/core/content/query";
+import { displayDate, siteDateParts } from "@/core/content/query";
 import { PagePresentation } from "./route-state";
 import { Icon } from "./icon";
 import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";
@@ -10,9 +10,14 @@ export function Archives({ snapshot }: { snapshot: PublicSnapshot }) {
   const articles = languageContents(snapshot.contents, snapshotLocale(snapshot))
     .filter((entry) => entry.kind === "article")
     .sort((a, b) => Date.parse(b.published_at) - Date.parse(a.published_at));
+  const reading = snapshot.site.settings?.site.reading;
   const groups = new Map<string, typeof articles>();
   for (const article of articles) {
-    const month = displayDate(article.published_at).slice(0, 7);
+    const { year, month: number } = siteDateParts(
+      article.published_at,
+      reading,
+    );
+    const month = `${year}/${number}`;
     const group = groups.get(month) ?? [];
     group.push(article);
     groups.set(month, group);
@@ -43,7 +48,12 @@ export function Archives({ snapshot }: { snapshot: PublicSnapshot }) {
               {entries.map((article) => (
                 <li key={article.id}>
                   <time dateTime={article.published_at}>
-                    {displayDate(article.published_at).slice(5)}
+                    {displayDate(
+                      article.published_at,
+                      false,
+                      snapshotLocale(snapshot),
+                      reading,
+                    )}
                   </time>
                   <Link href={article.path} expectedContent>
                     {article.title}

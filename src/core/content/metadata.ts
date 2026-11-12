@@ -25,7 +25,9 @@ export function contentMetadata(
   const cover =
     content.access === "public"
       ? resourceUrl(
-          content.cover_url || discoverySettings(site ?? {}).share_image,
+          content.share_image_url ||
+            content.cover_url ||
+            discoverySettings(site ?? {}).share_image,
         )
       : null;
   const image =

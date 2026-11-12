@@ -89,6 +89,10 @@ export function useRouteState() {
   return value;
 }
 
+export function useSiteReadingPreferences() {
+  return useContext(RouteContext)?.site.settings?.site.reading;
+}
+
 /** Bridge per-page server data into the persistent sidebar after its route commits. */
 export function PagePresentation({
   site,

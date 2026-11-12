@@ -1,3 +1,4 @@
+import { displayDate } from "@/core/content/query";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { readConfiguration } from "@/core/config/server";
 import { normalizeCatalog } from "@/core/i18n/catalog";
@@ -51,7 +52,12 @@ export async function feedResponse(request: Request, format: "rss" | "atom") {
       items: entries.map((item) => ({
         title: item.title,
         href: item.path,
-        meta: new Date(item.published_at).toLocaleDateString("zh-CN"),
+        meta: displayDate(
+          item.published_at,
+          false,
+          item.language,
+          snapshot.site.settings?.site.reading,
+        ),
         summary: item.excerpt,
         tags: item.categories.map((term) => term.name),
       })),

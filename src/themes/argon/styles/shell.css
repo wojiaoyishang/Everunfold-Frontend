@@ -235,3 +235,11 @@ html[data-theme="dark"] .theme-moon {
 .main-column {
   min-width: 0;
 }
+
+.site-brand-logo {
+  flex: none;
+  inline-size: 32px;
+  block-size: 32px;
+  margin-inline-end: 0.5rem;
+  object-fit: contain;
+}

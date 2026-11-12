@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import type { Content, PublicSnapshot, Site } from "@/core/content/types";
 import { normalizeCatalog } from "@/core/i18n/catalog";
+import { readingPage } from "@/core/pages/reading-pages";
 import { pageLanguages } from "@/core/pages/languages";
 import { registeredPageLanguages } from "@/core/pages/registered-languages";
 import { hasPageImplementation } from "@/core/pages/registry";
@@ -11,6 +12,7 @@ export function discoverySettings(site: Pick<Site, "settings">) {
     sitemap_enabled: true,
     feeds_enabled: true,
     feed_limit: 30,
+    feed_content: "excerpt" as const,
     structured_data: true,
     share_image: "",
     google_verification: "",
@@ -51,12 +53,16 @@ export function sitemapEntries(
   if (!sitemapEnabled(site)) return [];
   const catalog = normalizeCatalog(site.settings?.site.language_catalog);
   const absolute = (path: string) => new URL(path, origin).href;
+  const homePages = new Set<string>();
   const homes = catalog.languages
     .filter((language) => language.enabled)
-    .map((language) => ({
-      language: language.code,
-      path: language.prefix || "/",
-    }));
+    .flatMap((language) => {
+      const page = readingPage(snapshot, "home_page_id", language.code);
+      if (page) homePages.add(page.id);
+      return indexable(site, page)
+        ? [{ language: language.code, path: language.prefix || "/" }]
+        : [];
+    });
   const languages = (items: { language: string; path: string }[]) =>
     Object.fromEntries(
       items.map((item) => [item.language, absolute(item.path)]),
@@ -81,7 +87,10 @@ export function sitemapEntries(
     });
   const pages = (snapshot.pages ?? []).filter(
     (page) =>
-      indexable(site, page) && page.enabled && hasPageImplementation(page),
+      indexable(site, page) &&
+      !homePages.has(page.id) &&
+      page.enabled &&
+      hasPageImplementation(page),
   );
   const allowedPages = new Set(pages.map((page) => page.id));
   const occupied = new Set(
