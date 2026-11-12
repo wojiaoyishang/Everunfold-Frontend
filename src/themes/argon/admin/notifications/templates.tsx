@@ -12,6 +12,11 @@ import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { useLanguageCatalog, UiText, useT } from "@/core/i18n/provider";
 import { useNotificationState } from "@/core/notifications/use-notifications";
+import {
+  escapeHtml,
+  interpolateEmail,
+  renderEmailCanvas,
+} from "@/core/notifications/email-canvas";
 import { Button, TextField } from "../../components/ui/primitives";
 import {
   CodeEditor,
@@ -23,9 +28,12 @@ import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { SettingsLayout } from "../settings/section-navigation";
+import { MailBrandDialog } from "./mail-brand";
+import { VisualEmailEditor } from "./visual-email-editor";
 import {
   NotificationVariableValues,
-  notificationSampleValues,
+  templateSampleValues,
+  variableLabels,
 } from "./variable-values";
 import styles from "./notifications.module.css";
 
@@ -33,32 +41,10 @@ type DraftMap = Record<string, SaveNotificationTemplate>;
 
 const textLanguage: Extension = [];
 const emailHtmlLanguage = htmlLanguage();
+const emptySiteVariables: Record<string, string> = {};
 
 function identity(event: string, platform: string, locale: string) {
   return `${event}\0${platform}\0${locale}`;
-}
-
-function interpolate(value: string, values: Record<string, string>) {
-  return value.replace(
-    /\{\{\s*([a-zA-Z_][a-zA-Z0-9_.]*)\s*\}\}/g,
-    (_match, key: string) => values[key] ?? "",
-  );
-}
-
-function escapeHtml(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-function interpolateHtml(value: string, values: Record<string, string>) {
-  return value.replace(
-    /\{\{\s*([a-zA-Z_][a-zA-Z0-9_.]*)\s*\}\}/g,
-    (_match, key: string) => escapeHtml(values[key] ?? ""),
-  );
 }
 
 function plainToEmailHtml(value: string) {
@@ -68,11 +54,6 @@ function plainToEmailHtml(value: string) {
       (paragraph) => `<p>${escapeHtml(paragraph).replaceAll("\n", "<br>")}</p>`,
     )
     .join("\n");
-}
-
-function htmlPreviewDocument(value: string, values?: Record<string, string>) {
-  const body = values ? interpolateHtml(value, values) : value;
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>body{margin:0;padding:14px;color:#20252d;background:#fff;font:14px/1.7 system-ui,sans-serif}img{max-width:100%;height:auto}table{max-width:100%;border-collapse:collapse}td,th{padding:6px 8px}</style></head><body>${body}</body></html>`;
 }
 
 function draftFrom(view: NotificationTemplateView): SaveNotificationTemplate {
@@ -134,10 +115,19 @@ export function NotificationTemplatesPage() {
   const [eventType, setEventType] = useState("");
   const [platformId, setPlatformId] = useState("in-app");
   const [locale, setLocale] = useState("");
-  const [htmlView, setHtmlView] = useState<"visual" | "source">("visual");
-  const [previewValues, setPreviewValues] = useState<Record<string, string>>({
-    ...notificationSampleValues,
-  });
+  const [htmlView, setHtmlView] = useState<"visual" | "source" | "text">(
+    "visual",
+  );
+  const [previewMode, setPreviewMode] = useState<"html" | "no-icon" | "text">(
+    "html",
+  );
+  const [sampleOverrides, setSampleOverrides] = useState<
+    Record<string, string>
+  >({});
+  const [insertTarget, setInsertTarget] = useState<"subject" | "body">("body");
+  const [brandOpen, setBrandOpen] = useState(false);
+  const brandTrigger = useRef<HTMLButtonElement>(null);
+  const subjectField = useRef<HTMLInputElement>(null);
   const bodyEditor = useRef<SourceEditorHandle | null>(null);
   const [draftStore, setDraftStore] = useState<{
     revision: number;
@@ -166,6 +156,23 @@ export function NotificationTemplatesPage() {
   const key = identity(selectedEvent, selectedPlatform, selectedLocale);
   const draft = drafts[key] ?? (view ? draftFrom(view) : null);
   const event = editor.state?.events.find((item) => item.id === selectedEvent);
+  const isEmail = selectedPlatform === "email";
+  const security = selectedEvent === "security.email_verification";
+  const site = editor.state?.site_variables ?? emptySiteVariables;
+  const emailVariables = isEmail ? (editor.state?.email_variables ?? []) : [];
+  const variables = [...(event?.variables ?? []), ...emailVariables];
+  const previewValues = useMemo(
+    () => ({
+      ...templateSampleValues(
+        selectedPlatform,
+        selectedEvent,
+        selectedLocale,
+        site,
+      ),
+      ...sampleOverrides,
+    }),
+    [selectedPlatform, selectedEvent, selectedLocale, site, sampleOverrides],
+  );
   const languageOptions = useMemo(
     () =>
       catalog.languages
@@ -189,8 +196,22 @@ export function NotificationTemplatesPage() {
       draft.html_enabled !== view.html_enabled ||
       draft.enabled !== view.enabled)
   );
-  const activeBodyMode =
-    selectedPlatform === "email" && draft?.html_enabled ? "html" : "text";
+  const htmlEnabled = isEmail && !!draft?.html_enabled;
+  const activeBodyMode = htmlEnabled && htmlView !== "text" ? "html" : "text";
+  const showHtmlPreview = htmlEnabled && previewMode !== "text";
+  const sourceHtml = draft?.html ?? "";
+  const canvas = useMemo(
+    () =>
+      htmlEnabled
+        ? renderEmailCanvas(
+            sourceHtml,
+            previewMode === "no-icon"
+              ? { ...previewValues, "site.icon_url": "" }
+              : previewValues,
+          )
+        : null,
+    [htmlEnabled, sourceHtml, previewMode, previewValues],
+  );
   const update = (patch: Partial<SaveNotificationTemplate>) => {
     if (!draft) return;
     setDraftStore((current) => ({
@@ -238,14 +259,30 @@ export function NotificationTemplatesPage() {
   const appendVariable = (variable: string) => {
     if (!draft) return;
     const token = `{{${variable}}}`;
+    if (insertTarget === "subject" && subjectField.current) {
+      const input = subjectField.current;
+      const { selectionStart, selectionEnd, value } = input;
+      const start = selectionStart ?? value.length;
+      const end = selectionEnd ?? value.length;
+      const subject = value.slice(0, start) + token + value.slice(end);
+      if (subject.length > input.maxLength) return;
+      update({ subject });
+      requestAnimationFrame(() => {
+        input.focus();
+        input.setSelectionRange(start + token.length, start + token.length);
+      });
+      return;
+    }
     const target = bodyEditor.current;
     if (target) {
       target.insert(token);
       target.focus();
       return;
     }
-    if (activeBodyMode === "html") update({ html: (draft.html ?? "") + token });
-    else update({ text: (draft.text ?? "") + (draft.text ? " " : "") + token });
+    if (activeBodyMode === "html") {
+      update({ html: `${draft.html ?? ""}\n<p>${token}</p>` });
+    } else
+      update({ text: (draft.text ?? "") + (draft.text ? " " : "") + token });
   };
   const setHtmlEnabled = (enabled: boolean) => {
     setHtmlView("visual");
@@ -263,16 +300,48 @@ export function NotificationTemplatesPage() {
         title="通知模板"
         description="正文使用代码编辑器；邮件可编辑 HTML 并保留纯文本回退，变量只做安全插值，不执行模板代码。"
         action={
-          <Button
-            className="admin-button"
-            disabled={editor.loading || editor.busy}
-            onClick={() => void editor.reload()}
-          >
-            <Icon name="refresh" />
-            <UiText text="重新读取" />
-          </Button>
+          <div className={styles.sectionActions}>
+            {editor.state && (
+              <Button
+                ref={brandTrigger}
+                className="admin-button"
+                disabled={!editable || editor.busy}
+                onClick={() => {
+                  editor.clearMessage();
+                  setBrandOpen(true);
+                }}
+              >
+                <Icon name="mail" />
+                <UiText text="邮件品牌" />
+              </Button>
+            )}
+            <Button
+              className="admin-button"
+              disabled={editor.loading || editor.busy}
+              onClick={() => void editor.reload()}
+            >
+              <Icon name="refresh" />
+              <UiText text="重新读取" />
+            </Button>
+          </div>
         }
       />
+      {brandOpen && editor.state && (
+        <MailBrandDialog
+          brand={editor.state.mail_brand}
+          site={site}
+          busy={editor.busy}
+          error={editor.error}
+          returnFocus={brandTrigger}
+          onClose={() => setBrandOpen(false)}
+          onSave={async (brand) => {
+            const revision = await editor.saveBrand(brand);
+            if (!revision) return false;
+            setDraftStore({ revision, values: drafts });
+            return true;
+          }}
+        />
+      )}
       {editor.loading && !editor.state ? (
         <div className="admin-settings-loading" role="status">
           <UiText text="正在读取通知模板…" />
@@ -284,7 +353,7 @@ export function NotificationTemplatesPage() {
         </div>
       ) : (
         <div className={styles.workspace}>
-          {editor.error && (
+          {editor.error && !brandOpen && (
             <div className={styles.message} data-error="true" role="alert">
               <Icon name="warning" />
               <UiText text={editor.error} />
@@ -337,6 +406,11 @@ export function NotificationTemplatesPage() {
               <UiText text="纯文本正文必须包含验证码变量；启用 HTML 时，HTML 正文也必须包含验证码变量。验证码不能放在主题或 HTML 属性中。" />
             </p>
           )}
+          {isEmail && !site.url && (
+            <p className={styles.message}>
+              <UiText text="请在邮件品牌中填写公开站点地址，邮件才能包含站内操作链接。预览使用示例地址。" />
+            </p>
+          )}
           {!view || !draft || !event ? (
             <div className={styles.message} data-error="true">
               <Icon name="warning" />
@@ -373,9 +447,12 @@ export function NotificationTemplatesPage() {
                     <label className={styles.toolbarField}>
                       <UiText text="主题" />
                       <TextField
+                        ref={subjectField}
                         value={draft.subject ?? ""}
                         maxLength={300}
-                        placeholder="通知主题"
+                        placeholder={t("通知主题")}
+                        disabled={!editable || editor.busy}
+                        onFocus={() => setInsertTarget("subject")}
                         onChange={(input) =>
                           update({ subject: input.target.value })
                         }
@@ -383,6 +460,7 @@ export function NotificationTemplatesPage() {
                     </label>
                     <div
                       className={`${styles.toolbarField} ${styles.bodyEditor}`}
+                      onFocusCapture={() => setInsertTarget("body")}
                     >
                       <div className={styles.bodyEditorHeading}>
                         <span>
@@ -401,7 +479,7 @@ export function NotificationTemplatesPage() {
                                 onCheckedChange={setHtmlEnabled}
                               />
                             </label>
-                            {activeBodyMode === "html" && (
+                            {htmlEnabled && (
                               <div
                                 className={styles.bodyModeTabs}
                                 role="tablist"
@@ -429,17 +507,29 @@ export function NotificationTemplatesPage() {
                                   <Icon name="code" />
                                   <UiText text="HTML 源码" />
                                 </Button>
+                                <Button
+                                  role="tab"
+                                  aria-selected={htmlView === "text"}
+                                  data-current={
+                                    htmlView === "text" || undefined
+                                  }
+                                  onClick={() => setHtmlView("text")}
+                                >
+                                  <UiText text="纯文本" />
+                                </Button>
                               </div>
                             )}
                           </div>
                         )}
                       </div>
-                      {activeBodyMode === "html" && htmlView === "visual" ? (
-                        <iframe
-                          className={styles.previewFrame}
-                          title={t("HTML 正文可视化")}
-                          sandbox=""
-                          srcDoc={htmlPreviewDocument(draft.html ?? "")}
+                      {activeBodyMode === "html" &&
+                      htmlView === "visual" &&
+                      canvas ? (
+                        <VisualEmailEditor
+                          canvas={canvas}
+                          source={sourceHtml}
+                          disabled={!editable || editor.busy}
+                          onChange={(html) => update({ html })}
                         />
                       ) : (
                         <CodeEditor
@@ -472,19 +562,46 @@ export function NotificationTemplatesPage() {
                     </div>
                     <div>
                       <p className={styles.muted}>
-                        <UiText text="可用变量" />
+                        <UiText
+                          text={
+                            insertTarget === "subject"
+                              ? "插入变量到主题"
+                              : "插入变量到正文"
+                          }
+                        />
                       </p>
-                      <div className={styles.variables}>
-                        {event.variables.map((variable) => (
-                          <Button
-                            key={variable}
-                            disabled={!editable || editor.busy}
-                            onClick={() => appendVariable(variable)}
-                          >
-                            {`{{${variable}}}`}
-                          </Button>
-                        ))}
-                      </div>
+                      {[
+                        { label: "事件变量", keys: event.variables },
+                        { label: "通用邮件变量", keys: emailVariables },
+                      ].map(({ label, keys }) =>
+                        keys.length ? (
+                          <div key={label} className={styles.variableGroup}>
+                            <small className={styles.muted}>
+                              <UiText text={label} />
+                            </small>
+                            <div className={styles.variables}>
+                              {keys.map((variable) => (
+                                <Button
+                                  key={variable}
+                                  title={t(
+                                    variableLabels[variable] ?? variable,
+                                  )}
+                                  disabled={
+                                    !editable ||
+                                    editor.busy ||
+                                    (security &&
+                                      insertTarget === "subject" &&
+                                      variable === "verification.code")
+                                  }
+                                  onClick={() => appendVariable(variable)}
+                                >
+                                  {`{{${variable}}}`}
+                                </Button>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null,
+                      )}
                     </div>
                   </section>
                   <section className={styles.panel}>
@@ -492,30 +609,50 @@ export function NotificationTemplatesPage() {
                       <h2>
                         <UiText text="安全预览" />
                       </h2>
-                      <span>
-                        {currentLanguage?.label ?? selectedLocale}
-                        {selectedPlatform === "email"
-                          ? ` · ${activeBodyMode === "html" ? "HTML" : "纯文本"}`
-                          : ""}
-                      </span>
+                      {htmlEnabled && (
+                        <div
+                          className={`${styles.previewControls} ${styles.variables}`}
+                        >
+                          {(
+                            [
+                              ["html", "HTML"],
+                              ["no-icon", "无图标"],
+                              ["text", "纯文本"],
+                            ] as const
+                          ).map(([mode, label]) => (
+                            <Button
+                              key={mode}
+                              aria-pressed={previewMode === mode}
+                              onClick={() => setPreviewMode(mode)}
+                            >
+                              <UiText text={label} />
+                            </Button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className={styles.previewSubject}>
-                      {interpolate(draft.subject ?? "", previewValues) ||
+                      {interpolateEmail(draft.subject ?? "", previewValues) ||
                         t("未填写主题")}
                     </div>
-                    {activeBodyMode === "html" ? (
-                      <iframe
-                        className={styles.previewFrame}
-                        title={t("HTML 通知安全预览")}
-                        sandbox=""
-                        srcDoc={htmlPreviewDocument(
-                          draft.html ?? "",
-                          previewValues,
-                        )}
-                      />
+                    {showHtmlPreview && canvas ? (
+                      <>
+                        {!site.support_url &&
+                          sourceHtml.includes("site.support_url") && (
+                            <small className={styles.muted}>
+                              <UiText text="帮助链接预览使用示例地址，可在邮件品牌中设置实际地址。" />
+                            </small>
+                          )}
+                        <iframe
+                          className={styles.previewFrame}
+                          title={t("HTML 通知安全预览")}
+                          sandbox=""
+                          srcDoc={canvas.document}
+                        />
+                      </>
                     ) : (
                       <pre className={styles.previewBody}>
-                        {interpolate(draft.text ?? "", previewValues) ||
+                        {interpolateEmail(draft.text ?? "", previewValues) ||
                           t("未填写正文")}
                       </pre>
                     )}
@@ -568,17 +705,15 @@ export function NotificationTemplatesPage() {
                       </h3>
                     </div>
                     <NotificationVariableValues
-                      variables={event.variables}
+                      variables={variables}
                       values={previewValues}
                       onChange={(variable, value) =>
-                        setPreviewValues((current) => ({
+                        setSampleOverrides((current) => ({
                           ...current,
                           [variable]: value,
                         }))
                       }
-                      onReset={() =>
-                        setPreviewValues({ ...notificationSampleValues })
-                      }
+                      onReset={() => setSampleOverrides({})}
                     />
                   </section>
                 </aside>
@@ -590,9 +725,23 @@ export function NotificationTemplatesPage() {
                   />
                 </span>
                 <div className={styles.sectionActions}>
+                  {view.builtin && (
+                    <Button
+                      className="admin-button"
+                      disabled={!editable || dirty || editor.busy}
+                      onClick={() => {
+                        if (!view.builtin) return;
+                        update(view.builtin);
+                        setHtmlView("visual");
+                        setPreviewMode("html");
+                      }}
+                    >
+                      <UiText text="载入新版到草稿" />
+                    </Button>
+                  )}
                   <Button
                     className="admin-button"
-                    disabled={!view.custom || editor.busy}
+                    disabled={!editable || !view.custom || editor.busy}
                     onClick={() => void save(true)}
                   >
                     <Icon name="undo" />

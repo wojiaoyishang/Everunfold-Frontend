@@ -1211,3 +1211,38 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.brandFields {
+  display: grid;
+  gap: 12px;
+}
+.variableGroup {
+  display: grid;
+  gap: 6px;
+}
+.variableGroup + .variableGroup {
+  margin-top: 12px;
+}
+.previewControls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+}
+.previewControls button[aria-pressed="true"] {
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+
+.visualEditor {
+  display: grid;
+  gap: 8px;
+}
+.visualToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}

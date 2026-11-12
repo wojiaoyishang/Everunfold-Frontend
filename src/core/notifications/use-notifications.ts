@@ -5,9 +5,11 @@ import {
   markNotificationsRead,
   readNotificationInbox,
   readNotificationState,
+  saveMailBrand,
   saveNotificationRoutes,
   saveNotificationTemplate,
   type NotificationInbox,
+  type MailBrand,
   type NotificationRouteInput,
   type NotificationState,
   type SaveNotificationTemplate,
@@ -119,6 +121,34 @@ export function useNotificationState() {
     }
   };
 
+  const saveBrand = async (brand: MailBrand) => {
+    if (!state || busy) return false;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const response = await saveMailBrand(
+        baseUrl,
+        { expected_revision: state.revision, brand },
+        csrfToken,
+      );
+      setState(response.data);
+      setMessage("邮件品牌已保存。");
+      return response.data.revision;
+    } catch (reason) {
+      setError(
+        failureMessage(
+          reason,
+          "邮件品牌已在其他窗口修改，请重新读取。",
+          "请输入完整的 HTTP(S) 地址和六位十六进制颜色。",
+        ),
+      );
+      return false;
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return {
     state,
     loading,
@@ -128,6 +158,7 @@ export function useNotificationState() {
     reload,
     saveRoutes,
     saveTemplate,
+    saveBrand,
     clearMessage: () => {
       setError("");
       setMessage("");

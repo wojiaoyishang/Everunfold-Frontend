@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[站点邮件品牌与评论审核确认](decisions/0122-branded-mail-and-comment-confirmation.md)说明内置样式、HTML 可视化编辑和邮件内审核入口。
+
 [邮箱验证与访问策略](development/accounts.md#资料与账号安全)、[ADR0120](decisions/0120-account-email-ownership-and-access-policy.md)：账号中心在同一弹窗确认发信状态并重发，后台分离站点认证策略和用户邮箱审核权限。
 
 [共享伪终端日志](handoff/task-terminal-log-verification.md)：运行记录、手动任务和邮件测试统一使用深色伪终端；日志按序号升序、最新在底部，按阶段/请求/响应/警告/错误/终态着色。自动跟随与复制位于标题栏，日志区超过360px后在终端内部滚动；展开日志时暂停外层执行列表刷新。
