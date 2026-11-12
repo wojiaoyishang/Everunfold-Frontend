@@ -70,6 +70,7 @@
   box-shadow: 0 0 0 2px #3fb9502e;
 }
 .terminal {
+  margin-top: 16px;
   overflow: hidden;
   border: 1px solid #30363d;
   border-radius: 7px;

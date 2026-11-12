@@ -124,6 +124,13 @@
   border-bottom: 1px solid var(--line);
   padding-bottom: 18px;
 }
+.retainedRun {
+  margin-bottom: 18px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+}
 .run:last-child {
   border-bottom: 0;
   padding-bottom: 0;

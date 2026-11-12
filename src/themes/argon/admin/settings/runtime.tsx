@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   readRuntime,
   controlRuntime,
@@ -16,6 +16,7 @@ import { AdminPageHeading } from "../components/page-heading";
 import { ConnectedTaskProgress } from "../components/task-progress";
 import { ManualWorkerTaskDialog } from "./manual-worker-task";
 import styles from "./runtime.module.css";
+type RuntimeRun = RuntimeOverview["runs"][number];
 const labels: Record<string, string> = {
   online: "在线",
   stale: "心跳过期",
@@ -37,6 +38,14 @@ const date = (value: string | number | null | undefined) =>
         typeof value === "number" ? value * 1000 : value,
       ).toLocaleString()
     : "—";
+const RuntimeTaskProgress = memo(function RuntimeTaskProgress({
+  id,
+}: {
+  id: string;
+}) {
+  return <ConnectedTaskProgress identity={{ resource: "runtime", id }} />;
+});
+
 export function RuntimePage() {
   const { baseUrl, csrfToken } = useAdminRequest();
   const writable = can(useAdminAccount(), "settings:write");
@@ -44,7 +53,7 @@ export function RuntimePage() {
     [error, setError] = useState(""),
     [busy, setBusy] = useState("");
   const [tab, setTab] = useState("概览");
-  const [selectedRun, setSelectedRun] = useState<string | null>(null);
+  const [selectedRun, setSelectedRun] = useState<RuntimeRun | null>(null);
   const [manualOpen, setManualOpen] = useState(false);
   const serial = useRef(0);
   const refresh = useCallback(
@@ -68,14 +77,21 @@ export function RuntimePage() {
     queueMicrotask(() => {
       if (!controller.signal.aborted) void refresh(controller.signal);
     });
-    const timer = setInterval(() => {
+    return () => {
+      controller.abort();
+    };
+  }, [refresh]);
+  useEffect(() => {
+    if (tab === "执行记录" && selectedRun) return;
+    const controller = new AbortController();
+    const timer = window.setInterval(() => {
       if (!document.hidden) void refresh(controller.signal);
     }, 5000);
     return () => {
       controller.abort();
-      clearInterval(timer);
+      window.clearInterval(timer);
     };
-  }, [refresh]);
+  }, [refresh, selectedRun, tab]);
   const control = async (task_id: string, action: RuntimeCommand["action"]) => {
     if (busy) return;
     setBusy(task_id);
@@ -320,6 +336,47 @@ export function RuntimePage() {
               <h2>
                 <UiText text="最近 100 次执行" />
               </h2>
+              {selectedRun &&
+                !data.runs.some((run) => run.id === selectedRun.id) && (
+                  <div className={`${styles.run} ${styles.retainedRun}`}>
+                    <article className={styles.plan}>
+                      <div>
+                        <strong>
+                          {data.plans.find(
+                            (plan) => plan.id === selectedRun.task_id,
+                          )?.title ?? selectedRun.task_id}
+                        </strong>
+                        <small>
+                          {date(
+                            selectedRun.started_at ?? selectedRun.planned_at,
+                          )}{" "}
+                          · {selectedRun.id.slice(0, 8)}
+                        </small>
+                        <p>
+                          <UiText text="此执行已移出最近 100 条，当前查看保持展开。" />
+                        </p>
+                      </div>
+                      <div className={styles.actions}>
+                        <span data-state={selectedRun.status}>
+                          <UiText
+                            text={
+                              labels[selectedRun.status] ?? selectedRun.status
+                            }
+                          />
+                        </span>
+                        <Button
+                          className="admin-button"
+                          aria-expanded={true}
+                          onClick={() => setSelectedRun(null)}
+                        >
+                          <Icon name="activity" />
+                          <UiText text="收起进度" />
+                        </Button>
+                      </div>
+                    </article>
+                    <RuntimeTaskProgress id={selectedRun.id} />
+                  </div>
+                )}
               {!data.runs.length && (
                 <p>
                   <UiText text="暂无执行记录" />
@@ -345,27 +402,24 @@ export function RuntimePage() {
                       </span>
                       <Button
                         className="admin-button"
-                        aria-expanded={selectedRun === run.id}
+                        aria-expanded={selectedRun?.id === run.id}
                         onClick={() =>
                           setSelectedRun((current) =>
-                            current === run.id ? null : run.id,
+                            current?.id === run.id ? null : run,
                           )
                         }
                       >
                         <Icon name="activity" />
                         <UiText
                           text={
-                            selectedRun === run.id ? "收起进度" : "查看进度"
+                            selectedRun?.id === run.id ? "收起进度" : "查看进度"
                           }
                         />
                       </Button>
                     </div>
                   </article>
-                  {selectedRun === run.id && (
-                    <ConnectedTaskProgress
-                      key={run.id}
-                      identity={{ resource: "runtime", id: run.id }}
-                    />
+                  {selectedRun?.id === run.id && (
+                    <RuntimeTaskProgress id={run.id} />
                   )}
                 </div>
               ))}
@@ -387,7 +441,7 @@ export function RuntimePage() {
             const selected =
               runs.find((run) => ["queued", "running"].includes(run.status)) ??
               runs[0];
-            setSelectedRun(selected?.id ?? null);
+            setSelectedRun(selected ?? null);
           }}
         />
       )}
