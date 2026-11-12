@@ -146,11 +146,12 @@ export function NotificationTemplatesPage() {
   const drafts =
     draftStore.revision === editor.state?.revision ? draftStore.values : {};
   const selectedEvent = eventType || editor.state?.events[0]?.id || "";
-  const selectedPlatform = editor.state?.platforms.some(
-    (item) => item.id === platformId,
-  )
-    ? platformId
-    : (editor.state?.platforms[0]?.id ?? "in-app");
+  const selectedPlatform =
+    selectedEvent === "security.email_verification"
+      ? "email"
+      : editor.state?.platforms.some((item) => item.id === platformId)
+        ? platformId
+        : (editor.state?.platforms[0]?.id ?? "in-app");
   const selectedLocale = locale || catalog.default_code;
   const view = useMemo(
     () =>
@@ -323,10 +324,19 @@ export function NotificationTemplatesPage() {
             </label>
           </div>
           <PlatformTabs
-            platforms={editor.state.platforms}
+            platforms={
+              selectedEvent === "security.email_verification"
+                ? editor.state.platforms.filter((item) => item.id === "email")
+                : editor.state.platforms
+            }
             selected={selectedPlatform}
             onSelect={setPlatformId}
           />
+          {selectedEvent === "security.email_verification" && (
+            <p className={styles.message}>
+              <UiText text="纯文本正文必须包含验证码变量；启用 HTML 时，HTML 正文也必须包含验证码变量。验证码不能放在主题或 HTML 属性中。" />
+            </p>
+          )}
           {!view || !draft || !event ? (
             <div className={styles.message} data-error="true">
               <Icon name="warning" />

@@ -6,6 +6,8 @@ import { Icon } from "../../components/icon";
 import styles from "./notifications.module.css";
 
 export const notificationSampleValues: Record<string, string> = {
+  "verification.code": "123456",
+  "verification.expires_minutes": "15",
   "actor.name": "小灵",
   "content.excerpt": "这是一条刚刚提交、正在等待审核的评论。",
   "content.title": "如何在秋日整理一间安静的书房",

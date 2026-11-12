@@ -374,23 +374,27 @@ export function NotificationPolicyPage() {
             </div>
           )}
           <div className={styles.eventGrid}>
-            {editor.state.events.map((event) => (
-              <EventRoutes
-                key={event.id}
-                event={event}
-                routes={drafts.filter((route) => route.event_type === event.id)}
-                platforms={platformOptions}
-                permissionOptions={permissionOptions}
-                mailProfiles={mailProfiles}
-                editable={editable && !editor.busy}
-                onChange={(eventRoutes) => {
-                  const others = drafts.filter(
-                    (route) => route.event_type !== event.id,
-                  );
-                  change([...others, ...eventRoutes]);
-                }}
-              />
-            ))}
+            {editor.state.events
+              .filter((event) => event.id !== "security.email_verification")
+              .map((event) => (
+                <EventRoutes
+                  key={event.id}
+                  event={event}
+                  routes={drafts.filter(
+                    (route) => route.event_type === event.id,
+                  )}
+                  platforms={platformOptions}
+                  permissionOptions={permissionOptions}
+                  mailProfiles={mailProfiles}
+                  editable={editable && !editor.busy}
+                  onChange={(eventRoutes) => {
+                    const others = drafts.filter(
+                      (route) => route.event_type !== event.id,
+                    );
+                    change([...others, ...eventRoutes]);
+                  }}
+                />
+              ))}
           </div>
           <div className={styles.savebar}>
             <span>

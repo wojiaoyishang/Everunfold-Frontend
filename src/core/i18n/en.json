@@ -409,6 +409,8 @@
   "已登录，昵称已自动填写为": "Signed in. Your nickname is filled in as",
   "；邮箱和网站无需重复填写。": ". You do not need to enter an email or website again.",
   "验证邮箱": "Verify email",
+  "向用户发送邮箱验证验证码。": "Send an email verification code to the user.",
+  "纯文本正文必须包含验证码变量；启用 HTML 时，HTML 正文也必须包含验证码变量。验证码不能放在主题或 HTML 属性中。": "The plain text body must include the verification code variable. The HTML body must also include it when enabled. Do not place it in the subject or HTML attributes.",
   "已验证": "Verified",
   "未验证": "Unverified",
   "更换邮箱": "Change email",
