@@ -4,6 +4,7 @@ import { normalizeCatalog } from "@/core/i18n/catalog";
 import { pageLanguages } from "@/core/pages/languages";
 import { registeredPageLanguages } from "@/core/pages/registered-languages";
 import { hasPageImplementation } from "@/core/pages/registry";
+import { SITEMAP_XML_PATH, sitemapEnabled } from "./sitemap-paths";
 
 export function discoverySettings(site: Pick<Site, "settings">) {
   return {
@@ -47,7 +48,7 @@ export function sitemapEntries(
   origin: string,
 ): MetadataRoute.Sitemap {
   const { site } = snapshot;
-  if (!indexable(site) || !discoverySettings(site).sitemap_enabled) return [];
+  if (!sitemapEnabled(site)) return [];
   const catalog = normalizeCatalog(site.settings?.site.language_catalog);
   const absolute = (path: string) => new URL(path, origin).href;
   const homes = catalog.languages
@@ -142,8 +143,8 @@ export function robotsRules(site: Site, origin?: string): MetadataRoute.Robots {
         "/reference/",
       ],
     },
-    ...(origin && indexable(site) && discoverySettings(site).sitemap_enabled
-      ? { sitemap: discoveryXmlUrl("/sitemap.xml", origin) }
+    ...(origin && sitemapEnabled(site)
+      ? { sitemap: new URL(SITEMAP_XML_PATH, origin).href }
       : {}),
   };
 }

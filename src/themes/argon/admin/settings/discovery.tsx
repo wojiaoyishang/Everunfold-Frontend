@@ -5,6 +5,10 @@ import { useSettingsEditor } from "@/core/settings/editor";
 import { SettingsSection, SettingsText, SettingsToggle } from "./shared";
 import { TextField, TextLink } from "../../components/ui/primitives";
 import type { SearchDiscovery } from "@/core/contracts/settings";
+import {
+  SITEMAP_PREVIEW_PATH,
+  SITEMAP_XML_PATH,
+} from "@/core/seo/sitemap-paths";
 export function DiscoverySettings() {
   const { draft, setDraft } = useSettingsEditor();
   const countId = useId();
@@ -63,7 +67,14 @@ export function DiscoverySettings() {
         </div>
         <div className="admin-settings-actions">
           <TextLink
-            href="/sitemap.xml"
+            href={SITEMAP_PREVIEW_PATH}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <UiText text="查看站点地图" /> ↗
+          </TextLink>
+          <TextLink
+            href={SITEMAP_XML_PATH}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -84,7 +95,7 @@ export function DiscoverySettings() {
           </TextLink>
         </div>
         <small>
-          <UiText text="保存并同步后生效。上述地址使用部署配置中的站点域名；站点地图需要在搜索引擎站长平台提交。" />
+          <UiText text="保存并同步后，robots.txt 会公布启用的站点地图 XML 地址。" />
         </small>
       </SettingsSection>
       <SettingsSection

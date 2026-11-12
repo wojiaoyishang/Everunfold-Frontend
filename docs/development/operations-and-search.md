@@ -47,7 +47,7 @@ Comment 以 content_id/page_id 二选一关联原文。历史评论保持身份�
 
 | 设置或入口                              | 行为                                                                    |
 | --------------------------------------- | ----------------------------------------------------------------------- |
-| site.allow_indexing                     | 全站关闭时输出 noindex, follow 和相应 X-Robots-Tag；地图为空、订阅404   |
+| site.allow_indexing                     | 全站关闭时输出 noindex, follow 和相应 X-Robots-Tag；地图和订阅返回 404 |
 | site.discovery.sitemap_enabled          | 默认开启；/sitemap.xml 包含语言首页、文章、说说和有可用实现的启用页面   |
 | site.discovery.feeds_enabled            | 默认开启；/feed.xml 为 RSS 2.0，/atom.xml 为 Atom                       |
 | site.discovery.feed_limit               | 默认30，允许1至100；按发布时间倒序输出标题、摘要、原文链接              |
@@ -64,9 +64,9 @@ canonical、站点地图和分享地址使用前端服务端部署配置 publicS
 
 ### 浏览器阅读视图与机器响应
 
-`/sitemap.xml`、`/feed.xml` 和 `/atom.xml` 使用同一地址做保守内容协商。普通浏览器页面导航且接受 `text/html` 时，收到无 JavaScript 的代码编辑器式阅读页，可直接浏览公开地址或最近内容；RSS/Atom 阅读器、已知爬虫、`Accept` 不包含 HTML 的请求继续收到原有标准 XML。Googlebot 等已知爬虫即使同时接受 HTML 也优先返回 XML。
+`/sitemap.xml` 固定返回标准 XML，`robots.txt` 公布同一地址。启用地图且配置公开站点地址后，读者可从页脚「站点地图」或后台「站点地图与订阅」打开 `/sitemap.xml/preview`。阅读页保留响应式列表、时间、语言和原始 XML 链接，并标记 `noindex, follow`。两份输出使用相同的公开内容过滤规则。详见 [ADR0121](../decisions/0121-separate-sitemap-preview-and-xml.md)。
 
-原始 XML 可通过 `?format=xml` 强制读取；例如 `/feed.xml?format=xml`。浏览器说明页按钮链接到该地址。机器响应不增加登录、脚本或重定向。两个响应都声明`Vary: Accept, Sec-Fetch-Dest, User-Agent`，避免共享缓存把 HTML 与 XML 混用。HTML 视图使用`noindex, follow`，不改变站点正文的索引策略。
+`/feed.xml` 和 `/atom.xml` 继续按请求头区分浏览器阅读页和机器 XML；`?format=xml` 可显式读取 XML。订阅响应声明 `Vary: Accept, Sec-Fetch-Dest, User-Agent`。旧站点地图的 `?format=xml` 仍可用，`?format=html` 跳转到阅读页。
 
 站点地图由 Route Handler 输出，并保持`urlset`、`url/loc`、`lastmod`、`xhtml:link`等标准字段；RSS/Atom 的 XML 生成器、稳定 ID、语言过滤和转义逻辑保持不变。直接读取`robots.txt`仍使用标准纯文本。
 

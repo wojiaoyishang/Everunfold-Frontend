@@ -1748,3 +1748,15 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/handoff/task-terminal-log-verification.md` | `task-terminal-log-verification-3` | `a52d24b7fa5480ba21806811a24cc613cabc776017455f1953eac386a94e0b84` |
 | `docs/design/task-log-terminal.png` | `task-log-terminal-3` | `1262e775b4a5672e1c9db8fd9305541a33c785df41500bf1a959c030f839a60b` |
 | `docs/design/task-log-terminal-mobile.png` | `task-log-terminal-mobile-3` | `182a44c1599ab231869765f10f52c5be8eb339036db437238e9fcddeb07b3135` |
+
+## 站点地图 XML 与阅读页分离（2026-11-12）
+
+前端站点地图采用固定 XML 地址和独立阅读页。后端同步公共说明，原始基线与业务契约不变。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-sitemap-xml-and-preview-1` | `29f4ee471bdc6cd2a144cd17a674cf6a4fa005be1554123972c4508755821dff` |
+| `docs/decisions/0119-discovery-documents-for-browsers-and-crawlers.md` | `ADR0119-2` | `8dcc50005a21b6132334ab34584320ec081c6cbeaed47426331208aa41e93142` |
+| `docs/decisions/0121-separate-sitemap-preview-and-xml.md` | `ADR0121-1` | `0d85baa2b7c294bf01962d09d02635d82ab024836f27b24b59dbb02678e538fc` |
+| `docs/development/operations-and-search.md` | `operations-sitemap-xml-and-preview-1` | `49e620c4e31a1df131c5f435a2cad17167491010361b8c1cbbbd1c973b4cb82b` |
+| `docs/development/settings.md` | `settings-sitemap-xml-and-preview-1` | `8563d2e325e9290ecdf05bdfbe1812c7e917212091925a6a31cd94ba01735920` |

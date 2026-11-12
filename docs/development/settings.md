@@ -116,4 +116,4 @@ settings.directory/
 
 ## 搜索发现设置（2026-11-09）
 
-settings 1.17.0新增site.discovery：站点地图、RSS/Atom、条数、分享图、JSON-LD与Google/Bing站长验证。站点设置新增两组表单及快速导航；全站关闭收录时地图为空、订阅404，同时页面输出noindex, follow。文章/说说新增单篇allow_indexing，页面沿用原值。配置使用原revision保存、审计和可靠投递；升级前端接收器契约后再同步。具体字段、默认值和边界见[运营与搜索指南](operations-and-search.md)。
+settings 1.17.0新增site.discovery：站点地图、RSS/Atom、条数、分享图、JSON-LD与Google/Bing站长验证。站点设置新增两组表单及快速导航；全站关闭收录时地图和订阅返回404，同时页面输出noindex, follow。文章/说说新增单篇allow_indexing，页面沿用原值。配置使用原revision保存、审计和可靠投递；升级前端接收器契约后再同步。具体字段、默认值和边界见[运营与搜索指南](operations-and-search.md)。

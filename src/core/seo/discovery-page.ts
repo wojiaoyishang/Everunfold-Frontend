@@ -1,3 +1,5 @@
+import { SITEMAP_PREVIEW_PATH } from "./sitemap-paths";
+
 export type DiscoveryPageKind = "sitemap" | "rss" | "atom";
 
 export type DiscoveryPageItem = {
@@ -79,7 +81,7 @@ export function renderDiscoveryPage(input: DiscoveryPageInput) {
       kicker: "sitemap",
       title: "站点地图",
       description:
-        "公开可访问的页面、文章与说说。机器请求仍读取同一地址的标准 XML。",
+        "浏览公开的页面、文章与说说，或打开供搜索引擎读取的 XML 文件。",
       collection: "公开地址",
       empty: "当前没有可公开列出的地址。",
     },
@@ -101,6 +103,7 @@ export function renderDiscoveryPage(input: DiscoveryPageInput) {
     },
   }[input.kind];
   const items = input.items.slice(0, 100);
+  const ready = (input.status ?? 200) === 200;
   const rows = items
     .map(
       (item, index) => `
@@ -124,7 +127,7 @@ export function renderDiscoveryPage(input: DiscoveryPageInput) {
     ? `?language=${encodeURIComponent(input.language)}`
     : "";
   const tabs = [
-    { kind: "sitemap", file: "sitemap.xml", href: "/sitemap.xml" },
+    { kind: "sitemap", file: "sitemap.xml", href: SITEMAP_PREVIEW_PATH },
     {
       kind: "rss",
       file: "feed.xml",
@@ -165,7 +168,7 @@ export function renderDiscoveryPage(input: DiscoveryPageInput) {
   <header class="appbar">
     <div class="appbar-inner">
       <a class="brand" href="/"><span class="brand-mark">E</span><span class="brand-site">${escapeHtml(input.siteName)}</span><span class="brand-separator">/</span><span class="brand-file">${escapeHtml(rawPath.replace(/^[/]/, ""))}</span></a>
-      <nav class="top-actions" aria-label="站点与原始文件"><a href="/">站点</a><a href="${escapeHtml(input.rawHref)}">原始 XML</a></nav>
+      <nav class="top-actions" aria-label="站点与原始文件"><a href="/">站点</a>${ready ? `<a href="${escapeHtml(input.rawHref)}">原始 XML</a>` : ""}</nav>
     </div>
   </header>
   <main class="shell">
@@ -180,7 +183,7 @@ export function renderDiscoveryPage(input: DiscoveryPageInput) {
     <section class="pane">
       <header class="pane-head">
         <div><p class="eyebrow">${escapeHtml(meta.kicker)}</p><h1>${escapeHtml(meta.title)}</h1><p>${escapeHtml(meta.description)}</p></div>
-        <div class="buttons"><a class="button" href="/">返回站点</a><a class="button" data-primary href="${escapeHtml(input.rawHref)}">查看原始 XML</a></div>
+        <div class="buttons"><a class="button" href="/">返回站点</a>${ready ? `<a class="button" data-primary href="${escapeHtml(input.rawHref)}">查看原始 XML</a>` : ""}</div>
       </header>
       <div class="meta-bar">
         <div class="meta-item"><span>entries</span><strong>${input.items.length}</strong></div>
@@ -188,9 +191,9 @@ export function renderDiscoveryPage(input: DiscoveryPageInput) {
         <div class="meta-item"><span>updated</span><strong>${escapeHtml(formattedDate(input.updatedAt) || "—")}</strong></div>
         <div class="meta-item"><span>format</span><strong>XML</strong></div>
       </div>
-      <div class="file-head"><strong>${escapeHtml(meta.collection)}</strong><code>${escapeHtml(rawPath)}</code></div>
+      <div class="file-head"><strong>${escapeHtml(meta.collection)}${input.items.length > items.length ? ` · 显示前 ${items.length} 条` : ""}</strong><code>${escapeHtml(rawPath)}</code></div>
       ${rows ? `<ol class="entries">${rows}</ol>` : `<p class="empty">${escapeHtml(input.emptyMessage || meta.empty)}</p>`}
-      <footer class="statusbar"><span class="ready">XML ready</span><span>UTF-8</span><span>noindex</span><span class="push">crawlers receive standard XML</span></footer>
+      <footer class="statusbar"><span class="${ready ? "ready" : ""}">${ready ? "XML ready" : "XML unavailable"}</span><span>UTF-8</span><span>noindex</span></footer>
     </section>
   </main>
 </body>
@@ -206,7 +209,9 @@ export function discoveryPageResponse(input: DiscoveryPageInput) {
       "Content-Security-Policy":
         "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
       "Referrer-Policy": "no-referrer",
-      Vary: "Accept, Sec-Fetch-Dest, User-Agent",
+      ...(input.kind === "sitemap"
+        ? {}
+        : { Vary: "Accept, Sec-Fetch-Dest, User-Agent" }),
       "X-Content-Type-Options": "nosniff",
       "X-Robots-Tag": "noindex, follow",
     },

@@ -2,6 +2,7 @@ import type { PublicSnapshot as StoredSnapshot } from "@/core/contracts/public";
 
 import type { CachePolicy, PublicSettings } from "@/core/contracts/settings";
 export type Site = StoredSnapshot["site"] & {
+  sitemapPreviewPath?: string;
   locale?: string;
   contentLocales?: Record<string, string>;
   contentTranslations?: Record<

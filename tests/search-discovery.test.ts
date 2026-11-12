@@ -67,10 +67,7 @@ test("sitemap excludes restricted and noindex pages and their alternate links", 
     },
   ];
   const map = sitemapEntries(data, origin);
-  assert.equal(
-    robotsRules(data.site, origin).sitemap,
-    origin + "/sitemap.xml?format=xml",
-  );
+  assert.equal(robotsRules(data.site, origin).sitemap, origin + "/sitemap.xml");
   assert.ok(map.some((item) => item.url === origin + "/page"));
   assert.ok(!map.some((item) => /second|secret|hidden/.test(item.url)));
   assert.ok(!JSON.stringify(map).includes("second.html"));
@@ -110,7 +107,7 @@ test("browser discovery view is used only for real page navigation", () => {
   assert.equal(browserDiscoveryRequested(browser), true);
   assert.equal(
     browserDiscoveryRequested(
-      new Request(origin + "/sitemap.xml", {
+      new Request(origin + "/feed.xml", {
         headers: {
           Accept: "text/html",
           "User-Agent": "Mozilla/5.0 Safari/605.1.15",
@@ -134,7 +131,7 @@ test("browser discovery view is used only for real page navigation", () => {
     );
   }
   assert.equal(
-    browserDiscoveryRequested(new Request(origin + "/sitemap.xml?format=html")),
+    browserDiscoveryRequested(new Request(origin + "/feed.xml?format=html")),
     true,
   );
   assert.equal(

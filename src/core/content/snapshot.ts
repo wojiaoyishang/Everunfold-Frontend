@@ -9,6 +9,7 @@ import { readConfiguration } from "@/core/config/server";
 import type { PublicSnapshot } from "./types";
 import { parsePublicSnapshot } from "./validation";
 import { FileContentStore } from "@/server/content/store";
+import { SITEMAP_PREVIEW_PATH, sitemapEnabled } from "@/core/seo/sitemap-paths";
 
 export class SnapshotUnavailable extends Error {
   constructor() {
@@ -76,6 +77,10 @@ export const readPublicSnapshot = cache(async (): Promise<PublicSnapshot> => {
               }
             : {}),
           ...(applied.policy ? { cachePolicy: applied.policy } : {}),
+          ...(configuration.publicSiteUrl &&
+          sitemapEnabled({ settings: value ?? snapshot.site.settings })
+            ? { sitemapPreviewPath: SITEMAP_PREVIEW_PATH }
+            : {}),
         },
       };
     } finally {
