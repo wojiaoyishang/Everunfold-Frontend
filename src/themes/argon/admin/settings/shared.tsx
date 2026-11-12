@@ -107,11 +107,13 @@ export function SettingsToggle({
   hint,
   value,
   onChange,
+  disabled,
 }: {
   label: string;
   hint?: string;
   value: boolean;
   onChange: (value: boolean) => void;
+  disabled?: boolean;
 }) {
   const id = useId();
   return (
@@ -126,7 +128,12 @@ export function SettingsToggle({
           </small>
         )}
       </div>
-      <Switch checked={value} onCheckedChange={onChange} aria-labelledby={id} />
+      <Switch
+        checked={value}
+        onCheckedChange={onChange}
+        disabled={disabled}
+        aria-labelledby={id}
+      />
     </div>
   );
 }

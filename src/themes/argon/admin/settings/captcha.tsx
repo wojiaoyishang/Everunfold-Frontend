@@ -15,6 +15,7 @@ import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
 import { SettingsSection, SettingsToggle } from "./shared";
 import { UnsavedAccountChanges } from "../../account/unsaved";
+import { AccountCaptchaSection } from "./account-captcha";
 import styles from "./captcha.module.css";
 
 const contentTypes = [
@@ -25,7 +26,9 @@ const contentTypes = [
 export function CaptchaSettingsPanel({ trailing }: { trailing?: ReactNode }) {
   const t = useT();
   const editor = useCaptchaSettings();
-  const editable = can(useAdminAccount(), "settings:write");
+  const user = useAdminAccount();
+  const editable = can(user, "settings:write");
+  const canManageAccess = can(user, "access:manage");
   const id = useId();
   const { draft, saved } = editor;
   const provider = draft?.provider ?? "local";
@@ -157,6 +160,16 @@ export function CaptchaSettingsPanel({ trailing }: { trailing?: ReactNode }) {
                   </>
                 )}
               </SettingsSection>
+              <AccountCaptchaSection
+                rules={draft.rules}
+                disabled={!canManageAccess}
+                onChange={(action, value) =>
+                  editor.setDraft({
+                    ...draft,
+                    rules: { ...draft.rules, [action]: value },
+                  })
+                }
+              />
               {(["read", "comment"] as const).map((action) => (
                 <SettingsSection
                   key={action}

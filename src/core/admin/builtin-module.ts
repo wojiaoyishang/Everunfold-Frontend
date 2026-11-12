@@ -105,6 +105,7 @@ export const builtinAdminModule = {
       label: "访问与安全",
       description: "登录验证与认证邮件",
       icon: "lock",
+      matchesChild: (path: string) => path === "/admin/access/captcha",
       menu: { group: "core.people", order: 30 },
     },
     {

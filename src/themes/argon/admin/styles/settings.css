@@ -75,6 +75,16 @@
   gap: 8px;
   min-width: 0;
 }
+.admin-access-select {
+  inline-size: min(100%, 18rem);
+  min-inline-size: 0;
+}
+.admin-settings-link {
+  justify-self: start;
+  color: var(--admin-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
 .admin-settings-field > label,
 .admin-settings-toggle label {
   font-size: 13px;
