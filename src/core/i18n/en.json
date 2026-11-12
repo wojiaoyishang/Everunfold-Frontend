@@ -88,6 +88,8 @@
   "退出登录": "Sign out",
   "登录": "Sign in",
   "用户名": "Username",
+  "用户名或邮箱": "Username or email",
+  "输入用户名或已验证邮箱": "Enter your username or verified email",
   "密码": "Password",
   "固定链接：": "Permalink:",
   "正文": "Content",

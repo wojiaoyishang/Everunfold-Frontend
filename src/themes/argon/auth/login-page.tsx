@@ -122,7 +122,7 @@ export function LoginPage({
         />
       ) : (
         <Form className="login-form" onSubmit={submit} aria-busy={busy}>
-          <FormField id="login-username" label="用户名" icon="user">
+          <FormField id="login-username" label="用户名或邮箱" icon="user">
             <TextField
               id="login-username"
               name="username"
@@ -130,11 +130,11 @@ export function LoginPage({
               autoCapitalize="none"
               spellCheck={false}
               required
-              maxLength={64}
+              maxLength={254}
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               disabled={busy}
-              placeholder="输入用户名"
+              placeholder="输入用户名或已验证邮箱"
             />
           </FormField>
           <FormField
