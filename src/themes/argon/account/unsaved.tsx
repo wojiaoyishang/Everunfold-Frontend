@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { useEditorNavigation } from "@/core/content-management/use-editor-navigation";
 import { ConfirmDialog } from "../components/ui/confirm-dialog";
 import { isEmbeddedEditor } from "@/core/preview/bridge";
@@ -20,6 +21,18 @@ interface AccountNavigation {
 }
 const AccountNavigationContext = createContext<AccountNavigation | null>(null);
 
+function navigateAfterDiscard(
+  router: ReturnType<typeof useRouter>,
+  href: string,
+) {
+  const target = new URL(href, location.href);
+  if (target.origin !== location.origin) {
+    location.assign(target.href);
+    return;
+  }
+  router.push(`${target.pathname}${target.search}${target.hash}`);
+}
+
 export function useAccountNavigation() {
   return useContext(AccountNavigationContext);
 }
@@ -30,6 +43,7 @@ export function AccountNavigationProvider({
 }: {
   children: ReactNode;
 }) {
+  const router = useRouter();
   const [changes, setChanges] = useState(new Map<symbol, Changes>());
   const [pending, setPending] = useState<(() => void) | null>(null);
   const dirty = [...changes.values()].some((value) => value.dirty);
@@ -51,8 +65,8 @@ export function AccountNavigationProvider({
     [dirty, busy],
   );
   const navigate = useCallback(
-    (href: string) => request(() => location.assign(href)),
-    [request],
+    (href: string) => request(() => navigateAfterDiscard(router, href)),
+    [request, router],
   );
   useEditorNavigation(dirty, busy, navigate);
   return (
@@ -106,6 +120,7 @@ function ScopedAccountChanges({
 }
 
 function StandaloneChanges({ dirty, busy }: Changes) {
+  const router = useRouter();
   const [destination, setDestination] = useState("");
   const confirmedLeave = useRef(false);
   const request = useCallback((href: string) => setDestination(href), []);
@@ -128,7 +143,7 @@ function StandaloneChanges({ dirty, busy }: Changes) {
       onConfirm={() => true}
       onConfirmed={() => {
         confirmedLeave.current = true;
-        location.assign(destination);
+        navigateAfterDiscard(router, destination);
       }}
     />
   );
