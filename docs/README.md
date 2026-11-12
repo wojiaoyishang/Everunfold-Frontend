@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[共享伪终端日志](handoff/task-terminal-log-verification.md)：运行记录、手动任务和邮件测试统一使用深色伪终端；日志按序号升序、最新在底部，按阶段/请求/响应/警告/错误着色，默认自动跟随并允许用户上滚暂停。
+
 [放弃修改后的客户端导航](handoff/unsaved-leave-client-navigation-verification.md)：未保存确认退场后，同源站内目标使用 Next.js 客户端导航，不再刷新整页；跨域目标保留浏览器文档导航。账号中心与普通后台页面共用该规则。
 
 [站点地图与订阅浏览器视图](handoff/discovery-browser-view-verification.md)、[ADR0119](decisions/0119-discovery-documents-for-browsers-and-crawlers.md)：`/sitemap.xml`、`/feed.xml`、`/atom.xml` 对普通浏览器显示无脚本的响应式阅读页，对 RSS 阅读器和已知爬虫继续返回标准 XML；`?format=xml` 可强制读取原始文件。通知平台菜单改用独立发送图标。

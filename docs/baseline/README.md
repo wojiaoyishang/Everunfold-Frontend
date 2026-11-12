@@ -1736,3 +1736,15 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/development/accounts.md` | `accounts-unsaved-client-navigation-1` | `f18b7327b75844957c0add633286a1e068c3297dd7b62a7e4371f813b940489c` |
 | `docs/development/pages.md` | `pages-unsaved-client-navigation-1` | `a7ed7dd9702138e3491b4c464346828867bef5317ab845256c0a6eae8bdec80d` |
 | `docs/handoff/unsaved-leave-client-navigation-verification.md` | `unsaved-leave-client-navigation-verification-1` | `714b335db55ad8588dc24cc65f603135f848c1b5342d7b1637b3379736b32542` |
+
+## 共享伪终端日志（2026-11-12）
+
+运行记录、手动任务和邮件测试统一使用伪终端日志：按序号升序、最新在底部，分级着色并默认自动跟随；任务成功、失败、取消和未知状态追加为最终日志行。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-task-terminal-log-1` | `eb841d159252fd221f8142dfc0d4b6369c4e3f5fbe311c405ccd32908e24d5d3` |
+| `docs/development/task-progress.md` | `task-progress-2` | `582f12171d27b40f4997c25f55d9a5e734ad844ecd3b8a0156b81a4186e8df7d` |
+| `docs/handoff/task-terminal-log-verification.md` | `task-terminal-log-verification-1` | `f680f455a5ce449ca2aebf8fe1787909ab5c1e0aed48e1d71bc5089162d8658d` |
+| `docs/design/task-log-terminal.png` | `task-log-terminal-1` | `8b9af5db4ec900200a5972389ab267caa8600738dfa03715408bd118fbb564d6` |
+| `docs/design/task-log-terminal-mobile.png` | `task-log-terminal-mobile-1` | `65a015bc73b0488b8788093df565dd3a032fc766242afea72278b4c6e5ef812d` |
