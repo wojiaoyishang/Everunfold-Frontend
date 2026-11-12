@@ -157,24 +157,6 @@ export function CaptchaSettingsPanel({ trailing }: { trailing?: ReactNode }) {
                   </>
                 )}
               </SettingsSection>
-              <SettingsSection
-                id="captcha-login"
-                title="登录验证"
-                description="所有浏览器登录均遵守此规则；已登录的会话继续有效。"
-                group="验证码"
-              >
-                <SettingsToggle
-                  label="登录需要验证码"
-                  hint="在校验账号和密码前完成安全验证。"
-                  value={draft.rules.login ?? false}
-                  onChange={(login) =>
-                    editor.setDraft({
-                      ...draft,
-                      rules: { ...draft.rules, login },
-                    })
-                  }
-                />
-              </SettingsSection>
               {(["read", "comment"] as const).map((action) => (
                 <SettingsSection
                   key={action}

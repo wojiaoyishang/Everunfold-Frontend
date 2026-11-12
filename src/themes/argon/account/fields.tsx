@@ -20,6 +20,7 @@ export function AccountField({
   autoComplete,
   type = "text",
   disabled = false,
+  readOnly = false,
   min,
   max,
   step,
@@ -40,6 +41,7 @@ export function AccountField({
   max?: number;
   step?: number;
   disabled?: boolean;
+  readOnly?: boolean;
   action?: ReactNode;
 }) {
   const id = useId();
@@ -47,6 +49,7 @@ export function AccountField({
     id,
     value,
     disabled,
+    readOnly,
     required,
     minLength,
     maxLength,
@@ -89,10 +92,12 @@ export function ProfileFieldsEditor({
   value,
   onChange,
   emailAction,
+  emailReadOnly = false,
 }: {
   value: ProfileFields;
   onChange: (value: ProfileFields) => void;
   emailAction?: ReactNode;
+  emailReadOnly?: boolean;
 }) {
   const catalog = useLanguageCatalog();
   const change = (field: keyof ProfileFields, next: string) =>
@@ -125,6 +130,7 @@ export function ProfileFieldsEditor({
         hint="邮箱用于接收验证码和通知；修改邮箱后需要重新验证。"
         maxLength={254}
         action={emailAction}
+        readOnly={emailReadOnly}
       />
       <AccountField
         label="个人网站"

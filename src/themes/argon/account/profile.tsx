@@ -136,16 +136,17 @@ export function AccountProfileEditor({
             <ProfileFieldsEditor
               value={value}
               onChange={setValue}
+              emailReadOnly
               emailAction={
                 <EmailVerificationControl
                   email={value.email ?? ""}
-                  verified={
-                    profile.email_verified === true &&
-                    (value.email ?? "") === (profile.email ?? "")
-                  }
+                  source={profile.email_verification_source}
                   disabled={action.busy}
                   onVerified={(updated) => {
-                    setValue(profileFields(updated));
+                    setValue((draft) => ({
+                      ...draft,
+                      email: updated.email ?? "",
+                    }));
                     onSaved(updated);
                   }}
                 />

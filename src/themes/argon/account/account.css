@@ -1158,3 +1158,21 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.account-email-dialog {
+  display: grid;
+  gap: 12px;
+}
+.account-email-dialog p {
+  margin: 0;
+}
+.account-email-dialog-actions,
+.account-email-review {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.account-email-review {
+  margin-top: 12px;
+}

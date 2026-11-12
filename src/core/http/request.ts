@@ -8,6 +8,7 @@ export class RequestError extends Error {
     public readonly kind: RequestFailure,
     public readonly status?: number,
     public readonly code?: number,
+    public readonly retryAfterSeconds?: number,
   ) {
     super(`API request ${kind}`);
     this.name = "RequestError";
@@ -169,7 +170,14 @@ async function sendJSON<T>(
           } catch {
             /* HTTP status remains authoritative without a JSON error body. */
           }
-          throw new RequestError("http", response.status, code);
+          const retry = response.headers.get("Retry-After");
+          const seconds = retry && /^\d+$/.test(retry) ? Number(retry) : NaN;
+          throw new RequestError(
+            "http",
+            response.status,
+            code,
+            Number.isSafeInteger(seconds) ? seconds : undefined,
+          );
         }
         let result: unknown;
         try {

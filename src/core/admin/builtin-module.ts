@@ -100,6 +100,14 @@ export const builtinAdminModule = {
       menu: { group: "core.people", order: 20 },
     },
     {
+      id: "core.access",
+      href: "/admin/access",
+      label: "访问与安全",
+      description: "登录验证与认证邮件",
+      icon: "lock",
+      menu: { group: "core.people", order: 30 },
+    },
+    {
       id: "core.settings.api-keys",
       href: "/admin/settings/api-keys",
       label: "应用程序接入",

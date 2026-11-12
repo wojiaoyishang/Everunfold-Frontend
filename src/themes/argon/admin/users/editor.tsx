@@ -34,6 +34,8 @@ import type { PermissionValues } from "../../account/permissions";
 import { AdminPageHeading } from "../components/page-heading";
 import { UserGrants } from "./grants";
 import { ManagedUserSecurity } from "./security";
+import { ManagedEmailReview } from "./email-review";
+import { can } from "@/core/accounts/permissions";
 import { UserPresetPicker } from "./preset-picker";
 
 export function UserEditor({ id }: { id?: string }) {
@@ -255,6 +257,13 @@ export function UserEditor({ id }: { id?: string }) {
               ) : (
                 <>
                   <ProfileFieldsEditor value={fields} onChange={setFields} />
+                  {saved && can(actor, "users:verify_email") && (
+                    <ManagedEmailReview
+                      profile={saved}
+                      disabled={(fields.email ?? "") !== (saved.email ?? "")}
+                      onReviewed={setSaved}
+                    />
+                  )}
                   <div className="account-field account-user-avatar-select">
                     <span>
                       <UiText text="用户的头像" />
