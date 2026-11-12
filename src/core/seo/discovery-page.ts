@@ -52,11 +52,25 @@ export function browserDiscoveryRequested(request: Request) {
   if (forced === "html") return true;
   const userAgent = request.headers.get("user-agent") ?? "";
   if (CRAWLER.test(userAgent)) return false;
-  const destination = request.headers.get("sec-fetch-dest");
-  const accept = (request.headers.get("accept") ?? "").toLowerCase();
-  return (
-    accept.includes("text/html") && (!destination || destination === "document")
-  );
+  if (request.headers.get("sec-fetch-dest") !== "document") return false;
+  let html = 0;
+  let xml = 0;
+  for (const range of (request.headers.get("accept") ?? "")
+    .toLowerCase()
+    .split(",")) {
+    const [type, ...parameters] = range.split(";").map((part) => part.trim());
+    const weight = parameters.find((part) => part.startsWith("q="));
+    const q = weight ? Number(weight.slice(2)) : 1;
+    if (!(q > 0 && q <= 1)) continue;
+    if (type === "text/html") html = Math.max(html, q);
+    if (
+      type === "text/xml" ||
+      type === "application/xml" ||
+      /^application\/(?:rss|atom)\+xml$/.test(type)
+    )
+      xml = Math.max(xml, q);
+  }
+  return html > xml;
 }
 
 export function renderDiscoveryPage(input: DiscoveryPageInput) {

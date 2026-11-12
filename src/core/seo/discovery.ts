@@ -27,13 +27,19 @@ export function indexable(
     (!item?.access || item.access === "public")
   );
 }
+
+export function discoveryXmlUrl(path: string, origin: string) {
+  const url = new URL(path, origin);
+  url.searchParams.set("format", "xml");
+  return url.href;
+}
 /** Each route's alternates replace the layout's object, so include feed discovery there too. */
 export function feedAlternates(site: Pick<Site, "settings">, origin?: string) {
   if (!origin || !indexable(site) || !discoverySettings(site).feeds_enabled)
     return undefined;
   return {
-    "application/rss+xml": new URL("/feed.xml", origin).href,
-    "application/atom+xml": new URL("/atom.xml", origin).href,
+    "application/rss+xml": discoveryXmlUrl("/feed.xml", origin),
+    "application/atom+xml": discoveryXmlUrl("/atom.xml", origin),
   };
 }
 export function sitemapEntries(
@@ -137,7 +143,7 @@ export function robotsRules(site: Site, origin?: string): MetadataRoute.Robots {
       ],
     },
     ...(origin && indexable(site) && discoverySettings(site).sitemap_enabled
-      ? { sitemap: new URL("/sitemap.xml", origin).href }
+      ? { sitemap: discoveryXmlUrl("/sitemap.xml", origin) }
       : {}),
   };
 }

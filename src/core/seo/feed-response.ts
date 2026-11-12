@@ -17,6 +17,7 @@ export async function feedResponse(request: Request, format: "rss" | "atom") {
   ).languages;
   const headers = {
     "Cache-Control": "no-store",
+    Vary: "Accept, Sec-Fetch-Dest, User-Agent",
     "X-Robots-Tag": "noindex",
     "X-Content-Type-Options": "nosniff",
   };
@@ -65,7 +66,6 @@ export async function feedResponse(request: Request, format: "rss" | "atom") {
   return new Response(buildFeed(snapshot, origin, format, language), {
     headers: {
       ...headers,
-      Vary: "Accept, Sec-Fetch-Dest, User-Agent",
       "Content-Type":
         format === "rss"
           ? "application/rss+xml; charset=utf-8"

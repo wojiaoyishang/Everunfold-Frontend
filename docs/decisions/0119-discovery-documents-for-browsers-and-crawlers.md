@@ -9,8 +9,8 @@
 ## 决定
 
 1. `/sitemap.xml`、`/feed.xml`、`/atom.xml` 同时承担浏览器阅读与机器读取，不建立第二套公开地址。
-2. 只有普通浏览器页面导航、接受`text/html`且 User-Agent 不属于已知爬虫/订阅器时返回 HTML。已知机器人始终优先获得 XML。
-3. `?format=xml`强制返回机器 XML；HTML 页面提供“查看原始 XML”入口。
+2. 未指定格式时，仅在请求标明页面导航（`Sec-Fetch-Dest: document`）、明确优先接受 HTML 且并非已知爬虫时返回 HTML。其余请求默认返回 XML。
+3. `?format=xml`强制返回机器 XML，`?format=html`可直接进入阅读视图。HTML 页面、订阅发现链接和 `robots.txt` 使用显式 XML 链接供程序读取。
 4. XML 与 HTML 响应都声明`Vary: Accept, Sec-Fetch-Dest, User-Agent`，防止共享缓存混用表示。
 5. HTML 页面无客户端脚本、无外部资源，使用克制的代码编辑器布局：文件标签、元数据状态栏、等宽路径与响应式内容行；标题、摘要、路径、语言与更新时间全部重新转义。
 6. HTML 视图使用`noindex, follow`；正文页面索引规则、权限和公开快照不改。
@@ -21,7 +21,7 @@
 
 - 用户可以直接阅读站点地图和订阅内容，不需要查看原始 XML。
 - 爬虫、RSS/Atom 阅读器、curl 等机器客户端保持标准 Content-Type 和 XML 结构。
-- 搜索引擎自动发现链接、robots.txt 中的 sitemap 地址和现有订阅地址都不需要修改。
+- 现有订阅地址继续有效。新发现链接和 sitemap 声明显式选择 XML，程序不必使用特定请求头。
 
 ## 验证
 

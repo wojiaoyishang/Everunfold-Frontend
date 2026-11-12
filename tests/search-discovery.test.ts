@@ -67,6 +67,10 @@ test("sitemap excludes restricted and noindex pages and their alternate links", 
     },
   ];
   const map = sitemapEntries(data, origin);
+  assert.equal(
+    robotsRules(data.site, origin).sitemap,
+    origin + "/sitemap.xml?format=xml",
+  );
   assert.ok(map.some((item) => item.url === origin + "/page"));
   assert.ok(!map.some((item) => /second|secret|hidden/.test(item.url)));
   assert.ok(!JSON.stringify(map).includes("second.html"));
@@ -113,6 +117,24 @@ test("browser discovery view is used only for real page navigation", () => {
         },
       }),
     ),
+    false,
+  );
+  for (const accept of [
+    "text/html;q=0,application/xml",
+    "text/html;q=0.5,application/rss+xml",
+    "*/*",
+  ]) {
+    assert.equal(
+      browserDiscoveryRequested(
+        new Request(origin + "/feed.xml", {
+          headers: { Accept: accept, "Sec-Fetch-Dest": "document" },
+        }),
+      ),
+      false,
+    );
+  }
+  assert.equal(
+    browserDiscoveryRequested(new Request(origin + "/sitemap.xml?format=html")),
     true,
   );
   assert.equal(
@@ -192,6 +214,14 @@ test("feeds use stable identities, escape markup and honor locale and limit", ()
   assert.equal((rss.match(/<item>/g) ?? []).length, 1);
   assert.ok(!buildFeed(data, origin, "rss", "zh-CN").includes("article-2"));
   const atom = buildFeed(data, origin, "atom", "en");
+  assert.match(
+    rss,
+    /href="https:\/\/blog\.example\/feed\.xml\?language=en&amp;format=xml" rel="self"/,
+  );
+  assert.match(
+    atom,
+    /<id>https:\/\/blog\.example\/atom\.xml\?language=en<\/id>/,
+  );
   assert.match(atom, /<updated>2026-10-02T00:00:00Z<\/updated>/);
   data.site.settings.site.discovery.feeds_enabled = false;
   assert.deepEqual(feedItems(data), []);
@@ -213,7 +243,7 @@ test("article metadata honors site and content indexing with safe JSON-LD", () =
   );
   assert.equal(
     metadata.alternates?.types?.["application/rss+xml"],
-    origin + "/feed.xml",
+    origin + "/feed.xml?format=xml",
   );
   assert.equal(metadata.alternates?.canonical, origin + article.path);
   const html = renderToStaticMarkup(
