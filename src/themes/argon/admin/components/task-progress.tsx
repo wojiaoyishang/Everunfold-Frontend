@@ -1,11 +1,12 @@
 "use client";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useTaskProgress,
   type TaskIdentity,
   type TaskMonitor,
 } from "@/core/tasks/use-task-progress";
 import { UiText, useT } from "@/core/i18n/provider";
+import { copyText } from "@/core/browser/clipboard";
 import {
   orderedTaskEvents,
   taskCompletionLog,
@@ -41,6 +42,10 @@ const connections: Record<string, string> = {
   paused: "页面隐藏，监控已暂停",
   stopped: "本次监控已结束",
 };
+const logTime = (value: string | undefined) =>
+  value
+    ? new Date(value).toLocaleTimeString("en-GB", { hour12: false })
+    : "--:--:--";
 export function ConnectedTaskProgress({
   identity,
 }: {
@@ -54,21 +59,44 @@ export function ConnectedTaskProgress({
 export function TaskProgressPanel({ monitor }: { monitor: TaskMonitor }) {
   const { data, events, running, connection, error, truncated, refresh } =
     monitor;
-  const [expanded, setExpanded] = useState(true),
-    [following, setFollowing] = useState(true);
+  const [following, setFollowing] = useState(true);
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
+    "idle",
+  );
   const log = useRef<HTMLDivElement>(null),
-    id = useId(),
     t = useT();
   const orderedEvents = useMemo(() => orderedTaskEvents(events), [events]);
   const completion = taskCompletionLog(data?.state ?? "");
   const followKey = `${orderedEvents.at(-1)?.sequence ?? 0}:${data?.state ?? ""}:${data?.finished_at ?? ""}`;
   useEffect(() => {
-    if (!following || !expanded) return;
+    if (!following) return;
     const frame = requestAnimationFrame(() => {
       if (log.current) log.current.scrollTop = log.current.scrollHeight;
     });
     return () => cancelAnimationFrame(frame);
-  }, [followKey, following, expanded]);
+  }, [followKey, following]);
+  useEffect(() => {
+    if (copyState === "idle") return;
+    const timer = window.setTimeout(() => setCopyState("idle"), 1600);
+    return () => window.clearTimeout(timer);
+  }, [copyState]);
+  const copyLog = async () => {
+    const lines = orderedEvents.map((event) => {
+      const presentation = taskLogPresentation(event);
+      return `${String(event.sequence).padStart(4, "0")}\t${logTime(event.at)}\t${presentation.badge}\t${event.message}`;
+    });
+    if (completion) {
+      lines.push(
+        `END\t${logTime(data?.finished_at ?? data?.updated_at)}\t${completion.badge}\t${completion.message}`,
+      );
+    }
+    try {
+      await copyText(lines.join("\n"));
+      setCopyState("copied");
+    } catch {
+      setCopyState("failed");
+    }
+  };
   const percent = data?.percent;
   const stageText = data
     ? data.stage && data.stage !== data.state
@@ -125,128 +153,129 @@ export function TaskProgressPanel({ monitor }: { monitor: TaskMonitor }) {
       <p className={styles.connection} role="status">
         <UiText text={error || connections[connection]} />
       </p>
-      <div className={styles.logToolbar}>
-        <Button
-          className="admin-button"
-          aria-expanded={expanded}
-          aria-controls={id}
-          onClick={() => setExpanded((value) => !value)}
-        >
-          <Icon name="code" />
-          <UiText text={expanded ? "收起日志" : "查看日志与报文"} />
-          <span className={styles.count}>{orderedEvents.length}</span>
-        </Button>
-        {expanded && (
-          <Button
-            className="admin-button"
-            aria-pressed={following}
-            onClick={() => setFollowing((value) => !value)}
-          >
-            <span
-              className={styles.followIndicator}
-              data-active={following || undefined}
-              aria-hidden="true"
-            />
-            <UiText text={following ? "自动跟随" : "恢复跟随"} />
-          </Button>
-        )}
-      </div>
-      <div id={id} hidden={!expanded}>
-        {truncated && (
-          <p className={styles.connection}>
-            <UiText text="当前显示最近 1000 条日志。" />
-          </p>
-        )}
-        <div className={styles.terminal}>
-          <div className={styles.terminalBar}>
-            <span className={styles.terminalDots} aria-hidden="true">
-              <i />
-              <i />
-              <i />
-            </span>
-            <code>task.log</code>
+      {truncated && (
+        <p className={styles.connection}>
+          <UiText text="当前显示最近 1000 条日志。" />
+        </p>
+      )}
+      <div className={styles.terminal} data-task-terminal="true">
+        <div className={styles.terminalBar} data-task-terminal-titlebar="true">
+          <span className={styles.terminalDots} aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+          <code>task.log</code>
+          <span className={styles.terminalCount}>
+            {orderedEvents.length + (completion ? 1 : 0)}
+          </span>
+          <div className={styles.terminalTools}>
             <span className={styles.terminalState} data-connection={connection}>
               <UiText text={connections[connection]} />
             </span>
-          </div>
-          <div
-            ref={log}
-            className={styles.log}
-            role="log"
-            aria-live="polite"
-            aria-relevant="additions"
-            aria-label={t("任务日志与报文")}
-            tabIndex={0}
-            onScroll={(event) => {
-              const node = event.currentTarget;
-              const nearEnd =
-                node.scrollHeight - node.scrollTop - node.clientHeight < 24;
-              setFollowing(nearEnd);
-            }}
-          >
-            {!orderedEvents.length && (
-              <p className={styles.empty}>
-                <UiText
-                  text={running ? "等待任务写入日志…" : "此任务没有详细日志。"}
-                />
-              </p>
-            )}
-            {orderedEvents.map((event) => {
-              const presentation = taskLogPresentation(event);
-              return (
-                <div
-                  className={styles.entry}
-                  data-tone={presentation.tone}
-                  key={event.sequence}
-                >
-                  <span className={styles.sequence} aria-hidden="true">
-                    {String(event.sequence).padStart(4, "0")}
-                  </span>
-                  <time dateTime={event.at}>
-                    {new Date(event.at).toLocaleTimeString("en-GB", {
-                      hour12: false,
-                    })}
-                  </time>
-                  <span className={styles.level} title={t(presentation.label)}>
-                    {presentation.badge}
-                  </span>
-                  <pre>{event.message}</pre>
-                </div>
-              );
-            })}
-            {completion && (
-              <div
-                className={styles.entry}
-                data-tone={completion.tone}
-                data-task-completion="true"
-              >
-                <span className={styles.sequence} aria-hidden="true">
-                  END
-                </span>
-                <time dateTime={data?.finished_at ?? data?.updated_at}>
-                  {new Date(
-                    data?.finished_at ?? data?.updated_at ?? "",
-                  ).toLocaleTimeString("en-GB", { hour12: false })}
-                </time>
-                <span className={styles.level}>{completion.badge}</span>
-                <pre>{completion.message}</pre>
-              </div>
-            )}
-            {!completion && !!orderedEvents.length && (
-              <div className={styles.prompt} aria-hidden="true">
-                <span>›</span>
-                <span>
-                  <UiText text={running ? "等待新日志" : "任务输出结束"} />
-                </span>
-                {running && <i />}
-              </div>
-            )}
+            <Button
+              className={styles.terminalAction}
+              aria-pressed={following}
+              title={t(following ? "暂停自动跟随" : "恢复自动跟随")}
+              onClick={() => setFollowing((value) => !value)}
+            >
+              <span
+                className={styles.followIndicator}
+                data-active={following || undefined}
+                aria-hidden="true"
+              />
+              <UiText text={following ? "跟随" : "恢复"} />
+            </Button>
+            <Button
+              className={styles.terminalAction}
+              disabled={!orderedEvents.length && !completion}
+              title={t("复制全部日志")}
+              onClick={() => void copyLog()}
+            >
+              <Icon name={copyState === "copied" ? "check" : "copy"} />
+              <UiText
+                text={
+                  copyState === "copied"
+                    ? "已复制"
+                    : copyState === "failed"
+                      ? "复制失败"
+                      : "复制"
+                }
+              />
+            </Button>
           </div>
         </div>
-        <p className={styles.connection}>
-          <UiText text="日志与报文按任务事件顺序记录。" />
-        </p>
+        <div
+          ref={log}
+          className={styles.log}
+          role="log"
+          aria-live="polite"
+          aria-relevant="additions"
+          aria-label={t("任务日志与报文")}
+          tabIndex={0}
+          onScroll={(event) => {
+            const node = event.currentTarget;
+            const nearEnd =
+              node.scrollHeight - node.scrollTop - node.clientHeight < 24;
+            setFollowing(nearEnd);
+          }}
+        >
+          {!orderedEvents.length && (
+            <p className={styles.empty}>
+              <UiText
+                text={running ? "等待任务写入日志…" : "此任务没有详细日志。"}
+              />
+            </p>
+          )}
+          {orderedEvents.map((event) => {
+            const presentation = taskLogPresentation(event);
+            return (
+              <div
+                className={styles.entry}
+                data-tone={presentation.tone}
+                key={event.sequence}
+              >
+                <span className={styles.sequence} aria-hidden="true">
+                  {String(event.sequence).padStart(4, "0")}
+                </span>
+                <time dateTime={event.at}>{logTime(event.at)}</time>
+                <span className={styles.level} title={t(presentation.label)}>
+                  {presentation.badge}
+                </span>
+                <pre>{event.message}</pre>
+              </div>
+            );
+          })}
+          {completion && (
+            <div
+              className={styles.entry}
+              data-tone={completion.tone}
+              data-task-completion="true"
+            >
+              <span className={styles.sequence} aria-hidden="true">
+                END
+              </span>
+              <time dateTime={data?.finished_at ?? data?.updated_at}>
+                {logTime(data?.finished_at ?? data?.updated_at)}
+              </time>
+              <span className={styles.level}>{completion.badge}</span>
+              <pre>{completion.message}</pre>
+            </div>
+          )}
+          {!completion && !!orderedEvents.length && (
+            <div className={styles.prompt} aria-hidden="true">
+              <span>›</span>
+              <span>
+                <UiText text={running ? "等待新日志" : "任务输出结束"} />
+              </span>
+              {running && <i />}
+            </div>
+          )}
+        </div>
       </div>
+      <p className={styles.connection}>
+        <UiText text="日志与报文按任务事件顺序记录。" />
+      </p>
     </section>
   );
 }
