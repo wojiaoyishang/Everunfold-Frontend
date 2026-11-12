@@ -1,6 +1,16 @@
 .admin-settings-page {
   max-width: 1120px;
 }
+.access-invitations {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  list-style: none;
+}
+.access-invitations li {
+  padding: 8px 0;
+  border-top: 1px solid var(--admin-border);
+}
 .admin-settings-section {
   display: block;
   padding: 0;

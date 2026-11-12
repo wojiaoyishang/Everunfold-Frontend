@@ -2,18 +2,18 @@
   "version": 1,
   "contracts": {
     "accounts-v1.schema.json": {
-      "schema_version": "1.7.0",
+      "schema_version": "1.8.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/accounts-v1.schema.json",
-      "source_commit": "b17aeb948486115ef50dbc39e5c67e0ae1508352",
-      "sha256": "049d99233a21841794fe747a1d08fd3dcbf3fd47116440ed6d31e1a18ca206b1"
+      "source_commit": "5131afa388b378b468b5107314864fa10c512f83",
+      "sha256": "294069bc95536df068fb42b975ef5632473eb837adf13a0f5f3fb6c991e933e8"
     },
     "auth-v0.1.schema.json": {
-      "schema_version": "0.4.0",
+      "schema_version": "0.6.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/auth-v0.1.schema.json",
-      "source_commit": "dc169db25dec3549d0002ce6434110e3cfd5094e",
-      "sha256": "8c4fcf48d319ba22c3c4c9ee059e2770133593fa50cc509d9fe871e6d90847e6"
+      "source_commit": "5131afa388b378b468b5107314864fa10c512f83",
+      "sha256": "d79c70aba96cf3c56bdd5be5bef0703cc13bca84c7b4f50d5ff508a60e3047f3"
     },
     "collaboration-v1.schema.json": {
       "schema_version": "2.7.0",
@@ -79,11 +79,11 @@
       "sha256": "c890a9cd75b714ae2ff8741ac52b5ed49c69453acbc486cb189f342d8ea770b3"
     },
     "captcha-v1.schema.json": {
-      "schema_version": "1.6.0",
+      "schema_version": "1.7.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/captcha-v1.schema.json",
-      "source_commit": "b17aeb948486115ef50dbc39e5c67e0ae1508352",
-      "sha256": "e5d3a8266584a35cb797daa7a691ce6d7d8f8304d43f9885fbaf5e04865d7877"
+      "source_commit": "5131afa388b378b468b5107314864fa10c512f83",
+      "sha256": "21b71b02fd808e728bb7c5191e9e5e55116c2e61d110554e7872220c8d862f40"
     },
     "operations-v1.schema.json": {
       "schema_version": "1.0.0",

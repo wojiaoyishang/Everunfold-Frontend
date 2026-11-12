@@ -6,11 +6,17 @@ import { loginDestination } from "@/core/auth/routes";
 import { useSession } from "@/core/auth/use-session";
 import { authFailureMessage, checkedSession } from "@/core/auth/session";
 import { RequestError } from "@/core/http/request";
-import { login } from "@/core/contracts/auth";
+import {
+  completeSecondFactor,
+  login,
+  logout,
+  readRegistrationOptions,
+} from "@/core/contracts/auth";
 import { Icon } from "../components/icon";
 import { Button, Form, TextField } from "../components/ui/primitives";
 import { FormField } from "../components/ui/form-field";
 import { PasswordField } from "../components/ui/password-field";
+import { RouteLink } from "../components/ui/route-link";
 import { ManagementEntry } from "./management-entry";
 import { SessionFeedback } from "./session-feedback";
 import { LoginSuccess } from "./login-success";
@@ -30,16 +36,35 @@ export function LoginPage({
   const captcha = useCaptcha(baseUrl, "login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [secondFactor, setSecondFactor] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [passwordError, setPasswordError] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(false);
   const action = useRef<AbortController | null>(null);
   const passwordField = useRef<HTMLInputElement>(null);
+  const secondFactorField = useRef<HTMLInputElement>(null);
   useEffect(() => () => action.current?.abort(), []);
   useEffect(() => {
     if (!busy && message && passwordError) passwordField.current?.focus();
   }, [busy, message, passwordError]);
   const entering = state.phase === "ready" && state.session.authenticated;
+  const pending = state.phase === "ready" && state.session.mfa_required;
+  useEffect(() => {
+    if (pending && !busy) secondFactorField.current?.focus();
+  }, [busy, pending]);
+  const showLogin = state.phase === "ready" && !entering && !pending;
+  useEffect(() => {
+    if (!showLogin) return;
+    const controller = new AbortController();
+    void readRegistrationOptions(baseUrl, { signal: controller.signal })
+      .then(({ data }) => {
+        if (!controller.signal.aborted)
+          setRegistrationOpen(data.mode !== "closed");
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [baseUrl, showLogin]);
   const destination = loginDestination(
     returnTo,
     state.phase === "ready" && canAccessAdmin(state.session.user),
@@ -68,7 +93,8 @@ export function LoginPage({
         { signal: controller.signal },
       );
       const session = checkedSession(response.data);
-      if (!session.authenticated) throw new RequestError("invalid");
+      if (!session.authenticated && !session.mfa_required)
+        throw new RequestError("invalid");
       setPassword("");
       accept(session);
     } catch (error) {
@@ -97,12 +123,55 @@ export function LoginPage({
     }
   }
 
+  async function submitSecondFactor(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (busy || state.phase !== "ready" || !state.session.mfa_required) return;
+    const controller = new AbortController();
+    action.current = controller;
+    setBusy(true);
+    setMessage("");
+    try {
+      const response = await completeSecondFactor(
+        baseUrl,
+        { code: secondFactor.trim() },
+        state.session.csrf_token,
+        { signal: controller.signal },
+      );
+      const session = checkedSession(response.data);
+      if (!session.authenticated) throw new RequestError("invalid");
+      setSecondFactor("");
+      accept(session);
+    } catch (error) {
+      if (controller.signal.aborted) return;
+      setMessage(
+        error instanceof RequestError && error.status === 401
+          ? "验证码或恢复码不正确，或验证已过期。"
+          : authFailureMessage(error, "login"),
+      );
+      if (
+        error instanceof RequestError &&
+        (error.status === 401 ||
+          error.status === 403 ||
+          error.status === undefined)
+      )
+        void check(true);
+    } finally {
+      if (!controller.signal.aborted) setBusy(false);
+    }
+  }
+
   return (
     <ManagementEntry
       cardRef={card}
       panel={{
-        title: "登录你的账号",
-        description: "输入账号信息，继续访问。",
+        title:
+          state.phase === "ready" && state.session.mfa_required
+            ? "两步验证"
+            : "登录你的账号",
+        description:
+          state.phase === "ready" && state.session.mfa_required
+            ? "输入认证器中的六位验证码，或使用一次性恢复码。"
+            : "输入账号信息，继续访问。",
       }}
     >
       {entering ? (
@@ -120,6 +189,69 @@ export function LoginPage({
             void check();
           }}
         />
+      ) : state.session.mfa_required ? (
+        <Form
+          className="login-form"
+          onSubmit={submitSecondFactor}
+          aria-busy={busy}
+        >
+          <FormField
+            id="login-second-factor"
+            label="验证码或恢复码"
+            icon="lock"
+          >
+            <TextField
+              id="login-second-factor"
+              name="second-factor"
+              autoComplete="one-time-code"
+              required
+              maxLength={32}
+              value={secondFactor}
+              onChange={(event) => setSecondFactor(event.target.value)}
+              disabled={busy}
+              ref={secondFactorField}
+              aria-describedby={message ? "second-factor-error" : undefined}
+            />
+          </FormField>
+          <div
+            id="second-factor-error"
+            className="login-message"
+            role={message ? "alert" : undefined}
+            aria-live="polite"
+          >
+            {message && <span>{message}</span>}
+          </div>
+          <Button
+            type="submit"
+            className="management-primary login-submit"
+            disabled={busy || !secondFactor.trim()}
+          >
+            <UiText text={busy ? "正在验证…" : "完成登录"} />
+          </Button>
+          <Button
+            type="button"
+            className="login-back"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                const response = await logout(
+                  baseUrl,
+                  state.session.csrf_token,
+                );
+                accept(checkedSession(response.data));
+                setSecondFactor("");
+                setMessage("");
+              } catch (error) {
+                setMessage(authFailureMessage(error, "logout"));
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            <UiText text="返回账号登录" />
+          </Button>
+        </Form>
       ) : (
         <Form className="login-form" onSubmit={submit} aria-busy={busy}>
           <FormField id="login-username" label="用户名或邮箱" icon="user">
@@ -186,6 +318,11 @@ export function LoginPage({
             />
           </Button>
         </Form>
+      )}
+      {showLogin && registrationOpen && (
+        <RouteLink href="/login/register" className="management-text-link">
+          <UiText text="注册账号" />
+        </RouteLink>
       )}
       <noscript>
         <p>

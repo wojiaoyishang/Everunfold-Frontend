@@ -10,9 +10,11 @@ import { startLoginHandoff } from "./login-handoff";
 export function LoginSuccess({
   destination,
   cardRef,
+  registered = false,
 }: {
   destination: string;
   cardRef: RefObject<HTMLDivElement | null>;
+  registered?: boolean;
 }) {
   const router = useRouter();
   const { enabled } = useMotion();
@@ -43,14 +45,18 @@ export function LoginSuccess({
         <Icon name="check" />
       </span>
       <h2>
-        <UiText text="登录成功" />
+        <UiText text={registered ? "注册成功" : "登录成功"} />
       </h2>
       <p>
-        {destination.startsWith("/admin") ? (
-          <UiText text="正在进入后台" />
-        ) : (
-          <UiText text="正在返回站点" />
-        )}
+        <UiText
+          text={
+            destination.startsWith("/admin")
+              ? "正在进入后台"
+              : destination === "/account"
+                ? "正在进入账号中心"
+                : "正在返回站点"
+          }
+        />
       </p>
     </div>
   );

@@ -6,25 +6,31 @@ import { Button, TextArea } from "../components/ui/primitives";
 
 export function SecretReveal({
   entries,
+  title = "请保存你的密钥",
+  description = "密钥只在这一次显示，关闭后无法再次读取。请保存到安全的位置。",
+  copyLabel = "复制密钥",
   onClose,
 }: {
   entries: { label: string; value: string }[];
+  title?: string;
+  description?: string;
+  copyLabel?: string;
   onClose: () => void;
 }) {
   const [closing, setClosing] = useState(false);
   return (
     <Modal
-      title="请保存你的密钥"
+      title={title}
       className="account-secret-modal"
       closing={closing}
       onClose={() => setClosing(true)}
       onExited={onClose}
     >
       <p className="account-secret-warning">
-        <UiText text="密钥只在这一次显示，关闭后无法再次读取。请保存到安全的位置。" />
+        <UiText text={description} />
       </p>
       {entries.map((entry) => (
-        <SecretEntry key={entry.label} {...entry} />
+        <SecretEntry key={entry.label} {...entry} copyLabel={copyLabel} />
       ))}
       <div className="account-actions">
         <Button
@@ -37,7 +43,15 @@ export function SecretReveal({
     </Modal>
   );
 }
-function SecretEntry({ label, value }: { label: string; value: string }) {
+function SecretEntry({
+  label,
+  value,
+  copyLabel,
+}: {
+  label: string;
+  value: string;
+  copyLabel: string;
+}) {
   const ref = useRef<HTMLTextAreaElement>(null),
     id = useId();
   const [message, setMessage] = useState("");
@@ -65,13 +79,13 @@ function SecretEntry({ label, value }: { label: string; value: string }) {
         id={id}
         value={value}
         readOnly
-        rows={3}
+        rows={Math.max(3, Math.min(10, value.split("\n").length))}
         spellCheck={false}
         autoComplete="off"
       />
       <div className="account-secret-actions">
         <Button className="admin-button" onClick={() => void copy()}>
-          <UiText text="复制密钥" />
+          <UiText text={copyLabel} />
         </Button>
         <span role="status">
           <UiText text={message} />

@@ -15,6 +15,7 @@ import { Checkbox } from "../components/ui/checkbox";
 import { ConfirmDialog } from "../components/ui/confirm-dialog";
 import { AccountField } from "./fields";
 import { UnsavedAccountChanges } from "./unsaved";
+import { TwoFactorCard } from "./two-factor";
 
 export function AccountSecurity({
   profile,
@@ -52,6 +53,7 @@ export function AccountSecurity({
   const dirty = !!(current || password || confirmation);
   return (
     <>
+      <TwoFactorCard />
       <section className="account-card">
         <header>
           <h2>

@@ -16,6 +16,7 @@ import { UnsavedAccountChanges } from "../../account/unsaved";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "../settings/section-navigation";
 import { SettingsSection, SettingsToggle } from "../settings/shared";
+import { RegistrationInvitations } from "./registration-invitations";
 
 export function AccessSettingsPage() {
   const { baseUrl, csrfToken } = useAdminRequest();
@@ -42,6 +43,8 @@ export function AccessSettingsPage() {
     !!draft &&
     !!saved &&
     (draft.login_captcha !== saved.login_captcha ||
+      draft.registration_mode !== saved.registration_mode ||
+      draft.registration_captcha !== saved.registration_captcha ||
       draft.email_verification_captcha !== saved.email_verification_captcha ||
       draft.mail_profile_id !== saved.mail_profile_id);
   return (
@@ -58,6 +61,8 @@ export function AccessSettingsPage() {
                 {
                   expected_revision: draft.revision,
                   login_captcha: draft.login_captcha,
+                  registration_mode: draft.registration_mode,
+                  registration_captcha: draft.registration_captcha,
                   email_verification_captcha: draft.email_verification_captcha,
                   mail_profile_id: draft.mail_profile_id,
                 },
@@ -82,6 +87,40 @@ export function AccessSettingsPage() {
                 value={draft.login_captcha}
                 onChange={(login_captcha) =>
                   setDraft({ ...draft, login_captcha })
+                }
+              />
+            </SettingsSection>
+            <SettingsSection
+              id="access-registration"
+              title="注册"
+              description="新账号在邮箱验证通过后创建。"
+            >
+              <div className="admin-settings-field">
+                <UiText text="注册方式" />
+                <Select
+                  name="registration-mode"
+                  label="注册方式"
+                  value={draft.registration_mode}
+                  options={[
+                    { value: "closed", label: "关闭注册" },
+                    { value: "invite", label: "仅限邀请" },
+                    { value: "open", label: "开放注册" },
+                  ]}
+                  onValueChange={(mode) => {
+                    if (
+                      mode === "closed" ||
+                      mode === "invite" ||
+                      mode === "open"
+                    )
+                      setDraft({ ...draft, registration_mode: mode });
+                  }}
+                />
+              </div>
+              <SettingsToggle
+                label="注册需要人机验证"
+                value={draft.registration_captcha}
+                onChange={(registration_captcha) =>
+                  setDraft({ ...draft, registration_captcha })
                 }
               />
             </SettingsSection>
@@ -172,6 +211,7 @@ export function AccessSettingsPage() {
           <UiText text="正在读取设置…" />
         </p>
       )}
+      {saved && <RegistrationInvitations />}
     </SettingsLayout>
   );
 }

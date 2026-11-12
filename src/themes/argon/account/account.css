@@ -1171,3 +1171,19 @@
 .account-email-review {
   margin-top: 12px;
 }
+.account-two-factor-setup {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  min-width: 0;
+  margin: 16px 0;
+}
+.account-two-factor-qr {
+  padding: 12px;
+  border-radius: 8px;
+  background: #fff;
+}
+.account-two-factor-setup > code {
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, monospace;
+}
