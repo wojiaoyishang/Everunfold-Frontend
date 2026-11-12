@@ -93,6 +93,14 @@ export function alignUnits(left: Unit[], right: Unit[]) {
       result.set(a++, b++);
       continue;
     }
+    if (!left[a].tag && !left[a].key.trim()) {
+      a++;
+      continue;
+    }
+    if (!right[b].tag && !right[b].key.trim()) {
+      b++;
+      continue;
+    }
     // Formatting whitespace, generated wrappers and preview decoration may exist
     // in one projection only. Limit lookahead for long blocks.
     let found = false;

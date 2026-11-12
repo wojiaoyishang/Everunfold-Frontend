@@ -15,6 +15,8 @@ import { useAnchoredPopover } from "./use-anchored-popover";
 import { Icon } from "../icon";
 import styles from "./date-time-field.module.css";
 
+const calendarWidth = 304;
+
 export function DateTimeField({
   label,
   value,
@@ -38,7 +40,7 @@ export function DateTimeField({
     onToggle,
     onBeforeToggle,
     onPanelKeyDown,
-  } = useAnchoredPopover(304, true);
+  } = useAnchoredPopover(calendarWidth, true, calendarWidth);
   const [day, setDay] = useState(() => new Date(2000, 0, 1));
   const [month, setMonth] = useState(() => new Date(2000, 0, 1));
   const [hour, setHour] = useState(12);

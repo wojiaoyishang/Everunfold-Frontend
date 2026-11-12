@@ -161,6 +161,55 @@ export function DeliveryBadge({ value }: { value: DeliveryState }) {
     </span>
   );
 }
+export function SettingsSaveBar({
+  dirty,
+  busy,
+  checking = false,
+  status,
+  delivery,
+  form,
+  onReset,
+}: {
+  dirty: boolean;
+  busy: boolean;
+  checking?: boolean;
+  status: ReactNode;
+  delivery?: ReactNode;
+  form?: string;
+  onReset: () => void;
+}) {
+  return (
+    <div className="admin-settings-savebar">
+      <div>
+        <span>{dirty ? <UiText text="有尚未保存的修改" /> : status}</span>
+        {delivery && <div className="admin-settings-delivery">{delivery}</div>}
+      </div>
+      <div className="admin-settings-actions">
+        <Button
+          className="admin-button"
+          disabled={busy || !dirty}
+          onClick={onReset}
+        >
+          <UiText text="撤销修改" />
+        </Button>
+        <Button
+          className="admin-button admin-button-primary"
+          type="submit"
+          form={form}
+          disabled={busy || !dirty}
+        >
+          <Icon name={busy ? "refresh" : "check"} />
+          <UiText
+            text={
+              checking ? "正在检查使用情况…" : busy ? "正在保存" : "保存更改"
+            }
+          />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function SettingsFrame({
   title,
   description,
@@ -218,49 +267,20 @@ export function SettingsFrame({
               {editor.message}
             </p>
           )}
-          <div className="admin-settings-savebar">
-            <div>
-              <span>
-                {editor.dirty ? (
-                  <UiText text="有尚未保存的修改" />
-                ) : (
-                  `已读取版本 ${editor.saved?.revision ?? ""}`
-                )}
-              </span>
-              <div className="admin-settings-delivery">
-                {editor.saved?.delivery
-                  .filter((node) => node.enabled)
-                  .map((node) => (
-                    <span key={node.node_id} title={node.node_id}>
-                      <DeliveryBadge value={node} />
-                    </span>
-                  ))}
-              </div>
-            </div>
-            <div className="admin-settings-actions">
-              <Button
-                className="admin-button"
-                disabled={editor.busy || !editor.dirty}
-                onClick={editor.reset}
-              >
-                <UiText text="撤销修改" />
-              </Button>
-              <Button
-                className="admin-button admin-button-primary"
-                type="submit"
-                disabled={editor.busy || !editor.dirty}
-              >
-                <Icon name={editor.busy ? "refresh" : "check"} />
-                {editor.checkingPlugins ? (
-                  <UiText text="正在检查使用情况…" />
-                ) : editor.busy ? (
-                  <UiText text="正在保存" />
-                ) : (
-                  <UiText text="保存更改" />
-                )}
-              </Button>
-            </div>
-          </div>
+          <SettingsSaveBar
+            dirty={editor.dirty}
+            busy={editor.busy}
+            checking={editor.checkingPlugins}
+            status={`已读取版本 ${editor.saved?.revision ?? ""}`}
+            delivery={editor.saved?.delivery
+              .filter((node) => node.enabled)
+              .map((node) => (
+                <span key={node.node_id} title={node.node_id}>
+                  <DeliveryBadge value={node} />
+                </span>
+              ))}
+            onReset={editor.reset}
+          />
         </Form>
       )}
     </SettingsLayout>

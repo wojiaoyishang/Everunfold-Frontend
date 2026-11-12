@@ -107,9 +107,18 @@ export const RichImage = Image.extend({
       : image;
   },
 });
+const TemplateImage = RichImage.extend({
+  renderHTML: ({ node }) => [
+    "span",
+    { "data-editor-image-placeholder": "", contenteditable: "false" },
+    String(node.attrs.src || node.attrs.alt || "图片"),
+  ],
+});
+
 export function richExtensions(
   shared: boolean,
   inlineImages = false,
+  template = false,
 ): Extensions {
   return [
     StarterKit.configure({
@@ -125,7 +134,7 @@ export function richExtensions(
     RichTextStyle,
     TextAlign.configure({ types: ["heading", "paragraph"] }),
     TableKit.configure({ table: { resizable: false } }),
-    RichImage.configure({ inline: inlineImages }),
+    (template ? TemplateImage : RichImage).configure({ inline: inlineImages }),
     RawHtml,
     ...(!shared
       ? [PreservedHtmlAttributes, ...preservedHtmlNodes, ...localEmbeddedNodes]

@@ -15,12 +15,12 @@ import { useNotificationState } from "@/core/notifications/use-notifications";
 import {
   escapeHtml,
   interpolateEmail,
-  renderEmailCanvas,
-} from "@/core/notifications/email-canvas";
+  renderEmailPreview,
+} from "@/core/notifications/email-preview";
 import { Button, TextField } from "../../components/ui/primitives";
 import {
   CodeEditor,
-  type SourceEditorHandle,
+  type CodeEditorHandle,
 } from "../../components/ui/code-editor";
 import { Select } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
@@ -29,7 +29,8 @@ import { AdminPageHeading } from "../components/page-heading";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { SettingsLayout } from "../settings/section-navigation";
 import { MailBrandDialog } from "./mail-brand";
-import { VisualEmailEditor } from "./visual-email-editor";
+import { RichTextEditor } from "../../components/ui/rich-text-editor";
+import { RichToolbar } from "../content/plugins/rich-toolbar";
 import {
   NotificationVariableValues,
   templateSampleValues,
@@ -115,12 +116,8 @@ export function NotificationTemplatesPage() {
   const [eventType, setEventType] = useState("");
   const [platformId, setPlatformId] = useState("in-app");
   const [locale, setLocale] = useState("");
-  const [htmlView, setHtmlView] = useState<"visual" | "source" | "text">(
-    "visual",
-  );
-  const [previewMode, setPreviewMode] = useState<"html" | "no-icon" | "text">(
-    "html",
-  );
+  const [htmlView, setHtmlView] = useState<"visual" | "source">("visual");
+  const [previewMode, setPreviewMode] = useState<"html" | "no-icon">("html");
   const [sampleOverrides, setSampleOverrides] = useState<
     Record<string, string>
   >({});
@@ -128,7 +125,7 @@ export function NotificationTemplatesPage() {
   const [brandOpen, setBrandOpen] = useState(false);
   const brandTrigger = useRef<HTMLButtonElement>(null);
   const subjectField = useRef<HTMLInputElement>(null);
-  const bodyEditor = useRef<SourceEditorHandle | null>(null);
+  const bodyEditor = useRef<CodeEditorHandle | null>(null);
   const [draftStore, setDraftStore] = useState<{
     revision: number;
     values: DraftMap;
@@ -197,19 +194,17 @@ export function NotificationTemplatesPage() {
       draft.enabled !== view.enabled)
   );
   const htmlEnabled = isEmail && !!draft?.html_enabled;
-  const activeBodyMode = htmlEnabled && htmlView !== "text" ? "html" : "text";
-  const showHtmlPreview = htmlEnabled && previewMode !== "text";
   const sourceHtml = draft?.html ?? "";
-  const canvas = useMemo(
+  const previewDocument = useMemo(
     () =>
       htmlEnabled
-        ? renderEmailCanvas(
+        ? renderEmailPreview(
             sourceHtml,
             previewMode === "no-icon"
               ? { ...previewValues, "site.icon_url": "" }
               : previewValues,
           )
-        : null,
+        : undefined,
     [htmlEnabled, sourceHtml, previewMode, previewValues],
   );
   const update = (patch: Partial<SaveNotificationTemplate>) => {
@@ -275,11 +270,12 @@ export function NotificationTemplatesPage() {
     }
     const target = bodyEditor.current;
     if (target) {
-      target.insert(token);
+      if (target.insertText) target.insertText(token);
+      else target.insert(token);
       target.focus();
       return;
     }
-    if (activeBodyMode === "html") {
+    if (htmlEnabled) {
       update({ html: `${draft.html ?? ""}\n<p>${token}</p>` });
     } else
       update({ text: (draft.text ?? "") + (draft.text ? " " : "") + token });
@@ -298,7 +294,7 @@ export function NotificationTemplatesPage() {
       <UnsavedAccountChanges dirty={dirty} busy={editor.busy} />
       <AdminPageHeading
         title="通知模板"
-        description="正文使用代码编辑器；邮件可编辑 HTML 并保留纯文本回退，变量只做安全插值，不执行模板代码。"
+        description="邮件正文可使用 HTML 可视化或源码编辑，变量仅在下方安全预览中填充。"
         action={
           <div className={styles.sectionActions}>
             {editor.state && (
@@ -403,7 +399,7 @@ export function NotificationTemplatesPage() {
           />
           {selectedEvent === "security.email_verification" && (
             <p className={styles.message}>
-              <UiText text="纯文本正文必须包含验证码变量；启用 HTML 时，HTML 正文也必须包含验证码变量。验证码不能放在主题或 HTML 属性中。" />
+              <UiText text="正文必须包含验证码变量。验证码不能放在主题或 HTML 属性中。" />
             </p>
           )}
           {isEmail && !site.url && (
@@ -507,54 +503,45 @@ export function NotificationTemplatesPage() {
                                   <Icon name="code" />
                                   <UiText text="HTML 源码" />
                                 </Button>
-                                <Button
-                                  role="tab"
-                                  aria-selected={htmlView === "text"}
-                                  data-current={
-                                    htmlView === "text" || undefined
-                                  }
-                                  onClick={() => setHtmlView("text")}
-                                >
-                                  <UiText text="纯文本" />
-                                </Button>
                               </div>
                             )}
                           </div>
                         )}
                       </div>
-                      {activeBodyMode === "html" &&
-                      htmlView === "visual" &&
-                      canvas ? (
-                        <VisualEmailEditor
-                          canvas={canvas}
-                          source={sourceHtml}
+                      {htmlEnabled && htmlView === "visual" ? (
+                        <RichTextEditor
+                          key={key}
+                          template
+                          editorRef={bodyEditor}
+                          value={sourceHtml}
+                          label={t("HTML 正文可视化")}
                           disabled={!editable || editor.busy}
                           onChange={(html) => update({ html })}
+                          toolbar={(instance) => (
+                            <RichToolbar editor={instance} emailTemplate />
+                          )}
                         />
                       ) : (
                         <CodeEditor
-                          ref={bodyEditor}
+                          key={key}
+                          ref={(instance) => {
+                            bodyEditor.current = instance;
+                          }}
                           value={
-                            activeBodyMode === "html"
+                            htmlEnabled
                               ? (draft.html ?? "")
                               : (draft.text ?? "")
                           }
                           onChange={(value) =>
                             update(
-                              activeBodyMode === "html"
-                                ? { html: value }
-                                : { text: value },
+                              htmlEnabled ? { html: value } : { text: value },
                             )
                           }
                           label={
-                            activeBodyMode === "html"
-                              ? t("HTML 正文源码")
-                              : t("通知正文")
+                            htmlEnabled ? t("HTML 正文源码") : t("通知正文")
                           }
                           language={
-                            activeBodyMode === "html"
-                              ? emailHtmlLanguage
-                              : textLanguage
+                            htmlEnabled ? emailHtmlLanguage : textLanguage
                           }
                           disabled={!editable || editor.busy}
                         />
@@ -617,7 +604,6 @@ export function NotificationTemplatesPage() {
                             [
                               ["html", "HTML"],
                               ["no-icon", "无图标"],
-                              ["text", "纯文本"],
                             ] as const
                           ).map(([mode, label]) => (
                             <Button
@@ -635,7 +621,7 @@ export function NotificationTemplatesPage() {
                       {interpolateEmail(draft.subject ?? "", previewValues) ||
                         t("未填写主题")}
                     </div>
-                    {showHtmlPreview && canvas ? (
+                    {htmlEnabled ? (
                       <>
                         {!site.support_url &&
                           sourceHtml.includes("site.support_url") && (
@@ -647,7 +633,7 @@ export function NotificationTemplatesPage() {
                           className={styles.previewFrame}
                           title={t("HTML 通知安全预览")}
                           sandbox=""
-                          srcDoc={canvas.document}
+                          srcDoc={previewDocument}
                         />
                       </>
                     ) : (

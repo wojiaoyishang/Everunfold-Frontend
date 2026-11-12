@@ -9,10 +9,18 @@ function visualAttributes(value: unknown): Record<string, string> {
     ["class", "style", "title", "lang", "dir"].includes(key),
   );
   const escaped = attrs
-    .map(
-      ([key, val]) =>
-        ` ${key}="${String(val).replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;")}"`,
-    )
+    .map(([key, val]) => {
+      let text = String(val);
+      // The editor displays literal source; CSS declarations with variables
+      // only acquire a value in the template preview.
+      if (key === "style" && text.includes("{{")) {
+        text = text
+          .split(";")
+          .filter((declaration) => !declaration.includes("{{"))
+          .join(";");
+      }
+      return ` ${key}="${text.replaceAll("&", "&amp;").replaceAll('"', "&quot;").replaceAll("<", "&lt;")}"`;
+    })
     .join("");
   const safe = sanitizeHtml(`<div${escaped}></div>`, {
     allowedTags: ["div"],

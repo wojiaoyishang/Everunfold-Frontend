@@ -39,12 +39,13 @@ export function matchOption(
 export function placePopover(
   anchor: { left: number; top: number; bottom: number; width: number },
   viewport: { width: number; height: number },
-  desired: { width: number; height: number },
+  desired: { width: number; height: number; maxWidth?: number },
 ) {
   const margin = 12;
   const gap = 7;
   const width = Math.min(
     Math.max(anchor.width, desired.width),
+    desired.maxWidth ?? Infinity,
     Math.max(0, viewport.width - margin * 2),
   );
   const below = Math.max(0, viewport.height - anchor.bottom - gap - margin);

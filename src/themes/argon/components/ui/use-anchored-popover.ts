@@ -13,7 +13,11 @@ import { placePopover } from "./select-model";
 const noSubscription = () => () => {};
 
 /** Native top-layer/light-dismiss with bounded positioning inside dialogs and popovers. */
-export function useAnchoredPopover(minWidth = 180, overlapAnchor = false) {
+export function useAnchoredPopover(
+  minWidth = 180,
+  overlapAnchor = false,
+  maxWidth?: number,
+) {
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -38,9 +42,10 @@ export function useAnchoredPopover(minWidth = 180, overlapAnchor = false) {
       height: window.innerHeight,
     };
     // Measure wrapped content at its final width, while the panel is still hidden.
-    panel.current.style.width = `${placePopover(bounds, viewport, { width: minWidth, height: 0 }).width}px`;
+    const size = { width: minWidth, maxWidth };
+    panel.current.style.width = `${placePopover(bounds, viewport, { ...size, height: 0 }).width}px`;
     const placement = placePopover(bounds, viewport, {
-      width: minWidth,
+      ...size,
       height: panel.current.scrollHeight,
     });
     if (overlapAnchor && panel.current.scrollHeight > placement.maxHeight) {
@@ -56,7 +61,7 @@ export function useAnchoredPopover(minWidth = 180, overlapAnchor = false) {
         `${value}px`;
     }
     panel.current.dataset.positioned = "true";
-  }, [minWidth, overlapAnchor]);
+  }, [minWidth, overlapAnchor, maxWidth]);
   useLayoutEffect(() => {
     if (!open || !trigger.current || !panel.current) return;
     position();

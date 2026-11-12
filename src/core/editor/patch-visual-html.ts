@@ -56,6 +56,7 @@ export function patchVisualHtml(
   source: string,
   before: string,
   after: string,
+  normalize = (value: string) => renderRichNode(htmlRichSource(value)),
 ): string | undefined {
   if (before === after) return source;
   if (!source.trim())
@@ -102,7 +103,7 @@ export function patchVisualHtml(
           ? raw[last].end
           : undefined;
     if (start === undefined || end === undefined || end > limit || end < start)
-      return patchChangedTable(source, before, after);
+      return patchChangedTable(source, before, after, normalize);
     result =
       result.slice(0, start) +
       right.slice(edit.start, edit.end).join("") +
@@ -122,18 +123,21 @@ export function patchVisualHtml(
   }
   // The visual model can normalize constructs it cannot round-trip. Do not
   // write a misleading splice if its new projection is different.
-  const normalize = (value: string) => renderRichNode(htmlRichSource(value));
   if (normalize(formatted) === normalize(after)) return formatted;
   if (normalize(result) === normalize(after)) return result;
-  return patchChangedTable(source, before, after);
+  return patchChangedTable(source, before, after, normalize);
 }
 
 /** Cell merges/splits can add schema-only paragraphs absent from the raw HTML.
  * Replace one changed top-level table after verifying both full projections;
  * all source outside that table remains byte-for-byte intact.
  */
-function patchChangedTable(source: string, before: string, after: string) {
-  const normalize = (value: string) => renderRichNode(htmlRichSource(value));
+function patchChangedTable(
+  source: string,
+  before: string,
+  after: string,
+  normalize: (value: string) => string,
+) {
   if (normalize(source) !== normalize(before)) return;
   const parts = (html: string) =>
     parseDocument(html, { withStartIndices: true, withEndIndices: true })

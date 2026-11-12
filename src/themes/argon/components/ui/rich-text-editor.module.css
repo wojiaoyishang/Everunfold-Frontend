@@ -53,6 +53,14 @@
   height: auto;
   border-radius: 5px;
 }
+.canvas :global([data-editor-image-placeholder]) {
+  display: inline-block;
+  max-width: 100%;
+  padding: 0 6px;
+  border: 1px dashed var(--admin-border);
+  border-radius: 4px;
+  font-family: monospace;
+}
 .canvas blockquote {
   margin: 1em 0;
   padding: 4px 18px;

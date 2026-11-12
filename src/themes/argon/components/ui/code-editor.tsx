@@ -68,6 +68,7 @@ export interface CodeEditorHandle {
   select: (selection: SourceSelection) => void;
   reveal?: (selection: SourceSelection) => void;
   insert: (before: string, after?: string) => void;
+  insertText?: (text: string) => void;
   captureInsertion: () => CapturedInsertion;
 }
 export interface SourceSearch {

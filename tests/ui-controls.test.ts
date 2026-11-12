@@ -48,6 +48,22 @@ test("anchored controls flip above, fit a narrow viewport and reserve edge space
   assert.ok(short.top >= 12);
   assert.ok(short.top + short.maxHeight <= 188);
 });
+test("a calendar has a compact panel even when its trigger fills the form", () => {
+  const anchor = { left: 200, top: 180, bottom: 222, width: 1000 };
+  const viewport = { width: 1440, height: 900 };
+  const calendar = { width: 304, maxWidth: 304, height: 360 };
+  assert.equal(placePopover(anchor, viewport, calendar).width, 304);
+  assert.equal(
+    placePopover(anchor, viewport, { width: 180, height: 240 }).width,
+    1000,
+  );
+  const narrow = placePopover(
+    { ...anchor, left: 12, width: 280 },
+    { width: 300, height: 680 },
+    calendar,
+  );
+  assert.equal(narrow.left + narrow.width, 288);
+});
 test("search selection preserves the default GET value before hydration without duplicate successful controls", () => {
   const html = renderToStaticMarkup(
     createElement(Select, {

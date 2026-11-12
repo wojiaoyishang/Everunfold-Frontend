@@ -104,6 +104,7 @@ interface RichTextEditorProps {
   format?: "html" | "markdown";
   statusTarget?: HTMLElement | null;
   hideStatusBar?: boolean;
+  template?: boolean;
 }
 
 function hasLiveEditor(editor: Editor | null): editor is Editor {
@@ -127,6 +128,7 @@ export function RichTextEditor({
   uploadEntries,
   statusTarget,
   hideStatusBar,
+  template = false,
 }: RichTextEditorProps) {
   const readSource =
     format === "markdown" ? markdownRichSource : htmlRichSource;
@@ -143,7 +145,7 @@ export function RichTextEditor({
     latest.current = { onChange, media, shared };
   }, [onChange, media, shared]);
   const root = useRef<HTMLDivElement>(null);
-  const extensions = richExtensions(false, format === "markdown");
+  const extensions = richExtensions(false, format === "markdown", template);
   extensions.push(ReadonlyGuard.configure({ disabled }));
   const editor = useEditor({
     extensions,
@@ -151,6 +153,17 @@ export function RichTextEditor({
     editable: !disabled,
     content: readSource(value),
     editorProps: {
+      handleDOMEvents: {
+        click: (_view, event) => {
+          if (
+            template &&
+            event.target instanceof Element &&
+            event.target.closest("a")
+          )
+            event.preventDefault();
+          return false;
+        },
+      },
       handlePaste: (view, event) => {
         const html = event.clipboardData?.getData("text/html");
         if (!html) return false;
@@ -185,6 +198,12 @@ export function RichTextEditor({
               source.current,
               renderRichNode(transaction.before.toJSON()),
               renderRichNode(editor.getJSON()),
+              template
+                ? (html) =>
+                    renderRichNode(
+                      editor.schema.nodeFromJSON(readSource(html)).toJSON(),
+                    )
+                : undefined,
             );
       if (next === undefined) {
         setProblem(true);
@@ -356,7 +375,7 @@ export function RichTextEditor({
     return () => cancelAnimationFrame(frame);
   }, [editor, initialSelection, mapSelection]);
   useEffect(() => {
-    if (!hasLiveEditor(editor)) return;
+    if (template || !hasLiveEditor(editor)) return;
     const render = () => {
       if (!hasLiveEditor(editor)) return;
       for (const img of root.current?.querySelectorAll<HTMLImageElement>(
@@ -439,7 +458,7 @@ export function RichTextEditor({
     return () => {
       editor.off("transaction", render);
     };
-  }, [editor, media, uploadEntries]);
+  }, [editor, media, uploadEntries, template]);
   useImperativeHandle(
     editorRef,
     () => ({
@@ -482,6 +501,14 @@ export function RichTextEditor({
             .focus()
             .insertContent(readSource(before + after).content ?? [])
             .run();
+      },
+      insertText: (text) => {
+        if (hasLiveEditor(editor) && !disabled) {
+          editor.view.dispatch(
+            editor.state.tr.insertText(text).scrollIntoView(),
+          );
+          editor.commands.focus();
+        }
       },
       captureInsertion: () => {
         if (!hasLiveEditor(editor)) return () => {};
@@ -541,16 +568,23 @@ export function RichTextEditor({
       ref={root}
       data-disabled={disabled}
       data-editor-local-control
+      data-template-editor={template || undefined}
     >
-      <ContentResources
-        features={inspectContentFeatures(
-          format === "markdown" ? renderMarkdownSource(value) : value,
-        )}
-      />
-      <style
-        data-editor-fonts
-        dangerouslySetInnerHTML={{ __html: referencedFontFaces(value, media) }}
-      />
+      {!template && (
+        <>
+          <ContentResources
+            features={inspectContentFeatures(
+              format === "markdown" ? renderMarkdownSource(value) : value,
+            )}
+          />
+          <style
+            data-editor-fonts
+            dangerouslySetInnerHTML={{
+              __html: referencedFontFaces(value, media),
+            }}
+          />
+        </>
+      )}
       {editor?.extensionManager && (
         <fieldset disabled={disabled} className={styles.tools}>
           {toolbar(editor)}

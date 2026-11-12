@@ -21,6 +21,7 @@ export function RichToolbar({
   editor,
   fonts = [],
   markdown = false,
+  emailTemplate = false,
   onMedia,
   onShortcode,
   onUpload,
@@ -28,6 +29,7 @@ export function RichToolbar({
   editor: Editor;
   fonts?: FontAsset[];
   markdown?: boolean;
+  emailTemplate?: boolean;
   onMedia?: (kind: "image" | "all" | "video") => void;
   onShortcode?: () => void;
   onUpload?: (files: File[]) => void;
@@ -143,7 +145,12 @@ export function RichToolbar({
           triggerContent={<Icon name="link" />}
         >
           {(close) => (
-            <LinkForm key={state.link} editor={editor} close={close} />
+            <LinkForm
+              key={state.link}
+              editor={editor}
+              close={close}
+              emailTemplate={emailTemplate}
+            />
           )}
         </ActionPopover>
         <div className={styles.insertGroup} role="group" aria-label="插入">
@@ -186,10 +193,12 @@ export function RichToolbar({
           ].map(([label, icon, run]) =>
             button(label as string, icon as IconName, run as () => void),
           )}
-          <ContentFeatureButtons
-            className={styles.toolButton}
-            prepare={(kind) => prepareVisualFeature(editor, kind)}
-          />
+          {!emailTemplate && (
+            <ContentFeatureButtons
+              className={styles.toolButton}
+              prepare={(kind) => prepareVisualFeature(editor, kind)}
+            />
+          )}
           {onShortcode && (
             <ShortcodeButton
               className={styles.toolButton}
@@ -197,9 +206,13 @@ export function RichToolbar({
               onClick={onShortcode}
             />
           )}
-          {button("插入视频", "video", () => onMedia?.("video"))}
-          {button("插入图片", "image", () => onMedia?.("image"))}
-          {button("插入媒体或附件", "folder", () => onMedia?.("all"))}
+          {onMedia && (
+            <>
+              {button("插入视频", "video", () => onMedia("video"))}
+              {button("插入图片", "image", () => onMedia("image"))}
+              {button("插入媒体或附件", "folder", () => onMedia("all"))}
+            </>
+          )}
           {onUpload && (
             <FilePicker
               className={styles.toolButton}
@@ -251,20 +264,22 @@ export function RichToolbar({
       </div>
       {!markdown && (
         <div className={styles.toolbarRow}>
-          <FontField
-            className={styles.font}
-            label="文字字体"
-            value={state.font}
-            fonts={fonts}
-            onChange={(fontId, font) => {
-              if (font) void loadFont(font);
-              editor
-                .chain()
-                .focus()
-                .setMark("textStyle", { fontId: fontId || null })
-                .run();
-            }}
-          />
+          {!emailTemplate && (
+            <FontField
+              className={styles.font}
+              label="文字字体"
+              value={state.font}
+              fonts={fonts}
+              onChange={(fontId, font) => {
+                if (font) void loadFont(font);
+                editor
+                  .chain()
+                  .focus()
+                  .setMark("textStyle", { fontId: fontId || null })
+                  .run();
+              }}
+            />
+          )}
           <Select
             name="html-font-size"
             className={styles.size}
@@ -397,8 +412,17 @@ export function RichToolbar({
     </div>
   );
 }
-function LinkForm({ editor, close }: { editor: Editor; close: () => void }) {
-  const current = String(editor.getAttributes("link").href ?? "");
+function LinkForm({
+  editor,
+  close,
+  emailTemplate,
+}: {
+  editor: Editor;
+  close: () => void;
+  emailTemplate: boolean;
+}) {
+  const link = editor.getAttributes("link");
+  const current = String(link.href ?? "");
   const [url, setUrl] = useState(current);
   const [error, setError] = useState("");
   return (
@@ -407,11 +431,30 @@ function LinkForm({ editor, close }: { editor: Editor; close: () => void }) {
       onSubmit={(e) => {
         e.preventDefault();
         const href = url.trim();
-        if (!/^(https?:\/\/|mailto:|\/|#|site:\/\/media\/)/i.test(href)) {
+        const variable = emailTemplate
+          ? /^\{\{\s*([a-zA-Z_][a-zA-Z0-9_.]*)\s*\}\}/.exec(href)
+          : null;
+        if (
+          !variable &&
+          !/^(https?:\/\/|mailto:|\/|#|site:\/\/media\/)/i.test(href)
+        ) {
           setError("请填写 HTTP、HTTPS、邮箱或站内链接。");
           return;
         }
-        editor.chain().focus().extendMarkRange("link").setLink({ href }).run();
+        const sourceAttrs = { ...link.sourceAttrs };
+        if (emailTemplate && "data-mail-optional" in sourceAttrs) {
+          if (variable) sourceAttrs["data-mail-optional"] = variable[1];
+          else delete sourceAttrs["data-mail-optional"];
+        }
+        const attributes = emailTemplate
+          ? { ...link, href, sourceAttrs }
+          : { href };
+        editor
+          .chain()
+          .focus()
+          .extendMarkRange("link")
+          .setLink(attributes)
+          .run();
         close();
       }}
     >

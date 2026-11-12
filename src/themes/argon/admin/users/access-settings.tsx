@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { useAccessSettings } from "@/core/accounts/use-access-settings";
@@ -10,11 +12,12 @@ import { RouteLink } from "../../components/ui/route-link";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "../settings/section-navigation";
-import { SettingsSection } from "../settings/shared";
+import { SettingsSaveBar, SettingsSection } from "../settings/shared";
 import { RegistrationInvitations } from "./registration-invitations";
 
 export function AccessSettingsPage() {
   const user = useAdminAccount();
+  const formId = useId();
   const { draft, saved, setDraft, save, busy, message, error, reload } =
     useAccessSettings();
   const captchaHref =
@@ -41,6 +44,7 @@ export function AccessSettingsPage() {
       </SettingsSection>
       {draft ? (
         <Form
+          id={formId}
           onSubmit={(event) => {
             event.preventDefault();
             if (dirty)
@@ -50,7 +54,7 @@ export function AccessSettingsPage() {
               });
           }}
         >
-          <fieldset className="account-fieldset" disabled={busy}>
+          <fieldset className="admin-settings-form" disabled={busy}>
             <SettingsSection
               id="access-registration"
               title="注册"
@@ -64,7 +68,6 @@ export function AccessSettingsPage() {
                   id="registration-mode"
                   name="registration-mode"
                   label="注册方式"
-                  className="admin-access-select"
                   programOptions
                   value={draft.registration_mode}
                   options={[
@@ -96,7 +99,6 @@ export function AccessSettingsPage() {
                   id="access-sender"
                   name="access-sender"
                   label="认证邮件发信配置"
-                  className="admin-access-select"
                   value={draft.mail_profile_id ?? "default"}
                   options={[
                     { value: "default", label: "使用默认发信配置" },
@@ -136,20 +138,6 @@ export function AccessSettingsPage() {
                 <UiText text="查看发信配置" />
               </RouteLink>
             </SettingsSection>
-            <div className="account-actions">
-              <Button
-                type="submit"
-                className="admin-button admin-button-primary"
-                disabled={!dirty}
-              >
-                <UiText text="保存设置" />
-              </Button>
-              {message && (
-                <span role="status">
-                  <UiText text={message} />
-                </span>
-              )}
-            </div>
           </fieldset>
         </Form>
       ) : error ? (
@@ -164,7 +152,21 @@ export function AccessSettingsPage() {
           <UiText text="正在读取设置…" />
         </p>
       )}
+      {message && (
+        <p role="status" className="admin-settings-message">
+          <UiText text={message} />
+        </p>
+      )}
       {saved && <RegistrationInvitations />}
+      {saved && draft && (
+        <SettingsSaveBar
+          form={formId}
+          dirty={dirty}
+          busy={busy}
+          status={<UiText text="设置已同步" />}
+          onReset={() => setDraft(saved)}
+        />
+      )}
     </SettingsLayout>
   );
 }

@@ -24,7 +24,12 @@ export function useEditorNavigation(
         event.target instanceof Element
           ? event.target.closest<HTMLAnchorElement>("a[href]")
           : null;
-      if (!link || link.target === "_blank" || link.hasAttribute("download"))
+      if (
+        !link ||
+        link.closest("[data-template-editor]") ||
+        link.target === "_blank" ||
+        link.hasAttribute("download")
+      )
         return;
       const url = new URL(link.href, location.href);
       if (

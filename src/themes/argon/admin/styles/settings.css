@@ -1,6 +1,10 @@
 .admin-settings-page {
   max-width: 1120px;
 }
+.access-invitation-fields {
+  display: grid;
+  gap: 18px;
+}
 .access-invitations {
   display: grid;
   gap: 8px;
@@ -74,10 +78,6 @@
   display: grid;
   gap: 8px;
   min-width: 0;
-}
-.admin-access-select {
-  inline-size: min(100%, 18rem);
-  min-inline-size: 0;
 }
 .admin-settings-link {
   justify-self: start;

@@ -486,7 +486,7 @@
   "；邮箱和网站无需重复填写。": ". You do not need to enter an email or website again.",
   "验证邮箱": "Verify email",
   "向用户发送邮箱验证验证码。": "Send an email verification code to the user.",
-  "纯文本正文必须包含验证码变量；启用 HTML 时，HTML 正文也必须包含验证码变量。验证码不能放在主题或 HTML 属性中。": "The plain text body must include the verification code variable. The HTML body must also include it when enabled. Do not place it in the subject or HTML attributes.",
+  "正文必须包含验证码变量。验证码不能放在主题或 HTML 属性中。": "The body must include the verification code variable. Keep it out of the subject and HTML attributes.",
   "已验证": "Verified",
   "未验证": "Unverified",
   "更换邮箱": "Change email",
@@ -2303,6 +2303,7 @@
   "已投递": "Delivered",
   "结果未知": "Outcome unknown",
   "已抑制": "Suppressed",
+  "邮件正文可使用 HTML 可视化或源码编辑，变量仅在下方安全预览中填充。": "Edit email HTML visually or as source. Sample values appear only in the preview below.",
   "邮件品牌": "Email branding",
   "邮件品牌已保存。": "Email branding saved.",
   "邮件品牌已在其他窗口修改，请重新读取。": "Email branding changed in another window. Reload before saving.",
@@ -2359,5 +2360,15 @@
   "保留双花括号内的模板变量，发送时会填入实际值。": "Keep template variables in double braces. Their values are filled in when the email is sent.",
   "邮件正文文字": "Email body text",
   "链接文字": "Link text",
-  "图片地址": "Image URL"
+  "图片地址": "Image URL",
+  "设置已同步": "Settings are up to date",
+  "生成数量": "Number of codes",
+  "一次最多生成 100 个邀请码。": "Generate up to 100 invitation codes at a time.",
+  "自定义到期时间": "Custom expiration",
+  "永久有效": "No expiration",
+  "邀请码到期时间": "Invitation expiration",
+  "邀请码到期时间必须晚于当前时间。": "The invitation expiration must be in the future.",
+  "按当前设备时区选择。": "Choose the time in your device’s time zone.",
+  "正在生成…": "Generating…",
+  "复制全部邀请码": "Copy all invitation codes"
 }
