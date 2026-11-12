@@ -1,6 +1,6 @@
 # Everunfold 文档入口
 
-[共享伪终端日志](handoff/task-terminal-log-verification.md)：运行记录、手动任务和邮件测试统一使用深色伪终端；日志按序号升序、最新在底部，按阶段/请求/响应/警告/错误着色，默认自动跟随并允许用户上滚暂停。
+[共享伪终端日志](handoff/task-terminal-log-verification.md)：运行记录、手动任务和邮件测试统一使用深色伪终端；日志按序号升序、最新在底部，按阶段/请求/响应/警告/错误/终态着色。自动跟随与复制位于标题栏，日志区超过360px后在终端内部滚动。
 
 [放弃修改后的客户端导航](handoff/unsaved-leave-client-navigation-verification.md)：未保存确认退场后，同源站内目标使用 Next.js 客户端导航，不再刷新整页；跨域目标保留浏览器文档导航。账号中心与普通后台页面共用该规则。
 
