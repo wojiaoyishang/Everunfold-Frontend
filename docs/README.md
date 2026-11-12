@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[放弃修改后的客户端导航](handoff/unsaved-leave-client-navigation-verification.md)：未保存确认退场后，同源站内目标使用 Next.js 客户端导航，不再刷新整页；跨域目标保留浏览器文档导航。账号中心与普通后台页面共用该规则。
+
 [站点地图与订阅浏览器视图](handoff/discovery-browser-view-verification.md)、[ADR0119](decisions/0119-discovery-documents-for-browsers-and-crawlers.md)：`/sitemap.xml`、`/feed.xml`、`/atom.xml` 对普通浏览器显示无脚本的响应式阅读页，对 RSS 阅读器和已知爬虫继续返回标准 XML；`?format=xml` 可强制读取原始文件。通知平台菜单改用独立发送图标。
 
 [通知策略用户选择器与快速导航](handoff/notification-policy-user-picker-verification.md)、[ADR0118](decisions/0118-account-user-picker-and-policy-navigation.md)：指定用户可按姓名、用户名、邮箱或完整 UUID 搜索，保存值始终为稳定用户 ID；目录权限保持`users:manage`，无权限时可手填 ID。通知策略桌面端按事件生成右侧快速导航，手机端保持单列。

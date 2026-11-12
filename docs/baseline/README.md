@@ -1724,3 +1724,15 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/design/sitemap-browser-view.png` | `sitemap-browser-view-1` | `df1dcee97c2859854b723b4382ffa6b3959c93866fe3227ddab8baa837543f27` |
 | `docs/design/rss-browser-view.png` | `rss-browser-view-1` | `aea0796d26592770b2110cef43d092cccb207f38b883dae9b7bb3eab706bb4f6` |
 | `docs/design/rss-browser-mobile.png` | `rss-browser-mobile-1` | `d12ef5dce69fe78248d208ee69f2a6f2be156c6e6ecdca1052d9f6b6997bbdab` |
+
+## 放弃修改后的客户端导航（2026-11-12）
+
+共享离开守卫确认放弃修改后，同源目标改用Next.js客户端导航，跨域目标保留文档导航，修复站内页面整页刷新。以下版本替代对应旧摘要，原始基线不变，STATUS分别维护。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/README.md` | `index-unsaved-client-navigation-1` | `1cda497e6d24f4b10da21d5424336ee8e5a70ca599006df9e0b86af4c258a4f4` |
+| `docs/development/protocol.md` | `protocol-unsaved-client-navigation-1` | `e149463fc189f2dec6c0f6c9cfb1f4137500def91d0b23e7a995b1147d0f44d5` |
+| `docs/development/accounts.md` | `accounts-unsaved-client-navigation-1` | `f18b7327b75844957c0add633286a1e068c3297dd7b62a7e4371f813b940489c` |
+| `docs/development/pages.md` | `pages-unsaved-client-navigation-1` | `a7ed7dd9702138e3491b4c464346828867bef5317ab845256c0a6eae8bdec80d` |
+| `docs/handoff/unsaved-leave-client-navigation-verification.md` | `unsaved-leave-client-navigation-verification-1` | `714b335db55ad8588dc24cc65f603135f848c1b5342d7b1637b3379736b32542` |
