@@ -9,6 +9,7 @@ import { Select } from "../components/ui/select";
 
 export function AccountField({
   label,
+  labelAside,
   value,
   onChange,
   secret = false,
@@ -27,6 +28,7 @@ export function AccountField({
   action,
 }: {
   label: string;
+  labelAside?: ReactNode;
   value: string;
   onChange: (value: string) => void;
   secret?: boolean;
@@ -64,9 +66,12 @@ export function AccountField({
   };
   return (
     <div className="account-field">
-      <label htmlFor={id}>
-        <UiText text={label} />
-      </label>
+      <div className="account-field-label">
+        <label htmlFor={id}>
+          <UiText text={label} />
+        </label>
+        {labelAside}
+      </div>
       {secret ? (
         <PasswordField {...props} />
       ) : multiline ? (
@@ -92,11 +97,13 @@ export function ProfileFieldsEditor({
   value,
   onChange,
   emailAction,
+  emailStatus,
   emailReadOnly = false,
 }: {
   value: ProfileFields;
   onChange: (value: ProfileFields) => void;
   emailAction?: ReactNode;
+  emailStatus?: ReactNode;
   emailReadOnly?: boolean;
 }) {
   const catalog = useLanguageCatalog();
@@ -123,6 +130,7 @@ export function ProfileFieldsEditor({
       />
       <AccountField
         label="邮箱"
+        labelAside={emailStatus}
         value={value.email ?? ""}
         onChange={(next) => change("email", next)}
         type="email"

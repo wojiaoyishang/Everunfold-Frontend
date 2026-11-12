@@ -16,7 +16,10 @@ import { UnsavedAccountChanges } from "./unsaved";
 import { AvatarPicker } from "./avatar-picker";
 import { Avatar } from "../components/ui/avatar";
 import { Icon } from "../components/icon";
-import { EmailVerificationControl } from "./email-verification";
+import {
+  EmailVerificationControl,
+  EmailVerificationStatus,
+} from "./email-verification";
 
 export function AccountProfileEditor({
   profile,
@@ -137,6 +140,11 @@ export function AccountProfileEditor({
               value={value}
               onChange={setValue}
               emailReadOnly
+              emailStatus={
+                <EmailVerificationStatus
+                  source={profile.email_verification_source}
+                />
+              }
               emailAction={
                 <EmailVerificationControl
                   email={value.email ?? ""}

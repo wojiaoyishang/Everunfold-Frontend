@@ -32,6 +32,20 @@ const statusText: Record<EmailVerificationState["status"], string> = {
   verified: "邮箱已验证。",
 };
 
+export function EmailVerificationStatus({
+  source,
+}: {
+  source?: AccountProfile["email_verification_source"];
+}) {
+  if (!source) return null;
+  return (
+    <span className="admin-badge admin-badge-success account-email-status">
+      <Icon name="check" />
+      <UiText text={source === "mailbox" ? "已验证" : "人工通过"} />
+    </span>
+  );
+}
+
 export function EmailVerificationControl({
   email,
   source,
@@ -46,13 +60,7 @@ export function EmailVerificationControl({
   const trigger = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   return (
-    <div className="account-email-verification">
-      {source && (
-        <span className="admin-badge admin-badge-success">
-          <Icon name="check" />
-          <UiText text={source === "mailbox" ? "已验证" : "人工通过"} />
-        </span>
-      )}
+    <>
       <Button
         ref={trigger}
         type="button"
@@ -71,7 +79,7 @@ export function EmailVerificationControl({
           onVerified={onVerified}
         />
       )}
-    </div>
+    </>
   );
 }
 

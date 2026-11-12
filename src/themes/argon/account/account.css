@@ -241,6 +241,19 @@
   gap: 8px;
   min-width: 0;
 }
+.account-field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.account-email-status {
+  padding-block: 2px;
+  line-height: 1;
+}
+.account-email-status > .icon {
+  width: 12px;
+  height: 12px;
+}
 .account-field small {
   color: var(--admin-muted);
   font-size: 12px;
@@ -251,24 +264,16 @@
 }
 .account-field-control {
   display: flex;
-  align-items: flex-start;
+  flex-wrap: wrap;
   gap: 8px;
   min-width: 0;
 }
 .account-field-control > .ui-input {
-  flex: 1;
-}
-.account-email-verification {
-  display: grid;
-  flex: 0 0 auto;
-  gap: 5px;
-  max-width: 148px;
+  flex: 1 1 10rem;
 }
 .account-email-verify {
+  flex: 0 0 auto;
   min-height: 40px;
-}
-.account-email-verification .account-field-hint {
-  line-height: 1.45;
 }
 .account-user-savebar {
   position: static;
@@ -393,16 +398,6 @@
   .account-form-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: 18px;
-  }
-  .account-field-control {
-    align-items: stretch;
-    flex-direction: column;
-  }
-  .account-email-verification {
-    max-width: none;
-  }
-  .account-email-verify {
-    width: 100%;
   }
 }
 .account-card.account-profile-card {
