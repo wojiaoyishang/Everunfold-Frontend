@@ -133,12 +133,12 @@ export function NotificationTemplatesPage() {
   const drafts =
     draftStore.revision === editor.state?.revision ? draftStore.values : {};
   const selectedEvent = eventType || editor.state?.events[0]?.id || "";
-  const selectedPlatform =
-    selectedEvent === "security.email_verification"
-      ? "email"
-      : editor.state?.platforms.some((item) => item.id === platformId)
-        ? platformId
-        : (editor.state?.platforms[0]?.id ?? "in-app");
+  const event = editor.state?.events.find((item) => item.id === selectedEvent);
+  const selectedPlatform = event?.email_only
+    ? "email"
+    : editor.state?.platforms.some((item) => item.id === platformId)
+      ? platformId
+      : (editor.state?.platforms[0]?.id ?? "in-app");
   const selectedLocale = locale || catalog.default_code;
   const view = useMemo(
     () =>
@@ -152,9 +152,8 @@ export function NotificationTemplatesPage() {
   );
   const key = identity(selectedEvent, selectedPlatform, selectedLocale);
   const draft = drafts[key] ?? (view ? draftFrom(view) : null);
-  const event = editor.state?.events.find((item) => item.id === selectedEvent);
   const isEmail = selectedPlatform === "email";
-  const security = selectedEvent === "security.email_verification";
+  const requiresCode = event?.requires_code;
   const site = editor.state?.site_variables ?? emptySiteVariables;
   const emailVariables = isEmail ? (editor.state?.email_variables ?? []) : [];
   const variables = [...(event?.variables ?? []), ...emailVariables];
@@ -390,14 +389,14 @@ export function NotificationTemplatesPage() {
           </div>
           <PlatformTabs
             platforms={
-              selectedEvent === "security.email_verification"
+              event?.email_only
                 ? editor.state.platforms.filter((item) => item.id === "email")
                 : editor.state.platforms
             }
             selected={selectedPlatform}
             onSelect={setPlatformId}
           />
-          {selectedEvent === "security.email_verification" && (
+          {requiresCode && (
             <p className={styles.message}>
               <UiText text="正文必须包含验证码变量。验证码不能放在主题或 HTML 属性中。" />
             </p>
@@ -576,7 +575,7 @@ export function NotificationTemplatesPage() {
                                   disabled={
                                     !editable ||
                                     editor.busy ||
-                                    (security &&
+                                    (requiresCode &&
                                       insertTarget === "subject" &&
                                       variable === "verification.code")
                                   }

@@ -375,7 +375,7 @@ export function NotificationPolicyPage() {
           )}
           <div className={styles.eventGrid}>
             {editor.state.events
-              .filter((event) => event.id !== "security.email_verification")
+              .filter((event) => !event.email_only)
               .map((event) => (
                 <EventRoutes
                   key={event.id}

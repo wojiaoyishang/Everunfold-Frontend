@@ -11,6 +11,7 @@ import {
   login,
   logout,
   readRegistrationOptions,
+  readRecoveryOptions,
 } from "@/core/contracts/auth";
 import { Icon } from "../components/icon";
 import { Button, Form, TextField } from "../components/ui/primitives";
@@ -41,6 +42,7 @@ export function LoginPage({
   const [message, setMessage] = useState("");
   const [passwordError, setPasswordError] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(false);
+  const [recoveryOpen, setRecoveryOpen] = useState(false);
   const action = useRef<AbortController | null>(null);
   const passwordField = useRef<HTMLInputElement>(null);
   const secondFactorField = useRef<HTMLInputElement>(null);
@@ -61,6 +63,11 @@ export function LoginPage({
       .then(({ data }) => {
         if (!controller.signal.aborted)
           setRegistrationOpen(data.mode !== "closed");
+      })
+      .catch(() => {});
+    void readRecoveryOptions(baseUrl, { signal: controller.signal })
+      .then(({ data }) => {
+        if (!controller.signal.aborted) setRecoveryOpen(data.enabled);
       })
       .catch(() => {});
     return () => controller.abort();
@@ -318,6 +325,11 @@ export function LoginPage({
             />
           </Button>
         </Form>
+      )}
+      {showLogin && recoveryOpen && (
+        <RouteLink href="/login/recover" className="management-text-link">
+          <UiText text="忘记密码" />
+        </RouteLink>
       )}
       {showLogin && registrationOpen && (
         <RouteLink href="/login/register" className="management-text-link">

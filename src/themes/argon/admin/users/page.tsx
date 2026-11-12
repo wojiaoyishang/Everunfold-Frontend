@@ -21,9 +21,17 @@ export function UsersPage() {
     [state, setState] = useState("all"),
     [page, setPage] = useState(1),
     [refresh, setRefresh] = useState(0);
-  const [list, setList] = useState<AccountUserList | null>(null),
-    [error, setError] = useState(""),
-    [policy, setPolicy] = useState(false);
+  const [result, setResult] = useState<{
+    key: string;
+    list: AccountUserList | null;
+    error: string;
+  } | null>(null);
+  const [policy, setPolicy] = useState(false);
+  const requestKey = JSON.stringify([baseUrl, query, state, page, refresh]);
+  const current = result?.key === requestKey ? result : null;
+  const loading = current === null;
+  const list = current?.list;
+  const error = current?.error;
   useEffect(() => {
     const controller = new AbortController();
     const timer = setTimeout(() => {
@@ -39,19 +47,23 @@ export function UsersPage() {
       )
         .then(({ data }) => {
           if (!controller.signal.aborted) {
-            setList(data);
-            setError("");
+            setResult({ key: requestKey, list: data, error: "" });
           }
         })
         .catch((failure) => {
-          if (!controller.signal.aborted) setError(accountFailure(failure));
+          if (!controller.signal.aborted)
+            setResult({
+              key: requestKey,
+              list: null,
+              error: accountFailure(failure),
+            });
         });
     }, 180);
     return () => {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [baseUrl, page, query, state, refresh]);
+  }, [baseUrl, page, query, state, requestKey]);
   return (
     <>
       <AdminPageHeading
@@ -118,6 +130,11 @@ export function UsersPage() {
             <UiText text="刷新" />
           </Button>
         </div>
+        {loading && (
+          <p className="account-empty" role="status">
+            <UiText text="正在读取用户…" />
+          </p>
+        )}
         {error && (
           <p role="alert">
             <UiText text={error} />
@@ -187,28 +204,30 @@ export function UsersPage() {
             <UiText text="没有匹配的用户。" />
           </p>
         )}
-        <div className="account-actions">
-          <span className="account-muted">
-            {list?.total ?? 0} <UiText text="位用户" />
-          </span>
-          <Button
-            className="admin-button"
-            disabled={page === 1}
-            onClick={() => setPage((value) => value - 1)}
-          >
-            <UiText text="上一页" />
-          </Button>
-          <span>
-            {page} / {Math.max(1, Math.ceil((list?.total ?? 0) / 20))}
-          </span>
-          <Button
-            className="admin-button"
-            disabled={page * 20 >= (list?.total ?? 0)}
-            onClick={() => setPage((value) => value + 1)}
-          >
-            <UiText text="下一页" />
-          </Button>
-        </div>
+        {list && (
+          <div className="account-actions">
+            <span className="account-muted">
+              {list?.total ?? 0} <UiText text="位用户" />
+            </span>
+            <Button
+              className="admin-button"
+              disabled={page === 1}
+              onClick={() => setPage((value) => value - 1)}
+            >
+              <UiText text="上一页" />
+            </Button>
+            <span>
+              {page} / {Math.max(1, Math.ceil((list?.total ?? 0) / 20))}
+            </span>
+            <Button
+              className="admin-button"
+              disabled={page * 20 >= (list?.total ?? 0)}
+              onClick={() => setPage((value) => value + 1)}
+            >
+              <UiText text="下一页" />
+            </Button>
+          </div>
+        )}
       </section>
       {policy && <AvatarPolicyEditor onClose={() => setPolicy(false)} />}
     </>

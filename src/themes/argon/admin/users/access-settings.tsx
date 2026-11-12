@@ -12,7 +12,11 @@ import { RouteLink } from "../../components/ui/route-link";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "../settings/section-navigation";
-import { SettingsSaveBar, SettingsSection } from "../settings/shared";
+import {
+  SettingsSaveBar,
+  SettingsSection,
+  SettingsToggle,
+} from "../settings/shared";
 import { RegistrationInvitations } from "./registration-invitations";
 
 export function AccessSettingsPage() {
@@ -28,7 +32,8 @@ export function AccessSettingsPage() {
     !!draft &&
     !!saved &&
     (draft.registration_mode !== saved.registration_mode ||
-      draft.mail_profile_id !== saved.mail_profile_id);
+      draft.mail_profile_id !== saved.mail_profile_id ||
+      draft.password_recovery_enabled !== saved.password_recovery_enabled);
   return (
     <SettingsLayout>
       <AdminPageHeading title="访问与安全" />
@@ -50,6 +55,7 @@ export function AccessSettingsPage() {
             if (dirty)
               save({
                 registration_mode: draft.registration_mode,
+                password_recovery_enabled: draft.password_recovery_enabled,
                 mail_profile_id: draft.mail_profile_id,
               });
           }}
@@ -87,9 +93,22 @@ export function AccessSettingsPage() {
               </div>
             </SettingsSection>
             <SettingsSection
+              id="access-password-recovery"
+              title="找回密码"
+              description="开启后，用户可通过已验证邮箱自行重置密码。"
+            >
+              <SettingsToggle
+                label="允许全站找回密码"
+                value={draft.password_recovery_enabled}
+                onChange={(enabled) =>
+                  setDraft({ ...draft, password_recovery_enabled: enabled })
+                }
+              />
+            </SettingsSection>
+            <SettingsSection
               id="access-email"
               title="邮箱验证"
-              description="选择发送邮箱验证码时使用的发信配置。"
+              description="选择发送注册、邮箱验证和找回密码邮件时使用的发信配置。"
             >
               <div className="admin-settings-field">
                 <label htmlFor="access-sender">

@@ -3,7 +3,7 @@ import { adminDestination } from "../admin/navigation";
 /** Explicit code routes are reachable without a public-content snapshot. */
 export function isManagementRoute(pathname: string): boolean {
   return (
-    /^\/(?:login(?:\/register)?|account)\/?$/.test(pathname) ||
+    /^\/(?:login(?:\/(?:register|recover))?|account)\/?$/.test(pathname) ||
     !!adminDestination(pathname)
   );
 }

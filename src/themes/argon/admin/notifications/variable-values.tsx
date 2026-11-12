@@ -65,7 +65,33 @@ export function templateSampleValues(
   const english = locale.toLowerCase().split("-")[0] === "en";
   const reviewPath =
     "/admin/comments?comment=83f05ab3-485d-4d50-8823-355af9b5c53f";
-  const security = event === "security.email_verification";
+  const accountSamples: Record<string, readonly string[]> = {
+    "security.email_verification": [
+      "验证邮箱",
+      "Email verification",
+      "你收到这封邮件是因为有人请求验证此邮箱。",
+      "You received this email because verification was requested for this address.",
+    ],
+    "security.registration_verification": [
+      "注册账号",
+      "Account registration",
+      "你收到这封邮件是因为有人使用此邮箱申请注册。",
+      "You received this email because registration was requested for this address.",
+    ],
+    "security.password_recovery": [
+      "找回密码",
+      "Password recovery",
+      "你收到这封邮件是因为有人请求重置账号密码。",
+      "You received this email because a password reset was requested.",
+    ],
+    "security.password_reset_completed": [
+      "",
+      "",
+      "这封邮件用于通知你账号密码已重置。",
+      "You received this email to confirm that your password was reset.",
+    ],
+  };
+  const accountSample = accountSamples[event];
   const origin = platform === "email" ? site.url || "https://example.com" : "";
   const values: Record<string, string> = {
     ...notificationSampleValues,
@@ -77,14 +103,17 @@ export function templateSampleValues(
     "comment.review_url": origin + reviewPath,
     "comment.approve_url": origin + reviewPath + "&action=approve",
     "comment.reject_url": origin + reviewPath + "&action=reject",
-    "verification.purpose": english ? "Email verification" : "验证邮箱",
-    "mail.reason": security
-      ? english
-        ? "You received this email because verification was requested for this address."
-        : "你收到这封邮件是因为有人请求验证此邮箱。"
-      : english
+    "verification.code":
+      event === "security.password_recovery"
+        ? "ExampleRecoveryCode1234567890abc"
+        : notificationSampleValues["verification.code"],
+    "verification.expires_minutes": "15",
+    "verification.purpose": accountSample?.[english ? 1 : 0] ?? "",
+    "mail.reason":
+      accountSample?.[english ? 3 : 2] ??
+      (english
         ? "You received this email because the site sends you this notification."
-        : "你收到这封邮件是因为站点为你配置了这项通知。",
+        : "你收到这封邮件是因为站点为你配置了这项通知。"),
   };
   for (const key of ["resource.url", "content.url", "admin.url"] as const) {
     values[key] = origin + notificationSampleValues[key];

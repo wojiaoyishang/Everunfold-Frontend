@@ -333,10 +333,10 @@ if (auth) {
     !Array.isArray(operations) ||
     operations.some(
       (op) =>
-        !/^(readAuthSession|login|completeSecondFactor|readTwoFactor|beginTwoFactor|activateTwoFactor|disableTwoFactor|rotateRecoveryCodes|logout|readAdminSession|readRegistrationOptions|readRegistrationStatus|requestRegistration|confirmRegistration)$/.test(
+        !/^(readAuthSession|login|completeSecondFactor|readTwoFactor|beginTwoFactor|activateTwoFactor|disableTwoFactor|rotateRecoveryCodes|logout|readAdminSession|readRegistrationOptions|readRegistrationStatus|requestRegistration|confirmRegistration|readRecoveryOptions|requestPasswordRecovery|confirmPasswordRecovery)$/.test(
           op.name,
         ) ||
-        !/^\/v1\/(auth\/(session|login|login\/second-factor|logout|registration\/(options|status|request|confirm))|account\/two-factor(\/setup|\/activate|\/disable|\/recovery-codes)?|admin\/session)$/.test(
+        !/^\/v1\/(auth\/(session|login|login\/second-factor|logout|registration\/(options|status|request|confirm)|password-recovery\/(options|request|confirm))|account\/two-factor(\/setup|\/activate|\/disable|\/recovery-codes)?|admin\/session)$/.test(
           op.path,
         ) ||
         !["GET", "POST"].includes(op.method) ||
