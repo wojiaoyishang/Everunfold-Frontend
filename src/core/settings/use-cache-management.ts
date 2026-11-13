@@ -7,16 +7,26 @@ import {
   readFrontendNodes,
   readNodeCache,
   rebuildNodeCache,
+  saveCachePolicy,
   type CacheNodeState,
+  type CachePolicy,
   type CacheRebuild,
+  type PolicyState,
 } from "@/core/contracts/settings";
 import { RequestError } from "@/core/http/request";
+import { settingsFailure } from "./editor";
 
 type Action = CacheRebuild["scope"] | "prune";
+type PolicyDraft = { base: PolicyState; value: CachePolicy };
 
 export function useCacheManagement(localNode: string) {
   const { baseUrl, csrfToken } = useAdminRequest();
-  const [nodes, setNodes] = useState<string[] | null>(null);
+  const [nodes, setNodes] = useState<PolicyState[] | null>(null);
+  const [drafts, setDrafts] = useState(() => new Map<string, PolicyDraft>());
+  const [policyNotice, setPolicyNotice] = useState<{
+    type: "saved" | "error";
+    text: string;
+  }>();
   const [selected, select] = useState("");
   const [snapshot, setSnapshot] = useState<CacheNodeState>();
   const [loading, setLoading] = useState(false);
@@ -29,13 +39,20 @@ export function useCacheManagement(localNode: string) {
   const current = useRef<AbortController | null>(null);
   const listing = useRef<AbortController | null>(null);
   const operation = useRef<AbortController | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<Action | "policy">();
   const [watch, setWatch] = useState(0);
-  const node =
-    nodes?.find((id) => id === selected) ??
-    nodes?.find((id) => id === localNode) ??
-    nodes?.[0] ??
-    "";
+  const policy =
+    nodes?.find((item) => item.node_id === selected) ??
+    nodes?.find((item) => item.node_id === localNode) ??
+    nodes?.[0];
+  const node = policy?.node_id ?? "";
+  const draft = drafts.get(node);
+  const policyConflict = Boolean(
+    draft &&
+    policy &&
+    (draft.base.revision !== policy.revision ||
+      draft.base.source_epoch !== policy.source_epoch),
+  );
   const state = snapshot?.node_id === node ? snapshot : undefined;
 
   const loadNodes = useCallback(async () => {
@@ -46,8 +63,7 @@ export function useCacheManagement(localNode: string) {
     setListError(false);
     try {
       const response = await readFrontendNodes(baseUrl, { signal });
-      if (!signal.aborted)
-        setNodes(response.data.nodes.map((entry) => entry.node_id));
+      if (!signal.aborted) setNodes(response.data.nodes);
     } catch {
       if (!signal.aborted) setListError(true);
     }
@@ -114,15 +130,63 @@ export function useCacheManagement(localNode: string) {
     return () => window.clearInterval(timer);
   }, [node, pending, watch, refresh]);
 
-  async function run(action: Action) {
+  function resetPolicy() {
+    setDrafts((current) => {
+      const next = new Map(current);
+      next.delete(node);
+      return next;
+    });
+    setPolicyNotice(undefined);
+  }
+
+  function updatePolicy(change: Partial<CachePolicy>) {
+    if (!policy || operation.current) return;
+    setPolicyNotice(undefined);
+    setDrafts((current) => {
+      const previous = current.get(node);
+      const base = previous?.base ?? policy;
+      const value = { ...base.value, ...previous?.value, ...change };
+      const next = new Map(current);
+      if (JSON.stringify(base.value) === JSON.stringify(value))
+        next.delete(node);
+      else next.set(node, { base, value });
+      return next;
+    });
+  }
+
+  async function run(action: Action | PolicyDraft) {
     if (!node || operation.current) return false;
     const request = new AbortController();
     operation.current = request;
-    setBusy(true);
-    setActionError("");
-    setResult(undefined);
+    const savingPolicy = typeof action !== "string";
+    setBusy(savingPolicy ? "policy" : action);
+    if (savingPolicy) {
+      setPolicyNotice(undefined);
+    } else {
+      setActionError("");
+      setResult(undefined);
+    }
     try {
-      if (action === "prune") {
+      if (savingPolicy) {
+        const { data } = await saveCachePolicy(
+          baseUrl,
+          node,
+          { expected_revision: action.base.revision, value: action.value },
+          csrfToken,
+          { signal: request.signal },
+        );
+        if (request.signal.aborted) return false;
+        // An earlier list request must not replace the revision just saved.
+        listing.current?.abort();
+        setNodes(
+          (current) =>
+            current?.map((item) => (item.node_id === node ? data : item)) ??
+            null,
+        );
+        resetPolicy();
+        setPolicyNotice({ type: "saved", text: "节点策略已保存。" });
+        setWatch((value) => value + 1);
+      } else if (action === "prune") {
         const { data } = await pruneNodeCache(baseUrl, node, csrfToken, {
           signal: request.signal,
           timeoutMs: 12000,
@@ -145,18 +209,24 @@ export function useCacheManagement(localNode: string) {
       return true;
     } catch (error) {
       if (!request.signal.aborted) {
-        setActionError(
-          error instanceof RequestError && error.status === 403
-            ? "当前账号无权管理缓存。"
-            : "未能确认操作结果，请刷新状态后重试。",
-        );
+        if (savingPolicy) {
+          setPolicyNotice({ type: "error", text: settingsFailure(error) });
+          if (error instanceof RequestError && error.status === 409)
+            void loadNodes();
+        } else {
+          setActionError(
+            error instanceof RequestError && error.status === 403
+              ? "当前账号无权管理缓存。"
+              : "未能确认操作结果，请刷新状态后重试。",
+          );
+        }
         void refresh();
       }
       return false;
     } finally {
       if (operation.current === request) {
         operation.current = null;
-        if (!request.signal.aborted) setBusy(false);
+        if (!request.signal.aborted) setBusy(undefined);
       }
     }
   }
@@ -169,15 +239,32 @@ export function useCacheManagement(localNode: string) {
     listError,
     readError,
     actionError,
-    busy,
+    busy: busy !== undefined,
     result,
-    run,
+    run: (action: Action) => run(action),
+    policy: {
+      value: draft?.value ?? policy?.value,
+      dirty: Boolean(draft),
+      hasChanges: drafts.size > 0,
+      conflict: policyConflict,
+      saving: busy === "policy",
+      notice: policyNotice,
+      update: updatePolicy,
+      reset: resetPolicy,
+      save: () => {
+        if (draft && !policyConflict) void run(draft);
+      },
+    },
     reloadNodes: () => void loadNodes(),
-    refresh: () => void refresh(),
+    refresh: () => {
+      void loadNodes();
+      void refresh();
+    },
     clearActionError: () => setActionError(""),
     select: (id: string) => {
       setResult(undefined);
       setReadError(false);
+      setPolicyNotice(undefined);
       select(id);
     },
   };

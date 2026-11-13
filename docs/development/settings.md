@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-节点磁盘版本、占用与旧文件清理见[缓存管理指南](cache-management.md)。
+节点策略、磁盘版本、占用与旧文件清理见[缓存管理指南](cache-management.md)。
 
 版本：settings-runtime-20，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)、[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)与[ADR0111](../decisions/0111-sparse-custom-translation-overrides.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
@@ -14,7 +14,8 @@
 | `/admin/icons`            | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用                                                                                                                                          |
 | `/admin/media`            | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取                                                                                                |
 | `/admin/settings/theme`   | 公共宿主保留已安装主题切换；具体设置由当前主题目录的 `theme-settings.tsx` 动态提供。Argon 包含外观/横幅/字体/首页/文章显示/代码/背景，Paper 包含自己的纸张底色；不同主题分别保存                   |
-| `/admin/settings/system`  | 验证码提供方与全局规则、API Key 明确授权豁免和请求限额；按稳定节点 ID 保存动态请求策略；查看期望/确认版本、重新同步；部署来源脱敏展示；旧 `/admin/settings/captcha` 跳转到验证码分区 |
+| `/admin/settings/system`  | 验证码规则、站点与主题发布状态、部署信息和节点策略入口 |
+| `/admin/settings/cache`   | 选择节点查看磁盘副本与投递回执，编辑节点策略、重发副本和清理旧文件 |
 | `/admin/translations`     | 以内置 `zh-CN`/`en` 只读语言包为基础，按前台、后台和 API 消息维护数据库覆盖；搜索、状态筛选、分页、恢复默认和独立翻译修订 |
 
 settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码与背景的主题 profile、`site.footer`、`site.author_tagline`和`site.glossary`，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON在读取时补默认值，文章内容和术语匹配结果不进入设置或正文快照。顶层`theme`是活动主题的兼容投影，权威分主题值在`theme_options[themeId]`。主题表单见[主题设置指南](theme-settings.md)，代码字体继续只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL。参数和加载规则见[代码指南](code-blocks.md)。
@@ -62,7 +63,7 @@ uv run python -m tools.run_settings_dev --frontend-root E:/Programming/Node/Ever
 
 独立部署的入口分别是：前端 `npm run settings:receiver`；后端 `uv run celery -A app.entrypoints.worker:celery_app worker` 和 `uv run python -m app.entrypoints.scheduler`。凭据由各服务的运行环境注入；进程监督、TLS、生产 Worker pool/权限和磁盘策略另行部署验证。Scheduler 不需要发送密钥，只有真正投递的 Worker 读取凭据。
 
-修改实际 TOML/环境变量后需重启相应 API/接收器/Worker/Scheduler；后台保存业务设置无需重启。完成部署后在系统页点当前节点「重新同步」，确认站点和策略均已应用。只保存数据库而未运行接收/Worker/Scheduler 时，前台会继续保留原已应用版本，不能把「已保存」当所有节点已更新。
+修改实际 TOML/环境变量后需重启相应 API、接收器、Worker 或 Scheduler。完成部署后，在缓存管理选择当前节点并点击「重新同步全部」。等待节点确认后核对站点设置和策略的磁盘版本。
 
 ## 副本结构与恢复
 
@@ -78,7 +79,7 @@ settings.directory/
 
 - 后端离线、有公开快照/设置：直接使用本地完整版本，无定时过期，正文/菜单/SEO 仍可输出；动态请求按既有渐进失败行为隐藏失败字段。
 - 无公开快照：公开页面为可恢复 503，不能拿空配置伪装正常；登录/后台壳可打开，身份校验失败会提示连接异常。
-- 最新设置文件损坏：失败关闭，禁止悄悄回退旧设置；修复文件或使用正确版本重新配置节点。对于完整丢失的副本，系统页「重新同步」可以重发当前已确认版本。没有自动损坏修复/文件巡检。
+- 最新设置文件损坏时会停止使用该副本。修复文件或使用正确版本重新配置节点。副本完整丢失时，可在缓存管理重新同步当前版本。
 - 网络失败：Worker 有界重试，后台可手动重新同步；未知发送结果可以幂等重发。同版本不同内容不覆盖。
 - 数据库还原：必须维护 source_epoch 变更流程，分别调整节点绑定并重新发布，不能把新库旧版本当原库更高版本接受。
 - 新菜单已设置但仍见旧页面：检查节点状态后发起一次新的页面访问。现阶段不强制刷新已打开标签，也没有跨节点框架派生缓存失效器。

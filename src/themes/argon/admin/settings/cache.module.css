@@ -57,8 +57,28 @@
 .resource dd {
   text-align: right;
 }
-.resource > button {
-  justify-self: start;
+.policyForm {
+  display: grid;
+  gap: 1rem;
+}
+.policyNode {
+  display: block;
+  max-inline-size: min(18rem, 40vw);
+  overflow-wrap: anywhere;
+}
+.policyField {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.policyField :global(.ui-input) {
+  max-inline-size: 140px;
+  min-inline-size: 0;
+}
+.policyField > span {
+  color: var(--admin-muted);
+  font-size: 12px;
+  white-space: nowrap;
 }
 @media (max-width: 580px) {
   .summary {

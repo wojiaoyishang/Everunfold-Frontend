@@ -11,13 +11,16 @@ import type {
   DeliverySummary,
 } from "@/core/contracts/settings";
 import { useCacheManagement } from "@/core/settings/use-cache-management";
+import { UnsavedAccountChanges } from "../../account/unsaved";
 import { Button } from "../../components/ui/primitives";
+import { RouteLink } from "../../components/ui/route-link";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "./section-navigation";
 import { SettingsSection } from "./shared";
+import { CachePolicySection } from "./cache-policy";
 import styles from "./cache.module.css";
 
 type CacheResource = CacheDiskResource["resource"];
@@ -94,9 +97,13 @@ export function CacheSettingsPage({ localNode }: { localNode: string }) {
   };
   return (
     <SettingsLayout fullWidth>
+      <UnsavedAccountChanges
+        dirty={cache.policy.hasChanges}
+        busy={cache.policy.saving}
+      />
       <AdminPageHeading
         title="缓存管理"
-        description="查看各前端节点磁盘上的公开副本。"
+        description="查看前端节点磁盘上的公开副本并配置节点策略。"
       />
       <SettingsSection
         id="cache-node"
@@ -109,9 +116,12 @@ export function CacheSettingsPage({ localNode }: { localNode: string }) {
               name="cache-node"
               label="前端节点"
               value={cache.node}
-              options={cache.nodes.map((id) => ({
-                value: id,
-                label: id === localNode ? `${id} · ${t("当前节点")}` : id,
+              options={cache.nodes.map(({ node_id }) => ({
+                value: node_id,
+                label:
+                  node_id === localNode
+                    ? `${node_id} · ${t("当前节点")}`
+                    : node_id,
               }))}
               onValueChange={cache.select}
               disabled={cache.busy}
@@ -239,14 +249,28 @@ export function CacheSettingsPage({ localNode }: { localNode: string }) {
                         {sync ? <UiText text={syncLabels[sync.state]} /> : "—"}
                       </dd>
                     </dl>
-                    {editable && (
-                      <Button
-                        className="admin-button"
-                        disabled={!canRebuild || cache.busy}
-                        onClick={(event) => open(name, event.currentTarget)}
-                      >
-                        <UiText text="重新同步" />
-                      </Button>
+                    {(editable || name === "cache-policy") && (
+                      <div className="admin-settings-inline-actions">
+                        {editable && (
+                          <Button
+                            className="admin-button"
+                            disabled={!canRebuild || cache.busy}
+                            onClick={(event) => open(name, event.currentTarget)}
+                          >
+                            <UiText text="重新同步" />
+                          </Button>
+                        )}
+                        {name === "cache-policy" && (
+                          <RouteLink
+                            className="admin-settings-link"
+                            href="#settings-nodes"
+                          >
+                            <UiText
+                              text={editable ? "编辑节点策略" : "查看节点策略"}
+                            />
+                          </RouteLink>
+                        )}
+                      </div>
                     )}
                   </article>
                 );
@@ -290,6 +314,12 @@ export function CacheSettingsPage({ localNode }: { localNode: string }) {
           </p>
         )}
       </SettingsSection>
+      <CachePolicySection
+        node={cache.node}
+        policy={cache.policy}
+        editable={editable}
+        busy={cache.busy}
+      />
       <ConfirmDialog
         open={action !== undefined}
         title={label}

@@ -4,9 +4,11 @@ import { usePathname } from "next/navigation";
 import { SettingsEditorProvider } from "./editor";
 import { PluginImpactDialog } from "@/themes/argon/admin/settings/plugin-impact-dialog";
 
-/** Application credentials never enter the public settings editor or delivery projection. */
+/** These pages have their own data and save flows. */
 export function SettingsRouteBoundary({ children }: { children: ReactNode }) {
-  return usePathname() === "/admin/settings/api-keys" ? (
+  const path = usePathname();
+  return path === "/admin/settings/api-keys" ||
+    path === "/admin/settings/cache" ? (
     children
   ) : (
     <SettingsEditorProvider>
