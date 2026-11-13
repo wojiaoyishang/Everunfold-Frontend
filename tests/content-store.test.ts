@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -68,4 +68,45 @@ test("a durable newer intent fails closed through restart until its exact comple
   );
   await assert.rejects(store.read());
   await assert.rejects(new FileContentStore(root, "test", randomUUID()).read());
+});
+
+test("pruning old payloads keeps current content, durable barriers and unrelated files", async (t) => {
+  const root = await mkdtemp(path.join(tmpdir(), "everunfold-content-prune-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  const epoch = randomUUID();
+  const store = new FileContentStore(root, "test", epoch);
+  const folder = path.join(root, "releases", "test", epoch);
+  const old = path.join(folder, "public-content.1.snapshot.json");
+  const unrelated = path.join(folder, "unrelated.json");
+  await store.apply(release(epoch, 1));
+  await store.apply(release(epoch, 2, true));
+  await writeFile(unrelated, "untouched");
+  const size = (await stat(old)).size;
+  assert.equal((await store.usage(2)).reclaimable_bytes, size);
+  assert.deepEqual(await store.prune(), {
+    removed_files: 1,
+    removed_bytes: size,
+  });
+  await assert.rejects(stat(old), { code: "ENOENT" });
+  assert.ok(await stat(path.join(folder, "public-content.1.intent.json")));
+  assert.equal(await readFile(unrelated, "utf8"), "untouched");
+  assert.equal((await store.usage(2)).reclaimable_bytes, 0);
+  const restarted = new FileContentStore(root, "test", epoch);
+  assert.deepEqual((await restarted.read())?.contents, []);
+  const next = release(epoch, 3, true);
+  await publishImmutableJson(
+    path.join(folder, "public-content.3.intent.json"),
+    {
+      revision: 3,
+      digest: jsonDigest(next),
+    },
+  );
+  assert.deepEqual(await restarted.prune(), {
+    removed_files: 0,
+    removed_bytes: 0,
+  });
+  await restarted.apply(release(epoch, 1));
+  await assert.rejects(restarted.read());
+  await restarted.apply(next);
+  assert.equal((await restarted.read())?.generation, 3);
 });

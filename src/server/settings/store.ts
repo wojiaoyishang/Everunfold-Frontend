@@ -1,11 +1,16 @@
 /** Node-only storage adapter. No identity, credentials or article body belongs here. */
-import { open, readdir } from "node:fs/promises";
+import { open } from "node:fs/promises";
 import { jsonDigest, publishImmutableJson } from "../storage/immutable-json";
 import path from "node:path";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "@/core/contracts/settings-v1-schema";
 import type { SettingsDelivery } from "@/core/contracts/settings";
+import {
+  pruneRevisions,
+  revisionFiles,
+  revisionUsage,
+} from "../storage/revisions";
 
 const ajv = new Ajv({ strict: true });
 addFormats(ajv);
@@ -51,29 +56,50 @@ export class FileSettingsStore implements SettingsStore {
   private folder() {
     return path.join(this.directory, this.nodeId, this.sourceEpoch);
   }
+  private files(resource: SettingsResource) {
+    return revisionFiles(
+      this.folder(),
+      new RegExp(`^${resource}\\.([1-9]\\d*)\\.json$`),
+    );
+  }
+  usage(resource: SettingsResource, verifiedRevision: number | null) {
+    return this.files(resource).then((files) =>
+      revisionUsage(this.folder(), files, verifiedRevision),
+    );
+  }
+  async prune(resource: SettingsResource) {
+    const current = await this.read(resource).catch(() => null);
+    if (!current) return { removed_files: 0, removed_bytes: 0 };
+    return pruneRevisions(
+      this.folder(),
+      await this.files(resource),
+      current.revision,
+    );
+  }
   async read(resource: SettingsResource) {
-    let names: string[];
+    const [newest] = await this.files(resource);
+    if (!newest) return null;
     try {
-      names = await readdir(this.folder());
+      return await this.readRevision(resource, newest.name, newest.revision);
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
-      throw error;
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      const [latest] = await this.files(resource);
+      if (!latest || latest.revision <= newest.revision) throw error;
+      // Cleanup can remove a revision we selected just as its successor arrived.
+      return this.readRevision(resource, latest.name, latest.revision);
     }
-    const pattern = new RegExp(`^${resource}\\.(\\d+)\\.json$`);
-    const revisions = names
-      .flatMap((name) => {
-        const match = pattern.exec(name);
-        return match ? [{ name, revision: Number(match[1]) }] : [];
-      })
-      .sort((a, b) => b.revision - a.revision);
-    if (!revisions.length) return null;
-    const newest = revisions[0];
-    const file = await open(path.join(this.folder(), newest.name), "r");
+  }
+  private async readRevision(
+    resource: SettingsResource,
+    name: string,
+    revision: number,
+  ) {
+    const file = await open(path.join(this.folder(), name), "r");
     try {
       if ((await file.stat()).size > 65536)
         throw new Error("Oversized settings revision");
       const value = this.checked(JSON.parse(await file.readFile("utf8")));
-      if (value.resource !== resource || value.revision !== newest.revision)
+      if (value.resource !== resource || value.revision !== revision)
         throw new Error("Settings revision mismatch");
       return value;
     } finally {

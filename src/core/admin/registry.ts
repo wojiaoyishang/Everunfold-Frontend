@@ -23,6 +23,7 @@ export type AdminPageIcon =
   | "notification"
   | "notification-platform"
   | "node-settings"
+  | "cache"
   | "runtime"
   | "system";
 export interface AdminMenuGroup {

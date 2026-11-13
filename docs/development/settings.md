@@ -1,5 +1,7 @@
 # 基本设置运行指南
 
+节点磁盘版本、占用与旧文件清理见[缓存管理指南](cache-management.md)。
+
 版本：settings-runtime-20，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)、[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)与[ADR0111](../decisions/0111-sparse-custom-translation-overrides.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
 ## 使用入口

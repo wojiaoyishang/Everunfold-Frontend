@@ -29,6 +29,7 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   theme: "sun",
   system: "server",
   "node-settings": "sliders",
+  cache: "archive",
   runtime: "activity",
   overview: "grid",
   content: "copy",

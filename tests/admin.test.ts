@@ -101,6 +101,7 @@ test("admin navigation separates primary content, tools, appearance and system s
     "core.settings.plugins",
     "core.settings.site",
     "core.settings.system",
+    "core.settings.cache",
     "core.settings.runtime",
     "core.settings.api-keys",
   ]);

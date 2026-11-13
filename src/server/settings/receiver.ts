@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { BlockList, isIP } from "node:net";
 import { createHash, timingSafeEqual } from "node:crypto";
 import type { ReceiverStatus } from "@/core/contracts/settings";
+import type { cacheMaintenance } from "./cache-maintenance";
 import type { SettingsStore } from "./store";
 import type { ContentStore } from "../content/store";
 
@@ -38,6 +39,7 @@ export function settingsReceiver(
   content?: ContentStore,
   identity?: Pick<ReceiverStatus, "node_id" | "source_epoch">,
   isCurrent: () => boolean = () => true,
+  maintenance?: ReturnType<typeof cacheMaintenance>,
 ) {
   if (token.length < 32 || !peers.length)
     throw new Error("Settings receiver credentials are not configured");
@@ -77,6 +79,19 @@ export function settingsReceiver(
         return;
       }
       if (
+        maintenance &&
+        request.method === "GET" &&
+        request.url === "/internal/cache/v1/status"
+      ) {
+        request.resume();
+        try {
+          reply(200, await maintenance.status());
+        } catch {
+          reply(503, { error: "cache_state_unavailable" });
+        }
+        return;
+      }
+      if (
         identity &&
         request.method === "GET" &&
         request.url === "/internal/settings/status"
@@ -95,7 +110,9 @@ export function settingsReceiver(
           : request.url === "/internal/cache/v1/apply"
             ? content
             : undefined;
-      if (request.method !== "POST" || !selected) {
+      const prune =
+        maintenance && identity && request.url === "/internal/cache/v1/prune";
+      if (request.method !== "POST" || (!selected && !prune)) {
         reply(404, { error: "unknown_operation" });
         request.resume();
         return;
@@ -112,7 +129,14 @@ export function settingsReceiver(
       try {
         for await (const chunk of request) {
           size += chunk.length;
-          if (size > (selected === content ? content.maxBytes : 65536)) {
+          if (
+            size >
+            (prune
+              ? 4096
+              : selected === content && content
+                ? content.maxBytes
+                : 65536)
+          ) {
             reply(413, { error: "too_large" });
             request.resume();
             return;
@@ -120,9 +144,26 @@ export function settingsReceiver(
           chunks.push(Buffer.from(chunk));
         }
         const bytes = Buffer.concat(chunks);
-        const applied = await selected.apply(
-          JSON.parse(bytes.toString("utf8")),
-        );
+        const payload = JSON.parse(bytes.toString("utf8"));
+        if (prune) {
+          if (
+            !payload ||
+            Object.keys(payload).length !== 2 ||
+            payload.node_id !== identity.node_id ||
+            payload.source_epoch !== identity.source_epoch
+          ) {
+            reply(409, { error: "cache_identity_mismatch" });
+            return;
+          }
+          try {
+            reply(200, await maintenance.prune());
+          } catch {
+            reply(503, { error: "cache_prune_unconfirmed" });
+          }
+          return;
+        }
+        if (!selected) return;
+        const applied = await selected.apply(payload);
         reply(200, {
           node_id: applied.node_id,
           source_epoch: applied.source_epoch,

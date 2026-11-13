@@ -5,6 +5,7 @@ import {
   readConfigurationFiles,
 } from "../src/core/config/files";
 import { FileSettingsStore } from "../src/server/settings/store";
+import { cacheMaintenance } from "../src/server/settings/cache-maintenance";
 import { settingsReceiver } from "../src/server/settings/receiver";
 import { FileContentStore } from "../src/server/content/store";
 const root = process.env.EVERUNFOLD_PROJECT_ROOT ?? process.cwd();
@@ -26,12 +27,16 @@ const content = new FileContentStore(
   config.settings.sourceEpoch,
   config.cache.maxSnapshotBytes,
 );
+const target = {
+  node_id: config.frontendNodeId,
+  source_epoch: config.settings.sourceEpoch,
+};
 const server = settingsReceiver(
   store,
   token,
   config.backend.allowedPeerIps,
   content,
-  { node_id: config.frontendNodeId, source_epoch: config.settings.sourceEpoch },
+  target,
   () => {
     try {
       const current = readConfigurationFiles(root);
@@ -43,6 +48,7 @@ const server = settingsReceiver(
       return false;
     }
   },
+  cacheMaintenance(target, store, content),
 );
 server.listen(config.settings.receiverPort, config.settings.receiverHost, () =>
   console.log(`Content/settings receiver ready for ${config.frontendNodeId}`),

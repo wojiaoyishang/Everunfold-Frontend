@@ -1,0 +1,70 @@
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: end;
+}
+.toolbar > :first-child {
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+.summary,
+.resources {
+  display: grid;
+  gap: 0.75rem;
+}
+.summary {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  margin: 0;
+}
+.resources {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+.summary > div,
+.resource {
+  border: 1px solid var(--admin-border);
+  border-radius: var(--radius);
+  min-width: 0;
+  padding: 0.8rem;
+}
+.summary > div {
+  background: var(--admin-subtle);
+}
+.summary dd,
+.resource dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.summary dt,
+.resource dt {
+  color: var(--admin-muted);
+}
+.resource {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+}
+.resource h3,
+.resource dl {
+  margin: 0;
+}
+.resource dl {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.35rem 0.6rem;
+}
+.resource dd {
+  text-align: right;
+}
+.resource > button {
+  justify-self: start;
+}
+@media (max-width: 580px) {
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .resource dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

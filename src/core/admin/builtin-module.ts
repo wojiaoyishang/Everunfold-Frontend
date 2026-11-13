@@ -173,6 +173,14 @@ export const builtinAdminModule = {
       menu: { group: "core.settings", order: 40 },
     },
     {
+      id: "core.settings.cache",
+      href: "/admin/settings/cache",
+      label: "缓存管理",
+      description: "检查节点磁盘副本、清理旧版本与重新同步",
+      icon: "cache",
+      menu: { group: "core.settings", order: 45 },
+    },
+    {
       id: "core.settings.captcha",
       href: "/admin/settings/captcha",
       label: "验证码设置",

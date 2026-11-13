@@ -1,5 +1,5 @@
 /** Complete public releases with a durable minimum-version barrier. Never contains drafts. */
-import { open, readdir, readFile } from "node:fs/promises";
+import { open, readFile } from "node:fs/promises";
 import path from "node:path";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
@@ -8,6 +8,11 @@ import type { ContentDelivery } from "@/core/contracts/content-admin";
 import type { PublicSnapshot } from "@/core/content/types";
 import { parsePublicSnapshot } from "../../core/content/validation";
 import { jsonDigest, publishImmutableJson } from "../storage/immutable-json";
+import {
+  pruneRevisions,
+  revisionFiles,
+  revisionUsage,
+} from "../storage/revisions";
 
 const ajv = new Ajv({ strict: true });
 addFormats(ajv);
@@ -39,6 +44,26 @@ export class FileContentStore implements ContentStore {
   }
   private folder() {
     return path.join(this.directory, "releases", this.nodeId, this.sourceEpoch);
+  }
+  private files() {
+    return revisionFiles(
+      this.folder(),
+      /^public-content\.([1-9]\d*)\.(intent|snapshot)\.json$/,
+    );
+  }
+  usage(verifiedRevision: number | null) {
+    return this.files().then((files) =>
+      revisionUsage(this.folder(), files, verifiedRevision),
+    );
+  }
+  async prune() {
+    const current = await this.read().catch(() => null);
+    if (!current?.generation) return { removed_files: 0, removed_bytes: 0 };
+    return pruneRevisions(
+      this.folder(),
+      await this.files(),
+      current.generation,
+    );
   }
   private checked(input: unknown): ContentDelivery {
     if (
@@ -76,20 +101,18 @@ export class FileContentStore implements ContentStore {
       jsonDigest({ node_id: this.nodeId, source_epoch: this.sourceEpoch })
     )
       throw new Error("Content source binding changed");
-    const names = await readdir(this.folder());
-    const revisions = names.flatMap((name) => {
-      const match = /^public-content\.(\d+)\.(?:intent|snapshot)\.json$/.exec(
-        name,
-      );
-      return match && Number.isSafeInteger(Number(match[1]))
-        ? [Number(match[1])]
-        : [];
-    });
-    if (!revisions.length) throw new Error("Managed content is missing");
-    const revision = revisions.reduce(
-      (latest, value) => Math.max(latest, value),
-      0,
-    );
+    const [latest] = await this.files();
+    if (!latest) throw new Error("Managed content is missing");
+    try {
+      return await this.readRevision(latest.revision);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      const [newest] = await this.files();
+      if (!newest || newest.revision <= latest.revision) throw error;
+      return this.readRevision(newest.revision);
+    }
+  }
+  private async readRevision(revision: number) {
     const intent = await this.json(
       path.join(this.folder(), `public-content.${revision}.intent.json`),
       4096,
