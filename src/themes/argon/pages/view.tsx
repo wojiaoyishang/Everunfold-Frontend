@@ -2,7 +2,11 @@ import { ExtensionComponent } from "@/core/extensions/components";
 import { ThemeTemplate, ThemeSlot } from "@/core/themes/presentation";
 import type { PublicManagedPage } from "@/core/contracts/pages";
 import { hasPageImplementation } from "@/core/pages/registry";
-import { RegisteredPageView } from "@/core/pages/registered-view";
+import type { PageArticleData } from "@/core/pages/articles";
+import {
+  RegisteredPageView,
+  useRegisteredPageImplementation,
+} from "@/core/pages/registered-view";
 import { PageFrame } from "./frame";
 import styles from "./pages.module.css";
 import { ContentLanguages } from "../components/content-languages";
@@ -16,11 +20,13 @@ export function ManagedPageView({
   onReady,
   translations,
   comments = [],
+  articleData,
 }: {
   page: PublicManagedPage;
   onReady?: () => void;
   translations?: Content["translations"];
   comments?: PublicComment[];
+  articleData?: PageArticleData;
 }) {
   if (!hasPageImplementation(page))
     throw new Error("Unavailable registered page implementation");
@@ -35,6 +41,7 @@ export function ManagedPageView({
           key={`${page.id}:${page.revision}`}
           page={page}
           translations={translations}
+          articleData={articleData}
         />
       ) : (
         <PageCommentsBoundary
@@ -49,6 +56,7 @@ export function ManagedPageView({
             page={page}
             onReady={onReady}
             translations={translations}
+            articleData={articleData}
           />
         </PageCommentsBoundary>
       )}
@@ -60,18 +68,26 @@ export function ManagedPageSurface({
   page,
   onReady,
   translations,
+  articleData,
 }: Parameters<typeof ManagedPageView>[0]) {
+  const { entry: implementation } = useRegisteredPageImplementation(page);
   return (
-    <article className={styles.page} data-reading-content="true">
+    <article
+      className={styles.page}
+      data-reading-content="true"
+      data-page-layout={implementation?.layout}
+    >
       <ThemeSlot
         name="page.header.before"
         context={{ page, preview: Boolean(onReady) }}
       />
-      <ExtensionComponent
-        name="public.page.heading"
-        page={page}
-        translations={translations}
-      />
+      {implementation?.heading !== "component" && (
+        <ExtensionComponent
+          name="public.page.heading"
+          page={page}
+          translations={translations}
+        />
+      )}
       <ThemeSlot
         name="page.header.after"
         context={{ page, preview: Boolean(onReady) }}
@@ -85,7 +101,12 @@ export function ManagedPageSurface({
           {page.source === "custom" ? (
             <PageFrame value={page} onReady={onReady} />
           ) : (
-            <RegisteredPageView page={page} onReady={onReady} />
+            <RegisteredPageView
+              page={page}
+              articleData={articleData}
+              preview={Boolean(onReady)}
+              onReady={onReady}
+            />
           )}
         </div>
       </PageImageViewerBoundary>

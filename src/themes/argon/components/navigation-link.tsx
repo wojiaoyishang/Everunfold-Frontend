@@ -15,6 +15,7 @@ import { normalizePath } from "@/core/content/urls";
 type AppLinkProps = Omit<ComponentProps<typeof Link>, "href"> & {
   href: string;
   expectedContent?: boolean;
+  localize?: boolean;
 };
 
 /** Keep Next's prefetching and browser gestures, sharing only the pending transition. */
@@ -25,6 +26,7 @@ export function AppLink({
   onNavigate,
   onClick,
   expectedContent,
+  localize = true,
   ...props
 }: AppLinkProps) {
   const { navigate, site } = useRouteState();
@@ -34,11 +36,13 @@ export function AppLink({
   const publicContent = site.contentTranslations?.[
     normalizePath(new URL(originalHref, "http://locale.invalid").pathname)
   ]?.find((item) => item.language === preferred);
-  const href = site.contentLocales?.[
-    normalizePath(new URL(sourceHref, "http://locale.invalid").pathname)
-  ]
-    ? (publicContent?.path ?? sourceHref)
-    : localizeHref(sourceHref, preferred, catalog);
+  const href = !localize
+    ? sourceHref
+    : site.contentLocales?.[
+          normalizePath(new URL(sourceHref, "http://locale.invalid").pathname)
+        ]
+      ? (publicContent?.path ?? sourceHref)
+      : localizeHref(sourceHref, preferred, catalog);
   const contentLocale =
     site.contentLocales?.[
       normalizePath(new URL(href, "http://locale.invalid").pathname)

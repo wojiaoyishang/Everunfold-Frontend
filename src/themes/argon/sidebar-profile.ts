@@ -23,7 +23,6 @@ const campfirePersonal = [
 ];
 
 const campfireFriends = [
-  { id: "school-diary", label: "高中日记归档", href: "/gzrj/" },
   {
     id: "school-blog",
     label: "鳌江中学心情屋",

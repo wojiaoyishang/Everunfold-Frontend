@@ -42,7 +42,6 @@ export function codePageMetadata(
     {
       "/search": "站内搜索",
       "/archives": "文章归档",
-      "/gzrj": "高中日记",
       "/about": "关于网站",
       "/categories": "文章分类",
       "/tags": "文章标签",
@@ -119,7 +118,6 @@ export async function CodePage(props: CodePageProps) {
         : path === "/about"
           ? "page"
           : path === "/archives" ||
-              path === "/gzrj" ||
               (path === "/article" && archiveRoute(snapshot) === path)
             ? "archives"
             : path === "/ss" || path === "/article"
@@ -197,7 +195,6 @@ function renderCodePage(
     path === "/article" ? readingPage(snapshot, "posts_page_id") : undefined;
   if (path === "/archives" || (path === "/article" && !postsPage))
     return <Archives snapshot={snapshot} />;
-  if (path === "/gzrj") return <Archives snapshot={snapshot} diary />;
   if (path === "/about") {
     const { name, author, description } = snapshot.site;
     return (

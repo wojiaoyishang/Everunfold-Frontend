@@ -7,14 +7,8 @@ import { Icon } from "./icon";
 import { snapshotLocale } from "@/core/i18n/snapshot";
 import { archiveArticles } from "@/core/content/archive";
 
-export function Archives({
-  snapshot,
-  diary = false,
-}: {
-  snapshot: PublicSnapshot;
-  diary?: boolean;
-}) {
-  const articles = archiveArticles(snapshot, diary);
+export function Archives({ snapshot }: { snapshot: PublicSnapshot }) {
+  const articles = archiveArticles(snapshot);
   const locale = snapshotLocale(snapshot);
   const reading = snapshot.site.settings?.site.reading;
   const monthLabel = new Intl.DateTimeFormat(locale, {
@@ -34,13 +28,13 @@ export function Archives({
     <>
       <PagePresentation site={snapshot.site} />
       <header className="surface page-heading">
-        <Icon name={diary ? "book" : "archive"} />
+        <Icon name="archive" />
         <div>
           <h1>
-            <UiText text={diary ? "高中日记" : "文章归档"} />
+            <UiText text="文章归档" />
           </h1>
           <p>
-            {articles.length} <UiText text={diary ? "篇日记" : "篇文章"} />
+            {articles.length} <UiText text="篇文章" />
           </p>
         </div>
       </header>
@@ -79,7 +73,7 @@ export function Archives({
         ))}
         {!articles.length && (
           <p>
-            <UiText text={diary ? "暂时还没有日记。" : "暂时还没有文章。"} />
+            <UiText text="暂时还没有文章。" />
           </p>
         )}
       </div>

@@ -10,6 +10,9 @@ export {
 } from "@/themes/argon/components/ui/primitives";
 export { Avatar } from "@/themes/argon/components/ui/avatar";
 export { Icon } from "@/themes/argon/components/icon";
+export { AppLink } from "@/themes/argon/components/navigation-link";
+export { Pagination } from "@/themes/argon/components/pagination";
+export { PublicDate } from "@/themes/argon/components/public-date";
 export { Select } from "@/themes/argon/components/ui/select";
 export { Switch } from "@/themes/argon/components/ui/switch";
 export { Modal } from "@/themes/argon/components/ui/modal";
@@ -32,7 +35,12 @@ export { useDialogDismiss } from "@/themes/argon/hooks/use-dialog-dismiss";
 export { surfacePortalTarget } from "@/core/themes/portal";
 export { createPluginDataSource } from "@/core/plugin-data/source";
 export { pageConfigurationSource } from "@/core/plugin-data/pages";
-export { readPageMetadata, savePageMetadata } from "@/core/contracts/pages";
+export {
+  readPageCategories,
+  readPageMetadata,
+  savePageMetadata,
+} from "@/core/contracts/pages";
+export { resourceUrl, taxonomyHref } from "@/core/content/urls";
 export { useAdminRequest } from "@/core/admin/account-context";
 
 export { MediaPickerDialog } from "./media-picker";

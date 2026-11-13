@@ -17,6 +17,7 @@ export type { PageCommentInput } from "@/core/pages/comment-client";
 export type { CaptchaController } from "@/core/captcha/use-captcha";
 export type { PublicComment } from "@/core/content/types";
 export type { CustomPageProps } from "@/core/pages/registered-view";
+export type { PageCategory } from "@/core/contracts/pages";
 export type {
   ThemeTemplateProps,
   ThemeSlotProps,

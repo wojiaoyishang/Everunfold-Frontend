@@ -3,6 +3,7 @@ import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Site } from "@/core/content/types";
+import type { PageArticle } from "@/core/pages/articles";
 import type { PublicManagedPage } from "@/core/contracts/pages";
 import { readManagedPage } from "@/core/contracts/pages";
 import { useAdminRequest } from "@/core/admin/account-context";
@@ -20,9 +21,11 @@ import { usePreviewReceipt } from "@/core/preview/use-preview-receipt";
 export function ManagedPagePreview({
   id,
   site,
+  articleSources,
 }: {
   id: string;
   site: Site | null;
+  articleSources: PageArticle[];
 }) {
   usePluginRuntime();
   const { baseUrl } = useAdminRequest();
@@ -143,7 +146,11 @@ export function ManagedPagePreview({
         </section>
       ) : page ? (
         hasPageImplementation(page) ? (
-          <ManagedPageView page={page} onReady={rendered} />
+          <ManagedPageView
+            page={page}
+            onReady={rendered}
+            articleData={{ sources: articleSources }}
+          />
         ) : (
           <section className={`surface ${styles.state}`} role="alert">
             <UiText text="页面实现尚未安装，配置已保留。" />

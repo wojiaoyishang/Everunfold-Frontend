@@ -5,7 +5,7 @@ import { readingPage } from "@/core/pages/reading-pages";
 import { pageLanguages } from "@/core/pages/languages";
 import { registeredPageLanguages } from "@/core/pages/registered-languages";
 import { hasPageImplementation } from "@/core/pages/registry";
-import { archiveRoute, isDiaryArticle } from "@/core/content/archive";
+import { archiveRoute } from "@/core/content/archive";
 import { localizeHref } from "@/core/i18n/locale";
 import { normalizePath } from "@/core/content/urls";
 import { SITEMAP_XML_PATH, sitemapEnabled } from "./sitemap-paths";
@@ -78,7 +78,6 @@ export function sitemapEntries(
   const articles = contents.filter((item) => item.kind === "article");
   const codePages = [
     ...(articles.length ? [archiveRoute(snapshot)] : []),
-    ...(articles.some(isDiaryArticle) ? ["/gzrj"] : []),
     ...(![...snapshot.contents, ...(snapshot.pages ?? [])].some(
       (item) => normalizePath(item.path) === "/about",
     )

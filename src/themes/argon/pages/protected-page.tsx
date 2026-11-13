@@ -9,6 +9,7 @@ import {
 import { useCaptcha, captchaFailure } from "@/core/captcha/use-captcha";
 import { ExtensionComponent } from "@/core/extensions/components";
 import type { Content } from "@/core/content/types";
+import type { PageArticleData } from "@/core/pages/articles";
 import { useReaderData } from "../components/reader-data";
 import { ReadingAccessForm } from "../components/reading-access-form";
 import styles from "./pages.module.css";
@@ -16,9 +17,11 @@ import styles from "./pages.module.css";
 export function ProtectedManagedPage({
   page,
   translations,
+  articleData,
 }: {
   page: PublicManagedPage;
   translations?: Content["translations"];
+  articleData?: PageArticleData;
 }) {
   const { store } = useReaderData();
   const [unlocked, setUnlocked] = useState<UnlockedManagedPage | null>(null);
@@ -59,6 +62,7 @@ export function ProtectedManagedPage({
         name="public.page.surface"
         page={unlocked}
         translations={translations}
+        articleData={articleData}
       />
     </PageCommentsBoundary>
   ) : (

@@ -35,12 +35,6 @@ const known: Partial<Record<string, Omit<NavigationItem, "href">>> = {
         description: "沿着时间，重读旧故事",
       },
       {
-        label: "高中日记",
-        href: "/gzrj/",
-        icon: "book",
-        description: "那些写在纸上的青春",
-      },
-      {
         label: "文章分类",
         href: "/categories",
         icon: "folder",

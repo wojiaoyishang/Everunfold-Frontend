@@ -6,8 +6,6 @@ import {
   preferredHomeHref,
 } from "../src/core/browser/home-feed-policy";
 import { queryFeed } from "../src/core/content/presentation";
-import { archiveArticles, archiveRoute } from "../src/core/content/archive";
-import { sitemapEntries } from "../src/core/seo/discovery";
 import { category, content, snapshot, tag } from "./fixtures";
 
 const origin = "https://blog.example.com/article.html";
@@ -65,30 +63,4 @@ test("homepage exclusions use stable taxonomy IDs before pagination", () => {
   );
   assert.equal(home.pages, 1);
   assert.equal(queryFeed(data, { query: "一篇文章" }).total, 3);
-});
-
-test("only public diary articles contribute a discoverable diary archive", () => {
-  const data = snapshot();
-  const diary = { ...category, slug: "gzrj" };
-  data.contents = [
-    content({ id: "ordinary" }),
-    content({ id: "diary", path: "/diary.html", categories: [diary] }),
-    content({ id: "page", kind: "page", path: "/page", categories: [diary] }),
-  ];
-  assert.equal(archiveRoute(data), "/article");
-  assert.deepEqual(
-    archiveArticles(data, true).map((item) => item.id),
-    ["diary"],
-  );
-  assert.ok(
-    sitemapEntries(data, origin).some(
-      (item) => new URL(item.url).pathname === "/gzrj",
-    ),
-  );
-  data.contents[1].access = "captcha";
-  assert.ok(
-    !sitemapEntries(data, origin).some(
-      (item) => new URL(item.url).pathname === "/gzrj",
-    ),
-  );
 });

@@ -21,6 +21,12 @@ export interface CustomPageDefinition {
   settingsModel?: SettingsModel;
   /** Share options across the configured language paths; translations stay in code. */
   localized?: boolean;
+  /** A registered page may use the reading column without the desktop sidebar. */
+  layout?: "wide";
+  /** The registered component renders the page's primary heading. */
+  heading?: "component";
+  /** Project a category of publicly readable articles from the local snapshot. */
+  articleCollection?: { categoryOption: string; pageSize: number };
   comments?: PageCommentsPlacement;
   imageViewer?: PageImageViewerOptions;
 }

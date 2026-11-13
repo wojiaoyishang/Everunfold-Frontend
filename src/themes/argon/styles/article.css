@@ -386,11 +386,15 @@
 }
 
 @media (min-width: 901px) {
-  .blog-container:has(.main-column [data-article-layout="wide"]) {
+  .blog-container:has(
+    .main-column :is([data-article-layout="wide"], [data-page-layout="wide"])
+  ) {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .blog-container:has(.main-column [data-article-layout="wide"])
+  .blog-container:has(
+      .main-column :is([data-article-layout="wide"], [data-page-layout="wide"])
+    )
     > .site-sidebar {
     display: none;
   }

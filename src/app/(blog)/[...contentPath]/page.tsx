@@ -13,6 +13,13 @@ import { ManagedPageView } from "@/themes/argon/pages/view";
 import { pageLanguages } from "@/core/pages/languages";
 import { registeredPageLanguages } from "@/core/pages/registered-languages";
 import { normalizeCatalog } from "@/core/i18n/catalog";
+import { snapshotLocale } from "@/core/i18n/snapshot";
+import { pageImplementation } from "@/core/pages/registry";
+import {
+  pageArticleCategory,
+  pageArticleCollection,
+  pageArticleSources,
+} from "@/core/pages/articles";
 import { PagePresentation } from "@/themes/argon/components/route-state";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -178,7 +185,23 @@ export default async function ContentPage({
     return (
       <CodePage snapshot={snapshot} path="/article" parameters={parameters} />
     );
-  if (managed)
+  if (managed) {
+    const collection = pageImplementation(managed)?.articleCollection;
+    const category =
+      collection && pageArticleCategory(managed, collection.categoryOption);
+    const articleData =
+      collection &&
+      (managed.access === "captcha"
+        ? { sources: pageArticleSources(snapshot) }
+        : {
+            collection: pageArticleCollection(
+              category ? pageArticleSources(snapshot, category) : [],
+              category,
+              snapshotLocale(snapshot),
+              pageNumber(parameters.page),
+              collection.pageSize,
+            ),
+          });
     return (
       <>
         <PagePresentation
@@ -189,9 +212,11 @@ export default async function ContentPage({
           page={managed}
           translations={pageLanguages(snapshot, managed)}
           comments={snapshot.comments[managed.id] ?? []}
+          articleData={articleData}
         />
       </>
     );
+  }
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
   if (codePath === "/glossary") return <GlossaryDirectory />;
   if (codePath?.startsWith("/glossary/"))

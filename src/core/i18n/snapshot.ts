@@ -13,11 +13,13 @@ export function snapshotLocale(snapshot: PublicSnapshot): Locale {
 }
 
 /** Pick one published member per group before pagination, preserving real paths. */
-export function languageContents(
-  contents: Content[],
-  locale: Locale,
-): Content[] {
-  const groups = new Map<string, Content[]>();
+export function languageContents<
+  T extends Pick<
+    Content,
+    "id" | "language" | "translation_group_id" | "translations"
+  >,
+>(contents: readonly T[], locale: Locale): T[] {
+  const groups = new Map<string, T[]>();
   for (const item of contents) {
     const key = item.translation_group_id || item.id;
     const list = groups.get(key) ?? [];

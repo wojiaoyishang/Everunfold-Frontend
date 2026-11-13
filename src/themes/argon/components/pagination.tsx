@@ -24,6 +24,8 @@ export function Pagination({
   query,
   type,
   languages,
+  label = "文章分页",
+  localize = true,
 }: {
   page: number;
   pages: number;
@@ -31,17 +33,20 @@ export function Pagination({
   query?: string;
   type?: string;
   languages?: string;
+  label?: string;
+  localize?: boolean;
 }) {
   if (pages <= 1 && page === 1) return null;
   const visible = [...new Set([1, page - 1, page, page + 1, pages])]
     .filter((number) => number >= 1 && number <= pages)
     .sort((a, b) => a - b);
   return (
-    <nav className="pagination" aria-label="文章分页">
+    <nav className="pagination" aria-label={label}>
       {page > 1 && (
         <Link
           href={href(pathname, page - 1, query, type, languages)}
           aria-label="上一页"
+          localize={localize}
         >
           <Icon name="chevron-left" />
         </Link>
@@ -55,6 +60,7 @@ export function Pagination({
             href={href(pathname, number, query, type, languages)}
             className={number === page ? "current" : undefined}
             aria-current={number === page ? "page" : undefined}
+            localize={localize}
           >
             {number}
           </Link>
@@ -64,6 +70,7 @@ export function Pagination({
         <Link
           href={href(pathname, page + 1, query, type, languages)}
           aria-label="下一页"
+          localize={localize}
         >
           <Icon name="chevron" />
         </Link>

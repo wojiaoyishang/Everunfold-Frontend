@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { readPublicSnapshot } from "@/core/content/snapshot";
 import { isManagedPagePreviewPath } from "@/core/pages/preview";
 import { ManagedPagePreview } from "@/themes/argon/preview/page-preview";
+import { pageArticleSources } from "@/core/pages/articles";
 import "@/themes/argon/argon.css";
 export const metadata = {
   title: "页面预览",
@@ -19,7 +20,12 @@ export default async function PagePreview({
   const snapshot = await readPublicSnapshot().catch(() => null);
   return (
     <PublicTheme theme={await readActiveTheme()}>
-      <ManagedPagePreview key={id} id={id} site={snapshot?.site ?? null} />
+      <ManagedPagePreview
+        key={id}
+        id={id}
+        site={snapshot?.site ?? null}
+        articleSources={snapshot ? pageArticleSources(snapshot) : []}
+      />
     </PublicTheme>
   );
 }

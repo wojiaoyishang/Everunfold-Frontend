@@ -4,33 +4,78 @@ import { ExtensionPlaceholder } from "@/themes/argon/components/extension-placeh
 import type { PublicManagedPage } from "@/core/contracts/pages";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { ExtensionComponent } from "@/core/extensions/components";
+import { useLocale } from "@/core/i18n/provider";
+import { useRouteState } from "@/themes/argon/components/route-state";
+import { pageNumber } from "@/core/content/query";
+import {
+  pageArticleCategory,
+  pageArticleCollection,
+  type PageArticleCollection,
+  type PageArticleData,
+} from "./articles";
+import { pageImplementation } from "./registry";
 
 export interface CustomPageProps {
   page: PublicManagedPage;
+  articleCollection?: PageArticleCollection;
+  pathname?: string;
+  preview?: boolean;
 }
 
-export function RegisteredPageView({
-  page,
-  onReady,
-}: CustomPageProps & { onReady?: () => void }) {
+export function useRegisteredPageImplementation(page: PublicManagedPage) {
   const runtime = usePluginRuntime();
   const definitions =
     runtime.catalog?.plugins
       .filter((p) => !runtime.catalog?.disabled.includes(p.id))
       .flatMap((p) => p.pages) ?? pluginRegistry.pages;
-  const entry = definitions.find(
-    ({ registration }) =>
-      registration.id === page.implementation_id &&
-      registration.version === page.implementation_version,
-  );
+  return {
+    entry: pageImplementation(page, definitions),
+    loading: runtime.loading,
+  };
+}
+
+export function RegisteredPageView({
+  page,
+  onReady,
+  articleData,
+  preview,
+}: Pick<CustomPageProps, "page" | "preview"> & {
+  onReady?: () => void;
+  articleData?: PageArticleData;
+}) {
+  const { entry, loading } = useRegisteredPageImplementation(page);
+  const { route } = useRouteState();
+  const { locale } = useLocale();
   if (!entry)
     return (
       <ExtensionPlaceholder
         name={page.implementation_id ?? "page"}
-        loading={runtime.loading}
+        loading={loading}
       />
     );
+  const [pathname, query] = route.split("?");
+  const collection = entry.articleCollection;
+  const articles =
+    articleData?.collection ??
+    (collection && articleData?.sources
+      ? pageArticleCollection(
+          articleData.sources,
+          pageArticleCategory(page, collection.categoryOption),
+          locale,
+          preview
+            ? 1
+            : pageNumber(new URLSearchParams(query).get("page") ?? undefined),
+          collection.pageSize,
+        )
+      : undefined);
   return (
-    <ExtensionComponent name={entry.component} page={page} onReady={onReady} />
+    <ExtensionComponent
+      name={entry.component}
+      page={page}
+      articleCollection={articles}
+      pathname={preview ? page.path : pathname}
+      preview={preview}
+      onReady={onReady}
+    />
   );
 }

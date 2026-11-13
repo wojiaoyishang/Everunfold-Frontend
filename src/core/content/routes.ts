@@ -12,7 +12,6 @@ export const publicCodePaths = new Set([
   "/tags",
   "/ss",
   "/article",
-  "/gzrj",
   "/about",
   "/glossary",
 ]);
