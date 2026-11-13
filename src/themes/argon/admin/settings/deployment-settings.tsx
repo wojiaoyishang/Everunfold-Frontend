@@ -5,8 +5,19 @@ export interface DeploymentSummary {
   nodeId: string;
   publicSiteUrl: string | null;
   backendBaseUrl: string;
-  receiverConfigured: boolean;
+  sourceBound: boolean;
+  settingsReplicaDirectory: string | null;
+  publicSnapshotDirectory: string | null;
 }
+
+function StorageDirectory({ directory }: { directory: string | null }) {
+  return directory ? (
+    <code>{directory}</code>
+  ) : (
+    <UiText text="项目外的自定义目录" />
+  );
+}
+
 export function DeploymentSettings({
   runtime,
 }: {
@@ -39,15 +50,23 @@ export function DeploymentSettings({
         </div>
         <div>
           <dt>
-            <UiText text="设置副本" />
+            <UiText text="设置副本目录" />
           </dt>
-          <dd>config.toml → settings.directory</dd>
+          <dd>
+            {runtime.sourceBound ? (
+              <StorageDirectory directory={runtime.settingsReplicaDirectory} />
+            ) : (
+              <UiText text="未绑定后端来源" />
+            )}
+          </dd>
         </div>
         <div>
           <dt>
             <UiText text="公开快照目录" />
           </dt>
-          <dd>config.toml → cache.directory</dd>
+          <dd>
+            <StorageDirectory directory={runtime.publicSnapshotDirectory} />
+          </dd>
         </div>
         <div>
           <dt>
@@ -78,7 +97,7 @@ export function DeploymentSettings({
             <UiText text="配置来源绑定" />
           </dt>
           <dd>
-            {runtime.receiverConfigured ? (
+            {runtime.sourceBound ? (
               <UiText text="已配置" />
             ) : (
               <UiText text="待配置" />

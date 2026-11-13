@@ -1780,9 +1780,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 
 ## 后台标识与节点部署配置（2026-11-13）
 
-后台标识读取站点设置。部署配置并入节点状态。
+后台及登录入口的标识读取站点设置。节点状态的部署配置按当前连接显示副本目录。
 
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
-| `docs/decisions/0140-admin-brand-and-node-deployment.md` | `ADR0140-1` | `ce6bad1b4b84c3cf0576f5eb69dd56d08a0e6e39d07a66c2d91d790eba0dd457` |
+| `docs/decisions/0140-admin-brand-and-node-deployment.md` | `ADR0140-2` | `e7cb72165a906fd3a00a2a82958b40f1f7e70ecdab7ca62de1d0784c9693df44` |
 | `docs/development/captcha.md` | `captcha-8` | `a6b35cc2cec6c03b864906c5e5b4c408f7f8effb2f574eb93b64a6b18700f6bc` |

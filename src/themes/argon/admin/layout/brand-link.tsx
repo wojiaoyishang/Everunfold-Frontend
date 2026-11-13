@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import type { AdminSiteBrand } from "@/core/admin/site-brand";
-import { resourceUrl } from "@/core/content/urls";
+import { defaultSiteName } from "@/core/site/brand";
 import { useT } from "@/core/i18n/provider";
-import { Icon } from "../../components/icon";
+import { SiteIcon } from "../../components/site-icon";
 import { RouteLink } from "../../components/ui/route-link";
 
 export function AdminBrandLink({
@@ -15,8 +14,7 @@ export function AdminBrandLink({
   onClick?: () => void;
 }) {
   const t = useT();
-  const name = brand?.name.trim() || "Everunfold";
-  const icon = resourceUrl(brand?.icon_url);
+  const name = brand?.name.trim() || defaultSiteName;
   return (
     <RouteLink
       href="/admin"
@@ -25,32 +23,17 @@ export function AdminBrandLink({
       title={name}
       onClick={onClick}
     >
-      <AdminBrandMark key={icon} icon={icon} />
+      <span className="admin-brand-mark" aria-hidden="true">
+        <SiteIcon
+          url={brand?.icon_url}
+          fallback="book"
+          size={24}
+          className="admin-brand-image"
+        />
+      </span>
       <span className="admin-brand-label" dir="auto">
         {name}
       </span>
     </RouteLink>
-  );
-}
-
-function AdminBrandMark({ icon }: { icon: string | null }) {
-  const [failed, setFailed] = useState(false);
-  return (
-    <span className="admin-brand-mark" aria-hidden="true">
-      {icon && !failed ? (
-        // eslint-disable-next-line @next/next/no-img-element -- Site icon URLs can use any configured HTTP(S) host.
-        <img
-          className="admin-brand-image"
-          src={icon}
-          alt=""
-          width={24}
-          height={24}
-          decoding="async"
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <Icon name="book" />
-      )}
-    </span>
   );
 }

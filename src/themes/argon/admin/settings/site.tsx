@@ -63,7 +63,9 @@ export function SiteSettingsPage() {
             />
             <SettingsMediaField
               label="站点图标"
-              hint={t("用于后台导航和浏览器标签页，也作为邮件品牌的默认图标。")}
+              hint={t(
+                "用于登录页、后台导航和浏览器标签页，也作为邮件品牌的默认图标。",
+              )}
               kind="image"
               value={site.icon_url ?? ""}
               mediaId={site.icon_media_id}

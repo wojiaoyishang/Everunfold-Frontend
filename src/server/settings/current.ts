@@ -24,3 +24,11 @@ export const readAppliedSettings = cache(async () => {
     revision: publicValue?.revision ?? 0,
   };
 });
+
+export async function readAppliedSiteBrand() {
+  const applied = await readAppliedSettings().catch(() => null);
+  const site = applied?.publicSettings?.site;
+  return site && applied
+    ? { name: site.name, icon_url: site.icon_url, revision: applied.revision }
+    : null;
+}

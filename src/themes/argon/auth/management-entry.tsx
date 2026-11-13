@@ -1,6 +1,8 @@
 "use client";
 import { UiText, useLocale } from "@/core/i18n/provider";
+import { defaultSiteName, SiteBrandContext } from "@/core/site/brand";
 import {
+  useContext,
   useEffect,
   useRef,
   useState,
@@ -8,6 +10,7 @@ import {
   type RefObject,
 } from "react";
 import { Icon } from "../components/icon";
+import { SiteIcon } from "../components/site-icon";
 import { TextLink } from "../components/ui/primitives";
 import { ManagementScene } from "./management-scene";
 import { InterfaceLanguage } from "../components/language-switcher";
@@ -29,6 +32,8 @@ export function ManagementEntry({
   children,
   cardRef,
 }: ManagementEntryProps) {
+  const brand = useContext(SiteBrandContext);
+  const siteName = brand?.name.trim() || defaultSiteName;
   const ownCard = useRef<HTMLDivElement>(null);
   const entry = cardRef ?? ownCard;
   const [settled, setSettled] = useState(false);
@@ -86,9 +91,16 @@ export function ManagementEntry({
         onPointerDownCapture={() => setSettled(true)}
       >
         <header className="login-entry-header">
-          <span className="management-brand">
-            <Icon name="leaf" />
-            Everunfold
+          <span className="management-brand" title={siteName}>
+            <SiteIcon
+              url={brand?.icon_url}
+              fallback="leaf"
+              size={20}
+              className="management-brand-image"
+            />
+            <span className="management-brand-name" dir="auto">
+              {siteName}
+            </span>
           </span>
           <div className="login-entry-actions">
             <TextLink href="/" className="login-back">

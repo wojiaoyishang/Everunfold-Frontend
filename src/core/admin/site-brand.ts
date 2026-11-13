@@ -1,9 +1,9 @@
 "use client";
 
 import { createContext } from "react";
-import type { SitePreferences } from "@/core/contracts/settings";
+import type { SiteBrand } from "@/core/site/brand";
 
-export type AdminSiteBrand = Pick<SitePreferences, "name" | "icon_url"> & {
+export type AdminSiteBrand = SiteBrand & {
   revision: number;
 };
 

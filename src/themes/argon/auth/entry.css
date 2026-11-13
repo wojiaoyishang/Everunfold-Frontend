@@ -28,6 +28,7 @@
   padding: 24px 36px 0;
 }
 .login-entry-header .management-brand {
+  min-width: 0;
   gap: 8px;
   color: var(--text);
   font-size: 14px;
@@ -37,6 +38,19 @@
   width: 20px;
   height: 20px;
   color: var(--accent);
+}
+.management-brand-name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.management-brand-image {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 .login-entry-actions {
   display: flex;
