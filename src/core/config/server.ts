@@ -3,9 +3,10 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { parse } from "smol-toml";
+import { cache } from "react";
 
-import { ConfigurationError, parseConfiguration } from "./schema";
+import { ConfigurationError } from "./schema";
+import { contentDirectory, readConfigurationFiles } from "./files";
 
 export function projectRoot(): string {
   const candidates = [
@@ -36,21 +37,10 @@ export function projectRoot(): string {
 
 export function readConfiguration() {
   const root = projectRoot();
-  const configuredFile = process.env.CONFIG_FILE ?? "config.toml";
-  if (!configuredFile.trim())
-    throw new ConfigurationError("CONFIG_FILE 不能为空");
-  const filename = path.resolve(root, configuredFile);
-  let input: unknown;
-  try {
-    input = parse(
-      fs.readFileSync(/* turbopackIgnore: true */ filename, "utf8"),
-    );
-  } catch {
-    throw new ConfigurationError("前端实例配置缺失或 TOML 格式无效");
-  }
-  const settings = parseConfiguration(input, process.env);
+  const { settings, connections } = readConfigurationFiles(root);
   return {
     ...settings,
+    connections,
     plugins: { directory: path.resolve(root, settings.plugins.directory) },
     settings: {
       ...settings.settings,
@@ -58,7 +48,9 @@ export function readConfiguration() {
     },
     cache: {
       ...settings.cache,
-      directory: path.resolve(root, settings.cache.directory),
+      directory: path.resolve(root, contentDirectory(settings, !!connections)),
     },
   };
 }
+
+export const readPageConfiguration = cache(readConfiguration);

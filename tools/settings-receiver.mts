@@ -1,20 +1,15 @@
-import fs from "node:fs";
 import path from "node:path";
-import { parse } from "smol-toml";
-import { parseConfiguration } from "../src/core/config/schema";
+import {
+  connectionIdentity,
+  contentDirectory,
+  readConfigurationFiles,
+} from "../src/core/config/files";
 import { FileSettingsStore } from "../src/server/settings/store";
 import { settingsReceiver } from "../src/server/settings/receiver";
 import { FileContentStore } from "../src/server/content/store";
 const root = process.env.EVERUNFOLD_PROJECT_ROOT ?? process.cwd();
-const config = parseConfiguration(
-  parse(
-    fs.readFileSync(
-      path.resolve(root, process.env.CONFIG_FILE ?? "config.toml"),
-      "utf8",
-    ),
-  ),
-  process.env,
-);
+const { settings: config, connections } = readConfigurationFiles(root);
+const identity = connectionIdentity(config);
 if (!config.settings.sourceEpoch)
   throw new Error(
     "Configure settings.source_epoch before starting the receiver",
@@ -26,7 +21,7 @@ const store = new FileSettingsStore(
   config.settings.sourceEpoch,
 );
 const content = new FileContentStore(
-  path.resolve(root, config.cache.directory),
+  path.resolve(root, contentDirectory(config, !!connections)),
   config.frontendNodeId,
   config.settings.sourceEpoch,
   config.cache.maxSnapshotBytes,
@@ -37,6 +32,17 @@ const server = settingsReceiver(
   config.backend.allowedPeerIps,
   content,
   { node_id: config.frontendNodeId, source_epoch: config.settings.sourceEpoch },
+  () => {
+    try {
+      const current = readConfigurationFiles(root);
+      return (
+        !!current.connections === !!connections &&
+        connectionIdentity(current.settings) === identity
+      );
+    } catch {
+      return false;
+    }
+  },
 );
 server.listen(config.settings.receiverPort, config.settings.receiverHost, () =>
   console.log(`Content/settings receiver ready for ${config.frontendNodeId}`),

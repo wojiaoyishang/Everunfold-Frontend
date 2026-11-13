@@ -1,7 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { parse } from "smol-toml";
-import { parseConfiguration } from "../../src/core/config/schema";
+import { readConfigurationFiles } from "../../src/core/config/files";
 import { readInstalledPlugins } from "../../src/server/plugins/packages";
 
 export async function readInventory(root: string, pluginDirectory?: string) {
@@ -49,15 +48,7 @@ export function watchInventory(root: string, pluginDirectory?: string) {
     lastReport = 0;
   const cycle = async () => {
     try {
-      const config = parseConfiguration(
-        parse(
-          await readFile(
-            path.resolve(root, process.env.CONFIG_FILE ?? "config.toml"),
-            "utf8",
-          ),
-        ),
-        process.env,
-      );
+      const { settings: config } = readConfigurationFiles(root);
       const token = process.env[config.backend.nextjsToFastapiTokenEnv ?? ""];
       if (!token) throw new Error("missing deployment token");
       const inventory = await readInventory(
@@ -65,11 +56,18 @@ export function watchInventory(root: string, pluginDirectory?: string) {
         pluginDirectory ?? path.resolve(root, config.plugins.directory),
       );
       const body = JSON.stringify(inventory);
-      if (body !== accepted || Date.now() - lastReport > 60000) {
+      const destination = [
+        config.frontendNodeId,
+        config.backend.baseUrl,
+        config.settings.sourceEpoch,
+      ];
+      const report = JSON.stringify([destination, body]);
+      if (report !== accepted || Date.now() - lastReport > 60000) {
         const response = await fetch(
           `${config.backend.baseUrl}/internal/extensions/${encodeURIComponent(config.frontendNodeId)}`,
           {
             method: "POST",
+            redirect: "error",
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
@@ -79,7 +77,7 @@ export function watchInventory(root: string, pluginDirectory?: string) {
           },
         );
         if (!response.ok) throw new Error("inventory registration unavailable");
-        accepted = body;
+        accepted = report;
         lastReport = Date.now();
       }
     } catch {

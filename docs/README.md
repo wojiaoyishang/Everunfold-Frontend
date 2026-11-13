@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[前端本机节点诊断](development/nodes-monitor.md)说明 `/admin/_nodes`、独立连接文件、离线密码与切换步骤。
+
 [顶栏标识](decisions/0128-header-branding.md)说明展示模式、默认值和兼容行为。
 
 [侧栏导航与搜索](decisions/0127-sidebar-navigation-and-search.md)说明侧栏文案、菜单继承、搜索和预览。

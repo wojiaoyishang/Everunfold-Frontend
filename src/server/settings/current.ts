@@ -1,12 +1,12 @@
 import "server-only";
 import { cache } from "react";
-import { readConfiguration } from "../../core/config/server";
+import { readPageConfiguration } from "../../core/config/server";
 import { FileSettingsStore } from "./store";
 import type { CachePolicy, PublicSettings } from "@/core/contracts/settings";
 
 /** No backend fetch and no time TTL: read the last complete locally applied revision. */
 export const readAppliedSettings = cache(async () => {
-  const config = readConfiguration();
+  const config = readPageConfiguration();
   const epoch = config.settings.sourceEpoch;
   if (!epoch) return { publicSettings: null, policy: null, revision: 0 };
   const store = new FileSettingsStore(

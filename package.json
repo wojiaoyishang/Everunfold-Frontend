@@ -33,6 +33,7 @@
     "test": "node --import tsx --import ./tools/extensions/node.mjs --test tests/*.test.ts",
     "verify:http": "node tools/verify-public-http.mjs",
     "settings:receiver": "tsx tools/settings-receiver.mts",
+    "nodes:password": "node tools/nodes-password.mjs",
     "contracts:prepare": "node tools/prepare-contracts.mjs",
     "prepare:local": "npm run prepare:host && npm run extensions:check",
     "plugins:build": "node --import tsx tools/plugins/build.mjs",

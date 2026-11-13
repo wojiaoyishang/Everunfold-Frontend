@@ -1,9 +1,12 @@
 import { adminDestination } from "../admin/navigation";
 
+export const nodesConsolePath = "/admin/_nodes";
+
 /** Explicit code routes are reachable without a public-content snapshot. */
 export function isManagementRoute(pathname: string): boolean {
   return (
     /^\/(?:login(?:\/(?:register|recover))?|account)\/?$/.test(pathname) ||
+    /^\/admin\/_nodes(?:\/local)?\/?$/.test(pathname) ||
     !!adminDestination(pathname)
   );
 }
@@ -34,6 +37,7 @@ export function loginReturnPath(input: string | undefined): string | undefined {
       url.origin !== "https://management.invalid" ||
       (url.pathname !== "/" &&
         !/^\/account\/?$/.test(url.pathname) &&
+        url.pathname !== nodesConsolePath &&
         !adminDestination(url.pathname))
     )
       return "/";

@@ -1,0 +1,121 @@
+.page,
+.center {
+  min-height: 100dvh;
+  padding: clamp(1rem, 4vw, 3rem);
+}
+.center {
+  display: grid;
+  place-items: center;
+}
+.shell {
+  display: grid;
+  gap: 1rem;
+  width: min(100%, 68rem);
+  margin: 0 auto;
+}
+.center .shell {
+  width: min(100%, 27rem);
+}
+.shell h1,
+.shell h2,
+.shell h3,
+.shell p,
+.shell dl,
+.shell dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.shell h1 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+.shell h2 {
+  font-size: 1.18rem;
+}
+.shell h3 {
+  font-size: 1rem;
+}
+.toolbar,
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+.toolbar {
+  justify-content: space-between;
+}
+.stack,
+.panel {
+  display: grid;
+  gap: 0.85rem;
+}
+.panel {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 0.75rem;
+  background: var(--admin-surface);
+  padding: 1rem;
+}
+.health,
+.resources,
+.summary {
+  display: grid;
+  gap: 0.65rem;
+}
+.health {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
+}
+.resources {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+}
+.summary {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+}
+.resource {
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  padding: 0.7rem;
+}
+.resource dl {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.25rem 0.5rem;
+  margin-top: 0.4rem;
+}
+.resource dd {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.resource p {
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+}
+.muted,
+.shell dt,
+.resource p {
+  color: var(--muted);
+}
+.error,
+.shell [data-tone="negative"] {
+  color: var(--admin-danger, var(--danger));
+}
+.shell [data-tone="positive"] {
+  color: var(--admin-positive);
+}
+.picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.65rem;
+}
+.picker > :first-child {
+  flex: 1 1 14rem;
+}
+@media (max-width: 460px) {
+  .actions :global(.ui-button) {
+    min-height: 44px;
+  }
+  .picker > button {
+    width: 100%;
+  }
+}

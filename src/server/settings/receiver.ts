@@ -19,12 +19,25 @@ async function replica(
   }
 }
 
+export async function readReplicas(
+  store: SettingsStore,
+  content?: ContentStore,
+) {
+  const [public_settings, cache_policy, public_content] = await Promise.all([
+    replica(async () => (await store.read("public-settings"))?.revision),
+    replica(async () => (await store.read("cache-policy"))?.revision),
+    replica(async () => (await content?.read())?.generation),
+  ]);
+  return { public_settings, cache_policy, public_content };
+}
+
 export function settingsReceiver(
   store: SettingsStore,
   token: string,
   peers: string[],
   content?: ContentStore,
   identity?: Pick<ReceiverStatus, "node_id" | "source_epoch">,
+  isCurrent: () => boolean = () => true,
 ) {
   if (token.length < 32 || !peers.length)
     throw new Error("Settings receiver credentials are not configured");
@@ -58,26 +71,21 @@ export function settingsReceiver(
         request.resume();
         return;
       }
+      if (!isCurrent()) {
+        reply(503, { error: "receiver_restart_required" });
+        request.resume();
+        return;
+      }
       if (
         identity &&
         request.method === "GET" &&
         request.url === "/internal/settings/status"
       ) {
         request.resume();
-        const [public_settings, cache_policy, public_content] =
-          await Promise.all([
-            replica(
-              async () => (await store.read("public-settings"))?.revision,
-            ),
-            replica(async () => (await store.read("cache-policy"))?.revision),
-            replica(async () => (await content?.read())?.generation),
-          ]);
         reply(200, {
           protocol: "node-status-1",
           ...identity,
-          public_settings,
-          cache_policy,
-          public_content,
+          ...(await readReplicas(store, content)),
         } satisfies ReceiverStatus);
         return;
       }

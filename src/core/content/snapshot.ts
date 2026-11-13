@@ -5,7 +5,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { cache } from "react";
 import { readAppliedSettings } from "@/server/settings/current";
-import { readConfiguration } from "@/core/config/server";
+import { readPageConfiguration } from "@/core/config/server";
 import type { PublicSnapshot } from "./types";
 import { parsePublicSnapshot } from "./validation";
 import { FileContentStore } from "@/server/content/store";
@@ -22,19 +22,22 @@ export class SnapshotUnavailable extends Error {
 
 export const readPublicSnapshot = cache(async (): Promise<PublicSnapshot> => {
   try {
+    const configuration = readPageConfiguration();
     const catalog = await readRuntimeCatalog();
     const disabledPages = new Set(
       catalog.plugins
         .filter((plugin) => catalog.disabled.includes(plugin.id))
         .flatMap((plugin) => plugin.pages.map((page) => page.registration.id)),
     );
-    const configuration = readConfiguration();
     const received = await new FileContentStore(
       configuration.cache.directory,
       configuration.frontendNodeId,
       configuration.settings.sourceEpoch ?? "",
       configuration.cache.maxSnapshotBytes,
     ).read();
+    // Explicit backend profiles use source-specific stores; legacy snapshots do not
+    // carry a deployment binding suitable for fallback after a connection switch.
+    if (configuration.connections && !received) throw new SnapshotUnavailable();
     const filename = path.join(configuration.cache.directory, "current.json");
     const file = received ? null : await fs.open(filename, "r");
     try {

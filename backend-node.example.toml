@@ -1,0 +1,18 @@
+# Copy to backend-node.toml on each frontend host. Put credential values in its environment.
+active = "main"
+
+[profiles.main]
+# Browser API origin and source UUID of this backend.
+BACKEND_BASE_URL = "https://api.example.com"
+source_epoch = "00000000-0000-0000-0000-000000000000"
+
+[profiles.main.backend]
+# Next.js and the reporter use this address. Omit to use BACKEND_BASE_URL.
+base_url = "https://api.internal.example.com"
+allowed_peer_ips = ["192.0.2.10"]
+nextjs_to_fastapi_token_env = "NEXTJS_TO_FASTAPI_WEB_MAIN_TOKEN"
+fastapi_to_nextjs_token_env = "FASTAPI_TO_NEXTJS_WEB_MAIN_TOKEN"
+connect_timeout_seconds = 2
+request_timeout_seconds = 15
+
+# Optional: add another [profiles.<id>] with its own source UUID and backend fields.

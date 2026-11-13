@@ -6,6 +6,7 @@ import { resolveManagedPage } from "@/core/pages/resolve";
 import { resolveContent } from "@/core/content/query";
 import { failureDocument } from "@/themes/argon/failure/document";
 import { isManagementRoute } from "@/core/auth/routes";
+import { readConfiguration } from "@/core/config/server";
 import {
   localeOf,
   localePath,
@@ -20,6 +21,30 @@ export async function proxy(request: NextRequest) {
   headers.set("x-everunfold-path", path);
   headers.set("x-everunfold-management", "false");
   if (isManagementRoute(request.nextUrl.pathname)) {
+    if (/^\/admin\/_nodes(?:\/|$)/.test(path)) {
+      const monitor = readConfiguration().nodesMonitor;
+      if (
+        !monitor.enabled ||
+        !monitor.origin ||
+        request.headers.get("host")?.toLowerCase() !==
+          new URL(monitor.origin).host ||
+        request.nextUrl.protocol !== new URL(monitor.origin).protocol
+      ) {
+        if (/\/local\/?$/.test(path)) {
+          return NextResponse.json(
+            { error: "节点诊断未启用" },
+            { status: 404, headers: { "Cache-Control": "private, no-store" } },
+          );
+        }
+        return new NextResponse(failureDocument(404), {
+          status: 404,
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+            "Cache-Control": "private, no-store",
+          },
+        });
+      }
+    }
     headers.set(
       "x-everunfold-locale",
       localeOf(request.cookies.get("everunfold-admin-locale")?.value),

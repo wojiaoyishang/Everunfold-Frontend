@@ -13,6 +13,12 @@ export interface FrontendConfiguration {
   publicSiteUrl: string | undefined;
   backendBaseUrl: string;
   frontendNodeId: string;
+  nodesMonitor: {
+    enabled: boolean;
+    origin: string | undefined;
+    passwordHash: string | undefined;
+    sessionSecretEnv: string;
+  };
   backend: {
     baseUrl: string;
     allowedPeerIps: string[];
@@ -37,14 +43,17 @@ export interface FrontendConfiguration {
   };
 }
 
-function object(value: unknown, field: string): Record<string, unknown> {
+export function configObject(
+  value: unknown,
+  field: string,
+): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new ConfigurationError(`${field} 必须为配置对象`);
   }
   return value as Record<string, unknown>;
 }
 
-function knownKeys(
+export function configKeys(
   value: Record<string, unknown>,
   keys: string[],
   field: string,
@@ -69,7 +78,7 @@ function number(value: unknown, fallback: number, field: string): number {
   return value;
 }
 
-function baseUrl(value: unknown, field: string): string {
+export function baseUrl(value: unknown, field: string): string {
   const raw = string(value, field);
   let url: URL;
   try {
@@ -79,6 +88,7 @@ function baseUrl(value: unknown, field: string): string {
   }
   if (
     !["http:", "https:"].includes(url.protocol) ||
+    /[\u0000-\u0020\u007f\\]/.test(raw) ||
     url.username ||
     url.password ||
     url.search ||
@@ -90,6 +100,55 @@ function baseUrl(value: unknown, field: string): string {
     );
   }
   return raw.replace(/\/+$/, "");
+}
+
+export function loopback(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname === "[::1]" ||
+    (isIP(hostname) === 4 && hostname.startsWith("127."))
+  );
+}
+
+function monitorConfig(value: unknown): FrontendConfiguration["nodesMonitor"] {
+  const monitor = configObject(value ?? {}, "nodes_monitor");
+  configKeys(
+    monitor,
+    ["enabled", "origin", "password_hash", "session_secret_env"],
+    "nodes_monitor",
+  );
+  const enabled = monitor.enabled ?? false;
+  if (typeof enabled !== "boolean")
+    throw new ConfigurationError("nodes_monitor.enabled 必须为布尔值");
+  const origin =
+    monitor.origin === undefined
+      ? undefined
+      : new URL(baseUrl(monitor.origin, "nodes_monitor.origin"));
+  if (
+    origin &&
+    (origin.pathname !== "/" ||
+      (origin.protocol !== "https:" && !loopback(origin.hostname)))
+  )
+    throw new ConfigurationError("节点诊断需要 HTTPS 或回环 HTTP 来源");
+  if (enabled && !origin)
+    throw new ConfigurationError("启用节点诊断需要配置 nodes_monitor.origin");
+  const hash = monitor.password_hash;
+  if (
+    hash !== undefined &&
+    (typeof hash !== "string" ||
+      !/^scrypt\$[0-9a-f]{32}\$[0-9a-f]{64}$/.test(hash))
+  )
+    throw new ConfigurationError("节点诊断密码必须使用生成工具生成哈希");
+  return {
+    enabled,
+    origin: origin?.origin,
+    passwordHash: hash,
+    sessionSecretEnv:
+      tokenReference(
+        monitor.session_secret_env,
+        "nodes_monitor.session_secret_env",
+      ) ?? "EVERUNFOLD_FRONTEND_NODES_SESSION_SECRET",
+  };
 }
 
 function tokenReference(value: unknown, field: string): string | undefined {
@@ -129,8 +188,8 @@ export function parseConfiguration(
   input: unknown,
   environment: Record<string, string | undefined> = {},
 ): FrontendConfiguration {
-  const root = object(input, "根配置");
-  knownKeys(
+  const root = configObject(input, "根配置");
+  configKeys(
     root,
     [
       "BACKEND_BASE_URL",
@@ -141,27 +200,28 @@ export function parseConfiguration(
       "settings",
       "theme",
       "plugins",
+      "nodes_monitor",
     ],
     "根配置",
   );
-  const plugins = object(root.plugins ?? {}, "plugins");
-  knownKeys(plugins, ["directory"], "plugins");
+  const plugins = configObject(root.plugins ?? {}, "plugins");
+  configKeys(plugins, ["directory"], "plugins");
   const pluginDirectory = string(
     environment.PLUGINS_DIRECTORY ?? plugins.directory ?? "./plugins",
     "plugins.directory",
   );
-  const theme = object(root.theme ?? {}, "theme");
-  knownKeys(theme, ["active"], "theme");
+  const theme = configObject(root.theme ?? {}, "theme");
+  configKeys(theme, ["active"], "theme");
   const activeTheme = string(
     environment.FRONTEND_THEME ?? theme.active ?? "argon",
     "theme.active",
   );
   if (!/^[a-z][a-z0-9-]*$/.test(activeTheme))
     throw new ConfigurationError("theme.active 必须为已安装主题的ID");
-  const backend = object(root.backend ?? {}, "backend");
-  const cache = object(root.cache ?? {}, "cache");
-  const settings = object(root.settings ?? {}, "settings");
-  knownKeys(
+  const backend = configObject(root.backend ?? {}, "backend");
+  const cache = configObject(root.cache ?? {}, "cache");
+  const settings = configObject(root.settings ?? {}, "settings");
+  configKeys(
     settings,
     ["directory", "source_epoch", "receiver_host", "receiver_port"],
     "settings",
@@ -188,7 +248,7 @@ export function parseConfiguration(
   );
   if (receiverPort > 65535)
     throw new ConfigurationError("settings.receiver_port 不合法");
-  knownKeys(
+  configKeys(
     backend,
     [
       "base_url",
@@ -200,7 +260,7 @@ export function parseConfiguration(
     ],
     "backend",
   );
-  knownKeys(
+  configKeys(
     cache,
     [
       "directory",
@@ -220,7 +280,7 @@ export function parseConfiguration(
     environment.FRONTEND_NODE_ID ?? root.FRONTEND_NODE_ID,
     "FRONTEND_NODE_ID",
   );
-  if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(nodeId)) {
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(nodeId)) {
     throw new ConfigurationError("FRONTEND_NODE_ID 格式不正确");
   }
   const siteValue = environment.PUBLIC_SITE_URL ?? root.PUBLIC_SITE_URL;
@@ -243,6 +303,7 @@ export function parseConfiguration(
     publicSiteUrl,
     backendBaseUrl: publicUrl,
     frontendNodeId: nodeId,
+    nodesMonitor: monitorConfig(root.nodes_monitor),
     backend: {
       baseUrl:
         backend.base_url === undefined

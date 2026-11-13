@@ -1,7 +1,11 @@
 import "server-only";
 import path from "node:path";
 import { cache } from "react";
-import { readConfiguration, projectRoot } from "@/core/config/server";
+import {
+  readConfiguration,
+  readPageConfiguration,
+  projectRoot,
+} from "@/core/config/server";
 import { readAppliedSettings } from "@/server/settings/current";
 import { installRuntimePlugins } from "@/core/plugins/runtime/store";
 import { readInstalledPlugins, publicPackage, sha256 } from "./packages";
@@ -10,7 +14,7 @@ import type { RuntimeCatalog } from "@/core/plugins/runtime/types";
 
 export const readRuntimeCatalog = cache(async (): Promise<RuntimeCatalog> => {
   const root = projectRoot(),
-    config = readConfiguration();
+    config = readPageConfiguration();
   const [installed, applied] = await Promise.all([
     readInstalledPlugins(
       config.plugins.directory,
