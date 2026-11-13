@@ -168,6 +168,7 @@ export function useDraftEditor(
           if (response.data.type_id !== type.id)
             throw new RequestError("invalid");
           apply(response.data);
+          if (response.data.edit_mode === "components") return;
           if (
             writeScope !== "all" &&
             (writeScope !== "own" || response.data.owner_id !== account.id)

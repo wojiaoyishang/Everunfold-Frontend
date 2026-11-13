@@ -10,6 +10,7 @@ import {
 import { PagePresentation } from "./route-state";
 import { CommentSection } from "./comments/comment-section";
 import { ArticleActions } from "./article-actions";
+import type { BuilderRenderContext } from "../builder/content";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 
 export async function ShuoshuoCard({
@@ -17,11 +18,13 @@ export async function ShuoshuoCard({
   entry,
   detail = false,
   glossary,
+  builderContext,
 }: {
   theme: string;
   entry: FeedEntry;
   detail?: boolean;
   glossary?: GlossaryRuntimeOptions;
+  builderContext?: BuilderRenderContext;
 }) {
   const rendered = await renderContentForReader(entry.content);
   return (
@@ -35,6 +38,7 @@ export async function ShuoshuoCard({
       detail={detail}
       rendered={rendered}
       glossary={glossary}
+      builderContext={builderContext}
     />
   );
 }
@@ -70,6 +74,7 @@ export function ShuoshuoDetail({
           theme={theme}
           entry={entry}
           detail
+          builderContext={{ shortcodes: snapshot.site.settings?.shortcodes }}
           glossary={{
             auto_match: glossary?.auto_match ?? true,
             max_matches_per_page: glossary?.max_matches_per_page ?? 20,

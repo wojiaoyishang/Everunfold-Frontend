@@ -31,3 +31,22 @@
     padding: 26px 22px 20px;
   }
 }
+
+.page[data-page-layout="wide_transparent"],
+.page[data-page-layout="blank"] {
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+}
+.page[data-page-layout="blank"] .heading {
+  border: 0;
+}
+
+.componentBody {
+  padding: clamp(18px, 4vw, 48px);
+  min-width: 0;
+}
+
+.page[data-page-layout="blank"] .componentBody {
+  padding: 0;
+}

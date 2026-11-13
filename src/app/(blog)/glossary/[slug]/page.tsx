@@ -1,22 +1,14 @@
-import { GlossaryDetailPage } from "@/themes/argon/glossary/detail";
-import { translate } from "@/core/i18n/messages";
-import { messageLocale } from "@/core/i18n/locale";
-import { headers } from "next/headers";
+import { readPageSnapshot } from "@/core/i18n/server";
+import { GlossaryTerm, glossaryTermMetadata } from "../term";
 
-export async function generateMetadata() {
-  const request = await headers();
-  return {
-    title: translate(
-      "术语表",
-      messageLocale(request.get("x-everunfold-ui-locale")),
-    ),
-  };
+type Props = { params: Promise<{ slug: string }> };
+
+export async function generateMetadata({ params }: Props) {
+  const [snapshot, { slug }] = await Promise.all([readPageSnapshot(), params]);
+  return glossaryTermMetadata(snapshot, slug);
 }
 
-export default async function GlossaryTermPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  return <GlossaryDetailPage slug={decodeURIComponent((await params).slug)} />;
+export default async function GlossaryTermPage({ params }: Props) {
+  const [snapshot, { slug }] = await Promise.all([readPageSnapshot(), params]);
+  return <GlossaryTerm snapshot={snapshot} slug={slug} />;
 }

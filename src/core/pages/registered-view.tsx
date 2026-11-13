@@ -4,7 +4,10 @@ import { ExtensionPlaceholder } from "@/themes/argon/components/extension-placeh
 import type { PublicManagedPage } from "@/core/contracts/pages";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { ExtensionComponent } from "@/core/extensions/components";
-import { useLocale } from "@/core/i18n/provider";
+import {
+  RegisteredPageLocale,
+  useRegisteredPageLocale,
+} from "@/core/i18n/provider";
 import { useRouteState } from "@/themes/argon/components/route-state";
 import { pageNumber } from "@/core/content/query";
 import {
@@ -45,7 +48,7 @@ export function RegisteredPageView({
 }) {
   const { entry, loading } = useRegisteredPageImplementation(page);
   const { route } = useRouteState();
-  const { locale } = useLocale();
+  const { locale } = useRegisteredPageLocale();
   if (!entry)
     return (
       <ExtensionPlaceholder
@@ -69,13 +72,17 @@ export function RegisteredPageView({
         )
       : undefined);
   return (
-    <ExtensionComponent
-      name={entry.component}
-      page={page}
-      articleCollection={articles}
-      pathname={preview ? page.path : pathname}
-      preview={preview}
-      onReady={onReady}
-    />
+    <RegisteredPageLocale>
+      <div lang={locale}>
+        <ExtensionComponent
+          name={entry.component}
+          page={page}
+          articleCollection={articles}
+          pathname={preview ? page.path : pathname}
+          preview={preview}
+          onReady={onReady}
+        />
+      </div>
+    </RegisteredPageLocale>
   );
 }

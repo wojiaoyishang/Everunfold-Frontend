@@ -1,5 +1,7 @@
 import { ArticleAgeNotice } from "./article-age-notice";
 import { AppLink as Link } from "./navigation-link";
+import type { BuilderRenderContext } from "../builder/content";
+import { BuilderContent } from "../builder/content";
 import type { ContentMetadata } from "@/core/content/types";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import {
@@ -30,6 +32,7 @@ type ArticleCardProps = {
   glossary?: GlossaryRuntimeOptions;
   articleDisplay?: ArticleDisplayPreferences;
   code?: CodePreferences;
+  builderContext?: BuilderRenderContext;
 };
 
 /** The reading surface is shared by publication and authorized draft previews. */
@@ -41,6 +44,7 @@ export function ArticleCard({
   glossary,
   articleDisplay,
   code,
+  builderContext,
 }: ArticleCardProps) {
   const display = resolveDisplay(content, articleDisplay);
   return (
@@ -82,6 +86,7 @@ export function ArticleCard({
         glossary={glossary}
         articleDisplay={display}
         code={code}
+        builderContext={builderContext}
       />
       <ServerThemeSlot
         theme={theme}
@@ -99,20 +104,37 @@ export function ArticleBody({
   glossary,
   articleDisplay,
   code,
+  builderContext,
 }: ArticleCardProps) {
   return (
     <div className="article-body">
       <ArticleAgeNotice content={content} display={articleDisplay} />
       <ArticleMedia enabled={content.show_image_viewer !== false}>
-        <StaticContentMarkup
-          className="article-content"
-          html={rendered.html}
-          features={rendered.features}
-          contentId={content.id}
-          contentRevision={content.updated_at}
-          glossary={interactive ? glossary : undefined}
-          code={code}
-        />
+        {content.edit_mode === "components" && content.component_document ? (
+          <div className="article-content">
+            <BuilderContent
+              document={content.component_document}
+              preview={!interactive}
+              context={{
+                ...builderContext,
+                contentId: interactive ? content.id : undefined,
+                contentRevision: interactive ? content.updated_at : undefined,
+                media: content.media_urls,
+                glossary: interactive ? glossary : undefined,
+              }}
+            />
+          </div>
+        ) : (
+          <StaticContentMarkup
+            className="article-content"
+            html={rendered.html}
+            features={rendered.features}
+            contentId={content.id}
+            contentRevision={content.updated_at}
+            glossary={interactive ? glossary : undefined}
+            code={code}
+          />
+        )}
       </ArticleMedia>
       <ArticleAfterword content={content} display={articleDisplay} />
       {content.tags.length > 0 && (

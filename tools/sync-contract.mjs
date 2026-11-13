@@ -200,10 +200,21 @@ const types = await compile(schema, rootName, {
 const typesPath = path.join(output, `${outputName}.ts`);
 await writeArtifact(
   typesPath,
-  await format(types, {
-    ...(await resolveConfig(typesPath)),
-    filepath: typesPath,
-  }),
+  await format(
+    types.replace(
+      /(export interface (?:Props|ComponentParameters\d*) \{\s+\[k: string\]: )JsonValue;/g,
+      "$1ComponentJsonValue;",
+    ) +
+      (/(?:interface ComponentDocument|interface ComponentParameters)/.test(
+        types,
+      )
+        ? "\nexport type ComponentJsonValue = null | boolean | number | string | ComponentJsonValue[] | { [key: string]: ComponentJsonValue };\n"
+        : ""),
+    {
+      ...(await resolveConfig(typesPath)),
+      filepath: typesPath,
+    },
+  ),
 );
 await writeArtifact(path.join(output, path.basename(absoluteSource)), source);
 await writeArtifact(

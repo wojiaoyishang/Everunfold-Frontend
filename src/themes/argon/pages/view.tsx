@@ -12,7 +12,14 @@ import styles from "./pages.module.css";
 import { ContentLanguages } from "../components/content-languages";
 import type { Content, PublicComment } from "@/core/content/types";
 import { ProtectedManagedPage } from "./protected-page";
-import { PageCommentsBoundary } from "@/core/pages/comments";
+import { BuilderContent } from "@/themes/argon/builder/content";
+import { emptyBuilderDocument } from "@/core/builder/document";
+import { useRouteState } from "../components/route-state";
+import {
+  PageComments,
+  PageCommentsBoundary,
+  usePageComments,
+} from "@/core/pages/comments";
 import { PageImageViewerBoundary } from "./image-viewer-boundary";
 
 export function ManagedPageView({
@@ -71,11 +78,16 @@ export function ManagedPageSurface({
   articleData,
 }: Parameters<typeof ManagedPageView>[0]) {
   const { entry: implementation } = useRegisteredPageImplementation(page);
+  const { site } = useRouteState();
+  const { readReceipt } = usePageComments();
+  const layout =
+    page.source === "custom" ? (page.layout ?? "wide") : implementation?.layout;
+
   return (
     <article
       className={styles.page}
       data-reading-content="true"
-      data-page-layout={implementation?.layout}
+      data-page-layout={layout}
     >
       <ThemeSlot
         name="page.header.before"
@@ -97,9 +109,33 @@ export function ManagedPageSurface({
         context={{ page, preview: Boolean(onReady) }}
       />
       <PageImageViewerBoundary page={page}>
-        <div data-managed-page-body="true">
+        <div
+          data-managed-page-body="true"
+          className={
+            page.source === "custom" && page.edit_mode === "components"
+              ? styles.componentBody
+              : undefined
+          }
+        >
           {page.source === "custom" ? (
-            <PageFrame value={page} onReady={onReady} />
+            page.edit_mode === "components" ? (
+              <BuilderContent
+                document={page.component_document ?? emptyBuilderDocument}
+                parameters={page.component_parameters}
+                preview={Boolean(onReady)}
+                context={{
+                  contentId: onReady ? undefined : page.id,
+                  readReceipt,
+                  contentRevision: String(page.revision),
+                  media: page.media_urls,
+                  shortcodes: site.settings?.shortcodes,
+                  comments: <PageComments />,
+                }}
+                onReady={onReady}
+              />
+            ) : (
+              <PageFrame value={page} onReady={onReady} />
+            )
           ) : (
             <RegisteredPageView
               page={page}

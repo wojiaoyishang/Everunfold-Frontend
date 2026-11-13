@@ -1,5 +1,10 @@
 "use client";
-import { useLocale, useT, useLanguageCatalog } from "@/core/i18n/provider";
+import {
+  useLocale,
+  useRegisteredPageLocale,
+  useT,
+  useLanguageCatalog,
+} from "@/core/i18n/provider";
 import { localizeHref } from "@/core/i18n/locale";
 
 import { normalizePath } from "@/core/content/urls";
@@ -57,6 +62,10 @@ export function PublicLanguage() {
     toast = useToast();
   const variants =
     site.contentTranslations?.[normalizePath(route.split("?")[0])];
+  const codeOwned = site.registeredPagePaths?.includes(
+    normalizePath(route.split("?")[0]),
+  );
+  const displayLocale = useRegisteredPageLocale().locale;
   return (
     <ActionPopover
       label={t("语言")}
@@ -78,9 +87,25 @@ export function PublicLanguage() {
               const body = (
                 <>
                   <LanguageLabel code={item.code} />
-                  {item.code === locale && <Icon name="check" />}
+                  {item.code === (codeOwned ? displayLocale : locale) && (
+                    <Icon name="check" />
+                  )}
                 </>
               );
+              if (codeOwned)
+                return (
+                  <Button
+                    key={item.code}
+                    lang={item.code}
+                    aria-pressed={item.code === displayLocale}
+                    onClick={() => {
+                      change(item.code, item.ui_locale);
+                      close();
+                    }}
+                  >
+                    {body}
+                  </Button>
+                );
               return href ? (
                 <TextLink
                   key={item.code}

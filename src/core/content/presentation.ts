@@ -1,5 +1,6 @@
 import type { ContentPresentation } from "@/core/contracts/presentation";
 import type { Content, PublicSnapshot } from "./types";
+import { builderSearchText } from "@/core/builder/discovery";
 import { normalizePath } from "./urls";
 import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";
 
@@ -100,7 +101,15 @@ export function queryFeed(
     const text = [
       content.title,
       content.excerpt,
-      ...content.content.map((block) => block.content),
+      ...(content.edit_mode === "components" && content.component_document
+        ? [
+            builderSearchText(
+              content.component_document,
+              content.media_urls,
+              snapshot.site.settings?.shortcodes,
+            ),
+          ]
+        : content.content.map((block) => block.content)),
       ...content.tags.map((tag) => tag.name),
       ...content.categories.map((category) => category.name),
     ]

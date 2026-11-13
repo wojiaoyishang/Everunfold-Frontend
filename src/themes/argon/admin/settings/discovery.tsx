@@ -36,7 +36,7 @@ export function DiscoverySettings() {
       >
         <SettingsToggle
           label="生成站点地图"
-          hint="包含首页、文章、说说和已启用页面，关联可收录的多语言版本。"
+          hint="包含首页、文章、说说、术语和已启用页面，关联可收录的多语言版本。"
           value={value.sitemap_enabled ?? true}
           onChange={(sitemap_enabled) => update({ sitemap_enabled })}
         />
@@ -125,6 +125,13 @@ export function DiscoverySettings() {
         description="为搜索引擎和分享卡片提供明确的页面信息。"
       >
         <SettingsText
+          label="站点简称"
+          hint="可填常用简称，供搜索引擎识别站点名称。"
+          maxLength={120}
+          value={value.site_alternate_name ?? ""}
+          onChange={(site_alternate_name) => update({ site_alternate_name })}
+        />
+        <SettingsText
           label="默认分享图片"
           hint="填写图片地址。文章有封面时优先使用文章封面。"
           value={value.share_image ?? ""}
@@ -132,7 +139,7 @@ export function DiscoverySettings() {
         />
         <SettingsToggle
           label="输出结构化数据"
-          hint="公开文章输出作者、发布日期、修改日期等 JSON-LD 信息。"
+          hint="按内容类型输出 JSON-LD，首页包含站点名称和简称。"
           value={value.structured_data ?? true}
           onChange={(structured_data) => update({ structured_data })}
         />

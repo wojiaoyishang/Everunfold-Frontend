@@ -32,7 +32,9 @@ export function ManagedPagesDirectory({
   const [refresh, setRefresh] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-  const [restore, setRestore] = useState<ManagedPageSummary | null>(null);
+  const [target, setTarget] = useState<ManagedPageSummary | null>(null);
+  const restore = target?.archived === true;
+  const canRemove = can(actor, "pages:write") && can(actor, "pages:publish");
   const action = usePageAction();
   usePageErrorToast(error);
   const { catalog } = usePluginRuntime();
@@ -194,16 +196,6 @@ export function ManagedPagesDirectory({
                   }}
                 />
               )}
-              {row.archived &&
-                can(actor, "pages:write") &&
-                can(actor, "pages:publish") && (
-                  <Button
-                    className="admin-button"
-                    onClick={() => setRestore(row)}
-                  >
-                    <UiText text="恢复" />
-                  </Button>
-                )}
               <RouteLink
                 href={"/admin/pages/" + row.id}
                 className="admin-button"
@@ -221,6 +213,25 @@ export function ManagedPagesDirectory({
                   }
                 />
               </RouteLink>
+              {canRemove && (
+                <Button
+                  className="admin-icon-button"
+                  title={t(row.archived ? "恢复页面" : "移到回收站")}
+                  aria-label={t(
+                    row.archived ? "恢复 {title}" : "删除 {title}",
+                    {
+                      title: row.title,
+                    },
+                  )}
+                  disabled={loading || action.busy}
+                  onClick={() => {
+                    action.clearDialogError();
+                    setTarget(row);
+                  }}
+                >
+                  <Icon name={row.archived ? "undo" : "trash"} />
+                </Button>
+              )}
             </div>
           </div>
         ))}
@@ -239,18 +250,24 @@ export function ManagedPagesDirectory({
         </p>
       </section>
       <ConfirmDialog
-        open={!!restore}
-        title="恢复此页面？"
-        description="源码与配置将恢复，页面保持停用。"
-        confirmLabel="恢复页面"
-        onCancel={() => setRestore(null)}
+        open={Boolean(target)}
+        title={restore ? "恢复此页面？" : "将页面移到回收站？"}
+        description={
+          restore
+            ? "源码与配置将恢复，页面保持停用。"
+            : "页面将停用，已保存的内容和配置可从回收站恢复。"
+        }
+        confirmLabel={restore ? "恢复页面" : "移到回收站"}
+        intent={restore ? undefined : "danger"}
+        onCancel={() => setTarget(null)}
         busy={action.busy}
+        error={action.dialogError}
         onConfirm={() =>
-          action.run(async (signal) => {
+          action.runInDialog(async (signal) => {
             const input = {
-              id: restore!.id,
-              expected_revision: restore!.revision,
-              restore: true,
+              id: target!.id,
+              expected_revision: target!.revision,
+              restore,
             };
             await removeManagedPage(
               baseUrl,
@@ -258,10 +275,15 @@ export function ManagedPagesDirectory({
               csrfToken,
               { signal },
             );
-          }, "页面已恢复。")
+          })
         }
         onConfirmed={() => {
-          setRestore(null);
+          action.notify(
+            restore ? "页面已恢复。" : "页面已移到回收站。",
+            "success",
+          );
+          setTarget(null);
+          setLoading(true);
           setRefresh((value) => value + 1);
         }}
       />

@@ -19,6 +19,7 @@ import type {
 import {
   readManagedPage,
   saveManagedPage,
+  savePageTemplate,
   removeManagedPage,
 } from "@/core/contracts/pages";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
@@ -45,16 +46,26 @@ import { PageConfigurationEditor } from "./configuration";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { readSettingsModel } from "@/core/forms/schema";
 import { parsePageConfiguration } from "@/core/pages/configuration";
+import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
+import { useEditorResources } from "@/core/content-management/use-editor-resources";
 import { customPageTypeId } from "@/core/pages/registration";
 import styles from "./pages.module.css";
 import { Select } from "../../components/ui/select";
 import { PageLanguages } from "./languages";
+import { SeoDisclosure, SeoFieldsEditor } from "../components/seo-fields";
 import { CaptchaOverrides } from "../components/captcha-overrides";
 import { PageCodeFields } from "./code-fields";
 import { usePageAction } from "./feedback";
+import { BuilderEditor } from "@/themes/argon/admin/builder/editor";
+import { PageEditOptions } from "./edit-mode";
+
+const emptyDocument = { version: 1 as const, nodes: [] };
 
 const blank: PageValue = {
   title: "",
+  edit_mode: "components",
+  component_document: emptyDocument,
+  layout: "wide",
   path: "",
   description: "",
   html: "",
@@ -88,16 +99,27 @@ export function ManagedPageEditor({
   const previewId = id ?? draftId;
   const t = useT();
   const catalog = useLanguageCatalog();
+  const shortcodes = useAppliedShortcodes();
+  const resources = useEditorResources();
   const [language, setLanguage] = useState(catalog.default_code);
   const [saved, setSaved] = useState<ManagedPageItem | null>(null);
   const [initial] = useState<PageValue>(() => {
     const definition = pageType?.registration;
     if (!definition)
       return template
-        ? { ...blank, ...template.value, title: "", description: "" }
+        ? {
+            ...blank,
+            ...template.value,
+            edit_mode: template.value.edit_mode ?? "source",
+            title: "",
+            description: "",
+          }
         : blank;
     return {
       ...blank,
+      edit_mode: undefined,
+      component_document: undefined,
+      layout: undefined,
       title: definition.title,
       path: "",
       comments_open: definition.comments_open ?? true,
@@ -123,7 +145,9 @@ export function ManagedPageEditor({
   const [attempt, setAttempt] = useState(0);
   const [manualPath, setManualPath] = useState(Boolean(id));
   const [pathError, setPathError] = useState("");
-  const [confirm, setConfirm] = useState<"remove" | null>(null);
+  const [confirm, setConfirm] = useState<"remove" | "template" | null>(null);
+  const [templateName, setTemplateName] = useState("");
+  const [newTemplateId, setNewTemplateId] = useState<string>();
   const removed = useRef(false);
   const action = usePageAction((error) => {
     const message = pagesFailure(error);
@@ -135,7 +159,11 @@ export function ManagedPageEditor({
   );
   const write =
     can(actor, "pages:write") &&
-    !(value.javascript_enabled && actor.role !== "admin");
+    !(
+      value.edit_mode !== "components" &&
+      value.javascript_enabled &&
+      actor.role !== "admin"
+    );
   const publish = write && can(actor, "pages:publish");
   const source =
     saved?.source ??
@@ -145,11 +173,12 @@ export function ManagedPageEditor({
   const available = saved?.available ?? pageType?.available ?? !id;
   const ready = !id || Boolean(saved);
   const templateId = saved?.template?.id ?? template?.id;
+  const componentMode = source === "custom" && value.edit_mode === "components";
   const typeTitle =
     saved?.template?.title ??
     definition?.title ??
     pageType?.title ??
-    (source === "custom" ? "自定义代码" : typeId);
+    (source === "custom" ? "自定义页面" : typeId);
   const defaultPath = suggestedPagePath(
     value.title,
     catalog.languages.find(
@@ -234,7 +263,11 @@ export function ManagedPageEditor({
   };
   const previewPage = useMemo<PublicManagedPage>(
     () => ({
-      ...value,
+      ...Object.fromEntries(
+        Object.entries(value).filter(([key]) => key !== "share_image_media_id"),
+      ),
+      share_image_url: saved?.share_image_url,
+      media_urls: { ...saved?.media_urls, ...resources.media },
       comments_open: value.comments_open ?? true,
       title: value.title || "未命名页面",
       path: path || "/preview",
@@ -257,6 +290,7 @@ export function ManagedPageEditor({
       source,
       typeId,
       definition?.version,
+      resources.media,
     ],
   );
   const preview = usePagePreview(previewPage);
@@ -290,6 +324,19 @@ export function ManagedPageEditor({
           <UiText text="返回页面列表" />
         </RouteLink>
         <ScrollHeaderActions className={styles.editorActions}>
+          {saved && publish && !saved.archived && (
+            <Button
+              className="admin-button"
+              onClick={() => {
+                action.clearDialogError();
+                setConfirm("remove");
+              }}
+              disabled={action.busy}
+            >
+              <Icon name="trash" />
+              <UiText text="移到回收站" />
+            </Button>
+          )}
           <PreviewAction
             icon="sidebar"
             label="实时预览"
@@ -487,7 +534,7 @@ export function ManagedPageEditor({
                     </div>
                     <div className={styles.description}>
                       <AccountField
-                        label="页面说明与搜索摘要"
+                        label="页面说明"
                         value={value.description ?? ""}
                         onChange={(description) =>
                           setValue({ ...value, description })
@@ -504,16 +551,6 @@ export function ManagedPageEditor({
                           checked={!!value.enabled}
                           onCheckedChange={(enabled) =>
                             setValue({ ...value, enabled })
-                          }
-                        />
-                      </span>
-                      <span>
-                        <UiText text="允许搜索引擎收录" />
-                        <Switch
-                          aria-label={t("允许搜索引擎收录")}
-                          checked={value.allow_indexing !== false}
-                          onCheckedChange={(allow_indexing) =>
-                            setValue({ ...value, allow_indexing })
                           }
                         />
                       </span>
@@ -565,6 +602,42 @@ export function ManagedPageEditor({
                       <UiText text="关闭评论只停止新提交，已有评论仍可阅读。保存草稿不会影响前台，保存并应用后生效。" />
                     </p>
                   </section>
+                  {definition?.seo_editable !== false && (
+                    <SeoDisclosure label="搜索与分享">
+                      <SeoFieldsEditor
+                        value={value}
+                        onChange={(patch) => setValue({ ...value, ...patch })}
+                        disabled={!write || action.busy}
+                        content={{
+                          kind: "page",
+                          id: saved?.id,
+                          title: value.title,
+                          summary: value.description,
+                          path: path || undefined,
+                          language:
+                            saved?.language ??
+                            (source === "custom"
+                              ? language
+                              : catalog.default_code),
+                          published: Boolean(saved?.enabled),
+                          access:
+                            value.captcha_read === "required"
+                              ? "captcha"
+                              : "public",
+                          cover:
+                            typeof value.options?.cover_url === "string"
+                              ? value.options.cover_url
+                              : undefined,
+                          share_image_url:
+                            value.share_image_media_id &&
+                            value.share_image_media_id ===
+                              saved?.value.share_image_media_id
+                              ? saved.share_image_url
+                              : undefined,
+                        }}
+                      />
+                    </SeoDisclosure>
+                  )}
                   {source === "registered" ? (
                     <section className="account-card">
                       <header>
@@ -618,36 +691,103 @@ export function ManagedPageEditor({
                         </p>
                       )}
                     </section>
-                  ) : templateId ? (
-                    <section className="account-card">
-                      <header>
-                        <h2>
-                          <UiText text="自定义页面模板" />
-                        </h2>
-                      </header>
-                      <div className={styles.templateReference}>
-                        <div>
-                          <strong>{typeTitle}</strong>
-                          <p>
-                            <UiText text="此页面使用模板的 HTML、CSS 和 JavaScript。更新模板会同步到使用它的页面。" />
-                          </p>
-                        </div>
-                        <RouteLink
-                          className="admin-button"
-                          href={`/admin/pages/templates/${templateId}`}
-                        >
-                          <Icon name="code" />
-                          <UiText text={write ? "编辑模板" : "查看模板"} />
-                        </RouteLink>
-                      </div>
-                    </section>
                   ) : (
-                    <PageCodeFields
-                      value={value}
-                      onChange={(patch) => setValue({ ...value, ...patch })}
-                      disabled={!write || action.busy}
-                      allowScripts={actor.role === "admin"}
-                    />
+                    <>
+                      <section className="account-card">
+                        <PageEditOptions
+                          mode={componentMode ? "components" : "source"}
+                          layout={value.layout}
+                          onMode={
+                            templateId
+                              ? undefined
+                              : (edit_mode) =>
+                                  setValue((current) => ({
+                                    ...current,
+                                    edit_mode,
+                                    component_document:
+                                      edit_mode === "components"
+                                        ? (current.component_document ??
+                                          emptyDocument)
+                                        : null,
+                                  }))
+                          }
+                          onLayout={(layout) =>
+                            setValue((current) => ({ ...current, layout }))
+                          }
+                        />
+                      </section>
+                      {componentMode && (
+                        <BuilderEditor
+                          allowComments
+                          value={value.component_document ?? emptyDocument}
+                          parameters={value.component_parameters ?? {}}
+                          onChange={(component_document) =>
+                            setValue((current) => ({
+                              ...current,
+                              component_document,
+                            }))
+                          }
+                          onParametersChange={(component_parameters) =>
+                            setValue((current) => ({
+                              ...current,
+                              component_parameters,
+                            }))
+                          }
+                          linked={Boolean(templateId)}
+                          onMedia={resources.remember}
+                          renderContext={{
+                            media: previewPage.media_urls,
+                            shortcodes,
+                          }}
+                          disabled={!write || action.busy || saved?.archived}
+                          onSaveTemplate={
+                            write && !templateId
+                              ? () => {
+                                  setTemplateName(value.title.trim());
+                                  setNewTemplateId(randomUUID());
+                                  action.clearDialogError();
+                                  setConfirm("template");
+                                }
+                              : undefined
+                          }
+                        />
+                      )}
+                      {templateId ? (
+                        <section className="account-card">
+                          <header>
+                            <h2>
+                              <UiText text="自定义页面模板" />
+                            </h2>
+                          </header>
+                          <div className={styles.templateReference}>
+                            <div>
+                              <strong>{typeTitle}</strong>
+                              <p>
+                                <UiText text="此页面使用模板的结构。更新模板会同步到使用它的页面，各页面填写的参数会保留。" />
+                              </p>
+                            </div>
+                            <RouteLink
+                              className="admin-button"
+                              href={`/admin/pages/templates/${templateId}`}
+                            >
+                              <Icon name="code" />
+                              <UiText text={write ? "编辑模板" : "查看模板"} />
+                            </RouteLink>
+                          </div>
+                        </section>
+                      ) : (
+                        !componentMode && (
+                          <PageCodeFields
+                            value={value}
+                            onChange={(patch) =>
+                              setValue({ ...value, ...patch })
+                            }
+                            disabled={!write || action.busy}
+                            allowScripts={actor.role === "admin"}
+                          />
+                        )
+                      )}
+                    </>
                   )}
                 </fieldset>
               </Form>
@@ -662,19 +802,55 @@ export function ManagedPageEditor({
                   }}
                 />
               )}
-              {saved && publish && !saved.archived && (
-                <Button
-                  className="admin-button"
-                  onClick={() => setConfirm("remove")}
-                  disabled={action.busy}
-                >
-                  <UiText text="移到回收站" />
-                </Button>
-              )}
             </div>
           </div>
         </>
       )}
+      <ConfirmDialog
+        open={confirm === "template"}
+        title="另存为页面模板"
+        description="模板保存组件结构及选中保留的参数默认值。新建页面时可以选择这个模板。"
+        confirmLabel="保存模板"
+        submitOnEnter
+        busy={action.busy}
+        confirmDisabled={!templateName.trim()}
+        error={action.dialogError}
+        onCancel={() => setConfirm(null)}
+        onConfirm={() =>
+          action.runInDialog(async (signal) => {
+            if (!newTemplateId) return;
+            const input = {
+              id: newTemplateId,
+              expected_revision: 0,
+              value: {
+                title: templateName.trim(),
+                description: value.description,
+                edit_mode: "components" as const,
+                component_document: value.component_document ?? emptyDocument,
+                layout: value.layout,
+              },
+            };
+            await savePageTemplate(
+              baseUrl,
+              { ...input, operation_id: action.operation(input) },
+              csrfToken,
+              { signal },
+            );
+          })
+        }
+        onConfirmed={() => {
+          setConfirm(null);
+          action.notify("模板已保存。", "success");
+        }}
+      >
+        <AccountField
+          label="模板名称"
+          value={templateName}
+          onChange={setTemplateName}
+          maxLength={120}
+          required
+        />
+      </ConfirmDialog>
       <ConfirmDialog
         open={confirm === "remove"}
         title="将页面移到回收站？"
@@ -683,8 +859,9 @@ export function ManagedPageEditor({
         intent="danger"
         onCancel={() => setConfirm(null)}
         busy={action.busy}
+        error={action.dialogError}
         onConfirm={() =>
-          action.run(async (signal) => {
+          action.runInDialog(async (signal) => {
             const input = { id: saved!.id, expected_revision: saved!.revision };
             await removeManagedPage(
               baseUrl,
@@ -693,11 +870,14 @@ export function ManagedPageEditor({
               { signal },
             );
             removed.current = !signal.aborted;
-          }, "页面已移到回收站。")
+          })
         }
         onConfirmed={() => {
           setConfirm(null);
-          if (removed.current) router.replace("/admin/pages");
+          if (removed.current) {
+            action.notify("页面已移到回收站。", "success");
+            router.replace("/admin/pages");
+          }
         }}
       />
       <UnsavedAccountChanges dirty={dirty} busy={action.busy} />

@@ -3,6 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ComponentDraftEditor } from "./component-draft-editor";
 import type { ContentTypeDefinition } from "@/core/contracts/content-admin";
 import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
 import { requestEmbeddedLeave } from "@/core/preview/bridge";
@@ -215,6 +216,10 @@ export function DraftEditor({
         </RouteLink>
       </section>
     );
+  if (editor.detail?.edit_mode === "components")
+    return (
+      <ComponentDraftEditor type={type} id={id} initialDetail={editor.detail} />
+    );
   return (
     <CodePreferencesProvider value={resources.codePreferences}>
       <InlineUploadToasts uploads={uploads} />
@@ -269,6 +274,22 @@ export function DraftEditor({
           </Button>
           <div className={styles.headerActions}>
             <ScrollHeaderActions className={styles.previewActions}>
+              {(type.id === "article" || type.id === "shuoshuo") && (
+                <Button
+                  className="admin-button admin-editor-preview-action"
+                  disabled={
+                    editor.loading || editor.busy || uploading || dragging
+                  }
+                  onClick={() =>
+                    requestLeave(
+                      `/admin/content/${type.id}/${id ? `${id}/edit` : "new"}?mode=components`,
+                    )
+                  }
+                >
+                  <Icon name="grid" />
+                  <UiText text="组件模式" />
+                </Button>
+              )}
               <Button
                 className="admin-button admin-editor-preview-action"
                 aria-pressed={mode === "preview"}

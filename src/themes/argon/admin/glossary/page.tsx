@@ -25,6 +25,8 @@ import { hasUploadMarkers } from "@/core/editor/upload-placeholders";
 import { useEditorResources } from "@/core/content-management/use-editor-resources";
 import { useInlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
 import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
+import { glossaryTermPath } from "@/core/glossary/routes";
+import { SeoDisclosure, SeoFieldsEditor } from "../components/seo-fields";
 import { mediaReferenceId } from "@/core/media/references";
 import { AdminPageHeading } from "../components/page-heading";
 import { AdminActionButton } from "../components/action-button";
@@ -114,6 +116,17 @@ function detailFields(value: Detail): Fields {
     title: value.title,
     summary: value.summary,
     feature_media_id: value.feature_media_id ?? null,
+    allow_indexing: value.allow_indexing,
+    seo_title: value.seo_title,
+    seo_description: value.seo_description,
+    seo_canonical_path: value.seo_canonical_path,
+    seo_share_title: value.seo_share_title,
+    seo_share_description: value.seo_share_description,
+    seo_image_alt: value.seo_image_alt,
+    seo_max_snippet: value.seo_max_snippet,
+    seo_image_preview: value.seo_image_preview,
+    seo_structured_data: value.seo_structured_data,
+    share_image_media_id: value.share_image_media_id,
     show_image_viewer: value.show_image_viewer !== false,
     body: value.body.map((block) => ({ ...block })),
     aliases: value.aliases,
@@ -592,7 +605,10 @@ export function GlossaryAdminPage() {
               {selected?.status === "published" && (
                 <RouteLink
                   className="admin-button admin-action-button"
-                  href={`/glossary/${selected.slug}`}
+                  href={
+                    glossaryTermPath(selected, languages) ??
+                    `/glossary/${encodeURIComponent(selected.slug)}`
+                  }
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -818,6 +834,45 @@ export function GlossaryAdminPage() {
                 </small>
               </div>
             </SettingsSection>
+            <SeoDisclosure
+              key={selected?.id ?? newTermSession}
+              label="搜索与分享"
+            >
+              <SeoFieldsEditor
+                value={fields}
+                onChange={update}
+                disabled={!writable || saving}
+                content={{
+                  kind: "glossary",
+                  id: selected?.id,
+                  title: fields.title,
+                  summary: fields.summary,
+                  path:
+                    fields.slug || slugify(fields.title)
+                      ? glossaryTermPath(
+                          {
+                            slug: fields.slug || slugify(fields.title),
+                            language: fields.language ?? "*",
+                          },
+                          languages,
+                        )
+                      : undefined,
+                  language:
+                    fields.language === "*"
+                      ? languages.default_code
+                      : fields.language,
+                  cover: featureImage,
+                  share_image_url:
+                    fields.share_image_media_id &&
+                    fields.share_image_media_id ===
+                      selected?.share_image_media_id
+                      ? selected.share_image_url
+                      : undefined,
+                  published: selected?.status === "published",
+                  aliases: fields.aliases,
+                }}
+              />
+            </SeoDisclosure>
             <SettingsSection
               id="glossary-publication"
               title="发布状态"

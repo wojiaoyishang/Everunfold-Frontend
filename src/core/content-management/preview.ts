@@ -64,10 +64,15 @@ export function previewContent(draft: DraftDetail, terms: Taxonomy[]): Content {
     tags: taxonomy(settings?.tags ?? [], "tag"),
     comment_count: 0,
     pinned: settings?.pinned ?? false,
-    content: draft.body.map((block) => ({
-      ...block,
-      type: block.type ?? "markdown",
-    })),
+    edit_mode: draft.edit_mode,
+    component_document:
+      draft.edit_mode === "components" ? draft.component_document : undefined,
+    content: (draft.edit_mode === "components" ? [] : draft.body).map(
+      (block) => ({
+        ...block,
+        type: block.type ?? "markdown",
+      }),
+    ),
     media_urls: media,
     comments_open: settings?.comments_open ?? true,
     access: settings?.opens_at

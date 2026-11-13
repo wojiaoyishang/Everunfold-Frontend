@@ -26,11 +26,20 @@ export function parsePublicSnapshot(input: unknown): PublicSnapshot {
         item.access &&
         item.access !== "public" &&
         (item.content.length ||
+          item.component_document != null ||
           Object.keys(item.media_urls).length ||
           item.excerpt ||
           item.cover_url ||
           item.seo_description ||
           item.seo_title ||
+          item.seo_canonical_path ||
+          item.seo_share_title ||
+          item.seo_share_description ||
+          item.seo_image_alt ||
+          item.share_image_url ||
+          item.seo_max_snippet != null ||
+          item.seo_image_preview ||
+          item.seo_structured_data != null ||
           item.word_count ||
           item.comment_count),
     )
@@ -64,7 +73,20 @@ export function parsePublicSnapshot(input: unknown): PublicSnapshot {
       (page.html ||
         page.css ||
         page.javascript ||
+        page.component_document != null ||
+        Object.keys(page.component_parameters ?? {}).length ||
+        Object.keys(page.media_urls ?? {}).length ||
         page.description ||
+        page.seo_description ||
+        page.seo_title ||
+        page.seo_canonical_path ||
+        page.seo_share_title ||
+        page.seo_share_description ||
+        page.seo_image_alt ||
+        page.share_image_url ||
+        page.seo_max_snippet != null ||
+        page.seo_image_preview ||
+        page.seo_structured_data != null ||
         Object.keys(page.options ?? {}).length)
     )
       throw new Error("Restricted page leaked into public snapshot");

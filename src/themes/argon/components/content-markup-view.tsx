@@ -1,18 +1,30 @@
 "use client";
 
-import { useEffect, useRef, type HTMLAttributes, type RefObject } from "react";
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useRef,
+  type HTMLAttributes,
+  type RefObject,
+} from "react";
 
 import { mountShortcodeScripts } from "@/core/shortcodes/scripts";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import { ThemeCodeFont } from "@/core/fonts/provider";
 import { useCodeTools } from "../hooks/use-code-tools";
-import { ShortcodeRegions } from "./shortcode-regions";
 import { ContentResources } from "./content-resources";
 import {
   codeFontFace,
   codePreferenceStyle,
   useCodePreferences,
 } from "./code-preferences";
+
+const ShortcodeRegions = lazy(() =>
+  import("./shortcode-regions").then((module) => ({
+    default: module.ShortcodeRegions,
+  })),
+);
 
 type ContentMarkupViewProps = Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -146,7 +158,11 @@ export function ContentMarkupView({
         }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
-      {!preview && <ShortcodeRegions root={root} html={html} />}
+      {!preview && html.includes("data-shortcode-region=") && (
+        <Suspense fallback={null}>
+          <ShortcodeRegions root={root} html={html} />
+        </Suspense>
+      )}
       {codeTools ? tools : null}
     </>
   );

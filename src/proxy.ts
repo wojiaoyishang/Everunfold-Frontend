@@ -16,6 +16,27 @@ import {
 } from "@/core/i18n/locale";
 import { normalizeCatalog } from "@/core/i18n/catalog";
 import { localizedCodePath } from "@/core/i18n/routes";
+import {
+  glossarySlug,
+  glossaryTermPath,
+  publishedGlossaryTerm,
+} from "@/core/glossary/routes";
+import { readPublicGlossaryTerm } from "@/core/glossary/server";
+import { indexable } from "@/core/seo/policy";
+import { readingPage } from "@/core/pages/reading-pages";
+
+function publicFailure(status: 404 | 503) {
+  return new NextResponse(failureDocument(status), {
+    status,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+      "X-Robots-Tag": "noindex, follow",
+      ...(status === 503 ? { "Retry-After": "60" } : {}),
+    },
+  });
+}
+
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const headers = new Headers(request.headers);
@@ -90,6 +111,25 @@ export async function proxy(request: NextRequest) {
     const defaultLanguage = catalog.languages.find(
       (item) => item.code === catalog.default_code,
     )!;
+    const termSlug = glossarySlug(path, catalog);
+    let termIndexable = true;
+    if (termSlug) {
+      const published = publishedGlossaryTerm(snapshot, termSlug, locale);
+      if (snapshot.glossary != null && !published) return publicFailure(404);
+      const result = await readPublicGlossaryTerm(termSlug, locale);
+      if (result.status !== "ready")
+        return publicFailure(result.status === "missing" ? 404 : 503);
+      const target = glossaryTermPath(result.term, catalog);
+      if (!target) return publicFailure(404);
+      if (target !== new URL(path, request.url).pathname) {
+        const redirect = request.nextUrl.clone();
+        redirect.pathname = target;
+        const response = NextResponse.redirect(redirect, 307);
+        response.headers.set("Cache-Control", "no-store");
+        return response;
+      }
+      termIndexable = indexable(snapshot.site, result.term);
+    }
     if (
       !content &&
       !managed &&
@@ -107,34 +147,31 @@ export async function proxy(request: NextRequest) {
       (!content && !managed && !active) ||
       !hasPublicRoute(snapshot, codePath ?? path)
     ) {
-      return new NextResponse(failureDocument(404), {
-        status: 404,
-        headers: {
-          "Content-Type": "text/html; charset=utf-8",
-          "Cache-Control": "no-store",
-        },
-      });
+      return publicFailure(404);
     }
     const response = NextResponse.next({ request: { headers } });
     response.headers.set("Content-Language", locale);
+    const base = codePath ?? path;
+    const assigned =
+      base === "/"
+        ? readingPage(snapshot, "home_page_id", locale)
+        : base === "/article"
+          ? readingPage(snapshot, "posts_page_id", locale)
+          : undefined;
     if (
-      snapshot.site.settings?.site.allow_indexing === false ||
-      content?.allow_indexing === false ||
-      managed?.allow_indexing === false ||
-      (content?.access && content.access !== "public") ||
-      managed?.access === "captcha"
+      !termIndexable ||
+      !active ||
+      !indexable(snapshot.site, content ?? managed ?? assigned) ||
+      base === "/search" ||
+      base === "/ss" ||
+      (base === "/" &&
+        (request.nextUrl.searchParams.has("q") ||
+          request.nextUrl.searchParams.has("s")))
     )
       response.headers.set("X-Robots-Tag", "noindex, follow");
     return response;
   } catch {
-    return new NextResponse(failureDocument(503), {
-      status: 503,
-      headers: {
-        "Content-Type": "text/html; charset=utf-8",
-        "Cache-Control": "no-store",
-        "Retry-After": "60",
-      },
-    });
+    return publicFailure(503);
   }
 }
 export const config = {

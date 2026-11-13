@@ -58,6 +58,11 @@ export const readPublicSnapshot = cache(async (): Promise<PublicSnapshot> => {
             !page.implementation_id ||
             !disabledPages.has(page.implementation_id),
         ),
+        glossary: value?.extensions?.disabled_plugins?.includes(
+          "everunfold.glossary",
+        )
+          ? []
+          : snapshot.glossary,
         site: {
           ...snapshot.site,
           ...(value

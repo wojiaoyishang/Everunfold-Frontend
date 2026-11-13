@@ -179,6 +179,7 @@ export function ContentPreview({
                 }}
                 detail
                 rendered={presentation.rendered}
+                builderContext={{ shortcodes: site.settings?.shortcodes }}
                 interactive={false}
               />
             ) : (
@@ -186,6 +187,7 @@ export function ContentPreview({
                 theme={runtime.catalog?.theme ?? "argon"}
                 content={presentation.content}
                 rendered={presentation.rendered}
+                builderContext={{ shortcodes: site.settings?.shortcodes }}
                 interactive={false}
               />
             )}

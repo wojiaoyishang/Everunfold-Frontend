@@ -7,6 +7,7 @@ import {
 } from "@/core/content/presentation";
 import { ServerThemeComponent } from "@/core/extensions/server-components";
 import { contentMetadata } from "@/core/content/client-data";
+import type { BuilderRenderContext } from "../builder/content";
 import { ShuoshuoCard } from "./shuoshuo";
 import { PagePresentation } from "./route-state";
 import { Pagination } from "./pagination";
@@ -19,12 +20,14 @@ import "./feed-layout.css";
 export function ContentCard({
   entry,
   theme,
+  shortcodes,
 }: {
   entry: FeedEntry;
+  shortcodes?: BuilderRenderContext["shortcodes"];
   theme: string;
 }) {
   return entry.content.type === "shuoshuo" ? (
-    <ShuoshuoCard entry={entry} theme={theme} />
+    <ShuoshuoCard entry={entry} theme={theme} builderContext={{ shortcodes }} />
   ) : (
     <ServerThemeComponent
       theme={theme}
@@ -97,7 +100,12 @@ export function Feed({
             data-density={homepage ? preferences?.density : undefined}
           >
             {result.items.map((entry) => (
-              <ContentCard key={entry.content.id} entry={entry} theme={theme} />
+              <ContentCard
+                key={entry.content.id}
+                entry={entry}
+                theme={theme}
+                shortcodes={snapshot.site.settings?.shortcodes}
+              />
             ))}
           </div>
         </div>

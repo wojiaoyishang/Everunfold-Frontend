@@ -1,4 +1,5 @@
 "use client";
+import { glossaryTermPath } from "@/core/glossary/routes";
 
 import { useEffect, useMemo, useState } from "react";
 import type { GlossaryContract } from "@/core/contracts/glossary";
@@ -6,7 +7,7 @@ import type { PublicShortcode } from "@/core/contracts/settings";
 import { loadGlossaryMatches } from "@/core/glossary/runtime";
 import { renderGlossaryPreview } from "@/core/glossary/content";
 import { translate } from "@/core/i18n/messages";
-import { useLocale, useT } from "@/core/i18n/provider";
+import { useLanguageCatalog, useLocale, useT } from "@/core/i18n/provider";
 import { AppLink } from "./navigation-link";
 import { Icon } from "./icon";
 import { useReaderBaseUrl } from "./reader-data";
@@ -53,6 +54,7 @@ export default function GlossaryFootnotes({
   const baseUrl = useReaderBaseUrl();
   const { site } = useRouteState();
   const { uiLocale } = useLocale();
+  const catalog = useLanguageCatalog();
   const t = useT();
   const [index, setIndex] = useState<MatchIndex | null>(null);
 
@@ -101,7 +103,8 @@ export default function GlossaryFootnotes({
         {items.map(({ term, hint }) => (
           <li key={term.id}>
             <AppLink
-              href={term.path}
+              href={glossaryTermPath(term, catalog) ?? term.path}
+              localize={false}
               target="_blank"
               rel="noopener noreferrer"
               aria-label={t("打开术语：{title}", { title: term.title })}

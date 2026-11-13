@@ -85,7 +85,7 @@ export function localizeHref(
   const url = new URL(href, "http://locale.invalid"),
     path = unprefixedPath(url.pathname, catalog);
   if (
-    !/^\/(?:$|(?:article|ss|archives|search|categories|tags)$|about\/?$|category\/|tag\/)/.test(
+    !/^\/(?:$|(?:article|ss|archives|search|categories|tags|glossary)$|about\/?$|category\/|tag\/)/.test(
       path,
     )
   )

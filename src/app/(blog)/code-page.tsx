@@ -1,4 +1,7 @@
 import { readConfiguration } from "@/core/config/server";
+import { defaultHomeSeo, managedPageSeo } from "@/core/seo/page";
+import { seoSite, siteIdentity } from "@/core/seo/metadata";
+import { StructuredData } from "@/core/seo/structured-data";
 import { feedAlternates } from "@/core/seo/discovery";
 import { readingPage } from "@/core/pages/reading-pages";
 import { ManagedPageView } from "@/themes/argon/pages/view";
@@ -46,6 +49,7 @@ export function codePageMetadata(
       "/categories": "文章分类",
       "/tags": "文章标签",
       "/ss": "说说",
+      "/glossary": "术语表",
       "/article": "文章归档",
     } as Record<string, string>
   )[path];
@@ -60,6 +64,8 @@ export function codePageMetadata(
       : path === "/article"
         ? readingPage(snapshot, "posts_page_id")
         : undefined;
+  if (assigned) return managedPageSeo(snapshot, assigned, origin).metadata;
+  if (path === "/") return defaultHomeSeo(snapshot, origin).metadata;
   const target = (language: string) =>
     path === "/article"
       ? (readingPage(snapshot, "posts_page_id", language)?.path ??
@@ -86,14 +92,7 @@ export function codePageMetadata(
           },
         }
       : {}),
-    ...(assigned
-      ? { title: assigned.title, description: assigned.description }
-      : title
-        ? { title: translator(snapshot)(title) }
-        : {}),
-    ...(assigned?.allow_indexing === false
-      ? { robots: { index: false, follow: true } }
-      : {}),
+    ...(title ? { title: translator(snapshot)(title) } : {}),
     ...(path === "/search" || path === "/ss"
       ? { robots: { index: false, follow: true } }
       : {}),
@@ -110,6 +109,22 @@ export async function CodePage(props: CodePageProps) {
   const theme = await readActiveTheme();
   const output = renderCodePage(props, theme);
   const query = parameters.q || parameters.s;
+  const origin = readConfiguration().publicSiteUrl;
+  const isHome = path === "/" && !query;
+  const assigned = isHome
+    ? readingPage(snapshot, "home_page_id")
+    : path === "/article"
+      ? readingPage(snapshot, "posts_page_id")
+      : undefined;
+  const identity =
+    isHome &&
+    (!snapshot.site.locale ||
+      snapshot.site.locale === seoSite(snapshot.site).defaultLanguage)
+      ? siteIdentity(seoSite(snapshot.site), origin)
+      : null;
+  const pageData = assigned
+    ? managedPageSeo(snapshot, assigned, origin).structured
+    : null;
   const name =
     path === "/" && !query
       ? "home"
@@ -129,6 +144,8 @@ export async function CodePage(props: CodePageProps) {
       name={name}
       context={{ site: snapshot.site, path }}
     >
+      <StructuredData data={identity} />
+      <StructuredData data={pageData} />
       {output}
     </ServerThemeTemplate>
   );

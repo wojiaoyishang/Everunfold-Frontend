@@ -53,7 +53,11 @@ export function ManagedPageTypes({ choose = false }: { choose?: boolean }) {
                     {type.source === "template" ? (
                       type.title
                     ) : (
-                      <UiText text={type.title} />
+                      <UiText
+                        text={
+                          type.source === "custom" ? "自定义页面" : type.title
+                        }
+                      />
                     )}
                   </h2>
                   <span>
@@ -72,7 +76,7 @@ export function ManagedPageTypes({ choose = false }: { choose?: boolean }) {
               {type.description && (
                 <p>
                   {type.source === "custom" ? (
-                    <UiText text="编写 HTML、CSS 和 JavaScript，保存为可复用的页面模板。" />
+                    <UiText text="拖放组件搭建页面，也可以切换为源码模式。" />
                   ) : type.source === "template" ? (
                     type.description
                   ) : (
@@ -110,19 +114,21 @@ export function ManagedPageTypes({ choose = false }: { choose?: boolean }) {
                     <UiText text={write ? "编辑模板" : "查看模板"} />
                   </RouteLink>
                 )}
+                {!choose && write && type.source === "custom" && (
+                  <RouteLink
+                    href="/admin/pages/templates/new"
+                    className="admin-button"
+                  >
+                    <UiText text="创建模板" />
+                  </RouteLink>
+                )}
                 {write && type.available && (
                   <RouteLink
-                    href={
-                      type.source === "custom"
-                        ? "/admin/pages/templates/new"
-                        : `/admin/pages/new?type=${encodeURIComponent(type.id)}`
-                    }
+                    href={`/admin/pages/new?type=${encodeURIComponent(type.id)}`}
                     className={`admin-button${choose ? " admin-button-primary" : ""}`}
                   >
                     <Icon name="plus" />
-                    <UiText
-                      text={type.source === "custom" ? "创建模板" : "新建页面"}
-                    />
+                    <UiText text="新建页面" />
                   </RouteLink>
                 )}
               </div>

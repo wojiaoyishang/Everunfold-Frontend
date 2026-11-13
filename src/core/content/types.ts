@@ -5,6 +5,7 @@ export type Site = StoredSnapshot["site"] & {
   sitemapPreviewPath?: string;
   locale?: string;
   contentLocales?: Record<string, string>;
+  registeredPagePaths?: string[];
   contentTranslations?: Record<
     string,
     NonNullable<StoredSnapshot["contents"][number]["translations"]>

@@ -12,11 +12,12 @@ import type {
   MediaURL,
 } from "@/core/contracts/content-admin";
 import type { MediaItem } from "@/core/contracts/settings";
-import { Button, TextArea, TextField } from "../../components/ui/primitives";
+import { Button, TextField } from "../../components/ui/primitives";
 import { DateTimeField } from "../../components/ui/date-time-field";
 import { Select } from "../../components/ui/select";
 import { PasswordField } from "../../components/ui/password-field";
 import { Switch } from "../../components/ui/switch";
+import { SeoFieldsEditor } from "../components/seo-fields";
 import { CaptchaOverrides } from "../components/captcha-overrides";
 import { CategorySelector, type CreateCategory } from "./category-selector";
 import { TagSelector } from "./tag-selector";
@@ -398,60 +399,54 @@ function CaptchaPanel({ settings, update, disabled }: PanelProps) {
     </Panel>
   );
 }
-function SeoPanel({ settings, update, fields, disabled }: PanelProps) {
-  return (
-    <Panel title="搜索展示" initialOpen={false}>
-      <label className="admin-settings-toggle">
-        <span>
-          <UiText text="允许搜索引擎收录" />
-        </span>
-        <Switch
-          checked={settings.allow_indexing !== false}
-          disabled={disabled}
-          onCheckedChange={(allow_indexing) => update({ allow_indexing })}
-        />
-      </label>
-      <label className="admin-field">
-        <span>
-          <UiText text="搜索标题" />
-        </span>
-        <TextField
-          disabled={disabled}
-          value={settings.seo_title ?? ""}
-          maxLength={200}
-          placeholder={fields.title || "使用内容标题"}
-          onChange={(event) => update({ seo_title: event.target.value })}
-        />
-      </label>
-      <label className="admin-field">
-        <span>
-          <UiText text="搜索描述" />
-        </span>
-        <TextArea
-          disabled={disabled}
-          rows={4}
-          maxLength={500}
-          value={settings.seo_description ?? ""}
-          placeholder="留空使用摘要"
-          onChange={(event) => update({ seo_description: event.target.value })}
-        />
-      </label>
-      <small>
-        <UiText text="同时用于页面元信息和分享卡片；实际搜索结果由搜索引擎决定。" />
-      </small>
-    </Panel>
-  );
-}
-function ArticleOverridesPanel({
+function SeoPanel({
+  type,
   settings,
   update,
+  fields,
   disabled,
+  detail,
   media,
   onMedia,
 }: PanelProps) {
-  const [picker, setPicker] = useState(false);
-  const imageId = settings.share_image_media_id;
-  const preview = imageId ? media[imageId]?.original : null;
+  return (
+    <Panel title="搜索与分享" initialOpen={false}>
+      <SeoFieldsEditor
+        value={settings}
+        onChange={update}
+        onMedia={onMedia}
+        disabled={disabled}
+        content={{
+          kind: type.id === "shuoshuo" ? "shuoshuo" : "article",
+          id: detail?.id,
+          title: fields.title ?? "",
+          summary: fields.excerpt,
+          path: settings.path || detail?.public_path || undefined,
+          language: detail?.language,
+          published: Boolean(detail?.published_revision),
+          access:
+            settings.visibility === "password"
+              ? "password"
+              : settings.captcha_read === "required"
+                ? "captcha"
+                : "public",
+          cover: settings.cover_media_id
+            ? media[settings.cover_media_id]?.original
+            : undefined,
+          share_image_url: settings.share_image_media_id
+            ? media[settings.share_image_media_id]?.original
+            : undefined,
+          author: settings.byline?.trim() || detail?.author,
+          publishedAt:
+            settings.display_published_at || detail?.published_at || undefined,
+          updatedAt: detail?.updated_at,
+        }}
+      />
+    </Panel>
+  );
+}
+
+function ArticleOverridesPanel({ settings, update, disabled }: PanelProps) {
   const overrides = [
     ["show_toc", "本文目录"],
     ["show_share", "本文分享按钮"],
@@ -528,40 +523,6 @@ function ArticleOverridesPanel({
           />
         </div>
       ))}
-      <Button
-        className={styles.cover}
-        disabled={disabled}
-        onClick={() => setPicker(true)}
-      >
-        {preview ? (
-          <MediaPreview url={preview} kind="image" label="本文分享图片" />
-        ) : (
-          <>
-            <Icon name="image" />
-            <UiText text="选择本文分享图" />
-          </>
-        )}
-      </Button>
-      {imageId && (
-        <Button
-          className="admin-button"
-          disabled={disabled}
-          onClick={() => update({ share_image_media_id: null })}
-        >
-          <UiText text="移除本文分享图" />
-        </Button>
-      )}
-      {picker && (
-        <EditorMediaDialog
-          kind="image"
-          onClose={() => setPicker(false)}
-          onPick={(item) => {
-            if (disabled) return;
-            onMedia(item);
-            update({ share_image_media_id: item.id.replace(/^media:/, "") });
-          }}
-        />
-      )}
     </Panel>
   );
 }

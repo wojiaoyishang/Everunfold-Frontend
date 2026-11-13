@@ -70,7 +70,15 @@ export function ManagedPagePreview({
       .then((response) => {
         if (!controller.signal.aborted && !received)
           setPage({
-            ...response.data.value,
+            ...Object.fromEntries(
+              Object.entries(response.data.value).filter(
+                ([key]) => key !== "share_image_media_id",
+              ),
+            ),
+            title: response.data.value.title,
+            path: response.data.value.path,
+            share_image_url: response.data.share_image_url,
+            media_urls: response.data.media_urls,
             id,
             source: response.data.source,
             implementation_id: response.data.implementation_id,

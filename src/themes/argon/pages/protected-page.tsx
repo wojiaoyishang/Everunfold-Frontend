@@ -66,7 +66,12 @@ export function ProtectedManagedPage({
       />
     </PageCommentsBoundary>
   ) : (
-    <article className={styles.page}>
+    <article
+      className={styles.page}
+      data-page-layout={
+        page.source === "custom" ? (page.layout ?? "wide") : undefined
+      }
+    >
       <ExtensionComponent
         name="public.page.heading"
         page={page}

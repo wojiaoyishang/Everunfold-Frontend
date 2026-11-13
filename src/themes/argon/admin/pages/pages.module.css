@@ -387,3 +387,9 @@
 .editorColumn {
   min-width: 0;
 }
+
+.editOption {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}

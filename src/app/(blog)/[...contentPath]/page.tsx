@@ -1,29 +1,18 @@
-import {
-  discoverySettings,
-  feedAlternates,
-  indexable,
-} from "@/core/seo/discovery";
-import { resourceUrl } from "@/core/content/urls";
 import { articleSchema, StructuredData } from "@/core/seo/structured-data";
+import { seoRoutes } from "@/core/seo/routes";
+import { managedPageSeo } from "@/core/seo/page";
 import { readingPage } from "@/core/pages/reading-pages";
 import { normalizePath } from "@/core/content/urls";
-import { localizeHref } from "@/core/i18n/locale";
+import { glossarySlug } from "@/core/glossary/routes";
 import { resolveManagedPage } from "@/core/pages/resolve";
 import { ManagedPageView } from "@/themes/argon/pages/view";
 import { pageLanguages } from "@/core/pages/languages";
-import { registeredPageLanguages } from "@/core/pages/registered-languages";
 import { normalizeCatalog } from "@/core/i18n/catalog";
-import { snapshotLocale } from "@/core/i18n/snapshot";
 import { pageImplementation } from "@/core/pages/registry";
-import {
-  pageArticleCategory,
-  pageArticleCollection,
-  pageArticleSources,
-} from "@/core/pages/articles";
+import { pageArticleCategory, pageArticleSources } from "@/core/pages/articles";
 import { PagePresentation } from "@/themes/argon/components/route-state";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { headers } from "next/headers";
 import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
 import { pageNumber, resolveContent } from "@/core/content/query";
 import { RelatedArticles } from "@/themes/argon/components/related-articles";
@@ -41,9 +30,7 @@ import { localizedCodePath } from "@/core/i18n/routes";
 import { CodePage, codePageMetadata } from "../code-page";
 import { readActiveTheme } from "@/core/themes/server";
 import { GlossaryDirectory } from "@/themes/argon/glossary/directory";
-import { GlossaryDetailPage } from "@/themes/argon/glossary/detail";
-import { translate } from "@/core/i18n/messages";
-import { messageLocale } from "@/core/i18n/locale";
+import { GlossaryTerm, glossaryTermMetadata } from "../glossary/term";
 type Parameters = {
   params: Promise<{ contentPath: string[] }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -54,99 +41,15 @@ export async function generateMetadata({
   const snapshot = await readPublicSnapshot();
   const { contentPath } = await params;
   const managed = resolveManagedPage(snapshot, `/${contentPath.join("/")}`);
-  if (managed) {
-    if (
-      readingPage(snapshot, "posts_page_id", managed.language ?? undefined)
-        ?.id === managed.id
-    )
-      return codePageMetadata(snapshot, "/article");
-    const variants =
-      managed.source === "custom"
-        ? pageLanguages(snapshot, managed)
-        : registeredPageLanguages(
-            managed,
-            normalizeCatalog(snapshot.site.settings?.site.language_catalog),
-            new Set(
-              [...snapshot.contents, ...(snapshot.pages ?? [])].map(
-                (item) => item.path,
-              ),
-            ),
-          );
-    const canonical =
-      managed.source === "registered"
-        ? (variants.find((item) => item.language === snapshot.site.locale)
-            ?.path ?? managed.path)
-        : readingPage(snapshot, "home_page_id", managed.language ?? undefined)
-              ?.id === managed.id
-          ? localizeHref(
-              "/",
-              managed.language ?? snapshot.site.locale ?? "zh-CN",
-              normalizeCatalog(snapshot.site.settings?.site.language_catalog),
-            )
-          : managed.path;
-    const origin = readConfiguration().publicSiteUrl;
-    const image = resourceUrl(discoverySettings(snapshot.site).share_image);
-    const url = origin ? new URL(canonical, origin).href : undefined;
-    const description = managed.description || undefined;
-    const images = image && origin ? [new URL(image, origin).href] : undefined;
-    return {
-      title: managed.title,
-      description,
-      openGraph: {
-        title: managed.title,
-        description,
-        type: "website",
-        siteName: snapshot.site.name,
-        url,
-        images,
-      },
-      twitter: {
-        card: images ? "summary_large_image" : "summary",
-        title: managed.title,
-        description,
-        images,
-      },
-      robots: {
-        index:
-          managed.access !== "captcha" &&
-          managed.allow_indexing !== false &&
-          snapshot.site.settings?.site.allow_indexing !== false,
-        follow: true,
-      },
-      alternates: origin
-        ? {
-            canonical: url,
-            types: feedAlternates(snapshot.site, origin),
-            languages: Object.fromEntries(
-              variants
-                .filter((item) =>
-                  managed.source === "registered"
-                    ? indexable(snapshot.site, managed)
-                    : snapshot.pages?.some(
-                        (page) =>
-                          page.id === item.id && indexable(snapshot.site, page),
-                      ),
-                )
-                .map((item) => [
-                  item.language,
-                  new URL(item.path, origin).href,
-                ]),
-            ),
-          }
-        : undefined,
-    };
-  }
+  const origin = readConfiguration().publicSiteUrl;
+  if (managed) return managedPageSeo(snapshot, managed, origin).metadata;
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
-  if (codePath?.startsWith("/glossary")) {
-    const request = await headers();
-    return {
-      title: translate(
-        "术语表",
-        messageLocale(request.get("x-everunfold-ui-locale")),
-      ),
-      robots: { index: true, follow: true },
-    };
-  }
+  if (codePath === "/glossary") return codePageMetadata(snapshot, codePath);
+  const term = glossarySlug(
+    `/${contentPath.join("/")}`,
+    normalizeCatalog(snapshot.site.settings?.site.language_catalog),
+  );
+  if (term) return glossaryTermMetadata(snapshot, term);
   if (codePath) return codePageMetadata(snapshot, codePath);
   const presented = resolvePresentation(snapshot, `/${contentPath.join("/")}`);
   return presented
@@ -156,11 +59,7 @@ export async function generateMetadata({
         readConfiguration().publicSiteUrl,
         presented.example,
         snapshot.site,
-        new Set(
-          snapshot.contents
-            .filter((item) => indexable(snapshot.site, item))
-            .map((item) => item.path),
-        ),
+        seoRoutes(snapshot),
       )
     : { title: "404 页面未找到", robots: { index: false } };
 }
@@ -193,17 +92,15 @@ export default async function ContentPage({
       collection &&
       (managed.access === "captcha"
         ? { sources: pageArticleSources(snapshot) }
-        : {
-            collection: pageArticleCollection(
-              category ? pageArticleSources(snapshot, category) : [],
-              category,
-              snapshotLocale(snapshot),
-              pageNumber(parameters.page),
-              collection.pageSize,
-            ),
-          });
+        : { sources: category ? pageArticleSources(snapshot, category) : [] });
     return (
       <>
+        <StructuredData
+          data={
+            managedPageSeo(snapshot, managed, readConfiguration().publicSiteUrl)
+              .structured
+          }
+        />
         <PagePresentation
           site={snapshot.site}
           id={`page:${managed.id}:${managed.revision}`}
@@ -219,12 +116,11 @@ export default async function ContentPage({
   }
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
   if (codePath === "/glossary") return <GlossaryDirectory />;
-  if (codePath?.startsWith("/glossary/"))
-    return (
-      <GlossaryDetailPage
-        slug={decodeURIComponent(codePath.slice("/glossary/".length))}
-      />
-    );
+  const term = glossarySlug(
+    `/${contentPath.join("/")}`,
+    normalizeCatalog(snapshot.site.settings?.site.language_catalog),
+  );
+  if (term) return <GlossaryTerm snapshot={snapshot} slug={term} />;
   if (codePath)
     return (
       <CodePage snapshot={snapshot} path={codePath} parameters={parameters} />
@@ -269,6 +165,7 @@ export default async function ContentPage({
             presented.content,
             snapshot.site,
             readConfiguration().publicSiteUrl,
+            seoRoutes(snapshot),
           )}
         />
         <ShuoshuoDetail
@@ -288,6 +185,7 @@ export default async function ContentPage({
             presented.content,
             snapshot.site,
             readConfiguration().publicSiteUrl,
+            seoRoutes(snapshot),
           )}
         />
       )}

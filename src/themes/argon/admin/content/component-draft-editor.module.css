@@ -1,0 +1,33 @@
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.metadata {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  min-width: 0;
+  margin-bottom: 16px;
+}
+
+.metadata > :first-child {
+  width: 100%;
+}
+
+.settings {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: clamp(14px, 3vw, 24px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius, 12px);
+  background: var(--surface);
+}
+
+.settings aside {
+  min-width: 0;
+}

@@ -21,10 +21,21 @@ import { RouteLink } from "../../components/ui/route-link";
 import { AdminPageHeading } from "../components/page-heading";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { PageCodeFields } from "./code-fields";
+import { BuilderEditor } from "@/themes/argon/admin/builder/editor";
+import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
+import { useEditorResources } from "@/core/content-management/use-editor-resources";
+import { PageEditOptions } from "./edit-mode";
 import { usePageAction } from "./feedback";
 import styles from "./pages.module.css";
 
-const emptyTemplate: TitledPageCode = { title: "", description: "" };
+const emptyDocument = { version: 1 as const, nodes: [] };
+const emptyTemplate: TitledPageCode = {
+  title: "",
+  description: "",
+  edit_mode: "components",
+  component_document: emptyDocument,
+  layout: "wide",
+};
 
 export function PageTemplateEditor({ id }: { id?: string }) {
   const actor = useAdminAccount();
@@ -37,6 +48,8 @@ export function PageTemplateEditor({ id }: { id?: string }) {
   const [loadFailed, setLoadFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const action = usePageAction();
+  const shortcodes = useAppliedShortcodes();
+  const resources = useEditorResources();
   const notifyLoadError = useEffectEvent((error: unknown) =>
     action.notify(pagesFailure(error)),
   );
@@ -44,7 +57,9 @@ export function PageTemplateEditor({ id }: { id?: string }) {
   const allowScripts = actor.role === "admin";
   const write =
     can(actor, "pages:write") &&
-    (allowScripts || !saved?.value.javascript_enabled);
+    (allowScripts ||
+      saved?.value.edit_mode === "components" ||
+      !saved?.value.javascript_enabled);
   const dirty =
     JSON.stringify(value) !== JSON.stringify(saved?.value ?? emptyTemplate);
 
@@ -125,7 +140,7 @@ export function PageTemplateEditor({ id }: { id?: string }) {
       </div>
       <AdminPageHeading
         title={id ? "编辑自定义页面模板" : "创建自定义页面模板"}
-        description="页面各自设置标题和 URL。保存模板会更新使用它的页面源码，已发布的页面会同步到前端。"
+        description="页面各自设置标题和 URL。保存模板会更新使用它的页面结构，已发布的页面会同步到前端。"
       />
       {ready ? (
         <Form
@@ -159,12 +174,47 @@ export function PageTemplateEditor({ id }: { id?: string }) {
                 />
               </div>
             </section>
-            <PageCodeFields
-              value={value}
-              disabled={!write || action.busy}
-              onChange={(patch) => setValue({ ...value, ...patch })}
-              allowScripts={allowScripts}
-            />
+            <section className="account-card">
+              <PageEditOptions
+                mode={value.edit_mode ?? "source"}
+                layout={value.layout}
+                onMode={(edit_mode) =>
+                  setValue((current) => ({
+                    ...current,
+                    edit_mode,
+                    component_document:
+                      edit_mode === "components"
+                        ? (current.component_document ?? emptyDocument)
+                        : null,
+                  }))
+                }
+                onLayout={(layout) =>
+                  setValue((current) => ({ ...current, layout }))
+                }
+              />
+            </section>
+            {value.edit_mode === "components" ? (
+              <BuilderEditor
+                allowComments
+                value={value.component_document ?? emptyDocument}
+                onMedia={resources.remember}
+                renderContext={{
+                  media: { ...saved?.media_urls, ...resources.media },
+                  shortcodes,
+                }}
+                disabled={!write || action.busy}
+                onChange={(component_document) =>
+                  setValue((current) => ({ ...current, component_document }))
+                }
+              />
+            ) : (
+              <PageCodeFields
+                value={value}
+                disabled={!write || action.busy}
+                onChange={(patch) => setValue({ ...value, ...patch })}
+                allowScripts={allowScripts}
+              />
+            )}
           </fieldset>
         </Form>
       ) : (

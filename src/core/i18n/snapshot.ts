@@ -80,6 +80,14 @@ export function localizedSnapshot(
       ...snapshot.site,
       locale,
       navigationResources: resources,
+      registeredPagePaths: (snapshot.pages ?? [])
+        .filter((page) => page.source === "registered")
+        .flatMap((page) => [
+          normalizePath(page.path),
+          ...registeredPageLanguages(page, catalog, occupied).map((variant) =>
+            normalizePath(variant.path),
+          ),
+        ]),
       contentLocales: Object.fromEntries(
         [...snapshot.contents, ...pages]
           .map((item) => [normalizePath(item.path), item.language!])

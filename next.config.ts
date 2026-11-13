@@ -3,6 +3,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  // Keep canonical, robots and social metadata inside the initial HTML head.
+  htmlLimitedBots: /.*/,
   experimental: { turbopackFileSystemCacheForDev: false },
   // Only hostnames explicitly supplied by the local deployment may use dev assets.
   allowedDevOrigins: (process.env.EVERUNFOLD_DEV_ALLOWED_HOSTS ?? "")

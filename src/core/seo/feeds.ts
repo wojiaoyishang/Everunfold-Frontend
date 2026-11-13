@@ -1,4 +1,6 @@
+import { escapeMarkup } from "@/core/rendering/features/model";
 import type { PublicSnapshot } from "@/core/content/types";
+import { builderSyndicationHtml } from "@/core/builder/discovery";
 import { renderContent } from "@/core/rendering/content";
 import { discoverySettings, discoveryXmlUrl, feedItems } from "./discovery";
 
@@ -21,7 +23,17 @@ export function buildFeed(
   const site = snapshot.site;
   const full = discoverySettings(site).feed_content === "full";
   const body = (item: PublicSnapshot["contents"][number]) =>
-    xml(renderContent(item, site.settings?.shortcodes).html);
+    xml(
+      item.edit_mode === "components" && item.component_document
+        ? builderSyndicationHtml(
+            item.component_document,
+            item.media_urls,
+            site.settings?.shortcodes,
+          ) || `<p>${escapeMarkup(item.excerpt)}</p>`
+        : renderContent(item, site.settings?.shortcodes, {
+            disableShortcodeScripts: true,
+          }).html,
+    );
   const url = (path: string) => xml(new URL(path, origin).href);
   const self = new URL(format === "rss" ? "/feed.xml" : "/atom.xml", origin);
   if (language) self.searchParams.set("language", language);

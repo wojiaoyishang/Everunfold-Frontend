@@ -155,25 +155,37 @@
 }
 
 .paperHeader {
+  flex-wrap: wrap;
   padding-block-end: 0.9rem;
   border-block-end: 1px solid var(--line);
 }
 
 .paperHeader h2 {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
+  position: relative;
+  flex: 1 1 auto;
+  min-inline-size: 0;
   margin: 0;
+  padding-inline-start: calc(5px + 0.7rem);
   color: var(--text-strong);
   font-size: clamp(1.45rem, 3vw, 2.15rem);
+  line-height: 1.25;
+  overflow-wrap: break-word;
+  word-break: keep-all;
 }
 
 .paperHeader h2::before {
-  flex: 0 0 5px;
+  position: absolute;
+  inset-block-start: 0.225em;
+  inset-inline-start: 0;
+  inline-size: 5px;
   block-size: 0.8em;
   border-radius: 6px;
   background: var(--accent);
   content: "";
+}
+
+.paperHeader > span {
+  white-space: nowrap;
 }
 
 .contents,

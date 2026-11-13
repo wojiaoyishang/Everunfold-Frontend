@@ -39,6 +39,8 @@ export function editorPreviewContent(
       title: fields.title ?? "",
       excerpt: fields.excerpt ?? "",
       body: fields.body,
+      edit_mode: fields.edit_mode,
+      component_document: fields.component_document,
       settings: fields.settings ?? undefined,
       media_urls: media,
     },

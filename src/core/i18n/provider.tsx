@@ -14,7 +14,11 @@ import {
   type CustomTranslations,
   type MessageScope,
 } from "./messages";
-import { initialCatalog, type LanguageCatalog } from "./catalog";
+import {
+  activeLanguage,
+  initialCatalog,
+  type LanguageCatalog,
+} from "./catalog";
 
 const CatalogContext = createContext<LanguageCatalog>(initialCatalog);
 export const LanguageCatalogProvider = CatalogContext.Provider;
@@ -100,6 +104,24 @@ export function LocaleProvider({
 }
 export function useLocale() {
   return useContext(LocaleContext);
+}
+
+/** Code-owned pages adapt to the reader without creating a separate authored translation. */
+export function useRegisteredPageLocale() {
+  const { locale, preferred } = useLocale();
+  const catalog = useLanguageCatalog();
+  const language = activeLanguage(catalog, preferred || locale);
+  return { locale: language.code, uiLocale: language.ui_locale };
+}
+
+export function RegisteredPageLocale({ children }: { children: ReactNode }) {
+  const context = useLocale();
+  const language = useRegisteredPageLocale();
+  return (
+    <LocaleContext value={{ ...context, ...language }}>
+      {children}
+    </LocaleContext>
+  );
 }
 function subscribeLocale(listener: () => void) {
   window.addEventListener("everunfold-locale-change", listener);

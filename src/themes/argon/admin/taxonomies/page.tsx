@@ -200,14 +200,15 @@ export function TaxonomiesPage() {
                     >
                       <UiText text="合并" />
                     </AdminActionButton>
-                    <AdminActionButton
-                      icon="trash"
-                      tone="danger"
+                    <Button
+                      className="admin-icon-button"
+                      title={t("删除")}
+                      aria-label={t("删除 {title}", { title: item.name })}
                       disabled={catalog.loading || !!catalog.error}
                       onClick={() => setCommand({ action: "remove", item })}
                     >
-                      <UiText text="删除" />
-                    </AdminActionButton>
+                      <Icon name="trash" />
+                    </Button>
                   </div>
                 )}
               </article>

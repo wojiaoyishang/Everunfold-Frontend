@@ -1,0 +1,110 @@
+.fields,
+.revealBody {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.disclosure,
+.card {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 12px;
+  text-align: start;
+  font-weight: 600;
+}
+
+.toggle svg {
+  flex: none;
+  transform: rotate(-90deg);
+  transition: transform var(--motion-fast);
+}
+
+.toggle[aria-expanded="true"] svg {
+  transform: none;
+}
+
+.reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--motion-normal);
+}
+
+.reveal[data-open="true"] {
+  grid-template-rows: 1fr;
+}
+
+.reveal > div {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.revealBody {
+  padding: 4px 12px 12px;
+}
+
+.media {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.media > :first-child:not(button) {
+  inline-size: 88px;
+  block-size: 54px;
+}
+
+.card {
+  display: grid;
+  gap: 5px;
+  padding: 12px;
+  overflow-wrap: anywhere;
+  background: var(--surface);
+}
+
+.card > span,
+.card > small {
+  color: var(--muted);
+}
+
+.card > strong {
+  color: var(--accent);
+}
+
+.card p {
+  margin: 0;
+}
+
+.fields :global(.admin-field) {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.fields :global(.admin-field) > :is(input, textarea, :global(.ui-select)) {
+  width: 100%;
+  min-width: 0;
+}
+
+.fields :global(.admin-field) :global(.ui-select-trigger) {
+  width: 100%;
+}
+
+.disclosure {
+  background: var(--admin-canvas, var(--surface));
+}
+
+.toggle {
+  min-height: 42px;
+}

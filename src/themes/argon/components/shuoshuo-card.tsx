@@ -4,6 +4,7 @@ import type {
   FeedEntry,
 } from "@/core/content/presentation";
 import type { ContentFeatures } from "@/core/rendering/features/model";
+import { BuilderContent, type BuilderRenderContext } from "../builder/content";
 import { StaticContentMarkup } from "./content-markup-static";
 import { AppLink as Link } from "./navigation-link";
 import { ArticleMedia } from "./article-media";
@@ -22,24 +23,42 @@ export function ShuoshuoCardView({
   detail = false,
   interactive = true,
   glossary,
+  builderContext,
 }: {
   entry: Omit<FeedEntry, "content"> & { content: ContentPresentationMetadata };
   rendered: { html: string; features: ContentFeatures };
   detail?: boolean;
   interactive?: boolean;
   glossary?: GlossaryRuntimeOptions;
+  builderContext?: BuilderRenderContext;
 }) {
   const { content, example } = entry;
   const body = (
     <ArticleMedia enabled={content.show_image_viewer !== false}>
-      <StaticContentMarkup
-        className="article-content shuoshuo-content"
-        html={rendered.html}
-        features={rendered.features}
-        contentId={content.id}
-        contentRevision={content.updated_at}
-        glossary={interactive ? glossary : undefined}
-      />
+      {content.edit_mode === "components" && content.component_document ? (
+        <div className="article-content shuoshuo-content">
+          <BuilderContent
+            document={content.component_document}
+            preview={!interactive}
+            context={{
+              ...builderContext,
+              contentId: interactive ? content.id : undefined,
+              contentRevision: interactive ? content.updated_at : undefined,
+              media: content.media_urls,
+              glossary: interactive ? glossary : undefined,
+            }}
+          />
+        </div>
+      ) : (
+        <StaticContentMarkup
+          className="article-content shuoshuo-content"
+          html={rendered.html}
+          features={rendered.features}
+          contentId={content.id}
+          contentRevision={content.updated_at}
+          glossary={interactive ? glossary : undefined}
+        />
+      )}
     </ArticleMedia>
   );
   return (

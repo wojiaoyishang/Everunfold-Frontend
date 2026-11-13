@@ -23,6 +23,7 @@ export {
   useT,
   useLocale,
   useLanguageCatalog,
+  useRegisteredPageLocale,
 } from "@/core/i18n/provider";
 export {
   ExtensionComponent,

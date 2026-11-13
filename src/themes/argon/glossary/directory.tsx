@@ -1,11 +1,12 @@
 "use client";
+import { glossaryTermPath } from "@/core/glossary/routes";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import { loadGlossaryIndex } from "@/core/glossary/runtime";
-import { UiText, useLocale } from "@/core/i18n/provider";
+import { UiText, useLanguageCatalog, useLocale } from "@/core/i18n/provider";
 import { AppLink } from "../components/navigation-link";
 import { PagePresentation, useRouteState } from "../components/route-state";
 import { Icon } from "../components/icon";
@@ -17,6 +18,7 @@ type Index = NonNullable<GlossaryContract["public_index"]["data"]>;
 export function GlossaryDirectory() {
   const baseUrl = useReaderBaseUrl();
   const { locale } = useLocale();
+  const catalog = useLanguageCatalog();
   const { site } = useRouteState();
   const [index, setIndex] = useState<Index | null>(null);
   const [error, setError] = useState(false);
@@ -68,7 +70,8 @@ export function GlossaryDirectory() {
           {terms.map((term) => (
             <AppLink
               className={`surface ${styles.card}`}
-              href={term.path}
+              href={glossaryTermPath(term, catalog) ?? term.path}
+              localize={false}
               key={term.id}
             >
               <span className={styles.termThumbnail} aria-hidden="true">

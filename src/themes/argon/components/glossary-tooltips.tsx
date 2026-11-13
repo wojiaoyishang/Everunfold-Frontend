@@ -1,4 +1,5 @@
 "use client";
+import { glossaryTermPath } from "@/core/glossary/routes";
 
 import {
   useCallback,
@@ -35,7 +36,7 @@ import { useRouteState } from "./route-state";
 import { ContentMarkupView } from "./content-markup-view";
 import { ArticleMedia } from "./article-media";
 import { GlossaryExpandedDialog } from "./glossary-expanded-dialog";
-import { useLocale, useT } from "@/core/i18n/provider";
+import { useLanguageCatalog, useLocale, useT } from "@/core/i18n/provider";
 import { translate } from "@/core/i18n/messages";
 import Image from "next/image";
 
@@ -130,6 +131,7 @@ export default function GlossaryTooltips({
   const baseUrl = useReaderBaseUrl();
   const { site } = useRouteState();
   const { uiLocale } = useLocale();
+  const catalog = useLanguageCatalog();
   const t = useT();
   const [index, setIndex] = useState<MatchIndex | null>(null);
   const [active, setActive] = useState<ActiveTooltip | null>(null);
@@ -574,7 +576,8 @@ export default function GlossaryTooltips({
           </div>
           <div className="glossary-tooltip-actions">
             <AppLink
-              href={active.term.path}
+              href={glossaryTermPath(active.term, catalog) ?? active.term.path}
+              localize={false}
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -600,7 +603,7 @@ export default function GlossaryTooltips({
       {expanded && fullContent && (
         <GlossaryExpandedDialog
           title={active.term.title}
-          path={active.term.path}
+          path={glossaryTermPath(active.term, catalog) ?? active.term.path}
           html={fullContent.html}
           features={fullContent.features}
           onDismiss={() => {

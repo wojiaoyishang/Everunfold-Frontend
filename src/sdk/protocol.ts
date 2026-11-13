@@ -21,6 +21,7 @@ export const SDK_CLIENT_EXPORTS = [
   "useT",
   "useLocale",
   "useLanguageCatalog",
+  "useRegisteredPageLocale",
   "MediaPickerDialog",
   "SettingsForm",
   "FontStyles",

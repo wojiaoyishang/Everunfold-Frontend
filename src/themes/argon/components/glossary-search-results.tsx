@@ -1,11 +1,12 @@
 "use client";
+import { glossaryTermPath } from "@/core/glossary/routes";
 
 import { useEffect, useId, useState } from "react";
 
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import { loadGlossaryIndex } from "@/core/glossary/runtime";
 import { filterGlossaryTerms } from "@/core/glossary/search";
-import { UiText, useLocale } from "@/core/i18n/provider";
+import { UiText, useLanguageCatalog, useLocale } from "@/core/i18n/provider";
 import type { SearchType } from "@/core/content/presentation";
 import { Icon } from "./icon";
 import { AppLink } from "./navigation-link";
@@ -28,6 +29,7 @@ export function GlossarySearchResults({
 }) {
   const baseUrl = useReaderBaseUrl();
   const { locale } = useLocale();
+  const catalog = useLanguageCatalog();
   const heading = useId();
   const needle = query.trim();
   const language = allLanguages ? "" : (selectedLanguage ?? locale);
@@ -94,7 +96,11 @@ export function GlossarySearchResults({
       ) : matches.length ? (
         <div className="glossary-search-grid">
           {matches.map((term) => (
-            <AppLink key={term.id} href={term.path}>
+            <AppLink
+              key={term.id}
+              href={glossaryTermPath(term, catalog) ?? term.path}
+              localize={false}
+            >
               <Icon name="book" />
               <span>
                 <strong>{term.title}</strong>

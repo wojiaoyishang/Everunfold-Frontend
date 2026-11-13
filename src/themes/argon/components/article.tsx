@@ -56,6 +56,7 @@ export async function Article({
           }}
           articleDisplay={display}
           code={profile?.code}
+          builderContext={{ shortcodes: snapshot.site.settings?.shortcodes }}
         />
         {content.kind === "article" && (
           <div className="article-followup">

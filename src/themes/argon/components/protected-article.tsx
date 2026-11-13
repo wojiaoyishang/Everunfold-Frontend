@@ -6,6 +6,8 @@ import { useMemo, type ReactNode } from "react";
 import type { Content, Site } from "@/core/content/types";
 import { useProtectedContent } from "@/core/content/use-protected-content";
 import { renderContent } from "@/core/rendering/content";
+import { ShortcodeRegionBoundary } from "./shortcode-regions";
+import { BuilderContent } from "../builder/content";
 import { ContentMarkup } from "./content-markup";
 import { themeProfile } from "@/core/settings/theme-options";
 import {
@@ -72,11 +74,34 @@ export function ProtectedArticle({
           <div className={`article-body ${styles.revealed}`}>
             <ArticleAgeNotice content={readable} display={display} />
             <ArticleMedia enabled={access.content.show_image_viewer !== false}>
-              <ContentMarkup
-                className="article-content"
-                html={rendered.html}
-                features={rendered.features}
-              />
+              {readable.edit_mode === "components" &&
+              readable.component_document ? (
+                <div className="article-content">
+                  <BuilderContent
+                    document={readable.component_document}
+                    context={{
+                      contentId: content.id,
+                      contentRevision: readable.updated_at,
+                      media: readable.media_urls,
+                      shortcodes: site.settings?.shortcodes,
+                      readReceipt: access.content.read_receipt,
+                    }}
+                  />
+                </div>
+              ) : (
+                <ShortcodeRegionBoundary
+                  target={content.id}
+                  readReceipt={access.content.read_receipt}
+                >
+                  <ContentMarkup
+                    className="article-content"
+                    html={rendered.html}
+                    features={rendered.features}
+                    contentId={content.id}
+                    contentRevision={readable.updated_at}
+                  />
+                </ShortcodeRegionBoundary>
+              )}
             </ArticleMedia>
             <ArticleAfterword content={readable} display={display} />
             {display.show_share !== false && (

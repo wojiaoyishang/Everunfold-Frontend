@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[可视化组件编辑器](development/component-editor.md)与 [ADR 0141](decisions/0141-component-pages-and-protected-shortcodes.md)说明画布、模板参数、代码注册页语言及短代码受限区域。
+
 [后台标识与节点部署配置](decisions/0140-admin-brand-and-node-deployment.md)说明侧栏标识来源及部署配置位置。
 
 [主题推荐插件](decisions/0139-theme-plugin-recommendations.md)说明推荐清单、批量启用和特色图打包。

@@ -45,29 +45,27 @@ function ToastViewport({ store }: { store: ToastStore }) {
     document.addEventListener("close", refresh, true);
     return () => document.removeEventListener("close", refresh, true);
   }, [active]);
-  // Select the current theme surface at publication time, including an active native modal.
   if (!entries.length || typeof document === "undefined") return null;
-  const target =
-    Array.from(document.querySelectorAll("dialog[open]")).at(-1) ??
+  const surface =
     document.querySelector(
       "[data-surface='admin'], [data-public-theme], .blog-shell, .auth-root",
-    ) ??
-    document.body;
-  return createPortal(
-    ([undefined, "top-center"] as const).map((placement) => {
-      const placed = entries.filter((entry) => entry.placement === placement);
-      return placed.length ? (
-        <ToastLane
-          key={placement ?? "default"}
-          placement={placement}
-          entries={placed}
-          store={store}
-          target={target}
-        />
-      ) : null;
-    }),
-    target,
-  );
+    ) ?? document.body;
+  const dialog = Array.from(document.querySelectorAll("dialog[open]")).at(-1);
+  return ([undefined, "top-center"] as const).map((placement) => {
+    const placed = entries.filter((entry) => entry.placement === placement);
+    if (!placed.length) return null;
+    const target = placement === "top-center" ? surface : (dialog ?? surface);
+    return createPortal(
+      <ToastLane
+        placement={placement}
+        entries={placed}
+        store={store}
+        target={target}
+      />,
+      target,
+      placement ?? "default",
+    );
+  });
 }
 
 function ToastLane({
@@ -83,24 +81,28 @@ function ToastLane({
 }) {
   const lane = useRef<HTMLElement>(null);
   useLayoutEffect(() => {
-    const header =
-      placement === "top-center" &&
-      target.matches(".admin-shell") &&
-      target.querySelector(".admin-header");
-    if (!header) return;
-    const dock = header.querySelector("[data-admin-header-dock]");
+    if (placement !== "top-center" || !target.matches("[data-surface='admin']"))
+      return;
+    const header = target.querySelector(".admin-header");
+    const toolbar = target.querySelector(".admin-page-editor-toolbar");
+    const dock = header?.querySelector("[data-admin-header-dock]");
     const update = () => {
       const bottom = Math.max(
-        header.getBoundingClientRect().bottom,
+        header?.getBoundingClientRect().bottom ?? 0,
         dock?.getBoundingClientRect().bottom ?? 0,
+        toolbar?.getBoundingClientRect().bottom ?? 0,
       );
       lane.current?.style.setProperty("--toast-top", `${bottom + 8}px`);
     };
     const observer = new ResizeObserver(update);
-    observer.observe(header);
-    if (dock) observer.observe(dock);
+    for (const element of [header, dock, toolbar])
+      if (element) observer.observe(element);
+    window.addEventListener("scroll", update, true);
     update();
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", update, true);
+    };
   }, [placement, target]);
   return (
     <section

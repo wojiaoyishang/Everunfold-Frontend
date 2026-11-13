@@ -1,38 +1,15 @@
 import type { MetadataRoute } from "next";
 import type { Content, PublicSnapshot, Site } from "@/core/content/types";
 import { normalizeCatalog } from "@/core/i18n/catalog";
-import { readingPage } from "@/core/pages/reading-pages";
-import { pageLanguages } from "@/core/pages/languages";
-import { registeredPageLanguages } from "@/core/pages/registered-languages";
-import { hasPageImplementation } from "@/core/pages/registry";
 import { archiveRoute } from "@/core/content/archive";
 import { localizeHref } from "@/core/i18n/locale";
 import { normalizePath } from "@/core/content/urls";
 import { SITEMAP_XML_PATH, sitemapEnabled } from "./sitemap-paths";
 
-export function discoverySettings(site: Pick<Site, "settings">) {
-  return {
-    sitemap_enabled: true,
-    feeds_enabled: true,
-    feed_limit: 30,
-    feed_content: "excerpt" as const,
-    structured_data: true,
-    share_image: "",
-    google_verification: "",
-    bing_verification: "",
-    ...site.settings?.site.discovery,
-  };
-}
-export function indexable(
-  site: Pick<Site, "settings">,
-  item?: { access?: string; allow_indexing?: boolean },
-) {
-  return (
-    site.settings?.site.allow_indexing !== false &&
-    item?.allow_indexing !== false &&
-    (!item?.access || item.access === "public")
-  );
-}
+import { discoverySettings, indexable } from "./policy";
+import { canonicalPath, seoAlternates, seoRoutes } from "./routes";
+
+export { discoverySettings, indexable } from "./policy";
 
 export function discoveryXmlUrl(path: string, origin: string) {
   const url = new URL(path, origin);
@@ -56,26 +33,39 @@ export function sitemapEntries(
   if (!sitemapEnabled(site)) return [];
   const catalog = normalizeCatalog(site.settings?.site.language_catalog);
   const absolute = (path: string) => new URL(path, origin).href;
-  const homePages = new Set<string>();
-  const homes = catalog.languages
-    .filter((language) => language.enabled)
-    .flatMap((language) => {
-      const page = readingPage(snapshot, "home_page_id", language.code);
-      if (page) homePages.add(page.id);
-      return indexable(site, page)
-        ? [{ language: language.code, path: language.prefix || "/" }]
-        : [];
+  const routes = seoRoutes(snapshot);
+  const result: MetadataRoute.Sitemap = [...routes.values()]
+    .filter(
+      (item) => item.eligible && canonicalPath(item, routes) === item.path,
+    )
+    .map((item) => {
+      const alternates = Object.entries(seoAlternates(item, routes));
+      if (item.group === "home" && alternates.length > 1) {
+        const fallback = alternates.find(
+          ([locale]) => locale === catalog.default_code,
+        );
+        if (fallback) alternates.push(["x-default", fallback[1]]);
+      }
+      return {
+        url: absolute(item.path),
+        lastModified: item.updatedAt,
+        ...(alternates.length
+          ? {
+              alternates: {
+                languages: Object.fromEntries(
+                  alternates.map(([language, path]) => [
+                    language,
+                    absolute(path),
+                  ]),
+                ),
+              },
+            }
+          : {}),
+      };
     });
-  const languages = (items: { language: string; path: string }[]) =>
-    Object.fromEntries(
-      items.map((item) => [item.language, absolute(item.path)]),
-    );
-  const result: MetadataRoute.Sitemap = homes.map((item) => ({
-    url: absolute(item.path),
-    alternates: { languages: languages(homes) },
-  }));
-  const contents = snapshot.contents.filter((item) => indexable(site, item));
-  const articles = contents.filter((item) => item.kind === "article");
+  const articles = snapshot.contents.filter(
+    (item) => item.kind === "article" && indexable(site, item),
+  );
   const codePages = [
     ...(articles.length ? [archiveRoute(snapshot)] : []),
     ...(![...snapshot.contents, ...(snapshot.pages ?? [])].some(
@@ -94,47 +84,11 @@ export function sitemapEntries(
     for (const variant of variants)
       result.push({
         url: absolute(variant.path),
-        alternates: { languages: languages(variants) },
-      });
-  }
-  const paths = new Set(contents.map((item) => item.path));
-  for (const item of contents)
-    result.push({
-      url: absolute(item.path),
-      lastModified: item.updated_at,
-      alternates: {
-        languages: languages(
-          (item.translations ?? []).filter(
-            (member) => paths.has(member.path) && member.access === "public",
+        alternates: {
+          languages: Object.fromEntries(
+            variants.map((item) => [item.language, absolute(item.path)]),
           ),
-        ),
-      },
-    });
-  const pages = (snapshot.pages ?? []).filter(
-    (page) =>
-      indexable(site, page) &&
-      !homePages.has(page.id) &&
-      page.enabled &&
-      hasPageImplementation(page),
-  );
-  const allowedPages = new Set(pages.map((page) => page.id));
-  const occupied = new Set(
-    [...snapshot.contents, ...(snapshot.pages ?? [])].map((item) => item.path),
-  );
-  for (const page of pages) {
-    const variants =
-      page.source === "custom"
-        ? pageLanguages(snapshot, page).filter((item) =>
-            allowedPages.has(item.id),
-          )
-        : registeredPageLanguages(page, catalog, occupied);
-    const urls = new Set([page.path, ...variants.map((item) => item.path)]);
-    for (const path of urls)
-      result.push({
-        url: absolute(path),
-        ...(variants.length
-          ? { alternates: { languages: languages(variants) } }
-          : {}),
+        },
       });
   }
   return [...new Map(result.map((item) => [item.url, item])).values()];
