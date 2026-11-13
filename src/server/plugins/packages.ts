@@ -143,6 +143,8 @@ async function scanInstalledPlugins(directory: string, cacheDirectory: string) {
         !packageFontsMatch(registry.fonts, manifest) ||
         JSON.stringify(registry.componentNames) !==
           JSON.stringify(manifest.components) ||
+        JSON.stringify(registry.builderComponents) !==
+          JSON.stringify(manifest.builderComponents ?? []) ||
         JSON.stringify(
           registry.pages.map(({ pluginId, ...page }) => {
             void pluginId;

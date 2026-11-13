@@ -1,6 +1,7 @@
 import type { PluginPackage } from "./types";
 import { createFontRegistry } from "@/core/fonts/registry";
 import type { FontDefinition } from "@/core/fonts/types";
+import { defineBuilderComponent } from "@/core/builder/registry";
 
 export const validAssetName = (name: string) =>
   /^[A-Za-z0-9][A-Za-z0-9._-]{0,150}$/.test(name) && !name.includes("..");
@@ -61,6 +62,10 @@ export function parsePluginPackage(
   const fonts = createFontRegistry(item.fonts ?? [], false).all;
   if (fonts.some((font) => !font.id.startsWith(item.id + ".")))
     throw new Error("Invalid plugin font namespace");
+  for (const definition of item.builderComponents ?? []) {
+    if (!defineBuilderComponent(definition).type.startsWith(item.id + "."))
+      throw new Error("Invalid builder component namespace");
+  }
   // Preserve the original object: normalizing before digest verification would reject old packages.
   return item;
 }

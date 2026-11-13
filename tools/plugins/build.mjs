@@ -313,6 +313,9 @@ export async function buildPlugin(
     entries,
     assets,
     components: registry.componentNames,
+    ...(registry.builderComponents.length
+      ? { builderComponents: registry.builderComponents }
+      : {}),
     pages: registry.pages.map(({ pluginId, ...page }) => {
       void pluginId;
       return page;

@@ -115,44 +115,54 @@ function keyboardCoordinates(
     }
   };
 }
-const collision: CollisionDetection = (args) => {
-  const available = args.droppableContainers.filter(
-    (d) => d.data.current?.slot,
-  );
-  const rects = available
-    .map((d) => args.droppableRects.get(d.id))
-    .filter((r) => r !== undefined);
-  const p = args.pointerCoordinates;
-  if (
-    p &&
-    rects.length &&
-    (p.x < Math.min(...rects.map((r) => r.left)) - 20 ||
-      p.x > Math.max(...rects.map((r) => r.right)) + 20 ||
-      p.y < Math.min(...rects.map((r) => r.top)) - 64 ||
-      p.y > Math.max(...rects.map((r) => r.bottom)) + 64)
-  )
-    return [];
-  if (p) {
-    return available
-      .flatMap((container) => {
-        const rect = args.droppableRects.get(container.id);
-        return rect
-          ? [
-              {
-                id: container.id,
-                data: {
-                  droppableContainer: container,
-                  value: Math.abs(p.y - (rect.top + rect.height / 2)),
+const slotCollision =
+  (nested: boolean): CollisionDetection =>
+  (args) => {
+    const available = args.droppableContainers.filter(
+      (d) => d.data.current?.slot,
+    );
+    const rects = available
+      .map((d) => args.droppableRects.get(d.id))
+      .filter((r) => r !== undefined);
+    const p = args.pointerCoordinates;
+    if (
+      p &&
+      rects.length &&
+      (p.x < Math.min(...rects.map((r) => r.left)) - 20 ||
+        p.x > Math.max(...rects.map((r) => r.right)) + 20 ||
+        p.y < Math.min(...rects.map((r) => r.top)) - 64 ||
+        p.y > Math.max(...rects.map((r) => r.bottom)) + 64)
+    )
+      return [];
+    if (p) {
+      return available
+        .flatMap((container) => {
+          const rect = args.droppableRects.get(container.id);
+          return rect
+            ? [
+                {
+                  id: container.id,
+                  data: {
+                    droppableContainer: container,
+                    value: nested
+                      ? Math.hypot(
+                          Math.max(rect.left - p.x, 0, p.x - rect.right),
+                          Math.max(rect.top - p.y, 0, p.y - rect.bottom),
+                        ) +
+                        Math.abs(p.y - (rect.top + rect.height / 2)) / 100
+                      : Math.abs(p.y - (rect.top + rect.height / 2)),
+                  },
                 },
-              },
-            ]
-          : [];
-      })
-      .sort((a, b) => a.data.value - b.data.value)
-      .slice(0, 1);
-  }
-  return closestCenter({ ...args, droppableContainers: available });
-};
+              ]
+            : [];
+        })
+        .sort((a, b) => a.data.value - b.data.value)
+        .slice(0, 1);
+    }
+    return closestCenter({ ...args, droppableContainers: available });
+  };
+const collision = slotCollision(false);
+const nestedCollision = slotCollision(true);
 
 /** Theme-owned interaction boundary. Dragging never mutates application data. */
 export function DragAndDrop({
@@ -161,12 +171,14 @@ export function DragAndDrop({
   onDrop,
   onBusyChange,
   renderPreview,
+  nested = false,
 }: {
   children: ReactNode;
   disabled: boolean;
   onDrop: (item: DragItem, before: string | null) => void;
   onBusyChange: (busy: boolean) => void;
   renderPreview: (item: DragItem) => ReactNode;
+  nested?: boolean;
 }) {
   const id = useId(),
     [active, setActive] = useState<DragItem | null>(null),
@@ -208,7 +220,7 @@ export function DragAndDrop({
     <DndContext
       id={id}
       sensors={sensors}
-      collisionDetection={collision}
+      collisionDetection={nested ? nestedCollision : collision}
       autoScroll={{
         canScroll: (e) => e === document.scrollingElement,
         threshold: { x: 0, y: 0.15 },

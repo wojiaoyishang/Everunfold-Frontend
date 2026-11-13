@@ -1,6 +1,11 @@
 /** Stable plugin authoring contract. Runtime capabilities live in the client entry. */
 export type { CaptchaWidgetProps } from "./captcha";
 export type {
+  BuilderComponentDefinition,
+  BuilderField,
+  BuilderValues,
+} from "@/core/builder/types";
+export type {
   FrontendPlugin,
   PluginShortcode,
   ShortcodeRenderContext,

@@ -3,6 +3,8 @@ import type { CustomPageDefinition } from "@/core/pages/registration";
 import { collectCustomPages } from "@/core/pages/registration";
 import type { FontDefinition } from "@/core/fonts/types";
 import { createFontRegistry, defineFont } from "@/core/fonts/registry";
+import { defineBuilderComponent } from "@/core/builder/registry";
+import type { BuilderComponentDefinition } from "@/core/builder/types";
 import type {
   FrontendPlugin,
   PluginShortcode,
@@ -25,6 +27,7 @@ export function createPluginRegistry(
   const pages: (CustomPageDefinition & { pluginId: string })[] = [];
   const components = new Map<string, string>();
   const fonts: FontDefinition[] = [];
+  const builderComponents = new Map<string, BuilderComponentDefinition>();
   for (const plugin of plugins) {
     if (
       !identity.test(plugin.id) ||
@@ -35,6 +38,7 @@ export function createPluginRegistry(
       throw new Error(`Invalid or duplicate frontend plugin: ${plugin.id}`);
     pluginIds.add(plugin.id);
     let collecting = true;
+    const ownBuilderComponents: BuilderComponentDefinition[] = [];
     const register = (shortcode: PluginShortcode) => {
       if (!collecting)
         throw new Error(`Plugin setup has finished: ${plugin.id}`);
@@ -91,6 +95,23 @@ export function createPluginRegistry(
       const result: unknown = plugin.setup(
         Object.freeze({
           shortcodes: Object.freeze({ register }),
+          builder: Object.freeze({
+            register(definition: BuilderComponentDefinition) {
+              if (!collecting)
+                throw new Error(`Plugin setup has finished: ${plugin.id}`);
+              if (
+                !definition.type.startsWith(plugin.id + ".") ||
+                builderComponents.has(definition.type) ||
+                Boolean(definition.component) === Boolean(definition.shortcode)
+              )
+                throw new Error(
+                  `Invalid plugin builder component: ${definition.type}`,
+                );
+              const registered = defineBuilderComponent(definition);
+              builderComponents.set(registered.type, registered);
+              ownBuilderComponents.push(registered);
+            },
+          }),
           fonts: Object.freeze({
             register(font: FontDefinition) {
               if (!collecting)
@@ -136,6 +157,26 @@ export function createPluginRegistry(
     } finally {
       collecting = false;
     }
+    for (const definition of ownBuilderComponents) {
+      if (
+        definition.component &&
+        components.get(definition.component) !== plugin.id
+      )
+        throw new Error(
+          `Builder renderer must be registered by its plugin: ${definition.type}`,
+        );
+      if (
+        definition.shortcode &&
+        !contributions.some(
+          (item) =>
+            item.pluginId === plugin.id &&
+            item.definition.name === definition.shortcode,
+        )
+      )
+        throw new Error(
+          `Builder shortcode must be registered by its plugin: ${definition.type}`,
+        );
+    }
   }
   const shortcodes = Object.freeze(contributions);
   collectCustomPages(pages);
@@ -144,6 +185,7 @@ export function createPluginRegistry(
   );
   return Object.freeze({
     fonts: createFontRegistry(fonts).all,
+    builderComponents: Object.freeze([...builderComponents.values()]),
     shortcodes,
     pages: Object.freeze(pages),
     componentNames: Object.freeze([...components.keys()]),
