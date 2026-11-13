@@ -35,6 +35,7 @@ export function usePageTypes() {
     error,
     loading,
     reload: () => {
+      setError("");
       setLoading(true);
       setAttempt((value) => value + 1);
     },

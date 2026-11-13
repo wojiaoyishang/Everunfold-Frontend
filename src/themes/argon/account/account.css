@@ -246,6 +246,9 @@
   align-items: center;
   gap: 8px;
 }
+.account-field:has([aria-invalid="true"]) small {
+  color: var(--admin-danger, var(--danger));
+}
 .account-email-status {
   padding-block: 2px;
   line-height: 1;

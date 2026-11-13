@@ -12,6 +12,24 @@
   overflow: auto;
   pointer-events: none;
 }
+.viewport[data-placement="top-center"] {
+  top: max(var(--toast-top, 16px), env(safe-area-inset-top));
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  width: max-content;
+  max-width: min(440px, calc(100vw - 24px));
+  box-sizing: border-box;
+  transform: translateX(-50%);
+}
+.viewport[data-placement="top-center"] .toast {
+  --toast-enter-y: -9px;
+  align-items: center;
+  padding-block: 12px 14px;
+}
+.viewport[data-placement="top-center"] .close {
+  margin-block: 0;
+}
 .toast {
   --toast-tint: var(--accent);
   position: relative;
@@ -122,6 +140,24 @@
   background: var(--accent-soft);
   overflow: hidden;
 }
+.countdown {
+  position: absolute;
+  inset: auto 0 0;
+  height: 3px;
+  background: var(--accent-soft);
+}
+.countdown > span {
+  display: block;
+  height: 100%;
+  background: var(--toast-tint);
+  transform-origin: left;
+  animation: toast-countdown linear both;
+}
+@keyframes toast-countdown {
+  to {
+    transform: scaleX(0);
+  }
+}
 .progress > span {
   display: block;
   height: 100%;
@@ -136,11 +172,20 @@
 @keyframes toast-in {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.98);
+    transform: translateY(var(--toast-enter-y, 10px)) scale(0.98);
   }
   to {
     opacity: 1;
     transform: none;
+  }
+}
+.viewport[data-placement="top-center"] .toast[data-state="closing"] {
+  animation-name: toast-out-top;
+}
+@keyframes toast-out-top {
+  to {
+    opacity: 0;
+    transform: translateY(-7px);
   }
 }
 @keyframes toast-out {
@@ -163,8 +208,14 @@
   }
 }
 :global(html[data-motion="reduced"]:not(:has([data-surface="admin"]))) .toast,
-:global([data-admin-motion="reduced"]) .toast {
+:global([data-admin-motion="reduced"]) .toast,
+:global([data-admin-motion="reduced"])
+  .viewport[data-placement="top-center"]
+  .toast[data-state="closing"] {
   animation: none;
+}
+:global([data-admin-motion="reduced"]) .countdown > span {
+  animation-timing-function: steps(5, end);
 }
 :global(html[data-motion="reduced"]:not(:has([data-surface="admin"]))) .spinner,
 :global([data-admin-motion="reduced"]) .spinner,
@@ -177,10 +228,16 @@
 }
 @media (prefers-reduced-motion: reduce) {
   :global([data-admin-motion="system"]) .toast,
+  :global([data-admin-motion="system"])
+    .viewport[data-placement="top-center"]
+    .toast[data-state="closing"],
   :global([data-admin-motion="system"]) .spinner,
   :global([data-admin-motion="system"]) .progress > span {
     animation: none;
     transition: none;
+  }
+  :global([data-admin-motion="system"]) .countdown > span {
+    animation-timing-function: steps(5, end);
   }
 }
 @media (max-width: 640px) {

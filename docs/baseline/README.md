@@ -1760,3 +1760,11 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | `docs/decisions/0121-separate-sitemap-preview-and-xml.md` | `ADR0121-1` | `0d85baa2b7c294bf01962d09d02635d82ab024836f27b24b59dbb02678e538fc` |
 | `docs/development/operations-and-search.md` | `operations-sitemap-xml-and-preview-1` | `49e620c4e31a1df131c5f435a2cad17167491010361b8c1cbbbd1c973b4cb82b` |
 | `docs/development/settings.md` | `settings-sitemap-xml-and-preview-1` | `8563d2e325e9290ecdf05bdfbe1812c7e917212091925a6a31cd94ba01735920` |
+
+## 自定义页面模板（2026-11-13）
+
+自定义页面模板拥有独立修订和共享源码。页面保留各自的 URL、草稿和已应用设置。后台保存反馈在导航栏下方居中显示并带倒计时。部署先执行 `0058_page_templates`，管理契约为 pages-v1 1.13.0。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0138-custom-page-templates.md` | `ADR0138-1` | `8598cbd08ef4a0055bf9b59db7b9efb7d3914604c4000396a65b96d12d919326` |

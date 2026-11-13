@@ -1,12 +1,11 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { PublicManagedPage } from "@/core/contracts/pages";
 import { managedPagePreviewPath } from "./preview";
 /** Unsaved page previews use exact owned windows and never persist draft source in a URL or browser store. */
 export function usePagePreview(page: PublicManagedPage) {
   const popup = useRef<Window | null>(null),
     latest = useRef(page);
-  const [error, setError] = useState("");
   useEffect(() => {
     latest.current = page;
   }, [page]);
@@ -42,7 +41,6 @@ export function usePagePreview(page: PublicManagedPage) {
       `everunfold-page-preview-${page.id}`,
     );
     popup.current = target;
-    setError(target ? "" : "预览窗口被浏览器拦截，请允许弹出窗口后重试。");
     if (target) {
       target.focus();
       target.postMessage(
@@ -50,6 +48,7 @@ export function usePagePreview(page: PublicManagedPage) {
         window.location.origin,
       );
     }
+    return Boolean(target);
   };
-  return { openWindow, error };
+  return { openWindow };
 }

@@ -7,21 +7,25 @@ import { Icon } from "../../components/icon";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { AdminPageHeading } from "../components/page-heading";
+import { usePageErrorToast } from "./feedback";
 import styles from "./pages.module.css";
 
 export function ManagedPageTypes({ choose = false }: { choose?: boolean }) {
   const actor = useAdminAccount();
   const { items, error, loading, reload } = usePageTypes();
   const write = can(actor, "pages:write");
+  usePageErrorToast(error);
   return (
     <>
       <AdminPageHeading
         title={choose ? "选择页面类型" : "页面类型"}
         action={
-          <RouteLink href="/admin/pages" className="admin-button">
-            <Icon name="arrow-left" />
-            <UiText text="返回页面列表" />
-          </RouteLink>
+          <div className={styles.typeActions}>
+            <RouteLink href="/admin/pages" className="admin-button">
+              <Icon name="arrow-left" />
+              <UiText text="返回页面列表" />
+            </RouteLink>
+          </div>
         }
       />
       {loading && (
@@ -30,8 +34,7 @@ export function ManagedPageTypes({ choose = false }: { choose?: boolean }) {
         </p>
       )}
       {!loading && error && (
-        <div className={styles.typeError} role="alert">
-          <p>{error}</p>
+        <div className={styles.typeError}>
           <Button className="admin-button" onClick={reload}>
             <UiText text="重试" />
           </Button>
@@ -43,22 +46,38 @@ export function ManagedPageTypes({ choose = false }: { choose?: boolean }) {
             <article key={type.id} className={styles.typeCard}>
               <header>
                 <span className={styles.pageIcon}>
-                  <Icon name={type.source === "custom" ? "code" : "grid"} />
+                  <Icon name={type.source === "registered" ? "grid" : "code"} />
                 </span>
                 <div>
                   <h2>
-                    <UiText text={type.title} />
+                    {type.source === "template" ? (
+                      type.title
+                    ) : (
+                      <UiText text={type.title} />
+                    )}
                   </h2>
                   <span>
                     <UiText
-                      text={type.source === "custom" ? "内置" : "前端插件"}
+                      text={
+                        type.source === "template"
+                          ? "自定义模板"
+                          : type.source === "custom"
+                            ? "内置"
+                            : "前端插件"
+                      }
                     />
                   </span>
                 </div>
               </header>
               {type.description && (
                 <p>
-                  <UiText text={type.description} />
+                  {type.source === "custom" ? (
+                    <UiText text="编写 HTML、CSS 和 JavaScript，保存为可复用的页面模板。" />
+                  ) : type.source === "template" ? (
+                    type.description
+                  ) : (
+                    <UiText text={type.description} />
+                  )}
                 </p>
               )}
               <div className={styles.typeActions}>
@@ -83,13 +102,27 @@ export function ManagedPageTypes({ choose = false }: { choose?: boolean }) {
                     <UiText text="实现未就绪" />
                   </span>
                 )}
+                {type.template_id && (
+                  <RouteLink
+                    href={`/admin/pages/templates/${type.template_id}`}
+                    className="admin-button"
+                  >
+                    <UiText text={write ? "编辑模板" : "查看模板"} />
+                  </RouteLink>
+                )}
                 {write && type.available && (
                   <RouteLink
-                    href={`/admin/pages/new?type=${encodeURIComponent(type.id)}`}
+                    href={
+                      type.source === "custom"
+                        ? "/admin/pages/templates/new"
+                        : `/admin/pages/new?type=${encodeURIComponent(type.id)}`
+                    }
                     className={`admin-button${choose ? " admin-button-primary" : ""}`}
                   >
                     <Icon name="plus" />
-                    <UiText text="新建页面" />
+                    <UiText
+                      text={type.source === "custom" ? "创建模板" : "新建页面"}
+                    />
                   </RouteLink>
                 )}
               </div>

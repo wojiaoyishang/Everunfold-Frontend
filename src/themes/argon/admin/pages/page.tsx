@@ -4,7 +4,6 @@ import type { ManagedPageSummary } from "@/core/contracts/pages";
 import { readManagedPages, removeManagedPage } from "@/core/contracts/pages";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
-import { useAccountAction } from "@/core/accounts/use-action";
 import { pagesFailure } from "@/core/pages/failure";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Button, TextField } from "../../components/ui/primitives";
@@ -17,6 +16,7 @@ import styles from "./pages.module.css";
 import { PageEnabledControl } from "./enabled-control";
 import { PageLanguageMenu } from "./language-menu";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
+import { usePageAction, usePageErrorToast } from "./feedback";
 export function ManagedPagesDirectory({
   initialType = "",
 }: {
@@ -33,7 +33,8 @@ export function ManagedPagesDirectory({
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [restore, setRestore] = useState<ManagedPageSummary | null>(null);
-  const action = useAccountAction(pagesFailure);
+  const action = usePageAction();
+  usePageErrorToast(error);
   const { catalog } = usePluginRuntime();
   useEffect(() => {
     const controller = new AbortController();
@@ -69,17 +70,23 @@ export function ManagedPagesDirectory({
         title="页面"
         action={
           <div className={styles.typeActions}>
-            <RouteLink href="/admin/pages/types" className="admin-button">
-              <UiText text="页面类型" />
-            </RouteLink>
             {can(actor, "pages:write") && (
-              <RouteLink
-                href="/admin/pages/new"
-                className="admin-button admin-button-primary"
-              >
-                <Icon name="plus" />
-                <UiText text="新建页面" />
-              </RouteLink>
+              <>
+                <RouteLink
+                  href="/admin/pages/templates/new"
+                  className="admin-button"
+                >
+                  <Icon name="code" />
+                  <UiText text="创建自定义页面模板" />
+                </RouteLink>
+                <RouteLink
+                  href="/admin/pages/new"
+                  className="admin-button admin-button-primary"
+                >
+                  <Icon name="plus" />
+                  <UiText text="新建页面" />
+                </RouteLink>
+              </>
             )}
           </div>
         }
@@ -116,6 +123,9 @@ export function ManagedPagesDirectory({
             ]}
             onValueChange={setType}
           />
+          <RouteLink href="/admin/pages/types" className="admin-button">
+            <UiText text="页面类型" />
+          </RouteLink>
           <div className={styles.search}>
             <TextField
               type="search"
@@ -127,6 +137,7 @@ export function ManagedPagesDirectory({
             <Button
               className="admin-button"
               onClick={() => {
+                setError("");
                 setLoading(true);
                 setRefresh((value) => value + 1);
               }}
@@ -135,11 +146,6 @@ export function ManagedPagesDirectory({
             </Button>
           </div>
         </div>
-        {error && (
-          <p role="alert" className={styles.error}>
-            {error}
-          </p>
-        )}
         {rows.map((row) => (
           <div className={styles.row} key={row.id}>
             <span className={styles.pageIcon}>
@@ -238,7 +244,7 @@ export function ManagedPagesDirectory({
         description="源码与配置将恢复，页面保持停用。"
         confirmLabel="恢复页面"
         onCancel={() => setRestore(null)}
-        error={action.message}
+        busy={action.busy}
         onConfirm={() =>
           action.run(async (signal) => {
             const input = {
@@ -252,7 +258,7 @@ export function ManagedPagesDirectory({
               csrfToken,
               { signal },
             );
-          })
+          }, "页面已恢复。")
         }
         onConfirmed={() => {
           setRestore(null);

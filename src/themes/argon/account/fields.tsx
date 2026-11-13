@@ -16,6 +16,7 @@ export function AccountField({
   multiline = false,
   required = false,
   hint,
+  error,
   minLength,
   maxLength = 2048,
   autoComplete,
@@ -35,6 +36,7 @@ export function AccountField({
   multiline?: boolean;
   required?: boolean;
   hint?: string;
+  error?: string;
   minLength?: number;
   maxLength?: number;
   autoComplete?: string;
@@ -59,7 +61,8 @@ export function AccountField({
     min,
     max,
     step,
-    "aria-describedby": hint ? id + "-hint" : undefined,
+    "aria-invalid": Boolean(error) || undefined,
+    "aria-describedby": error || hint ? id + "-hint" : undefined,
     onChange: (
       event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     ) => onChange(event.target.value),
@@ -84,9 +87,9 @@ export function AccountField({
       ) : (
         <TextField {...props} type={type} />
       )}
-      {hint && (
+      {(error || hint) && (
         <small id={id + "-hint"}>
-          <UiText text={hint} />
+          <UiText text={error || hint || ""} />
         </small>
       )}
     </div>

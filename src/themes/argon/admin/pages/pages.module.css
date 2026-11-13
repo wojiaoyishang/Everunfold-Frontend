@@ -152,6 +152,27 @@
 .configuration > p {
   margin: 0;
 }
+.pathReset {
+  border: 0;
+  padding: 4px 0;
+  color: var(--admin-accent);
+  background: transparent;
+  font: inherit;
+}
+.pathReset:is(:hover, :focus-visible) {
+  text-decoration: underline;
+}
+.templateReference {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px 20px;
+}
+.templateReference p {
+  margin: 6px 0 0;
+  color: var(--admin-muted);
+}
 .help,
 .configurationHint {
   color: var(--admin-muted);

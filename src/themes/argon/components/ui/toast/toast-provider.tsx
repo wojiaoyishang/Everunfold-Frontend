@@ -3,6 +3,8 @@ import {
   createContext,
   useContext,
   useEffect,
+  useLayoutEffect,
+  useReducer,
   useRef,
   useState,
   useSyncExternalStore,
@@ -35,6 +37,14 @@ function ToastViewport({ store }: { store: ToastStore }) {
     store.snapshot,
     store.snapshot,
   );
+  const [, refresh] = useReducer((value: number) => value + 1, 0);
+  const active = entries.length > 0;
+  useEffect(() => {
+    if (!active) return;
+    // Confirmation results can arrive before the native dialog exits.
+    document.addEventListener("close", refresh, true);
+    return () => document.removeEventListener("close", refresh, true);
+  }, [active]);
   // Select the current theme surface at publication time, including an active native modal.
   if (!entries.length || typeof document === "undefined") return null;
   const target =
@@ -44,14 +54,69 @@ function ToastViewport({ store }: { store: ToastStore }) {
     ) ??
     document.body;
   return createPortal(
-    <section className={styles.viewport} aria-label="通知" tabIndex={-1}>
-      {entries.map((entry) => (
-        <Toast key={entry.id} entry={entry} store={store} />
-      ))}
-    </section>,
+    ([undefined, "top-center"] as const).map((placement) => {
+      const placed = entries.filter((entry) => entry.placement === placement);
+      return placed.length ? (
+        <ToastLane
+          key={placement ?? "default"}
+          placement={placement}
+          entries={placed}
+          store={store}
+          target={target}
+        />
+      ) : null;
+    }),
     target,
   );
 }
+
+function ToastLane({
+  placement,
+  entries,
+  store,
+  target,
+}: {
+  placement: ToastEntry["placement"];
+  entries: ToastEntry[];
+  store: ToastStore;
+  target: Element;
+}) {
+  const lane = useRef<HTMLElement>(null);
+  useLayoutEffect(() => {
+    const header =
+      placement === "top-center" &&
+      target.matches(".admin-shell") &&
+      target.querySelector(".admin-header");
+    if (!header) return;
+    const dock = header.querySelector("[data-admin-header-dock]");
+    const update = () => {
+      const bottom = Math.max(
+        header.getBoundingClientRect().bottom,
+        dock?.getBoundingClientRect().bottom ?? 0,
+      );
+      lane.current?.style.setProperty("--toast-top", `${bottom + 8}px`);
+    };
+    const observer = new ResizeObserver(update);
+    observer.observe(header);
+    if (dock) observer.observe(dock);
+    update();
+    return () => observer.disconnect();
+  }, [placement, target]);
+  return (
+    <section
+      ref={lane}
+      className={styles.viewport}
+      data-placement={placement}
+      aria-label="通知"
+      tabIndex={-1}
+    >
+      {entries.map((entry) => (
+        <Toast key={entry.id} entry={entry} store={store} />
+      ))}
+    </section>
+  );
+}
+
 function Toast({ entry, store }: { entry: ToastEntry; store: ToastStore }) {
   const element = useRef<HTMLDivElement>(null);
   const [hovered, setHovered] = useState(false),
@@ -62,19 +127,28 @@ function Toast({ entry, store }: { entry: ToastEntry; store: ToastStore }) {
   const remaining = useRef(duration);
   useEffect(() => {
     remaining.current = duration;
-  }, [duration, tone]);
+  }, [duration, tone, entry.version]);
   useEffect(() => {
     if (!duration || entry.closing || hovered || focused) return;
-    const started = Date.now();
+    const started = performance.now();
     const timer = setTimeout(() => store.dismiss(entry.id), remaining.current);
     return () => {
       clearTimeout(timer);
       remaining.current = Math.max(
         0,
-        remaining.current - (Date.now() - started),
+        remaining.current - (performance.now() - started),
       );
     };
-  }, [duration, entry.id, entry.closing, hovered, focused, store, tone]);
+  }, [
+    duration,
+    entry.id,
+    entry.version,
+    entry.closing,
+    hovered,
+    focused,
+    store,
+    tone,
+  ]);
   useEffect(() => {
     if (entry.closing)
       return afterDialogMotion(
@@ -148,6 +222,18 @@ function Toast({ entry, store }: { entry: ToastEntry; store: ToastStore }) {
                 ? undefined
                 : { width: `${Math.max(0, Math.min(100, entry.progress))}%` }
             }
+          />
+        </div>
+      )}
+      {entry.countdown && duration > 0 && (
+        <div className={styles.countdown} aria-hidden="true">
+          <span
+            key={entry.version}
+            style={{
+              animationDuration: `${duration}ms`,
+              animationPlayState:
+                hovered || focused || entry.closing ? "paused" : "running",
+            }}
           />
         </div>
       )}

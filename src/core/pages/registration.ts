@@ -45,6 +45,7 @@ export function collectCustomPages(
       !/^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/.test(page.id) ||
       !/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/.test(page.version) ||
       page.id === customPageTypeId ||
+      page.id.startsWith("template.t-") ||
       ids.has(page.id)
     )
       throw new Error(`Invalid or duplicate custom page: ${page.id}`);

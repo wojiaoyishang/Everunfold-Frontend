@@ -14,7 +14,6 @@ import {
   readManagedPages,
 } from "@/core/contracts/pages";
 import { useAdminRequest, useAdminAccount } from "@/core/admin/account-context";
-import { useAccountAction } from "@/core/accounts/use-action";
 import { can } from "@/core/accounts/permissions";
 import { pagesFailure } from "@/core/pages/failure";
 import { UiText, useT, useLanguageCatalog } from "@/core/i18n/provider";
@@ -27,6 +26,7 @@ import { Modal } from "../../components/ui/modal";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Icon } from "../../components/icon";
 import { PageLanguageMenu } from "./language-menu";
+import { usePageAction, usePageErrorToast } from "./feedback";
 import styles from "./pages.module.css";
 
 export function PageLanguages({
@@ -42,7 +42,7 @@ export function PageLanguages({
     catalog = useLanguageCatalog(),
     actor = useAdminAccount(),
     t = useT();
-  const action = useAccountAction(pagesFailure);
+  const action = usePageAction();
   const [adding, setAdding] = useState(false),
     [closing, setClosing] = useState(false);
   const [language, setLanguage] = useState(""),
@@ -56,6 +56,7 @@ export function PageLanguages({
     member: PageTranslationMember;
   } | null>(null);
   const group = page.translations;
+  usePageErrorToast(adding && mode === "link" ? loadError : "");
   useEffect(() => {
     if (!adding || mode !== "link") return;
     const controller = new AbortController();
@@ -98,7 +99,7 @@ export function PageLanguages({
     action.run(async (signal) => {
       await execute(action.operation({ kind, ...input }), signal);
       await onChanged();
-    });
+    }, "页面语言设置已更新。");
   const close = () => {
     if (!action.busy) setClosing(true);
   };
@@ -221,6 +222,7 @@ export function PageLanguages({
             setAdding(true);
             setClosing(false);
             setTarget("");
+            setLoadError("");
           }}
         >
           <Icon name="plus" />
@@ -233,11 +235,6 @@ export function PageLanguages({
       {disabled && (
         <p className={styles.help}>
           <UiText text="请先保存当前修改，再管理语言关联。" />
-        </p>
-      )}
-      {!adding && !confirm && action.message && (
-        <p role="alert" className="account-message">
-          {action.message}
         </p>
       )}
       {adding && (
@@ -285,17 +282,19 @@ export function PageLanguages({
               />
             </label>
             {mode === "create" ? (
-              <div className={styles.toggle}>
-                <span>
-                  <UiText text="复制原文源码" />
-                </span>
-                <Switch
-                  aria-label={t("复制原文源码")}
-                  checked={copy}
-                  onCheckedChange={setCopy}
-                  disabled={action.busy}
-                />
-              </div>
+              !page.template && (
+                <div className={styles.toggle}>
+                  <span>
+                    <UiText text="复制原文源码" />
+                  </span>
+                  <Switch
+                    aria-label={t("复制原文源码")}
+                    checked={copy}
+                    onCheckedChange={setCopy}
+                    disabled={action.busy}
+                  />
+                </div>
+              )
             ) : (
               <>
                 <Select
@@ -320,13 +319,14 @@ export function PageLanguages({
               </>
             )}
             <p className={styles.help}>
-              <UiText text="新译文保持停用，JavaScript 默认关闭；确认译文后再单独启用。" />
+              <UiText
+                text={
+                  page.template
+                    ? "新译文沿用同一模板，确认译文后再单独启用。"
+                    : "新译文保持停用，JavaScript 默认关闭；确认译文后再单独启用。"
+                }
+              />
             </p>
-            {(action.message || loadError) && (
-              <p role="alert" className="account-message">
-                {action.message || loadError}
-              </p>
-            )}
             <div className={styles.languageActions}>
               <Button
                 className="admin-button"
@@ -345,7 +345,11 @@ export function PageLanguages({
                 onClick={() => {
                   const input =
                     mode === "create"
-                      ? { ...inputs(), language: chosen, copy_source: copy }
+                      ? {
+                          ...inputs(),
+                          language: chosen,
+                          copy_source: !page.template && copy,
+                        }
                       : { ...inputs(), target_id: target };
                   void run(mode, input, (operation_id, signal) =>
                     mode === "create"
@@ -354,7 +358,7 @@ export function PageLanguages({
                           {
                             ...inputs(),
                             language: chosen,
-                            copy_source: copy,
+                            copy_source: !page.template && copy,
                             operation_id,
                           },
                           csrfToken,
@@ -402,7 +406,6 @@ export function PageLanguages({
               : "回收此语言"
         }
         busy={action.busy}
-        error={action.message}
         onCancel={() => setConfirm(null)}
         onConfirm={() => {
           if (!confirm) return false;

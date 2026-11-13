@@ -1,11 +1,18 @@
 "use client";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
-import dynamic from "next/dynamic";
+import {
+  useEffect,
+  useEffectEvent,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import type {
   ManagedPageItem,
   PageTypeItem,
+  PageTemplateItem,
   PageValue,
   PublicManagedPage,
 } from "@/core/contracts/pages";
@@ -16,7 +23,6 @@ import {
 } from "@/core/contracts/pages";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
-import { useAccountAction } from "@/core/accounts/use-action";
 import { randomUUID } from "@/core/browser/crypto";
 import { livePreviewPath } from "@/core/preview/routes";
 import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
@@ -25,7 +31,8 @@ import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
 import { PreviewAction } from "../components/preview-action";
 import { usePagePreview } from "@/core/pages/use-preview";
-import { pagesFailure } from "@/core/pages/failure";
+import { isPageUrlFailure, pagesFailure } from "@/core/pages/failure";
+import { pageUrlError, suggestedPagePath } from "@/core/pages/path";
 import { UiText, useT, useLanguageCatalog } from "@/core/i18n/provider";
 import { Form, Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
@@ -42,10 +49,10 @@ import { customPageTypeId } from "@/core/pages/registration";
 import styles from "./pages.module.css";
 import { Select } from "../../components/ui/select";
 import { PageLanguages } from "./languages";
-import { AdminWarning } from "../components/warning";
 import { CaptchaOverrides } from "../components/captcha-overrides";
+import { PageCodeFields } from "./code-fields";
+import { usePageAction } from "./feedback";
 
-const SourceEditor = dynamic(() => import("./source-editor"), { ssr: false });
 const blank: PageValue = {
   title: "",
   path: "",
@@ -66,9 +73,11 @@ const blank: PageValue = {
 export function ManagedPageEditor({
   id,
   pageType,
+  template,
 }: {
   id?: string;
   pageType?: PageTypeItem;
+  template?: PageTemplateItem;
 }) {
   usePluginRuntime();
   const actor = useAdminAccount(),
@@ -77,19 +86,20 @@ export function ManagedPageEditor({
   const formId = useId();
   const [draftId] = useState(randomUUID);
   const previewId = id ?? draftId;
-  const form = useRef<HTMLFormElement>(null);
   const t = useT();
   const catalog = useLanguageCatalog();
   const [language, setLanguage] = useState(catalog.default_code);
   const [saved, setSaved] = useState<ManagedPageItem | null>(null);
   const [initial] = useState<PageValue>(() => {
     const definition = pageType?.registration;
-    if (!definition) return blank;
+    if (!definition)
+      return template
+        ? { ...blank, ...template.value, title: "", description: "" }
+        : blank;
     return {
       ...blank,
       title: definition.title,
-      path: pageType.page_count === 0 ? (definition.path ?? "") : "",
-      description: definition.description ?? "",
+      path: "",
       comments_open: definition.comments_open ?? true,
       options: {
         ...Object.fromEntries(
@@ -109,24 +119,46 @@ export function ManagedPageEditor({
       optionsSource === null ? "" : parsePageConfiguration(optionsSource).error,
     [optionsSource],
   );
-  const [error, setError] = useState("");
-  const [mode, setMode] = useState<"html" | "css" | "javascript">("html");
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const [manualPath, setManualPath] = useState(Boolean(id));
+  const [pathError, setPathError] = useState("");
   const [confirm, setConfirm] = useState<"remove" | null>(null);
   const removed = useRef(false);
-  const action = useAccountAction(pagesFailure);
+  const action = usePageAction((error) => {
+    const message = pagesFailure(error);
+    if (isPageUrlFailure(error)) setPathError(message);
+    return message;
+  });
+  const notifyLoadError = useEffectEvent((error: unknown) =>
+    action.notify(pagesFailure(error)),
+  );
   const write =
     can(actor, "pages:write") &&
     !(value.javascript_enabled && actor.role !== "admin");
   const publish = write && can(actor, "pages:publish");
-  const source = saved?.source ?? pageType?.source ?? "custom";
+  const source =
+    saved?.source ??
+    (pageType?.source === "registered" ? "registered" : "custom");
   const typeId = saved?.type_id ?? pageType?.id ?? customPageTypeId;
   const definition = saved ? saved.registration : pageType?.registration;
   const available = saved?.available ?? pageType?.available ?? !id;
   const ready = !id || Boolean(saved);
+  const templateId = saved?.template?.id ?? template?.id;
   const typeTitle =
+    saved?.template?.title ??
     definition?.title ??
     pageType?.title ??
     (source === "custom" ? "自定义代码" : typeId);
+  const defaultPath = suggestedPagePath(
+    value.title,
+    catalog.languages.find(
+      (item) =>
+        item.code === (source === "custom" ? language : catalog.default_code),
+    )?.prefix,
+  );
+  const path = manualPath ? value.path : defaultPath;
+  const visiblePathError = pathError || (manualPath ? pageUrlError(path) : "");
   const dirty =
     JSON.stringify(value) !== JSON.stringify(saved?.value ?? initial) ||
     Boolean(optionsError) ||
@@ -141,27 +173,41 @@ export function ManagedPageEditor({
             setValue(response.data.value);
             setOptionsSource(null);
             if (response.data.language) setLanguage(response.data.language);
-            setError("");
+            setLoadFailed(false);
           }
         })
         .catch((failure) => {
-          if (!controller.signal.aborted) setError(pagesFailure(failure));
+          if (!controller.signal.aborted) {
+            setLoadFailed(true);
+            notifyLoadError(failure);
+          }
         });
     return () => controller.abort();
-  }, [baseUrl, id]);
+  }, [baseUrl, id, attempt]);
   const save = async (apply: boolean) => {
     if (!ready) return false;
-    if (optionsError) {
-      action.setMessage(optionsError);
+    if (!value.title.trim()) {
+      action.notify("请输入页面标题。");
       return false;
     }
-    return action.run(
+    const urlError = manualPath ? pageUrlError(path) : "";
+    if (urlError) {
+      setPathError(urlError);
+      action.notify(urlError);
+      return false;
+    }
+    if (optionsError) {
+      action.notify(optionsError);
+      return false;
+    }
+    let createdId: string | undefined;
+    const completed = await action.run(
       async (signal) => {
         const input = {
           id: saved?.id ?? previewId,
           expected_revision: saved?.revision ?? 0,
           type_id: saved ? undefined : typeId,
-          value,
+          value: { ...value, path: manualPath ? path.trim() : undefined },
           apply,
           language:
             source === "registered" ? undefined : (saved?.language ?? language),
@@ -176,19 +222,22 @@ export function ManagedPageEditor({
           setSaved(response.data);
           setValue(response.data.value);
           setOptionsSource(null);
-          setError("");
-          if (!id) router.replace("/admin/pages/" + response.data.id);
+          setPathError("");
+          setManualPath(true);
+          if (!id) createdId = response.data.id;
         }
       },
       apply ? "页面已应用，公开入口将在前端同步后更新。" : "页面草稿已保存。",
     );
+    if (completed && createdId) router.replace("/admin/pages/" + createdId);
+    return completed;
   };
   const previewPage = useMemo<PublicManagedPage>(
     () => ({
       ...value,
       comments_open: value.comments_open ?? true,
       title: value.title || "未命名页面",
-      path: value.path || "/preview",
+      path: path || "/preview",
       id: previewId,
       source,
       implementation_id: source === "registered" ? typeId : null,
@@ -199,7 +248,16 @@ export function ManagedPageEditor({
       translation_group_id: saved?.translation_group_id,
       is_original: saved?.is_original,
     }),
-    [value, previewId, saved, language, source, typeId, definition?.version],
+    [
+      value,
+      path,
+      previewId,
+      saved,
+      language,
+      source,
+      typeId,
+      definition?.version,
+    ],
   );
   const preview = usePagePreview(previewPage);
   useEmbeddedPreviewPublisher(
@@ -211,10 +269,9 @@ export function ManagedPageEditor({
     { dirty, busy: action.busy },
   );
   const openLive = async () => {
-    if ((dirty || !saved) && !form.current?.reportValidity()) return;
     const popup = window.open("about:blank", "_blank");
     if (!popup) {
-      action.setMessage("预览窗口被浏览器拦截，请允许弹出窗口后重试。");
+      action.notify("预览窗口被浏览器拦截，请允许弹出窗口后重试。");
       return;
     }
     popup.opener = null;
@@ -245,7 +302,10 @@ export function ManagedPageEditor({
             label="前台预览"
             description="在新窗口中预览当前输入"
             disabled={!ready || Boolean(optionsError)}
-            onClick={preview.openWindow}
+            onClick={() => {
+              if (!preview.openWindow())
+                action.notify("预览窗口被浏览器拦截，请允许弹出窗口后重试。");
+            }}
           />
           <EmbeddedEditorActions>
             {ready && write && !saved?.archived && (
@@ -256,7 +316,7 @@ export function ManagedPageEditor({
                   onClick={(event) => {
                     if (event.currentTarget.ownerDocument !== document) {
                       event.preventDefault();
-                      if (form.current?.reportValidity()) void save(false);
+                      void save(false);
                     }
                   }}
                   className="admin-button"
@@ -276,7 +336,7 @@ export function ManagedPageEditor({
                     onClick={(event) => {
                       if (event.currentTarget.ownerDocument !== document) {
                         event.preventDefault();
-                        if (form.current?.reportValidity()) void save(true);
+                        void save(true);
                       }
                     }}
                     data-apply="true"
@@ -299,10 +359,24 @@ export function ManagedPageEditor({
         </ScrollHeaderActions>
       </div>
       <AdminPageHeading title={id ? "编辑页面" : "新建页面"} />
-      {error && (
-        <p role="alert" className={styles.error}>
-          {error}
-        </p>
+      {id && !ready && (
+        <section className="account-card">
+          {loadFailed ? (
+            <Button
+              className="admin-button"
+              onClick={() => {
+                setLoadFailed(false);
+                setAttempt((value) => value + 1);
+              }}
+            >
+              <UiText text="重新读取页面" />
+            </Button>
+          ) : (
+            <p role="status">
+              <UiText text="正在读取页面…" />
+            </p>
+          )}
+        </section>
       )}
       {(!id || saved) && (
         <>
@@ -322,16 +396,11 @@ export function ManagedPageEditor({
               </span>
             )}
           </div>
-          {preview.error && (
-            <p role="alert" className={styles.error}>
-              <UiText text={preview.error} />
-            </p>
-          )}
           <div className={styles.editorLayout}>
             <div className={styles.editorColumn}>
               <Form
-                ref={form}
                 id={formId}
+                noValidate
                 onSubmit={(event) => {
                   event.preventDefault();
                   const submitter = (event.nativeEvent as SubmitEvent)
@@ -369,17 +438,44 @@ export function ManagedPageEditor({
                       <AccountField
                         label="页面标题"
                         value={value.title}
-                        onChange={(title) => setValue({ ...value, title })}
+                        onChange={(title) => {
+                          if (!manualPath) setPathError("");
+                          setValue({ ...value, title });
+                        }}
                         required
                         maxLength={120}
                       />
                       <AccountField
-                        label="页面路径"
-                        value={value.path}
-                        onChange={(path) => setValue({ ...value, path })}
+                        label="页面 URL"
+                        value={path}
+                        onChange={(path) => {
+                          setManualPath(true);
+                          setPathError("");
+                          setValue({ ...value, path });
+                        }}
+                        error={visiblePathError}
                         required
                         maxLength={500}
-                        hint="例如 /links 或 /about，已有内容和系统路径不可占用。"
+                        hint={
+                          saved
+                            ? "站内路径，例如 /links 或 /about。"
+                            : "根据标题生成，也可手动填写站内路径。"
+                        }
+                        labelAside={
+                          !saved &&
+                          manualPath && (
+                            <Button
+                              className={styles.pathReset}
+                              onClick={() => {
+                                setManualPath(false);
+                                setPathError("");
+                                setValue({ ...value, path: "" });
+                              }}
+                            >
+                              <UiText text="按标题生成" />
+                            </Button>
+                          )
+                        }
                       />
                     </div>
                     <div className={styles.description}>
@@ -476,7 +572,12 @@ export function ManagedPageEditor({
                           <UiText text="页面选项" />
                         </h2>
                         <p className={styles.help}>
-                          <UiText text="由前端提供交互，在这里维护公开展示的内容。" />
+                          <UiText
+                            text={
+                              definition?.description ||
+                              "由前端提供交互，在这里维护公开展示的内容。"
+                            }
+                          />
                         </p>
                       </header>
                       {definition ? (
@@ -517,87 +618,36 @@ export function ManagedPageEditor({
                         </p>
                       )}
                     </section>
-                  ) : (
+                  ) : templateId ? (
                     <section className="account-card">
                       <header>
                         <h2>
-                          <UiText text="页面源码" />
+                          <UiText text="自定义页面模板" />
                         </h2>
                       </header>
-                      <nav
-                        className={styles.tabs}
-                        aria-label={t("页面源码模式")}
-                      >
-                        {(["html", "css", "javascript"] as const).map(
-                          (kind) => (
-                            <Button
-                              key={kind}
-                              aria-pressed={mode === kind}
-                              onClick={() => setMode(kind)}
-                            >
-                              {kind === "javascript"
-                                ? "JavaScript"
-                                : kind.toUpperCase()}
-                            </Button>
-                          ),
-                        )}
-                      </nav>
-                      {
-                        <SourceEditor
-                          kind={mode}
-                          value={value[mode] ?? ""}
-                          onChange={(text) =>
-                            setValue({ ...value, [mode]: text })
-                          }
-                          disabled={!write || action.busy}
-                        />
-                      }
-                      <div className={styles.toggle}>
-                        <span>JavaScript</span>
-                        <Switch
-                          aria-label={t("启用 JavaScript")}
-                          checked={!!value.javascript_enabled}
-                          onCheckedChange={(javascript_enabled) =>
-                            setValue({ ...value, javascript_enabled })
-                          }
-                          disabled={actor.role !== "admin"}
-                        />
+                      <div className={styles.templateReference}>
+                        <div>
+                          <strong>{typeTitle}</strong>
+                          <p>
+                            <UiText text="此页面使用模板的 HTML、CSS 和 JavaScript。更新模板会同步到使用它的页面。" />
+                          </p>
+                        </div>
+                        <RouteLink
+                          className="admin-button"
+                          href={`/admin/pages/templates/${templateId}`}
+                        >
+                          <Icon name="code" />
+                          <UiText text={write ? "编辑模板" : "查看模板"} />
+                        </RouteLink>
                       </div>
-                      <p className={styles.help}>
-                        <UiText text="JavaScript 默认关闭，仅在独立页面沙箱内运行。" />
-                      </p>
-                      <div className={`account-field ${styles.scriptPosition}`}>
-                        <span>
-                          <UiText text="脚本执行位置" />
-                        </span>
-                        <Select
-                          name="page-javascript-position"
-                          label="脚本执行位置"
-                          value={value.javascript_position ?? "body_end"}
-                          onValueChange={(position) => {
-                            if (position === "head" || position === "body_end")
-                              setValue({
-                                ...value,
-                                javascript_position: position,
-                              });
-                          }}
-                          options={[
-                            { value: "head", label: "正文加载前（Head 内）" },
-                            {
-                              value: "body_end",
-                              label: "正文加载后（Body 末尾）",
-                            },
-                          ]}
-                          programOptions
-                        />
-                        <small>
-                          <UiText text="加载前执行时，正文 DOM 尚未生成；直接操作页面元素请选择加载后。" />
-                        </small>
-                      </div>
-                      {value.javascript_enabled && (
-                        <AdminWarning text="JavaScript 已启用，脚本可以改变页面交互或触发跳转。请只使用可信代码。" />
-                      )}
                     </section>
+                  ) : (
+                    <PageCodeFields
+                      value={value}
+                      onChange={(patch) => setValue({ ...value, ...patch })}
+                      disabled={!write || action.busy}
+                      allowScripts={actor.role === "admin"}
+                    />
                   )}
                 </fieldset>
               </Form>
@@ -612,9 +662,6 @@ export function ManagedPageEditor({
                   }}
                 />
               )}
-              <p className="account-message" role="status">
-                <UiText text={action.message} />
-              </p>
               {saved && publish && !saved.archived && (
                 <Button
                   className="admin-button"
@@ -635,7 +682,7 @@ export function ManagedPageEditor({
         confirmLabel="移到回收站"
         intent="danger"
         onCancel={() => setConfirm(null)}
-        error={action.message}
+        busy={action.busy}
         onConfirm={() =>
           action.run(async (signal) => {
             const input = { id: saved!.id, expected_revision: saved!.revision };
@@ -646,7 +693,7 @@ export function ManagedPageEditor({
               { signal },
             );
             removed.current = !signal.aborted;
-          })
+          }, "页面已移到回收站。")
         }
         onConfirmed={() => {
           setConfirm(null);

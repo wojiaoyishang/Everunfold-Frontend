@@ -32,6 +32,7 @@ export default {
     id: "core.book",
     version: "1.0.0",
     title: "书籍页面",
+    description: "选择文章分类和书籍封面，把同一主题的文章展示为可翻阅的目录。",
     path: "/book",
     comments_open: false,
     defaults: Object.fromEntries(

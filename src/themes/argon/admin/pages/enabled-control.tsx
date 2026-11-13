@@ -4,11 +4,10 @@ import type { ManagedPageSummary } from "@/core/contracts/pages";
 import { setPageEnabled } from "@/core/contracts/pages";
 import { useAdminRequest, useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
-import { useAccountAction } from "@/core/accounts/use-action";
-import { pagesFailure } from "@/core/pages/failure";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Switch } from "../../components/ui/switch";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
+import { usePageAction } from "./feedback";
 import styles from "./pages.module.css";
 
 export function PageEnabledControl({
@@ -24,24 +23,27 @@ export function PageEnabledControl({
     { baseUrl, csrfToken } = useAdminRequest(),
     t = useT();
   const [confirm, setConfirm] = useState(false);
-  const action = useAccountAction(pagesFailure);
+  const action = usePageAction();
   const needsApply = !page.enabled && !page.has_applied_snapshot;
   const run = () =>
-    action.run(async (signal) => {
-      const input = {
-        id: page.id,
-        expected_revision: page.revision,
-        enabled: !page.enabled,
-        apply_draft: needsApply,
-      };
-      await setPageEnabled(
-        baseUrl,
-        { ...input, operation_id: action.operation(input) },
-        csrfToken,
-        { signal },
-      );
-      onChanged();
-    }, "");
+    action.run(
+      async (signal) => {
+        const input = {
+          id: page.id,
+          expected_revision: page.revision,
+          enabled: !page.enabled,
+          apply_draft: needsApply,
+        };
+        await setPageEnabled(
+          baseUrl,
+          { ...input, operation_id: action.operation(input) },
+          csrfToken,
+          { signal },
+        );
+        onChanged();
+      },
+      page.enabled ? "页面已停用。" : "页面已启用。",
+    );
   return (
     <div className={styles.enableControl}>
       <span>
@@ -64,9 +66,6 @@ export function PageEnabledControl({
           }}
         />
       </span>
-      {!confirm && action.message && (
-        <small role="alert">{action.message}</small>
-      )}
       <ConfirmDialog
         open={confirm}
         title={
@@ -85,7 +84,6 @@ export function PageEnabledControl({
           needsApply ? "应用并启用" : page.enabled ? "停用页面" : "启用页面"
         }
         busy={action.busy}
-        error={action.message}
         onCancel={() => {
           setConfirm(false);
         }}

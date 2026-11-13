@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { customPageTypeId } from "@/core/pages/registration";
 import { ManagedPageTypes } from "@/themes/argon/admin/pages/page-types";
 import { NewManagedPage } from "@/themes/argon/admin/pages/new-page";
 export const metadata = { title: "新建页面" };
@@ -7,6 +9,7 @@ export default async function NewPage({
   searchParams: Promise<{ type?: string | string[] }>;
 }) {
   const { type } = await searchParams;
+  if (type === customPageTypeId) redirect("/admin/pages/templates/new");
   return typeof type === "string" && type ? (
     <NewManagedPage key={type} typeId={type} />
   ) : (
