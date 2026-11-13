@@ -3,22 +3,23 @@ import { useState } from "react";
 import Image from "next/image";
 import type { InstalledPlugin } from "@/core/contracts/settings";
 import { commentMarkdown } from "@/core/rendering/comment-markdown";
-import { resourceUrl, publicHref } from "@/core/content/urls";
+import { publicHref } from "@/core/content/urls";
 import { Modal } from "../../components/ui/modal";
 import { TextLink } from "../../components/ui/primitives";
 import { UiText } from "@/core/i18n/provider";
 import styles from "./plugins.module.css";
 export function PluginDetails({
   plugin,
+  preview,
   onClose,
 }: {
   plugin: InstalledPlugin;
+  preview: string | null;
   onClose: () => void;
 }) {
   const [closing, setClosing] = useState(false),
     [broken, setBroken] = useState(false);
-  const preview = resourceUrl(plugin.preview ?? ""),
-    homepage = publicHref(plugin.homepage ?? "");
+  const homepage = publicHref(plugin.homepage ?? "");
   return (
     <Modal
       title={plugin.title}
@@ -33,8 +34,8 @@ export function PluginDetails({
           <div className={styles.hero}>
             <Image
               unoptimized
-              width={800}
-              height={400}
+              width={960}
+              height={540}
               src={preview}
               alt={plugin.title}
               onError={() => setBroken(true)}

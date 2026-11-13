@@ -83,7 +83,7 @@ Python代码更新需要受控重启，不声称同进程热替换。插件内�
 
 ## 部署目录展示元数据
 
-Plugin类或define_plugin可提供homepage、license、preview、readme，原version/author继续使用。preview为安全URL，readme为Markdown正文；缺省不影响加载。后台统一详情弹窗不执行介绍中的HTML/脚本。任务注册方法、生命周期和检查点见[任务指南](runtime-tasks.md)。
+Plugin类或define_plugin可提供homepage、license、preview、readme，原version/author继续使用。preview可填安全URL或 `asset:assets/preview.webp` 等包内图片。包内图片随目录登记，通过按内容哈希生成的公开 URL 提供，支持 WebP、PNG、JPEG 和 GIF，单张上限 4 MiB。readme为Markdown正文；缺省不影响加载。后台统一详情弹窗不执行介绍中的HTML/脚本。特色图见[ADR0139](../decisions/0139-theme-plugin-recommendations.md)。任务注册方法、生命周期和检查点见[任务指南](runtime-tasks.md)。
 
 ## 任务参数声明
 

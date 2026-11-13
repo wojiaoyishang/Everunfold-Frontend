@@ -72,11 +72,11 @@
       "sha256": "9324386a70b1d3f1b657939864683926ce9dc692061499d696506bb6aaf37e7c"
     },
     "settings-v1.schema.json": {
-      "schema_version": "1.41.0",
+      "schema_version": "1.42.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/settings-v1.schema.json",
-      "source_commit": "310f0ef04713991fe89b4b3cda99c99928ad3a5d",
-      "sha256": "055dab40dcbd7654a514408442c079534efe92a1a9abac9b0a5e303126ddf6b4"
+      "source_commit": "4a0f40fa658a294862afcd13757bd4e4b564928d",
+      "sha256": "47a60c7f62dd43cbb7bc020c6c38e71598f4736fc70429101e03d6c1d56e84f9"
     },
     "captcha-v1.schema.json": {
       "schema_version": "1.8.0",

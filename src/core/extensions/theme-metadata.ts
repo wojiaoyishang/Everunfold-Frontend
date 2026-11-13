@@ -2,6 +2,8 @@ import type { InstalledTheme } from "@/core/contracts/settings";
 import { resourceUrl } from "@/core/content/urls";
 import type { ThemeDefinition } from "./types";
 
+const pluginId = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/;
+
 /** Only deployment-owned display metadata is exported; never component implementations. */
 export function themeMetadata(theme: ThemeDefinition): InstalledTheme {
   const text = (value: unknown, max: number, required = false) =>
@@ -12,6 +14,7 @@ export function themeMetadata(theme: ThemeDefinition): InstalledTheme {
     text(value, 2048) && (!value || Boolean(resourceUrl(value as string)));
   const title = theme.title ?? theme.id;
   const author = theme.author;
+  const recommendations = theme.recommended_plugins;
   if (
     !text(title, 80, true) ||
     !text(theme.description ?? "", 500) ||
@@ -19,6 +22,14 @@ export function themeMetadata(theme: ThemeDefinition): InstalledTheme {
     !url(theme.preview ?? "") ||
     !url(theme.homepage ?? "") ||
     !url(theme.repository ?? "") ||
+    (recommendations != null &&
+      (!Array.isArray(recommendations) ||
+        recommendations.length > 100 ||
+        [...recommendations].some(
+          (id) =>
+            typeof id !== "string" || id !== id.trim() || !pluginId.test(id),
+        ) ||
+        new Set(recommendations).size !== recommendations.length)) ||
     (author != null &&
       (typeof author !== "object" ||
         Array.isArray(author) ||
@@ -40,5 +51,7 @@ export function themeMetadata(theme: ThemeDefinition): InstalledTheme {
     homepage: theme.homepage ?? "",
     repository: theme.repository ?? "",
     license: theme.license ?? "",
+    recommended_plugins:
+      recommendations == null ? null : [...recommendations].sort(),
   };
 }

@@ -11,6 +11,19 @@
   max-width: 520px;
 }
 
+.toolbarActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-inline-start: auto;
+}
+
+.recommendationStatus {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 13px;
+}
+
 .empty {
   margin: 0;
   padding: 24px 12px;
@@ -42,7 +55,7 @@
   border-radius: 8px;
 }
 
-.preview > :global(.icon) {
+.preview :global(.icon) {
   width: 24px;
   height: 24px;
 }
@@ -86,6 +99,12 @@
 .origin {
   background: var(--accent-soft);
   color: var(--accent);
+  border-radius: 6px;
+  padding: 5px 9px;
+}
+.recommended {
+  background: var(--admin-subtle);
+  color: var(--admin-muted);
   border-radius: 6px;
   padding: 5px 9px;
 }
@@ -164,6 +183,14 @@
 }
 
 @media (max-width: 540px) {
+  .toolbarActions {
+    width: 100%;
+  }
+
+  .toolbarActions > button {
+    flex: 1 1 auto;
+  }
+
   .summary {
     grid-template-columns: 76px minmax(0, 1fr);
     gap: 12px;

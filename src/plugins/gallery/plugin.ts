@@ -3,6 +3,7 @@ import { gallery } from "./shortcode";
 
 export default {
   id: "core.gallery",
+  preview: "asset:assets/preview.webp",
   version: "1.0.0",
   title: "图片画廊",
   description: "原生画廊短代码与媒体选择",

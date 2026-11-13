@@ -13,6 +13,17 @@ export default {
   repository: "https://github.com/wojiaoyishang/Everunfold-Frontend",
   version: "1.1.0",
   parent: null,
+  recommended_plugins: [
+    "core.basic-shortcodes",
+    "core.book",
+    "core.captcha",
+    "core.captcha-google",
+    "core.captcha-turnstile",
+    "core.gallery",
+    "core.honors",
+    "core.people",
+    "everunfold.glossary",
+  ],
   components: [
     "public.shell",
     "public.header",

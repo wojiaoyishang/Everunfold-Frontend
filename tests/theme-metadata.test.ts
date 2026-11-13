@@ -41,6 +41,7 @@ test("legacy theme declarations retain automatic discovery and parent defaults w
   assert.equal(result.parent, "argon");
   assert.equal(result.preview, "");
   assert.equal(result.author, null);
+  assert.equal(result.recommended_plugins, null);
 });
 
 test("theme discovery rejects unsafe artwork, links and malformed metadata before registration", () => {
@@ -70,9 +71,35 @@ test("theme discovery rejects unsafe artwork, links and malformed metadata befor
     { author: { name: " " } },
     { description: "x".repeat(501) },
     { license: "x".repeat(101) },
+    { recommended_plugins: ["core.book", "core.book"] },
+    { recommended_plugins: ["book"] },
+    { recommended_plugins: ["core.book\n"] },
+    {
+      recommended_plugins: Array.from(
+        { length: 101 },
+        (_, i) => `core.plugin-${i}`,
+      ),
+    },
   ])
     assert.throws(
       () => collectThemes([{ id: "argon", version: "1.0.0", ...patch }]),
       /Invalid theme metadata/,
     );
+});
+
+test("theme plugin metadata is sorted and preserves an explicit empty list", () => {
+  const source = {
+    id: "argon",
+    version: "1.0.0",
+    recommended_plugins: ["core.gallery", "core.book"],
+  };
+  assert.deepEqual(themeMetadata(source).recommended_plugins, [
+    "core.book",
+    "core.gallery",
+  ]);
+  assert.deepEqual(source.recommended_plugins, ["core.gallery", "core.book"]);
+  assert.deepEqual(
+    themeMetadata({ ...source, recommended_plugins: [] }).recommended_plugins,
+    [],
+  );
 });

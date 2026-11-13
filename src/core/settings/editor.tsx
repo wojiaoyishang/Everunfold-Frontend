@@ -180,6 +180,25 @@ function useEditor() {
       if (mounted.current) setBusy(false);
     }
   }
+  function changePlugins(pluginIds: readonly string[], enabled: boolean) {
+    pluginChangeTrigger.current =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
+    setDraft((value) => {
+      if (!value) return value;
+      const current = value.extensions?.disabled_plugins ?? [];
+      return {
+        ...value,
+        extensions: {
+          ...value.extensions,
+          disabled_plugins: enabled
+            ? current.filter((id) => !pluginIds.includes(id))
+            : [...new Set([...current, ...pluginIds])].sort(),
+        },
+      };
+    });
+  }
   async function save() {
     if (!saved || !draft || inFlight.current || pluginImpact) return;
     if (!pluginChangeTrigger.current?.isConnected)
@@ -278,6 +297,7 @@ function useEditor() {
     loading,
     dirty,
     save,
+    changePlugins,
     activateTheme,
     reload,
     refreshDelivery,

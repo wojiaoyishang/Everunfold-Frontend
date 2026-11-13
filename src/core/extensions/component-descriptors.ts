@@ -37,11 +37,15 @@ export function collectThemes(themes: readonly ThemeDefinition[]) {
       )
     )
       throw new Error(`Invalid or duplicate theme: ${theme.id}`);
+    const metadata = themeMetadata(theme);
     byId.set(
       theme.id,
       Object.freeze({
         ...theme,
-        ...themeMetadata(theme),
+        ...metadata,
+        recommended_plugins: metadata.recommended_plugins
+          ? Object.freeze(metadata.recommended_plugins)
+          : null,
         fonts: createFontRegistry(theme.fonts ?? [], false).all,
         typography: normalizeTypography(theme.typography),
         author: theme.author ? Object.freeze({ ...theme.author }) : null,

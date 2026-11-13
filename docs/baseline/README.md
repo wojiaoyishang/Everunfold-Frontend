@@ -1768,3 +1768,12 @@ Argon/Paper 的视频、封面、登录场景、贴纸和预览图移入各主�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0138-custom-page-templates.md` | `ADR0138-1` | `8598cbd08ef4a0055bf9b59db7b9efb7d3914604c4000396a65b96d12d919326` |
+
+## 主题推荐插件（2026-11-13）
+
+settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打包特色图。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0139-theme-plugin-recommendations.md` | `ADR0139-1` | `48e856ec8d08c00d7ef7cbd58d6bb0b7794c10396c2f251a606a45a1ab9b9b77` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-recommendations-1` | `fe47a76a9fc968c9b04a5defb03f94e2455056c15f6eba8694f4a522374ed957` |

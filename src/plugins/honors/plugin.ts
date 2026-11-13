@@ -3,6 +3,7 @@ import page from "./page";
 
 export default definePlugin({
   id: "core.honors",
+  preview: "asset:assets/preview.webp",
   version: "1.0.0",
   title: "荣誉与证书",
   description: "分类荣誉墙、时间筛选与证书查看",

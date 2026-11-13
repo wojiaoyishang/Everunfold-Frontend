@@ -200,7 +200,9 @@ npm run check覆盖类型、格式、注册不变量和包完整性/回退检查
 
 ## 插件详情元数据
 
-definePlugin允许author、homepage、license、preview、readme；版本继续使用version。preview填写安全HTTP(S)或同源资源URL，readme直接提供Markdown字符串。独立构建、运行清单和后端登记保留这些字段。管理列表显示特色图缩略图，详情使用满宽等比居中预览；旧包缺失字段时正常显示占位，不执行原始HTML/脚本。修改宿主构建/清单工具需要重启dev协调进程，普通插件声明仍自动重编译。常驻/有限任务由[后端SDK](runtime-tasks.md)贡献，不在浏览器运行。详见[ADR0110](../decisions/0110-theme-and-plugin-preview-artwork.md)。
+definePlugin允许author、homepage、license、preview、readme；版本继续使用version。preview可填HTTP(S)地址、同源资源路径或 `asset:assets/preview.webp` 等包内图片。构建器将包内图片加入哈希资源清单，支持 WebP、PNG、JPEG 和 GIF，单张上限 4 MiB。readme直接提供Markdown字符串。独立构建、运行清单和后端登记保留这些字段。管理列表显示特色图缩略图，详情使用满宽等比居中预览；旧包缺失字段时正常显示占位，不执行原始HTML/脚本。修改宿主构建/清单工具需要重启dev协调进程，普通插件声明仍自动重编译。常驻/有限任务由[后端SDK](runtime-tasks.md)贡献，不在浏览器运行。详见[ADR0110](../decisions/0110-theme-and-plugin-preview-artwork.md)与[ADR0139](../decisions/0139-theme-plugin-recommendations.md)。
+
+主题在 `theme.ts` 的 `recommended_plugins` 中列出推荐插件 ID。省略字段或设为 `null` 时继承父主题，空数组关闭推荐。管理员可以在插件管理批量选中推荐插件，然后保存更改。
 
 插件管理提供即时本地搜索，覆盖 ID、名称、说明、版本、作者及页面/短代码/组件贡献；也可搜索验证码提供方能力。搜索不写设置、不改变启停草稿，无结果时显示明确空态，详见[ADR0109](../decisions/0109-plugin-settings-search.md)。
 

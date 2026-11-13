@@ -22,6 +22,8 @@ export interface ThemeDefinition extends ThemeMetadata {
   version: string;
   /** Other themes inherit Argon unless an explicit standalone root is requested. */
   parent?: string | null;
+  /** Inherit when omitted or null. An empty list opts out of recommendations. */
+  recommended_plugins?: readonly string[] | null;
   components?: readonly string[];
   templates?: Readonly<Record<string, string>>;
   slots?: Readonly<Record<string, readonly string[] | false>>;

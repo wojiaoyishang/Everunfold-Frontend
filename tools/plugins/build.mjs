@@ -3,7 +3,14 @@ import { transformAsync } from "@babel/core";
 import refreshPlugin from "react-refresh/babel";
 import { createHash } from "node:crypto";
 import { createRequire } from "node:module";
-import { readdir, readFile, mkdir, lstat } from "node:fs/promises";
+import {
+  readdir,
+  readFile,
+  mkdir,
+  lstat,
+  realpath,
+  stat,
+} from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
@@ -21,6 +28,28 @@ const digest = (bytes) => createHash("sha256").update(bytes).digest("hex");
 export const projectRoot = fileURLToPath(new URL("../../", import.meta.url));
 const bridge = (name, exports, defaultExport = false) =>
   `const sdk=globalThis[Symbol.for(${JSON.stringify(SDK_RUNTIME_KEY)})];if(!sdk)throw new Error("Plugin SDK is not ready");const source=sdk[${JSON.stringify(name)}];${exports.map((key) => `export const ${key}=source.${key};`).join("\n")}${defaultExport ? "export default source;" : ""}`;
+
+async function bundlePreview(source, directory, preview, target, assets) {
+  if (!preview.startsWith("asset:")) return preview;
+  const match =
+    /^asset:(assets\/[a-zA-Z0-9_-]+\.(gif|jpeg|jpg|png|webp))$/.exec(preview);
+  if (!match || match[0] !== preview)
+    throw new Error("Invalid plugin preview asset");
+  const [, relative, extension] = match;
+  const root = await realpath(source);
+  const original = await realpath(path.join(root, relative));
+  if (!original.startsWith(root + path.sep))
+    throw new Error("Plugin preview asset is outside its source directory");
+  const info = await stat(original);
+  if (!info.isFile() || !info.size || info.size > 4 * 1024 * 1024)
+    throw new Error("Plugin preview asset exceeds package limits");
+  const bytes = await readFile(original);
+  const sha256 = digest(bytes);
+  const file = `asset.${sha256}.${extension}`;
+  await writeArtifact(path.join(target, file), bytes);
+  assets[file] = { sha256, bytes: bytes.length };
+  return `/__plugins/assets/${directory}/${file}`;
+}
 
 function sourceBoundary(root, directory, shared = false) {
   return {
@@ -272,7 +301,13 @@ export async function buildPlugin(
     author: plugin.author ?? "",
     homepage: plugin.homepage ?? "",
     license: plugin.license ?? "",
-    preview: plugin.preview ?? "",
+    preview: await bundlePreview(
+      source,
+      directory,
+      plugin.preview ?? "",
+      target,
+      assets,
+    ),
     readme: plugin.readme ?? "",
     development,
     entries,

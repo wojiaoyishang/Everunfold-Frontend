@@ -29,6 +29,7 @@ export interface FrontendPlugin {
   author?: string;
   homepage?: string;
   license?: string;
+  /** Use asset:assets/<image> for a raster preview shipped in this package. */
   preview?: string;
   readme?: string;
   title?: string;

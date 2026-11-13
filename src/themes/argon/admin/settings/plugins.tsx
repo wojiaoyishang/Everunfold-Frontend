@@ -5,19 +5,62 @@ import { PluginDetails } from "./plugin-details";
 import { Icon } from "../../components/icon";
 import styles from "./plugins.module.css";
 import { UiText } from "@/core/i18n/provider";
+import { useAdminRequest } from "@/core/admin/account-context";
 import { useSettingsEditor } from "@/core/settings/editor";
 import { useExtensionCatalog } from "@/core/plugins/use-catalog";
+import { usePluginRuntime } from "@/core/plugins/runtime/context";
+import {
+  isPluginReady,
+  planRecommendedActivation,
+  themePluginRecommendations,
+} from "@/core/plugins/recommendations";
 import { pluginMatchesSearch } from "@/core/plugins/search";
 import { resourceUrl } from "@/core/content/urls";
 import { MediaPreview } from "../media/media-preview";
 import { SettingsFrame, SettingsSection, SettingsToggle } from "./shared";
 import { Button, TextField } from "../../components/ui/primitives";
+
+function pluginPreview(
+  frontend: InstalledPlugin | undefined,
+  backend: InstalledPlugin | undefined,
+  backendUrl: string,
+) {
+  const local = resourceUrl(frontend?.preview);
+  if (local) return local;
+  const remote = resourceUrl(backend?.preview);
+  return remote?.startsWith("/v1/extensions/artwork/")
+    ? new URL(remote, backendUrl).href
+    : remote;
+}
+
 export function PluginsSettingsPage() {
-  const [detail, setDetail] = useState<InstalledPlugin | null>(null);
+  const [detail, setDetail] = useState<{
+    plugin: InstalledPlugin;
+    preview: string | null;
+  } | null>(null);
   const [search, setSearch] = useState("");
-  const { draft, setDraft, pluginChangeTrigger } = useSettingsEditor();
+  const { baseUrl } = useAdminRequest();
+  const { saved, draft, changePlugins } = useSettingsEditor();
+  const { catalog } = usePluginRuntime();
   const deployed = useExtensionCatalog();
   const disabled = draft?.extensions?.disabled_plugins ?? [];
+  const savedDisabled = saved?.value.extensions?.disabled_plugins ?? [];
+  const activeTheme = saved?.value.extensions?.theme || catalog?.theme || "";
+  const recommended = themePluginRecommendations(deployed.themes, activeTheme);
+  const { required, unavailable } = planRecommendedActivation(
+    deployed,
+    recommended,
+  );
+  const toEnable = disabled.some((id) => required.has(id));
+  const pendingActivation =
+    !toEnable && savedDisabled.some((id) => required.has(id));
+  const recommendationStatus = unavailable.length
+    ? "推荐插件尚未全部完成部署。"
+    : pendingActivation
+      ? "已选中所有推荐插件，保存更改后生效。"
+      : toEnable
+        ? "选中后，保存更改即可启用。"
+        : "推荐插件已全部启用。";
   const ids = [
     ...new Set([
       ...deployed.plugins.map((p) => p.id),
@@ -63,14 +106,43 @@ export function PluginsSettingsPage() {
               onChange={(event) => setSearch(event.target.value)}
             />
           </label>
-          <Button
-            className="admin-button"
-            onClick={() => void deployed.reload()}
-          >
-            <Icon name="refresh" />
-            <UiText text="刷新部署清单" />
-          </Button>
+          <div className={styles.toolbarActions}>
+            {recommended.length > 0 && (
+              <Button
+                className="admin-button"
+                aria-describedby={
+                  deployed.error ? undefined : "recommended-plugin-status"
+                }
+                disabled={
+                  !draft ||
+                  !!deployed.error ||
+                  !!unavailable.length ||
+                  !toEnable
+                }
+                onClick={() => changePlugins([...required], true)}
+              >
+                <Icon name="check" />
+                <UiText text="启用所有推荐插件" />
+              </Button>
+            )}
+            <Button
+              className="admin-button"
+              onClick={() => void deployed.reload()}
+            >
+              <Icon name="refresh" />
+              <UiText text="刷新部署清单" />
+            </Button>
+          </div>
         </div>
+        {recommended.length > 0 && !deployed.error && (
+          <p
+            id="recommended-plugin-status"
+            className={styles.recommendationStatus}
+            role="status"
+          >
+            <UiText text={recommendationStatus} />
+          </p>
+        )}
         {deployed.error && (
           <p role="alert">
             <UiText text={deployed.error} />
@@ -100,32 +172,24 @@ export function PluginsSettingsPage() {
           const frontend = deployed.plugins.find((p) => p.id === id);
           const backend = deployed.backendPlugins.find((p) => p.id === id);
           const plugin = frontend ?? backend;
-          const preview = resourceUrl(frontend?.preview || backend?.preview);
-          const ready = Boolean(
-            plugin &&
-            (!backend || deployed.backendInSync) &&
-            (!frontend ||
-              (deployed.nodes.length &&
-                deployed.nodes.every((node) =>
-                  node.inventory?.plugins?.some(
-                    (p) => p.id === id && p.build === plugin.build,
-                  ),
-                ))),
-          );
+          const preview = pluginPreview(frontend, backend, baseUrl);
+          const ready = isPluginReady(deployed, id);
           return (
             <section key={id} className={styles.row}>
               <div className={styles.summary}>
-                <span className={styles.preview}>
+                <div className={styles.preview}>
                   {preview ? (
                     <MediaPreview
+                      key={preview}
                       url={preview}
                       kind="image"
                       label={plugin?.title ?? id}
+                      fallback={<Icon name="puzzle" />}
                     />
                   ) : (
                     <Icon name="puzzle" />
                   )}
-                </span>
+                </div>
                 <SettingsToggle
                   label={plugin?.title ?? id}
                   hint={
@@ -133,25 +197,7 @@ export function PluginsSettingsPage() {
                     "插件未安装，保留停用设置与现有内容。"
                   }
                   value={!disabled.includes(id)}
-                  onChange={(enabled) => {
-                    pluginChangeTrigger.current =
-                      document.activeElement instanceof HTMLElement
-                        ? document.activeElement
-                        : null;
-                    setDraft((value) =>
-                      value
-                        ? {
-                            ...value,
-                            extensions: {
-                              ...value.extensions,
-                              disabled_plugins: enabled
-                                ? disabled.filter((item) => item !== id)
-                                : [...disabled, id].sort(),
-                            },
-                          }
-                        : value,
-                    );
-                  }}
+                  onChange={(enabled) => changePlugins([id], enabled)}
                 />
               </div>
               <div className={styles.meta}>
@@ -166,13 +212,18 @@ export function PluginsSettingsPage() {
                     }
                   />
                 </span>
+                {recommended.includes(id) && (
+                  <span className={styles.recommended}>
+                    <UiText text="主题推荐" />
+                  </span>
+                )}
                 <span>
                   {plugin?.version} {plugin?.author && ` · ${plugin.author}`}
                 </span>
                 {plugin && (
                   <Button
                     className="admin-button"
-                    onClick={() => setDetail(plugin)}
+                    onClick={() => setDetail({ plugin, preview })}
                   >
                     <Icon name="eye" />
                     <UiText text="查看详情" />
@@ -214,7 +265,7 @@ export function PluginsSettingsPage() {
           );
         })}
         {detail && (
-          <PluginDetails plugin={detail} onClose={() => setDetail(null)} />
+          <PluginDetails {...detail} onClose={() => setDetail(null)} />
         )}
         <details>
           <summary>

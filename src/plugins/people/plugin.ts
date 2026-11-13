@@ -3,6 +3,7 @@ import people from "./page";
 
 export default {
   id: "core.people",
+  preview: "asset:assets/preview.webp",
   version: "1.0.0",
   title: "人物与寄语",
   description: "人物分组、姓名云、卡片与寄语弹窗",

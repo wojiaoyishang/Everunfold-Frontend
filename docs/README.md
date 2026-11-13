@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[主题推荐插件](decisions/0139-theme-plugin-recommendations.md)说明推荐清单、批量启用和特色图打包。
+
 [自定义页面模板](decisions/0138-custom-page-templates.md)说明模板继承、已发布页面同步和 URL 校验。
 
 [页面类型与页面实例](decisions/0137-page-types-and-instances.md)说明类型选择、独立配置与发布。
