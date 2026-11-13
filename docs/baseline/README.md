@@ -1777,3 +1777,12 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | --- | --- | --- |
 | `docs/decisions/0139-theme-plugin-recommendations.md` | `ADR0139-1` | `48e856ec8d08c00d7ef7cbd58d6bb0b7794c10396c2f251a606a45a1ab9b9b77` |
 | `docs/development/frontend-plugins.md` | `frontend-plugins-recommendations-1` | `fe47a76a9fc968c9b04a5defb03f94e2455056c15f6eba8694f4a522374ed957` |
+
+## 后台标识与节点部署配置（2026-11-13）
+
+后台标识读取站点设置。部署配置并入节点状态。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0140-admin-brand-and-node-deployment.md` | `ADR0140-1` | `ce6bad1b4b84c3cf0576f5eb69dd56d08a0e6e39d07a66c2d91d790eba0dd457` |
+| `docs/development/captcha.md` | `captcha-8` | `a6b35cc2cec6c03b864906c5e5b4c408f7f8effb2f574eb93b64a6b18700f6bc` |

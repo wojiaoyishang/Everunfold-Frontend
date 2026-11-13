@@ -1,12 +1,19 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
-
 import { useEffect, useId, useState } from "react";
+import type { AdminSiteBrand } from "@/core/admin/site-brand";
 import { Icon } from "../../components/icon";
 import { Button, Dialog } from "../../components/ui/primitives";
 import { useModalDialog } from "../../hooks/use-modal-dialog";
 import { AdminNavigation } from "./navigation";
-export function AdminMobileNavigation({ pathname }: { pathname: string }) {
+import { AdminBrandLink } from "./brand-link";
+
+export function AdminMobileNavigation({
+  pathname,
+  siteBrand,
+}: {
+  pathname: string;
+  siteBrand: AdminSiteBrand | null;
+}) {
   const { dialog, open, close } = useModalDialog();
   const [expanded, setExpanded] = useState(false);
   const id = useId();
@@ -44,9 +51,7 @@ export function AdminMobileNavigation({ pathname }: { pathname: string }) {
       >
         <div className="admin-drawer-content">
           <div className="admin-drawer-heading">
-            <strong>
-              <UiText text="工作空间" />
-            </strong>
+            <AdminBrandLink brand={siteBrand} onClick={close} />
             <Button
               className="admin-icon-button"
               aria-label="关闭后台导航"

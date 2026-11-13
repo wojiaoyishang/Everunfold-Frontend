@@ -1,5 +1,5 @@
 "use client";
-import { useId, type ReactNode } from "react";
+import { useId } from "react";
 import { UiText, useT } from "@/core/i18n/provider";
 import { useCaptchaSettings } from "@/core/captcha/use-settings";
 import { can } from "@/core/accounts/permissions";
@@ -23,7 +23,7 @@ const contentTypes = [
   { key: "shuoshuo", label: "说说" },
   { key: "page", label: "页面" },
 ] as const;
-export function CaptchaSettingsPanel({ trailing }: { trailing?: ReactNode }) {
+export function CaptchaSettingsPanel() {
   const t = useT();
   const editor = useCaptchaSettings();
   const user = useAdminAccount();
@@ -52,12 +52,9 @@ export function CaptchaSettingsPanel({ trailing }: { trailing?: ReactNode }) {
     <>
       <UnsavedAccountChanges dirty={editor.dirty} busy={editor.busy} />
       {editor.loading ? (
-        <>
-          <p role="status">
-            <UiText text="正在读取设置…" />
-          </p>
-          {trailing}
-        </>
+        <p role="status">
+          <UiText text="正在读取设置…" />
+        </p>
       ) : (
         draft &&
         saved && (
@@ -243,7 +240,6 @@ export function CaptchaSettingsPanel({ trailing }: { trailing?: ReactNode }) {
                 </div>
               </SettingsSection>
             </fieldset>
-            {trailing}
             <div className="admin-settings-savebar">
               <div>
                 <UiText
@@ -276,7 +272,6 @@ export function CaptchaSettingsPanel({ trailing }: { trailing?: ReactNode }) {
           </Form>
         )
       )}
-      {!editor.loading && (!draft || !saved) && trailing}
       {editor.error && (
         <div className="admin-settings-message is-error" role="alert">
           <UiText text={editor.error} />

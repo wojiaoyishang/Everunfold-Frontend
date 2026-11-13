@@ -1,6 +1,6 @@
 # 基本设置运行指南
 
-发布回执、节点策略和磁盘副本见[节点状态指南](cache-management.md)。
+发布回执、节点策略、磁盘副本和部署配置见[节点状态指南](cache-management.md)。
 
 版本：settings-runtime-20，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)、[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)与[ADR0111](../decisions/0111-sparse-custom-translation-overrides.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
 
@@ -14,8 +14,8 @@
 | `/admin/icons`            | 全部内置图标、上传图标搜索/分页与安全上传；菜单选择器复用                                                                                                                                          |
 | `/admin/media`            | 图片/视频网格/列表、上传、类型与标题/文件名搜索；独立详情、元数据保存、图片编辑另存；表单仍直接选取                                                                                                |
 | `/admin/settings/theme`   | 公共宿主保留已安装主题切换；具体设置由当前主题目录的 `theme-settings.tsx` 动态提供。Argon 包含外观/横幅/字体/首页/文章显示/代码/背景，Paper 包含自己的纸张底色；不同主题分别保存                   |
-| `/admin/settings/system`  | 验证码规则与部署信息 |
-| `/admin/settings/nodes`   | 查看所有节点的站点与主题发布回执。选择节点查看磁盘副本、编辑策略、重发副本和清理旧文件 |
+| `/admin/settings/system`  | 验证码提供方与应用规则 |
+| `/admin/settings/nodes`   | 查看发布回执、节点缓存、请求策略与当前前端节点的部署配置 |
 | `/admin/translations`     | 以内置 `zh-CN`/`en` 只读语言包为基础，按前台、后台和 API 消息维护数据库覆盖；搜索、状态筛选、分页、恢复默认和独立翻译修订 |
 
 settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码与背景的主题 profile、`site.footer`、`site.author_tagline`和`site.glossary`，沿用PATCH /v1/admin/settings及expected_revision，不新建前端配置数据库；旧设置JSON在读取时补默认值，文章内容和术语匹配结果不进入设置或正文快照。顶层`theme`是活动主题的兼容投影，权威分主题值在`theme_options[themeId]`。主题表单见[主题设置指南](theme-settings.md)，代码字体继续只保存媒体ID，font_url/font_info由后端解析，拒绝无效字体且禁止伪造派生URL。参数和加载规则见[代码指南](code-blocks.md)。
@@ -30,7 +30,9 @@ settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码�
 
 一般“保存更改”把整份站点与主题草稿作为一个版本提交。已安装主题先通过卡片/列表打开详情，右下角启用按钮只保存主题选择，并保留其他未保存输入；可从实例默认的详情中恢复部署默认。提交成功后节点状态可能仍是等待同步，收到落盘确认才显示已应用。若提示版本冲突，当前草稿仍在；先保留你的修改，再使用明确标注的「放弃本地修改并载入服务器版本」合并。写请求不自动重试，未知结果先读取核对。节点策略按节点单独保存，切换选择不会覆盖该页其它节点草稿。
 
-验证码使用独立的私有配置和修订，不把 Secret 放到普通站点设置或公开快照。首次规则全部关闭；机器调用豁免还须在Key创建时授予对应权限。验证码保存栏在系统设置的部署配置之后，保存仍只提交验证码配置。见[验证码指南](captcha.md)。
+「站点设置 → 基本资料」的站点名称和站点图标同时用于后台侧栏与手机导航。保存成功后立即更新当前工作台，其他页面初次加载使用节点已应用的设置。
+
+验证码使用独立的私有配置和修订，不把 Secret 放到普通站点设置或公开快照。首次规则全部关闭；机器调用豁免还须在Key创建时授予对应权限。系统设置保存栏只提交验证码配置。见[验证码指南](captcha.md)。
 
 ## 保存与读取端点
 
@@ -93,7 +95,7 @@ settings.directory/
 
 ## 桌面分区导航（2026-11-05）
 
-站点设置、主题设置、系统设置和节点状态在 1200px 及以上提供右侧「快速导航」。目录按实际分区生成，滚动时高亮当前项。系统设置按「验证码」和「部署信息」分组。较窄屏幕隐藏目录，保留正文和表单。
+站点设置、主题设置、系统设置和节点状态在 1200px 及以上提供右侧「快速导航」。目录按实际分区生成，滚动时高亮当前项。节点状态的「部署配置」对应锚点 `#settings-deployment`。较窄屏幕隐藏目录，保留正文和表单。
 
 链接使用稳定hash，可复制带分区的地址、刷新及前进后退，键盘Enter可定位并把焦点移到目标。异步分区尚未挂载时，首次 hash 恢复会等待目标出现，不会提前选中第一个分区。导航不会保存设置或清空未保存输入；离开页面继续沿原有修改保护。新增分区需在SettingsSection提供唯一且稳定的id，可选用group提供右侧一级分组。具体展示、顶栏留白和页底短分区处理见[ADR0064](../decisions/0064-desktop-settings-section-navigation.md)与[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)，实页范围见[验收](../handoff/system-settings-captcha-navigation-verification.md)。
 

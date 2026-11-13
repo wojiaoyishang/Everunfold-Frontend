@@ -1,105 +1,12 @@
-"use client";
-
-import { UiText } from "@/core/i18n/provider";
 import { AdminPageHeading } from "../components/page-heading";
 import { CaptchaSettingsPanel } from "./captcha";
 import { SettingsLayout } from "./section-navigation";
-import { SettingsSection } from "./shared";
 
-export interface RuntimeSummary {
-  nodeId: string;
-  publicSiteUrl: string | null;
-  backendBaseUrl: string;
-  settingsDirectory: string;
-  snapshotDirectory: string;
-  receiverConfigured: boolean;
-}
-function DeploymentSettings({ runtime }: { runtime: RuntimeSummary }) {
-  return (
-    <SettingsSection
-      id="settings-deployment"
-      title="部署配置"
-      description="这些值属于当前 Next.js 实例，通过服务器配置文件维护。"
-      group="部署信息"
-    >
-      <dl className="admin-runtime-list">
-        <div>
-          <dt>
-            <UiText text="当前节点" />
-          </dt>
-          <dd>{runtime.nodeId}</dd>
-        </div>
-        <div>
-          <dt>
-            <UiText text="公开站点地址" />
-          </dt>
-          <dd>{runtime.publicSiteUrl ?? <UiText text="未配置" />}</dd>
-        </div>
-        <div>
-          <dt>
-            <UiText text="后端地址" />
-          </dt>
-          <dd>{runtime.backendBaseUrl}</dd>
-        </div>
-        <div>
-          <dt>
-            <UiText text="设置副本" />
-          </dt>
-          <dd>{runtime.settingsDirectory}</dd>
-        </div>
-        <div>
-          <dt>
-            <UiText text="公开快照目录" />
-          </dt>
-          <dd>{runtime.snapshotDirectory}</dd>
-        </div>
-        <div>
-          <dt>
-            <UiText text="公开快照有效期" />
-          </dt>
-          <dd>
-            <UiText text="无时间过期，按发布版本更新" />
-          </dd>
-        </div>
-        <div>
-          <dt>
-            <UiText text="页面生成" />
-          </dt>
-          <dd>
-            <UiText text="从本地公开快照按请求渲染" />
-          </dd>
-        </div>
-        <div>
-          <dt>
-            <UiText text="私有账号数据" />
-          </dt>
-          <dd>
-            <UiText text="不进入共享缓存" />
-          </dd>
-        </div>
-        <div>
-          <dt>
-            <UiText text="配置来源绑定" />
-          </dt>
-          <dd>
-            {runtime.receiverConfigured ? (
-              <UiText text="已配置" />
-            ) : (
-              <UiText text="待配置" />
-            )}
-          </dd>
-        </div>
-      </dl>
-    </SettingsSection>
-  );
-}
-export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
+export function SystemSettingsPage() {
   return (
     <SettingsLayout>
       <AdminPageHeading title="系统设置" />
-      <CaptchaSettingsPanel
-        trailing={<DeploymentSettings runtime={runtime} />}
-      />
+      <CaptchaSettingsPanel />
     </SettingsLayout>
   );
 }

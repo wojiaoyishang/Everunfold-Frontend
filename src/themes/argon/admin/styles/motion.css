@@ -14,7 +14,7 @@
 .admin-main-column {
   transition: margin-left var(--admin-motion-layout) var(--admin-motion-ease);
 }
-.admin-brand > span:last-child,
+.admin-sidebar .admin-brand-label,
 .admin-sidebar .admin-nav-text,
 .admin-sidebar .admin-nav-label {
   opacity: 1;
@@ -22,14 +22,13 @@
     opacity var(--admin-motion-fast) ease,
     visibility var(--admin-motion-fast);
 }
-.admin-brand > span:last-child,
 .admin-nav-text {
   overflow: hidden;
   white-space: nowrap;
 }
 .admin-shell[data-collapsed="true"]
   .admin-sidebar
-  :where(.admin-brand > span:last-child, .admin-nav-text, .admin-nav-label) {
+  :where(.admin-brand-label, .admin-nav-text, .admin-nav-label) {
   opacity: 0;
   visibility: hidden;
 }

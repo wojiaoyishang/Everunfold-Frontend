@@ -20,11 +20,17 @@
   align-items: center;
   gap: 10px;
   min-height: 34px;
+  min-width: 0;
   padding-inline: 10px;
   color: var(--admin-text);
   font-size: 16px;
   font-weight: 650;
   white-space: nowrap;
+}
+.admin-brand-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .admin-brand-mark {
   display: inline-grid;
@@ -36,6 +42,12 @@
   border: 1px solid var(--admin-border);
   border-radius: 7px;
   font-size: 19px;
+}
+.admin-brand-image {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  border-radius: 4px;
 }
 .admin-navigation {
   min-width: 0;
@@ -301,7 +313,13 @@
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 30px;
-  padding-left: 10px;
+}
+.admin-drawer-heading .admin-brand {
+  flex: 1 1 auto;
+  padding-inline: 0;
+}
+.admin-drawer-heading > .admin-icon-button {
+  flex: 0 0 auto;
 }
 .admin-skip-link {
   position: fixed;

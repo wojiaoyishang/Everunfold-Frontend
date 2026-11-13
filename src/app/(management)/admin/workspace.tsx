@@ -1,10 +1,14 @@
 "use client";
-import type { ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { useAdminAccess } from "@/core/admin/use-admin-access";
 import {
   AdminAccountContext,
   AdminRequestContext,
 } from "@/core/admin/account-context";
+import {
+  AdminSiteBrandUpdate,
+  type AdminSiteBrand,
+} from "@/core/admin/site-brand";
 import { adminPreferencesKey } from "@/core/admin/preferences";
 import { useAdminPreferences } from "@/core/admin/use-admin-preferences";
 import { AdminAccessState } from "@/themes/argon/admin/components/access-state";
@@ -14,9 +18,11 @@ import { LocalDraftRecovery } from "@/themes/argon/admin/content/local-recovery"
 
 export function AdminWorkspace({
   baseUrl,
+  initialBrand,
   children,
 }: {
   baseUrl: string;
+  initialBrand: AdminSiteBrand | null;
   children: ReactNode;
 }) {
   const access = useAdminAccess(baseUrl);
@@ -40,6 +46,7 @@ export function AdminWorkspace({
       baseUrl={baseUrl}
       csrfToken={access.csrfToken}
       user={access.user}
+      initialBrand={initialBrand}
       onSignOut={access.signOut}
     >
       {children}
@@ -51,6 +58,7 @@ function ConfirmedWorkspace({
   csrfToken,
   storageKey,
   user,
+  initialBrand,
   onSignOut,
   children,
 }: {
@@ -58,21 +66,37 @@ function ConfirmedWorkspace({
   baseUrl: string;
   csrfToken: string;
   user: AuthUser;
+  initialBrand: AdminSiteBrand | null;
   onSignOut: () => Promise<void>;
   children: ReactNode;
 }) {
   const { preferences, update } = useAdminPreferences(storageKey);
+  const [confirmedBrand, setConfirmedBrand] = useState<AdminSiteBrand | null>(
+    null,
+  );
+  const updateBrand = useCallback((brand: AdminSiteBrand) => {
+    setConfirmedBrand((current) =>
+      current && current.revision > brand.revision ? current : brand,
+    );
+  }, []);
+  const brand =
+    confirmedBrand && confirmedBrand.revision >= (initialBrand?.revision ?? 0)
+      ? confirmedBrand
+      : initialBrand;
   return (
     <AdminRequestContext value={{ baseUrl, csrfToken }}>
       <AdminAccountContext value={user}>
-        <AdminShell
-          user={user}
-          preferences={preferences}
-          onPreferencesChange={update}
-          onSignOut={onSignOut}
-        >
-          {children}
-        </AdminShell>
+        <AdminSiteBrandUpdate value={updateBrand}>
+          <AdminShell
+            user={user}
+            siteBrand={brand}
+            preferences={preferences}
+            onPreferencesChange={update}
+            onSignOut={onSignOut}
+          >
+            {children}
+          </AdminShell>
+        </AdminSiteBrandUpdate>
       </AdminAccountContext>
     </AdminRequestContext>
   );

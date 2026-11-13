@@ -4,6 +4,7 @@ import { UiText } from "@/core/i18n/provider";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import type { AuthUser } from "@/core/contracts/auth";
+import type { AdminSiteBrand } from "@/core/admin/site-brand";
 import type { AdminPreferences } from "@/core/admin/preferences";
 import { adminDestination } from "@/core/admin/navigation";
 import { isLivePreviewPath } from "@/core/preview/routes";
@@ -13,6 +14,7 @@ import { Icon } from "../../components/icon";
 import { Button, TextLink } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { AdminAppearance } from "../components/preferences";
+import { AdminBrandLink } from "./brand-link";
 import { AdminNavigation } from "./navigation";
 import { AdminMobileNavigation } from "./mobile-navigation";
 import { InterfaceLanguage } from "../../components/language-switcher";
@@ -25,12 +27,14 @@ import { NotificationCenter } from "../notifications/center";
 
 export function AdminShell({
   user,
+  siteBrand,
   preferences,
   onPreferencesChange,
   onSignOut,
   children,
 }: {
   user: AuthUser;
+  siteBrand: AdminSiteBrand | null;
   preferences: AdminPreferences;
   onPreferencesChange: (patch: Partial<AdminPreferences>) => void;
   onSignOut: () => Promise<void>;
@@ -102,16 +106,7 @@ export function AdminShell({
           <UiText text="跳至主要内容" />
         </RouteLink>
         <aside ref={sidebar} className="admin-sidebar">
-          <RouteLink
-            href="/admin"
-            className="admin-brand"
-            aria-label="Everunfold 工作台"
-          >
-            <span className="admin-brand-mark">
-              <Icon name="book" />
-            </span>
-            <span>Everunfold</span>
-          </RouteLink>
+          <AdminBrandLink brand={siteBrand} />
           <AdminNavigation
             pathname={pathname}
             flyouts
@@ -137,7 +132,10 @@ export function AdminShell({
               >
                 <Icon name="sidebar" />
               </Button>
-              <AdminMobileNavigation pathname={pathname} />
+              <AdminMobileNavigation
+                pathname={pathname}
+                siteBrand={siteBrand}
+              />
               <span className="admin-breadcrumb-root">
                 <UiText text="工作空间" />
               </span>

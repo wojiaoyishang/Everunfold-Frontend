@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[后台标识与节点部署配置](decisions/0140-admin-brand-and-node-deployment.md)说明侧栏标识来源及部署配置位置。
+
 [主题推荐插件](decisions/0139-theme-plugin-recommendations.md)说明推荐清单、批量启用和特色图打包。
 
 [自定义页面模板](decisions/0138-custom-page-templates.md)说明模板继承、已发布页面同步和 URL 校验。
@@ -68,7 +70,7 @@
 
 [统一阅读图片查看器](development/reader-images.md)、[ADR0112](decisions/0112-shared-reader-image-viewer.md)与[验收](handoff/reader-image-viewer-verification.md)：复用自研缩放/全屏/画廊查看器，不为术语单独造弹层；文章、说说、托管页面与术语默认启用，可逐项关闭，代码页面通过 `imageViewer` 声明控制。
 
-[系统设置归并与分组快速导航](handoff/system-settings-captcha-navigation-verification.md)、[开发指南](development/settings.md)及[ADR0106](decisions/0106-system-settings-captcha-and-grouped-navigation.md)：验证码并入系统设置，左侧不再显示独立入口，设置组按插件管理、站点、邮件、系统、运行与任务、应用接入排列；右侧目录支持一级分组与二级分区，旧验证码地址继续定位到对应锚点。验证码保存栏位于部署配置之后，仍使用独立修订和保存接口。
+[系统设置归并与分组快速导航](handoff/system-settings-captcha-navigation-verification.md)、[开发指南](development/settings.md)及[ADR0106](decisions/0106-system-settings-captcha-and-grouped-navigation.md)记录验证码并入系统设置、独立保存及旧地址的锚点跳转。
 
 [术语富文本编辑与弹层验收](handoff/glossary-rich-editor-verification.md)：术语后台接入文章式区块编辑器，保存栏与系统设置统一；Tooltip 和公开详情复用文章的安全 Markdown/HTML、代码、公式、媒体与短代码渲染。
 

@@ -1,7 +1,7 @@
 "use client";
 import { SitePublishingSettings } from "./site-publishing";
 import { DiscoverySettings } from "./discovery";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 
 import { useSettingsEditor } from "@/core/settings/editor";
 import {
@@ -19,6 +19,7 @@ import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
 export function SiteSettingsPage() {
   const { draft, setDraft } = useSettingsEditor();
+  const t = useT();
   const site = draft?.site;
   const update = (value: Partial<NonNullable<typeof site>>) =>
     setDraft((current) =>
@@ -62,7 +63,7 @@ export function SiteSettingsPage() {
             />
             <SettingsMediaField
               label="站点图标"
-              hint="用于浏览器标签页，也作为邮件品牌的默认图标。"
+              hint={t("用于后台导航和浏览器标签页，也作为邮件品牌的默认图标。")}
               kind="image"
               value={site.icon_url ?? ""}
               mediaId={site.icon_media_id}

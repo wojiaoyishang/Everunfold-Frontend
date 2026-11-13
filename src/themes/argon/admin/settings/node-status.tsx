@@ -21,6 +21,10 @@ import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "./section-navigation";
 import { DeliveryBadge, SettingsSection } from "./shared";
 import { CachePolicySection } from "./cache-policy";
+import {
+  DeploymentSettings,
+  type DeploymentSummary,
+} from "./deployment-settings";
 import styles from "./cache.module.css";
 
 type CacheResource = CacheDiskResource["resource"];
@@ -121,9 +125,10 @@ function SiteDeliverySection({
   );
 }
 
-export function NodeStatusPage({ localNode }: { localNode: string }) {
+export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
   const t = useT();
   const editable = can(useAdminAccount(), "settings:write");
+  const localNode = runtime.nodeId;
   const cache = useCacheManagement(localNode);
   const [action, setAction] = useState<CacheAction>();
   const focus = useRef<HTMLButtonElement>(null);
@@ -160,7 +165,7 @@ export function NodeStatusPage({ localNode }: { localNode: string }) {
       />
       <AdminPageHeading
         title="节点状态"
-        description="查看节点发布回执、磁盘副本和请求策略。"
+        description="查看发布回执、节点缓存、请求策略与部署配置。"
       />
       <SiteDeliverySection {...cache.siteDelivery} />
       <SettingsSection
@@ -378,6 +383,7 @@ export function NodeStatusPage({ localNode }: { localNode: string }) {
         editable={editable}
         busy={cache.busy}
       />
+      <DeploymentSettings runtime={runtime} />
       <ConfirmDialog
         open={action !== undefined}
         title={label}

@@ -20,6 +20,7 @@ import {
   saveSettings,
 } from "@/core/contracts/settings";
 import { useAdminRequest } from "@/core/admin/account-context";
+import { AdminSiteBrandUpdate } from "@/core/admin/site-brand";
 import { RequestError } from "@/core/http/request";
 import {
   changedPluginIds,
@@ -49,6 +50,7 @@ export function settingsFailure(error: unknown) {
 }
 function useEditor() {
   const { baseUrl, csrfToken } = useAdminRequest();
+  const updateBrand = useContext(AdminSiteBrandUpdate);
   const [saved, setSaved] = useState<SettingsState | null>(null);
   const [draft, setDraft] = useState<PublicSettings | null>(null);
   const [error, setError] = useState("");
@@ -72,6 +74,15 @@ function useEditor() {
       mounted.current = false;
     };
   }, []);
+  const acceptSettings = useCallback(
+    (state: SettingsState) => {
+      const { name, icon_url } = state.value.site;
+      setSaved(state);
+      updateBrand?.({ name, icon_url, revision: state.revision });
+      window.dispatchEvent(new Event("everunfold-language-catalog"));
+    },
+    [updateBrand],
+  );
   const reload = useCallback(async () => {
     const id = ++operation.current;
     setLoading(true);
@@ -80,8 +91,7 @@ function useEditor() {
     try {
       const response = await readSettings(baseUrl);
       if (mounted.current && operation.current === id) {
-        setSaved(response.data);
-        window.dispatchEvent(new Event("everunfold-language-catalog"));
+        acceptSettings(response.data);
         setDraft(response.data.value);
       }
     } catch {
@@ -90,7 +100,7 @@ function useEditor() {
     } finally {
       if (mounted.current && operation.current === id) setLoading(false);
     }
-  }, [baseUrl]);
+  }, [acceptSettings, baseUrl]);
   useEffect(() => {
     let disposed = false;
     // Match the session boundary: discard Strict Mode's first setup before requesting.
@@ -142,8 +152,7 @@ function useEditor() {
     try {
       const response = await saveSettings(baseUrl, input, csrfToken);
       if (!mounted.current) return false;
-      setSaved(response.data);
-      window.dispatchEvent(new Event("everunfold-language-catalog"));
+      acceptSettings(response.data);
       setDraft(response.data.value);
       setMessage("设置已保存。节点应用后，下一次页面访问将使用最新配置。");
       return true;
@@ -165,11 +174,10 @@ function useEditor() {
         csrfToken,
       );
       if (!mounted.current) return false;
-      setSaved(response.data);
+      acceptSettings(response.data);
       setDraft((current) =>
         current ? mergeActivatedTheme(current, response.data.value) : current,
       );
-      window.dispatchEvent(new Event("everunfold-language-catalog"));
       setMessage("主题已启用，节点同步后生效。其他未保存的设置仍保留。");
       return true;
     } catch (error) {
