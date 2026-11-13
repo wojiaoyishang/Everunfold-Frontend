@@ -19,7 +19,7 @@ import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "./section-navigation";
-import { SettingsSection } from "./shared";
+import { DeliveryBadge, SettingsSection } from "./shared";
 import { CachePolicySection } from "./cache-policy";
 import styles from "./cache.module.css";
 
@@ -64,7 +64,64 @@ function bytes(value: number | null | undefined) {
 
 type CacheAction = CacheRebuild["scope"] | "prune";
 
-export function CacheSettingsPage({ localNode }: { localNode: string }) {
+function SiteDeliverySection({
+  rows,
+  refreshing,
+  error,
+  refresh,
+}: ReturnType<typeof useCacheManagement>["siteDelivery"]) {
+  return (
+    <SettingsSection
+      id="settings-delivery"
+      title="站点与主题发布"
+      description="各节点已应用的版本与后端期望版本。"
+    >
+      {rows?.length ? (
+        <ul className="admin-delivery-list" aria-busy={refreshing}>
+          {rows.map((row) => (
+            <li key={row.node_id}>
+              <span>{row.node_id}</span>
+              <span>
+                <UiText
+                  text="版本 {applied} / {expected}"
+                  values={{
+                    applied: row.applied_revision ?? "—",
+                    expected: row.desired_revision,
+                  }}
+                />
+              </span>
+              <DeliveryBadge value={row} />
+            </li>
+          ))}
+        </ul>
+      ) : !error ? (
+        <p role="status">
+          <UiText text={rows ? "尚未配置前端节点。" : "正在读取发布状态…"} />
+        </p>
+      ) : null}
+      {error && (
+        <div className="admin-settings-message is-error" role="alert">
+          <UiText
+            text={
+              rows?.length
+                ? "发布状态未能刷新，当前显示上次结果。"
+                : "尚未取得发布状态。"
+            }
+          />
+          <Button
+            className="admin-button"
+            onClick={refresh}
+            disabled={refreshing}
+          >
+            <UiText text="重试" />
+          </Button>
+        </div>
+      )}
+    </SettingsSection>
+  );
+}
+
+export function NodeStatusPage({ localNode }: { localNode: string }) {
   const t = useT();
   const editable = can(useAdminAccount(), "settings:write");
   const cache = useCacheManagement(localNode);
@@ -96,15 +153,16 @@ export function CacheSettingsPage({ localNode }: { localNode: string }) {
     setAction(operation);
   };
   return (
-    <SettingsLayout fullWidth>
+    <SettingsLayout>
       <UnsavedAccountChanges
         dirty={cache.policy.hasChanges}
         busy={cache.policy.saving}
       />
       <AdminPageHeading
-        title="缓存管理"
-        description="查看前端节点磁盘上的公开副本并配置节点策略。"
+        title="节点状态"
+        description="查看节点发布回执、磁盘副本和请求策略。"
       />
+      <SiteDeliverySection {...cache.siteDelivery} />
       <SettingsSection
         id="cache-node"
         title="节点缓存"

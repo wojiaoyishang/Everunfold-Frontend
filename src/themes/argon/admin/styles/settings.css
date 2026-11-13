@@ -308,14 +308,18 @@
 .admin-delivery-list {
   display: grid;
   gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.admin-delivery-list > div {
+.admin-delivery-list > li {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
   font-size: 12px;
+  overflow-wrap: anywhere;
 }
 .admin-runtime-list {
   margin: 0;

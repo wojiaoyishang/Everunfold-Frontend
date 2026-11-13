@@ -6,11 +6,13 @@ import {
   pruneNodeCache,
   readFrontendNodes,
   readNodeCache,
+  readSettings,
   rebuildNodeCache,
   saveCachePolicy,
   type CacheNodeState,
   type CachePolicy,
   type CacheRebuild,
+  type DeliveryState,
   type PolicyState,
 } from "@/core/contracts/settings";
 import { RequestError } from "@/core/http/request";
@@ -18,10 +20,16 @@ import { settingsFailure } from "./editor";
 
 type Action = CacheRebuild["scope"] | "prune";
 type PolicyDraft = { base: PolicyState; value: CachePolicy };
+type SiteDelivery = {
+  rows?: DeliveryState[];
+  refreshing?: boolean;
+  error?: boolean;
+};
 
 export function useCacheManagement(localNode: string) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const [nodes, setNodes] = useState<PolicyState[] | null>(null);
+  const [siteDelivery, setSiteDelivery] = useState<SiteDelivery>({});
   const [drafts, setDrafts] = useState(() => new Map<string, PolicyDraft>());
   const [policyNotice, setPolicyNotice] = useState<{
     type: "saved" | "error";
@@ -38,6 +46,7 @@ export function useCacheManagement(localNode: string) {
   >();
   const current = useRef<AbortController | null>(null);
   const listing = useRef<AbortController | null>(null);
+  const siteRequest = useRef<AbortController | null>(null);
   const operation = useRef<AbortController | null>(null);
   const [busy, setBusy] = useState<Action | "policy">();
   const [watch, setWatch] = useState(0);
@@ -69,6 +78,32 @@ export function useCacheManagement(localNode: string) {
     }
   }, [baseUrl]);
 
+  const refreshSiteDelivery = useCallback(
+    async (background = false) => {
+      if (background && siteRequest.current) return;
+      siteRequest.current?.abort();
+      const request = new AbortController();
+      siteRequest.current = request;
+      setSiteDelivery((current) => ({ ...current, refreshing: true }));
+      try {
+        const { data } = await readSettings(baseUrl, {
+          signal: request.signal,
+        });
+        if (!request.signal.aborted) setSiteDelivery({ rows: data.delivery });
+      } catch {
+        if (!request.signal.aborted)
+          setSiteDelivery((current) => ({
+            ...current,
+            refreshing: false,
+            error: true,
+          }));
+      } finally {
+        if (siteRequest.current === request) siteRequest.current = null;
+      }
+    },
+    [baseUrl],
+  );
+
   const refresh = useCallback(
     async (background = false) => {
       if (!node || (background && current.current)) return;
@@ -99,13 +134,17 @@ export function useCacheManagement(localNode: string) {
   useEffect(() => {
     let disposed = false;
     queueMicrotask(() => {
-      if (!disposed) void loadNodes();
+      if (!disposed) {
+        void loadNodes();
+        void refreshSiteDelivery();
+      }
     });
     return () => {
       disposed = true;
       listing.current?.abort();
+      siteRequest.current?.abort();
     };
-  }, [loadNodes]);
+  }, [loadNodes, refreshSiteDelivery]);
   useEffect(() => {
     let disposed = false;
     queueMicrotask(() => {
@@ -129,6 +168,18 @@ export function useCacheManagement(localNode: string) {
     }, 2500);
     return () => window.clearInterval(timer);
   }, [node, pending, watch, refresh]);
+  const sitePending = siteDelivery.rows?.some(
+    (row) => row.status === "pending" || row.status === "failed",
+  );
+  useEffect(() => {
+    if (!sitePending) return;
+    let count = 0;
+    const timer = window.setInterval(() => {
+      if (++count > 20) window.clearInterval(timer);
+      else void refreshSiteDelivery(true);
+    }, 2500);
+    return () => window.clearInterval(timer);
+  }, [sitePending, refreshSiteDelivery]);
 
   function resetPolicy() {
     setDrafts((current) => {
@@ -204,6 +255,8 @@ export function useCacheManagement(localNode: string) {
         if (request.signal.aborted) return false;
         setResult({ type: "queued" });
         setWatch((value) => value + 1);
+        if (action === "all" || action === "public-settings")
+          void refreshSiteDelivery();
       }
       await refresh();
       return true;
@@ -242,6 +295,10 @@ export function useCacheManagement(localNode: string) {
     busy: busy !== undefined,
     result,
     run: (action: Action) => run(action),
+    siteDelivery: {
+      ...siteDelivery,
+      refresh: () => void refreshSiteDelivery(),
+    },
     policy: {
       value: draft?.value ?? policy?.value,
       dirty: Boolean(draft),
@@ -259,6 +316,7 @@ export function useCacheManagement(localNode: string) {
     refresh: () => {
       void loadNodes();
       void refresh();
+      void refreshSiteDelivery();
     },
     clearActionError: () => setActionError(""),
     select: (id: string) => {

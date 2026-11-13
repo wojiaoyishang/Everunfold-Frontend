@@ -163,6 +163,7 @@ directory = "./var/absent-admin-verification-cache"
       "/admin/settings/plugins",
       "/admin/settings/captcha",
       "/admin/settings/system",
+      "/admin/settings/nodes",
       "/admin/settings/runtime",
       "/admin/settings/mail",
     ]) {

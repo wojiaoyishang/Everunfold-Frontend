@@ -1,12 +1,10 @@
 "use client";
 
 import { UiText } from "@/core/i18n/provider";
-import { useSettingsEditor } from "@/core/settings/editor";
-import { RouteLink } from "../../components/ui/route-link";
 import { AdminPageHeading } from "../components/page-heading";
 import { CaptchaSettingsPanel } from "./captcha";
 import { SettingsLayout } from "./section-navigation";
-import { DeliveryBadge, SettingsSection } from "./shared";
+import { SettingsSection } from "./shared";
 
 export interface RuntimeSummary {
   nodeId: string;
@@ -96,46 +94,9 @@ function DeploymentSettings({ runtime }: { runtime: RuntimeSummary }) {
   );
 }
 export function SystemSettingsPage({ runtime }: { runtime: RuntimeSummary }) {
-  const siteEditor = useSettingsEditor();
   return (
     <SettingsLayout>
       <AdminPageHeading title="系统设置" />
-      <SettingsSection
-        id="settings-nodes"
-        title="缓存管理"
-        description="在缓存管理中配置各节点的请求策略和查看磁盘状态。"
-        group="节点与发布"
-      >
-        <RouteLink
-          href="/admin/settings/cache#settings-nodes"
-          className="admin-settings-link"
-        >
-          <UiText text="前往节点策略" />
-        </RouteLink>
-      </SettingsSection>
-      <SettingsSection
-        id="settings-delivery"
-        title="站点与主题发布"
-        description="保存完成表示数据库已提交；节点应用完成表示整份配置已写入该节点。"
-        group="节点与发布"
-      >
-        <div className="admin-delivery-list">
-          {siteEditor.saved?.delivery.map((item) => (
-            <div key={item.node_id}>
-              <span>{item.node_id}</span>
-              <span>
-                <UiText text="版本" />
-                {item.applied_revision ?? "—"} / {item.desired_revision}
-              </span>
-              <DeliveryBadge value={item} />
-            </div>
-          )) ?? (
-            <p>
-              <UiText text="尚未取得发布状态。" />
-            </p>
-          )}
-        </div>
-      </SettingsSection>
       <CaptchaSettingsPanel
         trailing={<DeploymentSettings runtime={runtime} />}
       />

@@ -8,7 +8,7 @@ import { PluginImpactDialog } from "@/themes/argon/admin/settings/plugin-impact-
 export function SettingsRouteBoundary({ children }: { children: ReactNode }) {
   const path = usePathname();
   return path === "/admin/settings/api-keys" ||
-    path === "/admin/settings/cache" ? (
+    path === "/admin/settings/nodes" ? (
     children
   ) : (
     <SettingsEditorProvider>

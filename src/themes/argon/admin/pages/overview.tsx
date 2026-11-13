@@ -41,7 +41,7 @@ export function AdminOverview() {
         {
           label: "同步待重试",
           count: data.failed_deliveries,
-          href: "/admin/settings/system",
+          href: "/admin/settings/nodes",
         },
       ].filter((item) => item.count != null)
     : [];

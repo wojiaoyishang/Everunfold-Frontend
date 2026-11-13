@@ -43,6 +43,7 @@ test("registered admin destinations bypass public snapshots and survive a safe l
     "/admin/content/article/unknown/edit",
     "/admin/content/article/new/unknown",
     "/admin/content.html",
+    "/admin/settings/cache",
     "/administer",
     "/admin/%2f%2fevil.example",
     "/admin/media/../../login",
@@ -101,7 +102,7 @@ test("admin navigation separates primary content, tools, appearance and system s
     "core.settings.plugins",
     "core.settings.site",
     "core.settings.system",
-    "core.settings.cache",
+    "core.settings.nodes",
     "core.settings.runtime",
     "core.settings.api-keys",
   ]);
