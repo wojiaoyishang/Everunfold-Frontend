@@ -1,4 +1,5 @@
 "use client";
+import { postJSON } from "@/core/http/request";
 import { useAdminRequest } from "@/core/admin/account-context";
 import {
   saveShortcode,
@@ -18,6 +19,26 @@ const action = (item: Identity) => ({
 export function useShortcodeActions() {
   const { baseUrl, csrfToken } = useAdminRequest();
   return {
+    regionPassword: async (password: string) =>
+      (
+        await postJSON(
+          baseUrl,
+          "/v1/admin/shortcodes/region-password",
+          { password },
+          (value): value is { data: { credential: string } } =>
+            typeof value === "object" &&
+            value !== null &&
+            "data" in value &&
+            typeof value.data === "object" &&
+            value.data !== null &&
+            "credential" in value.data &&
+            typeof value.data.credential === "string",
+          {
+            credentials: "include",
+            headers: { "X-CSRF-Token": csrfToken ?? "" },
+          },
+        )
+      ).data.credential,
     save: async (value: ShortcodeSource, item: Identity | null) =>
       (
         await saveShortcode(

@@ -131,7 +131,14 @@ const options: sanitizeHtml.IOptions = {
     h5: ["id", "style"],
     h6: ["id", "style"],
     details: ["open", "class"],
-    div: ["class", "data-math", "data-latex"],
+    div: [
+      "class",
+      "data-math",
+      "data-latex",
+      "data-shortcode-instance",
+      "data-shortcode-region",
+      "data-shortcode-region-kind",
+    ],
     strong: ["class"],
     span: [
       "class",
@@ -150,6 +157,7 @@ const options: sanitizeHtml.IOptions = {
   allowedClasses: {
     "*": [
       "ef-shortcode",
+      "ef-shortcode-region",
       /^ef-sc-[a-f0-9]{32}(?:-[a-zA-Z_][a-zA-Z0-9_-]{0,63})?$/,
     ],
     code: [/^language-[a-zA-Z0-9_-]+$/, "hljs"],
@@ -182,7 +190,10 @@ function mappedUrl(value: string, media: Content["media_urls"]): string | null {
 export function renderContent(
   content: Pick<Content, "id" | "content" | "media_urls">,
   shortcodes: readonly PublicShortcode[] = [],
-  rendering: { shortcodePreview?: boolean } = {},
+  rendering: {
+    shortcodePreview?: boolean;
+    disableShortcodeScripts?: boolean;
+  } = {},
 ): {
   html: string;
   toc: TableOfContentsItem[];
@@ -205,9 +216,18 @@ export function renderContent(
   const toc: TableOfContentsItem[] = [];
   const seenHeadings = new Map<string, number>();
   const shortcodeStyles = new Set<string>();
+  const scripts: Record<
+    string,
+    { javascript: string; title: string; css: string }
+  > = {};
+  let instancePrefix = "ef-shortcode-hole";
+  while (
+    content.content.some((block) => block.content.includes(instancePrefix))
+  )
+    instancePrefix += "x";
   const diagnostics: ShortcodeDiagnostic[] = [];
   const html = content.content
-    .map((block) => {
+    .map((block, index) => {
       const expanded = renderNativeShortcodes(
         block.content,
         block.type === "markdown",
@@ -215,8 +235,11 @@ export function renderContent(
         block.type === "markdown" ? renderMarkdownSource : (source) => source,
         content.media_urls,
         rendering.shortcodePreview,
+        `${instancePrefix}-${index}`,
       );
       const raw = expanded.html;
+      if (!rendering.disableShortcodeScripts)
+        Object.assign(scripts, Object.fromEntries(expanded.scripts));
       if (expanded.css) shortcodeStyles.add(expanded.css);
       diagnostics.push(...expanded.diagnostics);
       const media = {
@@ -326,7 +349,10 @@ export function renderContent(
       (shortcodeStyles.size
         ? `<style data-shortcodes>${[...shortcodeStyles].join("\n")}</style>`
         : "") +
-      html,
+      html +
+      (Object.keys(scripts).length
+        ? `<script type="application/json" data-shortcode-scripts>${JSON.stringify(scripts).replaceAll("<", "\\u003c")}</script>`
+        : ""),
     toc,
     features: inspectContentFeatures(html),
     diagnostics,

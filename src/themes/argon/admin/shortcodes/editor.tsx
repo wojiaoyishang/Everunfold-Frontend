@@ -25,7 +25,9 @@ import { ShortcodeParameters, ShortcodeValues } from "./parameters";
 import { ShortcodePreview } from "./preview";
 import styles from "./shortcodes.module.css";
 
-const initial: ShortcodeSource = {
+type EditableShortcodeSource = ShortcodeSource & { javascript?: string };
+
+const initial: EditableShortcodeSource = {
   name: "custom:reading-tip",
   title: "阅读提示",
   description: "",
@@ -62,7 +64,7 @@ export function ShortcodeEditor({
 }) {
   const kindId = useId();
   const actions = useShortcodeActions();
-  const [source, setSource] = useState<ShortcodeSource>(
+  const [source, setSource] = useState<EditableShortcodeSource>(
     item?.source ?? initial,
   );
   const [tab, setTab] = useState("html"),
@@ -81,7 +83,8 @@ export function ShortcodeEditor({
   const compilation = useShortcodeCompilation(source, item?.id, writable);
   const compiled = writable ? compilation.compiled : item?.compiled;
   const htmlLanguage = useCodeLanguage("html"),
-    cssLanguage = useCodeLanguage("css");
+    cssLanguage = useCodeLanguage("css"),
+    javascriptLanguage = useCodeLanguage("javascript");
   const heading = useRef<HTMLDivElement>(null);
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
@@ -97,7 +100,7 @@ export function ShortcodeEditor({
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [writable, dirty]);
-  const update = (patch: Partial<ShortcodeSource>) => {
+  const update = (patch: Partial<EditableShortcodeSource>) => {
     setSource((current) => ({ ...current, ...patch }));
     setMessage("");
   };
@@ -246,6 +249,7 @@ export function ShortcodeEditor({
             {[
               ["html", "HTML"],
               ["css", "CSS"],
+              ["javascript", "JavaScript"],
               ["parameters", "参数"],
             ].map(([value, label]) => (
               <Button
@@ -299,14 +303,36 @@ export function ShortcodeEditor({
                   />
                 ) : (
                   <CodeEditor
-                    value={tab === "html" ? source.html : (source.css ?? "")}
+                    value={
+                      tab === "html"
+                        ? source.html
+                        : tab === "css"
+                          ? (source.css ?? "")
+                          : (source.javascript ?? "")
+                    }
                     onChange={(value) =>
-                      update(tab === "html" ? { html: value } : { css: value })
+                      update(
+                        tab === "html"
+                          ? { html: value }
+                          : tab === "css"
+                            ? { css: value }
+                            : { javascript: value },
+                      )
                     }
                     label={
-                      tab === "html" ? "短代码 HTML 源码" : "短代码 CSS 源码"
+                      tab === "html"
+                        ? "短代码 HTML 源码"
+                        : tab === "css"
+                          ? "短代码 CSS 源码"
+                          : "短代码 JavaScript 源码"
                     }
-                    language={tab === "html" ? htmlLanguage : cssLanguage}
+                    language={
+                      tab === "html"
+                        ? htmlLanguage
+                        : tab === "css"
+                          ? cssLanguage
+                          : javascriptLanguage
+                    }
                     disabled={!writable || busy}
                   />
                 )}
@@ -314,6 +340,8 @@ export function ShortcodeEditor({
               <p className={styles.hint}>
                 {tab === "html" ? (
                   <UiText text="HTML 与可视化修改同一份模板。容器保留一个 {{ content }} 正文插槽。" />
+                ) : tab === "javascript" ? (
+                  <UiText text="每个短代码实例独立运行。root 是该实例的最外层元素，rootSelector 可用来选中它。脚本在隔离框内执行。" />
                 ) : (
                   <UiText text="CSS 自动限定在此短代码内。用 & 表示外层；不支持脚本、外部资源、全局规则和悬浮定位。" />
                 )}

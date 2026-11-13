@@ -14,6 +14,7 @@ import type { PublicComment } from "@/core/content/types";
 import { ExtensionComponent } from "@/core/extensions/components";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { pluginRegistry } from "@/core/plugins/registry";
+import { ShortcodeRegionBoundary } from "@/themes/argon/components/shortcode-regions";
 import { useReaderData } from "@/themes/argon/components/reader-data";
 import {
   placePageCommentsHost,
@@ -137,7 +138,9 @@ export function PageCommentsBoundary({
   return (
     <PageCommentsContext.Provider value={context}>
       <div ref={scope} style={{ display: "contents" }}>
-        {children}
+        <ShortcodeRegionBoundary target={page.id} readReceipt={readReceipt}>
+          {children}
+        </ShortcodeRegionBoundary>
         <div ref={fallback} style={{ display: "contents" }} />
         {host &&
           activated &&

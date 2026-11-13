@@ -250,3 +250,50 @@ test("catalog preview preserves a frontend plugin's sample renderer", () => {
     assert.equal([...result.html.matchAll(/<span><\/span>/g)].length, columns);
   }
 });
+
+test("protected shortcode drafts and published markers never render their bodies", () => {
+  const reply = render("{{< reply-only >}}private draft{{< /reply-only >}}");
+  assert.match(reply.html, /回复可见区域/);
+  assert.doesNotMatch(reply.html, /private draft|data-shortcode-region=/);
+  const id = "4560da38-6c2c-48b7-a739-4b09f3652ea5";
+  const protectedContent = render(
+    `{{< password-area region="${id}" >}}{{< /password-area >}}`,
+  );
+  assert.match(protectedContent.html, /密码保护区域/);
+  assert.ok(protectedContent.html.includes(`data-shortcode-region="${id}"`));
+});
+
+test("shortcode scripts are carried in inert JSON and get a distinct marker for each instance", () => {
+  const notice = builtinShortcodes().find((item) => item.name === "notice")!;
+  const javascript = 'root.dataset.example = "</script>";';
+  const blocks = {
+    content: [
+      {
+        id: "a",
+        type: "markdown" as const,
+        content: "{{< notice >}}one{{< /notice >}}",
+      },
+      {
+        id: "b",
+        type: "markdown" as const,
+        content: "{{< notice >}}two{{< /notice >}}",
+      },
+    ],
+  };
+  const rendered = renderContent(content(blocks), [{ ...notice, javascript }]);
+  const markers = [
+    ...rendered.html.matchAll(/data-shortcode-instance="([^"]+)"/g),
+  ].map((item) => item[1]);
+  assert.equal(new Set(markers).size, 2);
+  const bank = rendered.html.match(
+    /<script type="application\/json" data-shortcode-scripts>([^<]+)<\/script>/,
+  );
+  assert.ok(bank);
+  assert.equal(JSON.parse(bank[1])[markers[0]].javascript, javascript);
+  assert.doesNotMatch(
+    renderContent(content(blocks), [{ ...notice, javascript }], {
+      disableShortcodeScripts: true,
+    }).html,
+    /data-shortcode-scripts/,
+  );
+});

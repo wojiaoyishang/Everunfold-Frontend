@@ -1,12 +1,14 @@
 "use client";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { PageValue } from "@/core/contracts/pages";
-import { pageDocument, pageRenderId } from "@/core/pages/document";
+import { pageDocument, pageRegions, pageRenderId } from "@/core/pages/document";
 import {
   ImageViewer,
   type GalleryImage,
 } from "../components/reader/image-viewer";
 import styles from "./pages.module.css";
+import { Modal } from "../components/ui/modal";
+import { ShortcodeRegion } from "../components/shortcode-regions";
 import { usePageImageViewer } from "./image-viewer-boundary";
 
 export function PageFrame({
@@ -23,10 +25,16 @@ export function PageFrame({
     index: number;
     items: GalleryImage[];
   } | null>(null);
+  const [region, setRegion] = useState<{
+    id: string;
+    kind: "reply-only" | "password-area";
+  }>();
+  const [closingRegion, setClosingRegion] = useState(false);
   const [loadedToken, setLoadedToken] = useState("");
   const frameId = useId();
   const { html, css, javascript, javascript_enabled, javascript_position } =
     value;
+  const regions = useMemo(() => pageRegions(html ?? ""), [html]);
   const document = useMemo(() => {
     const token = pageRenderId(frameId, {
       html,
@@ -69,6 +77,13 @@ export function PageFrame({
         setLoadedToken(document.token);
         return;
       }
+      if (event.data.type === "everunfold:page:region") {
+        const id = event.data.id;
+        if (typeof id !== "string" || onReady) return;
+        const kind = regions.get(id);
+        if (kind) setRegion({ id, kind });
+        return;
+      }
       if (event.data.type === "everunfold:page:image") {
         if (
           !imageViewer.enabled ||
@@ -106,7 +121,7 @@ export function PageFrame({
       "*",
     );
     return () => window.removeEventListener("message", resize);
-  }, [document.token, imageViewer.enabled]);
+  }, [document.token, imageViewer.enabled, onReady, regions]);
   return (
     <>
       <iframe
@@ -126,6 +141,20 @@ export function PageFrame({
           )
         }
       />
+      {region && regions.has(region.id) && (
+        <Modal
+          title={region.kind === "reply-only" ? "回复可见区域" : "密码保护区域"}
+          closeLabel="关闭区域"
+          closing={closingRegion}
+          onClose={() => setClosingRegion(true)}
+          onExited={() => {
+            setRegion(undefined);
+            setClosingRegion(false);
+          }}
+        >
+          <ShortcodeRegion id={region.id} kind={region.kind} />
+        </Modal>
+      )}
       {gallery && (
         <ImageViewer
           items={gallery.items}

@@ -5,7 +5,7 @@ import {
   type ShortcodeNode,
   type ShortcodeDiagnostic,
 } from "@/core/shortcodes/parser";
-import { shortcodeDefinitions } from "@/core/shortcodes/registry";
+import { regionKind, shortcodeDefinitions } from "@/core/shortcodes/registry";
 import { pluginRegistry } from "@/core/plugins/registry";
 
 const escape = (value: string) =>
@@ -68,6 +68,7 @@ export function renderNativeShortcodes(
   format: (source: string) => string,
   media: Content["media_urls"] = {},
   preview = false,
+  instancePrefix = "ef-shortcode-hole",
 ) {
   const definitions = new Map(
     shortcodeDefinitions(custom).map((item) => [item.name, item]),
@@ -76,7 +77,11 @@ export function renderNativeShortcodes(
   const diagnostics: ShortcodeDiagnostic[] = [...parsed.diagnostics];
   const css = new Map<string, string>(),
     mediaURLs: Record<string, string> = {};
-  let prefix = "ef-shortcode-hole";
+  const scripts = new Map<
+    string,
+    { javascript: string; title: string; css: string }
+  >();
+  let prefix = instancePrefix;
   while (source.includes(prefix)) prefix += "x";
   let counter = 0;
   const render = (from: number, to: number, nodes: ShortcodeNode[]): string => {
@@ -88,6 +93,23 @@ export function renderNativeShortcodes(
       cursor = node.to;
       const definition = definitions.get(node.name)!;
       try {
+        if (regionKind(node.name)) {
+          const id = node.attributes.region;
+          const label =
+            node.name === "reply-only" ? "回复可见区域" : "密码保护区域";
+          const key = `<!--${prefix}-${counter++}-->`;
+          const region =
+            !preview &&
+            /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(id ?? "")
+              ? ` data-shortcode-region="${id}" data-shortcode-region-kind="${node.name}"`
+              : "";
+          holes.set(
+            key,
+            `<div class="ef-shortcode-region"${region}><p>${label}</p></div>`,
+          );
+          text += key;
+          continue;
+        }
         if (node.error) throw new Error(node.error);
         const body =
           definition.kind === "container"
@@ -119,10 +141,20 @@ export function renderNativeShortcodes(
               ));
         if (definition.css) css.set(definition.id, definition.css);
         Object.assign(mediaURLs, definition.media_urls);
-        const key = `<!--${prefix}-${counter++}-->`;
+        const instance = `${prefix}-${counter++}`;
+        const key = `<!--${instance}-->`;
+        const javascript = (
+          definition as PublicShortcode & { javascript?: string }
+        ).javascript;
+        if (javascript)
+          scripts.set(instance, {
+            javascript,
+            title: definition.title,
+            css: definition.css,
+          });
         holes.set(
           key,
-          `<div class="ef-shortcode"><div class="${definition.scope}">${html}</div></div>`,
+          `<div class="ef-shortcode"${javascript ? ` data-shortcode-instance="${instance}"` : ""}><div class="${definition.scope}">${html}</div></div>`,
         );
         text += key;
       } catch (error) {
@@ -141,7 +173,13 @@ export function renderNativeShortcodes(
     return html;
   };
   const html = render(0, source.length, parsed.nodes);
-  return { html, css: [...css.values()].join("\n"), mediaURLs, diagnostics };
+  return {
+    html,
+    css: [...css.values()].join("\n"),
+    mediaURLs,
+    diagnostics,
+    scripts,
+  };
 }
 
 /** Excerpts recognize only the new delimiter; old bracketed text is ordinary authored text. */

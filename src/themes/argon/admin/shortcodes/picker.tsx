@@ -5,10 +5,12 @@ import { useId, useState } from "react";
 import type { MediaItem } from "@/core/contracts/settings";
 import type { MediaURL } from "@/core/contracts/content-admin";
 import { useShortcodeLibrary } from "@/core/shortcodes/use-library";
+import { useShortcodeActions } from "@/core/shortcodes/use-actions";
+import { RequestError } from "@/core/http/request";
 import { shortcodeCall } from "@/core/shortcodes/parser";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { renderContent } from "@/core/rendering/content";
-import { Button, TextArea } from "../../components/ui/primitives";
+import { Button, TextArea, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { Modal } from "../../components/ui/modal";
 import { Select } from "../../components/ui/select";
@@ -33,6 +35,10 @@ export function ShortcodePicker({
 }) {
   const id = useId();
   const library = useShortcodeLibrary();
+  const { regionPassword } = useShortcodeActions();
+  const [password, setPassword] = useState("");
+  const [settingPassword, setSettingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
   const [chosen, setChosen] = useState(""),
     [values, setValues] = useState<Record<string, string>>({});
   const [body, setBody] = useState(
@@ -66,6 +72,7 @@ export function ShortcodePicker({
   const available = mediaPicker
     ? Math.max(0, mediaPicker.limit - mediaReferences.length)
     : 0;
+  const needsPassword = selected?.name === "password-area";
   const call = selected ? shortcodeCall(selected, values, body) : "";
   const rendered = renderContent(
     {
@@ -127,14 +134,38 @@ export function ShortcodePicker({
                 onValueChange={(value) => {
                   setChosen(value);
                   setValues({});
+                  setPassword("");
+                  setPasswordError("");
                 }}
               />
             </div>
-            <ShortcodeValues
-              parameters={selected.parameters}
-              values={values}
-              onChange={setValues}
-            />
+            {needsPassword ? (
+              <label className={styles.field}>
+                <span>
+                  <UiText text="区域口令" />
+                </span>
+                <TextField
+                  className="admin-input"
+                  type="password"
+                  autoComplete="new-password"
+                  maxLength={200}
+                  value={password}
+                  disabled={settingPassword}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+                {passwordError && (
+                  <span className={styles.error} role="alert">
+                    <UiText text={passwordError} />
+                  </span>
+                )}
+              </label>
+            ) : (
+              <ShortcodeValues
+                parameters={selected.parameters}
+                values={values}
+                onChange={setValues}
+              />
+            )}
             {mediaPicker && (
               <div className={styles.pickerMedia}>
                 <Button
@@ -196,7 +227,15 @@ export function ShortcodePicker({
               <TextArea
                 readOnly
                 rows={2}
-                value={call}
+                value={
+                  needsPassword
+                    ? shortcodeCall(
+                        selected,
+                        { credential: "口令配置在插入时生成" },
+                        body,
+                      )
+                    : call
+                }
                 className={styles.invocation}
               />
             </label>
@@ -213,14 +252,36 @@ export function ShortcodePicker({
             !selected ||
             Boolean(rendered.diagnostics.length) ||
             library.loading ||
-            closing
+            closing ||
+            settingPassword ||
+            (needsPassword && !password.length)
           }
-          onClick={() => {
-            setResult(call);
-            setClosing(true);
+          onClick={async () => {
+            if (!selected) return;
+            if (!needsPassword) {
+              setResult(call);
+              setClosing(true);
+              return;
+            }
+            setSettingPassword(true);
+            setPasswordError("");
+            try {
+              const credential = await regionPassword(password);
+              setPassword("");
+              setResult(shortcodeCall(selected, { credential }, body));
+              setClosing(true);
+            } catch (error) {
+              setPasswordError(
+                error instanceof RequestError && error.code === 50381
+                  ? "服务器尚未配置密码区域加密密钥。"
+                  : "暂时无法设置区域口令，请重试。",
+              );
+            } finally {
+              setSettingPassword(false);
+            }
           }}
         >
-          <UiText text="插入到光标位置" />
+          <UiText text={settingPassword ? "正在设置口令…" : "插入到光标位置"} />
         </Button>
       </footer>
       {images && mediaPicker && available > 0 && (

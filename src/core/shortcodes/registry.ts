@@ -1,12 +1,22 @@
 import { pluginRegistry } from "@/core/plugins/registry";
 import type { PublicShortcode, ShortcodeItem } from "@/core/contracts/settings";
 
+import { regionDefinitions, regionKind } from "./region-definitions";
+
+export { regionKind } from "./region-definitions";
+
 export type CatalogItem = Omit<ShortcodeItem, "origin"> & {
   origin: "backend" | "frontend" | "custom";
 };
 /** Trusted frontend registrations share the catalog, but expose no write capability. */
 export const frontendShortcodes = (): readonly CatalogItem[] =>
-  pluginRegistry.shortcodes.map(({ definition, pluginId }) => ({
+  [
+    ...regionDefinitions.map((definition) => ({
+      definition,
+      pluginId: "core",
+    })),
+    ...pluginRegistry.shortcodes,
+  ].map(({ definition, pluginId }) => ({
     id: definition.id,
     origin: "frontend",
     editable: false,
@@ -27,10 +37,12 @@ export const frontendShortcodes = (): readonly CatalogItem[] =>
     versions: [],
   }));
 export const builtinShortcodes = (): readonly PublicShortcode[] => [
+  ...regionDefinitions,
   ...pluginRegistry.shortcodes.map((item) => item.definition),
 ];
 
 export function shortcodeDefinitions(applied: readonly PublicShortcode[] = []) {
+  applied = applied.filter((item) => !regionKind(item.name));
   const names = new Set<string>();
   const reservedNames = new Set(applied.map((item) => item.name));
   const reservedIds = new Set(applied.map((item) => item.id));

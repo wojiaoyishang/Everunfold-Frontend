@@ -1,0 +1,48 @@
+.region {
+  display: grid;
+  gap: 0.65rem;
+  margin-block: 1em;
+  padding: 1em 1.15em;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 0.7em;
+}
+
+.region p {
+  margin: 0;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.65rem;
+}
+
+.controls label {
+  display: grid;
+  gap: 0.25rem;
+  max-width: 100%;
+}
+.controls input,
+.controls button {
+  border: 1px solid color-mix(in srgb, currentColor 26%, transparent);
+  border-radius: 0.45em;
+  color: inherit;
+  background: transparent;
+  min-width: 0;
+  padding: 0.35em 0.65em;
+  font: inherit;
+}
+
+.controls button {
+  cursor: pointer;
+}
+.error {
+  color: var(--danger, #a13939);
+}
+
+@media (max-width: 420px) {
+  .controls > * {
+    flex: 1 1 100%;
+  }
+}

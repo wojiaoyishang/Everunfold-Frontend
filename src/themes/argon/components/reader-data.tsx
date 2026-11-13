@@ -109,8 +109,12 @@ export function ReaderDataProvider({
   );
 }
 
+export function useOptionalReaderBaseUrl() {
+  return useContext(ReaderBaseUrlContext);
+}
+
 export function useReaderBaseUrl() {
-  const value = useContext(ReaderBaseUrlContext);
+  const value = useOptionalReaderBaseUrl();
   if (!value)
     throw new Error("Reader endpoint requires the shared public shell");
   return value;

@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, type HTMLAttributes, type RefObject } from "react";
 
+import { mountShortcodeScripts } from "@/core/shortcodes/scripts";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import { ThemeCodeFont } from "@/core/fonts/provider";
 import { useCodeTools } from "../hooks/use-code-tools";
+import { ShortcodeRegions } from "./shortcode-regions";
 import { ContentResources } from "./content-resources";
 import {
   codeFontFace,
@@ -20,6 +22,7 @@ type ContentMarkupViewProps = Omit<
   features: ContentFeatures;
   containerRef?: RefObject<HTMLDivElement | null>;
   codeTools?: boolean;
+  preview?: boolean;
 };
 
 /** Shared safe body rendering and on-demand code/formula enhancement. */
@@ -28,6 +31,7 @@ export function ContentMarkupView({
   features,
   containerRef,
   codeTools = true,
+  preview = false,
   className = "",
   style,
   ...attributes
@@ -37,6 +41,11 @@ export function ContentMarkupView({
   const preferences = useCodePreferences();
   const tools = useCodeTools(root, html, preferences);
   const font = features.code ? codeFontFace(preferences) : "";
+
+  useEffect(() => {
+    const container = root.current;
+    if (container && !preview) return mountShortcodeScripts(container);
+  }, [html, preview, root]);
 
   useEffect(() => {
     const container = root.current;
@@ -137,6 +146,7 @@ export function ContentMarkupView({
         }}
         dangerouslySetInnerHTML={{ __html: html }}
       />
+      {!preview && <ShortcodeRegions root={root} html={html} />}
       {codeTools ? tools : null}
     </>
   );
