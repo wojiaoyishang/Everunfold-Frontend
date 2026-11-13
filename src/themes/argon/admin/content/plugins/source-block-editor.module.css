@@ -14,7 +14,7 @@
   min-width: 0;
   width: 94px;
 }
-.source .tools :global(.ui-select-trigger) {
+.tools :global(.ui-select-trigger) {
   min-height: 32px;
   padding: 3px 7px;
   font-size: 12px;
@@ -27,7 +27,7 @@
   padding: 0 6px;
   border-inline: 1px solid var(--admin-border);
 }
-.source .tool {
+.tools .tool {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -50,20 +50,20 @@
   height: 18px;
   flex-shrink: 0;
 }
-.source .tool:hover:not(:disabled),
+.tools .tool:hover:not(:disabled),
 .statusButton:hover {
   background: var(--admin-subtle);
   color: var(--admin-accent);
 }
-.source .tool:active:not(:disabled),
+.tools .tool:active:not(:disabled),
 .statusButton:active {
   transform: translateY(1px);
 }
-.source .tool:disabled {
+.tools .tool:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
-.source .tool[aria-pressed="true"],
+.tools .tool[aria-pressed="true"],
 .statusButton[aria-expanded="true"] {
   color: var(--admin-accent);
   background: var(--admin-accent-soft);
@@ -73,6 +73,9 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 2px;
+}
+:global([data-shared-editor-toolbar]) .toolGroup {
+  display: contents;
 }
 .statusButton {
   display: inline-flex;
@@ -116,7 +119,7 @@
 }
 
 @media (max-width: 600px) {
-  .source .tool {
+  .tools .tool {
     width: var(--editor-tool-width, 34px);
     min-width: var(--editor-tool-width, 34px);
     height: 34px;

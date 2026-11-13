@@ -11,6 +11,7 @@ import {
   type Ref,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import type { Extension } from "@codemirror/state";
 import type { SharedSource } from "@/core/collaboration/editor-binding";
 import type { UploadEntry } from "@/core/media/upload-queue";
@@ -74,6 +75,7 @@ export function SourceBlockEditor({
   uploadStatus,
   statusTarget,
   hideStatusBar,
+  toolbarTarget,
   ...props
 }: BlockEditorProps & {
   language: Extension;
@@ -81,6 +83,7 @@ export function SourceBlockEditor({
   actions: readonly SourceAction[];
   inserts: readonly SourceAction[];
   shortcuts: readonly SourceShortcut[];
+  toolbarTarget?: HTMLElement | null;
 }) {
   void _modeControls;
   const id = useId();
@@ -123,49 +126,52 @@ export function SourceBlockEditor({
     format === "markdown"
       ? (/^\s{0,3}(#{1,6})\s/.exec(currentLine)?.[1].length ?? 0)
       : Number(/^\s*<h([1-6])(?:\s|>)/i.exec(currentLine)?.[1] ?? 0);
+  const toolbar = toolbarTarget !== null && (
+    <SourceToolbar
+      label={props.label}
+      grouped={Boolean(toolbarTarget)}
+      disabled={props.disabled}
+      format={format}
+      heading={heading}
+      actions={actions}
+      inserts={inserts}
+      onMedia={props.onMedia}
+      onShortcode={props.onShortcode}
+      onUpload={props.onUpload}
+      onFeature={(kind) => {
+        let range = input.current?.selection() ?? { start: 0, end: 0 };
+        const existing =
+          kind === "code"
+            ? sourceCodeSnippet(props.value, range, format)
+            : undefined;
+        if (existing) {
+          range = existing.range;
+          input.current?.select(range);
+        }
+        const insert = input.current?.captureInsertion();
+        return {
+          initial: existing?.initial ?? {
+            source: props.value.slice(range.start, range.end),
+          },
+          apply: (value) => {
+            const block = kind === "code" || value.display;
+            const leading = !existing && block && range.start > 0 ? "\n\n" : "";
+            const trailing = existing
+              ? existing.suffix
+              : block && range.end < props.value.length
+                ? "\n\n"
+                : "";
+            insert?.(leading + featureSource(kind, value, format) + trailing);
+          },
+        };
+      }}
+      onCommand={(command) => input.current?.run(command)}
+      onIndent={(direction) => input.current?.indent(direction)}
+    />
+  );
   return (
     <div className={styles.source} data-format={format}>
-      <SourceToolbar
-        label={props.label}
-        disabled={props.disabled}
-        format={format}
-        heading={heading}
-        actions={actions}
-        inserts={inserts}
-        onMedia={props.onMedia}
-        onShortcode={props.onShortcode}
-        onUpload={props.onUpload}
-        onFeature={(kind) => {
-          let range = input.current?.selection() ?? { start: 0, end: 0 };
-          const existing =
-            kind === "code"
-              ? sourceCodeSnippet(props.value, range, format)
-              : undefined;
-          if (existing) {
-            range = existing.range;
-            input.current?.select(range);
-          }
-          const insert = input.current?.captureInsertion();
-          return {
-            initial: existing?.initial ?? {
-              source: props.value.slice(range.start, range.end),
-            },
-            apply: (value) => {
-              const block = kind === "code" || value.display;
-              const leading =
-                !existing && block && range.start > 0 ? "\n\n" : "";
-              const trailing = existing
-                ? existing.suffix
-                : block && range.end < props.value.length
-                  ? "\n\n"
-                  : "";
-              insert?.(leading + featureSource(kind, value, format) + trailing);
-            },
-          };
-        }}
-        onCommand={(command) => input.current?.run(command)}
-        onIndent={(direction) => input.current?.indent(direction)}
-      />
+      {toolbarTarget ? createPortal(toolbar, toolbarTarget) : toolbar}
       {uploadStatus}
       <SourceSearchPanel
         id={id}

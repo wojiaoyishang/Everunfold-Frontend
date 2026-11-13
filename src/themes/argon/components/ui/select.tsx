@@ -27,6 +27,7 @@ export function Select({
   programOptions = false,
   id: providedId,
   "aria-describedby": describedBy,
+  "aria-required": required,
 }: {
   name: string;
   label: string;
@@ -39,6 +40,7 @@ export function Select({
   programOptions?: boolean;
   id?: string;
   "aria-describedby"?: string;
+  "aria-required"?: boolean;
 }) {
   const t = useT();
   const label = t(sourceLabel);
@@ -158,6 +160,7 @@ export function Select({
         aria-haspopup="listbox"
         aria-controls={`${id}-options`}
         aria-describedby={describedBy}
+        aria-required={required}
         aria-activedescendant={
           open && active >= 0 ? `${id}-option-${active}` : undefined
         }

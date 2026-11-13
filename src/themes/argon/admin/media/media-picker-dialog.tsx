@@ -1,5 +1,5 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 
 import { useId, useState } from "react";
 import type { MediaItem, MediaQuery } from "@/core/contracts/settings";
@@ -8,29 +8,56 @@ import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { MediaBrowser } from "./media-browser";
 import { MediaPickerInspector } from "./media-picker-inspector";
+import { mediaReferenceId } from "@/core/media/references";
 import styles from "./media-picker.module.css";
 
-/** All media callers stage a choice in the same full-window picker before confirming. */
-export function MediaPickerDialog({
-  title = "选择媒体",
-  kind = "all",
-  value,
-  confirmLabel = "使用此文件",
-  onPick,
-  onClose,
-}: {
+type MediaPickerProps = {
   title?: string;
   kind?: NonNullable<MediaQuery["kind"]>;
-  value?: string;
   confirmLabel?: string;
-  onPick: (item: MediaItem) => void;
   onClose: () => void;
-}) {
+} & (
+  | { multiple?: false; value?: string; onPick: (item: MediaItem) => void }
+  | {
+      multiple: true;
+      maxSelection?: number;
+      excludedIds?: readonly string[];
+      onPick: (items: MediaItem[]) => void;
+    }
+);
+
+/** All media callers stage a choice in the same full-window picker before confirming. */
+export function MediaPickerDialog(props: MediaPickerProps) {
+  const {
+    title = "选择媒体",
+    kind = "all",
+    confirmLabel = props.multiple ? "添加所选媒体" : "使用此文件",
+    onClose,
+  } = props;
   const id = useId();
+  const t = useT();
   const [tab, setTab] = useState<"upload" | "library">("library");
-  const [selected, setSelected] = useState<MediaItem | null>(null);
-  const [result, setResult] = useState<MediaItem | null>(null);
+  const [selected, setSelected] = useState<MediaItem[]>([]);
+  const [confirmed, setConfirmed] = useState(false);
   const [closing, setClosing] = useState(false);
+  const current = selected.at(-1);
+  const maxSelection = props.multiple ? props.maxSelection : undefined;
+  const excludedIds = new Set(props.multiple ? props.excludedIds : undefined);
+  const full = maxSelection !== undefined && selected.length >= maxSelection;
+  const pick = (item: MediaItem) => {
+    if (!props.multiple) {
+      setSelected([item]);
+      return;
+    }
+    if (excludedIds.has(mediaReferenceId(item.id))) return;
+    setSelected((items) => {
+      if (items.some(({ id }) => id === item.id))
+        return items.filter(({ id }) => id !== item.id);
+      if (maxSelection !== undefined && items.length >= maxSelection)
+        return items;
+      return [...items, item];
+    });
+  };
   return (
     <Modal
       title={title}
@@ -39,7 +66,10 @@ export function MediaPickerDialog({
       closing={closing}
       onClose={() => setClosing(true)}
       onExited={() => {
-        if (result) onPick(result);
+        if (confirmed && current) {
+          if (props.multiple) props.onPick(selected);
+          else props.onPick(current);
+        }
         onClose();
       }}
     >
@@ -87,19 +117,72 @@ export function MediaPickerDialog({
           className={styles.workspace}
           role="tabpanel"
           aria-labelledby={`${id}-${tab}`}
-          data-selected={Boolean(selected)}
+          data-selected={Boolean(current)}
         >
           <div className={styles.files}>
             <MediaBrowser
               kind={kind}
-              value={selected?.id ?? value}
+              value={props.multiple ? undefined : (current?.id ?? props.value)}
+              selection={
+                props.multiple
+                  ? {
+                      selectedIds: new Set(selected.map(({ id }) => id)),
+                      excludedIds,
+                      full,
+                    }
+                  : undefined
+              }
               pickerTab={tab}
-              onSelect={setSelected}
+              onSelect={pick}
             />
           </div>
           <aside className={styles.inspector} aria-label="所选附件资料">
-            {selected ? (
-              <MediaPickerInspector key={selected.id} item={selected} />
+            {current ? (
+              <>
+                {props.multiple && (
+                  <section
+                    className={styles.selectedFiles}
+                    aria-labelledby={id + "-selected"}
+                  >
+                    <h3 id={id + "-selected"}>
+                      <UiText text="所选文件" />
+                    </h3>
+                    <ol>
+                      {selected.map((item) => (
+                        <li key={item.id}>
+                          <span title={item.title || item.label}>
+                            {item.title || item.label}
+                          </span>
+                          <Button
+                            className="admin-icon-button"
+                            aria-label={t("取消选择 {name}", {
+                              name: item.title || item.label,
+                            })}
+                            onClick={(event) => {
+                              const row = event.currentTarget.closest("li");
+                              const next =
+                                row?.nextElementSibling ??
+                                row?.previousElementSibling;
+                              const fallback = event.currentTarget
+                                .closest("dialog")
+                                ?.querySelector<HTMLElement>(
+                                  '[role="tab"][aria-selected="true"]',
+                                );
+                              (
+                                next?.querySelector("button") ?? fallback
+                              )?.focus();
+                              pick(item);
+                            }}
+                          >
+                            <Icon name="close" />
+                          </Button>
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+                )}
+                <MediaPickerInspector key={current.id} item={current} />
+              </>
             ) : (
               <div className={styles.empty}>
                 <Icon name="image" />
@@ -112,10 +195,20 @@ export function MediaPickerDialog({
         </div>
         <footer className={styles.footer}>
           <div className={styles.selection} role="status">
-            <Icon name={selected ? "check" : "image"} />
+            <Icon name={current ? "check" : "image"} />
             <span>
-              {selected ? (
-                `已选择：${selected.title || selected.label}`
+              {maxSelection !== undefined ? (
+                <UiText
+                  text="已选择 {count} / {limit} 个文件"
+                  values={{ count: selected.length, limit: maxSelection }}
+                />
+              ) : props.multiple && current ? (
+                <UiText
+                  text="已选择 {count} 个文件"
+                  values={{ count: selected.length }}
+                />
+              ) : current ? (
+                `已选择：${current.title || current.label}`
               ) : (
                 <UiText text="尚未选择文件" />
               )}
@@ -127,13 +220,13 @@ export function MediaPickerDialog({
             </Button>
             <Button
               className="admin-button admin-button-primary"
-              disabled={!selected}
+              disabled={!current}
               onClick={() => {
-                setResult(selected);
+                setConfirmed(true);
                 setClosing(true);
               }}
             >
-              {confirmLabel}
+              <UiText text={confirmLabel} />
             </Button>
           </div>
         </footer>

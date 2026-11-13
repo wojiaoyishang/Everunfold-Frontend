@@ -3,11 +3,56 @@
   gap: 24px;
   min-width: 0;
 }
+.pickerDialog:global(.admin-library-modal) {
+  width: min(660px, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  max-height: min(760px, calc(100dvh - 24px));
+  padding: 0;
+  overflow: hidden;
+}
+.pickerDialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+.pickerDialog > :global(.admin-library-modal-heading) {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--admin-border);
+}
 .picker {
   display: grid;
-  gap: 18px;
-  padding: 24px;
+  align-content: start;
+  gap: 14px;
+  padding: 16px 20px;
   min-width: 0;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.pickerMedia,
+.pickerActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.pickerMedia {
+  justify-content: space-between;
+}
+.pickerMedia > button[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pickerActions {
+  flex-shrink: 0;
+  justify-content: flex-end;
+  padding: 12px 20px;
+  border-top: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+}
+.picker .invocation {
+  min-height: 64px;
 }
 .toolbar,
 .actions,
@@ -132,7 +177,13 @@
 .fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 12px 16px;
+}
+.fields > .field {
+  grid-row: span 2;
+  grid-template-rows: subgrid;
+  row-gap: 6px;
+  align-items: start;
 }
 .field {
   display: grid;
@@ -141,23 +192,43 @@
   font-size: 13px;
   min-width: 0;
 }
-.field > span {
+.field > :is(span, label, h3) {
+  margin: 0;
+  font-size: inherit;
   font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.field > label[data-required="true"]::after {
+  content: " *";
+  color: var(--admin-danger);
+  font-weight: 600;
 }
 .field :global(.ui-input),
-.field :global(.ui-textarea) {
+.field :global(.ui-textarea),
+.field :global(.ui-select) {
+  min-width: 0;
   width: 100%;
 }
 .toolbar :global(.ui-input),
 .field :global(.ui-input),
-.field :global(.ui-textarea) {
+.field :global(.ui-textarea),
+.field :global(.ui-select-trigger) {
   min-height: 40px;
   padding: 9px 12px;
   border: 1px solid var(--admin-border);
   border-radius: 6px;
   background: var(--admin-surface);
   color: var(--admin-text);
+  font-size: inherit;
   line-height: 1.6;
+}
+.field :global(.ui-input),
+.field :global(.ui-select-trigger) {
+  height: 42px;
+}
+.field :global(.ui-select-trigger:hover),
+.field :global(.ui-select-trigger[aria-expanded="true"]) {
+  border-color: var(--admin-accent);
 }
 .workspace {
   display: grid;
@@ -246,6 +317,11 @@
   }
   .editor {
     padding: 16px;
+  }
+  .picker,
+  .pickerActions,
+  .pickerDialog > :global(.admin-library-modal-heading) {
+    padding-inline: 14px;
   }
   .cardHeading,
   .cardBody {

@@ -1,4 +1,5 @@
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
+import { useId } from "react";
 import type { ShortcodeParameter } from "@/core/contracts/settings";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
@@ -16,6 +17,7 @@ export function ShortcodeParameters({
   onChange: (parameters: ShortcodeParameter[]) => void;
   disabled: boolean;
 }) {
+  const id = useId();
   const update = (index: number, patch: Partial<ShortcodeParameter>) =>
     onChange(
       value.map((item, at) => (at === index ? { ...item, ...patch } : item)),
@@ -79,34 +81,40 @@ export function ShortcodeParameters({
                 }
               />
             </label>
-            <Select
-              programOptions
-              name={`parameter-${index}-type`}
-              label={`参数 ${index + 1} 类型`}
-              value={parameter.type ?? "text"}
-              disabled={disabled}
-              options={[
-                { value: "text", label: "文字" },
-                { value: "url", label: "链接" },
-                { value: "select", label: "选项" },
-                { value: "number", label: "数字" },
-                { value: "boolean", label: "布尔值" },
-              ]}
-              onValueChange={(type) =>
-                update(index, {
-                  type: type as ShortcodeParameter["type"],
-                  options: type === "select" ? ["选项一", "选项二"] : [],
-                  default:
-                    type === "select"
-                      ? "选项一"
-                      : type === "boolean"
-                        ? "true"
-                        : type === "number"
-                          ? "0"
-                          : "",
-                })
-              }
-            />
+            <div className={styles.field}>
+              <label htmlFor={`${id}-type-${index}`}>
+                <UiText text="参数类型" />
+              </label>
+              <Select
+                programOptions
+                id={`${id}-type-${index}`}
+                name={`parameter-${index}-type`}
+                label="参数类型"
+                value={parameter.type ?? "text"}
+                disabled={disabled}
+                options={[
+                  { value: "text", label: "文字" },
+                  { value: "url", label: "链接" },
+                  { value: "select", label: "选项" },
+                  { value: "number", label: "数字" },
+                  { value: "boolean", label: "布尔值" },
+                ]}
+                onValueChange={(type) =>
+                  update(index, {
+                    type: type as ShortcodeParameter["type"],
+                    options: type === "select" ? ["选项一", "选项二"] : [],
+                    default:
+                      type === "select"
+                        ? "选项一"
+                        : type === "boolean"
+                          ? "true"
+                          : type === "number"
+                            ? "0"
+                            : "",
+                  })
+                }
+              />
+            </div>
             <label className={styles.field}>
               <span>
                 <UiText text="默认值" />
@@ -182,39 +190,52 @@ export function ShortcodeValues({
   values: Record<string, string>;
   onChange: (values: Record<string, string>) => void;
 }) {
+  const id = useId();
+  const t = useT();
+  if (!parameters.length) return null;
   return (
     <div className={styles.fields}>
-      {parameters.map((parameter) =>
-        parameter.type === "select" || parameter.type === "boolean" ? (
-          <Select
-            key={parameter.name}
-            name={`sample-${parameter.name}`}
-            label={parameter.label}
-            value={values[parameter.name] ?? parameter.default ?? ""}
-            options={(parameter.type === "boolean"
-              ? ["true", "false"]
-              : (parameter.options ?? [])
-            ).map((value) => ({ value, label: value }))}
-            onValueChange={(value) =>
-              onChange({ ...values, [parameter.name]: value })
-            }
-          />
-        ) : (
-          <label className={styles.field} key={parameter.name}>
-            <span>
-              {parameter.label}
-              {parameter.required ? " *" : ""}
-            </span>
-            <TextField
-              value={values[parameter.name] ?? parameter.default ?? ""}
-              maxLength={1000}
-              onChange={(event) =>
-                onChange({ ...values, [parameter.name]: event.target.value })
-              }
-            />
-          </label>
-        ),
-      )}
+      {parameters.map((parameter) => {
+        const fieldId = `${id}-${parameter.name}`;
+        const label = parameter.label || parameter.name;
+        const choice =
+          parameter.type === "select" || parameter.type === "boolean";
+        const value = values[parameter.name] ?? parameter.default ?? "";
+        const setValue = (next: string) =>
+          onChange({ ...values, [parameter.name]: next });
+        return (
+          <div className={styles.field} key={parameter.name}>
+            <label
+              htmlFor={fieldId}
+              data-required={choice && parameter.required}
+            >
+              {t(label)}
+            </label>
+            {choice ? (
+              <Select
+                id={fieldId}
+                name={fieldId}
+                label={label}
+                aria-required={parameter.required}
+                value={value}
+                options={(parameter.type === "boolean"
+                  ? ["true", "false"]
+                  : (parameter.options ?? [])
+                ).map((value) => ({ value, label: value }))}
+                onValueChange={setValue}
+              />
+            ) : (
+              <TextField
+                id={fieldId}
+                required={parameter.required}
+                value={value}
+                maxLength={1000}
+                onChange={(event) => setValue(event.target.value)}
+              />
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

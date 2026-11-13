@@ -1,3 +1,49 @@
+.toolbar {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 3px 8px;
+  min-width: 0;
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--admin-border);
+  background: color-mix(in srgb, var(--admin-surface) 96%, var(--admin-text));
+}
+.toolbarPanes {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  min-height: 34px;
+  padding: 2px;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: var(--admin-surface);
+}
+.toolbarPanes > button {
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--admin-muted);
+  font-size: 12px;
+  white-space: nowrap;
+  transition:
+    background var(--admin-motion-fast),
+    color var(--admin-motion-fast);
+}
+.toolbarPanes > button:hover,
+.toolbarPanes > button[aria-pressed="true"] {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+/* Let the existing controls wrap across the full bar in split view. */
+.toolbarTools {
+  display: contents;
+}
+.toolbarTools > *,
+.toolbarTools > fieldset > *,
+.toolbarTools [role="group"],
+.toolbarTools [data-toolbar-row] {
+  display: contents;
+}
 .panes {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -22,7 +68,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 .panes[data-mode="split"] > .visualPane {
-  max-height: 645px;
+  max-height: 540px;
   overflow: auto;
   scrollbar-gutter: stable;
 }

@@ -5,18 +5,23 @@ import type { UploadEntry } from "@/core/media/upload-queue";
 import { Button } from "./primitives";
 import { Icon } from "../icon";
 import { formatBytes } from "@/core/media/image-editor";
+export type UploadSelectionState =
+  "selected" | "excluded" | "limit" | undefined;
+
 export function UploadQueueView<T extends { reused?: boolean }>({
   items,
   onRetry,
   onCancel,
   onClear,
   onSelect,
+  selectionState,
 }: {
   items: UploadEntry<T>[];
   onRetry: (id: string) => void;
   onCancel: (id: string) => void;
   onClear: () => void;
   onSelect?: (result: T) => void;
+  selectionState?: (result: T) => UploadSelectionState;
 }) {
   if (!items.length) return null;
   const complete = items.filter((item) => item.state === "done").length;
@@ -39,6 +44,9 @@ export function UploadQueueView<T extends { reused?: boolean }>({
       </div>
       <div className="admin-upload-entries">
         {items.map((item) => {
+          const selected = item.result
+            ? selectionState?.(item.result)
+            : undefined;
           const active = ["queued", "uploading", "saving"].includes(item.state);
           const label =
             item.state === "done"
@@ -102,9 +110,18 @@ export function UploadQueueView<T extends { reused?: boolean }>({
               ) : item.state === "done" && onSelect && item.result ? (
                 <Button
                   className="admin-upload-text-button"
+                  disabled={selected === "excluded" || selected === "limit"}
                   onClick={() => onSelect(item.result!)}
                 >
-                  <UiText text="选择" />
+                  <UiText
+                    text={
+                      selected === "selected"
+                        ? "取消选择"
+                        : selected === "excluded"
+                          ? "已添加"
+                          : "选择"
+                    }
+                  />
                 </Button>
               ) : (
                 item.retryable && (

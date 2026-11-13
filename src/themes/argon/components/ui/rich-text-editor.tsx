@@ -9,6 +9,7 @@ import {
   type Ref,
   type ReactNode,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   EditorContent,
   useEditor,
@@ -99,6 +100,7 @@ interface RichTextEditorProps {
   editorRef?: Ref<CodeEditorHandle>;
   media?: Record<string, MediaURL>;
   toolbar: (editor: Editor) => ReactNode;
+  toolbarTarget?: HTMLElement | null;
   afterToolbar?: ReactNode;
   uploadEntries?: UploadEntry<MediaItem>[];
   format?: "html" | "markdown";
@@ -123,6 +125,7 @@ export function RichTextEditor({
   editorRef,
   media = {},
   toolbar,
+  toolbarTarget,
   format = "html",
   afterToolbar,
   uploadEntries,
@@ -562,6 +565,11 @@ export function RichTextEditor({
     }),
     [editor, disabled, mapSelection, readSource],
   );
+  const tools = toolbarTarget !== null && hasLiveEditor(editor) && (
+    <fieldset disabled={disabled} className={styles.tools}>
+      {toolbar(editor)}
+    </fieldset>
+  );
   return (
     <div
       className={`${styles.root} ${presenceStyles.presence}`}
@@ -585,11 +593,7 @@ export function RichTextEditor({
           />
         </>
       )}
-      {editor?.extensionManager && (
-        <fieldset disabled={disabled} className={styles.tools}>
-          {toolbar(editor)}
-        </fieldset>
-      )}
+      {toolbarTarget ? createPortal(tools, toolbarTarget) : tools}
       {afterToolbar}
       {problem && (
         <p className={styles.sourceWarning} role="alert">

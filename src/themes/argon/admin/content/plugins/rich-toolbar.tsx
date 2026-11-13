@@ -21,6 +21,7 @@ export function RichToolbar({
   editor,
   fonts = [],
   markdown = false,
+  grouped = false,
   emailTemplate = false,
   onMedia,
   onShortcode,
@@ -29,6 +30,7 @@ export function RichToolbar({
   editor: Editor;
   fonts?: FontAsset[];
   markdown?: boolean;
+  grouped?: boolean;
   emailTemplate?: boolean;
   onMedia?: (kind: "image" | "all" | "video") => void;
   onShortcode?: () => void;
@@ -84,10 +86,10 @@ export function RichToolbar({
   return (
     <div
       className={styles.toolbar}
-      role="toolbar"
+      role={grouped ? "group" : "toolbar"}
       aria-label={markdown ? "Markdown 排版工具" : "HTML 排版工具"}
     >
-      <div className={styles.toolbarRow}>
+      <div className={styles.toolbarRow} data-toolbar-row>
         <Select
           name="html-heading"
           className={styles.heading}

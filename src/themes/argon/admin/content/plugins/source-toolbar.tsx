@@ -29,6 +29,7 @@ const headingOptions = [
 
 export function SourceToolbar({
   label,
+  grouped = false,
   disabled,
   format,
   heading,
@@ -42,6 +43,7 @@ export function SourceToolbar({
   onFeature,
 }: {
   label: string;
+  grouped?: boolean;
   disabled: boolean;
   format: "markdown" | "html";
   heading: number;
@@ -73,7 +75,7 @@ export function SourceToolbar({
   return (
     <div
       className={styles.tools}
-      role="toolbar"
+      role={grouped ? "group" : "toolbar"}
       aria-label={formatLabel + " 工具栏"}
     >
       <Select

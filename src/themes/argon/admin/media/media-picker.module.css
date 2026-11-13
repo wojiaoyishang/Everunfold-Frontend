@@ -108,6 +108,86 @@
   font-size: 13px;
   font-weight: 600;
 }
+.selectedFiles {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.selectedFiles > ol {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  max-height: 180px;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+.selectedFiles li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 2px 6px 2px 10px;
+  border-radius: 5px;
+  background: var(--admin-subtle);
+  font-size: 12px;
+}
+.selectedFiles li > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.selectedFiles li > button {
+  flex-shrink: 0;
+}
+.selectionMark,
+.alreadyAdded {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--admin-surface);
+  color: var(--admin-text);
+  border: 1px solid var(--admin-border);
+  border-radius: 4px;
+}
+.dialog :global(.admin-media-tile:disabled) {
+  cursor: not-allowed;
+}
+.dialog :global(.admin-media-tile:disabled:hover) {
+  border-color: var(--admin-border);
+  transform: none;
+}
+.selectionMark {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  transition:
+    background var(--admin-motion-fast),
+    border-color var(--admin-motion-fast);
+}
+.selectionMark > svg {
+  width: 15px;
+  height: 15px;
+}
+[aria-pressed="true"] > .selectionMark {
+  background: var(--admin-accent);
+  border-color: var(--admin-accent);
+  color: var(--admin-on-accent);
+}
+.alreadyAdded {
+  padding: 2px 6px;
+  font-size: 11px;
+}
+:global(.admin-media-list) :is(.selectionMark, .alreadyAdded) {
+  top: 5px;
+}
+:global(.admin-media-list) .selectionMark {
+  left: 53px;
+  right: auto;
+}
 .empty {
   display: grid;
   justify-items: center;

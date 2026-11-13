@@ -223,15 +223,30 @@ test("an applied backend definition keeps template ownership when a frontend nam
 
 test("catalog preview preserves a frontend plugin's sample renderer", () => {
   const gallery = frontendShortcodes().find((item) => item.name === "gallery")!;
-  const result = renderContent(
-    content({
-      content: [
-        { id: "preview", type: "markdown", content: "{{< gallery >}}" },
-      ],
-    }),
-    previewShortcodeDefinitions(gallery, backendShortcodes),
-    { shortcodePreview: true },
-  );
-  assert.deepEqual(result.diagnostics, []);
-  assert.match(result.html, /class="ef-gallery ef-gallery-sample"/);
+  for (const [attributes, columns] of [
+    ["", 3],
+    [' columns="2"', 2],
+    [' columns="4"', 4],
+  ] as const) {
+    const result = renderContent(
+      content({
+        content: [
+          {
+            id: "preview",
+            type: "markdown",
+            content: `{{< gallery${attributes} >}}`,
+          },
+        ],
+      }),
+      previewShortcodeDefinitions(gallery, backendShortcodes),
+      { shortcodePreview: true },
+    );
+    assert.deepEqual(result.diagnostics, []);
+    const classes =
+      columns === 3
+        ? "ef-gallery ef-gallery-sample"
+        : `ef-gallery ef-gallery-sample ef-gallery-${columns}`;
+    assert.ok(result.html.includes(`class="${classes}"`));
+    assert.equal([...result.html.matchAll(/<span><\/span>/g)].length, columns);
+  }
 });

@@ -1,7 +1,7 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import type {
   ShortcodeItem,
   ShortcodeSource,
@@ -60,6 +60,7 @@ export function ShortcodeEditor({
   onDirtyChange: (dirty: boolean) => void;
   definitions?: readonly PublicShortcode[];
 }) {
+  const kindId = useId();
   const actions = useShortcodeActions();
   const [source, setSource] = useState<ShortcodeSource>(
     item?.source ?? initial,
@@ -218,20 +219,26 @@ export function ShortcodeEditor({
             onChange={(event) => update({ description: event.target.value })}
           />
         </label>
-        <Select
-          programOptions
-          name="shortcode-kind"
-          label="调用类型"
-          value={source.kind ?? "container"}
-          disabled={!writable || busy || Boolean(item?.applied_revision)}
-          options={[
-            { value: "container", label: "容器 · 包含正文" },
-            { value: "leaf", label: "单体 · 无正文" },
-          ]}
-          onValueChange={(kind) =>
-            update({ kind: kind as "container" | "leaf" })
-          }
-        />
+        <div className={styles.field}>
+          <label htmlFor={kindId}>
+            <UiText text="调用类型" />
+          </label>
+          <Select
+            programOptions
+            id={kindId}
+            name="shortcode-kind"
+            label="调用类型"
+            value={source.kind ?? "container"}
+            disabled={!writable || busy || Boolean(item?.applied_revision)}
+            options={[
+              { value: "container", label: "容器 · 包含正文" },
+              { value: "leaf", label: "单体 · 无正文" },
+            ]}
+            onValueChange={(kind) =>
+              update({ kind: kind as "container" | "leaf" })
+            }
+          />
+        </div>
       </div>
       <div className={styles.workspace}>
         <div className={styles.source}>

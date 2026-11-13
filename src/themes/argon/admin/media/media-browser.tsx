@@ -16,16 +16,26 @@ import { MediaUploadArea } from "./media-upload-area";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { formatBytes } from "@/core/media/image-editor";
+import { mediaReferenceId } from "@/core/media/references";
+import type { UploadSelectionState } from "../../components/ui/upload-queue";
+import styles from "./media-picker.module.css";
+
 export function MediaBrowser({
   kind = "all",
   value,
   onSelect,
   pickerTab,
+  selection,
 }: {
   kind?: NonNullable<MediaQuery["kind"]>;
   value?: string;
   onSelect?: (item: MediaItem) => void;
   pickerTab?: "upload" | "library";
+  selection?: {
+    selectedIds: ReadonlySet<string>;
+    excludedIds: ReadonlySet<string>;
+    full: boolean;
+  };
 }) {
   const [view, setView] = useState<"grid" | "list">("grid");
   const [filter, setFilter] = useState(kind);
@@ -35,8 +45,14 @@ export function MediaBrowser({
   const library = useMediaLibrary(requestKind, trash);
   const [selected, setSelected] = useState<MediaItem | null>(null);
   const pick = (item: MediaItem) => {
-    setSelected(item);
-    onSelect?.(item);
+    if (onSelect) onSelect(item);
+    else setSelected(item);
+  };
+  const selectionState = (item: MediaItem): UploadSelectionState => {
+    if (selection?.selectedIds.has(item.id)) return "selected";
+    if (selection?.excludedIds.has(mediaReferenceId(item.id)))
+      return "excluded";
+    if (selection?.full) return "limit";
   };
   const items = library.items.filter(
     (item) => filter === "all" || item.kind === filter,
@@ -160,6 +176,7 @@ export function MediaBrowser({
         onCancel={(id) => library.queue.cancel(id)}
         onClear={() => library.queue.clearFinished()}
         onSelect={onSelect ? pick : undefined}
+        selectionState={selection ? selectionState : undefined}
       />
 
       {pickerTab !== "upload" && (
@@ -195,48 +212,66 @@ export function MediaBrowser({
             className={`admin-media-grid${view === "list" ? " admin-media-list" : ""}`}
             aria-busy={library.loading}
           >
-            {items.map((item) => (
-              <Button
-                key={item.id}
-                className="admin-media-tile"
-                aria-label={`${onSelect ? "选择媒体" : "查看附件"} ${item.title || item.label}`}
-                aria-pressed={(value ?? selected?.id) === item.id}
-                onClick={() => pick(item)}
-              >
-                <MediaPreview
-                  key={item.url}
-                  url={item.url}
-                  kind={item.kind}
-                  label={item.label}
-                  deleted={item.deleted}
-                />
-                <span
-                  className="admin-media-tile-title"
-                  title={item.title || item.label}
+            {items.map((item) => {
+              const state = selectionState(item);
+              const pressed = selection
+                ? state === "selected"
+                : (value ?? selected?.id) === item.id;
+              return (
+                <Button
+                  key={item.id}
+                  className="admin-media-tile"
+                  aria-label={`${onSelect ? "选择媒体" : "查看附件"} ${item.title || item.label}`}
+                  aria-pressed={pressed}
+                  disabled={state === "excluded" || state === "limit"}
+                  aria-description={state === "excluded" ? "已添加" : undefined}
+                  onClick={() => pick(item)}
                 >
-                  {item.title || item.label}
-                </span>
-                <span className="admin-media-tile-meta">
-                  {item.deleted ? (
-                    item.purge_pending ? (
-                      <UiText text="待清理" />
+                  <MediaPreview
+                    key={item.url}
+                    url={item.url}
+                    kind={item.kind}
+                    label={item.label}
+                    deleted={item.deleted}
+                  />
+                  <span
+                    className="admin-media-tile-title"
+                    title={item.title || item.label}
+                  >
+                    {item.title || item.label}
+                  </span>
+                  <span className="admin-media-tile-meta">
+                    {item.deleted ? (
+                      item.purge_pending ? (
+                        <UiText text="待清理" />
+                      ) : (
+                        <UiText text="已删除" />
+                      )
+                    ) : item.kind === "image" ? (
+                      <UiText text="图片" />
+                    ) : item.kind === "video" ? (
+                      <UiText text="视频" />
                     ) : (
-                      <UiText text="已删除" />
-                    )
-                  ) : item.kind === "image" ? (
-                    <UiText text="图片" />
-                  ) : item.kind === "video" ? (
-                    <UiText text="视频" />
+                      <UiText text="文件" />
+                    )}{" "}
+                    · {formatBytes(item.size)}
+                  </span>
+                  {state === "excluded" ? (
+                    <span className={styles.alreadyAdded} aria-hidden="true">
+                      <UiText text="已添加" />
+                    </span>
+                  ) : selection ? (
+                    <span className={styles.selectionMark} aria-hidden="true">
+                      {pressed && <Icon name="check" />}
+                    </span>
                   ) : (
-                    <UiText text="文件" />
-                  )}{" "}
-                  · {formatBytes(item.size)}
-                </span>
-                {(value ?? selected?.id) === item.id && (
-                  <Icon name="check" className="admin-media-selected" />
-                )}
-              </Button>
-            ))}
+                    pressed && (
+                      <Icon name="check" className="admin-media-selected" />
+                    )
+                  )}
+                </Button>
+              );
+            })}
           </div>
           {!items.length && (
             <p className="admin-library-empty">

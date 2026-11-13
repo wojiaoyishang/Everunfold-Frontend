@@ -44,9 +44,13 @@ export const gallery: PluginShortcode = {
     title: "选择画廊图片",
   },
   preview({ parameters }) {
-    return parameters.id
-      ? null
-      : '<div class="ef-gallery ef-gallery-sample" role="img" aria-label="图片画廊样式示例"><span></span><span></span><span></span></div>';
+    if (parameters.id) return null;
+    const columns =
+      parameters.columns === "2" || parameters.columns === "4"
+        ? Number(parameters.columns)
+        : 3;
+    const layout = columns === 3 ? "" : ` ef-gallery-${columns}`;
+    return `<div class="ef-gallery ef-gallery-sample${layout}" role="img" aria-label="图片画廊样式示例">${"<span></span>".repeat(columns)}</div>`;
   },
   render({ parameters, media }) {
     const ids = parameters.id

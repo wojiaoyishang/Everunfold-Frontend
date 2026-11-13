@@ -7,7 +7,9 @@ import {
   useSyncExternalStore,
 } from "react";
 import { createPortal } from "react-dom";
+import { UiText, useT } from "@/core/i18n/provider";
 import { markdownEditorLanguage as language } from "@/core/editor/markdown-language";
+import { Button } from "../../../components/ui/primitives";
 import { RichTextEditor } from "../../../components/ui/rich-text-editor";
 import { RichToolbar } from "./rich-toolbar";
 import { EditorViewToggle } from "./editor-view-toggle";
@@ -104,11 +106,19 @@ function subscribeSplitLayout(listener: () => void) {
 }
 const canSplitLayout = () => matchMedia(splitQuery).matches;
 const serverSplitLayout = () => false;
+const paneLabels = { source: "源码", visual: "可视化" } as const;
+type Pane = keyof typeof paneLabels;
+
 export default function MarkdownEditor(props: BlockEditorProps) {
+  const t = useT();
   const [preferredMode, setMode] = useState<"write" | "split" | "visual">(
     "write",
   );
   const [statusTarget, setStatusTarget] = useState<HTMLDivElement | null>(null);
+  const [toolbarTarget, setToolbarTarget] = useState<HTMLDivElement | null>(
+    null,
+  );
+  const [toolbarPane, setToolbarPane] = useState<Pane>("source");
   const wide = useSyncExternalStore(
     subscribeSplitLayout,
     canSplitLayout,
@@ -119,9 +129,9 @@ export default function MarkdownEditor(props: BlockEditorProps) {
     mode === "write" ? "visual" : mode === "visual" && wide ? "split" : "write";
   const source = useRef<CodeEditorHandle | null>(null);
   const visual = useRef<CodeEditorHandle | null>(null);
-  const focused = useRef<"source" | "visual">("source");
+  const focused = useRef<Pane>("source");
   const [selection, setSelection] = useState<{
-    pane: "source" | "visual";
+    pane: Pane;
     range: SourceSelection;
   }>();
   const panes = useRef<HTMLDivElement>(null),
@@ -131,10 +141,21 @@ export default function MarkdownEditor(props: BlockEditorProps) {
     mode === "visual" || (mode === "split" && focused.current === "visual")
       ? visual.current
       : source.current;
+  const activate = (pane: Pane) => {
+    focused.current = pane;
+    setToolbarPane(pane);
+  };
+  const targetFor = (pane: Pane) =>
+    mode === "split"
+      ? toolbarPane === pane
+        ? toolbarTarget
+        : null
+      : undefined;
   const switchView = (next: typeof mode) => {
     if (next === mode) return;
     const range = active()?.selection();
     const pane = next === "visual" ? "visual" : "source";
+    activate(pane);
     setSelection(range ? { pane, range } : undefined);
     setMode(next);
   };
@@ -193,6 +214,32 @@ export default function MarkdownEditor(props: BlockEditorProps) {
           </div>,
           props.modeControls,
         )}
+      {mode === "split" && (
+        <div
+          className={styles.toolbar}
+          role="toolbar"
+          aria-label={t("Markdown 共用工具栏")}
+          data-editor-local-control
+          data-shared-editor-toolbar
+        >
+          <div
+            className={styles.toolbarPanes}
+            role="group"
+            aria-label={t("工具栏操作区域")}
+          >
+            {(["source", "visual"] as const).map((pane) => (
+              <Button
+                key={pane}
+                aria-pressed={toolbarPane === pane}
+                onClick={() => activate(pane)}
+              >
+                <UiText text={paneLabels[pane]} />
+              </Button>
+            ))}
+          </div>
+          <div className={styles.toolbarTools} ref={setToolbarTarget} />
+        </div>
+      )}
       <div
         className={styles.panes}
         data-mode={mode}
@@ -203,14 +250,15 @@ export default function MarkdownEditor(props: BlockEditorProps) {
           className={styles.sourcePane}
           inert={mode === "visual"}
           aria-hidden={mode === "visual"}
-          onFocusCapture={() => {
-            focused.current = "source";
+          onFocusCapture={(event) => {
+            if (event.currentTarget.contains(event.target)) activate("source");
           }}
         >
           <SourceBlockEditor
             {...props}
             editorRef={source}
             statusTarget={statusTarget}
+            toolbarTarget={targetFor("source")}
             hideStatusBar={mode === "visual"}
             initialSelection={
               selection?.pane === "source" ? selection.range : undefined
@@ -227,8 +275,8 @@ export default function MarkdownEditor(props: BlockEditorProps) {
           ref={visualPane}
           inert={mode === "write"}
           aria-hidden={mode === "write"}
-          onFocusCapture={() => {
-            focused.current = "visual";
+          onFocusCapture={(event) => {
+            if (event.currentTarget.contains(event.target)) activate("visual");
           }}
         >
           {mode !== "write" && (
@@ -244,12 +292,14 @@ export default function MarkdownEditor(props: BlockEditorProps) {
               }
               editorRef={visual}
               statusTarget={statusTarget}
+              toolbarTarget={targetFor("visual")}
               hideStatusBar={mode === "split"}
               media={props.media}
               toolbar={(editor) => (
                 <RichToolbar
                   editor={editor}
                   markdown
+                  grouped={mode === "split"}
                   onMedia={props.onMedia}
                   onShortcode={props.onShortcode}
                   onUpload={props.onUpload}

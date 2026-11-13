@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[Markdown 分屏工具栏与画廊多选](decisions/0136-shared-markdown-toolbar-and-gallery-selection.md)说明工具栏的作用区域、短代码表单和媒体选择方式。
+
 [前端注册书籍页](decisions/0135-registered-book-page.md)说明页面路径、分类关联和封面配置。
 
 [注册一次验证与用户通知接收人](decisions/0133-registration-verification-and-notice-recipients.md)说明注册邮箱验证、可配置接收对象和账号中心收件箱。
