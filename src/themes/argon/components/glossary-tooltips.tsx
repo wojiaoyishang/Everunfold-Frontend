@@ -422,7 +422,11 @@ export default function GlossaryTooltips({
     const boundary = 12;
     const gap = 10;
     const maxViewportHeight = Math.max(80, window.innerHeight - boundary * 2);
-    const desiredHeight = Math.min(360, element.scrollHeight);
+    const scroll = element.querySelector(".glossary-tooltip-scroll");
+    const overflow = scroll
+      ? Math.max(0, scroll.scrollHeight - scroll.clientHeight)
+      : 0;
+    const desiredHeight = Math.min(360, element.offsetHeight + overflow);
     const belowTop = active.rect.bottom + gap;
     const belowSpace = window.innerHeight - boundary - belowTop;
     const aboveSpace = active.rect.top - gap - boundary;
@@ -448,17 +452,18 @@ export default function GlossaryTooltips({
   }, [active]);
 
   if (!active || typeof window === "undefined") return null;
-  const width = Math.min(400, window.innerWidth - 24);
+  const viewport = document.documentElement.clientWidth;
+  const width = Math.min(400, viewport - 24);
   const left = Math.max(
     12,
     Math.min(
       active.rect.left + active.rect.width / 2 - width / 2,
-      window.innerWidth - width - 12,
+      viewport - width - 12,
     ),
   );
   const arrowLeft = Math.max(
     14,
-    Math.min(width - 14, active.rect.left + active.rect.width / 2 - left),
+    Math.min(width - 18, active.rect.left + active.rect.width / 2 - left - 2),
   );
   const style = {
     left,

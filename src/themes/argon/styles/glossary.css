@@ -151,21 +151,22 @@
 }
 .glossary-tooltip::before {
   position: absolute;
+  z-index: 1;
   left: var(--glossary-arrow-left, 50%);
   width: 0;
   height: 0;
-  border: 8px solid transparent;
+  border-inline: 8px solid transparent;
   content: "";
   pointer-events: none;
   translate: -50% 0;
 }
 .glossary-tooltip[data-above="false"]::before {
-  top: -8px;
-  border-bottom-color: var(--glossary-accent);
+  bottom: calc(100% + 2px);
+  border-bottom: 8px solid var(--glossary-accent);
 }
 .glossary-tooltip[data-above="true"]::before {
-  bottom: -8px;
-  border-top-color: var(--glossary-accent);
+  top: calc(100% + 2px);
+  border-top: 8px solid var(--glossary-accent);
 }
 .glossary-tooltip header {
   flex: 0 0 auto;
@@ -219,8 +220,6 @@
   background: color-mix(in srgb, var(--accent) 4%, var(--surface));
 }
 .glossary-tooltip-scroll {
-  display: grid;
-  gap: 12px;
   min-height: 0;
   padding: 16px 16px 0;
   overflow: auto;
@@ -237,7 +236,11 @@
   background: var(--accent-soft);
 }
 .glossary-tooltip-viewer {
-  display: contents;
+  display: grid;
+  gap: 12px;
+}
+.glossary-tooltip-feature + .glossary-tooltip-aliases {
+  margin-top: 2px;
 }
 .glossary-tooltip-feature img {
   object-fit: cover;

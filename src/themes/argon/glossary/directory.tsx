@@ -71,22 +71,20 @@ export function GlossaryDirectory() {
               href={term.path}
               key={term.id}
             >
-              {term.feature_image ? (
-                <span className={styles.termImage}>
+              <span className={styles.termThumbnail} aria-hidden="true">
+                {term.feature_image ? (
                   <Image
-                    src={term.feature_image.original}
+                    src={term.feature_image.webp || term.feature_image.original}
                     alt=""
                     fill
-                    sizes="(max-width: 640px) 72px, 96px"
+                    sizes="(max-width: 640px) 48px, 64px"
                     unoptimized
                   />
-                </span>
-              ) : (
-                <span className={styles.termIcon}>
+                ) : (
                   <Icon name="book" />
-                </span>
-              )}
-              <div>
+                )}
+              </span>
+              <div className={styles.cardText}>
                 <h2>{term.title}</h2>
                 {term.summary.trim() && <p>{term.summary}</p>}
                 {term.aliases.length > 0 && (
