@@ -48,6 +48,7 @@ export const contentAdminModule: AdminModuleRegistration = {
       description: "自定义与前端注册页面",
       matchesChild: (path: string) =>
         path === "/admin/pages/new" ||
+        path === "/admin/pages/types" ||
         /^\/admin\/pages\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}(?:\/(?:preview|live))?$/i.test(
           path,
         ),

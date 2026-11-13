@@ -155,7 +155,7 @@ test("page storage configuration accepts undeclared nested JSON without dropping
   assert.ok(parsePageConfiguration(JSON.stringify(nested)).error);
 });
 
-test("page capabilities come from their definitions and duplicate IDs or paths fail", () => {
+test("page types allow shared path suggestions and reserve the custom source type", () => {
   const definition = {
     registration: {
       id: "fixture.page",
@@ -173,11 +173,24 @@ test("page capabilities come from their definitions and duplicate IDs or paths f
     () => collectCustomPages([definition, definition]),
     /duplicate custom page/,
   );
+  assert.equal(
+    collectCustomPages([
+      definition,
+      { registration: { ...definition.registration, id: "fixture.other" } },
+      {
+        registration: {
+          id: "fixture.no-path",
+          title: "No suggestion",
+          version: "1.0.0",
+        },
+      },
+    ]).manifest.pages.length,
+    3,
+  );
   assert.throws(
     () =>
       collectCustomPages([
-        definition,
-        { registration: { ...definition.registration, id: "fixture.other" } },
+        { registration: { ...definition.registration, id: "core.custom" } },
       ]),
     /duplicate custom page/,
   );

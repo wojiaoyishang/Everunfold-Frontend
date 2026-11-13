@@ -8,6 +8,7 @@ import { useAccountAction } from "@/core/accounts/use-action";
 import { pagesFailure } from "@/core/pages/failure";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Button, TextField } from "../../components/ui/primitives";
+import { Select } from "../../components/ui/select";
 import { RouteLink } from "../../components/ui/route-link";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Icon } from "../../components/icon";
@@ -16,13 +17,18 @@ import styles from "./pages.module.css";
 import { PageEnabledControl } from "./enabled-control";
 import { PageLanguageMenu } from "./language-menu";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
-export function ManagedPagesDirectory() {
+export function ManagedPagesDirectory({
+  initialType = "",
+}: {
+  initialType?: string;
+}) {
   const { baseUrl, csrfToken } = useAdminRequest(),
     actor = useAdminAccount(),
     t = useT();
   const [items, setItems] = useState<ManagedPageSummary[]>([]);
   const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<"active" | "trash">("active");
+  const [type, setType] = useState(initialType);
   const [refresh, setRefresh] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -47,12 +53,13 @@ export function ManagedPagesDirectory() {
       });
     return () => controller.abort();
   }, [baseUrl, refresh, catalog?.revision]);
+  const types = new Map(items.map((row) => [row.type_id, row.type_title]));
+  if (type && !types.has(type)) types.set(type, type);
   const rows = items.filter(
     (row) =>
-      (filter === "trash"
-        ? row.archived
-        : !row.archived && (filter === "all" || row.source === filter)) &&
-      `${row.title} ${row.path} ${(row.translations?.members ?? []).map((m) => `${m.title} ${m.path} ${m.language}`).join(" ")}`
+      (filter === "trash" ? row.archived : !row.archived) &&
+      (!type || row.type_id === type) &&
+      `${row.title} ${row.path} ${row.type_title} ${(row.translations?.members ?? []).map((m) => `${m.title} ${m.path} ${m.language}`).join(" ")}`
         .toLocaleLowerCase()
         .includes(query.toLocaleLowerCase()),
   );
@@ -61,26 +68,31 @@ export function ManagedPagesDirectory() {
       <AdminPageHeading
         title="页面"
         action={
-          can(actor, "pages:write") ? (
-            <RouteLink
-              href="/admin/pages/new"
-              className="admin-button admin-button-primary"
-            >
-              <Icon name="plus" />
-              <UiText text="新建自定义页面" />
+          <div className={styles.typeActions}>
+            <RouteLink href="/admin/pages/types" className="admin-button">
+              <UiText text="页面类型" />
             </RouteLink>
-          ) : null
+            {can(actor, "pages:write") && (
+              <RouteLink
+                href="/admin/pages/new"
+                className="admin-button admin-button-primary"
+              >
+                <Icon name="plus" />
+                <UiText text="新建页面" />
+              </RouteLink>
+            )}
+          </div>
         }
       />
       <section className="account-card">
         <div className={styles.toolbar}>
-          <nav className={styles.tabs} aria-label={t("页面来源")}>
-            {[
-              ["all", "全部"],
-              ["registered", "前端注册"],
-              ["custom", "自定义代码"],
-              ["trash", "回收站"],
-            ].map(([key, label]) => (
+          <nav className={styles.tabs} aria-label={t("页面状态")}>
+            {(
+              [
+                ["active", "全部"],
+                ["trash", "回收站"],
+              ] as const
+            ).map(([key, label]) => (
               <Button
                 key={key}
                 aria-pressed={filter === key}
@@ -90,6 +102,20 @@ export function ManagedPagesDirectory() {
               </Button>
             ))}
           </nav>
+          <Select
+            className={styles.typeFilter}
+            name="page-type-filter"
+            label="按页面类型筛选"
+            value={type}
+            options={[
+              { value: "", label: t("所有类型") },
+              ...Array.from(types, ([value, label]) => ({
+                value,
+                label: t(label),
+              })),
+            ]}
+            onValueChange={setType}
+          />
           <div className={styles.search}>
             <TextField
               type="search"
@@ -130,9 +156,7 @@ export function ManagedPagesDirectory() {
             </div>
             <div className={styles.badges}>
               <span className="admin-badge">
-                <UiText
-                  text={row.source === "registered" ? "前端注册" : "自定义代码"}
-                />
+                <UiText text={row.type_title} />
               </span>
               {row.archived && (
                 <span className="admin-badge">

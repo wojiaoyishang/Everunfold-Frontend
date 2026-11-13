@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[页面类型与页面实例](decisions/0137-page-types-and-instances.md)说明类型选择、独立配置与发布。
+
 [Markdown 分屏工具栏与画廊多选](decisions/0136-shared-markdown-toolbar-and-gallery-selection.md)说明工具栏的作用区域、短代码表单和媒体选择方式。
 
 [前端注册书籍页](decisions/0135-registered-book-page.md)说明页面路径、分类关联和封面配置。

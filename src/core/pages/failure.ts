@@ -17,6 +17,7 @@ export function pagesFailure(error: unknown): string {
       return "此地址已被其他页面或内容使用，请更换路径。";
     if (error.code === 40998)
       return "前端页面实现尚未就绪，或节点版本不一致。可以保存草稿。";
+    if (error.code === 42294) return "页面类型不存在或与已保存页面不一致。";
     if (error.code === 40397) return "页面脚本只能由管理员维护。";
     if (error.status === 422)
       return "请检查页面路径、人物字段长度和链接格式。当前输入已保留。";

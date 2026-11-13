@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import type {
   ManagedPageItem,
+  PageTypeItem,
   PageValue,
   PublicManagedPage,
 } from "@/core/contracts/pages";
@@ -37,6 +38,7 @@ import { PageConfigurationEditor } from "./configuration";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { readSettingsModel } from "@/core/forms/schema";
 import { parsePageConfiguration } from "@/core/pages/configuration";
+import { customPageTypeId } from "@/core/pages/registration";
 import styles from "./pages.module.css";
 import { Select } from "../../components/ui/select";
 import { PageLanguages } from "./languages";
@@ -61,7 +63,13 @@ const blank: PageValue = {
   show_glossary_footnotes: true,
   options: {},
 };
-export function ManagedPageEditor({ id }: { id?: string }) {
+export function ManagedPageEditor({
+  id,
+  pageType,
+}: {
+  id?: string;
+  pageType?: PageTypeItem;
+}) {
   usePluginRuntime();
   const actor = useAdminAccount(),
     { baseUrl, csrfToken } = useAdminRequest(),
@@ -74,7 +82,27 @@ export function ManagedPageEditor({ id }: { id?: string }) {
   const catalog = useLanguageCatalog();
   const [language, setLanguage] = useState(catalog.default_code);
   const [saved, setSaved] = useState<ManagedPageItem | null>(null);
-  const [value, setValue] = useState<PageValue>(blank);
+  const [initial] = useState<PageValue>(() => {
+    const definition = pageType?.registration;
+    if (!definition) return blank;
+    return {
+      ...blank,
+      title: definition.title,
+      path: pageType.page_count === 0 ? (definition.path ?? "") : "",
+      description: definition.description ?? "",
+      comments_open: definition.comments_open ?? true,
+      options: {
+        ...Object.fromEntries(
+          (definition.fields ?? []).map((field) => [
+            field.key,
+            field.default ?? "",
+          ]),
+        ),
+        ...definition.defaults,
+      },
+    };
+  });
+  const [value, setValue] = useState(initial);
   const [optionsSource, setOptionsSource] = useState<string | null>(null);
   const optionsError = useMemo(
     () =>
@@ -90,8 +118,17 @@ export function ManagedPageEditor({ id }: { id?: string }) {
     can(actor, "pages:write") &&
     !(value.javascript_enabled && actor.role !== "admin");
   const publish = write && can(actor, "pages:publish");
+  const source = saved?.source ?? pageType?.source ?? "custom";
+  const typeId = saved?.type_id ?? pageType?.id ?? customPageTypeId;
+  const definition = saved ? saved.registration : pageType?.registration;
+  const available = saved?.available ?? pageType?.available ?? !id;
+  const ready = !id || Boolean(saved);
+  const typeTitle =
+    definition?.title ??
+    pageType?.title ??
+    (source === "custom" ? "自定义代码" : typeId);
   const dirty =
-    JSON.stringify(value) !== JSON.stringify(saved?.value ?? blank) ||
+    JSON.stringify(value) !== JSON.stringify(saved?.value ?? initial) ||
     Boolean(optionsError) ||
     (!saved && language !== catalog.default_code);
   useEffect(() => {
@@ -113,6 +150,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
     return () => controller.abort();
   }, [baseUrl, id]);
   const save = async (apply: boolean) => {
+    if (!ready) return false;
     if (optionsError) {
       action.setMessage(optionsError);
       return false;
@@ -122,12 +160,11 @@ export function ManagedPageEditor({ id }: { id?: string }) {
         const input = {
           id: saved?.id ?? previewId,
           expected_revision: saved?.revision ?? 0,
+          type_id: saved ? undefined : typeId,
           value,
           apply,
           language:
-            saved?.source === "registered"
-              ? undefined
-              : (saved?.language ?? language),
+            source === "registered" ? undefined : (saved?.language ?? language),
         };
         const response = await saveManagedPage(
           baseUrl,
@@ -146,7 +183,6 @@ export function ManagedPageEditor({ id }: { id?: string }) {
       apply ? "页面已应用，公开入口将在前端同步后更新。" : "页面草稿已保存。",
     );
   };
-  const source = saved?.source ?? "custom";
   const previewPage = useMemo<PublicManagedPage>(
     () => ({
       ...value,
@@ -154,17 +190,16 @@ export function ManagedPageEditor({ id }: { id?: string }) {
       title: value.title || "未命名页面",
       path: value.path || "/preview",
       id: previewId,
-      source: saved?.source ?? "custom",
-      implementation_id: saved?.implementation_id,
-      implementation_version: saved?.registration?.version,
+      source,
+      implementation_id: source === "registered" ? typeId : null,
+      implementation_version: definition?.version,
       revision: saved?.revision ?? 1,
       enabled: true,
-      language:
-        saved?.source === "registered" ? null : (saved?.language ?? language),
+      language: source === "registered" ? null : (saved?.language ?? language),
       translation_group_id: saved?.translation_group_id,
       is_original: saved?.is_original,
     }),
-    [value, previewId, saved, language],
+    [value, previewId, saved, language, source, typeId, definition?.version],
   );
   const preview = usePagePreview(previewPage);
   useEmbeddedPreviewPublisher(
@@ -202,17 +237,18 @@ export function ManagedPageEditor({ id }: { id?: string }) {
             icon="sidebar"
             label="实时预览"
             description="在独立窗口中查看页面并编辑"
-            disabled={!write || action.busy || Boolean(optionsError)}
+            disabled={!ready || !write || action.busy || Boolean(optionsError)}
             onClick={() => void openLive()}
           />
           <PreviewAction
             icon="external"
             label="前台预览"
             description="在新窗口中预览当前输入"
+            disabled={!ready || Boolean(optionsError)}
             onClick={preview.openWindow}
           />
           <EmbeddedEditorActions>
-            {write && !saved?.archived && (
+            {ready && write && !saved?.archived && (
               <>
                 <Button
                   type="submit"
@@ -224,7 +260,11 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                     }
                   }}
                   className="admin-button"
-                  disabled={action.busy || !dirty || Boolean(optionsError)}
+                  disabled={
+                    action.busy ||
+                    (Boolean(saved) && !dirty) ||
+                    Boolean(optionsError)
+                  }
                 >
                   <Icon name="save" />
                   <UiText text="保存草稿" />
@@ -244,9 +284,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                     disabled={
                       action.busy ||
                       Boolean(optionsError) ||
-                      (source === "registered" &&
-                        value.enabled &&
-                        !saved?.available)
+                      (source === "registered" && value.enabled && !available)
                     }
                   >
                     <Icon name="save" />
@@ -260,7 +298,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
           </EmbeddedEditorActions>
         </ScrollHeaderActions>
       </div>
-      <AdminPageHeading title={id ? "编辑页面" : "新建自定义页面"} />
+      <AdminPageHeading title={id ? "编辑页面" : "新建页面"} />
       {error && (
         <p role="alert" className={styles.error}>
           {error}
@@ -270,9 +308,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
         <>
           <div className={styles.state}>
             <span className="admin-badge">
-              <UiText
-                text={source === "registered" ? "前端注册" : "自定义代码"}
-              />
+              <UiText text={typeTitle} />
             </span>
             {saved && (
               <span>
@@ -311,7 +347,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                   disabled={!write || action.busy || saved?.archived}
                 >
                   <section className="account-card">
-                    {!saved && (
+                    {!saved && source === "custom" && (
                       <label className={styles.newLanguage}>
                         <UiText text="内容语言" />
                         <Select
@@ -443,17 +479,13 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                           <UiText text="由前端提供交互，在这里维护公开展示的内容。" />
                         </p>
                       </header>
-                      {saved?.registration ? (
+                      {definition ? (
                         <PageConfigurationEditor
                           model={readSettingsModel(
-                            Object.keys(
-                              saved.registration.settings_schema ?? {},
-                            ).length
-                              ? saved.registration.settings_schema
+                            Object.keys(definition.settings_schema ?? {}).length
+                              ? definition.settings_schema
                               : pluginRegistry.pages.find(
-                                  (page) =>
-                                    page.registration.id ===
-                                    saved.implementation_id,
+                                  (page) => page.registration.id === typeId,
                                 )?.settingsModel,
                           )}
                           value={value.options ?? {}}
@@ -479,7 +511,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
                           <UiText text="页面实现尚未安装，配置已保留。" />
                         </p>
                       )}
-                      {!saved?.available && (
+                      {!available && (
                         <p role="alert" className={styles.error}>
                           <UiText text="前端页面实现尚未就绪，或节点版本不一致。可以保存草稿。" />
                         </p>
@@ -583,7 +615,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
               <p className="account-message" role="status">
                 <UiText text={action.message} />
               </p>
-              {saved?.source === "custom" && publish && !saved.archived && (
+              {saved && publish && !saved.archived && (
                 <Button
                   className="admin-button"
                   onClick={() => setConfirm("remove")}
@@ -599,7 +631,7 @@ export function ManagedPageEditor({ id }: { id?: string }) {
       <ConfirmDialog
         open={confirm === "remove"}
         title="将页面移到回收站？"
-        description="页面将停用，源码保留，可从回收站恢复。未保存的输入将丢弃。"
+        description="页面将停用，已保存的内容和配置可从回收站恢复。"
         confirmLabel="移到回收站"
         intent="danger"
         onCancel={() => setConfirm(null)}

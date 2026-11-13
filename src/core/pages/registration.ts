@@ -1,6 +1,8 @@
 import type { PageRegistration } from "@/core/contracts/pages";
 import type { SettingsModel } from "@/core/forms/schema";
 
+export const customPageTypeId = "core.custom";
+
 export interface PageCommentsPlacement {
   /** Auto appends the shared section; manual pages opt in with PageComments. */
   placement: "auto" | "manual";
@@ -38,17 +40,15 @@ export function collectCustomPages(
   >[],
 ) {
   const ids = new Set<string>();
-  const paths = new Set<string>();
   for (const { registration: page } of definitions) {
     if (
       !/^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/.test(page.id) ||
       !/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/.test(page.version) ||
-      ids.has(page.id) ||
-      paths.has(page.path)
+      page.id === customPageTypeId ||
+      ids.has(page.id)
     )
       throw new Error(`Invalid or duplicate custom page: ${page.id}`);
     ids.add(page.id);
-    paths.add(page.path);
   }
   return {
     manifest: {

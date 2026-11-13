@@ -2,9 +2,11 @@
 
 版本：registered-pages-runtime-9，2026-11-10。状态：按用户授权实施，见[ADR0072](../decisions/0072-managed-pages-and-people-messages.md)、[操作指南](../development/pages.md)与[验收](../handoff/pages-live-preview-verification.md)。菜单资源选择器、自定义页面语言组和已应用源文启停已按[ADR0074](../decisions/0074-page-languages-linked-navigation-and-live-preview.md)实施，脚本执行位置见[ADR0081](../decisions/0081-authored-page-script-position.md)。
 
-## 两种来源
+## 页面类型与页面实例
 
-按[ADR0083](../decisions/0083-plugin-activation-usage-confirmation.md)，目录不返回available=false的注册页面，包括插件主动停用和登记缺失/不一致；按ID记录、配置、元数据、已应用源文及修订保留。重新启用并部署一致后恢复条目，打开的目录随运行清单修订重读。应用快照仍用于启停使用计数，不用过滤后的目录反推引用。
+`/admin/pages/types` 展示内置的自定义代码类型和节点登记的插件类型。`/admin/pages` 展示实际创建的页面，支持按类型筛选。每个页面保存独立的 UUID、路径、草稿、应用源文、修订和元数据。已保存页面的类型固定。
+
+插件停用或节点登记不一致时，页面目录继续显示现有实例及不可用状态。插件使用统计按实际应用过的实例计数，启停确认沿用 [ADR0083](../decisions/0083-plugin-activation-usage-confirmation.md)。公开入口仍受插件启用及渲染实现约束。
 
 `/admin/pages`统一展示自定义源码页与可信前端注册页，支持搜索、状态和回收站。既有内容类型`page`的历史数据保留；本轮不改其历史正文或导入WordPress人员。
 
@@ -22,7 +24,7 @@
 
 权威字段来自后端pages契约中的`PageManifest`/`PageRegistration`/`PageOption`：稳定命名空间ID、实现版本、缺省标题/路径/说明、defaults与开放settings_schema。表单模型使用具名组件，由主题/插件实现，未知组件占位；配置允许任意JSON键值，字段模型不作为存储白名单。旧fields继续可读，新的控件类型不需要扩充后端枚举；配置仍有传输/深度上限，不接受可执行模板函数。
 
-前端`pages:manifest`仅向stdout导出声明，`pages:register`将其直接送后端安装器stdin并显式安装到稳定节点ID；没有中间registrations目录。浏览器没有登记清单的接口。初次登记建立停用配置；路径已被内容占用时选安全缺省路径，不抢占原地址。重新部署保留已有内容，卸载登记保留数据。
+前端 `pages:manifest` 输出类型声明，`pages:register` 将清单交给后端安装器。登记只记录类型，路径是新建时的可选建议，实际路径由管理员保存页面时占用。节点重新登记和卸载保留已保存的页面。
 
 启用节点必须拥有一致清单，缺失/版本不同可保存草稿但不能启用；已停用或移除配置的节点不参与可用性判断。公开节点只渲染自己已编译的实现版本，缺失实现返回503，不装载远程代码。更新选项Schema时由部署者评审并迁移旧值，本轮没有自动Schema升级器。
 

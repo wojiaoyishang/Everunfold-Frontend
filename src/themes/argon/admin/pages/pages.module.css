@@ -15,6 +15,56 @@
   flex-wrap: wrap;
   margin-bottom: 22px;
 }
+.typeFilter {
+  flex: 0 1 210px;
+}
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 16px;
+}
+.typeCard,
+.typeError {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+}
+.typeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.typeCard > header,
+.typeActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.typeCard > header {
+  gap: 12px;
+}
+.typeCard h2 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+.typeCard p,
+.typeCard > header div > span {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.typeActions {
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+.typeError > p {
+  color: var(--admin-danger);
+  margin: 0 0 12px;
+}
 .tabs {
   display: flex;
   gap: 4px;
