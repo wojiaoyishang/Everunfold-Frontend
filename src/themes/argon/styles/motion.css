@@ -224,9 +224,6 @@
   .header-menu-link:hover {
     transform: translateY(-1px);
   }
-  .site-brand:hover > .icon {
-    animation: campfire-greeting 540ms var(--motion-ease);
-  }
   .sidebar-navigation a:hover .icon {
     transform: translateX(3px);
   }
@@ -255,18 +252,6 @@
   .archive-month li:hover::before {
     background: var(--accent);
     transform: scale(1.35);
-  }
-}
-@keyframes campfire-greeting {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  35% {
-    transform: rotate(-9deg);
-  }
-  70% {
-    transform: rotate(7deg);
   }
 }
 @media (hover: none) {

@@ -24,6 +24,7 @@ import { Icon } from "./components/icon";
 import { Select } from "./components/ui/select";
 import { FontField } from "./admin/fonts/font-field";
 import { useFontLibrary } from "@/core/fonts/library";
+import { HeaderBrandSettings } from "./admin/settings/header-brand-settings";
 import { SidebarNavigationSettings } from "./admin/settings/sidebar-navigation-settings";
 import { SidebarProfileSettings } from "./admin/settings/sidebar-profile";
 import { ArticlePresentationSettings } from "./admin/settings/article-presentation";
@@ -133,21 +134,11 @@ export default function ArgonThemeSettings() {
           </p>
         </div>
       </SettingsSection>
-      <SettingsSection
-        id="settings-brand-images"
-        title="顶栏标识"
-        description="选择当前主题的顶栏 Logo。"
-      >
-        <SettingsMediaField
-          kind="image"
-          label="顶栏 Logo"
-          value={theme.header_logo_url}
-          mediaId={theme.header_logo_media_id}
-          onChange={(header_logo_url, header_logo_media_id) =>
-            update({ header_logo_url, header_logo_media_id })
-          }
-        />
-      </SettingsSection>
+      <HeaderBrandSettings
+        name={draft.site.name}
+        theme={theme}
+        onChange={update}
+      />
       <SidebarNavigationSettings
         site={draft.site}
         theme={theme}

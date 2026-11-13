@@ -32,21 +32,6 @@
     padding: 20px 16px 20px 64px;
     gap: 8px;
   }
-  .site-brand {
-    min-width: 0;
-    font-size: 18px;
-    gap: 8px;
-  }
-  .site-brand > .icon {
-    display: none;
-  }
-  .site-brand span {
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 56vw;
-  }
   .header-navigation {
     display: none;
   }
@@ -190,9 +175,6 @@
   }
   .header-inner {
     padding-right: 12px;
-  }
-  .site-brand {
-    font-size: 16px;
   }
   .icon-button {
     width: 34px;

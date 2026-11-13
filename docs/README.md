@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[顶栏标识](decisions/0128-header-branding.md)说明展示模式、默认值和兼容行为。
+
 [侧栏导航与搜索](decisions/0127-sidebar-navigation-and-search.md)说明侧栏文案、菜单继承、搜索和预览。
 
 [博主卡片和横幅动效](decisions/0126-theme-profile-and-banner.md)说明主题配置、旧值回退和同步。

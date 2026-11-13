@@ -1,5 +1,5 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { loginDestination } from "@/core/auth/routes";
@@ -33,6 +33,7 @@ export function LoginPage({
   baseUrl: string;
   returnTo: string | undefined;
 }) {
+  const t = useT();
   const card = useRef<HTMLDivElement>(null);
   const { state, check, accept, fail } = useSession(baseUrl);
   const captcha = useCaptcha(baseUrl, "login");
@@ -278,7 +279,7 @@ export function LoginPage({
               value={username}
               onChange={(event) => setUsername(event.target.value)}
               disabled={busy}
-              placeholder="输入用户名或已验证邮箱"
+              placeholder={t("输入用户名")}
             />
           </FormField>
           <FormField

@@ -66,6 +66,8 @@ export type RuntimeThemePreferences = Required<
 const defaults: RuntimeThemePreferences = {
   author_avatar_media_id: "",
   author_avatar_url: null,
+  header_brand_mode: "both",
+  header_brand_text: "",
   header_logo_media_id: "",
   header_logo_url: "",
   article: articleDefaults,

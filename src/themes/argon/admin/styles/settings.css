@@ -282,6 +282,29 @@
   color: var(--admin-muted);
   margin: 0;
 }
+.admin-header-brand-preview-label {
+  color: var(--admin-text);
+  font-size: 13px;
+  font-weight: 500;
+}
+.admin-header-brand-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 58px;
+  min-inline-size: 0;
+  max-inline-size: 420px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--preview-brand-background, var(--admin-accent));
+  color: white;
+}
+.admin-header-brand-preview > .icon {
+  margin-inline-start: 8px;
+}
+.admin-header-brand-preview-home {
+  white-space: nowrap;
+}
 .admin-node-status {
   display: flex;
   align-items: center;

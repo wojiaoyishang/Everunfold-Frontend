@@ -1,7 +1,5 @@
 "use client";
-import Image from "next/image";
 import { themeProfile } from "@/core/settings/theme-options";
-import { resourceUrl } from "@/core/content/urls";
 import { useLayoutEffect, useRef } from "react";
 import { Button } from "@/themes/argon/components/ui/primitives";
 
@@ -10,6 +8,7 @@ import { useScrollPosition } from "../hooks/use-scroll-position";
 import { AppLink as Link } from "./navigation-link";
 import { useNavigation } from "./navigation-state";
 import { Icon } from "./icon";
+import { SiteBrand } from "./site-brand";
 import { HeaderNavigation } from "./header-navigation";
 import { SearchDialog } from "./search-dialog";
 import { NavigationProgress } from "./navigation-progress";
@@ -38,7 +37,6 @@ export function SiteHeader({ site }: { site: Site }) {
     };
   }, []);
   const { open, setOpen, triggerRef } = useNavigation();
-  const logo = resourceUrl(themeProfile(site.settings)?.header_logo_url);
   const scrolled = useScrollPosition() > 80;
   return (
     <header
@@ -58,17 +56,11 @@ export function SiteHeader({ site }: { site: Site }) {
       </Button>
       <div className="header-inner">
         <Link href="/" className="site-brand">
-          {logo && (
-            <Image
-              src={logo}
-              width={32}
-              height={32}
-              className="site-brand-logo"
-              alt=""
-              unoptimized
-            />
-          )}
-          <span>{site.hero_title || site.name}</span>
+          <SiteBrand
+            name={site.name}
+            heroTitle={site.hero_title}
+            theme={themeProfile(site.settings)}
+          />
         </Link>
         <HeaderNavigation site={site} />
         <div className="header-actions">

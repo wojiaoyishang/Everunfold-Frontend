@@ -76,17 +76,14 @@
   align-items: center;
   gap: 34px;
 }
-.site-brand {
-  display: inline-flex;
-  gap: 11px;
-  align-items: center;
-  font-size: 16px;
-  font-weight: 500;
-  white-space: nowrap;
+.site-header .site-brand {
+  transition: opacity var(--motion-fast) ease;
 }
-.site-brand > .icon {
-  width: 25px;
-  height: 25px;
+.site-header .site-brand:hover {
+  opacity: 0.86;
+}
+.site-header .site-brand:active {
+  opacity: 0.72;
 }
 .header-navigation {
   display: flex;
@@ -262,12 +259,4 @@ html:not([data-motion="reduced"]) {
 }
 .main-column {
   min-width: 0;
-}
-
-.site-brand-logo {
-  flex: none;
-  inline-size: 32px;
-  block-size: 32px;
-  margin-inline-end: 0.5rem;
-  object-fit: contain;
 }
