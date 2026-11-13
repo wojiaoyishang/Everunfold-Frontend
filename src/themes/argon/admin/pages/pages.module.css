@@ -144,10 +144,21 @@
   font-size: 12px;
   flex-wrap: wrap;
 }
-.help {
+.configuration {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+.configuration > p {
+  margin: 0;
+}
+.help,
+.configurationHint {
   color: var(--admin-muted);
   font-size: 12px;
   line-height: 1.8;
+}
+.help {
   margin: 12px 0 0 !important;
 }
 .error {

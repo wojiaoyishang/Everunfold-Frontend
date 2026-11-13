@@ -32,7 +32,7 @@ export function PageConfigurationEditor({
     model.fields.length ? "form" : "json",
   );
   return (
-    <>
+    <div className={styles.configuration}>
       {!!model.fields.length && (
         <nav className={styles.tabs} aria-label={t("页面配置编辑方式")}>
           <Button
@@ -59,7 +59,7 @@ export function PageConfigurationEditor({
         />
       ) : (
         <>
-          <p className={styles.help}>
+          <p className={styles.configurationHint}>
             <UiText text="支持任意 JSON 键值、嵌套对象和数组。配置会随页面应用后公开；表单未展示的字段也会保留。" />
           </p>
           <SourceEditor
@@ -75,6 +75,6 @@ export function PageConfigurationEditor({
           )}
         </>
       )}
-    </>
+    </div>
   );
 }

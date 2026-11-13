@@ -19,6 +19,31 @@ const bold: SourceCommand = {
   after: "**",
   placeholder: "文字",
 };
+const tab: SourceCommand = { kind: "tab" };
+
+test("source tab inserts a literal tab at the cursor instead of the line start", () => {
+  const doc = '  "count": 1';
+  const cursor = doc.indexOf("1");
+  const state = apply(doc, cursor, cursor, tab);
+  assert.equal(state.doc.toString(), '  "count": \t1');
+  assert.equal(state.selection.main.anchor, cursor + 1);
+  assert.ok(state.selection.main.empty);
+});
+
+test("source tab prefixes an entire selection once and preserves its direction", () => {
+  const doc = '  "count": 1,\n  "total": 2';
+  const start = doc.indexOf("1");
+  for (const [anchor, head] of [
+    [start, doc.length],
+    [doc.length, start],
+  ]) {
+    const state = apply(doc, anchor, head, tab);
+    assert.equal(state.doc.toString(), '  "count": \t1,\n  "total": 2');
+    assert.equal(state.selection.main.anchor, anchor + 1);
+    assert.equal(state.selection.main.head, head + 1);
+  }
+});
+
 test("source inline formatting toggles without losing the Chinese or emoji selection", () => {
   let state = apply("你好🌟", 0, 4, bold);
   assert.equal(state.doc.toString(), "**你好🌟**");

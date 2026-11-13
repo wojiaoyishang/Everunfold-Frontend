@@ -5,6 +5,7 @@ import {
 } from "@codemirror/state";
 
 export type SourceCommand =
+  | { kind: "tab" }
   | {
       kind: "wrap";
       before: string;
@@ -22,6 +23,12 @@ export function sourceCommand(
   command: SourceCommand,
 ): TransactionSpec {
   const spec = state.changeByRange((range) => {
+    if (command.kind === "tab") {
+      return {
+        changes: { from: range.from, insert: "\t" },
+        range: EditorSelection.range(range.anchor + 1, range.head + 1),
+      };
+    }
     if (command.kind === "wrap") {
       const { before, after } = command;
       const selected = state.sliceDoc(range.from, range.to);

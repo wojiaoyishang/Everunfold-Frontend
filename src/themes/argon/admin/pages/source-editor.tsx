@@ -2,7 +2,15 @@
 import { useEffect, useState } from "react";
 import type { Extension } from "@codemirror/state";
 import { languages } from "@codemirror/language-data";
-import { CodeEditor } from "../../components/ui/code-editor";
+import {
+  CodeEditor,
+  type SourceShortcut,
+} from "../../components/ui/code-editor";
+
+const jsonShortcuts: readonly SourceShortcut[] = [
+  { key: "Tab", command: { kind: "tab" } },
+];
+
 export default function PageSourceEditor({
   kind,
   value,
@@ -44,6 +52,7 @@ export default function PageSourceEditor({
       onChange={onChange}
       language={language}
       disabled={disabled}
+      shortcuts={kind === "json" ? jsonShortcuts : undefined}
     />
   );
 }
