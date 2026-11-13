@@ -8,7 +8,7 @@ import { SidebarMobileBranch } from "./sidebar-mobile-navigation";
 export function SidebarNavigation({ site }: { site: Site }) {
   const root = useRef<HTMLElement>(null);
   const { setOpen } = useNavigation();
-  const items = siteNavigation(site);
+  const items = siteNavigation(site, "sidebar");
   const onNavigate = () => {
     root.current
       ?.querySelectorAll<HTMLElement>("[popover]:popover-open")

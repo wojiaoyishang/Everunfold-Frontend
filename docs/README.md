@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[侧栏导航与搜索](decisions/0127-sidebar-navigation-and-search.md)说明侧栏文案、菜单继承、搜索和预览。
+
 [博主卡片和横幅动效](decisions/0126-theme-profile-and-banner.md)说明主题配置、旧值回退和同步。
 
 [站点阅读与文章显示](decisions/0125-site-reading-and-article-presentation.md)记录全站默认值、主题与单篇设置的继承方式。

@@ -24,6 +24,7 @@ import { Icon } from "./components/icon";
 import { Select } from "./components/ui/select";
 import { FontField } from "./admin/fonts/font-field";
 import { useFontLibrary } from "@/core/fonts/library";
+import { SidebarNavigationSettings } from "./admin/settings/sidebar-navigation-settings";
 import { SidebarProfileSettings } from "./admin/settings/sidebar-profile";
 import { ArticlePresentationSettings } from "./admin/settings/article-presentation";
 import { CodeSettingsSection } from "./admin/settings/code-settings";
@@ -147,6 +148,19 @@ export default function ArgonThemeSettings() {
           }
         />
       </SettingsSection>
+      <SidebarNavigationSettings
+        site={draft.site}
+        theme={theme}
+        iconUrls={draft.icon_urls ?? {}}
+        onIconUrl={(id, url) =>
+          setDraft((current) =>
+            current
+              ? { ...current, icon_urls: { ...current.icon_urls, [id]: url } }
+              : current,
+          )
+        }
+        onChange={(sidebar_navigation) => update({ sidebar_navigation })}
+      />
       <SettingsSection
         id="settings-sidebar-profile"
         title="侧栏博主卡片"

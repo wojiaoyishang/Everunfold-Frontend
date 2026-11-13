@@ -1,19 +1,15 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import {
-  Button,
-  TextField,
-  TextLink,
-} from "@/themes/argon/components/ui/primitives";
+import { Button, TextLink } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useRef, useState } from "react";
-import { SearchForm } from "./navigation-link";
 
 import type { Site } from "@/core/content/types";
 import type { TableOfContentsItem } from "@/core/rendering/content";
 import { Icon } from "./icon";
-import { campfireIdentity } from "../navigation";
+import { sidebarIdentity } from "../navigation";
+import { SidebarBanner, SidebarSearchButton } from "./sidebar-navigation-panel";
 import { SidebarProfile } from "./sidebar-profile";
 import { SidebarNavigation } from "./sidebar-navigation";
 import { useReadingState } from "./reading-state";
@@ -30,7 +26,7 @@ export function Sidebar({
   toc?: TableOfContentsItem[];
   contentKey: string;
 }) {
-  const { open, setOpen, triggerRef } = useNavigation();
+  const { open, setOpen, triggerRef, openSearch } = useNavigation();
   const [selection, setSelection] = useState<{
     key: string;
     tab: "toc" | "overview";
@@ -87,7 +83,15 @@ export function Sidebar({
     };
   }, [open, setOpen, triggerRef]);
   const profile = themeProfile(site.settings);
-  const identity = campfireIdentity(site);
+  const options = profile?.sidebar_navigation;
+  const identity = sidebarIdentity(
+    site,
+    site.settings?.site.author_tagline,
+    options,
+  );
+  const showBanner =
+    options?.show_banner !== false &&
+    Boolean(identity.title || identity.alias || identity.tagline);
   const numberedToc = profile?.article.toc_numbered ?? false;
   const { activeId } = useReadingState();
   useEffect(() => {
@@ -119,6 +123,7 @@ export function Sidebar({
         id="site-sidebar"
         className={`site-sidebar ${open ? "is-open" : ""}`}
         aria-label="站点导航和概览"
+        data-sidebar-banner={showBanner}
       >
         <Button
           ref={closeRef}
@@ -129,28 +134,14 @@ export function Sidebar({
           <Icon name="close" />
         </Button>
         <section className="surface sidebar-menu-card">
-          <div className="sidebar-banner">
-            <span>
-              {identity.title}
-              {identity.alias && (
-                <>
-                  <br className="sidebar-title-break" />
-                  <span className="sidebar-title-alias">{identity.alias}</span>
-                </>
-              )}
-            </span>
-            <small>{identity.subtitle}</small>
-          </div>
+          {showBanner && <SidebarBanner {...identity} />}
           <SidebarNavigation site={site} />
-          <SearchForm className="sidebar-search">
-            <Icon name="search" />
-            <TextField
-              aria-label="搜索文章"
-              name="q"
-              placeholder="搜索什么…"
-              maxLength={160}
+          {options?.show_search !== false && (
+            <SidebarSearchButton
+              label={options?.search_label ?? ""}
+              onClick={openSearch}
             />
-          </SearchForm>
+          )}
         </section>
         <section className="surface sidebar-overview">
           {toc.length > 0 && (

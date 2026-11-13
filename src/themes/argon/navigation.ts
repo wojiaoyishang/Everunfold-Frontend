@@ -1,6 +1,9 @@
 import type { Site } from "@/core/content/types";
 import { normalizePath, publicHref } from "@/core/content/urls";
-import type { MenuItem } from "@/core/contracts/settings";
+import type {
+  MenuItem,
+  SidebarNavigationPreferences,
+} from "@/core/contracts/settings";
 import { localizedMenuLabel } from "@/core/navigation/labels";
 
 export interface NavigationItem {
@@ -87,7 +90,10 @@ export function navigationTarget(href: string) {
 }
 
 /** Presentation overrides for the reference theme, without inventing business data. */
-export function siteNavigation(site: Site): NavigationItem[] {
+export function siteNavigation(
+  site: Site,
+  position: "header" | "sidebar" = "header",
+): NavigationItem[] {
   if (site.settings) {
     const map = (item: MenuItem): NavigationItem[] => {
       const href = item.reference
@@ -109,8 +115,12 @@ export function siteNavigation(site: Site): NavigationItem[] {
         },
       ];
     };
-    const configured =
+    const shared =
       site.settings.theme?.navigation ?? site.settings.site.navigation ?? [];
+    const configured =
+      position === "sidebar"
+        ? (site.settings.theme?.sidebar_navigation?.menu ?? shared)
+        : shared;
     return configured.flatMap(map);
   }
   const items = site.navigation.length
@@ -137,13 +147,18 @@ export function siteNavigation(site: Site): NavigationItem[] {
   });
 }
 
-export function campfireIdentity(site: Site) {
+export function sidebarIdentity(
+  site: Pick<Site, "author" | "name" | "description" | "hero_title">,
+  authorTagline?: string,
+  value?: SidebarNavigationPreferences,
+) {
   const campfire = site.author === "Yishang";
   return {
-    title: site.hero_title || site.name,
-    alias: campfire ? "(梦吃丘)" : "",
-    subtitle:
-      site.settings?.site.author_tagline ||
-      (campfire ? "等待着、探索着、期待着" : site.description),
+    title: value?.title ?? (site.hero_title || site.name),
+    alias: value?.alias ?? (campfire ? "(梦吃丘)" : ""),
+    tagline:
+      value?.tagline ??
+      (authorTagline ||
+        (campfire ? "等待着、探索着、期待着" : site.description)),
   };
 }

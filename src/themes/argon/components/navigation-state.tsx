@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useCallback,
   useRef,
   useState,
   type Dispatch,
@@ -15,6 +16,8 @@ interface NavigationState {
   open: boolean;
   setOpen: Dispatch<SetStateAction<boolean>>;
   triggerRef: RefObject<HTMLButtonElement | null>;
+  searchRequest: { trigger: HTMLButtonElement } | null;
+  openSearch: (trigger: HTMLButtonElement) => void;
 }
 
 const NavigationContext = createContext<NavigationState | null>(null);
@@ -22,8 +25,16 @@ const NavigationContext = createContext<NavigationState | null>(null);
 export function NavigationProvider({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const [searchRequest, setSearchRequest] =
+    useState<NavigationState["searchRequest"]>(null);
+  const openSearch = useCallback((trigger: HTMLButtonElement) => {
+    setOpen(false);
+    setSearchRequest({ trigger });
+  }, []);
   return (
-    <NavigationContext.Provider value={{ open, setOpen, triggerRef }}>
+    <NavigationContext.Provider
+      value={{ open, setOpen, triggerRef, searchRequest, openSearch }}
+    >
       {children}
     </NavigationContext.Provider>
   );

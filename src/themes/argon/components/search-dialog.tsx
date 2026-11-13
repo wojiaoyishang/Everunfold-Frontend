@@ -7,16 +7,31 @@ import {
   Dialog,
 } from "@/themes/argon/components/ui/primitives";
 
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import { useModalDialog } from "../hooks/use-modal-dialog";
 import { SearchContentType } from "./search-content-type";
 import { SearchForm } from "./navigation-link";
 import { Icon } from "./icon";
+import { useNavigation } from "./navigation-state";
 import { SearchLanguages } from "./search-languages";
 export function SearchDialog() {
   const { dialog, open, close } = useModalDialog();
   const t = useT();
   const id = useId();
+  const queryField = useRef<HTMLInputElement>(null);
+  const { searchRequest, openSearch, triggerRef } = useNavigation();
+  useEffect(() => {
+    if (!searchRequest) return;
+    const source = searchRequest.trigger;
+    const returnTarget =
+      source.closest("#site-sidebar") &&
+      matchMedia("(max-width: 900px)").matches
+        ? triggerRef.current
+        : source;
+    returnTarget?.focus({ preventScroll: true });
+    open();
+    queryField.current?.focus();
+  }, [searchRequest, triggerRef, open]);
   return (
     <>
       <Button
@@ -25,11 +40,12 @@ export function SearchDialog() {
         aria-label="站内搜索"
         title="站内搜索"
         aria-haspopup="dialog"
-        onClick={open}
+        onClick={(event) => openSearch(event.currentTarget)}
       >
         <Icon name="search" />
       </Button>
       <Dialog
+        id="global-search-dialog"
         ref={dialog}
         className="search-dialog"
         aria-labelledby={`${id}-title`}
@@ -65,7 +81,7 @@ export function SearchDialog() {
             <Icon name="search" />
             <TextField
               name="q"
-              autoFocus
+              ref={queryField}
               placeholder={t("搜索文章、说说或术语…")}
               maxLength={160}
             />

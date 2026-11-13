@@ -458,3 +458,104 @@
   margin-top: 0.5rem;
   flex-wrap: wrap;
 }
+
+.admin-sidebar-settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  align-items: start;
+  gap: 20px;
+}
+.admin-sidebar-settings-fields,
+.admin-sidebar-preview {
+  min-inline-size: 0;
+  display: grid;
+  gap: 12px;
+}
+.admin-sidebar-preview-tools,
+.admin-sidebar-preview-tools > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.admin-sidebar-preview-tools {
+  justify-content: space-between;
+}
+.admin-sidebar-preview-tools .admin-button[aria-pressed="true"] {
+  color: var(--admin-accent);
+  border-color: var(--admin-accent);
+}
+.admin-sidebar-preview > p {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.admin-sidebar-preview-stage {
+  --surface: color-mix(in srgb, var(--brand-accent) 7%, var(--admin-surface));
+  --accent-soft: color-mix(
+    in srgb,
+    var(--brand-accent) 15%,
+    var(--admin-surface)
+  );
+  --text-strong: var(--admin-text);
+  padding: 10px;
+  background: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+}
+.admin-sidebar-preview-card {
+  margin-inline: auto;
+  inline-size: min(100%, 240px);
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text-strong);
+}
+[data-sidebar-preview="mobile"] .admin-sidebar-preview-card {
+  inline-size: min(100%, 320px);
+  border-start-start-radius: 0;
+  border-end-start-radius: 0;
+}
+.admin-sidebar-preview-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.admin-sidebar-preview-row {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  min-block-size: 37px;
+  padding: 6px 14px;
+  padding-inline-start: calc(14px + var(--preview-menu-depth) * 9px);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.admin-sidebar-preview-row[data-active="true"] {
+  background: var(--accent-soft);
+}
+[data-sidebar-preview="mobile"] .admin-sidebar-preview-row {
+  min-block-size: 48px;
+}
+.admin-sidebar-preview-row::-webkit-details-marker {
+  display: none;
+}
+.admin-sidebar-preview-row:is(summary) {
+  cursor: pointer;
+}
+.admin-sidebar-preview-menu
+  details[open]
+  > .admin-sidebar-preview-row
+  .admin-sidebar-preview-chevron {
+  rotate: 90deg;
+}
+.admin-sidebar-preview-search {
+  padding: 16px 20px;
+}
+@media (max-width: 1050px) {
+  .admin-sidebar-settings-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

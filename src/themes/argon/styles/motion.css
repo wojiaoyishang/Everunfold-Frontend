@@ -25,13 +25,11 @@
     scale var(--motion-normal) var(--motion-ease),
     opacity var(--motion-fast) ease;
 }
-.sidebar-search,
 .search-form > .ui-input {
   transition:
     box-shadow var(--motion-normal) ease,
     background-color var(--motion-normal) ease;
 }
-.sidebar-search:focus-within,
 .search-form > .ui-input:focus {
   box-shadow:
     0 0 0 3px var(--accent-soft),

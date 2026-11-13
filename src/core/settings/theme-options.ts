@@ -82,6 +82,7 @@ const defaults: RuntimeThemePreferences = {
   hero_animation: "rise",
   hero_typing_ms: 30,
   sidebar_profile: {},
+  sidebar_navigation: {},
   background_media_id: "",
   background_video_media_id: "",
   background_url: "",

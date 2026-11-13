@@ -25,7 +25,7 @@ export function NavigationSettingsPage() {
         <SettingsSection
           id="settings-navigation"
           title="当前主题导航"
-          description="顶栏、侧栏和移动菜单共用这份结构。首次保存会为当前主题建立独立导航，不会再改动其他主题。"
+          description="这份菜单用于顶栏。侧栏默认沿用，也可在主题设置中单独配置。"
         >
           <p className="admin-settings-hint">当前主题：{themeId}</p>
           {usingLegacy && (
