@@ -60,7 +60,7 @@ export function ManagementEntry({
     previousLocale.current = uiLocale;
     if (!enabled || !settled) return;
     const labels = entry.current?.querySelectorAll<HTMLElement>(
-      ".login-panel-heading h1, .login-panel-heading p, .login-form .ui-form-field > label, .login-submit > span, .login-back",
+      ".login-panel-heading h1, .login-panel-heading p, .login-form :is(.ui-form-field, .ui-field-heading) > label, .login-submit > span, .login-back, .login-entry-footer",
     );
     const animations = Array.from(labels ?? []).flatMap((element) =>
       element.animate

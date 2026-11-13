@@ -2516,5 +2516,7 @@
   "关闭搜索示例": "Close search preview",
   "这里仅展示搜索框样式。": "This preview does not submit a search.",
   "未命名菜单项": "Unnamed menu item",
-  "这份菜单用于顶栏。侧栏默认沿用，也可在主题设置中单独配置。": "This menu appears in the header. The sidebar can inherit it or use its own menu in Theme Settings."
+  "这份菜单用于顶栏。侧栏默认沿用，也可在主题设置中单独配置。": "This menu appears in the header. The sidebar can inherit it or use its own menu in Theme Settings.",
+  "还没有账号？": "New here?",
+  "已有账号？": "Already have an account?"
 }

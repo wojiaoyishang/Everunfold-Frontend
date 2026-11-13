@@ -37,10 +37,18 @@
   min-width: 0;
   gap: 9px;
 }
-.ui-form-field > label {
+.ui-form-field > label,
+.ui-field-heading > label {
   color: var(--text);
   font-size: 13px;
   font-weight: 550;
+}
+.ui-field-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 12px;
 }
 .ui-field-control {
   position: relative;
@@ -565,6 +573,9 @@ html[data-motion="reduced"]
 :is(.ui-form-field, .admin-settings-field, .account-field):has(
     :is(input, textarea, select)[required]
   )
+  > label::after,
+.ui-form-field:has(:is(input, textarea, select)[required])
+  > .ui-field-heading
   > label::after,
 label:has(+ :is(input, textarea, select)[required])::after,
 label:has(+ .ui-password-field input[required])::after {

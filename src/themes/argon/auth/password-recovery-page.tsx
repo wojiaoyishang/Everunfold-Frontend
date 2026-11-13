@@ -12,7 +12,8 @@ import { UiText } from "@/core/i18n/provider";
 import { FormField } from "../components/ui/form-field";
 import { PasswordField } from "../components/ui/password-field";
 import { Button, Form, TextField } from "../components/ui/primitives";
-import { RouteLink } from "../components/ui/route-link";
+import { Icon } from "../components/icon";
+import { EntryFooter } from "./entry-footer";
 import { ManagementEntry } from "./management-entry";
 import { SessionFeedback } from "./session-feedback";
 
@@ -241,15 +242,18 @@ export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
                 : code.length !== 32 || !password || !confirmation)
             }
           >
-            <UiText
-              text={
-                busy
-                  ? "正在处理…"
-                  : stage === "request"
-                    ? "发送重置码"
-                    : "重置密码"
-              }
-            />
+            <span>
+              <UiText
+                text={
+                  busy
+                    ? "正在处理…"
+                    : stage === "request"
+                      ? "发送重置码"
+                      : "重置密码"
+                }
+              />
+            </span>
+            <Icon name="arrow" />
           </Button>
           <Button
             className="login-back"
@@ -265,9 +269,7 @@ export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
           </Button>
         </Form>
       )}
-      <RouteLink href="/login" className="management-text-link">
-        <UiText text="返回账号登录" />
-      </RouteLink>
+      <EntryFooter href="/login" label="返回账号登录" />
     </ManagementEntry>
   );
 }

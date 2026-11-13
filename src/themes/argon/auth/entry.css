@@ -87,10 +87,10 @@
 }
 .login-panel {
   min-width: 0;
-  padding: 26px 36px 36px;
+  padding: 26px 36px 26px;
 }
 .login-panel-heading {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 .login-panel-heading .management-kicker {
   margin-bottom: 10px;
@@ -111,23 +111,27 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 304px;
 }
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 .login-form .ui-form-field {
   --field-height: 50px;
   --field-radius: 8px;
 }
-.login-form .ui-form-field > label {
+.login-form :is(.ui-form-field, .ui-field-heading) > label {
   font-size: 14px;
   font-weight: 500;
 }
 .login-form .ui-input {
-  background: color-mix(in srgb, var(--surface-soft) 60%, var(--surface));
+  --entry-input-surface: color-mix(
+    in srgb,
+    var(--surface-soft) 60%,
+    var(--surface)
+  );
+  background: var(--entry-input-surface);
   border-color: color-mix(in srgb, var(--text) 17%, var(--surface));
   font-size: 16px;
   transition:
@@ -142,6 +146,58 @@
   outline: 0;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+/* Match the form palette when a browser fills stored credentials. */
+.login-form .ui-input:is(:autofill, :-webkit-autofill) {
+  -webkit-text-fill-color: var(--text-strong);
+  caret-color: var(--text-strong);
+  box-shadow: inset 0 0 0 100px var(--entry-input-surface);
+}
+.login-form .ui-input:is(:autofill, :-webkit-autofill):focus {
+  box-shadow:
+    inset 0 0 0 100px var(--entry-input-surface),
+    0 0 0 3px color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.login-entry-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 6px;
+  margin-top: 20px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--text) 14%, var(--surface));
+  color: var(--entry-secondary);
+  font-size: 13px;
+  text-align: center;
+}
+.login-entry-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 36px;
+  padding-inline: 6px;
+  border-radius: 6px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+.login-entry-link:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+  text-decoration: underline;
+}
+.login-entry-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.login-credentials .ui-form-field:has(.ui-field-heading) {
+  gap: 4px;
+}
+.login-credentials .ui-field-heading .login-entry-link {
+  margin-block: -5px;
+  margin-inline-end: -6px;
 }
 .login-form .ui-input::placeholder {
   color: var(--entry-secondary);
@@ -327,19 +383,16 @@ html[data-motion="full"]
     padding: 26px 28px 0;
   }
   .login-panel {
-    padding: 32px 28px 34px;
+    padding: 28px 28px 24px;
   }
   .login-panel-heading {
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
   .login-panel-heading h1 {
     font-size: 28px;
   }
-  .login-panel-content {
-    min-height: 320px;
-  }
-  .login-form {
-    gap: 24px;
+  .login-entry-link {
+    min-block-size: 44px;
   }
   .login-form .ui-form-field {
     --field-height: 54px;
@@ -368,7 +421,7 @@ html[data-motion="full"]
     gap: 8px;
   }
   .login-panel {
-    padding: 30px 22px;
+    padding: 26px 22px 22px;
   }
   .login-panel-heading h1 {
     font-size: 26px;
@@ -389,6 +442,7 @@ html[data-motion="reduced"] .login-card {
   }
   .login-form .ui-input {
     border: 1px solid ButtonText;
+    box-shadow: none !important;
   }
   .login-form .ui-input:focus {
     outline: 2px solid Highlight;

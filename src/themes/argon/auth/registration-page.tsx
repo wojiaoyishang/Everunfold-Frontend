@@ -18,8 +18,9 @@ import { CaptchaField } from "../components/captcha-field";
 import { FormField } from "../components/ui/form-field";
 import { PasswordField } from "../components/ui/password-field";
 import { Button, Form, TextField } from "../components/ui/primitives";
-import { RouteLink } from "../components/ui/route-link";
 import { LoginSuccess } from "./login-success";
+import { Icon } from "../components/icon";
+import { EntryFooter } from "./entry-footer";
 import { ManagementEntry } from "./management-entry";
 import { SessionFeedback } from "./session-feedback";
 
@@ -353,7 +354,10 @@ export function RegistrationPage({ baseUrl }: { baseUrl: string }) {
                 (showRequest ? !captcha.ready : code.trim().length !== 6)
               }
             >
-              <UiText text={showRequest ? "发送验证码" : "验证并注册"} />
+              <span>
+                <UiText text={showRequest ? "发送验证码" : "验证并注册"} />
+              </span>
+              <Icon name="arrow" />
             </Button>
           )}
           {!showRequest && (
@@ -401,9 +405,7 @@ export function RegistrationPage({ baseUrl }: { baseUrl: string }) {
         </div>
       )}
       {!signedIn && (
-        <RouteLink href="/login" className="management-text-link">
-          <UiText text="返回账号登录" />
-        </RouteLink>
+        <EntryFooter href="/login" label="登录" prompt="已有账号？" />
       )}
     </ManagementEntry>
   );

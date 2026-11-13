@@ -18,6 +18,7 @@ import { Button, Form, TextField } from "../components/ui/primitives";
 import { FormField } from "../components/ui/form-field";
 import { PasswordField } from "../components/ui/password-field";
 import { RouteLink } from "../components/ui/route-link";
+import { EntryFooter } from "./entry-footer";
 import { ManagementEntry } from "./management-entry";
 import { SessionFeedback } from "./session-feedback";
 import { LoginSuccess } from "./login-success";
@@ -260,7 +261,11 @@ export function LoginPage({
           </Button>
         </Form>
       ) : (
-        <Form className="login-form" onSubmit={submit} aria-busy={busy}>
+        <Form
+          className="login-form login-credentials"
+          onSubmit={submit}
+          aria-busy={busy}
+        >
           <FormField id="login-username" label="用户名或邮箱" icon="user">
             <TextField
               id="login-username"
@@ -281,6 +286,13 @@ export function LoginPage({
             label="密码"
             icon="lock"
             invalid={passwordError}
+            action={
+              recoveryOpen && (
+                <RouteLink href="/login/recover" className="login-entry-link">
+                  <UiText text="忘记密码" />
+                </RouteLink>
+              )
+            }
           >
             <PasswordField
               id="login-password"
@@ -326,15 +338,12 @@ export function LoginPage({
           </Button>
         </Form>
       )}
-      {showLogin && recoveryOpen && (
-        <RouteLink href="/login/recover" className="management-text-link">
-          <UiText text="忘记密码" />
-        </RouteLink>
-      )}
       {showLogin && registrationOpen && (
-        <RouteLink href="/login/register" className="management-text-link">
-          <UiText text="注册账号" />
-        </RouteLink>
+        <EntryFooter
+          href="/login/register"
+          label="注册账号"
+          prompt="还没有账号？"
+        />
       )}
       <noscript>
         <p>
