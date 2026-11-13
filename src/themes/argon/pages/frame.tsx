@@ -8,6 +8,7 @@ import {
 } from "../components/reader/image-viewer";
 import styles from "./pages.module.css";
 import { Modal } from "../components/ui/modal";
+import regionStyles from "../components/shortcode-regions.module.css";
 import { ShortcodeRegion } from "../components/shortcode-regions";
 import { usePageImageViewer } from "./image-viewer-boundary";
 
@@ -144,6 +145,7 @@ export function PageFrame({
       {region && regions.has(region.id) && (
         <Modal
           title={region.kind === "reply-only" ? "回复可见区域" : "密码保护区域"}
+          className={regionStyles.dialog}
           closeLabel="关闭区域"
           closing={closingRegion}
           onClose={() => setClosingRegion(true)}
@@ -152,7 +154,11 @@ export function PageFrame({
             setClosingRegion(false);
           }}
         >
-          <ShortcodeRegion id={region.id} kind={region.kind} />
+          <ShortcodeRegion
+            id={region.id}
+            kind={region.kind}
+            showTitle={false}
+          />
         </Modal>
       )}
       {gallery && (

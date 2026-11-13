@@ -46,3 +46,75 @@
     flex: 1 1 100%;
   }
 }
+
+.region:not([data-embedded]) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.dialog:global(.admin-library-modal) {
+  box-sizing: border-box;
+  width: min(30rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  padding: 1.3rem;
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  color: var(--text-strong);
+  background: var(--surface);
+  box-shadow: 0 1.2rem 3rem rgb(0 0 0 / 24%);
+}
+
+.dialog::backdrop {
+  background: rgb(17 12 35 / 45%);
+}
+
+.dialog > :global(.admin-library-modal-heading) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.dialog > :global(.admin-library-modal-heading) h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.dialog > :global(.admin-library-modal-heading) button {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.45rem;
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.dialog > :global(.admin-library-modal-heading) svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.dialog .controls label {
+  flex: 1;
+}
+
+.dialog .controls input {
+  width: 100%;
+}
+
+.dialog .controls button {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: transparent;
+}
+
+@media (max-width: 420px) {
+  .dialog .controls label {
+    flex-basis: 100%;
+  }
+}

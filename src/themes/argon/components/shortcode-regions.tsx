@@ -78,9 +78,11 @@ function message(reason: unknown) {
 export function ShortcodeRegion({
   id,
   kind,
+  showTitle = true,
 }: {
   id: string;
   kind: RegionKind;
+  showTitle?: boolean;
 }) {
   const baseUrl = useOptionalReaderBaseUrl();
   const grant = useContext(Grant);
@@ -113,6 +115,7 @@ export function ShortcodeRegion({
   return (
     <Form
       className={styles.region}
+      data-embedded={showTitle || undefined}
       onSubmit={async (event) => {
         event.preventDefault();
         if (request.current) return;
@@ -142,9 +145,11 @@ export function ShortcodeRegion({
         }
       }}
     >
-      <strong>
-        <UiText text={reply ? "回复可见区域" : "密码保护区域"} />
-      </strong>
+      {showTitle && (
+        <strong>
+          <UiText text={reply ? "回复可见区域" : "密码保护区域"} />
+        </strong>
+      )}
       {reply && (
         <p>
           <UiText text="登录后发表评论，审核通过即可查看。" />
