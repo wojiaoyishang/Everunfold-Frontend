@@ -108,16 +108,16 @@ export function AccessSettingsPage() {
             <SettingsSection
               id="access-email"
               title="邮箱验证"
-              description="选择发送注册、邮箱验证和找回密码邮件时使用的发信配置。"
+              description="设置注册、邮箱验证和找回密码验证码的默认发信配置。通知策略可以按事件覆盖。"
             >
               <div className="admin-settings-field">
                 <label htmlFor="access-sender">
-                  <UiText text="认证邮件发信配置" />
+                  <UiText text="默认认证邮件发信配置" />
                 </label>
                 <Select
                   id="access-sender"
                   name="access-sender"
-                  label="认证邮件发信配置"
+                  label="默认认证邮件发信配置"
                   value={draft.mail_profile_id ?? "default"}
                   options={[
                     { value: "default", label: "使用默认发信配置" },
@@ -147,7 +147,7 @@ export function AccessSettingsPage() {
               </div>
               {saved && !saved.mail_ready && (
                 <p role="status">
-                  <UiText text="当前认证邮件发信配置不可用。" />
+                  <UiText text="当前默认认证邮件发信配置不可用。" />
                 </p>
               )}
               <RouteLink
@@ -156,6 +156,14 @@ export function AccessSettingsPage() {
               >
                 <UiText text="查看发信配置" />
               </RouteLink>
+              {can(user, "settings:read") && (
+                <RouteLink
+                  href="/admin/notifications#notification-event-security-email-verification"
+                  className="admin-settings-link"
+                >
+                  <UiText text="前往通知策略" />
+                </RouteLink>
+              )}
             </SettingsSection>
           </fieldset>
         </Form>

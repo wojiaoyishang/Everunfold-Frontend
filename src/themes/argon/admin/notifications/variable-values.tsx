@@ -9,6 +9,9 @@ export const notificationSampleValues: Record<string, string> = {
   "verification.code": "123456",
   "verification.expires_minutes": "15",
   "actor.name": "小灵",
+  "account.username": "xiaoling",
+  "account.display_name": "小灵",
+  "account.security_url": "/account",
   "recipient.display_name": "Alex",
   "event.id": "83f05ab3-485d-4d50-8823-355af9b5c53f",
   "event.occurred_at": "2026-11-12T09:30:00+00:00",
@@ -40,8 +43,12 @@ export const variableLabels: Record<string, string> = {
   "recipient.display_name": "收件人显示名称",
   "mail.reason": "邮件发送原因",
   "event.id": "事件编号",
+  "event.title": "事件名称",
   "event.occurred_at": "事件发生时间",
   "actor.name": "评论作者",
+  "account.username": "用户名",
+  "account.display_name": "用户显示名称",
+  "account.security_url": "账号安全链接",
   "content.excerpt": "评论摘要",
   "resource.title": "原文标题",
   "resource.url": "原文链接",
@@ -61,6 +68,7 @@ export function templateSampleValues(
   event: string,
   locale: string,
   site: Record<string, string>,
+  eventTitle = "",
 ) {
   const english = locale.toLowerCase().split("-")[0] === "en";
   const reviewPath =
@@ -99,6 +107,9 @@ export function templateSampleValues(
       Object.entries(site).map(([key, value]) => [`site.${key}`, value]),
     ),
     "site.support_url": site.support_url || "https://example.com/help",
+    "event.title": eventTitle,
+    "account.security_url":
+      origin + notificationSampleValues["account.security_url"],
     "resource.review_url": origin + reviewPath,
     "comment.review_url": origin + reviewPath,
     "comment.approve_url": origin + reviewPath + "&action=approve",
@@ -112,11 +123,15 @@ export function templateSampleValues(
     "mail.reason":
       accountSample?.[english ? 3 : 2] ??
       (english
-        ? "You received this email because the site sends you this notification."
-        : "你收到这封邮件是因为站点为你配置了这项通知。"),
+        ? "You received this email because the site enabled email notifications for this event."
+        : "你收到这封邮件是因为站点为此事件启用了邮件通知。"),
   };
   for (const key of ["resource.url", "content.url", "admin.url"] as const) {
     values[key] = origin + notificationSampleValues[key];
+  }
+  if (event.startsWith("account.")) {
+    values["admin.url"] =
+      origin + "/admin/users/83f05ab3-485d-4d50-8823-355af9b5c53f";
   }
   return values;
 }

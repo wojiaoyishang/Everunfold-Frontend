@@ -112,7 +112,7 @@ export function NotificationTemplatesPage() {
   const user = useAdminAccount();
   const catalog = useLanguageCatalog();
   const t = useT();
-  const editable = can(user, "settings:write");
+  const canWriteSettings = can(user, "settings:write");
   const [eventType, setEventType] = useState("");
   const [platformId, setPlatformId] = useState("in-app");
   const [locale, setLocale] = useState("");
@@ -134,6 +134,9 @@ export function NotificationTemplatesPage() {
     draftStore.revision === editor.state?.revision ? draftStore.values : {};
   const selectedEvent = eventType || editor.state?.events[0]?.id || "";
   const event = editor.state?.events.find((item) => item.id === selectedEvent);
+  const editable =
+    canWriteSettings &&
+    (!event?.id.startsWith("security.") || can(user, "access:manage"));
   const selectedPlatform = event?.email_only
     ? "email"
     : editor.state?.platforms.some((item) => item.id === platformId)
@@ -164,10 +167,18 @@ export function NotificationTemplatesPage() {
         selectedEvent,
         selectedLocale,
         site,
+        event?.title,
       ),
       ...sampleOverrides,
     }),
-    [selectedPlatform, selectedEvent, selectedLocale, site, sampleOverrides],
+    [
+      selectedPlatform,
+      selectedEvent,
+      selectedLocale,
+      site,
+      event?.title,
+      sampleOverrides,
+    ],
   );
   const languageOptions = useMemo(
     () =>
@@ -300,7 +311,7 @@ export function NotificationTemplatesPage() {
               <Button
                 ref={brandTrigger}
                 className="admin-button"
-                disabled={!editable || editor.busy}
+                disabled={!canWriteSettings || editor.busy}
                 onClick={() => {
                   editor.clearMessage();
                   setBrandOpen(true);

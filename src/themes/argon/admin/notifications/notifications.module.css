@@ -116,6 +116,14 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.routeRow[data-fixed] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.routeRow[data-fixed][data-mail] {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 2fr);
+}
+
 .routeRow:last-child {
   border-bottom: 0;
 }
@@ -133,6 +141,15 @@
   width: 100%;
   min-height: 36px;
   background: var(--admin-canvas);
+}
+
+.routeValue {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  color: var(--admin-text);
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .routeSwitch {
@@ -154,6 +171,18 @@
 
 .routeRow[data-mail] .routeRemove {
   grid-column: 4;
+}
+
+.routeRow[data-fixed] .routeSwitch {
+  grid-column: 1 / -1;
+}
+
+.routeRow[data-fixed]:has(.routeRemove) .routeSwitch {
+  grid-column: 1;
+}
+
+.routeRow[data-fixed] .routeRemove {
+  grid-column: -2;
 }
 
 .emptyRoutes {
@@ -1141,6 +1170,14 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .routeRow[data-fixed][data-mail] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .routeRow[data-fixed][data-mail] .routeField:last-of-type {
+    grid-column: 1 / -1;
+  }
+
   .routeRemove {
     grid-column: auto;
     width: 100%;
@@ -1195,8 +1232,14 @@
     padding: 14px 16px;
   }
 
-  .routeRow[data-mail] {
+  .routeRow[data-mail],
+  .routeRow[data-fixed],
+  .routeRow[data-fixed][data-mail] {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .routeRow[data-fixed] .routeValue {
+    min-height: 24px;
   }
 
   .toolbarField {

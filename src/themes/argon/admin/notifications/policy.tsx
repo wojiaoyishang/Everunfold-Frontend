@@ -48,6 +48,13 @@ function routeDraft(route: NotificationRouteView, index: number): RouteDraft {
   };
 }
 
+function eventGroup(event: NotificationEventView) {
+  if (event.plugin_id) return "插件事件";
+  if (event.id.startsWith("security.")) return "账号安全";
+  if (event.id.startsWith("account.")) return "用户通知";
+  return "通知事件";
+}
+
 function EventRoutes({
   event,
   routes,
@@ -70,6 +77,26 @@ function EventRoutes({
   onChange: (routes: RouteDraft[]) => void;
 }) {
   const t = useT();
+  const fixed = event.recipient_mode !== "configurable";
+  const required = event.delivery_mode === "security_required";
+  const managed = event.delivery_mode !== "notification";
+  const platformChoices = platforms.filter(
+    (platform) => !event.email_only || platform.value === "email",
+  );
+  const unusedPlatform = platformChoices.find(
+    (platform) =>
+      (platform.available || platform.value === "email") &&
+      !routes.some((route) => route.platform_id === platform.value),
+  );
+  const canAdd = !managed && (!fixed || !!unusedPlatform);
+  const inheritedMail =
+    event.delivery_mode === "security_optional"
+      ? "沿用找回密码验证码的发信配置"
+      : managed
+        ? "继承访问与安全的发信配置"
+        : "默认配置";
+  const recipient =
+    event.recipient_mode === "subject" ? "执行目标主体" : "管理员";
   const update = (key: string, patch: Partial<RouteDraft>) =>
     onChange(
       routes.map((route) =>
@@ -81,7 +108,7 @@ function EventRoutes({
       id={`notification-event-${event.id.replace(/[^a-z0-9]+/gi, "-")}`}
       className={styles.eventCard}
       data-settings-section={event.title}
-      data-settings-group="通知事件"
+      data-settings-group={eventGroup(event)}
       tabIndex={-1}
     >
       <header className={styles.eventHeading}>
@@ -94,129 +121,178 @@ function EventRoutes({
             <UiText text={event.description} />
           </p>
         </div>
-        <Button
-          className="admin-button"
-          disabled={!editable}
-          onClick={() =>
-            onChange([
-              ...routes,
-              {
-                key: `new-${Date.now()}`,
-                event_type: event.id,
-                recipient_type: "permission",
-                recipient_value: permissionOptions[0]?.value ?? "settings:read",
-                platform_id: "in-app",
-                mail_profile_id: null,
-                template_key: "default",
-                enabled: true,
-              },
-            ])
-          }
-        >
-          <Icon name="plus" />
-          <UiText text="添加接收规则" />
-        </Button>
+        {canAdd && (
+          <Button
+            className="admin-button"
+            disabled={!editable}
+            onClick={() =>
+              onChange([
+                ...routes,
+                {
+                  key: `new-${Date.now()}`,
+                  event_type: event.id,
+                  recipient_type:
+                    event.recipient_mode === "subject"
+                      ? "subject"
+                      : fixed
+                        ? "role"
+                        : "permission",
+                  recipient_value:
+                    event.recipient_mode === "subject"
+                      ? "subject"
+                      : fixed
+                        ? "admin"
+                        : (permissionOptions[0]?.value ?? "settings:read"),
+                  platform_id: fixed
+                    ? (unusedPlatform?.value ?? "email")
+                    : (platformChoices[0]?.value ?? "in-app"),
+                  mail_profile_id: null,
+                  template_key: "default",
+                  enabled: true,
+                },
+              ])
+            }
+          >
+            <Icon name="plus" />
+            <UiText text="添加接收规则" />
+          </Button>
+        )}
       </header>
       <div className={styles.routes}>
         {routes.length === 0 && (
           <p className={styles.emptyRoutes}>
-            <UiText text="此事件尚未通知任何人。" />
+            <UiText
+              text={
+                event.recipient_mode === "subject"
+                  ? "启用规则后，只通知执行目标主体。"
+                  : event.recipient_mode === "admins"
+                    ? "启用规则后，只向管理员发送。"
+                    : "此事件尚未通知任何人。"
+              }
+            />
           </p>
         )}
         {routes.map((route) => (
           <div
             className={styles.routeRow}
             data-mail={route.platform_id === "email" || undefined}
+            data-fixed={fixed || undefined}
             key={route.key}
           >
+            {fixed ? (
+              <div className={styles.routeField}>
+                <UiText text="接收人" />
+                <span className={styles.routeValue}>
+                  <UiText text={recipient} />
+                </span>
+              </div>
+            ) : (
+              <>
+                <div className={styles.routeField}>
+                  <UiText text="接收人类型" />
+                  <Select
+                    programOptions
+                    name={`${route.key}-recipient-type`}
+                    label={t("接收人类型")}
+                    value={route.recipient_type}
+                    disabled={!editable}
+                    options={[
+                      { value: "permission", label: "拥有权限的成员" },
+                      { value: "role", label: "角色" },
+                      { value: "user", label: "指定用户" },
+                    ]}
+                    onValueChange={(value) => {
+                      const recipientType =
+                        value as RouteDraft["recipient_type"];
+                      update(route.key, {
+                        recipient_type: recipientType,
+                        recipient_value:
+                          recipientType === "role"
+                            ? "admin"
+                            : recipientType === "permission"
+                              ? (permissionOptions[0]?.value ?? "settings:read")
+                              : "",
+                      });
+                    }}
+                  />
+                </div>
+                <div className={styles.routeField}>
+                  <UiText text="接收人" />
+                  {route.recipient_type === "role" ? (
+                    <Select
+                      programOptions
+                      name={`${route.key}-role`}
+                      label={t("接收角色")}
+                      value={route.recipient_value}
+                      disabled={!editable}
+                      options={[
+                        { value: "admin", label: "管理员" },
+                        { value: "user", label: "成员" },
+                      ]}
+                      onValueChange={(value) =>
+                        update(route.key, { recipient_value: value })
+                      }
+                    />
+                  ) : route.recipient_type === "permission" ? (
+                    <Select
+                      programOptions
+                      name={`${route.key}-permission`}
+                      label={t("接收权限")}
+                      value={route.recipient_value}
+                      disabled={!editable}
+                      options={permissionOptions}
+                      onValueChange={(value) =>
+                        update(route.key, { recipient_value: value })
+                      }
+                    />
+                  ) : (
+                    <AccountUserPicker
+                      label={t("指定用户")}
+                      value={route.recipient_value}
+                      disabled={!editable}
+                      onChange={(value) =>
+                        update(route.key, {
+                          recipient_value: value,
+                        })
+                      }
+                    />
+                  )}
+                </div>
+              </>
+            )}
             <div className={styles.routeField}>
-              <UiText text="接收人类型" />
-              <Select
-                programOptions
-                name={`${route.key}-recipient-type`}
-                label={t("接收人类型")}
-                value={route.recipient_type}
-                options={[
-                  { value: "permission", label: "拥有权限的成员" },
-                  { value: "role", label: "角色" },
-                  { value: "user", label: "指定用户" },
-                ]}
-                onValueChange={(value) => {
-                  const recipientType = value as RouteDraft["recipient_type"];
-                  update(route.key, {
-                    recipient_type: recipientType,
-                    recipient_value:
-                      recipientType === "role"
-                        ? "admin"
-                        : recipientType === "permission"
-                          ? (permissionOptions[0]?.value ?? "settings:read")
-                          : "",
-                  });
-                }}
-              />
-            </div>
-            <div className={styles.routeField}>
-              <UiText text="接收人" />
-              {route.recipient_type === "role" ? (
-                <Select
-                  programOptions
-                  name={`${route.key}-role`}
-                  label={t("接收角色")}
-                  value={route.recipient_value}
-                  options={[
-                    { value: "admin", label: "管理员" },
-                    { value: "user", label: "成员" },
-                  ]}
-                  onValueChange={(value) =>
-                    update(route.key, { recipient_value: value })
-                  }
-                />
-              ) : route.recipient_type === "permission" ? (
-                <Select
-                  programOptions
-                  name={`${route.key}-permission`}
-                  label={t("接收权限")}
-                  value={route.recipient_value}
-                  options={permissionOptions}
-                  onValueChange={(value) =>
-                    update(route.key, { recipient_value: value })
-                  }
-                />
+              <UiText text="通知平台" />
+              {event.email_only ? (
+                <span className={styles.routeValue}>
+                  <UiText text="邮件" />
+                </span>
               ) : (
-                <AccountUserPicker
-                  label={t("指定用户")}
-                  value={route.recipient_value}
+                <Select
+                  programOptions
+                  name={`${route.key}-platform`}
+                  label={t("通知平台")}
+                  value={route.platform_id}
                   disabled={!editable}
-                  onChange={(value) =>
+                  options={platformChoices.map((platform) => ({
+                    value: platform.value,
+                    label: platform.label,
+                    disabled:
+                      (!platform.available && platform.value !== "email") ||
+                      (fixed &&
+                        routes.some(
+                          (item) =>
+                            item.key !== route.key &&
+                            item.platform_id === platform.value,
+                        )),
+                  }))}
+                  onValueChange={(value) =>
                     update(route.key, {
-                      recipient_value: value,
+                      platform_id: value,
+                      mail_profile_id: null,
                     })
                   }
                 />
               )}
-            </div>
-            <div className={styles.routeField}>
-              <UiText text="通知平台" />
-              <Select
-                programOptions
-                name={`${route.key}-platform`}
-                label={t("通知平台")}
-                value={route.platform_id}
-                options={platforms.map((platform) => ({
-                  value: platform.value,
-                  label: platform.label,
-                  disabled: !platform.available,
-                }))}
-                onValueChange={(value) =>
-                  update(route.key, {
-                    platform_id: value,
-                    mail_profile_id:
-                      value === "email"
-                        ? (mailProfiles[0]?.value ?? null)
-                        : null,
-                  })
-                }
-              />
             </div>
             {route.platform_id === "email" && (
               <div className={styles.routeField}>
@@ -226,8 +302,9 @@ function EventRoutes({
                   name={`${route.key}-mail-profile`}
                   label={t("发信配置")}
                   value={route.mail_profile_id ?? "default"}
+                  disabled={!editable}
                   options={[
-                    { value: "default", label: "默认配置" },
+                    { value: "default", label: inheritedMail },
                     ...mailProfiles,
                   ]}
                   onValueChange={(value) =>
@@ -238,27 +315,36 @@ function EventRoutes({
                 />
               </div>
             )}
-            <span className={styles.routeSwitch}>
-              <Switch
-                checked={route.enabled ?? true}
+            {required ? (
+              <span className={styles.routeSwitch}>
+                <Icon name="lock" />
+                <UiText text="流程必需" />
+              </span>
+            ) : (
+              <span className={styles.routeSwitch}>
+                <Switch
+                  checked={route.enabled ?? true}
+                  disabled={!editable}
+                  onCheckedChange={(enabled) => update(route.key, { enabled })}
+                  aria-label={t("启用通知规则")}
+                />
+                <UiText text={route.enabled ? "启用" : "停用"} />
+              </span>
+            )}
+            {!managed && (
+              <Button
+                className={`admin-button ${styles.routeRemove}`}
+                aria-label={t("删除通知规则")}
+                title={t("删除通知规则")}
                 disabled={!editable}
-                onCheckedChange={(enabled) => update(route.key, { enabled })}
-                aria-label={t("启用通知规则")}
-              />
-              <UiText text={route.enabled ? "启用" : "停用"} />
-            </span>
-            <Button
-              className={`admin-button ${styles.routeRemove}`}
-              aria-label={t("删除通知规则")}
-              title={t("删除通知规则")}
-              disabled={!editable}
-              onClick={() =>
-                onChange(routes.filter((item) => item.key !== route.key))
-              }
-            >
-              <Icon name="trash" />
-              <UiText text="删除" />
-            </Button>
+                onClick={() =>
+                  onChange(routes.filter((item) => item.key !== route.key))
+                }
+              >
+                <Icon name="trash" />
+                <UiText text="删除" />
+              </Button>
+            )}
           </div>
         ))}
       </div>
@@ -271,6 +357,7 @@ export function NotificationPolicyPage() {
   const mailEditor = useMailSettings();
   const user = useAdminAccount();
   const editable = can(user, "settings:write");
+  const manageAccess = can(user, "access:manage");
   const [localDrafts, setLocalDrafts] = useState<RouteDraft[] | null>(null);
   const drafts = localDrafts ?? editor.state?.routes.map(routeDraft) ?? [];
   const dirty = localDrafts !== null;
@@ -336,7 +423,7 @@ export function NotificationPolicyPage() {
       <UnsavedAccountChanges dirty={dirty} busy={editor.busy} />
       <AdminPageHeading
         title="通知策略"
-        description="业务事件先进入通知队列，再按接收人和平台生成投递。接收规则去重后，同一成员在同一平台只会收到一次。"
+        description="配置事件的接收规则和投递渠道。账号验证码的收件人由认证流程确定。"
         action={
           <Button
             className="admin-button"
@@ -374,27 +461,27 @@ export function NotificationPolicyPage() {
             </div>
           )}
           <div className={styles.eventGrid}>
-            {editor.state.events
-              .filter((event) => !event.email_only)
-              .map((event) => (
-                <EventRoutes
-                  key={event.id}
-                  event={event}
-                  routes={drafts.filter(
-                    (route) => route.event_type === event.id,
-                  )}
-                  platforms={platformOptions}
-                  permissionOptions={permissionOptions}
-                  mailProfiles={mailProfiles}
-                  editable={editable && !editor.busy}
-                  onChange={(eventRoutes) => {
-                    const others = drafts.filter(
-                      (route) => route.event_type !== event.id,
-                    );
-                    change([...others, ...eventRoutes]);
-                  }}
-                />
-              ))}
+            {editor.state.events.map((event) => (
+              <EventRoutes
+                key={event.id}
+                event={event}
+                routes={drafts.filter((route) => route.event_type === event.id)}
+                platforms={platformOptions}
+                permissionOptions={permissionOptions}
+                mailProfiles={mailProfiles}
+                editable={
+                  editable &&
+                  !editor.busy &&
+                  (eventGroup(event) !== "账号安全" || manageAccess)
+                }
+                onChange={(eventRoutes) => {
+                  const others = drafts.filter(
+                    (route) => route.event_type !== event.id,
+                  );
+                  change([...others, ...eventRoutes]);
+                }}
+              />
+            ))}
           </div>
           <div className={styles.savebar}>
             <span>
