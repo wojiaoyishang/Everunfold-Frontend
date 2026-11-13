@@ -47,6 +47,11 @@ export function LoginSuccess({
       <h2>
         <UiText text={registered ? "注册成功" : "登录成功"} />
       </h2>
+      {registered && (
+        <p>
+          <UiText text="注册邮箱已验证。" />
+        </p>
+      )}
       <p>
         <UiText
           text={

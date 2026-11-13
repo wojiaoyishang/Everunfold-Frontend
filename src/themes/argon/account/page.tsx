@@ -21,6 +21,7 @@ import { Button } from "../components/ui/primitives";
 import { RouteLink } from "../components/ui/route-link";
 import { InterfaceLanguage } from "../components/language-switcher";
 import { Icon } from "../components/icon";
+import { NotificationCenter } from "../admin/notifications/center";
 import { AccountProfileEditor } from "./profile";
 import { AccountSecurity } from "./security";
 import { AccountKeys } from "./keys";
@@ -135,6 +136,7 @@ function ConfirmedAccount({
                   className="account-personal-actions"
                   aria-label={t("账号导航")}
                 >
+                  <NotificationCenter scope="account" />
                   <InterfaceLanguage />
                   <AccountLogoutControl
                     busy={action.busy}

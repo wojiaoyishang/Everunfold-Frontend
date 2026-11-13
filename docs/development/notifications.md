@@ -1,6 +1,6 @@
 # 通知系统与通知模板
 
-版本：notifications-15，2026-11-13。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)、[ADR0117](../decisions/0117-html-notification-templates.md)、[ADR0118](../decisions/0118-account-user-picker-and-policy-navigation.md)和[ADR0132](../decisions/0132-account-notification-events.md)。
+版本：notifications-16，2026-11-13。架构决定见 [ADR0113](../decisions/0113-notification-events-platforms-and-templates.md)、[ADR0117](../decisions/0117-html-notification-templates.md)、[ADR0118](../decisions/0118-account-user-picker-and-policy-navigation.md)、[ADR0132](../decisions/0132-account-notification-events.md)和[ADR0133](../decisions/0133-registration-verification-and-notice-recipients.md)。
 
 ## 概念
 
@@ -36,13 +36,13 @@
 | `settings.delivery_failed` | 前端节点在最大重试次数后仍未应用快照 | 运维告警 | 单条同步投递记录 |
 | `security.registration_verification`、`security.email_verification`、`security.password_recovery` | 认证流程需要验证码 | 发给流程验证的邮箱，必需 | 认证挑战 |
 | `security.password_reset_completed` | 自助重置密码成功 | 发给原已验证邮箱，默认开启 | 认证挑战 |
-| `security.email_verified` | 用户用验证码完成邮箱验证 | 发给通过验证的邮箱，可选 | 验证请求 |
+| `security.email_verified` | 在账号中心验证或更换邮箱成功 | 发给通过验证的邮箱，可选；注册时不重复发 | 验证请求 |
 | `security.two_factor_enabled`、`security.two_factor_disabled`、`security.two_factor_recovery_rotated`、`security.two_factor_recovery_used` | 两步验证启停、更新恢复码或用恢复码完成登录 | 发给操作涉及账号的已验证邮箱，可选 | 账号认证版本或登录事件 |
-| `account.registration_succeeded`、`account.user_created` | 自行注册完成或管理员新建账号 | 默认向管理员发送站内通知，可加邮件 | 新账号 ID |
+| `account.registration_succeeded`、`account.user_created` | 自行注册完成或管理员新建账号 | 默认管理员站内通知，可选指定用户、角色或权限 | 新账号 ID |
 
 事件目录由后端注册，后台策略和模板自动出现。验证码事件可单独指定发信配置，也可继承「访问与安全」的默认配置。规则只控制发信配置，不能停用流程必需的验证码，也不能将收件人改成用户、角色或其他渠道。密码重置完成邮件默认沿用该次重置码的发信配置，可单独覆盖或停用。上述邮件由认证 Worker 投递，状态留在认证流程中；普通通知在通知投递记录中查看。
 
-「注册成功」用于自行注册；「新增用户」用于后台建号。同一账号只触发其中一个。站内和邮件模板支持 `{{account.username}}`、`{{account.display_name}}` 和 `{{admin.url}}`。账号安全提醒没有模板变量能取到密码、验证码、TOTP 密钥或恢复码。编辑账号安全策略和模板需要 `settings:write` 与 `access:manage`。
+「注册成功」用于自行注册；「新增用户」用于后台建号。同一账号只触发其中一个。注册验证码通过即验证邮箱，无需到账号中心再次验证。两个用户通知可选择指定用户、角色或拥有某项权限的成员。站内和邮件模板支持 `{{account.username}}`、`{{account.display_name}}`；具备用户管理权限的接收人还可获得 `{{admin.url}}`。普通成员可在账号中心顶栏查看自己的站内通知。账号安全提醒没有模板变量能取到密码、验证码、TOTP 密钥或恢复码。编辑账号安全策略和模板需要 `settings:write` 与 `access:manage`。
 
 “指定用户”使用共享账号用户选择器，可搜索姓名、用户名、邮箱，也可粘贴完整稳定 UUID；显示名称和头像只用于识别，保存值始终是用户 ID。目录查询沿用`users:manage`边界。没有用户目录权限但具有通知设置权限的账号仍可手工填写稳定 ID。选择结果属于本地策略草稿，点击“保存策略”后才写入。
 

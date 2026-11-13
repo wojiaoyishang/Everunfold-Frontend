@@ -73,7 +73,8 @@ export function EmailVerificationControl({
       </Button>
       {open && (
         <VerificationDialog
-          email={source === "mailbox" ? "" : email}
+          email={email}
+          changing={source === "mailbox"}
           trigger={trigger}
           onClose={() => setOpen(false)}
           onVerified={onVerified}
@@ -85,11 +86,13 @@ export function EmailVerificationControl({
 
 function VerificationDialog({
   email,
+  changing,
   trigger,
   onClose,
   onVerified,
 }: {
   email: string;
+  changing: boolean;
   trigger: React.RefObject<HTMLButtonElement | null>;
   onClose: () => void;
   onVerified: (profile: AccountProfile) => void;
@@ -97,10 +100,9 @@ function VerificationDialog({
   const { baseUrl, csrfToken } = useAdminRequest();
   const t = useT();
   const codeId = useId();
-  const captcha = useCaptcha(baseUrl, "email_verification");
   const request = useAccountAction(requestFailure);
   const confirm = useAccountAction(confirmFailure);
-  const [destination, setDestination] = useState(email);
+  const [destination, setDestination] = useState(changing ? "" : email);
   const [delivery, setDelivery] = useState<EmailVerificationState | null>(null);
   const [code, setCode] = useState("");
   const [retryAt, setRetryAt] = useState(0);
@@ -108,12 +110,24 @@ function VerificationDialog({
   const [pollError, setPollError] = useState(false);
   const [pollVersion, setPollVersion] = useState(0);
   const normalized = destination.trim();
+  const alreadyVerified =
+    changing && normalized.toLowerCase() === email.trim().toLowerCase();
+  const captcha = useCaptcha(
+    baseUrl,
+    "email_verification",
+    undefined,
+    !alreadyVerified,
+  );
   const requestId = delivery?.request_id;
   const pending =
     delivery?.status === "queued" || delivery?.status === "sending";
   const busy = request.busy || confirm.busy;
   const sendEnabled =
-    !busy && captcha.ready && !remaining && emailPattern.test(normalized);
+    !busy &&
+    !alreadyVerified &&
+    captcha.ready &&
+    !remaining &&
+    emailPattern.test(normalized);
 
   useEffect(() => {
     if (!retryAt) return;
@@ -210,8 +224,12 @@ function VerificationDialog({
   return (
     <ConfirmDialog
       open
-      title="验证邮箱"
-      description="向此地址发送一次性验证码。验证码有效期为 15 分钟。"
+      title={changing ? "更换邮箱" : "验证邮箱"}
+      description={
+        changing
+          ? "新邮箱通过验证后才会替换当前邮箱。验证码有效期为 15 分钟。"
+          : "向此地址发送一次性验证码。验证码有效期为 15 分钟。"
+      }
       confirmLabel="确认验证"
       busyLabel={request.busy ? "确认验证" : "正在验证…"}
       busy={busy}
@@ -249,7 +267,7 @@ function VerificationDialog({
     >
       <div className="account-email-dialog">
         <AccountField
-          label="邮箱"
+          label={changing ? "新邮箱" : "邮箱"}
           value={destination}
           onChange={(value) => {
             setDestination(value);
@@ -264,7 +282,13 @@ function VerificationDialog({
           autoComplete="email"
           maxLength={254}
         />
-        <CaptchaField control={captcha} appearance="dialog" disabled={busy} />
+        {alreadyVerified ? (
+          <p role="status">
+            <UiText text="此邮箱已验证，请填写新的邮箱地址。" />
+          </p>
+        ) : (
+          <CaptchaField control={captcha} appearance="dialog" disabled={busy} />
+        )}
         <div className="account-email-dialog-actions">
           <Button
             type="button"
@@ -339,6 +363,7 @@ function requestFailure(error: unknown) {
     if ([40386, 40387, 40986, 42986, 50386].includes(error.code ?? 0))
       return captchaFailure(error);
     if (error.code === 42972) return "验证码发送过于频繁，请稍后再试。";
+    if (error.code === 40976) return "此邮箱已验证，请填写新的邮箱地址。";
     if (error.code === 42272) return "邮件服务暂不可用，请联系站点管理员。";
   }
   return accountFailure(error);
@@ -350,6 +375,7 @@ function confirmFailure(error: unknown) {
     if (error.code === 40973) return "验证码仍在发送，请稍后重试。";
     if (error.code === 40974) return "账号资料已更新，请重新申请验证码。";
     if (error.code === 40975) return "此邮箱无法绑定，请使用其他邮箱。";
+    if (error.code === 40976) return "此邮箱已验证，请填写新的邮箱地址。";
   }
   return accountFailure(error);
 }

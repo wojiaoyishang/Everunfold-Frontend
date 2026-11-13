@@ -78,6 +78,7 @@ function EventRoutes({
 }) {
   const t = useT();
   const fixed = event.recipient_mode !== "configurable";
+  const accountEvent = !event.plugin_id && event.id.startsWith("account.");
   const required = event.delivery_mode === "security_required";
   const managed = event.delivery_mode !== "notification";
   const platformChoices = platforms.filter(
@@ -134,13 +135,13 @@ function EventRoutes({
                   recipient_type:
                     event.recipient_mode === "subject"
                       ? "subject"
-                      : fixed
+                      : fixed || accountEvent
                         ? "role"
                         : "permission",
                   recipient_value:
                     event.recipient_mode === "subject"
                       ? "subject"
-                      : fixed
+                      : fixed || accountEvent
                         ? "admin"
                         : (permissionOptions[0]?.value ?? "settings:read"),
                   platform_id: fixed

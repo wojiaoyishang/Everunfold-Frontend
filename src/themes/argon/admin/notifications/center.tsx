@@ -1,6 +1,6 @@
 "use client";
 
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 import { useNotificationInbox } from "@/core/notifications/use-notifications";
 import { ActionPopover } from "../../components/ui/action-popover";
 import { Button } from "../../components/ui/primitives";
@@ -8,12 +8,21 @@ import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
 import styles from "./notifications.module.css";
 
-export function NotificationCenter() {
+export function NotificationCenter({
+  scope = "admin",
+}: {
+  scope?: "admin" | "account";
+}) {
+  const t = useT();
   const { inbox, unread, loading, error, refresh, markRead } =
-    useNotificationInbox();
+    useNotificationInbox(scope);
   return (
     <ActionPopover
-      label={`通知中心${unread ? `，${unread} 条未读` : ""}`}
+      label={
+        unread
+          ? t("通知中心，{count} 条未读", { count: unread })
+          : t("通知中心")
+      }
       className="admin-icon-button admin-notification-trigger"
       panelClassName={styles.centerPanel}
       panelWidth={380}
@@ -144,14 +153,16 @@ export function NotificationCenter() {
             <span>
               <UiText text="通知会在后台保持同步" />
             </span>
-            <RouteLink
-              href="/admin/notifications/deliveries"
-              className="admin-text-action"
-              onClick={close}
-            >
-              <UiText text="查看投递记录" />
-              <Icon name="arrow" />
-            </RouteLink>
+            {scope === "admin" && (
+              <RouteLink
+                href="/admin/notifications/deliveries"
+                className="admin-text-action"
+                onClick={close}
+              >
+                <UiText text="查看投递记录" />
+                <Icon name="arrow" />
+              </RouteLink>
+            )}
           </footer>
         </div>
       )}

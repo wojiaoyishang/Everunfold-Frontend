@@ -225,7 +225,7 @@ export function RegistrationPage({ baseUrl }: { baseUrl: string }) {
         title: !showRequest && canRegister ? "验证注册邮箱" : "注册账号",
         description:
           !showRequest && canRegister
-            ? "输入邮件中的六位验证码。"
+            ? "输入邮件中的六位验证码，即可验证邮箱并完成注册。"
             : "验证邮箱后即可创建账号。",
       }}
     >

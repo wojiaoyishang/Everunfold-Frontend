@@ -29,7 +29,11 @@ export async function generateSettingsClient(
               ? /^\/v1\/(?:account|admin\/users|admin\/user-presets|admin\/api-key-applications|admin\/access)(?:\/[a-z/{}_-]+)?$/.test(
                   op.path,
                 )
-              : /^\/v1\/admin\/[a-z/{}_-]+$/.test(op.path)) ||
+              : stem === "notifications"
+                ? /^\/v1\/(?:admin\/notifications\/[a-z-]+|account\/notifications\/inbox)$/.test(
+                    op.path,
+                  )
+                : /^\/v1\/admin\/[a-z/{}_-]+$/.test(op.path)) ||
         !["GET", "PATCH", "POST"].includes(op.method) ||
         !schema.properties[op.response] ||
         (op.input && !schema.properties[op.input]) ||

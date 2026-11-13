@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  markAccountNotificationsRead,
   markNotificationsRead,
+  readAccountNotificationInbox,
   readNotificationInbox,
   readNotificationState,
   saveMailBrand,
@@ -166,7 +168,7 @@ export function useNotificationState() {
   };
 }
 
-export function useNotificationInbox() {
+export function useNotificationInbox(scope: "admin" | "account" = "admin") {
   const { baseUrl, csrfToken } = useAdminRequest();
   const active = useRef<AbortController | null>(null);
   const [inbox, setInbox] = useState<NotificationInbox | null>(null);
@@ -180,9 +182,11 @@ export function useNotificationInbox() {
     active.current = controller;
     setLoading(true);
     try {
-      const response = await readNotificationInbox(baseUrl, {
-        signal: controller.signal,
-      });
+      const read =
+        scope === "account"
+          ? readAccountNotificationInbox
+          : readNotificationInbox;
+      const response = await read(baseUrl, { signal: controller.signal });
       if (!controller.signal.aborted) {
         setInbox(response.data);
         setError(false);
@@ -192,7 +196,7 @@ export function useNotificationInbox() {
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
-  }, [baseUrl]);
+  }, [baseUrl, scope]);
 
   useEffect(() => {
     const delay = window.setTimeout(() => void refresh(), 350);
@@ -211,7 +215,11 @@ export function useNotificationInbox() {
     if (loading) return;
     setLoading(true);
     try {
-      const response = await markNotificationsRead(baseUrl, { ids }, csrfToken);
+      const mark =
+        scope === "account"
+          ? markAccountNotificationsRead
+          : markNotificationsRead;
+      const response = await mark(baseUrl, { ids }, csrfToken);
       setInbox(response.data);
       setError(false);
     } catch {
