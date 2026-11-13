@@ -2,14 +2,29 @@
 import { createServer } from "node:http";
 import { BlockList, isIP } from "node:net";
 import { createHash, timingSafeEqual } from "node:crypto";
+import type { ReceiverStatus } from "@/core/contracts/settings";
 import type { SettingsStore } from "./store";
 import type { ContentStore } from "../content/store";
+
+async function replica(
+  read: () => Promise<number | undefined>,
+): Promise<ReceiverStatus["public_settings"]> {
+  try {
+    const revision = await read();
+    return revision === undefined
+      ? { status: "missing", revision: null }
+      : { status: "ready", revision };
+  } catch {
+    return { status: "unavailable", revision: null };
+  }
+}
 
 export function settingsReceiver(
   store: SettingsStore,
   token: string,
   peers: string[],
   content?: ContentStore,
+  identity?: Pick<ReceiverStatus, "node_id" | "source_epoch">,
 ) {
   if (token.length < 32 || !peers.length)
     throw new Error("Settings receiver credentials are not configured");
@@ -41,6 +56,29 @@ export function settingsReceiver(
       ) {
         reply(403, { error: "forbidden" });
         request.resume();
+        return;
+      }
+      if (
+        identity &&
+        request.method === "GET" &&
+        request.url === "/internal/settings/status"
+      ) {
+        request.resume();
+        const [public_settings, cache_policy, public_content] =
+          await Promise.all([
+            replica(
+              async () => (await store.read("public-settings"))?.revision,
+            ),
+            replica(async () => (await store.read("cache-policy"))?.revision),
+            replica(async () => (await content?.read())?.generation),
+          ]);
+        reply(200, {
+          protocol: "node-status-1",
+          ...identity,
+          public_settings,
+          cache_policy,
+          public_content,
+        } satisfies ReceiverStatus);
         return;
       }
       const selected =

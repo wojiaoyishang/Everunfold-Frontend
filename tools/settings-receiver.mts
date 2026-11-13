@@ -36,6 +36,7 @@ const server = settingsReceiver(
   token,
   config.backend.allowedPeerIps,
   content,
+  { node_id: config.frontendNodeId, source_epoch: config.settings.sourceEpoch },
 );
 server.listen(config.settings.receiverPort, config.settings.receiverHost, () =>
   console.log(`Content/settings receiver ready for ${config.frontendNodeId}`),

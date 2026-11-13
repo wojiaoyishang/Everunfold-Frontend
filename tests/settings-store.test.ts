@@ -88,7 +88,10 @@ test("receiver requires actual socket IP AND token; forwarding headers do not gr
   const store = new FileSettingsStore(directory, "test", epoch);
   const token = randomUUID() + randomUUID();
   for (const peers of [["127.0.0.2"], ["127.0.0.1"]]) {
-    const server = settingsReceiver(store, token, peers);
+    const server = settingsReceiver(store, token, peers, undefined, {
+      node_id: "test",
+      source_epoch: epoch,
+    });
     server.listen(0, "127.0.0.1");
     await once(server, "listening");
     try {
@@ -104,6 +107,27 @@ test("receiver requires actual socket IP AND token; forwarding headers do not gr
         body: JSON.stringify(policy(epoch, 1)),
       });
       assert.equal(result.status, peers[0] === "127.0.0.1" ? 200 : 403);
+      const statusUrl = url.replace(/\/apply$/, "/status");
+      assert.equal(
+        (
+          await fetch(statusUrl, {
+            headers: { "X-Forwarded-For": "127.0.0.1" },
+          })
+        ).status,
+        403,
+      );
+      const probe = await fetch(statusUrl, { headers });
+      assert.equal(probe.status, peers[0] === "127.0.0.1" ? 200 : 403);
+      if (probe.ok) {
+        assert.deepEqual(await probe.json(), {
+          protocol: "node-status-1",
+          node_id: "test",
+          source_epoch: epoch,
+          public_settings: { status: "missing", revision: null },
+          cache_policy: { status: "ready", revision: 1 },
+          public_content: { status: "missing", revision: null },
+        });
+      }
       assert.equal(
         (
           await fetch(url, {

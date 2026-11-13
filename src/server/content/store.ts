@@ -5,6 +5,7 @@ import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "@/core/contracts/content-admin-v1-schema";
 import type { ContentDelivery } from "@/core/contracts/content-admin";
+import type { PublicSnapshot } from "@/core/content/types";
 import { parsePublicSnapshot } from "../../core/content/validation";
 import { jsonDigest, publishImmutableJson } from "../storage/immutable-json";
 
@@ -22,6 +23,7 @@ const validate = ajv.compile<ContentDelivery>({
 
 export interface ContentStore {
   maxBytes: number;
+  read(): Promise<PublicSnapshot | null>;
   apply(value: unknown): Promise<ContentDelivery>;
 }
 
