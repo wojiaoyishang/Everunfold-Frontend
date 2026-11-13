@@ -4,6 +4,8 @@ active = "main"
 [profiles.main]
 # Browser API origin and source UUID of this backend.
 BACKEND_BASE_URL = "https://api.example.com"
+# Optional development alias. The loopback proxy must serve both the page and /v1/.
+# browser_loopback_origin = "http://127.0.0.1:3000"
 source_epoch = "00000000-0000-0000-0000-000000000000"
 
 [profiles.main.backend]

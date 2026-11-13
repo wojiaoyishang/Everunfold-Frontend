@@ -3,10 +3,12 @@ import "server-only";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { headers } from "next/headers";
 import { cache } from "react";
 
 import { ConfigurationError } from "./schema";
 import { contentDirectory, readConfigurationFiles } from "./files";
+import { browserBackendBaseUrl, browserProtocolHeader } from "./browser-api";
 
 export function projectRoot(): string {
   const candidates = [
@@ -54,3 +56,12 @@ export function readConfiguration() {
 }
 
 export const readPageConfiguration = cache(readConfiguration);
+
+export const readBrowserBackendBaseUrl = cache(async () => {
+  const request = await headers();
+  return browserBackendBaseUrl(
+    readPageConfiguration(),
+    request.get("host"),
+    request.get(browserProtocolHeader),
+  );
+});

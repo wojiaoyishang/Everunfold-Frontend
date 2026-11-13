@@ -12,6 +12,7 @@ export interface FrontendConfiguration {
   plugins: { directory: string };
   publicSiteUrl: string | undefined;
   backendBaseUrl: string;
+  browserLoopbackOrigin: string | undefined;
   frontendNodeId: string;
   nodesMonitor: {
     enabled: boolean;
@@ -193,6 +194,7 @@ export function parseConfiguration(
     root,
     [
       "BACKEND_BASE_URL",
+      "browser_loopback_origin",
       "FRONTEND_NODE_ID",
       "PUBLIC_SITE_URL",
       "backend",
@@ -276,6 +278,17 @@ export function parseConfiguration(
     environment.BACKEND_BASE_URL ?? root.BACKEND_BASE_URL,
     "BACKEND_BASE_URL",
   );
+  const loopbackOrigin =
+    root.browser_loopback_origin === undefined
+      ? undefined
+      : new URL(
+          baseUrl(root.browser_loopback_origin, "browser_loopback_origin"),
+        );
+  if (
+    loopbackOrigin &&
+    (!loopback(loopbackOrigin.hostname) || loopbackOrigin.pathname !== "/")
+  )
+    throw new ConfigurationError("browser_loopback_origin 必须为回环根地址");
   const nodeId = string(
     environment.FRONTEND_NODE_ID ?? root.FRONTEND_NODE_ID,
     "FRONTEND_NODE_ID",
@@ -302,6 +315,7 @@ export function parseConfiguration(
     },
     publicSiteUrl,
     backendBaseUrl: publicUrl,
+    browserLoopbackOrigin: loopbackOrigin?.origin,
     frontendNodeId: nodeId,
     nodesMonitor: monitorConfig(root.nodes_monitor),
     backend: {

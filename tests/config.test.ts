@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { browserBackendBaseUrl } from "../src/core/config/browser-api";
 import { parseConfiguration } from "../src/core/config/schema";
 
 const base = {
@@ -18,6 +19,37 @@ test("configuration uses an explicit public address while internal overrides sta
   );
   assert.equal(config.backendBaseUrl, "https://api.example.com");
   assert.equal(config.backend.baseUrl, "http://backend.internal:8000");
+});
+test("the configured loopback origin alone uses the same-origin API", () => {
+  const config = parseConfiguration({
+    ...base,
+    BACKEND_BASE_URL: "https://api.example.com",
+    browser_loopback_origin: "http://127.0.0.1:3000/",
+  });
+  assert.equal(
+    browserBackendBaseUrl(config, "127.0.0.1:3000", "http:"),
+    "http://127.0.0.1:3000",
+  );
+  for (const [host, protocol] of [
+    ["blog.example.com", "https:"],
+    ["localhost:3000", "http:"],
+    ["127.0.0.1:3100", "http:"],
+    ["127.0.0.1:3000", "https:"],
+  ]) {
+    assert.equal(
+      browserBackendBaseUrl(config, host, protocol),
+      config.backendBaseUrl,
+    );
+  }
+  assert.equal(config.backend.baseUrl, "https://api.example.com");
+  assert.throws(
+    () =>
+      parseConfiguration({
+        ...base,
+        browser_loopback_origin: "https://example.com",
+      }),
+    /回环根地址/,
+  );
 });
 test("unknown fields, empty overrides, bad addresses and CIDRs fail clearly", () => {
   assert.equal(parseConfiguration(base).publicSiteUrl, undefined);

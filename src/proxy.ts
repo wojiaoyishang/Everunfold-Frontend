@@ -7,6 +7,7 @@ import { resolveContent } from "@/core/content/query";
 import { failureDocument } from "@/themes/argon/failure/document";
 import { isManagementRoute } from "@/core/auth/routes";
 import { readConfiguration } from "@/core/config/server";
+import { browserProtocolHeader } from "@/core/config/browser-api";
 import {
   localeOf,
   localePath,
@@ -18,6 +19,7 @@ import { localizedCodePath } from "@/core/i18n/routes";
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const headers = new Headers(request.headers);
+  headers.set(browserProtocolHeader, request.nextUrl.protocol);
   headers.set("x-everunfold-path", path);
   headers.set("x-everunfold-management", "false");
   if (isManagementRoute(request.nextUrl.pathname)) {

@@ -4,7 +4,10 @@ import "@/themes/argon/argon.css";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { readPageSnapshot as readPublicSnapshot } from "@/core/i18n/server";
-import { readConfiguration } from "@/core/config/server";
+import {
+  readBrowserBackendBaseUrl,
+  readPageConfiguration,
+} from "@/core/config/server";
 import { PublicTheme } from "@/core/themes/presentation";
 import { readActiveTheme } from "@/core/themes/server";
 import { BlogShell } from "@/themes/argon/components/shell";
@@ -13,7 +16,7 @@ export async function generateMetadata(): Promise<Metadata> {
   try {
     const { site } = await readPublicSnapshot();
     const seo = discoverySettings(site);
-    const origin = readConfiguration().publicSiteUrl;
+    const origin = readPageConfiguration().publicSiteUrl;
     const image = resourceUrl(seo.share_image);
     const icon = resourceUrl(site.settings?.site.icon_url);
     return {
@@ -62,7 +65,7 @@ export default async function BlogLayout({
   children: ReactNode;
 }) {
   const { site } = await readPublicSnapshot();
-  const { backendBaseUrl } = readConfiguration();
+  const backendBaseUrl = await readBrowserBackendBaseUrl();
   return (
     <PublicTheme theme={await readActiveTheme()}>
       <BlogShell site={site} backendBaseUrl={backendBaseUrl}>

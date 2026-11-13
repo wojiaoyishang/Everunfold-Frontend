@@ -1,5 +1,10 @@
 # 前端交接状态
 
+## 开发节点诊断的回环入口
+
+- 独立连接的 `browser_loopback_origin` 为本机 Nginx 提供浏览器入口，精确匹配协议、主机和端口。现有测试域名继续使用 `BACKEND_BASE_URL`，内部请求沿用 `[backend].base_url`。
+- 已重启开发前端并开启回环诊断，项目默认配置仍关闭。Chromium 验证了进入诊断、登录、读全站和本机状态、返回后台，全程使用 `127.0.0.1:3000`。前端完整检查 382 项通过。见[本机诊断说明](../development/nodes-monitor.md)。
+
 ## 本机节点诊断
 
 - `/admin/_nodes` 默认关闭。后端可达时使用站点管理员会话读取全站状态，离线时可用本机密码查看本地副本并切换预登记的后端。独立 `backend-node.toml` 可在页面关闭时手工配置，内容按后端来源分开存储。见 [部署说明](../development/nodes-monitor.md)。

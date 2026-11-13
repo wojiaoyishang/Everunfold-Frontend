@@ -1,13 +1,16 @@
-import { readConfiguration } from "@/core/config/server";
+import {
+  readBrowserBackendBaseUrl,
+  readPageConfiguration,
+} from "@/core/config/server";
 import { SystemSettingsPage } from "@/themes/argon/admin/settings/system";
-export default function Page() {
-  const config = readConfiguration();
+export default async function Page() {
+  const config = readPageConfiguration();
   return (
     <SystemSettingsPage
       runtime={{
         nodeId: config.frontendNodeId,
         publicSiteUrl: config.publicSiteUrl ?? null,
-        backendBaseUrl: config.backendBaseUrl,
+        backendBaseUrl: await readBrowserBackendBaseUrl(),
         settingsDirectory: "config.toml → settings.directory",
         snapshotDirectory: "config.toml → cache.directory",
         receiverConfigured: Boolean(config.settings.sourceEpoch),

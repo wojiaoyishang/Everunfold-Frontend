@@ -6,6 +6,8 @@
 # 仅在服务端加载；地址仅为可替换示例
 # 前端自身身份，必须与后端 frontends 的对应配置键一致
 BACKEND_BASE_URL = "http://127.0.0.1:8001"
+# 可选的本机代理入口。使用独立连接文件时，将此字段放在相应的 [profiles.<id>] 中。
+# browser_loopback_origin = "http://127.0.0.1:3000"
 FRONTEND_NODE_ID = "web-main"
 # 可选：连接独立保存在 backend-node.toml。启用时移除 BACKEND_BASE_URL、
 # [backend] 和 settings.source_epoch。相对路径以主配置文件所在目录为准。

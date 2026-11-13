@@ -25,7 +25,10 @@ import { Article } from "@/themes/argon/components/article";
 import { resolvePresentation } from "@/core/content/presentation";
 import { ShuoshuoDetail } from "@/themes/argon/components/shuoshuo";
 import { contentMetadata } from "@/core/content/metadata";
-import { readConfiguration } from "@/core/config/server";
+import {
+  readBrowserBackendBaseUrl,
+  readConfiguration,
+} from "@/core/config/server";
 import { ProtectedArticle } from "@/themes/argon/components/protected-article";
 import { localizedCodePath } from "@/core/i18n/routes";
 import { CodePage, codePageMetadata } from "../code-page";
@@ -230,7 +233,7 @@ export default async function ContentPage({
         key={`${protectedContent.id}:${protectedContent.updated_at}`}
         content={protectedContent}
         site={snapshot.site}
-        baseUrl={readConfiguration().backendBaseUrl}
+        baseUrl={await readBrowserBackendBaseUrl()}
       />
     );
   if (presented?.content.type === "shuoshuo")

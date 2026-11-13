@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readConfiguration } from "@/core/config/server";
+import { browserBackendBaseUrl } from "@/core/config/browser-api";
 import { nodesConsolePath } from "@/core/auth/routes";
 import type { NodeProof, NodeProofRequest } from "@/core/contracts/settings";
 import type { LocalGate } from "@/core/nodes/local";
@@ -65,7 +66,11 @@ export async function GET(request: NextRequest) {
       offline && offlineSession(config, request.cookies.get(cookieName)?.value),
   };
   if (mode === "online") {
-    gate.backendBaseUrl = config.backendBaseUrl;
+    gate.backendBaseUrl = browserBackendBaseUrl(
+      config,
+      request.headers.get("host"),
+      request.nextUrl.protocol,
+    );
     gate.nodeId = config.frontendNodeId;
     gate.profile = config.connections?.active ?? "inline";
     gate.revision = localRevision(config);

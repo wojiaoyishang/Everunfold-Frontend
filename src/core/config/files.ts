@@ -78,6 +78,7 @@ export function readConfigurationFiles(
   const mainSettings = configObject(input.settings ?? {}, "settings");
   if (
     "BACKEND_BASE_URL" in input ||
+    "browser_loopback_origin" in input ||
     "backend" in input ||
     "source_epoch" in mainSettings ||
     environment.BACKEND_BASE_URL !== undefined
@@ -113,13 +114,19 @@ export function readConfigurationFiles(
     const profile = configObject(raw, "连接配置");
     configKeys(
       profile,
-      ["BACKEND_BASE_URL", "source_epoch", "backend"],
+      [
+        "BACKEND_BASE_URL",
+        "browser_loopback_origin",
+        "source_epoch",
+        "backend",
+      ],
       "连接配置",
     );
     const settings = parseConfiguration(
       {
         ...shared,
         BACKEND_BASE_URL: profile.BACKEND_BASE_URL,
+        browser_loopback_origin: profile.browser_loopback_origin,
         backend: profile.backend,
         settings: { ...mainSettings, source_epoch: profile.source_epoch },
       },

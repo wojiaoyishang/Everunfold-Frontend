@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { readConfiguration } from "@/core/config/server";
+import { readBrowserBackendBaseUrl } from "@/core/config/server";
 import { loginReturnPath } from "@/core/auth/routes";
 import { LoginPage } from "@/themes/argon/auth/login-page";
 
@@ -12,7 +12,7 @@ export default async function LoginRoute({
   const { next } = await searchParams;
   return (
     <LoginPage
-      baseUrl={readConfiguration().backendBaseUrl}
+      baseUrl={await readBrowserBackendBaseUrl()}
       returnTo={loginReturnPath(typeof next === "string" ? next : undefined)}
     />
   );
