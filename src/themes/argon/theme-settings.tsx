@@ -29,6 +29,8 @@ import { SidebarNavigationSettings } from "./admin/settings/sidebar-navigation-s
 import { SidebarProfileSettings } from "./admin/settings/sidebar-profile";
 import { ArticlePresentationSettings } from "./admin/settings/article-presentation";
 import { CodeSettingsSection } from "./admin/settings/code-settings";
+import { HomeFeedSettings } from "./admin/settings/home-feed";
+import type { ThemeSettingsProps } from "@/core/settings/theme-settings-host";
 import { UiText } from "@/core/i18n/provider";
 import { argonAssetUrl } from "./assets";
 
@@ -46,7 +48,7 @@ const articleToggles: readonly [keyof ArticleDisplayPreferences, string][] = [
   ["toc_numbered", "目录显示序号"],
 ];
 
-export default function ArgonThemeSettings() {
+export default function ArgonThemeSettings({ taxonomies }: ThemeSettingsProps) {
   const fonts = useFontLibrary();
   const { draft, setDraft } = useSettingsEditor();
   const themeId = activeThemeId(draft);
@@ -261,58 +263,12 @@ export default function ArgonThemeSettings() {
           </small>
         </div>
       </SettingsSection>
-      <SettingsSection
-        id="settings-feed"
-        title="首页内容"
-        description="新访客默认看到的内容范围；读者原有本机选择优先。"
-      >
-        <div className="admin-settings-field">
-          <label>
-            <UiText text="默认内容" />
-          </label>
-          <Select
-            programOptions
-            name="theme-feed"
-            label="默认内容"
-            value={theme.feed.default_type}
-            options={[
-              { value: "all", label: "文章与说说" },
-              { value: "article", label: "仅文章" },
-              { value: "shuoshuo", label: "仅说说" },
-            ]}
-            onValueChange={(default_type) =>
-              update({
-                feed: {
-                  ...theme.feed,
-                  default_type: default_type as typeof theme.feed.default_type,
-                },
-              })
-            }
-          />
-        </div>
-        <label className="admin-field">
-          <span>
-            <UiText text="每页内容数" />
-          </span>
-          <TextField
-            type="number"
-            min={1}
-            max={30}
-            value={theme.feed.page_size}
-            onChange={(event) =>
-              update({
-                feed: {
-                  ...theme.feed,
-                  page_size: Math.max(
-                    1,
-                    Math.min(30, Number(event.target.value) || 1),
-                  ),
-                },
-              })
-            }
-          />
-        </label>
-      </SettingsSection>
+      <HomeFeedSettings
+        value={theme.feed}
+        taxonomies={taxonomies}
+        staticHome={Boolean(draft.site.reading?.home_page_id)}
+        onChange={(feed) => update({ feed })}
+      />
       <SettingsSection
         id="settings-article"
         title="文章阅读"

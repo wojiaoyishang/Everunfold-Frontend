@@ -5,6 +5,10 @@ import {
   homeFeedType,
   preferredHomeHref,
 } from "../src/core/browser/home-feed-policy";
+import { queryFeed } from "../src/core/content/presentation";
+import { archiveArticles, archiveRoute } from "../src/core/content/archive";
+import { sitemapEntries } from "../src/core/seo/discovery";
+import { category, content, snapshot, tag } from "./fixtures";
 
 const origin = "https://blog.example.com/article.html";
 test("a saved home filter becomes a public query while explicit URLs keep precedence", () => {
@@ -42,4 +46,49 @@ test("changing a home filter clears pagination without altering other browsing m
   );
   assert.equal(homeFeedType("page"), "all");
   assert.equal(homeFeedType("article"), "article");
+});
+
+test("homepage exclusions use stable taxonomy IDs before pagination", () => {
+  const data = snapshot();
+  data.contents = [
+    content({ id: "excluded-category", pinned: true, tags: [] }),
+    content({ id: "excluded-tag", categories: [] }),
+    content({ id: "visible", categories: [], tags: [] }),
+  ];
+  const home = queryFeed(data, {
+    pageSize: 1,
+    excludeTaxonomies: [category.id, tag.id],
+  });
+  assert.deepEqual(
+    home.items.map(({ content }) => content.id),
+    ["visible"],
+  );
+  assert.equal(home.pages, 1);
+  assert.equal(queryFeed(data, { query: "一篇文章" }).total, 3);
+});
+
+test("only public diary articles contribute a discoverable diary archive", () => {
+  const data = snapshot();
+  const diary = { ...category, slug: "gzrj" };
+  data.contents = [
+    content({ id: "ordinary" }),
+    content({ id: "diary", path: "/diary.html", categories: [diary] }),
+    content({ id: "page", kind: "page", path: "/page", categories: [diary] }),
+  ];
+  assert.equal(archiveRoute(data), "/article");
+  assert.deepEqual(
+    archiveArticles(data, true).map((item) => item.id),
+    ["diary"],
+  );
+  assert.ok(
+    sitemapEntries(data, origin).some(
+      (item) => new URL(item.url).pathname === "/gzrj",
+    ),
+  );
+  data.contents[1].access = "captcha";
+  assert.ok(
+    !sitemapEntries(data, origin).some(
+      (item) => new URL(item.url).pathname === "/gzrj",
+    ),
+  );
 });

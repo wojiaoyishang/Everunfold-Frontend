@@ -82,7 +82,10 @@ function EventRoutes({
   const required = event.delivery_mode === "security_required";
   const managed = event.delivery_mode !== "notification";
   const platformChoices = platforms.filter(
-    (platform) => !event.email_only || platform.value === "email",
+    (platform) =>
+      (!event.email_only || platform.value === "email") &&
+      (!event.platform_ids?.length ||
+        event.platform_ids.includes(platform.value)),
   );
   const unusedPlatform = platformChoices.find(
     (platform) =>
@@ -96,8 +99,12 @@ function EventRoutes({
       : managed
         ? "继承访问与安全的发信配置"
         : "默认配置";
-  const recipient =
-    event.recipient_mode === "subject" ? "执行目标主体" : "管理员";
+  const reply = event.id === "comment.reply_published";
+  const recipient = reply
+    ? "原评论作者"
+    : event.recipient_mode === "subject"
+      ? "执行目标主体"
+      : "管理员";
   const update = (key: string, patch: Partial<RouteDraft>) =>
     onChange(
       routes.map((route) =>
@@ -164,11 +171,13 @@ function EventRoutes({
           <p className={styles.emptyRoutes}>
             <UiText
               text={
-                event.recipient_mode === "subject"
-                  ? "启用规则后，只通知执行目标主体。"
-                  : event.recipient_mode === "admins"
-                    ? "启用规则后，只向管理员发送。"
-                    : "此事件尚未通知任何人。"
+                reply
+                  ? "启用规则后，只通知原评论作者。"
+                  : event.recipient_mode === "subject"
+                    ? "启用规则后，只通知执行目标主体。"
+                    : event.recipient_mode === "admins"
+                      ? "启用规则后，只向管理员发送。"
+                      : "此事件尚未通知任何人。"
               }
             />
           </p>

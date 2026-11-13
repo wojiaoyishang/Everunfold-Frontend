@@ -129,6 +129,8 @@ export function templateSampleValues(
   for (const key of ["resource.url", "content.url", "admin.url"] as const) {
     values[key] = origin + notificationSampleValues[key];
   }
+  if (event === "comment.reply_published")
+    values["resource.url"] += "#comment-83f05ab3-485d-4d50-8823-355af9b5c53f";
   if (event.startsWith("account.")) {
     values["admin.url"] =
       origin + "/admin/users/83f05ab3-485d-4d50-8823-355af9b5c53f";

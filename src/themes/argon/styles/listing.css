@@ -503,16 +503,27 @@
 .archive-card {
   padding: 35px 38px;
 }
-.archive-month + .archive-month {
-  margin-top: 35px;
+.archive-year + .archive-year {
+  border-top: 1px solid var(--line);
+  margin-top: 28px;
+  padding-top: 24px;
 }
-.archive-month h2 {
+.archive-year h2 {
   color: var(--text-strong);
-  font-size: 22px;
-  font-weight: 500;
+  font-size: 26px;
+  font-weight: 600;
   margin: 0 0 18px;
 }
-.archive-month h2 small {
+.archive-month + .archive-month {
+  margin-top: 22px;
+}
+.archive-month h3 {
+  color: var(--text-strong);
+  font-size: 17px;
+  font-weight: 500;
+  margin: 0 0 8px;
+}
+.archive-month h3 small {
   font-size: 12px;
   color: var(--muted);
   margin-left: 10px;
@@ -552,4 +563,7 @@
 }
 .archive-month a:hover {
   color: var(--accent);
+}
+.archive-month a {
+  overflow-wrap: anywhere;
 }

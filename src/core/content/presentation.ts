@@ -66,10 +66,12 @@ export function queryFeed(
     includePages?: boolean;
     allLanguages?: boolean;
     language?: string;
+    excludeTaxonomies?: readonly string[];
   } = {},
 ) {
   const query = options.query?.trim().slice(0, 160).toLocaleLowerCase();
   const locale = snapshotLocale(snapshot);
+  const excluded = new Set(options.excludeTaxonomies);
   const candidates = (
     query
       ? snapshot.contents
@@ -87,6 +89,14 @@ export function queryFeed(
     if (options.type && options.type !== "all" && content.type !== options.type)
       return false;
     if (!options.includePages && content.type === "page") return false;
+    if (
+      excluded.size &&
+      [...content.tags, ...content.categories].some((term) =>
+        excluded.has(term.id),
+      )
+    )
+      return false;
+    if (!query) return true;
     const text = [
       content.title,
       content.excerpt,
@@ -96,7 +106,7 @@ export function queryFeed(
     ]
       .join(" ")
       .toLocaleLowerCase();
-    return !query || text.includes(query);
+    return text.includes(query);
   });
   const chosen = new Set(
     languageContents(

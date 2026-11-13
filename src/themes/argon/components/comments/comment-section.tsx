@@ -14,6 +14,7 @@ import { CommentItem } from "./comment-item";
 import { exampleComments } from "./examples";
 import { useCaptcha } from "@/core/captcha/use-captcha";
 import {
+  submitAccountReaderComment,
   submitReaderComment,
   type CaptchaAnswer,
 } from "@/core/contracts/captcha";
@@ -52,11 +53,10 @@ export function CommentSection({
 }) {
   const { store } = useReaderData();
   const account = usePublicAccount(store.baseUrl);
-  const signedInName =
-    account.state.phase === "ready" && account.state.session.user
-      ? account.state.session.user.display_name ||
-        account.state.session.user.username
-      : null;
+  const session =
+    account.state.phase === "ready" ? account.state.session : null;
+  const user = session?.user;
+  const signedInName = user ? user.display_name || user.username : null;
   const captcha = useCaptcha(
     store.baseUrl,
     "comment",
@@ -133,24 +133,33 @@ export function CommentSection({
         reply.active && reply.entry?.origin === "history"
           ? reply.entry.id
           : undefined;
-      const fingerprint = JSON.stringify({ draft, parentId, contentId });
+      const fingerprint = JSON.stringify({
+        draft,
+        parentId,
+        contentId,
+        userId: user?.id,
+      });
       if (submission.current?.fingerprint !== fingerprint)
         submission.current = { fingerprint, id: randomUUID() };
       try {
-        await submitReaderComment(
-          store.baseUrl,
-          {
-            operation_id: submission.current.id,
-            content_id: contentId,
-            client_id: captcha.clientId,
-            parent_id: parentId,
-            author: draft.author,
-            body: draft.body,
-            captcha: answer,
-            read_receipt: readReceipt,
-          },
-          { signal },
-        );
+        const input = {
+          operation_id: submission.current.id,
+          content_id: contentId,
+          client_id: captcha.clientId,
+          parent_id: parentId,
+          author: draft.author,
+          body: draft.body,
+          captcha: answer,
+          read_receipt: readReceipt,
+        };
+        if (session?.user)
+          await submitAccountReaderComment(
+            store.baseUrl,
+            input,
+            session.csrf_token,
+            { signal },
+          );
+        else await submitReaderComment(store.baseUrl, input, { signal });
         if (signal?.aborted) throw new RequestError("cancelled");
         setReply((current) => ({ ...current, active: false }));
         submission.current = null;

@@ -14,6 +14,7 @@ import { EmptyState } from "./empty-state";
 import { SiteNotice } from "./site-notice";
 import { Icon } from "./icon";
 import { themeProfile } from "@/core/settings/theme-options";
+import "./feed-layout.css";
 
 export function ContentCard({
   entry,
@@ -40,6 +41,7 @@ export function Feed({
   type = "all",
   pathname = "/",
   heading,
+  homepage = false,
 }: {
   theme: string;
   snapshot: PublicSnapshot;
@@ -47,11 +49,16 @@ export function Feed({
   type?: FeedType;
   pathname?: string;
   heading?: { title: string; description?: string };
+  homepage?: boolean;
 }) {
+  const preferences = themeProfile(snapshot.site.settings)?.feed;
   const result = queryFeed(snapshot, {
     page,
     type,
-    pageSize: themeProfile(snapshot.site.settings)?.feed.page_size ?? 10,
+    pageSize: preferences?.page_size ?? 10,
+    excludeTaxonomies: homepage
+      ? preferences?.excluded_taxonomy_ids
+      : undefined,
   });
   return (
     <>
@@ -82,15 +89,21 @@ export function Feed({
           </div>
         </header>
       )}
-      <div className="article-list">
-        {result.items.length ? (
-          result.items.map((entry) => (
-            <ContentCard key={entry.content.id} entry={entry} theme={theme} />
-          ))
-        ) : (
-          <EmptyState title="这里还很安静" />
-        )}
-      </div>
+      {result.items.length ? (
+        <div className="feed-layout-container">
+          <div
+            className="article-list feed-layout"
+            data-layout={homepage ? preferences?.layout : undefined}
+            data-density={homepage ? preferences?.density : undefined}
+          >
+            {result.items.map((entry) => (
+              <ContentCard key={entry.content.id} entry={entry} theme={theme} />
+            ))}
+          </div>
+        </div>
+      ) : (
+        <EmptyState title="这里还很安静" />
+      )}
       <Pagination
         page={result.page}
         pages={result.pages}

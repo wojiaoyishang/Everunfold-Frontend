@@ -137,21 +137,22 @@ export function NotificationTemplatesPage() {
   const editable =
     canWriteSettings &&
     (!event?.id.startsWith("security.") || can(user, "access:manage"));
-  const selectedPlatform = event?.email_only
-    ? "email"
-    : editor.state?.platforms.some((item) => item.id === platformId)
-      ? platformId
-      : (editor.state?.platforms[0]?.id ?? "in-app");
+  const availablePlatforms = (editor.state?.platforms ?? []).filter(
+    (item) =>
+      (!event?.email_only || item.id === "email") &&
+      (!event?.platform_ids?.length || event.platform_ids.includes(item.id)),
+  );
+  const selectedPlatform = availablePlatforms.some(
+    (item) => item.id === platformId,
+  )
+    ? platformId
+    : (availablePlatforms[0]?.id ?? "in-app");
   const selectedLocale = locale || catalog.default_code;
-  const view = useMemo(
-    () =>
-      editor.state?.templates.find(
-        (item) =>
-          item.event_type === selectedEvent &&
-          item.platform_id === selectedPlatform &&
-          item.locale === selectedLocale,
-      ),
-    [editor.state?.templates, selectedEvent, selectedLocale, selectedPlatform],
+  const view = editor.state?.templates.find(
+    (item) =>
+      item.event_type === selectedEvent &&
+      item.platform_id === selectedPlatform &&
+      item.locale === selectedLocale,
   );
   const key = identity(selectedEvent, selectedPlatform, selectedLocale);
   const draft = drafts[key] ?? (view ? draftFrom(view) : null);
@@ -399,11 +400,7 @@ export function NotificationTemplatesPage() {
             </label>
           </div>
           <PlatformTabs
-            platforms={
-              event?.email_only
-                ? editor.state.platforms.filter((item) => item.id === "email")
-                : editor.state.platforms
-            }
+            platforms={availablePlatforms}
             selected={selectedPlatform}
             onSelect={setPlatformId}
           />

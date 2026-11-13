@@ -30,7 +30,7 @@ export async function generateSettingsClient(
                   op.path,
                 )
               : stem === "notifications"
-                ? /^\/v1\/(?:admin\/notifications\/[a-z-]+|account\/notifications\/inbox)$/.test(
+                ? /^\/v1\/(?:admin\/notifications\/[a-z-]+|account\/notifications\/(?:inbox|preferences))$/.test(
                     op.path,
                   )
                 : /^\/v1\/admin\/[a-z/{}_-]+$/.test(op.path)) ||

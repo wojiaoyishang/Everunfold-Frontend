@@ -5,6 +5,9 @@ import { readingPage } from "@/core/pages/reading-pages";
 import { pageLanguages } from "@/core/pages/languages";
 import { registeredPageLanguages } from "@/core/pages/registered-languages";
 import { hasPageImplementation } from "@/core/pages/registry";
+import { archiveRoute, isDiaryArticle } from "@/core/content/archive";
+import { localizeHref } from "@/core/i18n/locale";
+import { normalizePath } from "@/core/content/urls";
 import { SITEMAP_XML_PATH, sitemapEnabled } from "./sitemap-paths";
 
 export function discoverySettings(site: Pick<Site, "settings">) {
@@ -72,6 +75,29 @@ export function sitemapEntries(
     alternates: { languages: languages(homes) },
   }));
   const contents = snapshot.contents.filter((item) => indexable(site, item));
+  const articles = contents.filter((item) => item.kind === "article");
+  const codePages = [
+    ...(articles.length ? [archiveRoute(snapshot)] : []),
+    ...(articles.some(isDiaryArticle) ? ["/gzrj"] : []),
+    ...(![...snapshot.contents, ...(snapshot.pages ?? [])].some(
+      (item) => normalizePath(item.path) === "/about",
+    )
+      ? ["/about"]
+      : []),
+  ];
+  for (const path of codePages) {
+    const variants = catalog.languages
+      .filter((language) => language.enabled)
+      .map((language) => ({
+        language: language.code,
+        path: localizeHref(path, language.code, catalog),
+      }));
+    for (const variant of variants)
+      result.push({
+        url: absolute(variant.path),
+        alternates: { languages: languages(variants) },
+      });
+  }
   const paths = new Set(contents.map((item) => item.path));
   for (const item of contents)
     result.push({

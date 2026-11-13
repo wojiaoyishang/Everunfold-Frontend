@@ -54,6 +54,9 @@ const codeDefaults: Required<CodePreferences> = {
 const feedDefaults: Required<FeedPreferences> = {
   default_type: "all",
   page_size: 10,
+  layout: "list",
+  density: "comfortable",
+  excluded_taxonomy_ids: [],
 };
 export type RuntimeThemePreferences = Required<
   Omit<ThemePreferences, "navigation">

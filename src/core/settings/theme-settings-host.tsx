@@ -14,12 +14,19 @@ import { SettingsFrame } from "@/themes/argon/admin/settings/shared";
 import { InstalledThemeSection } from "@/themes/argon/admin/settings/installed-theme";
 import { UiText } from "@/core/i18n/provider";
 import { Icon } from "@/themes/argon/components/icon";
+import type { Taxonomy } from "@/core/content/types";
 
-type ThemeSettingsModule = { default: ComponentType };
+export type ThemeSettingsProps = {
+  taxonomies?: readonly Pick<Taxonomy, "id" | "kind" | "name" | "slug">[];
+};
+type ThemeSettingsModule = { default: ComponentType<ThemeSettingsProps> };
 const modules = import.meta.glob<ThemeSettingsModule>(
   "/src/themes/*/theme-settings.tsx",
 );
-const panels = new Map<string, LazyExoticComponent<ComponentType>>(
+const panels = new Map<
+  string,
+  LazyExoticComponent<ComponentType<ThemeSettingsProps>>
+>(
   Object.entries(modules).map(([file, load]) => [
     /\/src\/themes\/([^/]+)\//.exec(file)?.[1] ?? "",
     lazy(load),
@@ -38,7 +45,7 @@ function ThemeUnavailable({ id }: { id: string }) {
   );
 }
 
-export function ThemeSettingsHost() {
+export function ThemeSettingsHost(props: ThemeSettingsProps) {
   const { draft } = useSettingsEditor();
   const theme = activeThemeId(draft);
   const Panel = panels.get(theme);
@@ -57,7 +64,7 @@ export function ThemeSettingsHost() {
               </div>
             }
           >
-            {createElement(Panel)}
+            {createElement(Panel, props)}
           </Suspense>
         ) : (
           <ThemeUnavailable id={theme} />

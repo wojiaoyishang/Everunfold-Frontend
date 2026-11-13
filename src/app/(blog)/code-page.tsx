@@ -13,13 +13,16 @@ import type { PublicSnapshot } from "@/core/content/types";
 import { pageNumber, resolveTaxonomy } from "@/core/content/query";
 import { feedType, searchType } from "@/core/content/presentation";
 import { taxonomyHref } from "@/core/content/urls";
+import { archiveRoute } from "@/core/content/archive";
 import { normalizeCatalog } from "@/core/i18n/catalog";
 import { translate } from "@/core/i18n/messages";
+import { UiText } from "@/core/i18n/provider";
 import { Feed } from "@/themes/argon/components/feed";
 import { SearchResults } from "@/themes/argon/components/search-results";
 import { Archives } from "@/themes/argon/components/archives";
 import { TaxonomyIndex } from "@/themes/argon/components/taxonomy-index";
 import { ArticleList } from "@/themes/argon/components/article-list";
+import { Icon } from "@/themes/argon/components/icon";
 
 export type PageParameters = Record<string, string | string[] | undefined>;
 function translator(snapshot: PublicSnapshot) {
@@ -39,10 +42,12 @@ export function codePageMetadata(
     {
       "/search": "站内搜索",
       "/archives": "文章归档",
+      "/gzrj": "高中日记",
+      "/about": "关于网站",
       "/categories": "文章分类",
       "/tags": "文章标签",
       "/ss": "说说",
-      "/article": "文章",
+      "/article": "文章归档",
     } as Record<string, string>
   )[path];
   const origin = readConfiguration().publicSiteUrl;
@@ -60,7 +65,11 @@ export function codePageMetadata(
     path === "/article"
       ? (readingPage(snapshot, "posts_page_id", language)?.path ??
         localizeHref(path, language, catalog))
-      : localizeHref(path, language, catalog);
+      : localizeHref(
+          path === "/archives" ? archiveRoute(snapshot) : path,
+          language,
+          catalog,
+        );
   return {
     ...(origin
       ? {
@@ -107,11 +116,15 @@ export async function CodePage(props: CodePageProps) {
       ? "home"
       : path === "/search" || path === "/"
         ? "search"
-        : path === "/archives"
-          ? "archives"
-          : path === "/ss" || path === "/article"
-            ? "feed"
-            : "taxonomy";
+        : path === "/about"
+          ? "page"
+          : path === "/archives" ||
+              path === "/gzrj" ||
+              (path === "/article" && archiveRoute(snapshot) === path)
+            ? "archives"
+            : path === "/ss" || path === "/article"
+              ? "feed"
+              : "taxonomy";
   return (
     <ServerThemeTemplate
       theme={theme}
@@ -182,12 +195,43 @@ function renderCodePage(
     );
   const postsPage =
     path === "/article" ? readingPage(snapshot, "posts_page_id") : undefined;
+  if (path === "/archives" || (path === "/article" && !postsPage))
+    return <Archives snapshot={snapshot} />;
+  if (path === "/gzrj") return <Archives snapshot={snapshot} diary />;
+  if (path === "/about") {
+    const { name, author, description } = snapshot.site;
+    return (
+      <>
+        <PagePresentation site={snapshot.site} />
+        <header className="surface page-heading">
+          <Icon name="bell" />
+          <div>
+            <h1>
+              <UiText text="关于网站" />
+            </h1>
+            <p>{name}</p>
+          </div>
+        </header>
+        {(description || author) && (
+          <div className="surface archive-card">
+            {description && <p>{description}</p>}
+            {author && (
+              <p>
+                <UiText text="作者" /> · {author}
+              </p>
+            )}
+          </div>
+        )}
+      </>
+    );
+  }
   if (path === "/" || path === "/ss" || path === "/article")
     return (
       <Feed
         theme={theme}
         snapshot={snapshot}
         page={page}
+        homepage={path === "/"}
         type={
           path === "/ss"
             ? "shuoshuo"
@@ -206,7 +250,6 @@ function renderCodePage(
         }
       />
     );
-  if (path === "/archives") return <Archives snapshot={snapshot} />;
   if (path === "/categories" || path === "/tags")
     return (
       <TaxonomyIndex

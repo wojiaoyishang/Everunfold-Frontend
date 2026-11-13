@@ -27,6 +27,7 @@ import { AccountSecurity } from "./security";
 import { AccountKeys } from "./keys";
 import { AccountSessionState } from "./session-state";
 import { AccountNavigationProvider, useAccountNavigation } from "./unsaved";
+import { NotificationPreferences } from "./notification-preferences";
 
 export function AccountPage({ baseUrl }: { baseUrl: string }) {
   const { state, check, accept } = useSession(baseUrl);
@@ -80,9 +81,9 @@ function ConfirmedAccount({
   const [profile, setProfile] = useState<AccountProfile | null>(null);
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
-  const [tab, setTab] = useState<"profile" | "security" | "keys">(
-    user.must_change_password ? "security" : "profile",
-  );
+  const [tab, setTab] = useState<
+    "profile" | "security" | "notifications" | "keys"
+  >(user.must_change_password ? "security" : "profile");
   const preferences = useAdminPreferences(
     adminPreferencesKey(baseUrl, user.id),
   );
@@ -174,6 +175,12 @@ function ConfirmedAccount({
                     <UiText text="账号安全" />
                   </AccountTab>
                   <AccountTab
+                    active={tab === "notifications"}
+                    onSelect={() => setTab("notifications")}
+                  >
+                    <UiText text="通知偏好" />
+                  </AccountTab>
+                  <AccountTab
                     active={tab === "keys"}
                     onSelect={() => setTab("keys")}
                   >
@@ -211,6 +218,13 @@ function ConfirmedAccount({
                             onSession(value);
                             setReload((revision) => revision + 1);
                           }}
+                        />
+                      </div>
+                    )}
+                    {tab === "notifications" && (
+                      <div className="account-panel">
+                        <NotificationPreferences
+                          emailVerified={Boolean(profile.email_verified)}
                         />
                       </div>
                     )}
