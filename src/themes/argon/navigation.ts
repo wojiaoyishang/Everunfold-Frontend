@@ -145,11 +145,5 @@ export function campfireIdentity(site: Site) {
     subtitle:
       site.settings?.site.author_tagline ||
       (campfire ? "等待着、探索着、期待着" : site.description),
-    social: campfire
-      ? [
-          { label: "BiliBili", href: "https://space.bilibili.com/197741923" },
-          { label: "Gitee", href: "https://gitee.com/wojiaoyishang" },
-        ]
-      : [],
   };
 }

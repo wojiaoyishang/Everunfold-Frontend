@@ -433,3 +433,28 @@
   color: var(--admin-muted);
   overflow-wrap: anywhere;
 }
+
+.admin-sidebar-links {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.admin-sidebar-links h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.admin-sidebar-links > .admin-button {
+  justify-self: start;
+}
+
+.admin-sidebar-link {
+  padding: 0.75rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+}
+
+.admin-sidebar-link > .admin-settings-actions {
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+}

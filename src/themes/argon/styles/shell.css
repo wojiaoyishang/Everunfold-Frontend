@@ -211,7 +211,7 @@ html[data-theme="dark"] .theme-moon {
   margin: 0;
   text-shadow: 0 2px 14px rgb(0 0 0 / 15%);
   line-height: 1.5;
-  animation: hero-arrive 800ms var(--motion-ease) both;
+  overflow-wrap: anywhere;
 }
 .hero-subtitle {
   font-size: 16px;
@@ -219,8 +219,36 @@ html[data-theme="dark"] .theme-moon {
   margin: 11px 0 0;
   opacity: 0.9;
   letter-spacing: 0.04em;
-  animation: hero-arrive 800ms 120ms var(--motion-ease) both;
+  overflow-wrap: anywhere;
 }
+html:not([data-motion="reduced"]) {
+  .hero[data-hero-animation="rise"] :is(.hero-title, .hero-subtitle) {
+    animation: hero-arrive 800ms var(--motion-ease) both;
+  }
+  .hero[data-hero-animation="fade"] :is(.hero-title, .hero-subtitle),
+  .hero[data-hero-animation="typewriter"] .hero-subtitle {
+    animation: hero-fade 650ms ease-out both;
+  }
+  .hero:not([data-hero-animation="none"]) .hero-subtitle {
+    animation-delay: 120ms;
+  }
+  .hero[data-hero-animation="typewriter"] .hero-glyph {
+    animation: hero-fade 1ms steps(1, end) var(--hero-typing-delay) both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion="full"])
+    .hero
+    :is(.hero-title, .hero-subtitle, .hero-glyph) {
+    animation: none !important;
+  }
+}
+@keyframes hero-fade {
+  from {
+    opacity: 0;
+  }
+}
+
 .blog-container {
   max-width: 1200px;
   padding: 0 25px;

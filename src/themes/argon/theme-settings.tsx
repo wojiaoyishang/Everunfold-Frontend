@@ -24,6 +24,7 @@ import { Icon } from "./components/icon";
 import { Select } from "./components/ui/select";
 import { FontField } from "./admin/fonts/font-field";
 import { useFontLibrary } from "@/core/fonts/library";
+import { SidebarProfileSettings } from "./admin/settings/sidebar-profile";
 import { ArticlePresentationSettings } from "./admin/settings/article-presentation";
 import { CodeSettingsSection } from "./admin/settings/code-settings";
 import { UiText } from "@/core/i18n/provider";
@@ -133,8 +134,8 @@ export default function ArgonThemeSettings() {
       </SettingsSection>
       <SettingsSection
         id="settings-brand-images"
-        title="顶栏与侧栏"
-        description="选择当前主题的顶栏标识和博主头像。"
+        title="顶栏标识"
+        description="选择当前主题的顶栏 Logo。"
       >
         <SettingsMediaField
           kind="image"
@@ -145,6 +146,12 @@ export default function ArgonThemeSettings() {
             update({ header_logo_url, header_logo_media_id })
           }
         />
+      </SettingsSection>
+      <SettingsSection
+        id="settings-sidebar-profile"
+        title="侧栏博主卡片"
+        description="设置头像、统计跳转、个人按钮和友情链接。"
+      >
         <SettingsMediaField
           kind="image"
           label="博主头像"
@@ -158,11 +165,16 @@ export default function ArgonThemeSettings() {
             update({ author_avatar_url, author_avatar_media_id })
           }
         />
+        <SidebarProfileSettings
+          author={draft.site.author}
+          value={theme.sidebar_profile}
+          onChange={(sidebar_profile) => update({ sidebar_profile })}
+        />
       </SettingsSection>
       <SettingsSection
         id="settings-hero"
         title="站点横幅"
-        description="首页上方的标题、副标题与背景。"
+        description="设置页面上方的标题、副标题和入场动效。"
       >
         <SettingsText
           label="横幅标题"
@@ -176,6 +188,54 @@ export default function ArgonThemeSettings() {
           maxLength={300}
           onChange={(hero_subtitle) => update({ hero_subtitle })}
         />
+        <SettingsToggle
+          label="显示横幅副标题"
+          value={theme.hero_show_subtitle}
+          onChange={(hero_show_subtitle) => update({ hero_show_subtitle })}
+        />
+        <div className="admin-settings-field">
+          <label htmlFor="hero-animation">
+            <UiText text="横幅入场动效" />
+          </label>
+          <Select
+            id="hero-animation"
+            name="hero-animation"
+            label="横幅入场动效"
+            programOptions
+            value={theme.hero_animation}
+            options={[
+              { value: "none", label: "关闭动效" },
+              { value: "fade", label: "淡入" },
+              { value: "rise", label: "上移淡入" },
+              { value: "typewriter", label: "标题打字" },
+            ]}
+            onValueChange={(hero_animation) => {
+              if (
+                hero_animation === "none" ||
+                hero_animation === "fade" ||
+                hero_animation === "rise" ||
+                hero_animation === "typewriter"
+              )
+                update({ hero_animation });
+            }}
+          />
+        </div>
+        {theme.hero_animation === "typewriter" && (
+          <label className="admin-settings-field">
+            <UiText text="打字间隔（毫秒／字）" />
+            <TextField
+              type="number"
+              min={10}
+              max={120}
+              value={theme.hero_typing_ms}
+              onChange={(event) => {
+                const hero_typing_ms = event.currentTarget.valueAsNumber;
+                if (Number.isInteger(hero_typing_ms))
+                  update({ hero_typing_ms });
+              }}
+            />
+          </label>
+        )}
       </SettingsSection>
       <SettingsSection
         id="settings-fonts"

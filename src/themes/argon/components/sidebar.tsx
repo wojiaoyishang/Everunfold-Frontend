@@ -8,14 +8,13 @@ import {
 } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import { AppLink as Link, SearchForm } from "./navigation-link";
+import { SearchForm } from "./navigation-link";
 
 import type { Site } from "@/core/content/types";
-import { resourceUrl } from "@/core/content/urls";
 import type { TableOfContentsItem } from "@/core/rendering/content";
 import { Icon } from "./icon";
 import { campfireIdentity } from "../navigation";
+import { SidebarProfile } from "./sidebar-profile";
 import { SidebarNavigation } from "./sidebar-navigation";
 import { useReadingState } from "./reading-state";
 import { useNavigation } from "./navigation-state";
@@ -88,7 +87,6 @@ export function Sidebar({
     };
   }, [open, setOpen, triggerRef]);
   const profile = themeProfile(site.settings);
-  const avatar = resourceUrl(profile?.author_avatar_url ?? site.avatar_url);
   const identity = campfireIdentity(site);
   const numberedToc = profile?.article.toc_numbered ?? false;
   const { activeId } = useReadingState();
@@ -213,61 +211,7 @@ export function Sidebar({
             labelledBy={toc.length ? "overview-tab" : "profile-title"}
             role={toc.length ? "tabpanel" : "region"}
           >
-            <div className="profile">
-              {avatar ? (
-                <Image
-                  src={avatar}
-                  alt={`${site.author} 的头像`}
-                  width={92}
-                  height={92}
-                  className="profile-avatar"
-                  unoptimized
-                />
-              ) : (
-                <div className="profile-avatar avatar-placeholder">
-                  <Icon name="campfire" />
-                </div>
-              )}
-              <h2 id="profile-title">{site.author}</h2>
-              <p>{site.settings?.site.author_tagline || site.description}</p>
-              <div className="site-stats">
-                <Link href="/archives">
-                  <strong>{site.stats.articles}</strong>
-                  <span>
-                    <UiText text="文章" />
-                  </span>
-                </Link>
-                <Link href="/categories">
-                  <strong>{site.stats.categories}</strong>
-                  <span>
-                    <UiText text="分类" />
-                  </span>
-                </Link>
-                <Link href="/tags">
-                  <strong>{site.stats.tags}</strong>
-                  <span>
-                    <UiText text="标签" />
-                  </span>
-                </Link>
-              </div>
-              <div className="profile-links">
-                {identity.social.map((item) => (
-                  <TextLink
-                    key={item.href}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <Icon name="link" />
-                    {item.label}
-                  </TextLink>
-                ))}
-                <Link href="/links/">
-                  <Icon name="leaf" />
-                  Links
-                </Link>
-              </div>
-            </div>
+            <SidebarProfile site={site} />
           </TransitionPanel>
         </section>
       </aside>

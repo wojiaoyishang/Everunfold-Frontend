@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[博主卡片和横幅动效](decisions/0126-theme-profile-and-banner.md)说明主题配置、旧值回退和同步。
+
 [站点阅读与文章显示](decisions/0125-site-reading-and-article-presentation.md)记录全站默认值、主题与单篇设置的继承方式。
 
 [账户邮件与自助找回密码](decisions/0124-account-mail-and-password-recovery.md)说明模板配置、全站开关和部署迁移。
