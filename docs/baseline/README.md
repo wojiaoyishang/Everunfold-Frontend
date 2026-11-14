@@ -1819,3 +1819,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0146-extension-source-git-allowlists.md` | `ADR0146-1` | `59c48cb0543fa0621f0b3afb99b0b043fb1b871ea7f259b79052070b9a8da611` |
+
+## 后台字段钩子与 AI 写作
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0147-admin-form-hooks-and-ai-writing.md` | `ADR0147-1` | `272f381b9b2887dae7180ffc79e726a1bca9780c3073f9a0c49b3efb24492a66` |

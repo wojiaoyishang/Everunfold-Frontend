@@ -58,6 +58,7 @@ import { customPageTypeId } from "@/core/pages/registration";
 import styles from "./pages.module.css";
 import editorColumns from "../components/editor-columns.module.css";
 import { NewPageLanguage, PageLanguages } from "./languages";
+import { authoringProse, pageScene } from "@/core/forms/authoring-source";
 import { SeoDisclosure, SeoFieldsEditor } from "../components/seo-fields";
 import { PageCodeFields } from "./code-fields";
 import { usePageAction } from "./feedback";
@@ -213,6 +214,35 @@ export function ManagedPageEditor({
   const path = manualPath ? value.path : defaultPath;
   const visiblePathError = pathError || (manualPath ? pageUrlError(path) : "");
   const disabled = !write || action.busy || Boolean(saved?.archived);
+  const pageLanguage =
+    saved?.language ?? (source === "custom" ? language : catalog.default_code);
+  const pageAuthoring = {
+    scene: pageScene,
+    resourceKey: `${saved?.id ?? "new"}:${pageLanguage}`,
+    source: () => {
+      const restricted = value.captcha_read === "required";
+      return {
+        resourceId: saved?.id,
+        language: pageLanguage,
+        title: value.title,
+        restricted,
+        summary: restricted
+          ? undefined
+          : authoringProse([
+              { type: "html", content: value.description ?? "" },
+            ]),
+        body:
+          restricted || source !== "custom"
+            ? undefined
+            : authoringProse(
+                [{ type: "html", content: value.html ?? "" }],
+                value.edit_mode === "components"
+                  ? value.component_document
+                  : null,
+              ),
+      };
+    },
+  };
   const onTitle = (title: string) => {
     if (!manualPath) setPathError("");
     update({ title });
@@ -717,6 +747,13 @@ export function ManagedPageEditor({
                   change={update}
                   disabled={disabled}
                   compact={compact}
+                  authoring={{
+                    ...pageAuthoring,
+                    source: () => ({
+                      ...pageAuthoring.source(),
+                      summary: undefined,
+                    }),
+                  }}
                   compactIdentity={
                     compact && (
                       <>
@@ -736,8 +773,9 @@ export function ManagedPageEditor({
                       <SeoDisclosure label="搜索与分享">
                         <SeoFieldsEditor
                           value={value}
+                          authoring={pageAuthoring}
                           onChange={update}
-                          disabled={!write || action.busy}
+                          disabled={disabled}
                           content={{
                             kind: "page",
                             id: saved?.id,

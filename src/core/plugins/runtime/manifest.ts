@@ -14,6 +14,7 @@ export function parsePluginPackage(
     !item ||
     item.protocol !== "plugin-package-1" ||
     item.sdk !== 1 ||
+    (item.surface !== undefined && item.surface !== "admin") ||
     item.directory !== directory ||
     !/^[a-z][a-z0-9-]*$/.test(directory) ||
     !/^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/.test(item.id) ||

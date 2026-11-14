@@ -3,6 +3,8 @@ export interface SettingField {
   key: string;
   label: string;
   component: string;
+  /** Opt a text field into the host's declared admin form scene. */
+  authoringAction?: true;
   default?: unknown;
   props?: Readonly<Record<string, unknown>>;
   fields?: readonly SettingField[];

@@ -566,3 +566,19 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.admin-authoring-field-heading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+}
+
+.admin-authoring-field-heading > :not(label) {
+  margin-inline-start: auto;
+}
+
+.admin-settings-field > .admin-authoring-field-heading > label {
+  font-weight: 500;
+}

@@ -17,6 +17,11 @@ import { DateTimeField } from "../../components/ui/date-time-field";
 import { Select } from "../../components/ui/select";
 import { PasswordField } from "../../components/ui/password-field";
 import { Switch } from "../../components/ui/switch";
+import {
+  articleScene,
+  draftAuthoringSource,
+  shuoshuoScene,
+} from "@/core/forms/authoring-source";
 import { SeoFieldsEditor } from "../components/seo-fields";
 import { CaptchaOverrides } from "../components/captcha-overrides";
 import { CategorySelector, type CreateCategory } from "./category-selector";
@@ -67,6 +72,7 @@ function Panel({
 }
 interface PanelProps {
   type: ContentTypeDefinition;
+  authoringLanguage?: string;
   fields: DraftFields;
   detail: DraftDetail | null;
   settings: EditorSettings;
@@ -401,6 +407,7 @@ function CaptchaPanel({ settings, update, disabled }: PanelProps) {
 }
 function SeoPanel({
   type,
+  authoringLanguage,
   settings,
   update,
   fields,
@@ -415,6 +422,20 @@ function SeoPanel({
         value={settings}
         onChange={update}
         onMedia={onMedia}
+        authoring={
+          authoringLanguage && (type.id === "article" || type.id === "shuoshuo")
+            ? {
+                scene: type.id === "article" ? articleScene : shuoshuoScene,
+                resourceKey: `${detail?.id ?? "new"}:${authoringLanguage}`,
+                source: () =>
+                  draftAuthoringSource(
+                    { ...fields, settings },
+                    authoringLanguage,
+                    detail?.id,
+                  ),
+              }
+            : undefined
+        }
         disabled={disabled}
         content={{
           kind: type.id === "shuoshuo" ? "shuoshuo" : "article",

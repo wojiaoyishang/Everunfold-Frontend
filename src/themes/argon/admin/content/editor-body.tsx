@@ -10,7 +10,7 @@ import type { MediaItem } from "@/core/contracts/settings";
 import type { InlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
 import { uploadMarkers } from "@/core/editor/upload-placeholders";
 import { mediaMarkup } from "@/core/content-management/editor-fields";
-import { Button, TextArea } from "../../components/ui/primitives";
+import { Button } from "../../components/ui/primitives";
 import { BlockFrame, BlockPosition } from "./block-frame";
 import { useBlockComposer } from "./block-composer";
 import { EditorMediaDialog } from "./editor-media-dialog";
@@ -24,7 +24,15 @@ import type {
 import type { MediaURL } from "@/core/contracts/content-admin";
 import styles from "./editor-workspace.module.css";
 import type { DraftSession } from "@/core/collaboration/session";
+import { AuthoringField } from "../components/authoring-field";
+import {
+  articleScene,
+  draftAuthoringSource,
+} from "@/core/forms/authoring-source";
+
 export interface EditorProps {
+  authoringLanguage?: string;
+  authoringId?: string;
   session?: DraftSession | null;
   type: ContentTypeDefinition;
   value: DraftFields;
@@ -39,6 +47,8 @@ export interface EditorProps {
 }
 export function EditorBody({
   session,
+  authoringLanguage,
+  authoringId,
   type,
   value,
   onChange,
@@ -221,23 +231,38 @@ export function EditorBody({
         <BlockPosition end />
       </div>
       {type.supports_excerpt && (
-        <label className={`admin-field ${styles.excerpt}`}>
-          <span>
-            <UiText text="摘要" />
+        <AuthoringField
+          className={`admin-field ${styles.excerpt}`}
+          binding={
+            type.id === "article" && authoringLanguage
+              ? {
+                  scene: articleScene,
+                  field: "excerpt",
+                  resourceKey: `${authoringId ?? "new"}:${authoringLanguage}`,
+                  source: () => ({
+                    ...draftAuthoringSource(
+                      value,
+                      authoringLanguage,
+                      authoringId,
+                    ),
+                    summary: undefined,
+                  }),
+                }
+              : undefined
+          }
+          label="摘要"
+          labelAside={
             <small>
               <UiText text="（可选）" />
             </small>
-          </span>
-          <TextArea
-            value={value.excerpt ?? ""}
-            rows={3}
-            maxLength={1000}
-            placeholder="留空时从正文生成摘要"
-            onChange={(event) =>
-              onChange({ ...value, excerpt: event.target.value })
-            }
-          />
-        </label>
+          }
+          value={value.excerpt ?? ""}
+          rows={3}
+          maxLength={1000}
+          disabled={disabled}
+          placeholder="留空时从正文生成摘要"
+          onChange={(excerpt) => onChange({ ...value, excerpt })}
+        />
       )}
       <span role="status" className="sr-only">
         {announcement}

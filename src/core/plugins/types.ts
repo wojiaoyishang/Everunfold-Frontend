@@ -3,6 +3,7 @@ import type { PublicShortcode } from "@/core/contracts/settings";
 import type { CustomPageDefinition } from "@/core/pages/registration";
 import type { FontDefinition } from "@/core/fonts/types";
 import type { BuilderComponentDefinition } from "@/core/builder/types";
+import type { AdminFormFieldHook } from "@/core/forms/admin-field-types";
 
 export interface ShortcodeRenderContext {
   parameters: Readonly<Record<string, string>>;
@@ -27,6 +28,7 @@ export interface PluginShortcode {
 }
 
 export interface FrontendPlugin {
+  surface?: "admin";
   author?: string;
   homepage?: string;
   license?: string;
@@ -43,6 +45,7 @@ export interface FrontendPlugin {
     components: { register: (name: string) => void };
     fonts: { register: (font: FontDefinition) => void };
     builder: { register: (definition: BuilderComponentDefinition) => void };
+    formFields: { register: (hook: AdminFormFieldHook) => void };
   }) => void;
 }
 

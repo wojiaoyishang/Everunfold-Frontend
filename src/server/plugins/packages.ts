@@ -64,6 +64,17 @@ export function publicPackage(manifest: PluginPackage): PublicPluginPackage {
   void node;
   return { ...manifest, entries };
 }
+export function pluginAssetCache(
+  cacheDirectory: string,
+  manifest: PluginPackage,
+  name: string,
+) {
+  const root =
+    manifest.surface === "admin"
+      ? path.join(cacheDirectory, ".admin-assets")
+      : cacheDirectory;
+  return path.resolve(root, manifest.directory, name);
+}
 async function scanInstalledPlugins(directory: string, cacheDirectory: string) {
   directory = path.resolve(directory);
   let state = roots.get(directory);
@@ -116,7 +127,7 @@ async function scanInstalledPlugins(directory: string, cacheDirectory: string) {
           throw new Error("Plugin asset digest mismatch");
         files.set(name, bytes);
         await immutableFile(
-          path.resolve(cacheDirectory, entry.name, name),
+          pluginAssetCache(cacheDirectory, manifest, name),
           bytes,
         );
       }
@@ -140,6 +151,7 @@ async function scanInstalledPlugins(directory: string, cacheDirectory: string) {
       const registry = createPluginRegistry([plugin], []);
       if (
         plugin.id !== manifest.id ||
+        plugin.surface !== manifest.surface ||
         !packageFontsMatch(registry.fonts, manifest) ||
         JSON.stringify(registry.componentNames) !==
           JSON.stringify(manifest.components) ||

@@ -26,6 +26,8 @@ import { useEditorResources } from "@/core/content-management/use-editor-resourc
 import { useInlineImageUploads } from "@/core/content-management/use-inline-image-uploads";
 import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { glossaryTermPath } from "@/core/glossary/routes";
+import { authoringProse, glossaryScene } from "@/core/forms/authoring-source";
+import { AuthoringField } from "../components/authoring-field";
 import { SeoDisclosure, SeoFieldsEditor } from "../components/seo-fields";
 import { mediaReferenceId } from "@/core/media/references";
 import { AdminPageHeading } from "../components/page-heading";
@@ -43,12 +45,7 @@ import { DraftPreview } from "../content/draft-preview";
 import { EditorBody } from "../content/editor-body";
 import { CodePreferencesProvider } from "../../components/code-preferences";
 import { RouteLink } from "../../components/ui/route-link";
-import {
-  Button,
-  Form,
-  TextArea,
-  TextField,
-} from "../../components/ui/primitives";
+import { Button, Form, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import { TokenField } from "../../components/ui/token-field";
 import { Icon } from "../../components/icon";
@@ -158,7 +155,6 @@ export function GlossaryAdminPage() {
   const languages = useLanguageCatalog();
   const languageId = useId();
   const languageHintId = useId();
-  const summaryId = useId();
   const statusId = useId();
   const statusHintId = useId();
   const resources = useEditorResources();
@@ -182,6 +178,22 @@ export function GlossaryAdminPage() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [newTermSession, setNewTermSession] = useState(() => randomUUID());
+  const termAuthoring = {
+    scene: glossaryScene,
+    resourceKey: `${selected?.id ?? newTermSession}:${fields.language ?? "*"}`,
+    source: () => ({
+      resourceId: selected?.id,
+      language:
+        !fields.language || fields.language === "*"
+          ? languages.default_code
+          : fields.language,
+      title: fields.title,
+      body: authoringProse(fields.body),
+      summary: authoringProse([
+        { type: "html", content: fields.summary ?? "" },
+      ]),
+    }),
+  };
   const slugTouched = useRef(false);
   const pendingHooks = useRef<PendingGlossaryHook[]>([]);
   const operation = useRef<{ fingerprint: string; id: string } | null>(null);
@@ -835,28 +847,32 @@ export function GlossaryAdminPage() {
               title="悬浮提示"
               description="简短摘要可留空；默认悬浮内容直接使用上方术语正文。"
             >
-              <div className="admin-settings-field">
-                <label htmlFor={summaryId}>
-                  <UiText text="简短提示（可选）" />
-                </label>
-                <TextArea
-                  id={summaryId}
-                  value={fields.summary ?? ""}
-                  rows={3}
-                  maxLength={500}
-                  placeholder="可留空；默认直接使用上方术语正文作为悬浮内容。"
-                  onChange={(event) => update({ summary: event.target.value })}
-                />
-                <small>
-                  <UiText text="可选。仅在站点提示内容来源设为“简短提示”时使用。" />
-                </small>
-              </div>
+              <AuthoringField
+                className="admin-settings-field"
+                label="简短提示（可选）"
+                binding={{
+                  ...termAuthoring,
+                  field: "summary",
+                  source: () => ({
+                    ...termAuthoring.source(),
+                    summary: undefined,
+                  }),
+                }}
+                value={fields.summary ?? ""}
+                rows={3}
+                maxLength={500}
+                disabled={!writable || saving || loading}
+                placeholder="可留空；默认直接使用上方术语正文作为悬浮内容。"
+                onChange={(summary) => update({ summary })}
+                hint="可选。仅在站点提示内容来源设为“简短提示”时使用。"
+              />
             </SettingsSection>
             <SeoDisclosure
               key={selected?.id ?? newTermSession}
               label="搜索与分享"
             >
               <SeoFieldsEditor
+                authoring={termAuthoring}
                 value={fields}
                 onChange={update}
                 disabled={!writable || saving}

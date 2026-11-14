@@ -42,6 +42,7 @@ export const SDK_CLIENT_EXPORTS = [
   "resourceUrl",
   "taxonomyHref",
   "useAdminRequest",
+  "randomUUID",
   "PageComments",
   "usePageComments",
   "usePageCommentClient",

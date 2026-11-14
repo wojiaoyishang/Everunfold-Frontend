@@ -3,7 +3,8 @@
 import type { ReactNode } from "react";
 import type { PageValue } from "@/core/contracts/pages";
 import { UiText, useT } from "@/core/i18n/provider";
-import { AccountField } from "../../account/fields";
+import { AuthoringField } from "../components/authoring-field";
+import type { AdminFormFieldContext } from "@/core/forms/admin-field-types";
 import { Icon } from "../../components/icon";
 import { Switch } from "../../components/ui/switch";
 import { CaptchaOverrides } from "../components/captcha-overrides";
@@ -71,6 +72,7 @@ export function PageSettings({
   disabled,
   compact,
   compactIdentity,
+  authoring,
   seo,
   extra,
 }: {
@@ -79,6 +81,7 @@ export function PageSettings({
   disabled: boolean;
   compact: boolean;
   compactIdentity?: ReactNode;
+  authoring?: Pick<AdminFormFieldContext, "scene" | "source" | "resourceKey">;
   seo?: ReactNode;
   extra?: ReactNode;
 }) {
@@ -91,12 +94,14 @@ export function PageSettings({
         {compactIdentity && (
           <div className={styles.identity}>{compactIdentity}</div>
         )}
-        <AccountField
+        <AuthoringField
+          binding={authoring && { ...authoring, field: "description" }}
           label="页面说明"
           value={value.description ?? ""}
           onChange={(description) => change({ description })}
-          multiline
+          rows={4}
           maxLength={500}
+          disabled={disabled}
         />
       </PageSettingsGroup>
       <PageSettingsGroup

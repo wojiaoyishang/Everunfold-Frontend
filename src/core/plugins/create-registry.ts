@@ -6,6 +6,14 @@ import { createFontRegistry, defineFont } from "@/core/fonts/registry";
 import { defineBuilderComponent } from "@/core/builder/registry";
 import type { BuilderComponentDefinition } from "@/core/builder/types";
 import type {
+  AdminFormFieldHook,
+  RegisteredAdminFormFieldHook,
+} from "@/core/forms/admin-field-types";
+import {
+  compareAdminFormFieldHooks,
+  validateAdminFormFieldHook,
+} from "@/core/forms/admin-field-hooks";
+import type {
   FrontendPlugin,
   PluginShortcode,
   RegisteredPluginShortcode,
@@ -28,20 +36,30 @@ export function createPluginRegistry(
   const components = new Map<string, string>();
   const fonts: FontDefinition[] = [];
   const builderComponents = new Map<string, BuilderComponentDefinition>();
+  const adminFormFieldHooks: RegisteredAdminFormFieldHook[] = [];
   for (const plugin of plugins) {
     if (
       !identity.test(plugin.id) ||
       !version.test(plugin.version) ||
+      (plugin.surface !== undefined && plugin.surface !== "admin") ||
       typeof plugin.setup !== "function" ||
       pluginIds.has(plugin.id)
     )
       throw new Error(`Invalid or duplicate frontend plugin: ${plugin.id}`);
     pluginIds.add(plugin.id);
     let collecting = true;
+    const assertPublicContribution = () => {
+      if (plugin.surface === "admin")
+        throw new Error(
+          `Admin-only plugins cannot register public contributions: ${plugin.id}`,
+        );
+    };
     const ownBuilderComponents: BuilderComponentDefinition[] = [];
+    const ownFieldHooks = new Map<string, RegisteredAdminFormFieldHook>();
     const register = (shortcode: PluginShortcode) => {
       if (!collecting)
         throw new Error(`Plugin setup has finished: ${plugin.id}`);
+      assertPublicContribution();
       const d = shortcode.definition;
       if (
         !uuid.test(d.id) ||
@@ -95,10 +113,30 @@ export function createPluginRegistry(
       const result: unknown = plugin.setup(
         Object.freeze({
           shortcodes: Object.freeze({ register }),
+          formFields: Object.freeze({
+            register(hook: AdminFormFieldHook) {
+              if (!collecting)
+                throw new Error(`Plugin setup has finished: ${plugin.id}`);
+              validateAdminFormFieldHook(hook);
+              if (plugin.surface !== "admin" || ownFieldHooks.has(hook.id))
+                throw new Error(
+                  `Invalid or duplicate admin field hook: ${plugin.id}.${hook.id}`,
+                );
+              ownFieldHooks.set(
+                hook.id,
+                Object.freeze({
+                  ...hook,
+                  pluginId: plugin.id,
+                  priority: hook.priority ?? 100,
+                }),
+              );
+            },
+          }),
           builder: Object.freeze({
             register(definition: BuilderComponentDefinition) {
               if (!collecting)
                 throw new Error(`Plugin setup has finished: ${plugin.id}`);
+              assertPublicContribution();
               if (
                 !definition.type.startsWith(plugin.id + ".") ||
                 builderComponents.has(definition.type) ||
@@ -116,6 +154,7 @@ export function createPluginRegistry(
             register(font: FontDefinition) {
               if (!collecting)
                 throw new Error(`Plugin setup has finished: ${plugin.id}`);
+              assertPublicContribution();
               if (!font.id.startsWith(plugin.id + "."))
                 throw new Error(
                   `Font must use its plugin namespace: ${plugin.id}`,
@@ -127,6 +166,7 @@ export function createPluginRegistry(
             register(page: CustomPageDefinition) {
               if (!collecting)
                 throw new Error(`Plugin setup has finished: ${plugin.id}`);
+              assertPublicContribution();
               if (!page.component)
                 throw new Error(
                   `Page component name required: ${page.registration.id}`,
@@ -157,6 +197,16 @@ export function createPluginRegistry(
     } finally {
       collecting = false;
     }
+    for (const hook of ownFieldHooks.values()) {
+      if (
+        hook.stage === "render" &&
+        components.get(hook.component) !== plugin.id
+      )
+        throw new Error(
+          `Field hook renderer must be registered by its plugin: ${hook.id}`,
+        );
+      adminFormFieldHooks.push(hook);
+    }
     for (const definition of ownBuilderComponents) {
       if (
         definition.component &&
@@ -186,6 +236,9 @@ export function createPluginRegistry(
   return Object.freeze({
     fonts: createFontRegistry(fonts).all,
     builderComponents: Object.freeze([...builderComponents.values()]),
+    adminFormFieldHooks: Object.freeze(
+      adminFormFieldHooks.sort(compareAdminFormFieldHooks),
+    ),
     shortcodes,
     pages: Object.freeze(pages),
     componentNames: Object.freeze([...components.keys()]),

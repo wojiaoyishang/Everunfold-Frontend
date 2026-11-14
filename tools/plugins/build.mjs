@@ -257,7 +257,7 @@ export async function buildPlugin(
         ".woff2": "file",
       },
       assetNames: "asset.[hash]",
-      publicPath: `/__plugins/assets/${directory}/`,
+      publicPath: `/__plugins/${plugin.surface === "admin" ? "admin/" : ""}assets/${directory}/`,
     });
     // Give every public asset a full content hash; references survive a package hot swap.
     const renames = new Map();
@@ -295,6 +295,7 @@ export async function buildPlugin(
     sdk: 1,
     directory,
     id: plugin.id,
+    ...(plugin.surface ? { surface: plugin.surface } : {}),
     title: plugin.title ?? plugin.id,
     description: plugin.description ?? "",
     version: plugin.version,

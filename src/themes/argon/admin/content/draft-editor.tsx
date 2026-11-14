@@ -585,6 +585,12 @@ export function DraftEditor({
                       ) : Fields ? (
                         <Fields
                           session={editor.session}
+                          authoringId={editor.detail?.id}
+                          authoringLanguage={
+                            editor.detail?.language ||
+                            language ||
+                            languages.default_code
+                          }
                           type={type}
                           value={editor.fields}
                           onChange={editor.setFields}
@@ -637,6 +643,9 @@ export function DraftEditor({
                 fields={editor.fields}
                 onChange={editor.setFields}
                 detail={editor.detail}
+                authoringLanguage={
+                  editor.detail?.language || language || languages.default_code
+                }
                 disabled={Boolean(blocked || (id && !editor.detail))}
                 terms={resources.terms}
                 newArticleDefaults={

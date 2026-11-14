@@ -4,6 +4,7 @@ import type { FontDefinition } from "@/core/fonts/types";
 import type { BuilderComponentDefinition } from "@/core/builder/types";
 
 export interface PluginPackage {
+  surface?: "admin";
   author?: string;
   homepage?: string;
   license?: string;

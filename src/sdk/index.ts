@@ -13,6 +13,14 @@ export type {
 export type { SettingsModel, SettingField } from "@/core/forms/schema";
 export type { FormFieldProps } from "@/core/forms/renderer";
 export type {
+  AdminFormFieldActionProps,
+  AdminFormFieldContext,
+  AdminFormFieldHook,
+  AdminFormFieldSource,
+  AdminFormFieldView,
+  PluginAdminSettingsProps,
+} from "@/core/forms/admin-field-types";
+export type {
   CustomPageDefinition,
   PageCommentsPlacement,
   PageImageViewerOptions,

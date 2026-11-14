@@ -23,10 +23,13 @@ export function TextControl({
   value,
   onChange,
   disabled,
+  authoringActions,
+  authoringView,
 }: FormFieldProps) {
   return (
     <AccountField
       label={field.label}
+      labelAside={authoringActions}
       value={text(value)}
       onChange={onChange}
       disabled={disabled}
@@ -34,6 +37,8 @@ export function TextControl({
       maxLength={num(field.props?.maxLength)}
       minLength={num(field.props?.minLength)}
       required={field.props?.required === true}
+      placeholder={authoringView?.placeholder}
+      hint={authoringView?.description}
     />
   );
 }

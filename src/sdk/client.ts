@@ -43,6 +43,7 @@ export {
 } from "@/core/contracts/pages";
 export { resourceUrl, taxonomyHref } from "@/core/content/urls";
 export { useAdminRequest } from "@/core/admin/account-context";
+export { randomUUID } from "@/core/browser/crypto";
 
 export { MediaPickerDialog } from "./media-picker";
 export { SettingsForm } from "@/core/forms/renderer";

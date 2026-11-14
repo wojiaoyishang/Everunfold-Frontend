@@ -34,7 +34,7 @@ import { editorPreviewContent } from "@/core/preview/content";
 import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { Icon } from "../../components/icon";
-import { Button, TextArea } from "../../components/ui/primitives";
+import { Button } from "../../components/ui/primitives";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { RouteLink } from "../../components/ui/route-link";
 import { livePreviewPath } from "@/core/preview/routes";
@@ -43,6 +43,11 @@ import { AdminPageHeading } from "../components/page-heading";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { usePageAction } from "../pages/feedback";
 import { EditorLanguages } from "./editor-languages";
+import { AuthoringField } from "../components/authoring-field";
+import {
+  articleScene,
+  draftAuthoringSource,
+} from "@/core/forms/authoring-source";
 import { EditorPanels } from "./editor-panels";
 import { EditorTitle } from "./editor-title";
 import type { PublicationChoice } from "./publication-schedule";
@@ -423,24 +428,38 @@ export function ComponentDraftEditor({
               aria-label="内容设置"
             >
               {type.supports_excerpt && (
-                <label className="admin-field">
-                  <UiText text="摘要" />
-                  <TextArea
-                    rows={3}
-                    maxLength={500}
-                    value={fields.excerpt ?? ""}
-                    disabled={!writable || action.busy}
-                    onChange={(event) =>
-                      setFields({ ...fields, excerpt: event.target.value })
-                    }
-                  />
-                </label>
+                <AuthoringField
+                  label="摘要"
+                  binding={
+                    type.id === "article"
+                      ? {
+                          scene: articleScene,
+                          field: "excerpt",
+                          resourceKey: `${detail?.id ?? "new"}:${detail?.language ?? language}`,
+                          source: () => ({
+                            ...draftAuthoringSource(
+                              fields,
+                              detail?.language ?? language,
+                              detail?.id,
+                            ),
+                            summary: undefined,
+                          }),
+                        }
+                      : undefined
+                  }
+                  rows={3}
+                  maxLength={1000}
+                  value={fields.excerpt ?? ""}
+                  disabled={!writable || action.busy}
+                  onChange={(excerpt) => setFields({ ...fields, excerpt })}
+                />
               )}
               <EditorPanels
                 type={type}
                 fields={fields}
                 onChange={setFields}
                 detail={detail}
+                authoringLanguage={detail?.language ?? language}
                 disabled={!writable || action.busy}
                 terms={resources.terms}
                 newArticleDefaults={

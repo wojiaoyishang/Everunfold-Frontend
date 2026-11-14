@@ -16,6 +16,7 @@ export function AccountField({
   multiline = false,
   required = false,
   hint,
+  placeholder,
   error,
   minLength,
   maxLength = 2048,
@@ -36,6 +37,7 @@ export function AccountField({
   multiline?: boolean;
   required?: boolean;
   hint?: string;
+  placeholder?: string;
   error?: string;
   minLength?: number;
   maxLength?: number;
@@ -58,6 +60,7 @@ export function AccountField({
     minLength,
     maxLength,
     autoComplete,
+    placeholder,
     min,
     max,
     step,

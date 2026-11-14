@@ -3,9 +3,16 @@ import { useState } from "react";
 import type { InstalledPlugin } from "@/core/contracts/settings";
 import { PluginDetails } from "./plugin-details";
 import { Icon } from "../../components/icon";
+import { Modal } from "../../components/ui/modal";
+import { can } from "@/core/accounts/permissions";
+import {
+  PluginAdminSettings,
+  useHasPluginAdminSettings,
+} from "@/core/plugins/admin-settings";
+import { OptionalPluginBoundary } from "@/core/plugins/runtime/optional-component";
 import styles from "./plugins.module.css";
 import { UiText } from "@/core/i18n/provider";
-import { useAdminRequest } from "@/core/admin/account-context";
+import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { useSettingsEditor } from "@/core/settings/editor";
 import { useExtensionCatalog } from "@/core/plugins/use-catalog";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
@@ -31,6 +38,47 @@ function pluginPreview(
   return remote?.startsWith("/v1/extensions/artwork/")
     ? new URL(remote, backendUrl).href
     : remote;
+}
+
+function PluginConfiguration({ id, title }: { id: string; title: string }) {
+  const hasSettings = useHasPluginAdminSettings(id);
+  const writable = can(useAdminAccount(), "settings:write");
+  const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
+  if (!hasSettings || !writable) return null;
+  const close = () => setClosing(true);
+  return (
+    <>
+      <Button
+        className="admin-button"
+        onClick={() => {
+          setClosing(false);
+          setOpen(true);
+        }}
+      >
+        <Icon name="settings" />
+        <UiText text="配置" />
+      </Button>
+      {open && (
+        <Modal
+          title={title}
+          closing={closing}
+          onClose={close}
+          onExited={() => setOpen(false)}
+        >
+          <OptionalPluginBoundary
+            fallback={
+              <p role="alert">
+                <UiText text="暂时无法打开插件配置。" />
+              </p>
+            }
+          >
+            <PluginAdminSettings pluginId={id} onClose={close} />
+          </OptionalPluginBoundary>
+        </Modal>
+      )}
+    </>
+  );
 }
 
 export function PluginsSettingsPage() {
@@ -220,6 +268,9 @@ export function PluginsSettingsPage() {
                 <span>
                   {plugin?.version} {plugin?.author && ` · ${plugin.author}`}
                 </span>
+                {ready && !savedDisabled.includes(id) && (
+                  <PluginConfiguration id={id} title={plugin?.title ?? id} />
+                )}
                 {plugin && (
                   <Button
                     className="admin-button"

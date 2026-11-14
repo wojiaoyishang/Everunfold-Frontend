@@ -17,6 +17,7 @@ import type { AuthUser } from "@/core/contracts/auth";
 import { LocalDraftRecovery } from "@/themes/argon/admin/content/local-recovery";
 import { AdminSeoContext, type AdminSeo } from "@/core/admin/seo-context";
 import { SiteBrandContext } from "@/core/site/brand";
+import { AdminPluginRuntimeProvider } from "@/core/plugins/runtime/provider";
 
 export function AdminWorkspace({
   baseUrl,
@@ -96,15 +97,17 @@ function ConfirmedWorkspace({
   return (
     <AdminRequestContext value={{ baseUrl, csrfToken }}>
       <AdminAccountContext value={user}>
-        <AdminShell
-          user={user}
-          siteBrand={siteBrand}
-          preferences={preferences}
-          onPreferencesChange={update}
-          onSignOut={onSignOut}
-        >
-          {children}
-        </AdminShell>
+        <AdminPluginRuntimeProvider>
+          <AdminShell
+            user={user}
+            siteBrand={siteBrand}
+            preferences={preferences}
+            onPreferencesChange={update}
+            onSignOut={onSignOut}
+          >
+            {children}
+          </AdminShell>
+        </AdminPluginRuntimeProvider>
       </AdminAccountContext>
     </AdminRequestContext>
   );

@@ -12,6 +12,10 @@ import {
 } from "./shared";
 import { SettingsMediaField } from "./media-field";
 import { SettingsLanguages } from "./languages";
+import { authoringProse, siteScene } from "@/core/forms/authoring-source";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
+import { AuthoringField } from "../components/authoring-field";
 import { normalizeCatalog } from "@/core/i18n/catalog";
 import { randomUUID } from "@/core/browser/crypto";
 import { Button, TextField } from "../../components/ui/primitives";
@@ -19,8 +23,20 @@ import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
 export function SiteSettingsPage() {
   const { draft, setDraft } = useSettingsEditor();
+  const writable = can(useAdminAccount(), "settings:write");
   const t = useT();
   const site = draft?.site;
+  const siteAuthoring = {
+    scene: siteScene,
+    resourceKey: site?.language_catalog?.default_code ?? "zh-CN",
+    source: () => ({
+      language: site?.language_catalog?.default_code ?? "zh-CN",
+      title: site?.name ?? "",
+      summary: authoringProse([
+        { type: "html", content: site?.description ?? "" },
+      ]),
+    }),
+  };
   const update = (value: Partial<NonNullable<typeof site>>) =>
     setDraft((current) =>
       current ? { ...current, site: { ...current.site, ...value } } : current,
@@ -48,7 +64,17 @@ export function SiteSettingsPage() {
                 onChange={(author) => update({ author })}
               />
             </div>
-            <SettingsText
+            <AuthoringField
+              className="admin-settings-field"
+              binding={{
+                ...siteAuthoring,
+                field: "description",
+                source: () => ({
+                  ...siteAuthoring.source(),
+                  summary: undefined,
+                }),
+              }}
+              disabled={!writable}
               label="站点简介"
               value={site.description}
               maxLength={300}
@@ -212,12 +238,15 @@ export function SiteSettingsPage() {
               maxLength={160}
               onChange={(title_template) => update({ title_template })}
             />
-            <SettingsText
+            <AuthoringField
+              className="admin-settings-field"
+              binding={{ ...siteAuthoring, field: "seo_description" }}
+              disabled={!writable}
               label="搜索描述"
               hint="留空时使用站点简介；文章仍优先使用各自的摘要。"
               value={site.seo_description ?? ""}
               maxLength={300}
-              multiline
+              rows={3}
               onChange={(seo_description) => update({ seo_description })}
             />
             <div className="admin-seo-preview">

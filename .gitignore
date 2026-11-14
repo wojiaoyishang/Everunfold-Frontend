@@ -48,6 +48,7 @@ Thumbs.db
 # Bundled extension sources. Use separate directories for local extensions.
 /src/plugins/*
 !/src/plugins/.gitkeep
+!/src/plugins/ai-writing/
 !/src/plugins/book/
 !/src/plugins/captcha/
 !/src/plugins/gallery/

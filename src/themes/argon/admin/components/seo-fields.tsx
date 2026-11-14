@@ -20,12 +20,14 @@ import {
   seoRouteFor,
   type SeoRoute,
 } from "@/core/seo/routes";
-import { Button, TextArea, TextField } from "../../components/ui/primitives";
+import { Button, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
 import { MediaPickerDialog } from "../media/media-picker-dialog";
 import { MediaPreview } from "../media/media-preview";
 import styles from "./seo-fields.module.css";
+import { AuthoringField } from "./authoring-field";
+import type { AdminFormFieldContext } from "@/core/forms/admin-field-types";
 
 export function SeoDisclosure({
   label,
@@ -57,6 +59,7 @@ export function SeoDisclosure({
 }
 
 type Props = {
+  authoring?: Pick<AdminFormFieldContext, "scene" | "source" | "resourceKey">;
   value: SeoFields;
   onChange: (patch: Partial<SeoFields>) => void;
   content: SeoInput & { id?: string; published?: boolean };
@@ -65,6 +68,7 @@ type Props = {
 };
 
 export function SeoFieldsEditor({
+  authoring,
   value,
   onChange,
   content,
@@ -174,27 +178,21 @@ export function SeoFieldsEditor({
     placeholder?: string,
     multiline = false,
   ) => {
-    const input = {
-      id: id + field,
-      maxLength,
-      disabled,
-      value: value[field] ?? "",
-      placeholder,
-      onChange: (
-        event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-      ) => onChange({ [field]: event.target.value }),
-    };
     return (
-      <div className="admin-field">
-        <label htmlFor={input.id}>
-          <UiText text={label} />
-        </label>
-        {multiline ? (
-          <TextArea {...input} rows={3} />
-        ) : (
-          <TextField {...input} />
-        )}
-      </div>
+      <AuthoringField
+        binding={
+          authoring && field !== "seo_image_alt"
+            ? { ...authoring, field }
+            : undefined
+        }
+        label={label}
+        maxLength={maxLength}
+        disabled={disabled}
+        value={value[field] ?? ""}
+        placeholder={placeholder}
+        rows={multiline ? 3 : undefined}
+        onChange={(next) => onChange({ [field]: next })}
+      />
     );
   };
   return (

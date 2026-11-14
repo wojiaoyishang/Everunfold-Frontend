@@ -1,0 +1,185 @@
+.fieldAction {
+  gap: 5px;
+  min-block-size: 32px;
+  padding-inline: 8px;
+  background: transparent;
+  color: var(--admin-accent);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+.fieldAction:hover {
+  background: var(--admin-subtle);
+}
+
+.fieldAction :global(.icon) {
+  width: 15px;
+  height: 15px;
+}
+
+.dialog:global(.admin-library-modal) {
+  width: min(610px, calc(100vw - 24px));
+}
+
+.flow,
+.form,
+.material,
+.candidate {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+}
+
+.flow p,
+.flow dl,
+.flow dd {
+  margin: 0;
+}
+
+.form,
+.scene {
+  min-inline-size: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.field {
+  display: grid;
+  min-width: 0;
+  gap: 5px;
+  font-size: 0.875rem;
+}
+
+.field > :global(.ui-input) {
+  width: 100%;
+  min-width: 0;
+}
+
+.switchRow,
+.reviewHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.875rem;
+}
+
+.reviewHeading {
+  flex-wrap: wrap;
+}
+
+.reviewHeading span {
+  overflow-wrap: anywhere;
+  color: var(--admin-muted);
+}
+
+.sceneSection h3 {
+  margin: 0 0 8px;
+  font-size: 0.9375rem;
+}
+
+.sceneGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.scene {
+  padding: 4px 12px 7px;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+}
+
+.scene legend {
+  padding-inline: 4px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.scene .switchRow + .switchRow {
+  margin-top: 5px;
+}
+
+.switchRow > :global(.ui-switch) {
+  flex-shrink: 0;
+}
+
+.material {
+  gap: 8px;
+  max-height: 220px;
+  padding: 12px;
+  overflow: auto;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+  background: var(--admin-subtle);
+}
+
+.sources {
+  display: grid;
+  gap: 9px;
+}
+
+.sources div {
+  display: grid;
+  gap: 3px;
+}
+
+.sources dt,
+.hint,
+.notice {
+  color: var(--admin-muted);
+  font-size: 0.8125rem;
+}
+
+.sources dd,
+.candidate p {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.candidate {
+  gap: 6px;
+  padding: 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+}
+
+.candidate strong {
+  font-size: 0.875rem;
+}
+
+.actions,
+.loadError {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.notice {
+  margin-inline-end: auto;
+}
+
+.error {
+  color: var(--admin-danger);
+  font-size: 0.875rem;
+}
+
+@media (max-width: 500px) {
+  .sceneGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .notice:not(:empty) {
+    flex-basis: 100%;
+  }
+}
+
+@media (max-width: 860px), (pointer: coarse) {
+  .fieldAction {
+    min-block-size: 44px;
+  }
+}
