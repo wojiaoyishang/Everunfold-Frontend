@@ -11,6 +11,7 @@ export async function generateSettingsClient(
     contractName = "SettingsContract",
     stem = "settings",
     schemaFile = "settings-v1.schema.json",
+    validators = {},
   } = {},
 ) {
   const operations = schema["x-everunfold-operations"];
@@ -20,7 +21,7 @@ export async function generateSettingsClient(
       (op) =>
         !/^[a-z][a-zA-Z]+$/.test(op.name) ||
         !(stem === "captcha"
-          ? /^\/v1\/(?:admin\/captcha|reader\/(?:captcha\/challenge|access-page|page-comments|comments))$/.test(
+          ? /^\/v1\/(?:admin\/captcha|reader\/(?:captcha\/challenge|access-page|discussion|page-comments|comments))$/.test(
               op.path,
             )
           : stem === "content-access"
@@ -71,6 +72,13 @@ export function ${op.name}(baseUrl: string, ${parameters.map(({ argument }) => `
     })
     .join("\n");
   const target = path.join(output, `${stem}-client.ts`);
+  const validation = Object.entries(validators)
+    .map(([name, property]) => {
+      if (!/^[a-z][a-zA-Z]+$/.test(name) || !schema.properties[property])
+        throw new Error("Invalid contract validator");
+      return `export const ${name} = ajv.compile<${contractName}[${JSON.stringify(property)}]>({ $ref: ${JSON.stringify(`${stem}#/properties/${property}`)} });`;
+    })
+    .join("\n");
   const imports = [
     ...new Set(
       operations.map((op) =>
@@ -93,7 +101,7 @@ import { ${imports.join(", ")}, type RequestOptions } from "@/core/http/request"
 const ajv = new Ajv({ strict: true });
 addFormats(ajv);
 ajv.addSchema(Object.fromEntries(Object.entries(schema).filter(([key]) => !key.startsWith("x-"))), "${stem}");
-${methods}
+${validation}${methods}
 `;
   await writeArtifact(
     target,

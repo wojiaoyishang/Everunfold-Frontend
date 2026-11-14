@@ -1,0 +1,128 @@
+.fields {
+  display: grid;
+  gap: var(--admin-field-gap);
+  min-width: 0;
+}
+
+.options {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+
+.options legend {
+  font-weight: 500;
+  margin-block-end: var(--admin-label-gap);
+  padding: 0;
+}
+
+.checks,
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: var(--admin-label-gap) var(--admin-field-gap);
+}
+
+.checks {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 120px), 1fr));
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: max(var(--admin-touch-target), 28px);
+  cursor: pointer;
+}
+
+.actions,
+.counts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.counts {
+  margin: 0;
+}
+
+.counts dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding-block: max(8px, var(--admin-label-gap));
+  gap: 8px var(--admin-field-gap);
+}
+
+.row + .row {
+  border-top: 1px solid var(--admin-border);
+}
+
+.row:first-child {
+  padding-block-start: 0;
+}
+
+.row:last-child {
+  padding-block-end: 0;
+}
+
+.rowBody {
+  display: grid;
+  flex: 1 1 160px;
+  justify-items: start;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--admin-touch-target);
+  color: var(--admin-accent);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.muted,
+.error {
+  margin: 0;
+  color: var(--admin-muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.error {
+  color: var(--admin-danger);
+}
+
+.upload {
+  :global(.admin-upload-queue) {
+    margin: 0;
+  }
+}
+
+@media (max-width: 560px) {
+  :global(.admin-settings-section-heading):has(
+    > :global(.admin-settings-section-action) > .actions
+  ) {
+    grid-template-columns: 1fr;
+  }
+
+  :global(.admin-settings-section-action):has(> .actions) {
+    margin-inline-start: 0;
+  }
+}

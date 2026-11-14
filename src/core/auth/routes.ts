@@ -33,12 +33,23 @@ export function loginReturnPath(input: string | undefined): string | undefined {
     return "/";
   try {
     const url = new URL(input, "https://management.invalid");
+    let readerComments = false;
+    if (url.hash === "#comments") {
+      const path = decodeURIComponent(url.pathname);
+      readerComments =
+        !/^\/(?:admin|account|login|api|v1|media|_next|_nodes)(?:\/|$)/i.test(
+          path,
+        ) &&
+        !/[\u0000-\u0020\u007f\\]/.test(path) &&
+        !path.startsWith("//");
+    }
     if (
       url.origin !== "https://management.invalid" ||
       (url.pathname !== "/" &&
         !/^\/account\/?$/.test(url.pathname) &&
         url.pathname !== nodesConsolePath &&
-        !adminDestination(url.pathname))
+        !adminDestination(url.pathname) &&
+        !readerComments)
     )
       return "/";
     return `${url.pathname}${url.search}${url.hash}`;

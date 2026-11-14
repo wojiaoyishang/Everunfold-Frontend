@@ -6,7 +6,6 @@ import { Button, TextLink } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PublicComment } from "@/core/content/types";
-import { publicHref } from "@/core/content/urls";
 import { useCommentLocation } from "./use-comment-location";
 import { Icon } from "../icon";
 import { CommentComposer } from "./comment-composer";
@@ -14,6 +13,7 @@ import { CommentItem } from "./comment-item";
 import { exampleComments } from "./examples";
 import { useCaptcha } from "@/core/captcha/use-captcha";
 import {
+  readDiscussionPolicy,
   submitAccountReaderComment,
   submitReaderComment,
   type CaptchaAnswer,
@@ -27,6 +27,7 @@ import {
   COMMENT_PAGE_SIZE,
   commentPage,
   commentPageFor,
+  commentWebsite,
   historicalComments,
   orderComments,
   type CommentDraft,
@@ -57,15 +58,54 @@ export function CommentSection({
     account.state.phase === "ready" ? account.state.session : null;
   const user = session?.user;
   const signedInName = user ? user.display_name || user.username : null;
+  const [allowGuests, setAllowGuests] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (!contentId || !open || !interactive) return;
+    const controller = new AbortController();
+    let reading = false;
+    const readPolicy = () => {
+      if (reading) return;
+      reading = true;
+      void readDiscussionPolicy(store.baseUrl, { signal: controller.signal })
+        .then(({ data }) => {
+          if (!controller.signal.aborted)
+            setAllowGuests(data.allow_guest_comments);
+        })
+        .catch(() => {
+          // Submission still enforces the server policy if the read is unavailable.
+          if (!controller.signal.aborted)
+            setAllowGuests((current) => current ?? true);
+        })
+        .finally(() => {
+          reading = false;
+        });
+    };
+    readPolicy();
+    window.addEventListener("focus", readPolicy);
+    return () => {
+      controller.abort();
+      window.removeEventListener("focus", readPolicy);
+    };
+  }, [contentId, interactive, open, store.baseUrl]);
+  const canWrite =
+    open && interactive && (!contentId || !!user || allowGuests === true);
+  const checking = account.state.phase === "checking" || allowGuests === null;
+  const loginHref = `/login?next=${encodeURIComponent(`${path.split("#")[0]}#comments`)}`;
   const captcha = useCaptcha(
     store.baseUrl,
     "comment",
     contentId,
-    Boolean(contentId && open && interactive),
+    Boolean(contentId && canWrite),
     { lazy: true },
   );
   const submission = useRef<{ fingerprint: string; id: string } | null>(null);
   const [local, setLocal] = useState<CommentEntry[]>([]);
+  const [approved, setApproved] = useState<PublicComment[]>([]);
+  const published = useMemo(() => {
+    const byId = new Map(approved.map((entry) => [entry.id, entry]));
+    comments.forEach((entry) => byId.set(entry.id, entry));
+    return historicalComments([...byId.values()]);
+  }, [approved, comments]);
   const [examples, setExamples] = useState(!contentId);
   const [reply, setReply] = useState<{
     entry: CommentEntry | null;
@@ -78,11 +118,11 @@ export function CommentSection({
   const entries = useMemo(
     () =>
       orderComments([
-        ...historicalComments(comments),
+        ...published,
         ...(examples && open ? exampleComments : []),
         ...local,
       ]),
-    [comments, examples, local, open],
+    [published, examples, local, open],
   );
   const { entries: paged, page, pages } = commentPage(entries, requestedPage);
   const shown = continuous ? entries.slice(0, page * COMMENT_PAGE_SIZE) : paged;
@@ -123,7 +163,7 @@ export function CommentSection({
     setTarget({ id: `comment-${id}` });
   }
   async function add(
-    draft: Omit<CommentDraft, "email">,
+    draft: CommentDraft,
     answer?: CaptchaAnswer,
     signal?: AbortSignal,
   ) {
@@ -149,25 +189,47 @@ export function CommentSection({
           parent_id: parentId,
           author: draft.author,
           body: draft.body,
+          format: draft.formatted ? ("markdown" as const) : ("plain" as const),
+          website: commentWebsite(draft.website),
           captcha: answer,
           read_receipt: readReceipt,
         };
-        if (session?.user)
-          await submitAccountReaderComment(
-            store.baseUrl,
-            input,
-            session.csrf_token,
-            { signal },
-          );
-        else await submitReaderComment(store.baseUrl, input, { signal });
+        const { data } = session?.user
+          ? await submitAccountReaderComment(
+              store.baseUrl,
+              input,
+              session.csrf_token,
+              { signal },
+            )
+          : await submitReaderComment(store.baseUrl, input, { signal });
         if (signal?.aborted) throw new RequestError("cancelled");
         setReply((current) => ({ ...current, active: false }));
         submission.current = null;
+        if (data.status === "approved") {
+          const comment = data.comment;
+          if (comment) {
+            setApproved((current) => [
+              ...current.filter(({ id }) => id !== comment.id),
+              comment,
+            ]);
+            const page = commentPageFor(
+              orderComments([
+                ...entries.filter(({ id }) => id !== comment.id),
+                ...historicalComments([comment]),
+              ]),
+              comment.id,
+            );
+            if (page) setRequestedPage(page);
+          }
+          return { accepted: true, message: "评论已发布。" };
+        }
         return {
           accepted: true,
           message: "评论已提交，等待审核。通过审核后会公开显示。",
         };
       } catch (reason) {
+        if (reason instanceof RequestError && reason.code === 40389)
+          setAllowGuests(false);
         return { accepted: false, message: commentSubmissionFailure(reason) };
       }
     }
@@ -180,7 +242,7 @@ export function CommentSection({
       createdAt: new Date().toISOString(),
       origin: "local",
       format: draft.formatted ? "formatted" : "plain",
-      website: publicHref(draft.website) ?? undefined,
+      website: commentWebsite(draft.website),
     };
     setLocal((current) => [...current, entry]);
     setRequestedPage(
@@ -208,12 +270,12 @@ export function CommentSection({
               <UiText text="篝火旁的声音" />
             </h2>
             <p>
-              {comments.length} <UiText text="条历史留言" />
+              {published.length} <UiText text="条历史留言" />
               {examples && open ? ` · ${exampleComments.length} 条示例` : ""}
               {local.length ? ` · ${local.length} 条本页留言` : ""}
             </p>
           </div>
-          {open && interactive && (
+          {canWrite && (
             <TextLink
               href="#comment-composer"
               className="comments-write"
@@ -266,6 +328,16 @@ export function CommentSection({
           <p className="comments-demo-note">
             <UiText text="评论已关闭，已有留言仍可阅读。" />
           </p>
+        ) : !canWrite ? (
+          <p className="comments-demo-note">
+            {checking ? (
+              <UiText text="正在检查评论权限…" />
+            ) : (
+              <TextLink href={loginHref}>
+                <UiText text="登录后发表评论" />
+              </TextLink>
+            )}
+          </p>
         ) : null}
         <div className="comment-view-options" aria-label="留言浏览方式">
           <Button
@@ -309,7 +381,7 @@ export function CommentSection({
                 void likes.toggle(entry.id);
               }}
               onReply={
-                open && interactive
+                canWrite
                   ? () => {
                       setReply({ entry, active: true });
                       setTarget({ id: "comment-composer" });
@@ -371,16 +443,18 @@ export function CommentSection({
         )}
       </section>
       {open && interactive && (
-        <CommentComposer
-          captcha={contentId ? captcha : undefined}
-          reply={reply.entry}
-          replying={reply.active}
-          signedInName={signedInName}
-          onCancelReply={() =>
-            setReply((current) => ({ ...current, active: false }))
-          }
-          onAdd={add}
-        />
+        <div hidden={!canWrite}>
+          <CommentComposer
+            captcha={contentId ? captcha : undefined}
+            reply={reply.entry}
+            replying={reply.active}
+            signedInName={signedInName}
+            onCancelReply={() =>
+              setReply((current) => ({ ...current, active: false }))
+            }
+            onAdd={add}
+          />
+        </div>
       )}
     </>
   );

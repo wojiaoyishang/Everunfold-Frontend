@@ -34,7 +34,6 @@ import {
 const initialDraft: CommentDraft = {
   author: "",
   body: "",
-  email: "",
   website: "",
   formatted: true,
 };
@@ -52,7 +51,7 @@ export function CommentComposer({
   replying: boolean;
   onCancelReply: () => void;
   onAdd: (
-    draft: Omit<CommentDraft, "email">,
+    draft: CommentDraft,
     answer?: CaptchaAnswer,
     signal?: AbortSignal,
   ) => CommentSubmissionResult | Promise<CommentSubmissionResult>;
@@ -135,7 +134,7 @@ export function CommentComposer({
     const first = Object.keys(nextErrors)[0];
     if (first) {
       setPreview(false);
-      if (nextErrors.email || nextErrors.website) setExtra(true);
+      if (nextErrors.website) setExtra(true);
       requestAnimationFrame(() =>
         form.current?.querySelector<HTMLElement>(`[name="${first}"]`)?.focus(),
       );
@@ -183,7 +182,7 @@ export function CommentComposer({
         message: result.message,
       });
       if (!result.accepted) return;
-      setDraft((current) => ({ ...current, body: "", email: "" }));
+      setDraft((current) => ({ ...current, body: "" }));
       setPreview(false);
       setEditorRevision((current) => current + 1);
     } catch (reason) {
@@ -264,32 +263,18 @@ export function CommentComposer({
             setPreview={setPreview}
             onChange={update}
           />
-          {signedInName ? (
-            <div className="composer-signed-identity">
-              <Icon name="user" />
-              <span>
-                <UiText text="已登录，昵称已自动填写为" />{" "}
-                <strong>{signedInName}</strong>
-                <UiText text="；邮箱和网站无需重复填写。" />
-              </span>
-            </div>
-          ) : (
-            <CommentIdentity
-              prefix={prefix}
-              draft={draft}
-              errors={errors}
-              extra={extra}
-              setExtra={setExtra}
-              update={update}
-            />
-          )}
+          <CommentIdentity
+            prefix={prefix}
+            draft={draft}
+            errors={errors}
+            extra={extra}
+            signedInName={signedInName}
+            setExtra={setExtra}
+            update={update}
+          />
         </div>
         <div className="composer-submit-row">
-          {captcha ? (
-            <p>
-              <UiText text="评论提交后须经审核才会公开。" />
-            </p>
-          ) : (
+          {!captcha && (
             <p>
               <span className="preview-badge">
                 <UiText text="互动演示" />

@@ -30,7 +30,6 @@ const entry = (
 const draft: CommentDraft = {
   author: "访客",
   body: "你好",
-  email: "",
   website: "",
   formatted: true,
 };
@@ -94,6 +93,25 @@ test("historical text stays plain while preview formatting never executes HTML",
   assert.doesNotMatch(formatted, /<img|<script|onerror="/);
 });
 
+test("persisted comments retain safe website and Markdown format", () => {
+  const record = {
+    id: "new",
+    author: "访客",
+    parent_id: null,
+    content: "**评论**",
+    created_at: "2026-01-01T00:00:00Z",
+    format: "markdown" as const,
+    website: "https://example.com",
+  };
+  const [comment, unsafe] = historicalComments([
+    record,
+    { ...record, id: "unsafe", website: "mailto:test@example.com" },
+  ]);
+  assert.equal(comment.format, "formatted");
+  assert.equal(comment.website, "https://example.com/");
+  assert.equal(unsafe.website, undefined);
+});
+
 test("draft validation refuses empty content, overlong fields and unsafe profile URLs", () => {
   assert.deepEqual(validateDraft(draft), {});
   assert.ok(validateDraft({ ...draft, body: "  " }).body);
@@ -105,11 +123,9 @@ test("draft validation refuses empty content, overlong fields and unsafe profile
     "https://name:secret@example.com",
   ])
     assert.ok(validateDraft({ ...draft, website }).website);
-  assert.ok(validateDraft({ ...draft, email: "bad-address" }).email);
   assert.deepEqual(
     validateDraft({
       ...draft,
-      email: "reader@example.test",
       website: "https://example.com/",
     }),
     {},

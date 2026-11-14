@@ -15,6 +15,10 @@ export function commentSubmissionFailure(reason: unknown) {
       return "提交超时，暂时无法确认结果。输入已保留，重试不会重复提交。";
     if (reason.code === 40388)
       return "此内容已关闭评论或阅读验证已过期，请刷新页面。";
+    if (reason.code === 40389) return "请先登录再发表评论。";
+    if (reason.code === 42288) return "评论包含本站禁止的内容，请修改后重试。";
+    if (reason.code === 42289) return "请检查个人网站地址。";
+    if (reason.code === 42287) return "请检查评论内容或回复对象。";
     if (reason.status === 429) return "提交较频繁，请稍后重试。输入已保留。";
     if (reason.status === 404)
       return "内容已不可用。输入已保留，请刷新页面核对。";

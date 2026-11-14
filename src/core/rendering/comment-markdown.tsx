@@ -104,5 +104,5 @@ export function commentMarkdown(
     });
     return root.children;
   }
-  return render(markdown.parse(body.slice(0, 2000), {}), "comment");
+  return render(markdown.parse(body.slice(0, 5000), {}), "comment");
 }

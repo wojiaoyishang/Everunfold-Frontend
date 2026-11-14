@@ -84,6 +84,20 @@ test("login defaults by confirmed role and preserves explicit safe return destin
   assert.equal(loginReturnPath("/login"), "/");
 });
 
+test("comment login returns to the local reader without accepting internal paths", () => {
+  assert.equal(
+    loginDestination("/posts/example?lang=en#comments", false),
+    "/posts/example?lang=en#comments",
+  );
+  for (const path of [
+    "/v1/reader/discussion#comments",
+    "/%2fexample.test#comments",
+    "/%5cexample#comments",
+    "/%6cogin#comments",
+  ])
+    assert.equal(loginReturnPath(path), "/");
+});
+
 test("generated session reads are credentialed, uncached, validated and do not send CSRF in a URL", async () => {
   for (const [read, route, data] of [
     [readAuthSession, "/v1/auth/session", guest],

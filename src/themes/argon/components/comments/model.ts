@@ -21,12 +21,11 @@ export interface CommentEntry {
 export interface CommentDraft {
   author: string;
   body: string;
-  email: string;
   website: string;
   formatted: boolean;
 }
 export type DraftErrors = Partial<
-  Record<"author" | "body" | "email" | "website", string>
+  Record<"author" | "body" | "website", string>
 >;
 
 export function historicalComments(
@@ -40,7 +39,8 @@ export function historicalComments(
     createdAt: comment.created_at,
     replyTo: comment.reply_to,
     origin: "history",
-    format: "plain",
+    format: comment.format === "markdown" ? "formatted" : "plain",
+    website: commentWebsite(comment.website),
   }));
 }
 
@@ -81,6 +81,12 @@ export function commentPageFor(
   return index < 0 ? null : Math.floor(index / COMMENT_PAGE_SIZE) + 1;
 }
 
+export function commentWebsite(value?: string | null): string | undefined {
+  return value && /^https?:\/\//i.test(value.trim())
+    ? (publicHref(value) ?? undefined)
+    : undefined;
+}
+
 export function validateDraft(draft: CommentDraft): DraftErrors {
   const errors: DraftErrors = {};
   if (!draft.author.trim()) errors.author = "请留下一个称呼。";
@@ -89,16 +95,7 @@ export function validateDraft(draft: CommentDraft): DraftErrors {
   if (!draft.body.trim()) errors.body = "写点什么，再加入这场对话吧。";
   else if (draft.body.length > COMMENT_MAX_LENGTH)
     errors.body = "留言请控制在 2000 字以内。";
-  if (
-    draft.email &&
-    (draft.email.length > 254 ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(draft.email.trim()))
-  )
-    errors.email = "请检查邮箱格式，或留空。";
-  if (
-    draft.website &&
-    (!/^https?:\/\//i.test(draft.website.trim()) || !publicHref(draft.website))
-  )
+  if (draft.website.trim() && !commentWebsite(draft.website))
     errors.website = "网站地址需要以 https:// 或 http:// 开头。";
   return errors;
 }

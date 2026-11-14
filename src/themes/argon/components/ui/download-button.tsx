@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "./primitives";
 import type { ReactNode } from "react";
+import { downloadText } from "@/core/browser/download";
 export function DownloadButton({
   filename,
   content,
@@ -17,14 +18,7 @@ export function DownloadButton({
   return (
     <Button
       className={className}
-      onClick={() => {
-        const url = URL.createObjectURL(new Blob([content()], { type: mime }));
-        const anchor = document.createElement("a");
-        anchor.href = url;
-        anchor.download = filename;
-        anchor.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      }}
+      onClick={() => downloadText(filename, content(), mime)}
     >
       {children}
     </Button>

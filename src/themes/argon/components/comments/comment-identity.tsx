@@ -8,49 +8,55 @@ export function CommentIdentity({
   draft,
   errors,
   extra,
+  signedInName,
   setExtra,
   update,
 }: {
   prefix: string;
-  draft: Pick<CommentDraft, "author" | "email" | "website">;
+  draft: Pick<CommentDraft, "author" | "website">;
   errors: DraftErrors;
   extra: boolean;
+  signedInName?: string | null;
   setExtra: (value: boolean) => void;
-  update: (
-    value: Partial<Pick<CommentDraft, "author" | "email" | "website">>,
-  ) => void;
+  update: (value: Partial<Pick<CommentDraft, "author" | "website">>) => void;
 }) {
   return (
     <>
-      {" "}
       <div className="composer-identity">
-        <label htmlFor={`${prefix}-author`}>
-          <UiText text="昵称" />
-          <span aria-hidden="true">*</span>
-          <TextField
-            id={`${prefix}-author`}
-            name="author"
-            required
-            maxLength={40}
-            autoComplete="nickname"
-            placeholder="怎么称呼你？"
-            value={draft.author}
-            onChange={(event) => update({ author: event.target.value })}
-            aria-invalid={!!errors.author}
-            aria-describedby={
-              errors.author ? `${prefix}-author-error` : undefined
-            }
-          />
-          {errors.author && (
-            <span
-              id={`${prefix}-author-error`}
-              className="form-error"
-              role="alert"
-            >
-              {errors.author}
-            </span>
-          )}
-        </label>
+        {signedInName ? (
+          <div className="composer-signed-identity">
+            <Icon name="user" />
+            <strong>{signedInName}</strong>
+          </div>
+        ) : (
+          <label htmlFor={`${prefix}-author`}>
+            <UiText text="昵称" />
+            <span aria-hidden="true">*</span>
+            <TextField
+              id={`${prefix}-author`}
+              name="author"
+              required
+              maxLength={40}
+              autoComplete="nickname"
+              placeholder="怎么称呼你？"
+              value={draft.author}
+              onChange={(event) => update({ author: event.target.value })}
+              aria-invalid={!!errors.author}
+              aria-describedby={
+                errors.author ? `${prefix}-author-error` : undefined
+              }
+            />
+            {errors.author && (
+              <span
+                id={`${prefix}-author-error`}
+                className="form-error"
+                role="alert"
+              >
+                {errors.author}
+              </span>
+            )}
+          </label>
+        )}
         <Button
           id={`${prefix}-extra-toggle`}
           className="composer-extra-toggle"
@@ -59,7 +65,7 @@ export function CommentIdentity({
           aria-controls={`${prefix}-extra-panel`}
           onClick={() => setExtra(!extra)}
         >
-          <UiText text="邮箱与网站（选填）" />
+          <UiText text="个人网站（选填）" />
           <Icon name="chevron" />
         </Button>
       </div>
@@ -70,32 +76,6 @@ export function CommentIdentity({
         role="region"
       >
         <div className="composer-extra-fields">
-          <label htmlFor={`${prefix}-email`}>
-            <UiText text="邮箱（不会公开）" />
-            <TextField
-              id={`${prefix}-email`}
-              name="email"
-              type="email"
-              autoComplete="email"
-              maxLength={254}
-              placeholder="you@example.com"
-              value={draft.email}
-              onChange={(event) => update({ email: event.target.value })}
-              aria-invalid={!!errors.email}
-              aria-describedby={
-                errors.email ? `${prefix}-email-error` : undefined
-              }
-            />
-            {errors.email && (
-              <span
-                id={`${prefix}-email-error`}
-                className="form-error"
-                role="alert"
-              >
-                {errors.email}
-              </span>
-            )}
-          </label>
           <label htmlFor={`${prefix}-website`}>
             <UiText text="个人网站" />
             <TextField

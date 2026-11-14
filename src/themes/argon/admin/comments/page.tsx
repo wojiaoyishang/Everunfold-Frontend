@@ -16,6 +16,7 @@ import {
   Button,
   Form,
   TextField,
+  TextLink,
   TextArea,
 } from "../../components/ui/primitives";
 import { Checkbox } from "../../components/ui/checkbox";
@@ -81,16 +82,27 @@ export function CommentsPage() {
     <>
       <AdminPageHeading
         title="评论管理"
-        description="审核通过后，评论才会在前台公开显示。"
+        description="管理待审核与已发布的评论。"
         action={
-          <Button
-            className="admin-button"
-            disabled={action.busy || state.loading}
-            onClick={refresh}
-          >
-            <Icon name="refresh" />
-            <UiText text="刷新" />
-          </Button>
+          <div className="admin-settings-actions">
+            {can(user, "settings:read") && (
+              <TextLink
+                href="/admin/settings/discussion"
+                className="admin-button"
+              >
+                <Icon name="settings" />
+                <UiText text="讨论设置" />
+              </TextLink>
+            )}
+            <Button
+              className="admin-button"
+              disabled={action.busy || state.loading}
+              onClick={refresh}
+            >
+              <Icon name="refresh" />
+              <UiText text="刷新" />
+            </Button>
+          </div>
         }
       />
       <section

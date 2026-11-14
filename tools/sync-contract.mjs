@@ -107,6 +107,8 @@ const operations =
 const captcha = path.basename(absoluteSource) === "captcha-v1.schema.json";
 const pages = path.basename(absoluteSource) === "pages-v1.schema.json";
 const glossary = path.basename(absoluteSource) === "glossary-v1.schema.json";
+const maintenance =
+  path.basename(absoluteSource) === "maintenance-v1.schema.json";
 const settings = path.basename(absoluteSource) === "settings-v1.schema.json";
 const notifications =
   path.basename(absoluteSource) === "notifications-v1.schema.json";
@@ -178,26 +180,34 @@ const output = process.env.EVERUNFOLD_CONTRACT_OUTPUT
   ? path.resolve(process.env.EVERUNFOLD_CONTRACT_OUTPUT)
   : path.join(projectRoot, "var/cache/contracts");
 await mkdir(output, { recursive: true });
-const types = await compile(schema, rootName, {
-  bannerComment:
-    "/* Generated from the backend public contract. Do not edit by hand. */",
-  additionalProperties: false,
-  ignoreMinAndMaxItems:
-    glossary ||
-    notifications ||
-    operations ||
-    captcha ||
-    pages ||
-    accounts ||
-    reader ||
-    likes ||
-    settings ||
-    contentAdmin ||
-    contentAccess ||
-    collaboration,
-  style: { singleQuote: false, semi: true, printWidth: 100 },
-});
-const typesPath = path.join(output, `${outputName}.ts`);
+const types = await compile(
+  schema,
+  maintenance ? "MaintenanceContract" : rootName,
+  {
+    bannerComment:
+      "/* Generated from the backend public contract. Do not edit by hand. */",
+    additionalProperties: false,
+    ignoreMinAndMaxItems:
+      maintenance ||
+      glossary ||
+      notifications ||
+      operations ||
+      captcha ||
+      pages ||
+      accounts ||
+      reader ||
+      likes ||
+      settings ||
+      contentAdmin ||
+      contentAccess ||
+      collaboration,
+    style: { singleQuote: false, semi: true, printWidth: 100 },
+  },
+);
+const typesPath = path.join(
+  output,
+  maintenance ? "maintenance-contract.ts" : `${outputName}.ts`,
+);
 await writeArtifact(
   typesPath,
   await format(
@@ -217,39 +227,37 @@ await writeArtifact(
   ),
 );
 await writeArtifact(path.join(output, path.basename(absoluteSource)), source);
+const sourceName = glossary
+  ? "glossary-source.json"
+  : notifications
+    ? "notifications-source.json"
+    : operations
+      ? "operations-source.json"
+      : captcha
+        ? "captcha-source.json"
+        : pages
+          ? "pages-source.json"
+          : accounts
+            ? "accounts-source.json"
+            : collaboration
+              ? "collaboration-source.json"
+              : contentAccess
+                ? "content-access-source.json"
+                : contentAdmin
+                  ? "content-admin-source.json"
+                  : settings
+                    ? "settings-source.json"
+                    : auth
+                      ? "auth-source.json"
+                      : likes
+                        ? "comment-likes-source.json"
+                        : reader
+                          ? "reader-preview-source.json"
+                          : presentation
+                            ? "presentation-source.json"
+                            : "contract-source.json";
 await writeArtifact(
-  path.join(
-    output,
-    glossary
-      ? "glossary-source.json"
-      : notifications
-        ? "notifications-source.json"
-        : operations
-          ? "operations-source.json"
-          : captcha
-            ? "captcha-source.json"
-            : pages
-              ? "pages-source.json"
-              : accounts
-                ? "accounts-source.json"
-                : collaboration
-                  ? "collaboration-source.json"
-                  : contentAccess
-                    ? "content-access-source.json"
-                    : contentAdmin
-                      ? "content-admin-source.json"
-                      : settings
-                        ? "settings-source.json"
-                        : auth
-                          ? "auth-source.json"
-                          : likes
-                            ? "comment-likes-source.json"
-                            : reader
-                              ? "reader-preview-source.json"
-                              : presentation
-                                ? "presentation-source.json"
-                                : "contract-source.json",
-  ),
+  path.join(output, maintenance ? "maintenance-source.json" : sourceName),
   `${JSON.stringify(
     {
       schema_version: schema["x-everunfold-contract-version"] ?? "0.1.0",
@@ -385,6 +393,13 @@ ${functions}\n`,
 console.log(`Generated contract from backend ${commit.slice(0, 7)}`);
 
 if (glossary) await generateGlossaryClient(schema, output);
+if (maintenance)
+  await generateSettingsClient(schema, output, {
+    contractName: "MaintenanceContract",
+    stem: "maintenance",
+    schemaFile: path.basename(absoluteSource),
+    validators: { validateMaintenanceImportRequest: "import_request" },
+  });
 if (notifications) {
   await generateSettingsClient(schema, output, {
     contractName: "NotificationsContract",

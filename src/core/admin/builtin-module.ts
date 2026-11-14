@@ -70,12 +70,28 @@ export const builtinAdminModule = {
       menu: { group: "core.settings", order: 50 },
     },
     {
+      id: "core.settings.maintenance",
+      href: "/admin/settings/maintenance",
+      label: "站点维护",
+      description: "站点健康、数据导入与导出",
+      icon: "maintenance",
+      menu: { group: "core.settings", order: 55 },
+    },
+    {
       id: "core.comments",
       href: "/admin/comments",
       label: "评论管理",
       description: "审核、回复与整理评论",
       icon: "comment",
       menu: { group: "core.people", order: 10 },
+    },
+    {
+      id: "core.settings.discussion",
+      href: "/admin/settings/discussion",
+      label: "讨论设置",
+      description: "全站评论权限与审核规则",
+      icon: "comment",
+      menu: { group: "core.people", order: 15 },
     },
     {
       id: "core.settings.plugins",

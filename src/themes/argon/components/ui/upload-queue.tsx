@@ -8,13 +8,15 @@ import { formatBytes } from "@/core/media/image-editor";
 export type UploadSelectionState =
   "selected" | "excluded" | "limit" | undefined;
 
-export function UploadQueueView<T extends { reused?: boolean }>({
+export function UploadQueueView<T extends object>({
   items,
   onRetry,
   onCancel,
   onClear,
   onSelect,
   selectionState,
+  completedLabel,
+  processingLabel = "正在保存",
 }: {
   items: UploadEntry<T>[];
   onRetry: (id: string) => void;
@@ -22,6 +24,8 @@ export function UploadQueueView<T extends { reused?: boolean }>({
   onClear: () => void;
   onSelect?: (result: T) => void;
   selectionState?: (result: T) => UploadSelectionState;
+  completedLabel?: string;
+  processingLabel?: string;
 }) {
   if (!items.length) return null;
   const complete = items.filter((item) => item.state === "done").length;
@@ -50,13 +54,14 @@ export function UploadQueueView<T extends { reused?: boolean }>({
           const active = ["queued", "uploading", "saving"].includes(item.state);
           const label =
             item.state === "done"
-              ? item.result?.reused
-                ? "已复用"
-                : "已上传"
+              ? (completedLabel ??
+                (item.result && "reused" in item.result && item.result.reused
+                  ? "已复用"
+                  : "已上传"))
               : item.state === "queued"
                 ? "等待上传"
                 : item.state === "saving"
-                  ? "正在保存"
+                  ? processingLabel
                   : item.state === "failed"
                     ? item.error
                     : item.state === "cancelled"
@@ -96,7 +101,7 @@ export function UploadQueueView<T extends { reused?: boolean }>({
                   </div>
                 )}
                 <span className="admin-upload-status" role="status">
-                  {label}
+                  {label && <UiText text={label} />}
                 </span>
               </div>
               {active ? (

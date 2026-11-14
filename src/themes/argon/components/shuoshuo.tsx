@@ -91,6 +91,7 @@ export function ShuoshuoDetail({
           />
         </div>
         <CommentSection
+          key={entry.content.id}
           contentId={entry.example ? undefined : entry.content.id}
           open={entry.content.comments_open}
           comments={snapshot.comments[entry.content.id] ?? []}

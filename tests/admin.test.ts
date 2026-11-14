@@ -76,6 +76,12 @@ test("admin navigation separates primary content, tools, appearance and system s
     "core.settings.navigation",
     "core.settings.translations",
   ]);
+  assert.deepEqual(ids("成员与互动"), [
+    "core.comments",
+    "core.settings.discussion",
+    "core.users",
+    "core.access",
+  ]);
   assert.deepEqual(ids("通知与消息"), [
     "core.notifications.policy",
     "core.notifications.templates",
@@ -104,6 +110,7 @@ test("admin navigation separates primary content, tools, appearance and system s
     "core.settings.system",
     "core.settings.nodes",
     "core.settings.runtime",
+    "core.settings.maintenance",
     "core.settings.api-keys",
   ]);
   const settingsIcons =

@@ -27,7 +27,7 @@ export function SettingsSection({
 }: {
   id: string;
   title: string;
-  description: string;
+  description?: string;
   group?: string;
   action?: ReactNode;
   children: ReactNode;
@@ -45,9 +45,11 @@ export function SettingsSection({
           <h2>
             <UiText text={title} />
           </h2>
-          <p>
-            <UiText text={description} />
-          </p>
+          {description && (
+            <p>
+              <UiText text={description} />
+            </p>
+          )}
         </div>
         {action && (
           <div className="admin-settings-section-action">{action}</div>

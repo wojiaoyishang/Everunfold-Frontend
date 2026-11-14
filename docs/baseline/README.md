@@ -1801,3 +1801,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0143-public-query-cache-and-snapshot-reuse.md` | `ADR0143-1` | `f6fd9bb2cdefa40c5756a392d47bc1325118d4743af421a7eadde47d60b56acc` |
+
+## 站点维护与讨论设置
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0144-site-maintenance-and-discussion.md` | `ADR0144-1` | `9c810bf5cd9e3133e3693c98cc3b639364a891e74ea5fc58917764f7da748caf` |

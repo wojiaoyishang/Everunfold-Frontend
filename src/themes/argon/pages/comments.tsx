@@ -7,6 +7,7 @@ export function ManagedPageComments() {
     usePageComments();
   return (
     <CommentSection
+      key={pageId}
       contentId={pageId}
       path={path}
       comments={comments}
