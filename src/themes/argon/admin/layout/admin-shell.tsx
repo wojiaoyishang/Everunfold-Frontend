@@ -24,6 +24,8 @@ import { Avatar } from "../../components/ui/avatar";
 import { adminSidebarScrollKey } from "@/core/admin/sidebar-scroll";
 import { useSidebarScrollPosition } from "./use-sidebar-scroll-position";
 import { NotificationCenter } from "../notifications/center";
+import { pluginAdminRoute } from "@/core/plugins/admin-routes";
+import { useAdminPluginRuntime } from "@/core/plugins/runtime/context";
 
 export function AdminShell({
   user,
@@ -61,14 +63,22 @@ export function AdminShell({
   }, [embedded, pathname]);
 
   const destination = adminDestination(pathname);
+  const route = pluginAdminRoute(pathname);
+  const { adminPages } = useAdminPluginRuntime();
+  const pluginPage =
+    route &&
+    adminPages.find(
+      (page) => page.pluginId === route.pluginId && page.id === route.pageId,
+    );
   const name = user.display_name || user.username;
   const capability = adminRoutePermission(pathname);
-  const allowed =
-    (!capability || can(user, capability)) &&
-    (!/\/(?:new|edit)$/.test(pathname) ||
-      can(user, "content:write") ||
-      pathname.startsWith("/admin/users") ||
-      (pathname.startsWith("/admin/pages") && can(user, "pages:write")));
+  const allowed = route
+    ? !pluginPage || can(user, pluginPage.permission, null)
+    : (!capability || can(user, capability)) &&
+      (!/\/(?:new|edit)$/.test(pathname) ||
+        can(user, "content:write") ||
+        pathname.startsWith("/admin/users") ||
+        (pathname.startsWith("/admin/pages") && can(user, "pages:write")));
   // Keep the confirmed account/request boundary, while the preview owns the public theme shell.
   if (
     allowed &&
@@ -141,7 +151,9 @@ export function AdminShell({
               </span>
               <Icon name="chevron" />
               <span className="admin-breadcrumb-current" key={pathname}>
-                <UiText text={destination?.label ?? "后台"} />
+                <UiText
+                  text={pluginPage?.label ?? destination?.label ?? "后台"}
+                />
               </span>
             </div>
             <div className="admin-header-dock" data-admin-header-dock />

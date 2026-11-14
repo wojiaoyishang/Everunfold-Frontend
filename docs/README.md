@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[后台插件页面与菜单](decisions/0148-admin-plugin-navigation.md)记录页面地址、菜单注册与权限。
+
 [后台字段钩子与 AI 写作](decisions/0147-admin-form-hooks-and-ai-writing.md)记录扩展注册、字段范围和模型部署。
 
 [插件和主题源码的 Git 白名单](decisions/0146-extension-source-git-allowlists.md)记录内置扩展与本地自定义扩展的目录约定。

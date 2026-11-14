@@ -6,6 +6,10 @@ import * as jsxDev from "react/jsx-dev-runtime";
 import * as client from "@/sdk/client";
 import { SDK_RUNTIME_KEY, SDK_CLIENT_EXPORTS } from "@/sdk/protocol";
 import type { FrontendPlugin } from "../types";
+import type {
+  RegisteredPluginAdminPage,
+  RegisteredPluginAdminMenuGroup,
+} from "../admin-page-types";
 import { createPluginRegistry } from "../create-registry";
 import { compareAdminFormFieldHooks } from "@/core/forms/admin-field-hooks";
 import { installRuntimePlugins } from "./store";
@@ -27,6 +31,8 @@ interface Loaded {
   components: Record<string, React.ComponentType<Record<string, unknown>>>;
   plugin: FrontendPlugin;
   fieldHooks: ReturnType<typeof createPluginRegistry>["adminFormFieldHooks"];
+  adminPages: readonly RegisteredPluginAdminPage[];
+  adminMenuGroups: readonly RegisteredPluginAdminMenuGroup[];
   dispose: () => void;
   css?: string;
 }
@@ -89,11 +95,15 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
     components: RuntimeComponents;
     loading: boolean;
     fieldHooks: ReturnType<typeof createPluginRegistry>["adminFormFieldHooks"];
+    adminPages: readonly RegisteredPluginAdminPage[];
+    adminMenuGroups: readonly RegisteredPluginAdminMenuGroup[];
   }>({
     catalog: initial,
     components: new Map(),
     loading: true,
     fieldHooks: [],
+    adminPages: [],
+    adminMenuGroups: [],
   });
   const initialRef = React.useRef(initial);
   const [updatePending, setUpdatePending] = React.useState(false);
@@ -177,9 +187,7 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
           throw new Error(
             "Plugin browser declaration does not match its manifest",
           );
-        const fieldHooks = surface
-          ? createPluginRegistry([declaration]).adminFormFieldHooks
-          : [];
+        const registry = surface ? createPluginRegistry([declaration]) : null;
         await stylesheet(plugin, controller.signal);
         const entryModule = plugin.entries.browser
           ? await import(
@@ -228,7 +236,9 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
             : undefined,
           components,
           plugin: declaration,
-          fieldHooks,
+          fieldHooks: registry?.adminFormFieldHooks ?? [],
+          adminPages: registry?.adminPages ?? [],
+          adminMenuGroups: registry?.adminMenuGroups ?? [],
           dispose,
         };
       }
@@ -251,7 +261,18 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
       const components = new Map(
         [...next].map(([id, item]) => [id, item.components]),
       );
-      setValue({ catalog, components, loading: false, fieldHooks });
+      setValue({
+        catalog,
+        components,
+        loading: false,
+        fieldHooks,
+        adminPages: [...next.values()].flatMap((item) =>
+          item.adminPages.filter((page) => item.components[page.component]),
+        ),
+        adminMenuGroups: [...next.values()].flatMap(
+          (item) => item.adminMenuGroups,
+        ),
+      });
       setUpdatePending(false);
       for (const link of styleNodes()) {
         const css = loaded.get(link.dataset.pluginCss ?? "")?.css;
@@ -285,7 +306,10 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
               });
         if (catalog) await apply(catalog);
       } catch {
-        if (!stopped) setError("插件更新暂未完成，当前内容已保留。");
+        if (!stopped) {
+          setError("插件更新暂未完成，当前内容已保留。");
+          setValue((current) => ({ ...current, loading: false }));
+        }
       }
     };
     let timer: ReturnType<typeof setTimeout>;

@@ -183,3 +183,57 @@
     min-block-size: 44px;
   }
 }
+
+.connection {
+  display: grid;
+  gap: var(--admin-field-gap, 14px);
+  min-width: 0;
+}
+
+.settingsPage {
+  max-inline-size: 70rem;
+  gap: var(--admin-panel-gap, 14px);
+}
+
+.settingsPage .form {
+  gap: var(--admin-panel-gap, 14px);
+}
+
+.settingsPage .connection,
+.settingsPage .sceneSection,
+.settingsPage .actions {
+  background: var(--admin-canvas);
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  padding: var(--admin-panel-padding, 16px);
+}
+
+.settingsPage .connection > .switchRow:first-child {
+  border-bottom: 1px solid var(--admin-border);
+  padding-block-end: var(--admin-field-gap, 14px);
+}
+
+.settingsPage .sceneSection h3 {
+  margin-block-end: 12px;
+}
+
+.settingsPage .actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+}
+
+.settingsPage .field > :global(.ui-input) {
+  padding-inline: 11px;
+}
+
+@media (min-width: 1000px) {
+  .settingsPage .connection {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+
+  .settingsPage .connection > :not(.field),
+  .settingsPage .connection > .field:has([type="password"]) {
+    grid-column: 1 / -1;
+  }
+}

@@ -1,4 +1,4 @@
-/* Generated from the AI writing plugin OpenAPI. SHA256: b2111e6fc60cd0e2dd725df95ecd99e9b74405eef9b3cbaa64fd2e38f50de7bf */
+/* Generated from the AI writing plugin OpenAPI. SHA256: 4f6a3b65fa17e0cbb673749fd22fdc405695113362cfcfed36dcecd3f1107740 */
 
 export type Revision = number;
 export type Enabled = boolean;

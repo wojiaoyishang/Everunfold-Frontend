@@ -1,4 +1,5 @@
 import { adminDestination } from "../admin/navigation";
+import { pluginAdminRoute } from "../plugins/admin-routes";
 
 export const nodesConsolePath = "/admin/_nodes";
 
@@ -7,6 +8,7 @@ export function isManagementRoute(pathname: string): boolean {
   return (
     /^\/(?:login(?:\/(?:register|recover))?|account)\/?$/.test(pathname) ||
     /^\/admin\/_nodes(?:\/local)?\/?$/.test(pathname) ||
+    !!pluginAdminRoute(pathname) ||
     !!adminDestination(pathname)
   );
 }
@@ -48,6 +50,7 @@ export function loginReturnPath(input: string | undefined): string | undefined {
       (url.pathname !== "/" &&
         !/^\/account\/?$/.test(url.pathname) &&
         url.pathname !== nodesConsolePath &&
+        !pluginAdminRoute(url.pathname) &&
         !adminDestination(url.pathname) &&
         !readerComments)
     )

@@ -24,7 +24,7 @@ function origin(value: string) {
   }
 }
 
-export function WritingSettings() {
+export function WritingSettings({ pageId }: { pageId?: string }) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const t = useWritingText();
   const [configuration, setConfiguration] = useState<Configuration | null>(
@@ -49,7 +49,13 @@ export function WritingSettings() {
   }, [baseUrl, csrfToken, revision]);
 
   if (configuration) {
-    return <ConfigurationForm value={configuration} reload={reload} />;
+    return (
+      <ConfigurationForm
+        value={configuration}
+        reload={reload}
+        page={Boolean(pageId)}
+      />
+    );
   }
   if (!unavailable) return <p role="status">{t("正在读取配置…")}</p>;
   return (
@@ -65,9 +71,11 @@ export function WritingSettings() {
 function ConfigurationForm({
   value,
   reload,
+  page,
 }: {
   value: Configuration;
   reload: () => void;
+  page: boolean;
 }) {
   const id = useId();
   const admin = useAdminRequest();
@@ -168,73 +176,78 @@ function ConfigurationForm({
       : "";
   const disabled = saving || test.busy;
   return (
-    <Form className={`admin-density-controls ${styles.flow}`} onSubmit={save}>
+    <Form
+      className={`admin-density-controls ${styles.flow} ${page ? styles.settingsPage : ""}`}
+      onSubmit={save}
+    >
       <fieldset className={styles.form} disabled={disabled}>
-        <div className={styles.switchRow}>
-          <label htmlFor={`${id}-enabled`}>{t("启用 AI 写作助手")}</label>
-          <Switch
-            id={`${id}-enabled`}
-            checked={enabled}
-            onCheckedChange={(next) => update({ enabled: next })}
-          />
-        </div>
-        <label className={styles.field}>
-          {t("接口地址")}
-          <TextField
-            type="url"
-            value={base_url}
-            maxLength={2048}
-            placeholder="https://api.openai.com/v1"
-            onChange={(event) => update({ base_url: event.target.value })}
-          />
-        </label>
-        <label className={styles.field}>
-          {t("模型 ID")}
-          <TextField
-            value={model}
-            maxLength={160}
-            spellCheck={false}
-            onChange={(event) => update({ model: event.target.value })}
-          />
-        </label>
-        <label className={styles.field}>
-          API Key
-          <TextField
-            type="password"
-            autoComplete="new-password"
-            value={key}
-            maxLength={4096}
-            disabled={clearKey}
-            placeholder={t(
-              api_key_configured && !clearKey ? "保留现有密钥" : "可填写密钥",
-            )}
-            onChange={(event) => {
-              setKey(event.target.value);
-              setError("");
-              setNotice("");
-            }}
-          />
-        </label>
-        {api_key_configured && (
+        <div className={styles.connection}>
           <div className={styles.switchRow}>
-            <label htmlFor={`${id}-clear-key`}>{t("移除现有密钥")}</label>
+            <label htmlFor={`${id}-enabled`}>{t("启用 AI 写作助手")}</label>
             <Switch
-              id={`${id}-clear-key`}
-              checked={clearKey}
-              onCheckedChange={(next) => {
-                setClearKey(next);
-                if (next) setKey("");
-                setNotice("");
-                setError("");
-              }}
+              id={`${id}-enabled`}
+              checked={enabled}
+              onCheckedChange={(next) => update({ enabled: next })}
             />
           </div>
-        )}
-        {changingOrigin && !clearKey && !key && (
-          <p className={styles.hint}>
-            {t("更换接口来源后，请填写新密钥或移除现有密钥。")}
-          </p>
-        )}
+          <label className={styles.field}>
+            {t("接口地址")}
+            <TextField
+              type="url"
+              value={base_url}
+              maxLength={2048}
+              placeholder="https://api.openai.com/v1"
+              onChange={(event) => update({ base_url: event.target.value })}
+            />
+          </label>
+          <label className={styles.field}>
+            {t("模型 ID")}
+            <TextField
+              value={model}
+              maxLength={160}
+              spellCheck={false}
+              onChange={(event) => update({ model: event.target.value })}
+            />
+          </label>
+          <label className={styles.field}>
+            API Key
+            <TextField
+              type="password"
+              autoComplete="new-password"
+              value={key}
+              maxLength={4096}
+              disabled={clearKey}
+              placeholder={t(
+                api_key_configured && !clearKey ? "保留现有密钥" : "可填写密钥",
+              )}
+              onChange={(event) => {
+                setKey(event.target.value);
+                setError("");
+                setNotice("");
+              }}
+            />
+          </label>
+          {api_key_configured && (
+            <div className={styles.switchRow}>
+              <label htmlFor={`${id}-clear-key`}>{t("移除现有密钥")}</label>
+              <Switch
+                id={`${id}-clear-key`}
+                checked={clearKey}
+                onCheckedChange={(next) => {
+                  setClearKey(next);
+                  if (next) setKey("");
+                  setNotice("");
+                  setError("");
+                }}
+              />
+            </div>
+          )}
+          {changingOrigin && !clearKey && !key && (
+            <p className={styles.hint}>
+              {t("更换接口来源后，请填写新密钥或移除现有密钥。")}
+            </p>
+          )}
+        </div>
         <section
           className={styles.sceneSection}
           aria-labelledby={`${id}-fields`}

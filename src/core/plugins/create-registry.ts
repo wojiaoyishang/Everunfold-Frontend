@@ -5,6 +5,14 @@ import type { FontDefinition } from "@/core/fonts/types";
 import { createFontRegistry, defineFont } from "@/core/fonts/registry";
 import { defineBuilderComponent } from "@/core/builder/registry";
 import type { BuilderComponentDefinition } from "@/core/builder/types";
+import { adminNavigationGroups } from "@/core/admin/navigation";
+import { validPluginAdminEntryId } from "./admin-routes";
+import type {
+  PluginAdminMenuGroup,
+  PluginAdminPage,
+  RegisteredPluginAdminMenuGroup,
+  RegisteredPluginAdminPage,
+} from "./admin-page-types";
 import type {
   AdminFormFieldHook,
   RegisteredAdminFormFieldHook,
@@ -22,6 +30,7 @@ import type {
 const identity = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/;
 const uuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const version = /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/;
+const hostMenuGroups = new Set(adminNavigationGroups.map((group) => group.id));
 
 /** Build a fresh registry atomically; setup may only contribute synchronously. */
 export function createPluginRegistry(
@@ -37,6 +46,8 @@ export function createPluginRegistry(
   const fonts: FontDefinition[] = [];
   const builderComponents = new Map<string, BuilderComponentDefinition>();
   const adminFormFieldHooks: RegisteredAdminFormFieldHook[] = [];
+  const adminPages: RegisteredPluginAdminPage[] = [];
+  const adminMenuGroups: RegisteredPluginAdminMenuGroup[] = [];
   for (const plugin of plugins) {
     if (
       !identity.test(plugin.id) ||
@@ -56,6 +67,25 @@ export function createPluginRegistry(
     };
     const ownBuilderComponents: BuilderComponentDefinition[] = [];
     const ownFieldHooks = new Map<string, RegisteredAdminFormFieldHook>();
+    const ownAdminPages = new Map<string, RegisteredPluginAdminPage>();
+    const ownAdminGroups = new Map<string, RegisteredPluginAdminMenuGroup>();
+    const assertAdminRegistration = (
+      item: PluginAdminPage | PluginAdminMenuGroup,
+      entries: ReadonlyMap<string, unknown>,
+    ) => {
+      if (!collecting)
+        throw new Error(`Plugin setup has finished: ${plugin.id}`);
+      if (
+        plugin.surface !== "admin" ||
+        typeof item?.id !== "string" ||
+        !validPluginAdminEntryId(item.id) ||
+        typeof item.label !== "string" ||
+        !item.label.trim() ||
+        item.label.length > 120 ||
+        entries.has(item.id)
+      )
+        throw new Error(`Invalid or duplicate admin navigation: ${plugin.id}`);
+    };
     const register = (shortcode: PluginShortcode) => {
       if (!collecting)
         throw new Error(`Plugin setup has finished: ${plugin.id}`);
@@ -113,6 +143,44 @@ export function createPluginRegistry(
       const result: unknown = plugin.setup(
         Object.freeze({
           shortcodes: Object.freeze({ register }),
+          adminPages: Object.freeze({
+            register(page: PluginAdminPage) {
+              assertAdminRegistration(page, ownAdminPages);
+              if (
+                typeof page.component !== "string" ||
+                typeof page.permission !== "string" ||
+                !/^[a-z][a-z_-]*:[a-z][a-z_-]*$/.test(page.permission) ||
+                (page.menu &&
+                  page.menu.order !== undefined &&
+                  !Number.isSafeInteger(page.menu.order))
+              )
+                throw new Error(`Invalid admin page: ${plugin.id}.${page.id}`);
+              ownAdminPages.set(
+                page.id,
+                Object.freeze({
+                  ...page,
+                  menu: page.menu ? Object.freeze({ ...page.menu }) : page.menu,
+                  pluginId: plugin.id,
+                }),
+              );
+            },
+            registerGroup(group: PluginAdminMenuGroup) {
+              assertAdminRegistration(group, ownAdminGroups);
+              if (
+                (group.order !== undefined &&
+                  !Number.isSafeInteger(group.order)) ||
+                (group.parent !== undefined &&
+                  !hostMenuGroups.has(group.parent))
+              )
+                throw new Error(
+                  `Invalid admin menu group: ${plugin.id}.${group.id}`,
+                );
+              ownAdminGroups.set(
+                group.id,
+                Object.freeze({ ...group, pluginId: plugin.id }),
+              );
+            },
+          }),
           formFields: Object.freeze({
             register(hook: AdminFormFieldHook) {
               if (!collecting)
@@ -207,6 +275,21 @@ export function createPluginRegistry(
         );
       adminFormFieldHooks.push(hook);
     }
+    for (const page of ownAdminPages.values()) {
+      if (components.get(page.component) !== plugin.id)
+        throw new Error(
+          `Admin page renderer must be registered by its plugin: ${page.id}`,
+        );
+      const group = page.menu ? page.menu.group : undefined;
+      if (
+        group !== undefined &&
+        !ownAdminGroups.has(group) &&
+        !hostMenuGroups.has(group)
+      )
+        throw new Error(`Unknown admin page group: ${plugin.id}.${page.id}`);
+      adminPages.push(page);
+    }
+    adminMenuGroups.push(...ownAdminGroups.values());
     for (const definition of ownBuilderComponents) {
       if (
         definition.component &&
@@ -239,6 +322,8 @@ export function createPluginRegistry(
     adminFormFieldHooks: Object.freeze(
       adminFormFieldHooks.sort(compareAdminFormFieldHooks),
     ),
+    adminPages: Object.freeze(adminPages),
+    adminMenuGroups: Object.freeze(adminMenuGroups),
     shortcodes,
     pages: Object.freeze(pages),
     componentNames: Object.freeze([...components.keys()]),

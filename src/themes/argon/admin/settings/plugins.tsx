@@ -62,19 +62,23 @@ function PluginConfiguration({ id, title }: { id: string; title: string }) {
       {open && (
         <Modal
           title={title}
+          className={`admin-density-controls ${styles.configurationDialog}`}
+          closeLabel="关闭插件配置"
           closing={closing}
           onClose={close}
           onExited={() => setOpen(false)}
         >
-          <OptionalPluginBoundary
-            fallback={
-              <p role="alert">
-                <UiText text="暂时无法打开插件配置。" />
-              </p>
-            }
-          >
-            <PluginAdminSettings pluginId={id} onClose={close} />
-          </OptionalPluginBoundary>
+          <div className={styles.configurationBody}>
+            <OptionalPluginBoundary
+              fallback={
+                <p role="alert">
+                  <UiText text="暂时无法打开插件配置。" />
+                </p>
+              }
+            >
+              <PluginAdminSettings pluginId={id} onClose={close} />
+            </OptionalPluginBoundary>
+          </div>
         </Modal>
       )}
     </>
@@ -268,17 +272,21 @@ export function PluginsSettingsPage() {
                 <span>
                   {plugin?.version} {plugin?.author && ` · ${plugin.author}`}
                 </span>
-                {ready && !savedDisabled.includes(id) && (
-                  <PluginConfiguration id={id} title={plugin?.title ?? id} />
-                )}
                 {plugin && (
-                  <Button
-                    className="admin-button"
-                    onClick={() => setDetail({ plugin, preview })}
+                  <div
+                    className={`admin-density-controls ${styles.rowActions}`}
                   >
-                    <Icon name="eye" />
-                    <UiText text="查看详情" />
-                  </Button>
+                    {ready && !savedDisabled.includes(id) && (
+                      <PluginConfiguration id={id} title={plugin.title} />
+                    )}
+                    <Button
+                      className="admin-button"
+                      onClick={() => setDetail({ plugin, preview })}
+                    >
+                      <Icon name="eye" />
+                      <UiText text="查看详情" />
+                    </Button>
+                  </div>
                 )}
               </div>
               <small>

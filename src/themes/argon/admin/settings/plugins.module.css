@@ -93,8 +93,14 @@
   color: var(--muted);
   font-size: 13px;
 }
-.meta > button {
-  margin-left: auto;
+.rowActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  min-inline-size: 0;
+  margin-inline-start: auto;
 }
 .origin {
   background: var(--accent-soft);
@@ -113,6 +119,45 @@
   max-height: 85dvh;
   overflow: hidden;
 }
+.configurationDialog:global(.admin-library-modal) {
+  --configuration-padding: var(--admin-panel-padding);
+  padding: 0;
+  overflow: hidden;
+}
+
+.configurationDialog[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.configurationDialog > :global(.admin-library-modal-heading) {
+  gap: 8px;
+  margin: 0;
+  padding: 10px var(--configuration-padding);
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.configurationDialog > :global(.admin-library-modal-heading) h2 {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.configurationDialog > :global(.admin-library-modal-heading) > button {
+  flex: none;
+}
+
+.configurationBody {
+  min-width: 0;
+  min-height: 0;
+  padding: var(--configuration-padding);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.configurationBody :global(.ui-input:not([type="checkbox"], [type="radio"])) {
+  padding-inline: 11px;
+}
+
 .body {
   overflow: auto;
   padding: 24px;

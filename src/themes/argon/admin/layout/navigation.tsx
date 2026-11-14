@@ -1,11 +1,8 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { UiText, useT } from "@/core/i18n/provider";
-import {
-  adminDestination,
-  adminNavigationGroups,
-} from "@/core/admin/navigation";
+import { createAdminPluginRegistry } from "@/core/admin/navigation";
 import {
   adminMenuEntries,
   type AdminPageIcon,
@@ -17,6 +14,8 @@ import { Icon, type IconName } from "../../components/icon";
 import { RouteLink } from "../../components/ui/route-link";
 import { Button } from "../../components/ui/primitives";
 import { AdminNavigationFlyout } from "./navigation-flyout";
+import { pluginAdminRoute } from "@/core/plugins/admin-routes";
+import { useAdminPluginRuntime } from "@/core/plugins/runtime/context";
 const navigationIcons: Record<AdminPageIcon, IconName> = {
   comment: "comment",
   discussion: "discussion",
@@ -37,6 +36,7 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   extension: "puzzle",
   icons: "shapes",
   shortcode: "shortcode",
+  writing: "writing",
   applications: "plug",
   navigation: "link",
   languages: "languages",
@@ -61,14 +61,27 @@ export function AdminNavigation({
   collapsed?: boolean;
   onExpand?: () => void;
 }) {
-  const current = adminDestination(pathname),
-    t = useT(),
-    user = useAdminAccount();
+  const { adminPages, adminMenuGroups } = useAdminPluginRuntime();
+  const t = useT();
+  const user = useAdminAccount();
   const id = useId();
-  const groups = adminNavigationGroups
+  const registry = useMemo(
+    () => createAdminPluginRegistry(adminPages, adminMenuGroups),
+    [adminPages, adminMenuGroups],
+  );
+  const current = registry.resolve(pathname);
+  const groups = registry.navigation
     .map((group) => ({
       ...group,
       entries: adminMenuEntries(group, (item) => {
+        const route = pluginAdminRoute(item.href);
+        if (route)
+          return adminPages.some(
+            (page) =>
+              page.pluginId === route.pluginId &&
+              page.id === route.pageId &&
+              can(user, page.permission, null),
+          );
         const capability = adminRoutePermission(item.href);
         return (
           !capability ||
@@ -101,7 +114,7 @@ export function AdminNavigation({
         onNavigate?.();
       }}
     >
-      <Icon name={navigationIcons[item.icon]} />
+      <Icon name={navigationIcons[item.icon] ?? "puzzle"} />
       <span className="admin-nav-text">
         <UiText text={item.label} />
       </span>
@@ -126,7 +139,9 @@ export function AdminNavigation({
                   <AdminNavigationFlyout
                     key={branch.id}
                     label={branch.label}
-                    icon={<Icon name={navigationIcons[branch.icon]} />}
+                    icon={
+                      <Icon name={navigationIcons[branch.icon] ?? "puzzle"} />
+                    }
                     current={false}
                     onPin={() => {
                       if (collapsed) onExpand?.();
@@ -164,7 +179,7 @@ export function AdminNavigation({
                       });
                     }}
                   >
-                    <Icon name={navigationIcons[branch.icon]} />
+                    <Icon name={navigationIcons[branch.icon] ?? "puzzle"} />
                     <span className="admin-nav-text">
                       <UiText text={branch.label} />
                     </span>

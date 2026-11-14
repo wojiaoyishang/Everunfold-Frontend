@@ -7,9 +7,18 @@ export default definePlugin({
   title: "AI 写作助手",
   description: "为摘要、搜索与分享文案提供生成建议。",
   surface: "admin",
-  setup({ components, formFields }) {
+  preview: "asset:assets/preview.webp",
+  setup({ adminPages, components, formFields }) {
     components.register("core.ai-writing.settings");
     components.register("core.ai-writing.generate");
+    adminPages.register({
+      id: "settings",
+      label: "AI 写作助手",
+      icon: "writing",
+      permission: "settings:write",
+      component: "core.ai-writing.settings",
+      menu: { group: "core.settings", order: 25 },
+    });
     for (const { scene, fields } of writingScenes) {
       for (const field of Object.keys(fields)) {
         formFields.register({

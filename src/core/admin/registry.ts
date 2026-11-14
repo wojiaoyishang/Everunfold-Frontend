@@ -1,4 +1,6 @@
-/** Trusted, build-time page metadata. A registry entry never grants permission. */
+import { pluginAdminRoute } from "@/core/plugins/admin-routes";
+
+/** Trusted page metadata. A registry entry never grants permission. */
 export type AdminPageIcon =
   | "comment"
   | "discussion"
@@ -16,6 +18,7 @@ export type AdminPageIcon =
   | "theme"
   | "icons"
   | "shortcode"
+  | "writing"
   | "applications"
   | "navigation"
   | "languages"
@@ -150,7 +153,10 @@ export function createAdminRegistry(
         throw new Error(
           `Duplicate admin page or route: ${page.id} (${page.href})`,
         );
-      if (!routePattern.test(page.href) || !page.label.trim())
+      if (
+        (!routePattern.test(page.href) && !pluginAdminRoute(page.href)) ||
+        !page.label.trim()
+      )
         throw new Error(`Invalid admin destination: ${page.id} (${page.href})`);
       if (page.menu && !Number.isSafeInteger(page.menu.order))
         throw new Error(`Invalid admin menu order: ${page.id}`);

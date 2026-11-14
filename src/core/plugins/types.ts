@@ -4,6 +4,7 @@ import type { CustomPageDefinition } from "@/core/pages/registration";
 import type { FontDefinition } from "@/core/fonts/types";
 import type { BuilderComponentDefinition } from "@/core/builder/types";
 import type { AdminFormFieldHook } from "@/core/forms/admin-field-types";
+import type { PluginAdminMenuGroup, PluginAdminPage } from "./admin-page-types";
 
 export interface ShortcodeRenderContext {
   parameters: Readonly<Record<string, string>>;
@@ -46,6 +47,10 @@ export interface FrontendPlugin {
     fonts: { register: (font: FontDefinition) => void };
     builder: { register: (definition: BuilderComponentDefinition) => void };
     formFields: { register: (hook: AdminFormFieldHook) => void };
+    adminPages: {
+      register: (page: PluginAdminPage) => void;
+      registerGroup: (group: PluginAdminMenuGroup) => void;
+    };
   }) => void;
 }
 

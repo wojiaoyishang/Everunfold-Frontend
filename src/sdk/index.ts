@@ -11,6 +11,11 @@ export type {
   ShortcodeRenderContext,
 } from "@/core/plugins/types";
 export type { SettingsModel, SettingField } from "@/core/forms/schema";
+export type {
+  PluginAdminMenuGroup,
+  PluginAdminPage,
+  PluginAdminPageProps,
+} from "@/core/plugins/admin-page-types";
 export type { FormFieldProps } from "@/core/forms/renderer";
 export type {
   AdminFormFieldActionProps,
