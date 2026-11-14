@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 755"
+     width="760" height="755">
+  <defs>
+    <marker id="head" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 9 5 L 0 10 Z" fill="#526a8c"/>
+    </marker>
+  </defs>
+  <style>
+    text {font-family: Noto Sans CJK SC, PingFang SC, Microsoft YaHei, sans-serif}
+    .step {fill: #fff; stroke: #b4c8e1; stroke-width: 1.4}
+    .branch {fill: #fff8ed; stroke: #d6b289; stroke-width: 1.4}
+    .badge {fill: #e1edff}
+    .number {fill: #184485; font-size: 14px; font-weight: 700}
+    .title {fill: #142747; font-size: 21px; font-weight: 700}
+    .detail {fill: #344563; font-size: 17px}
+    .transition {fill: #365b86; font-size: 15px}
+    .arrow {fill: none; stroke: #526a8c; stroke-width: 1.6}
+  </style>
+  <rect x="0.5" y="0.5" width="759" height="754"
+        rx="15" fill="#f4f7fc" stroke="#d6e1f0"/>
+<rect x="20" y="20" width="720" height="111" rx="10" class="step"/><circle cx="53" cy="50" r="15" class="badge"/><text x="53" y="55" class="number" text-anchor="middle">1</text><text x="79" y="56" class="title" text-anchor="start">记录整站恢复点</text><text x="79" y="84" class="detail" text-anchor="start">记录前后端提交、插件版本、迁移头与 source_epoch。</text><text x="79" y="108" class="detail" text-anchor="start">备份同批 PostgreSQL 与媒体原文件，另存主密钥和部署凭据。</text>
+<path d="M 380 136 L 380 163" class="arrow" marker-end="url(#head)"/>
+<text x="394" y="153" class="transition" text-anchor="start">恢复点已验证可读取</text>
+<rect x="20" y="171" width="720" height="111" rx="10" class="step"/><circle cx="53" cy="201" r="15" class="badge"/><text x="53" y="206" class="number" text-anchor="middle">2</text><text x="79" y="207" class="title" text-anchor="start">在隔离环境恢复</text><text x="79" y="235" class="detail" text-anchor="start">恢复数据和媒体，使用独立的 Redis 作用域、任务环境与副本目录。</text><text x="79" y="259" class="detail" text-anchor="start">启用任务之前检查外部投递目的地和站点地址。</text>
+<path d="M 380 287 L 380 314" class="arrow" marker-end="url(#head)"/>
+<text x="394" y="304" class="transition" text-anchor="start">数据库与媒体恢复完成</text>
+<rect x="20" y="322" width="720" height="111" rx="10" class="step"/><circle cx="53" cy="352" r="15" class="badge"/><text x="53" y="357" class="number" text-anchor="middle">3</text><text x="79" y="358" class="title" text-anchor="start">核对后端和业务数据</text><text x="79" y="386" class="detail" text-anchor="start">用匹配的代码验证表结构、API 就绪、管理员登录、内容和媒体。</text><text x="79" y="410" class="detail" text-anchor="start">验证通过后按计划启用 Worker 与 Scheduler。</text>
+<path d="M 380 438 L 380 465" class="arrow" marker-end="url(#head)"/>
+<text x="394" y="455" class="transition" text-anchor="start">后端验证通过</text>
+<rect x="20" y="473" width="720" height="111" rx="10" class="step"/><circle cx="53" cy="503" r="15" class="badge"/><text x="53" y="508" class="number" text-anchor="middle">4</text><text x="79" y="509" class="title" text-anchor="start">按来源与版本绑定目标节点</text><text x="79" y="537" class="detail" text-anchor="start">核对 source_epoch 和节点读写目录。</text><text x="79" y="561" class="detail" text-anchor="start">恢复库版本较低时，用计划中的隔离目录或新绑定重新同步。</text>
+<path d="M 380 589 L 380 616" class="arrow" marker-end="url(#head)"/>
+<text x="394" y="606" class="transition" text-anchor="start">节点收到新同步</text>
+<rect x="20" y="624" width="720" height="111" rx="10" class="step"/><circle cx="53" cy="654" r="15" class="badge"/><text x="53" y="659" class="number" text-anchor="middle">5</text><text x="79" y="660" class="title" text-anchor="start">确认同步，再切换流量</text><text x="79" y="688" class="detail" text-anchor="start">验收回执、磁盘版本、公开页面、媒体和受限访问后再切换流量。</text><text x="79" y="712" class="detail" text-anchor="start">旧副本移至隔离位置备用。</text>
+</svg>

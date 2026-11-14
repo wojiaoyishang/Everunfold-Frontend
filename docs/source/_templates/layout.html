@@ -1,0 +1,20 @@
+{% extends "!layout.html" %}
+
+{% block extrabody %}
+  {{ super() }}
+  <div class="handbook-nav-backdrop" aria-hidden="true"></div>
+{% endblock %}
+
+{% block sidebartitle %}
+  {{ super() }}
+  <button type="button" class="handbook-nav-close" aria-label="关闭目录">
+    <span aria-hidden="true">×</span>
+  </button>
+{% endblock %}
+
+{% block mobile_nav %}
+  <button type="button" class="handbook-nav-toggle" aria-expanded="false">
+    <span class="fa fa-bars" aria-hidden="true"></span> 目录
+  </button>
+  <a href="{{ pathto(root_doc) }}">{{ project }}</a>
+{% endblock %}

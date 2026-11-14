@@ -1,0 +1,187 @@
+.wy-nav-side {
+  background: #202a38;
+}
+
+.wy-side-scroll {
+  width: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.wy-menu-vertical {
+  width: 100%;
+  padding-block-end: 1.5rem;
+}
+
+.wy-side-nav-search {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+  margin-bottom: 0;
+  background: #254968;
+}
+
+.wy-menu-vertical p.caption {
+  height: auto;
+  min-height: 2rem;
+  margin: 0.85rem 0 0.25rem;
+  padding: 0.55rem 1.125rem 0;
+  border-top: 1px solid #3d4b5b;
+  color: #9bd4f4;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.wy-menu-vertical li.toctree-l1 > a {
+  padding: 0.5rem 1.125rem;
+  line-height: 1.45;
+}
+
+.wy-menu-vertical li > a:has(> button.toctree-expand) {
+  position: relative;
+  padding-inline-end: 3rem;
+}
+
+.wy-menu-vertical li a > button.toctree-expand {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 2.75rem;
+  margin: 0;
+  color: inherit;
+}
+
+.wy-menu-vertical li.toctree-l1 > a:hover {
+  background: #34495f;
+}
+
+.wy-menu-vertical li.toctree-l1.current > a,
+.wy-menu-vertical li.toctree-l1.current > a:hover {
+  border: 0;
+  background: #e8f1f9;
+  color: #1d4267;
+}
+
+.wy-menu-vertical li a:focus-visible,
+.wy-menu-vertical button.toctree-expand:focus-visible,
+.handbook-nav-close:focus-visible,
+.handbook-nav-toggle:focus-visible {
+  outline: 2px solid #72c7fa;
+  outline-offset: -3px;
+}
+
+.wy-nav-content {
+  max-width: 58rem;
+}
+
+.rst-content figure:has(a.flow-diagram) {
+  margin-inline: 0;
+}
+
+.rst-content img.flow-diagram {
+  max-width: 100%;
+  height: auto;
+}
+
+.handbook-nav-toggle,
+.handbook-nav-close,
+.handbook-nav-backdrop {
+  display: none;
+}
+
+@media screen and (max-width: 768px) {
+  .wy-nav-top {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    min-height: 52px;
+    padding: 0 0.75rem;
+    background: #254968;
+    line-height: 52px;
+    text-align: right;
+  }
+
+  .handbook-nav-toggle,
+  .handbook-nav-close {
+    display: inline-flex;
+    position: absolute;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 0.7rem;
+    border: 0;
+    border-radius: 0.25rem;
+    background: #1c3b56;
+    color: #fff;
+  }
+
+  .handbook-nav-toggle {
+    top: 4px;
+    left: 0.75rem;
+  }
+
+  .handbook-nav-close {
+    top: 0.35rem;
+    right: 0.4rem;
+    font-size: 1.5rem;
+  }
+
+  .wy-side-nav-search > a {
+    margin-inline: 2.5rem;
+  }
+
+  .wy-nav-side {
+    left: 0;
+    width: min(20rem, calc(100% - 3rem));
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition:
+      transform 160ms ease,
+      visibility 160ms;
+  }
+
+  .handbook-nav-open {
+    overflow: hidden;
+  }
+
+  .handbook-nav-open .wy-nav-side {
+    visibility: visible;
+    transform: translateX(0);
+  }
+
+  .handbook-nav-open .handbook-nav-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 190;
+    background: rgb(13 25 43 / 55%);
+  }
+
+  .wy-side-scroll {
+    overscroll-behavior: contain;
+  }
+
+  .wy-menu-vertical li[class*="toctree-l"] > a {
+    min-height: 44px;
+    padding-block: 0.72rem;
+  }
+
+  .rst-content a.flow-diagram::after {
+    display: block;
+    width: fit-content;
+    margin-block: 0.4rem 0.65rem;
+    content: "打开原图 ↗";
+  }
+
+  .wy-nav-content-wrap .wy-nav-content {
+    padding: 1.15rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wy-nav-side {
+    transition: none;
+  }
+}

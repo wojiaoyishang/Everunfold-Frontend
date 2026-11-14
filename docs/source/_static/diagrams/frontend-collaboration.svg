@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 655"
+     width="760" height="655">
+  <defs>
+    <marker id="head" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 9 5 L 0 10 Z" fill="#526a8c"/>
+    </marker>
+  </defs>
+  <style>
+    text {font-family: Noto Sans CJK SC, PingFang SC, Microsoft YaHei, sans-serif}
+    .step {fill: #fff; stroke: #b4c8e1; stroke-width: 1.4}
+    .branch {fill: #fff8ed; stroke: #d6b289; stroke-width: 1.4}
+    .badge {fill: #e1edff}
+    .number {fill: #184485; font-size: 14px; font-weight: 700}
+    .title {fill: #142747; font-size: 21px; font-weight: 700}
+    .detail {fill: #344563; font-size: 17px}
+    .transition {fill: #365b86; font-size: 15px}
+    .arrow {fill: none; stroke: #526a8c; stroke-width: 1.6}
+  </style>
+  <rect x="0.5" y="0.5" width="759" height="654"
+        rx="15" fill="#f4f7fc" stroke="#d6e1f0"/>
+<rect x="20" y="20" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="50" r="15" class="badge"/><text x="53" y="55" class="number" text-anchor="middle">1</text><text x="79" y="56" class="title" text-anchor="start">打开已保存的工作草稿</text><text x="79" y="84" class="detail" text-anchor="start">获取协作票据并连接 WebSocket</text>
+<path d="M 226 112 L 226 139" class="arrow" marker-end="url(#head)"/>
+
+<rect x="20" y="147" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="177" r="15" class="badge"/><text x="53" y="182" class="number" text-anchor="middle">2</text><text x="79" y="183" class="title" text-anchor="start">装载共享状态</text><text x="79" y="211" class="detail" text-anchor="start">按 sync 帧初始化 Y.Doc 和提交序号</text>
+<path d="M 226 239 L 226 266" class="arrow" marker-end="url(#head)"/>
+
+<rect x="20" y="274" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="304" r="15" class="badge"/><text x="53" y="309" class="number" text-anchor="middle">3</text><text x="79" y="310" class="title" text-anchor="start">发送本地修改</text><text x="79" y="338" class="detail" text-anchor="start">编辑生成带 update_id 的待提交更新</text>
+<path d="M 436 317 L 478 317" class="arrow" marker-end="url(#head)"/>
+<rect x="485" y="274" width="255" height="135" rx="10" class="branch"/><text x="503" y="310" class="title" text-anchor="start">断线后保留输入</text><text x="503" y="338" class="detail" text-anchor="start">本地分支保存在</text><text x="503" y="362" class="detail" text-anchor="start">IndexedDB</text><text x="503" y="386" class="detail" text-anchor="start">恢复连接后可比较并合并</text>
+<path d="M 226 366 L 226 413" class="arrow" marker-end="url(#head)"/>
+
+<rect x="20" y="421" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="451" r="15" class="badge"/><text x="53" y="456" class="number" text-anchor="middle">4</text><text x="79" y="457" class="title" text-anchor="start">服务端提交更新</text><text x="79" y="485" class="detail" text-anchor="start">事务提交后发送 ack 与提交序号</text>
+<path d="M 226 513 L 226 540" class="arrow" marker-end="url(#head)"/>
+
+<rect x="20" y="548" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="578" r="15" class="badge"/><text x="53" y="583" class="number" text-anchor="middle">5</text><text x="79" y="584" class="title" text-anchor="start">同步各窗口草稿</text><text x="79" y="612" class="detail" text-anchor="start">发送窗口确认回执，其他窗口合并增量</text>
+</svg>

@@ -1,3 +1,5 @@
+:orphan:
+
 站点后台使用
 ============
 
@@ -21,16 +23,13 @@
    * - 启用与配置扩展
      - 「设置 → 插件管理」，见 :doc:`extensions`。
 
-.. toctree::
-   :maxdepth: 1
-
-   writing
-   pages
-   resources
-   site
-   accounts
-   notifications
-   extensions
-   ai-writing
+- :doc:`writing`
+- :doc:`pages`
+- :doc:`resources`
+- :doc:`site`
+- :doc:`accounts`
+- :doc:`notifications`
+- :doc:`extensions`
+- :doc:`ai-writing`
 
 站点运行、节点回执及维护任务见 :doc:`../operations/index`。

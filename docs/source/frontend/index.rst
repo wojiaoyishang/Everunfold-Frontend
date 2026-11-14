@@ -1,3 +1,5 @@
+:orphan:
+
 前端开发
 ========
 
@@ -12,10 +14,7 @@ Next.js 负责公开页面、管理工作台和可信扩展的运行。FastAPI �
 - 为站点扩展能力时，按 :doc:`extensions` 选择插件、短代码、组件或子主题。
 - 提交或排查故障时，使用 :doc:`checks` 的命令和故障分类。
 
-.. toctree::
-   :maxdepth: 2
-
-   architecture
-   content
-   extensions
-   checks
+- :doc:`architecture`
+- :doc:`content`
+- :doc:`extensions`
+- :doc:`checks`

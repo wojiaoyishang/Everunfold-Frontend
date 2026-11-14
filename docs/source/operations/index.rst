@@ -1,3 +1,5 @@
+:orphan:
+
 部署与运维
 ==========
 
@@ -23,12 +25,9 @@
    * - 排查故障
      - :doc:`diagnostics` 按症状定位代理、登录、运行任务、缓存和节点投递。
 
-.. toctree::
-   :maxdepth: 1
-
-   topology
-   configuration
-   deploy
-   nodes
-   recovery
-   diagnostics
+- :doc:`topology`
+- :doc:`configuration`
+- :doc:`deploy`
+- :doc:`nodes`
+- :doc:`recovery`
+- :doc:`diagnostics`

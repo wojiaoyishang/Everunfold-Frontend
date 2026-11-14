@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 782"
+     width="760" height="782">
+  <defs>
+    <marker id="head" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 9 5 L 0 10 Z" fill="#526a8c"/>
+    </marker>
+  </defs>
+  <style>
+    text {font-family: Noto Sans CJK SC, PingFang SC, Microsoft YaHei, sans-serif}
+    .step {fill: #fff; stroke: #b4c8e1; stroke-width: 1.4}
+    .branch {fill: #fff8ed; stroke: #d6b289; stroke-width: 1.4}
+    .badge {fill: #e1edff}
+    .number {fill: #184485; font-size: 14px; font-weight: 700}
+    .title {fill: #142747; font-size: 21px; font-weight: 700}
+    .detail {fill: #344563; font-size: 17px}
+    .transition {fill: #365b86; font-size: 15px}
+    .arrow {fill: none; stroke: #526a8c; stroke-width: 1.6}
+  </style>
+  <rect x="0.5" y="0.5" width="759" height="781"
+        rx="15" fill="#f4f7fc" stroke="#d6e1f0"/>
+<rect x="20" y="20" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="50" r="15" class="badge"/><text x="53" y="55" class="number" text-anchor="middle">1</text><text x="79" y="56" class="title" text-anchor="start">接收 Worker 推送</text><text x="79" y="84" class="detail" text-anchor="start">POST /internal/cache/v1/apply</text>
+<path d="M 226 112 L 226 139" class="arrow" marker-end="url(#head)"/>
+
+<rect x="20" y="147" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="177" r="15" class="badge"/><text x="53" y="182" class="number" text-anchor="middle">2</text><text x="79" y="183" class="title" text-anchor="start">校验版本消息</text><text x="79" y="211" class="detail" text-anchor="start">核对来源、节点和数据结构</text>
+<path d="M 226 239 L 226 266" class="arrow" marker-end="url(#head)"/>
+
+<rect x="20" y="274" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="304" r="15" class="badge"/><text x="53" y="309" class="number" text-anchor="middle">3</text><text x="79" y="310" class="title" text-anchor="start">写入修订意图</text><text x="79" y="338" class="detail" text-anchor="start">记录已知修订及快照摘要</text>
+<path d="M 226 366 L 226 393" class="arrow" marker-end="url(#head)"/>
+
+<rect x="20" y="401" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="431" r="15" class="badge"/><text x="53" y="436" class="number" text-anchor="middle">4</text><text x="79" y="437" class="title" text-anchor="start">写入完整快照</text><text x="79" y="465" class="detail" text-anchor="start">意图和快照按修订号保存在磁盘</text>
+<path d="M 436 444 L 478 444" class="arrow" marker-end="url(#head)"/>
+<rect x="485" y="401" width="255" height="135" rx="10" class="branch"/><text x="503" y="437" class="title" text-anchor="start">返回持久回执</text><text x="503" y="465" class="detail" text-anchor="start">Worker 校验修订及请求摘</text><text x="503" y="489" class="detail" text-anchor="start">要</text><text x="503" y="513" class="detail" text-anchor="start">随后更新投递记录</text>
+<path d="M 226 493 L 226 540" class="arrow" marker-end="url(#head)"/>
+<text x="240" y="510" class="transition" text-anchor="start">后续公开请求</text>
+<rect x="20" y="548" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="578" r="15" class="badge"/><text x="53" y="583" class="number" text-anchor="middle">5</text><text x="79" y="584" class="title" text-anchor="start">公开请求读取</text><text x="79" y="612" class="detail" text-anchor="start">读取当前已知修订并核对摘要</text>
+<path d="M 436 591 L 478 591" class="arrow" marker-end="url(#head)"/>
+<rect x="485" y="548" width="255" height="111" rx="10" class="branch"/><text x="503" y="584" class="title" text-anchor="start">当前修订不可读</text><text x="503" y="612" class="detail" text-anchor="start">快照缺失或摘要不符时</text><text x="503" y="636" class="detail" text-anchor="start">公开页面返回 503</text>
+<path d="M 226 640 L 226 667" class="arrow" marker-end="url(#head)"/>
+
+<rect x="20" y="675" width="412" height="87" rx="10" class="step"/><circle cx="53" cy="705" r="15" class="badge"/><text x="53" y="710" class="number" text-anchor="middle">6</text><text x="79" y="711" class="title" text-anchor="start">查找并渲染页面</text><text x="79" y="739" class="detail" text-anchor="start">结合已应用的站点设置解析地址</text>
+</svg>

@@ -2,17 +2,30 @@
 ==============
 
 单机开发可以使用一个 HTTP 代理，对外统一访问一个本地入口。
-独立部署通常将网页和 API 放在同一站点的不同 HTTPS 主机名上。下图中的全域名仅作示例。
+独立部署通常将网页和 API 放在同一站点的不同 HTTPS 主机名上。图中使用示例域名。
 
-.. code-block:: text
+.. figure:: /_static/diagrams/ops-request-paths.svg
+   :width: 100%
+   :class: flow-diagram
+   :alt: 四类请求分别从浏览器到 Next.js、从浏览器到 FastAPI、从 Next.js 服务端到 FastAPI、从 Worker 到节点接收器。
 
-   浏览器
-     ├── 网页、静态资源 ─────────> https://blog.example.com ──> Next.js
-     └── API、受限内容、WebSocket ─> https://api.example.com  ──> FastAPI
-                                      FastAPI ──> PostgreSQL / Redis
-   Next.js 节点 ── 内部上报 ──> FastAPI
-   Scheduler ── 计划执行 ──> Celery Broker ──> Worker
-   Worker ── 内部投递 ──> Node 接收器 ──> 当前节点的副本目录 ──> Next.js
+   浏览器的网页与 API 请求使用公开地址。服务端上报和节点投递分别使用各自的私有地址、来源白名单和令牌。
+
+如何确定请求去向
+----------------
+
+1. 浏览器打开读者页、后台界面或静态资源时，向 ``https://blog.example.com``
+   请求 Next.js。公开内容由 Next.js 读取本地已应用的快照后渲染。
+2. 浏览器从后台界面保存内容，或访问需调用 API 的读者功能时，向
+   ``https://api.example.com`` 请求 FastAPI。受保护的浏览器写入检查会话和
+   CSRF，跨域请求需匹配允许的网页 Origin。协同时先申请短期 WebSocket 票据，
+   再连接 ``/ws/v1/`` 下的协同端点。
+3. Next.js 服务端上报扩展清单时，通过 ``[backend].base_url`` 请求
+   FastAPI 的 ``/internal/extensions/{node_id}``。FastAPI 按实际连接来源检查
+   白名单，再检查节点是否启用和 Next.js → FastAPI 的令牌。
+4. Worker 通过 ``settings_receiver_url`` 向目标节点投递公开版本。
+   接收器校验实际连接来源、Worker → Node 令牌、节点及来源身份，完成落盘才返回回执。
+   接收器和 Next.js 使用同一组副本目录。
 
 进程职责
 --------
@@ -32,7 +45,7 @@
    * - Celery Worker
      - 执行节点投递、邮件、媒体派生、可选的 AI 生成等后台工作。
    * - Scheduler
-     - 扫描计划、派发或恢复到期任务。同一 Redis 作用域保持一个实例。
+     - 扫描计划、通过 Celery Broker 派发或恢复到期任务。同一 Redis 作用域保持一个实例。
    * - Node 接收器
      - 校验来源并落盘公开内容、站点设置及节点策略。接收器与 Next.js 须读写
        同一节点、同一来源和同一组副本目录。

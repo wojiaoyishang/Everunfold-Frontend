@@ -4,12 +4,14 @@ on:
   push:
     branches: [main]
     paths:
+      - docs/diagrams/**
       - docs/source/**
       - docs/requirements.txt
       - .github/workflows/docs.yml
   pull_request:
     branches: [main]
     paths:
+      - docs/diagrams/**
       - docs/source/**
       - docs/requirements.txt
       - .github/workflows/docs.yml
@@ -44,6 +46,7 @@ jobs:
 
       - name: Build Sphinx HTML
         run: |
+          python docs/diagrams/render.py --check
           python -m sphinx -b html -d _build/doctrees -n -W docs/source _build/html
           test -s _build/html/index.html
 

@@ -26,31 +26,52 @@ Everunfold 是一个独立部署前后端的博客与轻量 CMS。第一次运�
 两份手册共用入门、后台使用和部署指南。
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: 开始使用
 
-   welcome/index
+   welcome/introduction
+   welcome/concepts
+   welcome/quickstart
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: 管理站点
 
-   usage/index
-
-.. toctree::
-   :maxdepth: 3
-   :caption: 源码与扩展
-
-   frontend/index
-
-.. toctree::
-   :maxdepth: 2
-   :caption: 运行环境
-
-   operations/index
+   usage/writing
+   usage/pages
+   usage/resources
+   usage/site
+   usage/accounts
+   usage/notifications
+   usage/extensions
+   usage/ai-writing
 
 .. toctree::
    :maxdepth: 2
+   :titlesonly:
+   :caption: 前端开发
+
+   frontend/architecture
+   frontend/content
+   frontend/extensions
+   frontend/checks
+
+.. toctree::
+   :maxdepth: 1
+   :caption: 部署与运维
+
+   operations/topology
+   operations/configuration
+   operations/deploy
+   operations/nodes
+   operations/recovery
+   operations/diagnostics
+
+.. toctree::
+   :maxdepth: 1
    :caption: 发布与贡献
 
-   release/index
+   release/prerelease
+   release/upgrade
+   release/documentation
+   release/contributing

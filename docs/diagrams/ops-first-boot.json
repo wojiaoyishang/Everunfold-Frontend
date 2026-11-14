@@ -1,0 +1,28 @@
+{
+  "steps": [
+    {
+      "title": "准备两个仓库和数据服务",
+      "detail": "检出配套提交，安装 Python 3.12、uv、Node.js 22 和 npm 10。\n启动 PostgreSQL 与 Redis，创建空库并给数据库角色授权。"
+    },
+    {
+      "title": "安装依赖，配置后端与节点",
+      "detail": "从 uv.lock 安装依赖，填写数据库、Redis、Broker 和网页 Origin。\n启用 web-main 节点，为两个内部请求方向分别设置令牌。"
+    },
+    {
+      "title": "显式初始化数据库",
+      "detail": "运行 init.database.py 迁移和初始化管理员，再登记后端插件。\n从已初始化的数据库查询 source_epoch。"
+    },
+    {
+      "title": "绑定前端实例",
+      "detail": "从 package-lock.json 安装依赖，填写公开网页与 API 地址。\n沿用节点 ID、来源 UUID 和对应方向的令牌。"
+    },
+    {
+      "title": "分别启动两端进程",
+      "detail": "启动 FastAPI（8001）、Worker、Scheduler，检查后端就绪。\n启动 Next.js（3000）与 Node 接收器（3001）。"
+    },
+    {
+      "title": "首次同步并验证读者页",
+      "detail": "打开「节点状态与维护」重新同步全部，核对回执与磁盘版本。\n发布测试文章并访问公开页，复查前端 /health/ready。"
+    }
+  ]
+}

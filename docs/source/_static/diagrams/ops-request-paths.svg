@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 520"
+     width="760" height="520">
+  <defs>
+    <marker id="head" viewBox="0 0 10 10" refX="8" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 0 L 9 5 L 0 10 Z" fill="#526a8c"/>
+    </marker>
+  </defs>
+  <style>
+    text {font-family: Noto Sans CJK SC, PingFang SC, Microsoft YaHei, sans-serif}
+    .step {fill: #fff; stroke: #b4c8e1; stroke-width: 1.4}
+    .branch {fill: #fff8ed; stroke: #d6b289; stroke-width: 1.4}
+    .badge {fill: #e1edff}
+    .number {fill: #184485; font-size: 14px; font-weight: 700}
+    .title {fill: #142747; font-size: 21px; font-weight: 700}
+    .detail {fill: #344563; font-size: 17px}
+    .transition {fill: #365b86; font-size: 15px}
+    .arrow {fill: none; stroke: #526a8c; stroke-width: 1.6}
+  </style>
+  <rect x="0.5" y="0.5" width="759" height="519"
+        rx="15" fill="#f4f7fc" stroke="#d6e1f0"/>
+<rect x="20" y="20" width="720" height="111" rx="10" class="step"/><circle cx="53" cy="50" r="15" class="badge"/><text x="53" y="55" class="number" text-anchor="middle">1</text><text x="79" y="56" class="title" text-anchor="start">浏览器 → Next.js 网页入口</text><text x="79" y="84" class="detail" text-anchor="start">blog.example.com · GET 页面、静态资源、RSS 与站点地图。</text><text x="79" y="108" class="detail" text-anchor="start">读者页面使用本节点已经应用的公开快照。</text>
+<rect x="20" y="143" width="720" height="111" rx="10" class="step"/><circle cx="53" cy="173" r="15" class="badge"/><text x="53" y="178" class="number" text-anchor="middle">2</text><text x="79" y="179" class="title" text-anchor="start">浏览器 → FastAPI 公开入口</text><text x="79" y="207" class="detail" text-anchor="start">api.example.com · /v1/、/media/、/ws/v1/。</text><text x="79" y="231" class="detail" text-anchor="start">按接口核对会话、CSRF、Origin 或 WebSocket 票据。</text>
+<rect x="20" y="266" width="720" height="111" rx="10" class="step"/><circle cx="53" cy="296" r="15" class="badge"/><text x="53" y="301" class="number" text-anchor="middle">3</text><text x="79" y="302" class="title" text-anchor="start">Next.js 服务端 → FastAPI 内部入口</text><text x="79" y="330" class="detail" text-anchor="start">[backend].base_url · /internal/extensions/{node_id}</text><text x="79" y="354" class="detail" text-anchor="start">上报扩展时核对连接来源和 Next.js → FastAPI 令牌。</text>
+<rect x="20" y="389" width="720" height="111" rx="10" class="step"/><circle cx="53" cy="419" r="15" class="badge"/><text x="53" y="424" class="number" text-anchor="middle">4</text><text x="79" y="425" class="title" text-anchor="start">Worker → 前端节点接收器</text><text x="79" y="453" class="detail" text-anchor="start">settings_receiver_url · 通过内部端点投递版本。</text><text x="79" y="477" class="detail" text-anchor="start">检查连接来源、反向令牌和节点身份，落盘后返回回执。</text>
+</svg>

@@ -1,0 +1,31 @@
+{
+  "steps": [
+    {
+      "title": "打开已保存的工作草稿",
+      "detail": "获取协作票据并连接 WebSocket"
+    },
+    {
+      "title": "装载共享状态",
+      "detail": "按 sync 帧初始化 Y.Doc 和提交序号"
+    },
+    {
+      "title": "发送本地修改",
+      "detail": "编辑生成带 update_id 的待提交更新"
+    },
+    {
+      "title": "服务端提交更新",
+      "detail": "事务提交后发送 ack 与提交序号"
+    },
+    {
+      "title": "同步各窗口草稿",
+      "detail": "发送窗口确认回执，其他窗口合并增量"
+    }
+  ],
+  "branches": [
+    {
+      "from": 3,
+      "title": "断线后保留输入",
+      "detail": "本地分支保存在 IndexedDB\n恢复连接后可比较并合并"
+    }
+  ]
+}

@@ -1,10 +1,9 @@
+:orphan:
+
 预发布与维护
 ============
 
-.. toctree::
-   :maxdepth: 2
-
-   prerelease
-   upgrade
-   documentation
-   contributing
+- :doc:`prerelease`
+- :doc:`upgrade`
+- :doc:`documentation`
+- :doc:`contributing`

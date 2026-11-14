@@ -1,0 +1,41 @@
+{
+  "steps": [
+    {
+      "title": "启动前端进程",
+      "detail": "tools/plugins/run.mts 启动 Next.js"
+    },
+    {
+      "title": "浏览器打开页面",
+      "detail": "Next.js 收到文档请求"
+    },
+    {
+      "title": "代理识别路径",
+      "detail": "src/proxy.ts 区分公开与管理路由"
+    },
+    {
+      "title": "读取本地公开快照",
+      "detail": "解析页面路径和内容语言"
+    },
+    {
+      "title": "选择阅读视图",
+      "detail": "首页走 CodePage，详情按类型分派"
+    },
+    {
+      "title": "返回公开首屏",
+      "detail": "主题呈现导航和正文，路由提供元数据"
+    }
+  ],
+  "transitions": ["", "", "公开页面", "", ""],
+  "branches": [
+    {
+      "from": 3,
+      "title": "后台工作台",
+      "detail": "浏览器确认后台会话\n通过后加载菜单与插件"
+    },
+    {
+      "from": 4,
+      "title": "无法呈现此路径",
+      "detail": "有效快照中找不到 → 404\n快照不可读 → 503"
+    }
+  ]
+}

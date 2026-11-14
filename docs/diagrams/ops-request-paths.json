@@ -1,0 +1,21 @@
+{
+  "layout": "lanes",
+  "steps": [
+    {
+      "title": "浏览器 → Next.js 网页入口",
+      "detail": "blog.example.com · GET 页面、静态资源、RSS 与站点地图。\n读者页面使用本节点已经应用的公开快照。"
+    },
+    {
+      "title": "浏览器 → FastAPI 公开入口",
+      "detail": "api.example.com · /v1/、/media/、/ws/v1/。\n按接口核对会话、CSRF、Origin 或 WebSocket 票据。"
+    },
+    {
+      "title": "Next.js 服务端 → FastAPI 内部入口",
+      "detail": "[backend].base_url · /internal/extensions/{node_id}\n上报扩展时核对连接来源和 Next.js → FastAPI 令牌。"
+    },
+    {
+      "title": "Worker → 前端节点接收器",
+      "detail": "settings_receiver_url · 通过内部端点投递版本。\n检查连接来源、反向令牌和节点身份，落盘后返回回执。"
+    }
+  ]
+}
