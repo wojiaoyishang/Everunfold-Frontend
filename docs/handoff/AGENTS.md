@@ -4,9 +4,9 @@
 
 ## 接手顺序
 
-1. 先读 `docs/handoff/STATUS.md`，确认已实现内容、当前检查结果与下一步。
-2. 再读 `docs/README.md`、`docs/development/protocol.md` 与 `docs/architecture/constraints.md`。
-3. 涉及设计决定时查 `docs/baseline/` 原文及 `docs/decisions/`；不依赖旧聊天或临时附件路径恢复进度。
+1. 先读同目录的 [STATUS.md](STATUS.md)，确认已实现内容、当前检查结果与下一步。
+2. 再读[文档索引](../README.md)、[开发协议](../development/protocol.md)与[架构约束](../architecture/constraints.md)。
+3. 涉及设计决定时查[原始基线](../baseline/README.md)及 `docs/decisions/`；不依赖旧聊天或临时附件路径恢复进度。
 4. 开始前检查工作区与分支，保留用户及其他协作者的未提交修改。
 
 ## 需求与范围
@@ -65,14 +65,6 @@
 - 新的实现决定写 ADR；功能设计和操作文档分别放 `docs/architecture/`、`docs/development/` 等子目录，并维护索引。
 - 公共规范和原始基线在两仓库同步，按 `docs/baseline/README.md` 规则记录版本及哈希；仓库状态和运行说明可各自维护。
 
-以下 Next.js 自动生成段只适用于前端开发；后端不引入 Next.js 依赖。
+## 前端框架文档
 
-<!-- BEGIN:nextjs-agent-rules -->
-
-## This is NOT the Next.js you know
-
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
+修改 Next.js 代码前，从前端仓库根目录查阅 `node_modules/next/dist/docs/` 中与已安装版本匹配的指南，并留意弃用说明。前端通过 `next.config.ts` 的 `agentRules: false` 关闭开发服务器自动生成根目录 `AGENTS.md` 的行为。

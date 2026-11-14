@@ -284,7 +284,7 @@
 - `Everunfold-Backend`：FastAPI、Celery Worker、Scheduler 共用 Python 项目；发布版本化 API/WS/事件契约。
 - `Everunfold-Frontend`：独立 Next.js 项目；消费指定版本契约，维护可信主题、页面和节点缓存。
 - 本页及公共规范在两仓库保持一致；运行说明、状态、功能设计按所属仓库维护。接口契约仍以后端为唯一权威，不把文档副本当成第二个契约源。
-- 根目录 `README.md` 是本仓库运行入口；根目录 `AGENTS.md` 是开发协作规则。实际版本和命令以它们及锁文件为准。
+- [仓库 README](../README.md)提供运行入口，[AI 开发协作约定](handoff/AGENTS.md)和[当前交接状态](handoff/STATUS.md)提供接手指引。实际版本与命令以运行文档及锁文件为准。
 
 ## 记录状态的约定
 

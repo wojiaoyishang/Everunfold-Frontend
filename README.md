@@ -68,6 +68,8 @@ npm run verify:production
 
 后台操作见 [站点使用指南](https://wojiaoyishang.github.io/Everunfold-Frontend/usage/index.html)。手册源码和发布方法见 [RST 文档](docs/source/index.rst) 与 [文档构建说明](docs/source/release/documentation.rst)。技术决策与交接记录见 [设计索引](docs/README.md)。
 
+开发交接见 [AI 开发协作约定](docs/handoff/AGENTS.md)和[当前状态](docs/handoff/STATUS.md)。
+
 ## 致谢与许可
 
 - 感谢 **WordPress**。内容管理、媒体库和后台编辑流程参考了 WordPress，原项目采用 GNU GPL v2 或更新版本。 [源码仓库](https://github.com/WordPress/wordpress-develop) · [许可声明](https://wordpress.org/about/license/)

@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Agent instructions live under docs/handoff.
+  agentRules: false,
   poweredByHeader: false,
   reactStrictMode: true,
   // Keep canonical, robots and social metadata inside the initial HTML head.

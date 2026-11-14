@@ -34,7 +34,7 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 
 两个仓库应逐字节同步以下文件：
 
-- 根 `AGENTS.md`。
+- [`docs/handoff/AGENTS.md`](../handoff/AGENTS.md)。
 - `docs/README.md`。
 - 本目录 `README.md` 与两份原始附件。
 - `docs/architecture/constraints.md`。
@@ -64,7 +64,7 @@ Get-FileHash -Algorithm SHA256 docs/baseline/02_Engineering_Plan_v0.14.md
 
 修改公共规范时在当前交付同步另一仓库，检查文件 SHA256 相同，并在两仓库状态中记录同步结果。若另一仓库暂时不可访问，明确记为待同步及目标版本，不能声称已一致。两个仓库分别提交，不要求提交哈希相同。
 
-`everunfold-frontend/AGENTS.md` 中由 Next.js 开发服务器自动维护的 `<!-- BEGIN:nextjs-agent-rules -->` 区块是该仓库工具专属内容，不复制到后端。根 `AGENTS.md` 的其余共享内容仍须保持一致；比较时先移除该区块。
+两仓库的 `docs/handoff/AGENTS.md` 逐字节同步。前端通过 `agentRules: false` 关闭 Next.js 自动生成根目录协作文件的行为。接手时从仓库 README 打开交接文件。
 
 根 README、锁文件、代码、检查结果、`docs/handoff/STATUS.md` 与仓库专属设计各自维护，不要求相同。两个根 `config.example.toml` 分别对应各自角色，必须不同；共同参数含义以后端契约与基线为准。版本化契约只由后端发布，前端生成内容不是第二份可编辑契约源。
 

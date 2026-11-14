@@ -1,5 +1,10 @@
 # 前端交接状态
 
+## AI 开发协作入口
+
+- 前后端的开发协作约定已统一移至 [AGENTS.md](AGENTS.md)，由仓库 README 和文档索引链接。两份约定内容相同。
+- `next.config.ts` 设置 `agentRules: false`。在 Node.js 22.15.1 和 Next.js 16.4.3 的隔离开发实例中确认，检测到 Codex 时启动也不会生成根目录 `AGENTS.md`，交接目录里的文件保持原样。
+
 ## 预发布 README
 
 - 两仓库互链，并提供已上线的 GitHub Pages 手册。README 说明架构由项目发起人确定、AI 辅助开发及预发布初测状态。
