@@ -238,13 +238,21 @@ export function parseConfiguration(
   )
     throw new ConfigurationError("settings.source_epoch 必须为后端来源 UUID");
   const receiverHost = string(
-    settings.receiver_host ?? "127.0.0.1",
+    environment.FRONTEND_RECEIVER_HOST ?? settings.receiver_host ?? "127.0.0.1",
     "settings.receiver_host",
   );
   if (!isIP(receiverHost))
     throw new ConfigurationError("settings.receiver_host 必须为监听 IP");
+  const receiverPortOverride = environment.FRONTEND_RECEIVER_PORT;
+  if (
+    receiverPortOverride !== undefined &&
+    !/^[0-9]+$/.test(receiverPortOverride)
+  )
+    throw new ConfigurationError("FRONTEND_RECEIVER_PORT 必须为十进制端口号");
   const receiverPort = number(
-    settings.receiver_port,
+    receiverPortOverride === undefined
+      ? settings.receiver_port
+      : Number(receiverPortOverride),
     3001,
     "settings.receiver_port",
   );

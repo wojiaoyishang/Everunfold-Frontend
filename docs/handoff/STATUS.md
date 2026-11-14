@@ -1,5 +1,11 @@
 # 前端交接状态
 
+## 源码挂载 Docker 部署
+
+- [Docker 指南](../../docker/README.md)提供前端运行镜像与一次性构建器。源码挂到 `/workspace`，在独立卷编译和缓存。成功构建放入版本目录，通过 `FRONTEND_RELEASE` 切换。插件包和公开快照独立持久化。
+- Compose 配置、入口语法、接收器环境变量定向测试通过。模拟挂载路径验证了冷构建、缓存复用、运行期间独立安装插件、真实接收器应用测试快照后就绪从 503 到 200，以及两个进程响应退出。
+- 当前环境没有 Docker daemon，镜像构建和 Compose 两端联调仍待在部署机验证。共享设计见 [ADR 0150](../decisions/0150-source-mounted-docker.md)。
+
 ## AI 开发协作入口
 
 - 前后端的开发协作约定已统一移至 [AGENTS.md](AGENTS.md)，由仓库 README 和文档索引链接。两份约定内容相同。

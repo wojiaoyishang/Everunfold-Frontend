@@ -61,3 +61,7 @@ Thumbs.db
 # Local Sphinx output
 /_build/
 .venv-docs/
+
+# Docker instance inputs
+/docker/runtime.env
+/docker/instance/

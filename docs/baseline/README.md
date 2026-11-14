@@ -1837,3 +1837,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0149-ai-writing-providers.md` | `ADR0149-1` | `9477c5984ddf3eddba4931ccf485f917a4b1bafa4cbd253552418ce705b17921` |
+
+## 源码挂载的双容器部署
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0150-source-mounted-docker.md` | `ADR0150-1` | `a012973d4289601024b727ff6e8117946430f15a7ce1acceeb409abd32f20546` |

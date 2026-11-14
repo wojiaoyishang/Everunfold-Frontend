@@ -9,6 +9,24 @@ const base = {
   backend: { allowed_peer_ips: ["127.0.0.1", "::1", "10.0.0.0/24"] },
   cache: { directory: "./var/public-snapshots" },
 };
+test("receiver environment overrides the instance listener and validates the port", () => {
+  const input = {
+    ...base,
+    settings: { receiver_host: "127.0.0.1", receiver_port: 3010 },
+  };
+  const config = parseConfiguration(input, {
+    FRONTEND_RECEIVER_HOST: "0.0.0.0",
+    FRONTEND_RECEIVER_PORT: "3001",
+  });
+  assert.equal(config.settings.receiverHost, "0.0.0.0");
+  assert.equal(config.settings.receiverPort, 3001);
+  assert.equal(parseConfiguration(input).settings.receiverPort, 3010);
+  for (const port of ["", "3e3", "65536"]) {
+    assert.throws(() =>
+      parseConfiguration(input, { FRONTEND_RECEIVER_PORT: port }),
+    );
+  }
+});
 test("configuration uses an explicit public address while internal overrides stay separate", () => {
   const config = parseConfiguration(
     {

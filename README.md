@@ -38,6 +38,8 @@ Everunfold 是一个 **vibe coding 项目**。项目发起人 [@wojiaoyishang](h
 
 ## 本地开发
 
+源码挂载与容器部署见 [Docker 指南](docker/README.md)。
+
 使用 Node.js 22 和 npm 10，具体版本见 [`.nvmrc`](.nvmrc)。首次运行时，将前端和后端检出到同一父目录，按 [本地快速开始](https://wojiaoyishang.github.io/Everunfold-Frontend/welcome/quickstart.html) 启动后端并配置节点。前端按 [`contracts.lock.json`](contracts.lock.json) 从指定后端提交生成客户端契约。
 
 在本仓库根目录安装依赖，再按 [配置示例](config.example.toml) 创建本地 `config.toml`，填写地址、节点 ID、来源 UUID 和凭据引用。

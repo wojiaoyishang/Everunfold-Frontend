@@ -1,0 +1,68 @@
+name: everunfold-frontend
+
+x-frontend-image: &frontend-image
+  image: ${FRONTEND_IMAGE:-everunfold-frontend:node22}
+  build:
+    context: .
+    dockerfile: Dockerfile
+
+x-frontend-source: &frontend-source
+  type: bind
+  source: ${FRONTEND_SOURCE_DIR:-..}
+  target: /workspace
+  read_only: true
+  bind:
+    create_host_path: false
+
+services:
+  frontend:
+    <<: *frontend-image
+    init: true
+    restart: unless-stopped
+    stop_grace_period: ${FRONTEND_STOP_GRACE_PERIOD:-35s}
+    env_file: ${FRONTEND_ENV_FILE:-./runtime.env}
+    environment:
+      FRONTEND_RELEASE: "${FRONTEND_RELEASE:-}"
+      FRONTEND_PORT: "${FRONTEND_WEB_PORT:-3000}"
+    ports:
+      - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PUBLISH_PORT:-3000}:${FRONTEND_WEB_PORT:-3000}"
+    volumes:
+      - *frontend-source
+      - type: bind
+        source: ${FRONTEND_CONFIG_DIR:-./instance}
+        target: /etc/everunfold
+        read_only: true
+        bind:
+          create_host_path: false
+      - releases:/releases
+      - plugins:/plugins:ro
+      - data:/data
+    networks:
+      everunfold:
+        aliases: [everunfold-frontend]
+
+  builder:
+    <<: *frontend-image
+    profiles: [build]
+    init: true
+    environment:
+      FRONTEND_BUILD_WORKERS: "${FRONTEND_BUILD_WORKERS:-2}"
+      NODE_OPTIONS: "${FRONTEND_BUILD_NODE_OPTIONS:---max-old-space-size=3072}"
+    healthcheck:
+      disable: true
+    volumes:
+      - *frontend-source
+      - build:/build
+      - releases:/releases
+      - plugins:/plugins
+
+volumes:
+  build:
+  releases:
+  plugins:
+  data:
+
+networks:
+  everunfold:
+    external: true
+    name: ${EVERUNFOLD_NETWORK:-everunfold}
