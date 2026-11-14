@@ -716,7 +716,9 @@ function BuilderControl({
   else if (field.type === "html" || field.type === "markdown")
     input = (
       <div className={styles.controlStack}>
-        {text && <p className={styles.sourceExcerpt}>{text}</p>}
+        {field.type === "markdown" && text && (
+          <p className={styles.sourceExcerpt}>{text}</p>
+        )}
         <div className={inspectorStyles.sourceActions}>
           <Button
             id={id}
