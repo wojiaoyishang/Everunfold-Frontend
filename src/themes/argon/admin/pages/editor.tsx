@@ -57,7 +57,7 @@ import { useEditorResources } from "@/core/content-management/use-editor-resourc
 import { customPageTypeId } from "@/core/pages/registration";
 import styles from "./pages.module.css";
 import editorColumns from "../components/editor-columns.module.css";
-import { PageLanguages } from "./languages";
+import { NewPageLanguage, PageLanguages } from "./languages";
 import { SeoDisclosure, SeoFieldsEditor } from "../components/seo-fields";
 import { PageCodeFields } from "./code-fields";
 import { usePageAction } from "./feedback";
@@ -554,6 +554,21 @@ export function ManagedPageEditor({
                 />
               </>
             )}
+          </fieldset>
+          {saved && (!compact || saved.translations) && (
+            <div data-live-part="settings">
+              <PageLanguages
+                page={saved}
+                compact={compact}
+                disabled={dirty || action.busy}
+                onChanged={refreshPage}
+              />
+            </div>
+          )}
+          <fieldset className="account-fieldset" disabled={disabled}>
+            {!saved && source === "custom" && (
+              <NewPageLanguage value={language} onChange={setLanguage} />
+            )}
             <div
               className={`admin-density-controls ${styles.pageEditControls}`}
               data-compact={compact || undefined}
@@ -670,11 +685,7 @@ export function ManagedPageEditor({
               )}
             </fieldset>
             <aside
-              className={
-                compact
-                  ? undefined
-                  : `${editorColumns.inspector} ${styles.editorSettings}`
-              }
+              className={compact ? undefined : editorColumns.inspector}
               aria-label={t("内容设置")}
               data-live-part="settings"
             >
@@ -697,11 +708,6 @@ export function ManagedPageEditor({
                         {permalink}
                       </>
                     )
-                  }
-                  language={
-                    !saved && source === "custom"
-                      ? { value: language, onChange: setLanguage }
-                      : undefined
                   }
                   seo={
                     definition?.seo_editable !== false && (
@@ -760,29 +766,6 @@ export function ManagedPageEditor({
                   }
                 />
               </fieldset>
-              {saved &&
-                (compact ? (
-                  saved.translations && (
-                    <PageSettingsGroup
-                      title="语言版本"
-                      initiallyOpen={false}
-                      compact
-                    >
-                      <PageLanguages
-                        page={saved}
-                        compact
-                        disabled={dirty || action.busy}
-                        onChanged={refreshPage}
-                      />
-                    </PageSettingsGroup>
-                  )
-                ) : (
-                  <PageLanguages
-                    page={saved}
-                    disabled={dirty || action.busy}
-                    onChanged={refreshPage}
-                  />
-                ))}
             </aside>
           </div>
         </Form>

@@ -28,7 +28,39 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Icon } from "../../components/icon";
 import { PageLanguageMenu } from "./language-menu";
 import { usePageAction, usePageErrorToast } from "./feedback";
+import translationStyles from "../content/translations.module.css";
 import styles from "./pages.module.css";
+
+export function NewPageLanguage({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const catalog = useLanguageCatalog();
+  return (
+    <div className={`admin-density-controls ${translationStyles.bar}`}>
+      <span>
+        <Icon name="languages" />
+        <UiText text="内容语言" />
+      </span>
+      <Select
+        name="page-language"
+        label="内容语言"
+        value={value}
+        onValueChange={onChange}
+        options={catalog.languages
+          .filter((item) => item.enabled)
+          .map((item) => ({
+            value: item.code,
+            label: item.name,
+            flag: item.flag,
+          }))}
+      />
+    </div>
+  );
+}
 
 export function PageLanguages({
   page,
@@ -46,6 +78,7 @@ export function PageLanguages({
     actor = useAdminAccount(),
     t = useT();
   const action = usePageAction();
+  const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false),
     [closing, setClosing] = useState(false);
   const [language, setLanguage] = useState(""),
@@ -60,6 +93,14 @@ export function PageLanguages({
   } | null>(null);
   const group = page.translations;
   usePageErrorToast(adding && mode === "link" ? loadError : "");
+  useEffect(() => {
+    const show = () => {
+      if (location.hash === "#page-languages") setOpen(true);
+    };
+    show();
+    window.addEventListener("hashchange", show);
+    return () => window.removeEventListener("hashchange", show);
+  }, []);
   useEffect(() => {
     if (!adding || mode !== "link") return;
     const controller = new AbortController();
@@ -77,7 +118,7 @@ export function PageLanguages({
   }, [adding, mode, baseUrl]);
   if (!group)
     return (
-      <p className={styles.help}>
+      <p className={translationStyles.bar}>
         <UiText text="此页面的多语言由前端代码管理。" />
       </p>
     );
@@ -91,6 +132,7 @@ export function PageLanguages({
     : (available[0]?.code ?? "");
   const locked = disabled || action.busy || !can(actor, "pages:write");
   const canPublish = can(actor, "pages:publish");
+  const currentMember = group.members.find((member) => member.id === page.id);
   const inputs = (member = page.id) => ({
     id: member,
     expected_revision: group.revision,
@@ -116,168 +158,207 @@ export function PageLanguages({
       (item.translations?.members.length ?? 0) === 1,
   );
   return (
-    <section
-      className={`account-card admin-density-controls ${styles.languagePanel}`}
+    <div
+      className={styles.languageEditor}
       id="page-languages"
       data-compact={compact || undefined}
     >
-      <div className={styles.languageHeader}>
-        {!compact && (
-          <h2>
-            <UiText text="语言版本" />
-          </h2>
-        )}
-        <div className={styles.languageHeaderActions}>
-          <PageLanguageMenu group={group} current={page.id} inPanel />
-          {available.length > 0 && (
-            <Button
-              className={styles.languageIcon}
-              aria-label={t("添加语言版本")}
-              title={t("添加语言版本")}
-              disabled={locked || page.archived}
-              onClick={() => {
-                setAdding(true);
-                setClosing(false);
-                setTarget("");
-                setLoadError("");
-              }}
-            >
-              <Icon name="plus" />
-            </Button>
-          )}
+      <div className={`admin-density-controls ${translationStyles.bar}`}>
+        <span>
+          <Icon name="languages" />
+          <LanguageLabel
+            code={currentMember?.language ?? page.language ?? undefined}
+          />
+          <UiText text={currentMember?.is_original ? " · 原文" : " · 译文"} />
+        </span>
+        <PageLanguageMenu
+          group={group}
+          current={page.id}
+          onManage={() => setOpen(true)}
+        />
+        <Button
+          className={translationStyles.manage}
+          aria-expanded={open}
+          aria-controls="page-language-management"
+          onClick={() => setOpen(!open)}
+        >
+          <UiText text="管理语言与译文" />
+        </Button>
+      </div>
+      <div className={translationStyles.reveal} data-open={open} inert={!open}>
+        <div>
+          <section
+            className={`admin-density-controls ${translationStyles.panel} ${styles.languagePanel}`}
+            id="page-language-management"
+            aria-label={t("语言与译文")}
+          >
+            <div className={styles.languageHeader}>
+              <h2>
+                <UiText text="语言与译文" />
+              </h2>
+              {available.length > 0 && (
+                <Button
+                  className={styles.languageIcon}
+                  aria-label={t("添加语言版本")}
+                  title={t("添加语言版本")}
+                  disabled={locked || page.archived}
+                  onClick={() => {
+                    setAdding(true);
+                    setClosing(false);
+                    setTarget("");
+                    setLoadError("");
+                  }}
+                >
+                  <Icon name="plus" />
+                </Button>
+              )}
+            </div>
+            <ul className={styles.languageList}>
+              {group.members.map((member) => {
+                const current = member.id === page.id;
+                const canUnlink = !member.archived && !member.is_original;
+                return (
+                  <li className={styles.languageMember} key={member.id}>
+                    <div className={styles.languageInfo}>
+                      <div className={styles.languageName}>
+                        <LanguageLabel code={member.language} />
+                        {member.is_original && <UiText text=" · 原文" />}
+                      </div>
+                      <small className={styles.languageMeta}>
+                        {!current && (
+                          <span title={member.title}>{member.title}</span>
+                        )}
+                        <UiText
+                          text={
+                            member.archived
+                              ? "已回收"
+                              : member.needs_review
+                                ? "待检查"
+                                : member.enabled
+                                  ? "已启用"
+                                  : "草稿"
+                          }
+                        />
+                      </small>
+                    </div>
+                    {(!current ||
+                      member.enabled ||
+                      canUnlink ||
+                      canPublish) && (
+                      <ActionPopover
+                        label={`${t("操作")} · ${member.language.toUpperCase()}`}
+                        className={styles.languageIcon}
+                        panelClassName={styles.languageMenu}
+                        panelWidth={180}
+                        triggerContent={<Icon name="more" />}
+                      >
+                        {(closeMenu) => (
+                          <>
+                            {!current && (
+                              <RouteLink
+                                href={`/admin/pages/${member.id}`}
+                                onClick={closeMenu}
+                              >
+                                <Icon name="edit" />
+                                <UiText text="编辑" />
+                              </RouteLink>
+                            )}
+                            {member.enabled && (
+                              <RouteLink
+                                href={member.path}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={closeMenu}
+                              >
+                                <Icon name="external" />
+                                <UiText text="在前台打开" />
+                              </RouteLink>
+                            )}
+                            {canUnlink && member.needs_review && (
+                              <Button
+                                disabled={locked}
+                                onClick={() => {
+                                  closeMenu();
+                                  const input = inputs(member.id);
+                                  void run(
+                                    "review",
+                                    input,
+                                    (operation_id, signal) =>
+                                      reviewPageTranslation(
+                                        baseUrl,
+                                        { ...input, operation_id },
+                                        csrfToken,
+                                        { signal },
+                                      ),
+                                  );
+                                }}
+                              >
+                                <Icon name="check" />
+                                <UiText text="已核对" />
+                              </Button>
+                            )}
+                            {canUnlink && (
+                              <Button
+                                disabled={locked}
+                                onClick={() => {
+                                  closeMenu();
+                                  setConfirm({ action: "unlink", member });
+                                }}
+                              >
+                                <Icon name="link" />
+                                <UiText text="解除关联" />
+                              </Button>
+                            )}
+                            {canPublish && (
+                              <Button
+                                disabled={locked}
+                                data-danger={member.archived ? undefined : true}
+                                onClick={() => {
+                                  closeMenu();
+                                  setConfirm({
+                                    action: member.archived
+                                      ? "restore"
+                                      : "remove",
+                                    member,
+                                  });
+                                }}
+                              >
+                                <Icon
+                                  name={member.archived ? "undo" : "trash"}
+                                />
+                                <UiText
+                                  text={member.archived ? "恢复" : "回收此语言"}
+                                />
+                              </Button>
+                            )}
+                          </>
+                        )}
+                      </ActionPopover>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            {available.length === 0 &&
+              can(actor, "settings:read") &&
+              !page.archived && (
+                <p className={styles.languageNote}>
+                  <RouteLink
+                    className={styles.languageSettingsLink}
+                    href="/admin/settings#settings-languages"
+                  >
+                    <UiText text="在站点设置中启用更多语言" />
+                  </RouteLink>
+                </p>
+              )}
+            {disabled && (
+              <p className={styles.languageNote}>
+                <UiText text="请先保存当前修改，再管理语言关联。" />
+              </p>
+            )}
+          </section>
         </div>
       </div>
-      <ul className={styles.languageList}>
-        {group.members.map((member) => {
-          const current = member.id === page.id;
-          const canUnlink = !member.archived && !member.is_original;
-          return (
-            <li className={styles.languageMember} key={member.id}>
-              <div className={styles.languageInfo}>
-                <div className={styles.languageName}>
-                  <LanguageLabel code={member.language} />
-                  {member.is_original && <UiText text=" · 原文" />}
-                </div>
-                <small className={styles.languageMeta}>
-                  {!current && <span title={member.title}>{member.title}</span>}
-                  <UiText
-                    text={
-                      member.archived
-                        ? "已回收"
-                        : member.needs_review
-                          ? "待检查"
-                          : member.enabled
-                            ? "已启用"
-                            : "草稿"
-                    }
-                  />
-                </small>
-              </div>
-              {(!current || member.enabled || canUnlink || canPublish) && (
-                <ActionPopover
-                  label={`${t("操作")} · ${member.language.toUpperCase()}`}
-                  className={styles.languageIcon}
-                  panelClassName={styles.languageMenu}
-                  panelWidth={180}
-                  triggerContent={<Icon name="more" />}
-                >
-                  {(closeMenu) => (
-                    <>
-                      {!current && (
-                        <RouteLink
-                          href={`/admin/pages/${member.id}`}
-                          onClick={closeMenu}
-                        >
-                          <Icon name="edit" />
-                          <UiText text="编辑" />
-                        </RouteLink>
-                      )}
-                      {member.enabled && (
-                        <RouteLink
-                          href={member.path}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={closeMenu}
-                        >
-                          <Icon name="external" />
-                          <UiText text="在前台打开" />
-                        </RouteLink>
-                      )}
-                      {canUnlink && member.needs_review && (
-                        <Button
-                          disabled={locked}
-                          onClick={() => {
-                            closeMenu();
-                            const input = inputs(member.id);
-                            void run("review", input, (operation_id, signal) =>
-                              reviewPageTranslation(
-                                baseUrl,
-                                { ...input, operation_id },
-                                csrfToken,
-                                { signal },
-                              ),
-                            );
-                          }}
-                        >
-                          <Icon name="check" />
-                          <UiText text="已核对" />
-                        </Button>
-                      )}
-                      {canUnlink && (
-                        <Button
-                          disabled={locked}
-                          onClick={() => {
-                            closeMenu();
-                            setConfirm({ action: "unlink", member });
-                          }}
-                        >
-                          <Icon name="link" />
-                          <UiText text="解除关联" />
-                        </Button>
-                      )}
-                      {canPublish && (
-                        <Button
-                          disabled={locked}
-                          data-danger={member.archived ? undefined : true}
-                          onClick={() => {
-                            closeMenu();
-                            setConfirm({
-                              action: member.archived ? "restore" : "remove",
-                              member,
-                            });
-                          }}
-                        >
-                          <Icon name={member.archived ? "undo" : "trash"} />
-                          <UiText
-                            text={member.archived ? "恢复" : "回收此语言"}
-                          />
-                        </Button>
-                      )}
-                    </>
-                  )}
-                </ActionPopover>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      {available.length === 0 &&
-        can(actor, "settings:read") &&
-        !page.archived && (
-          <p className={styles.languageNote}>
-            <RouteLink
-              className={styles.languageSettingsLink}
-              href="/admin/settings#settings-languages"
-            >
-              <UiText text="在站点设置中启用更多语言" />
-            </RouteLink>
-          </p>
-        )}
-      {disabled && (
-        <p className={styles.languageNote}>
-          <UiText text="请先保存当前修改，再管理语言关联。" />
-        </p>
-      )}
       {adding && (
         <Modal
           className={`admin-density-controls ${styles.languageDialog}`}
@@ -475,6 +556,6 @@ export function PageLanguages({
         }}
         onConfirmed={() => setConfirm(null)}
       />
-    </section>
+    </div>
   );
 }

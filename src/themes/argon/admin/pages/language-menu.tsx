@@ -3,6 +3,7 @@ import type { PageTranslationCatalog } from "@/core/contracts/pages";
 import { UiText, useT } from "@/core/i18n/provider";
 import { LanguageLabel } from "../../components/language-label";
 import { ActionPopover } from "../../components/ui/action-popover";
+import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
 import styles from "../content/translations.module.css";
@@ -12,11 +13,11 @@ import pageStyles from "./pages.module.css";
 export function PageLanguageMenu({
   group,
   current,
-  inPanel = false,
+  onManage,
 }: {
   group: PageTranslationCatalog;
   current: string;
-  inPanel?: boolean;
+  onManage?: () => void;
 }) {
   const t = useT();
   const code = group.members.find((member) => member.id === current)?.language;
@@ -24,21 +25,10 @@ export function PageLanguageMenu({
     <ActionPopover
       label={t("切换编辑语言")}
       panelWidth={300}
-      className={inPanel ? pageStyles.languageSelector : styles.trigger}
-      panelClassName={
-        inPanel
-          ? `${styles.popover} ${pageStyles.languageSwitcher}`
-          : styles.popover
-      }
+      className={styles.trigger}
+      panelClassName={`${styles.popover} ${pageStyles.languageSwitcher}`}
       triggerContent={
-        inPanel ? (
-          <>
-            <LanguageLabel code={code} compact />
-            <Icon name="chevron-down" />
-          </>
-        ) : (
-          <LanguageTrigger code={code} count={group.members.length} />
-        )
+        <LanguageTrigger code={code} count={group.members.length} />
       }
     >
       {(close) => (
@@ -73,14 +63,27 @@ export function PageLanguageMenu({
               </small>
             </RouteLink>
           ))}
-          <RouteLink
-            className={styles.member}
-            href={`/admin/pages/${current}#page-languages`}
-            onClick={close}
-          >
-            <Icon name="settings" />
-            <UiText text="管理语言" />
-          </RouteLink>
+          {onManage ? (
+            <Button
+              className={styles.member}
+              onClick={() => {
+                close();
+                onManage();
+              }}
+            >
+              <Icon name="settings" />
+              <UiText text="管理语言" />
+            </Button>
+          ) : (
+            <RouteLink
+              className={styles.member}
+              href={`/admin/pages/${current}#page-languages`}
+              onClick={close}
+            >
+              <Icon name="settings" />
+              <UiText text="管理语言" />
+            </RouteLink>
+          )}
         </div>
       )}
     </ActionPopover>

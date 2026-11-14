@@ -1,11 +1,10 @@
 "use client";
 
-import { useId, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { PageValue } from "@/core/contracts/pages";
-import { UiText, useLanguageCatalog, useT } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 import { AccountField } from "../../account/fields";
 import { Icon } from "../../components/icon";
-import { Select } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
 import { CaptchaOverrides } from "../components/captcha-overrides";
 import styles from "./page-settings.module.css";
@@ -71,7 +70,6 @@ export function PageSettings({
   change,
   disabled,
   compact,
-  language,
   compactIdentity,
   seo,
   extra,
@@ -80,13 +78,10 @@ export function PageSettings({
   change: (patch: Partial<PageValue>) => void;
   disabled: boolean;
   compact: boolean;
-  language?: { value: string; onChange: (value: string) => void };
   compactIdentity?: ReactNode;
   seo?: ReactNode;
   extra?: ReactNode;
 }) {
-  const catalog = useLanguageCatalog();
-  const languageId = useId();
   return (
     <div
       className={`admin-density-controls ${styles.settings}`}
@@ -95,27 +90,6 @@ export function PageSettings({
       <PageSettingsGroup title="基本信息">
         {compactIdentity && (
           <div className={styles.identity}>{compactIdentity}</div>
-        )}
-        {language && (
-          <div className={styles.language}>
-            <label htmlFor={languageId}>
-              <UiText text="内容语言" />
-            </label>
-            <Select
-              id={languageId}
-              name="page-language"
-              label="内容语言"
-              value={language.value}
-              onValueChange={language.onChange}
-              options={catalog.languages
-                .filter((item) => item.enabled)
-                .map((item) => ({
-                  value: item.code,
-                  label: item.name,
-                  flag: item.flag,
-                }))}
-            />
-          </div>
         )}
         <AccountField
           label="页面说明"

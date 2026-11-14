@@ -313,29 +313,24 @@
   display: block;
   max-width: 240px;
 }
+.languageEditor {
+  min-inline-size: 0;
+  scroll-margin-top: calc(var(--admin-header-dock-height, 0px) + 8px);
+}
+.languageEditor[data-compact] {
+  padding: 0 6px;
+}
+.languageEditor[data-compact] > div:first-child {
+  margin-block: 0 8px;
+}
 .languagePanel {
   --page-language-action-size: max(
     28px,
     calc(var(--admin-control-height) - 6px),
     var(--admin-touch-target)
   );
-  scroll-margin-top: calc(
-    var(--admin-header-height, 64px) + var(--admin-header-dock-height, 0px) +
-      20px
-  );
-}
-.languagePanel:global(.account-card):not([data-compact]) {
-  /* Match the adjacent settings cards in both density modes. */
-  padding: min(10px, var(--admin-label-gap))
-    min(16px, var(--admin-panel-padding));
-}
-.languagePanel .languageHeader > h2 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 650;
 }
 .languageHeader,
-.languageHeaderActions,
 .languageActions {
   display: flex;
   align-items: center;
@@ -345,10 +340,12 @@
 .languageHeader {
   justify-content: space-between;
 }
-.languageHeaderActions {
-  margin-inline-start: auto;
+.languagePanel .languageHeader > h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 650;
 }
-.languagePanel :is(.languageIcon, .languageSelector) {
+.languageIcon {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -364,28 +361,15 @@
     background var(--admin-motion-fast),
     color var(--admin-motion-fast);
 }
-.languagePanel .languageSelector {
-  gap: 4px;
-  padding-inline: 6px;
-  font-size: 11px;
-  white-space: nowrap;
-}
-.languagePanel
-  :is(.languageIcon, .languageSelector):is(:hover, [aria-expanded="true"]):not(
-    :disabled
-  ) {
+.languageIcon:is(:hover, [aria-expanded="true"]):not(:disabled) {
   background: var(--admin-accent-soft);
   color: var(--admin-accent);
 }
-.languagePanel :is(.languageIcon, .languageSelector) > svg,
+.languageIcon > svg,
 .languageMenu svg {
   flex: none;
   inline-size: 15px;
   block-size: 15px;
-}
-.languagePanel .languageSelector > svg {
-  inline-size: 12px;
-  block-size: 12px;
 }
 .languageList {
   margin: 3px 0 0;
@@ -432,7 +416,7 @@
 .languageMenu {
   padding: 4px;
 }
-.languageSwitcher a {
+.languageSwitcher :is(a, button) {
   min-block-size: max(var(--admin-control-height), var(--admin-touch-target));
 }
 .languageMenu > :is(a, button) {
@@ -627,15 +611,6 @@
 .editorLayout .editorPane > :is(.sourceCard, .pageOptionsCard) {
   margin: 0;
   padding: min(16px, var(--admin-panel-padding));
-}
-
-.editorSettings {
-  display: grid;
-  gap: min(16px, var(--admin-panel-gap));
-}
-
-.editorSettings > .languagePanel {
-  margin: 0;
 }
 
 .editOption {

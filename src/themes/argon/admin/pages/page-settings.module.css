@@ -72,16 +72,10 @@
     var(--page-settings-padding, 16px);
 }
 
-.identity,
-.language {
+.identity {
   display: grid;
   gap: 4px;
   min-inline-size: 0;
-}
-
-.language {
-  gap: 6px;
-  max-inline-size: 18rem;
 }
 
 .switches {
