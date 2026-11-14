@@ -1090,7 +1090,7 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/font-registration.md`                           | `font-registration-1`         | `c83fce15b8be12fb3980f615d6762d128c1aa60930fb448f8be83d1684c60389` |
 | `docs/development/frontend-plugins.md`                            | `frontend-plugins-7`          | `08fced8dc6f6b1b6af0faf598b97b670f27205d54132234b5b7daae8d7022465` |
 | `docs/development/settings.md`                                    | `settings-runtime-11`         | `131ab1bb5903f01f988bd0d2b050a529f4d1b354e84afee7c46782a60134b61a` |
-| `docs/development/protocol.md`                                    | `development-20`              | `3e9f07ba561e742c6d5be7b256a62852601a321cda2e6b624f4ea0c08e529e36` |
+| `docs/development/protocol.md` | `development-21` | `574e0cb5b05212153f8f38cb2d7a889148ecf58f94529367ca7235d34ee3b640` |
 | `docs/decisions/0080-minimal-paper-starter-theme.md`              | `ADR0080-2`                   | `0f7a9b020c64afdd569241fae67dbc272b3ec2028474d72e44f0c1c5bcc5f9f7` |
 | `docs/decisions/0084-theme-cards-metadata-and-settings-scroll.md` | `ADR0084-2`                   | `e39535b125f6d5103544a6e4f05eb490f52da2447a2fa884a244c241da708551` |
 | `docs/decisions/0085-shared-font-registration.md`                 | `ADR0085`                     | `60c7c469e00620f86f1ea1bc4bf0491bd3b0d45dbe445b8175d4b1e6fe63062d` |
@@ -1786,3 +1786,12 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | --- | --- | --- |
 | `docs/decisions/0140-admin-brand-and-node-deployment.md` | `ADR0140-2` | `e7cb72165a906fd3a00a2a82958b40f1f7e70ecdab7ca62de1d0784c9693df44` |
 | `docs/development/captcha.md` | `captcha-8` | `a6b35cc2cec6c03b864906c5e5b4c408f7f8effb2f574eb93b64a6b18700f6bc` |
+
+## 实时预览中的组件编辑（2026-11-14）
+
+按用户澄清，组件编排进入真实主题预览；管理页面维护元数据。沿用原组件契约。
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0142-live-component-editing.md` | `ADR0142-1` | `ccdffa603a52b6941183242e7b3fda652f417983a780847441c2273f4235103e` |
+| `docs/development/component-editor.md` | `component-editor-2` | `06f15df2fdbf37a3d21dae411434aef8a151204160ad534b0441d4b26119db02` |

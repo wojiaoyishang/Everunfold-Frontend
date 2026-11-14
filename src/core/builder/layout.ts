@@ -24,20 +24,25 @@ const positions: Record<string, string> = {
   stretch: "stretch",
 };
 
-export function builderStyle(props: BuilderValues): CSSProperties {
+export function builderStyle(
+  props: BuilderValues,
+  grid = false,
+): CSSProperties {
   const style: Record<string, string> = {};
   for (const device of ["desktop", "tablet", "mobile"] as const) {
     const suffix = device === "desktop" ? "" : "-" + device;
     const layout = layoutRecord(props, device);
-    const direction = layout.direction;
+    const direction = grid ? "grid" : layout.direction;
     if (direction === "row" || direction === "column" || direction === "grid") {
       style["--builder-display" + suffix] =
         direction === "grid" ? "grid" : "flex";
       style["--builder-direction" + suffix] =
         direction === "row" ? "row" : "column";
     }
-    if (typeof layout.columns === "number" && Number.isFinite(layout.columns)) {
-      const columns = Math.max(1, Math.min(6, Math.trunc(layout.columns)));
+    const count =
+      layout.columns ?? (grid && device === "mobile" ? 1 : undefined);
+    if (typeof count === "number" && Number.isFinite(count)) {
+      const columns = Math.max(1, Math.min(6, Math.trunc(count)));
       style["--builder-columns" + suffix] =
         "repeat(" + columns + ", minmax(0, 1fr))";
     }

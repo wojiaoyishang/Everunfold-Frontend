@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import type { Site } from "@/core/content/types";
 import type { PageArticle } from "@/core/pages/articles";
 import type { PublicManagedPage } from "@/core/contracts/pages";
-import { readManagedPage } from "@/core/contracts/pages";
+import { templatePreviewPage } from "@/core/preview/template";
+import { readManagedPage, readPageTemplate } from "@/core/contracts/pages";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { checkedPreviewPage } from "@/core/pages/preview-validation";
 import { pagesFailure } from "@/core/pages/failure";
@@ -22,8 +23,12 @@ export function ManagedPagePreview({
   id,
   site,
   articleSources,
+  liveWorkspace = false,
+  template = false,
 }: {
   id: string;
+  liveWorkspace?: boolean;
+  template?: boolean;
   site: Site | null;
   articleSources: PageArticle[];
 }) {
@@ -66,26 +71,42 @@ export function ManagedPagePreview({
         { type: "everunfold:page-preview-ready", id },
         window.location.origin,
       );
-    void readManagedPage(baseUrl, id, { signal: controller.signal })
-      .then((response) => {
-        if (!controller.signal.aborted && !received)
-          setPage({
-            ...Object.fromEntries(
-              Object.entries(response.data.value).filter(
-                ([key]) => key !== "share_image_media_id",
-              ),
-            ),
-            title: response.data.value.title,
-            path: response.data.value.path,
-            share_image_url: response.data.share_image_url,
-            media_urls: response.data.media_urls,
-            id,
-            source: response.data.source,
-            implementation_id: response.data.implementation_id,
-            implementation_version: response.data.registration?.version,
-            revision: response.data.revision,
-            enabled: true,
-          });
+    const read = async (): Promise<PublicManagedPage> => {
+      if (template) {
+        const { data } = await readPageTemplate(baseUrl, id, {
+          signal: controller.signal,
+        });
+        return templatePreviewPage(
+          id,
+          data.value,
+          data.revision,
+          data.media_urls ?? {},
+        );
+      }
+      const { data } = await readManagedPage(baseUrl, id, {
+        signal: controller.signal,
+      });
+      return {
+        ...Object.fromEntries(
+          Object.entries(data.value).filter(
+            ([key]) => key !== "share_image_media_id",
+          ),
+        ),
+        title: data.value.title,
+        path: data.value.path,
+        share_image_url: data.share_image_url,
+        media_urls: data.media_urls,
+        id,
+        source: data.source,
+        implementation_id: data.implementation_id,
+        implementation_version: data.registration?.version,
+        revision: data.revision,
+        enabled: true,
+      };
+    };
+    void read()
+      .then((next) => {
+        if (!controller.signal.aborted && !received) setPage(next);
       })
       .catch((failure) => {
         if (!controller.signal.aborted && !received)
@@ -95,7 +116,7 @@ export function ManagedPagePreview({
       controller.abort();
       window.removeEventListener("message", receive);
     };
-  }, [baseUrl, id, attempt, setStamp]);
+  }, [baseUrl, id, attempt, setStamp, template]);
   if (!site)
     return (
       <main className="admin-root admin-access" data-surface="admin">
@@ -111,43 +132,51 @@ export function ManagedPagePreview({
     );
   return (
     <BlogShell site={site} backendBaseUrl={baseUrl}>
-      <section className={`surface ${styles.bar}`}>
-        <strong>
-          <UiText text="页面预览" /> ·{" "}
-          <UiText text={live ? "编辑器输入" : "已保存草稿"} />
-        </strong>
-        <div className={styles.actions}>
-          <Button
-            className={styles.button}
-            onClick={() => setAttempt((value) => value + 1)}
-          >
-            <UiText text="刷新预览" />
-          </Button>
-          <Button
-            className={styles.button}
-            onClick={() => {
-              if (window.parent !== window) {
-                window.parent.postMessage(
-                  { type: "everunfold:focus-editor", id },
-                  window.location.origin,
-                );
-                return;
-              }
-              if (window.opener && !window.opener.closed) {
-                window.opener.focus();
-                window.close();
-                return;
-              }
-              router.push(`/admin/pages/${id}`);
-            }}
-          >
-            <UiText text="返回编辑" />
-          </Button>
-        </div>
-      </section>
-      <p className={styles.notice}>
-        <UiText text="仅有页面权限的用户可查看；预览不会启用页面，修改仅保留在编辑器中。" />
-      </p>
+      {!liveWorkspace && (
+        <>
+          <section className={`surface ${styles.bar}`}>
+            <strong>
+              <UiText text="页面预览" /> ·{" "}
+              <UiText text={live ? "编辑器输入" : "已保存草稿"} />
+            </strong>
+            <div className={styles.actions}>
+              <Button
+                className={styles.button}
+                onClick={() => setAttempt((value) => value + 1)}
+              >
+                <UiText text="刷新预览" />
+              </Button>
+              <Button
+                className={styles.button}
+                onClick={() => {
+                  if (window.parent !== window) {
+                    window.parent.postMessage(
+                      { type: "everunfold:focus-editor", id },
+                      window.location.origin,
+                    );
+                    return;
+                  }
+                  if (window.opener && !window.opener.closed) {
+                    window.opener.focus();
+                    window.close();
+                    return;
+                  }
+                  router.push(
+                    template
+                      ? `/admin/pages/templates/${id}`
+                      : `/admin/pages/${id}`,
+                  );
+                }}
+              >
+                <UiText text="返回编辑" />
+              </Button>
+            </div>
+          </section>
+          <p className={styles.notice}>
+            <UiText text="仅有页面权限的用户可查看；预览不会启用页面，修改仅保留在编辑器中。" />
+          </p>
+        </>
+      )}
       {error ? (
         <section className={`surface ${styles.state}`} role="alert">
           {error}

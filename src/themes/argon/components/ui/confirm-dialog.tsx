@@ -19,6 +19,7 @@ export interface ConfirmDialogProps {
   open: boolean;
   title: string;
   className?: string;
+  portalTarget?: Element;
   description?: ReactNode;
   children?: ReactNode;
   icon?: IconName;
@@ -57,6 +58,7 @@ export function ConfirmDialog({ open, ...props }: ConfirmDialogProps) {
 function ConfirmDialogSurface({
   title,
   className = "",
+  portalTarget,
   description,
   children,
   icon,
@@ -134,7 +136,7 @@ function ConfirmDialogSurface({
           submitOnEnter &&
           event.key === "Enter" &&
           !event.nativeEvent.isComposing &&
-          event.target instanceof HTMLInputElement
+          (event.target as HTMLElement | null)?.tagName === "INPUT"
         ) {
           event.preventDefault();
           event.stopPropagation();
@@ -211,6 +213,6 @@ function ConfirmDialogSurface({
         </Button>
       </div>
     </Dialog>,
-    surfacePortalTarget(),
+    portalTarget ?? surfacePortalTarget(),
   );
 }

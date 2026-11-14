@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import type {
   BuilderComponentDefinition,
   BuilderDevice,
@@ -25,6 +25,7 @@ import { mediaReferenceId, siteMediaReference } from "@/core/media/references";
 import { Icon } from "../../components/icon";
 import { Button, TextArea, TextField } from "../../components/ui/primitives";
 import { FormField } from "../../components/ui/form-field";
+import { RangeField } from "../../components/ui/range-field";
 import { Select } from "../../components/ui/select";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Modal } from "../../components/ui/modal";
@@ -38,11 +39,13 @@ import { ShortcodePicker } from "../shortcodes/picker";
 import { MediaPickerDialog } from "../media/media-picker-dialog";
 import { builderIcon, type BuilderRenderContext } from "../../builder/content";
 import styles from "./editor.module.css";
+import inspectorStyles from "./inspector.module.css";
 
 type FieldProps = {
   field: BuilderField;
   value?: BuilderValue;
   onChange: (value: BuilderValue) => void;
+  onInlineEdit?: () => void;
   disabled: boolean;
   context: BuilderRenderContext;
   onMedia: (item: MediaItem) => void;
@@ -62,6 +65,7 @@ export function BuilderInspector({
   onMedia,
   onChange,
   onSelect,
+  onInlineEdit,
   onCopy,
   onRemove,
   onMove,
@@ -79,6 +83,7 @@ export function BuilderInspector({
   onMedia: (item: MediaItem) => void;
   onChange: (nodes: BuilderNode[]) => void;
   onSelect: (id: string) => void;
+  onInlineEdit?: (id: string) => void;
   onCopy: (node: BuilderNode, position: BuilderPosition) => void;
   onRemove: (node: BuilderNode) => void;
   onMove: (node: BuilderNode, position: BuilderPosition) => void;
@@ -94,10 +99,6 @@ export function BuilderInspector({
         ?.fields?.find((field) => field.key === key),
     })),
   );
-  const changeNode = (
-    id: string,
-    update: (value: BuilderNode) => BuilderNode,
-  ) => onChange(updateBuilderNode(document.nodes, id, update));
   if (view === "parameters")
     return (
       <div className={styles.panelBody}>
@@ -198,174 +199,370 @@ export function BuilderInspector({
         <PanelEmpty
           icon="sliders"
           title="选择一个组件"
-          description="在画布或结构列表中选择组件，编辑内容和布局。"
+          description="在实时预览或结构列表中选择组件，编辑内容和布局。"
         />
       </div>
     );
-  const definition = definitions.get(node.type);
-  const position = siblingPosition(document.nodes, node.id);
+  return (
+    <NodeProperties
+      key={node.id}
+      node={node}
+      definition={definitions.get(node.type)}
+      position={siblingPosition(document.nodes, node.id)}
+      device={device}
+      disabled={disabled}
+      context={context}
+      onMedia={onMedia}
+      changeNode={(update) =>
+        onChange(updateBuilderNode(document.nodes, node.id, update))
+      }
+      onInlineEdit={onInlineEdit}
+      onMove={onMove}
+      onCopy={onCopy}
+      onRemove={onRemove}
+    />
+  );
+}
+
+const propertyTabs = ["content", "style", "advanced"] as const;
+type PropertyTab = (typeof propertyTabs)[number];
+
+function NodeProperties({
+  node,
+  definition,
+  position,
+  device,
+  disabled,
+  context,
+  onMedia,
+  changeNode,
+  onInlineEdit,
+  onMove,
+  onCopy,
+  onRemove,
+}: {
+  node: BuilderNode;
+  definition?: BuilderComponentDefinition;
+  position?: ReturnType<typeof siblingPosition>;
+  device: BuilderDevice;
+  disabled: boolean;
+  context: BuilderRenderContext;
+  onMedia: (item: MediaItem) => void;
+  changeNode: (update: (entry: BuilderNode) => BuilderNode) => void;
+  onInlineEdit?: (id: string) => void;
+  onMove: (node: BuilderNode, position: BuilderPosition) => void;
+  onCopy: (node: BuilderNode, position: BuilderPosition) => void;
+  onRemove: (node: BuilderNode) => void;
+}) {
+  const t = useT();
+  const id = useId();
+  const [tab, setTab] = useState<PropertyTab>("content");
+  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const index = position?.nodes.findIndex(({ id }) => id === node.id) ?? -1;
   const previous = position?.nodes[index - 1];
   const next = position?.nodes[index + 1];
   const afterNext = position?.nodes[index + 2];
   const setParameter = (key: string, parameter?: BuilderParameter) =>
-    changeNode(node.id, (entry) => {
+    changeNode((entry) => {
       const exposed = { ...entry.parameters };
       if (parameter) exposed[key] = parameter;
       else delete exposed[key];
       return { ...entry, parameters: exposed };
     });
-  return (
-    <div className={styles.panelBody}>
-      <div className={styles.selectionHeading}>
-        <span className={styles.selectionIcon}>
-          <Icon name={builderIcon(definition ?? node)} />
-        </span>
-        <h3>{definition ? <UiText text={definition.label} /> : node.type}</h3>
-      </div>
-      <div className={styles.nodeActions}>
-        <Button
-          className="admin-icon-button"
-          aria-label={t("上移组件")}
-          title={t("上移组件")}
-          disabled={disabled || !previous}
-          onClick={() =>
-            position &&
-            previous &&
-            onMove(node, { parentId: position.parentId, beforeId: previous.id })
-          }
-        >
-          <Icon name="up" />
-        </Button>
-        <Button
-          className="admin-icon-button"
-          aria-label={t("下移组件")}
-          title={t("下移组件")}
-          disabled={disabled || !next}
-          onClick={() =>
-            position &&
-            onMove(node, {
-              parentId: position.parentId,
-              beforeId: afterNext?.id ?? null,
-            })
-          }
-        >
-          <Icon name="down" />
-        </Button>
-        <Button
-          className="admin-icon-button"
-          aria-label={t("复制组件")}
-          title={t("复制组件")}
-          disabled={disabled}
-          onClick={() =>
-            position &&
-            onCopy(node, {
-              parentId: position.parentId,
-              beforeId: next?.id ?? null,
-            })
-          }
-        >
-          <Icon name="copy" />
-        </Button>
-        <ConfirmPopover
-          label="移除组件"
-          title="移除此组件？"
-          description="如果组件包含其他组件，子组件也会移除。"
-          triggerClassName="admin-icon-button"
-          disabled={disabled}
-          onConfirmed={() => onRemove(node)}
-        >
-          <Icon name="trash" />
-        </ConfirmPopover>
-      </div>
-      {definition?.fields?.length ? (
-        <div className={styles.fields}>
-          {definition.fields.map((field) => {
-            const parameter = node.parameters?.[field.key];
-            return (
-              <div className={styles.fieldGroup} key={field.key}>
-                <BuilderControl
-                  key={`${node.id}-${field.key}`}
-                  field={field}
-                  value={node.props[field.key]}
-                  onChange={(value) =>
-                    changeNode(node.id, (entry) => ({
-                      ...entry,
-                      props: { ...entry.props, [field.key]: value },
-                    }))
-                  }
+  const fields = definition?.fields ?? [];
+  const styleFields = fields.filter(
+    (field) =>
+      (node.type === "core.banner" && field.key === "image") ||
+      (node.type === "core.spacer" && field.key === "height"),
+  );
+  const contentFields = fields.filter((field) => !styleFields.includes(field));
+  const labels = {
+    content: definition?.container ? "布局" : "内容",
+    style: "样式",
+    advanced: "高级",
+  };
+  const icons = {
+    content: definition?.container ? "grid" : "edit",
+    style: "shapes",
+    advanced: "settings",
+  } as const;
+  const renderFields = (fields: readonly BuilderField[]) =>
+    fields.map((field) => {
+      const parameter = node.parameters?.[field.key];
+      return (
+        <div className={styles.fieldGroup} key={field.key}>
+          <BuilderControl
+            field={field}
+            value={node.props[field.key]}
+            onChange={(value) =>
+              changeNode((entry) => ({
+                ...entry,
+                props: { ...entry.props, [field.key]: value },
+              }))
+            }
+            disabled={disabled}
+            context={context}
+            onMedia={onMedia}
+            onInlineEdit={
+              onInlineEdit &&
+              field.key === "source" &&
+              (node.type === "core.html" || node.type === "core.markdown")
+                ? () => onInlineEdit(node.id)
+                : undefined
+            }
+          />
+          {field.expose !== false && (
+            <div className={styles.parameterControls}>
+              <label className={styles.checkbox}>
+                <Checkbox
+                  checked={Boolean(parameter)}
                   disabled={disabled}
-                  context={context}
-                  onMedia={onMedia}
-                />
-                {field.expose !== false && (
-                  <div className={styles.parameterControls}>
-                    <label className={styles.checkbox}>
-                      <Checkbox
-                        checked={Boolean(parameter)}
-                        disabled={disabled}
-                        onChange={(event) =>
-                          setParameter(
-                            field.key,
-                            event.target.checked
-                              ? {
-                                  id: builderId(),
-                                  label: t(field.label),
-                                  keep_default: true,
-                                }
-                              : undefined,
-                          )
-                        }
-                      />
-                      <UiText text="作为参数" />
-                    </label>
-                    {parameter && (
-                      <>
-                        <TextField
-                          className={styles.parameterLabel}
-                          value={parameter.label}
-                          disabled={disabled}
-                          aria-label={t("参数名称")}
-                          placeholder={t("参数名称")}
-                          maxLength={80}
-                          onChange={(event) =>
-                            setParameter(field.key, {
-                              ...parameter,
-                              label: event.target.value,
-                            })
+                  onChange={(event) =>
+                    setParameter(
+                      field.key,
+                      event.target.checked
+                        ? {
+                            id: builderId(),
+                            label: t(field.label),
+                            keep_default: true,
                           }
-                        />
-                        <label className={styles.checkbox}>
-                          <Checkbox
-                            checked={parameter.keep_default !== false}
-                            disabled={disabled}
-                            onChange={(event) =>
-                              setParameter(field.key, {
-                                ...parameter,
-                                keep_default: event.target.checked,
-                              })
-                            }
-                          />
-                          <UiText text="保留模板默认值" />
-                        </label>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                        : undefined,
+                    )
+                  }
+                />
+                <UiText text="作为参数" />
+              </label>
+              {parameter && (
+                <>
+                  <TextField
+                    className={styles.parameterLabel}
+                    value={parameter.label}
+                    disabled={disabled}
+                    aria-label={t("参数名称")}
+                    placeholder={t("参数名称")}
+                    maxLength={80}
+                    onChange={(event) =>
+                      setParameter(field.key, {
+                        ...parameter,
+                        label: event.target.value,
+                      })
+                    }
+                  />
+                  <label className={styles.checkbox}>
+                    <Checkbox
+                      checked={parameter.keep_default !== false}
+                      disabled={disabled}
+                      onChange={(event) =>
+                        setParameter(field.key, {
+                          ...parameter,
+                          keep_default: event.target.checked,
+                        })
+                      }
+                    />
+                    <UiText text="保留模板默认值" />
+                  </label>
+                </>
+              )}
+            </div>
+          )}
         </div>
-      ) : null}
-      <LayoutControls
-        key={`${node.id}-${device}`}
-        node={node}
-        container={definition?.container}
-        device={device}
-        disabled={disabled}
-        update={(value) => changeNode(node.id, () => value)}
-      />
+      );
+    });
+  const layout = (section: PropertyTab) => (
+    <LayoutControls
+      key={device}
+      node={node}
+      container={definition?.container}
+      device={device}
+      disabled={disabled}
+      section={section}
+      update={(value) => changeNode(() => value)}
+    />
+  );
+  return (
+    <div className={inspectorStyles.properties}>
+      <div
+        role="tablist"
+        aria-label={t("组件属性")}
+        className={inspectorStyles.tabs}
+      >
+        {propertyTabs.map((key, index) => (
+          <Button
+            key={key}
+            ref={(button) => {
+              tabs.current[index] = button;
+            }}
+            className={inspectorStyles.tab}
+            id={`${id}-tab-${key}`}
+            role="tab"
+            tabIndex={tab === key ? 0 : -1}
+            aria-selected={tab === key}
+            aria-controls={`${id}-panel-${key}`}
+            onClick={() => setTab(key)}
+            onKeyDown={(event) => {
+              const last = propertyTabs.length - 1;
+              const target = {
+                Home: 0,
+                End: last,
+                ArrowLeft: (index + last) % propertyTabs.length,
+                ArrowRight: (index + 1) % propertyTabs.length,
+              }[event.key];
+              if (target === undefined) return;
+              event.preventDefault();
+              setTab(propertyTabs[target]);
+              tabs.current[target]?.focus();
+            }}
+          >
+            <Icon name={icons[key]} />
+            <UiText text={labels[key]} />
+          </Button>
+        ))}
+      </div>
+      {propertyTabs.map((key) => (
+        <div
+          key={key}
+          className={inspectorStyles.tabPanel}
+          id={`${id}-panel-${key}`}
+          aria-labelledby={`${id}-tab-${key}`}
+          role="tabpanel"
+          hidden={tab !== key}
+        >
+          {key === "content" && (
+            <>
+              {definition?.container && (
+                <PropertySection title={definition.label} defaultOpen>
+                  {layout("content")}
+                </PropertySection>
+              )}
+              {contentFields.length > 0 && (
+                <PropertySection
+                  title={definition?.label ?? "组件属性"}
+                  defaultOpen
+                >
+                  <div className={styles.fields}>
+                    {renderFields(contentFields)}
+                  </div>
+                </PropertySection>
+              )}
+              {!definition?.container && !contentFields.length && (
+                <p className={inspectorStyles.empty}>
+                  <UiText
+                    text={definition ? "暂无内容设置" : "组件当前不可用"}
+                  />
+                </p>
+              )}
+            </>
+          )}
+          {key === "style" && (
+            <>
+              {styleFields.length > 0 && (
+                <PropertySection
+                  title={node.type === "core.banner" ? "背景" : "尺寸"}
+                  defaultOpen
+                >
+                  <div className={styles.fields}>
+                    {renderFields(styleFields)}
+                  </div>
+                </PropertySection>
+              )}
+              <PropertySection title="对齐" defaultOpen>
+                {layout("style")}
+              </PropertySection>
+            </>
+          )}
+          {key === "advanced" && (
+            <>
+              <PropertySection title="边距" defaultOpen>
+                {layout("advanced")}
+              </PropertySection>
+              <PropertySection title="组件操作">
+                <div className={inspectorStyles.actions}>
+                  <Button
+                    className="admin-icon-button"
+                    aria-label={t("上移组件")}
+                    title={t("上移组件")}
+                    disabled={disabled || !previous}
+                    onClick={() =>
+                      position &&
+                      previous &&
+                      onMove(node, {
+                        parentId: position.parentId,
+                        beforeId: previous.id,
+                      })
+                    }
+                  >
+                    <Icon name="up" />
+                  </Button>
+                  <Button
+                    className="admin-icon-button"
+                    aria-label={t("下移组件")}
+                    title={t("下移组件")}
+                    disabled={disabled || !next}
+                    onClick={() =>
+                      position &&
+                      onMove(node, {
+                        parentId: position.parentId,
+                        beforeId: afterNext?.id ?? null,
+                      })
+                    }
+                  >
+                    <Icon name="down" />
+                  </Button>
+                  <Button
+                    className="admin-icon-button"
+                    aria-label={t("复制组件")}
+                    title={t("复制组件")}
+                    disabled={disabled}
+                    onClick={() =>
+                      position &&
+                      onCopy(node, {
+                        parentId: position.parentId,
+                        beforeId: next?.id ?? null,
+                      })
+                    }
+                  >
+                    <Icon name="copy" />
+                  </Button>
+                  <ConfirmPopover
+                    label="移除组件"
+                    title="移除此组件？"
+                    description="如果组件包含其他组件，子组件也会移除。"
+                    triggerClassName="admin-icon-button"
+                    disabled={disabled}
+                    onConfirmed={() => onRemove(node)}
+                  >
+                    <Icon name="trash" />
+                  </ConfirmPopover>
+                </div>
+              </PropertySection>
+            </>
+          )}
+        </div>
+      ))}
     </div>
+  );
+}
+
+function PropertySection({
+  title,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  defaultOpen?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <details
+      className={inspectorStyles.section}
+      open={defaultOpen || undefined}
+    >
+      <summary>
+        <Icon name="chevron" />
+        <UiText text={title} />
+      </summary>
+      <div className={inspectorStyles.sectionBody}>{children}</div>
+    </details>
   );
 }
 
@@ -408,6 +605,7 @@ function BuilderControl({
   field,
   value,
   onChange,
+  onInlineEdit,
   disabled,
   context,
   onMedia,
@@ -429,6 +627,18 @@ function BuilderControl({
         <UiText text={field.label} />
       </label>
     );
+  if (field.type === "number")
+    return (
+      <NumericControl
+        label={field.label}
+        value={value}
+        defaultValue={field.default}
+        min={field.min}
+        max={field.max}
+        disabled={disabled}
+        onChange={onChange}
+      />
+    );
   let input;
   if (field.type === "select")
     input = (
@@ -441,26 +651,6 @@ function BuilderControl({
         onValueChange={onChange}
         disabled={disabled}
         programOptions
-      />
-    );
-  else if (field.type === "number")
-    input = (
-      <TextField
-        id={id}
-        type="number"
-        inputMode="numeric"
-        min={field.min}
-        max={field.max}
-        value={typeof value === "number" ? value : ""}
-        placeholder={
-          field.default === undefined ? undefined : String(field.default)
-        }
-        disabled={disabled}
-        onChange={(event) =>
-          onChange(
-            event.target.value === "" ? null : event.target.valueAsNumber,
-          )
-        }
       />
     );
   else if (field.type === "textarea")
@@ -532,15 +722,28 @@ function BuilderControl({
     input = (
       <div className={styles.controlStack}>
         {text && <p className={styles.sourceExcerpt}>{text}</p>}
-        <Button
-          id={id}
-          className="admin-button"
-          disabled={disabled}
-          onClick={() => setSourceEditor(true)}
-        >
-          <Icon name="edit" />
-          <UiText text="打开编辑器" />
-        </Button>
+        <div className={inspectorStyles.sourceActions}>
+          <Button
+            id={id}
+            className="admin-button"
+            disabled={disabled}
+            onClick={() => setSourceEditor(true)}
+          >
+            <Icon name="edit" />
+            <UiText text="打开编辑器" />
+          </Button>
+          {onInlineEdit && (
+            <Button
+              className="admin-icon-button"
+              aria-label={t("在画布中编辑")}
+              title={t("在画布中编辑")}
+              disabled={disabled}
+              onClick={onInlineEdit}
+            >
+              <Icon name="type" />
+            </Button>
+          )}
+        </div>
         {sourceEditor && (
           <SourceEditor
             format={field.type}
@@ -702,21 +905,135 @@ function SourceEditor({
   );
 }
 
+function isNumeric(value: BuilderValue | undefined): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function NumericControl({
+  label,
+  value,
+  defaultValue,
+  min,
+  max,
+  unit,
+  stepper = false,
+  disabled,
+  onChange,
+}: {
+  label: string;
+  value?: BuilderValue;
+  defaultValue?: BuilderValue;
+  min?: number;
+  max?: number;
+  unit?: string;
+  stepper?: boolean;
+  disabled: boolean;
+  onChange: (value: number | null) => void;
+}) {
+  const id = useId();
+  const t = useT();
+  const lower = isNumeric(min) ? min : -Infinity;
+  const upper = isNumeric(max) ? max : Infinity;
+  const constrain = (amount: number) =>
+    Math.max(lower, Math.min(upper, amount));
+  const current = constrain(
+    isNumeric(value) ? value : isNumeric(defaultValue) ? defaultValue : 0,
+  );
+  const shownValue = unit ? `${current} ${unit}` : String(current);
+  const bounded =
+    Number.isFinite(lower) && Number.isFinite(upper) && lower < upper;
+  const useSlider = bounded && !stepper;
+  const title = t(label);
+  return (
+    <div className={inspectorStyles.numeric}>
+      <div className={inspectorStyles.numericHeading}>
+        {useSlider ? (
+          <label htmlFor={id}>{title}</label>
+        ) : (
+          <span id={id}>{title}</span>
+        )}
+        {useSlider && (
+          <span className={inspectorStyles.numericValue} aria-hidden="true">
+            {shownValue}
+          </span>
+        )}
+        <Button
+          className={inspectorStyles.resetNumber}
+          disabled={disabled || !isNumeric(value)}
+          aria-label={`${title} · ${t("恢复默认")}`}
+          title={t("恢复默认")}
+          onClick={() => onChange(null)}
+        >
+          <Icon name="undo" />
+        </Button>
+      </div>
+      {useSlider ? (
+        <RangeField
+          id={id}
+          className={inspectorStyles.range}
+          min={lower}
+          max={upper}
+          step={1}
+          value={current}
+          aria-valuetext={shownValue}
+          disabled={disabled}
+          onChange={(event) => onChange(event.target.valueAsNumber)}
+        />
+      ) : (
+        <div
+          className={inspectorStyles.stepper}
+          role="group"
+          aria-labelledby={id}
+        >
+          <Button
+            aria-label={t("减少 {label}", { label: title })}
+            disabled={disabled || current <= lower}
+            onClick={() => onChange(constrain(current - 1))}
+          >
+            <Icon name="minus" />
+          </Button>
+          <output className={inspectorStyles.numericValue}>{shownValue}</output>
+          <Button
+            aria-label={t("增加 {label}", { label: title })}
+            disabled={disabled || current >= upper}
+            onClick={() => onChange(constrain(current + 1))}
+          >
+            <Icon name="plus" />
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LayoutControls({
   node,
   container,
   device,
   disabled,
+  section,
   update,
 }: {
   node: BuilderNode;
   container?: boolean;
   device: BuilderDevice;
   disabled: boolean;
+  section: PropertyTab;
   update: (value: BuilderNode) => void;
 }) {
   const id = useId();
   const layout = layoutRecord(node.props, device);
+  const fixedGrid = node.type === "core.grid";
+  const inheritedNumeric = (name: string, fallback: number) => {
+    if (device === "desktop") return fallback;
+    const tablet =
+      device === "mobile"
+        ? layoutRecord(node.props, "tablet")[name]
+        : undefined;
+    if (isNumeric(tablet)) return tablet;
+    const desktop = layoutRecord(node.props, "desktop")[name];
+    return isNumeric(desktop) ? desktop : fallback;
+  };
   const key = device === "desktop" ? "layout" : device;
   const direction =
     typeof layout.direction === "string" ? layout.direction : "";
@@ -733,11 +1050,8 @@ function LayoutControls({
     { value: "grid", label: "网格" },
   ];
   return (
-    <div className={styles.layoutControls}>
-      <h3>
-        <UiText text="布局" />
-      </h3>
-      {container && (
+    <div className={styles.fields}>
+      {section === "content" && container && !fixedGrid && (
         <FormField id={`${id}-direction`} label="排列方向">
           <Select
             id={`${id}-direction`}
@@ -751,74 +1065,65 @@ function LayoutControls({
           />
         </FormField>
       )}
-      {container &&
-        (direction === "grid" || (device === "tablet" && !direction)) && (
-          <FormField id={`${id}-columns`} label="网格列数">
-            <TextField
-              id={`${id}-columns`}
-              type="number"
-              min={1}
-              max={6}
-              placeholder="2"
-              value={typeof layout.columns === "number" ? layout.columns : ""}
-              onChange={(event) =>
-                set(
-                  "columns",
-                  event.target.value === "" ? null : event.target.valueAsNumber,
-                )
-              }
-              disabled={disabled}
-            />
-          </FormField>
+      {section === "content" &&
+        container &&
+        (fixedGrid ||
+          direction === "grid" ||
+          (device === "tablet" && !direction)) && (
+          <NumericControl
+            label="网格列数"
+            value={layout.columns}
+            defaultValue={
+              fixedGrid && device === "mobile"
+                ? 1
+                : inheritedNumeric("columns", 2)
+            }
+            min={1}
+            max={6}
+            stepper
+            disabled={disabled}
+            onChange={(value) => set("columns", value)}
+          />
         )}
-      <FormField id={`${id}-align`} label="对齐">
-        <Select
-          id={`${id}-align`}
-          name={`${id}-align`}
-          label="对齐"
-          value={typeof layout.align === "string" ? layout.align : ""}
-          onValueChange={(value) => set("align", value)}
-          options={[
-            { value: "", label: "默认对齐" },
-            { value: "start", label: "起始" },
-            { value: "center", label: "居中" },
-            { value: "end", label: "末端" },
-            ...(container ? [{ value: "stretch", label: "拉伸" }] : []),
-          ]}
-          disabled={disabled}
-          programOptions
-        />
-      </FormField>
+      {section === "style" && (
+        <FormField id={`${id}-align`} label="对齐方式">
+          <Select
+            id={`${id}-align`}
+            name={`${id}-align`}
+            label="对齐方式"
+            value={typeof layout.align === "string" ? layout.align : ""}
+            onValueChange={(value) => set("align", value)}
+            options={[
+              { value: "", label: "默认对齐" },
+              { value: "start", label: "起始" },
+              { value: "center", label: "居中" },
+              { value: "end", label: "末端" },
+              ...(container ? [{ value: "stretch", label: "拉伸" }] : []),
+            ]}
+            disabled={disabled}
+            programOptions
+          />
+        </FormField>
+      )}
       {layoutFields
-        .filter((field) => container || field.key !== "gap")
-        .map((field) => {
-          const fieldValue = layout[field.key];
-          return (
-            <FormField
-              id={`${id}-${field.key}`}
-              key={field.key}
-              label={`${field.label} (px)`}
-            >
-              <TextField
-                id={`${id}-${field.key}`}
-                type="number"
-                min={0}
-                max={field.max}
-                value={typeof fieldValue === "number" ? fieldValue : ""}
-                placeholder={String(field.default)}
-                disabled={disabled}
-                onChange={(event) =>
-                  set(
-                    field.key,
-                    event.target.value === ""
-                      ? null
-                      : event.target.valueAsNumber,
-                  )
-                }
-              />
-            </FormField>
-          );
-        })}
+        .filter((field) =>
+          section === "advanced"
+            ? field.key !== "gap"
+            : section === "content" && container && field.key === "gap",
+        )
+        .map((field) => (
+          <NumericControl
+            key={field.key}
+            label={field.label}
+            value={layout[field.key]}
+            defaultValue={inheritedNumeric(field.key, field.default)}
+            min={0}
+            max={field.max}
+            unit="px"
+            disabled={disabled}
+            onChange={(value) => set(field.key, value)}
+          />
+        ))}
     </div>
   );
 }

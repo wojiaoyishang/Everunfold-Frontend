@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ComponentDraftEditor } from "./component-draft-editor";
 import type { ContentTypeDefinition } from "@/core/contracts/content-admin";
 import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
-import { requestEmbeddedLeave } from "@/core/preview/bridge";
+import { isEmbeddedEditor, requestEmbeddedLeave } from "@/core/preview/bridge";
 import { editorPreviewContent } from "@/core/preview/content";
 import {
   useDraftEditor,
@@ -27,7 +27,7 @@ import { EditorActions } from "./editor-actions";
 import { EditorPanels } from "./editor-panels";
 import type { PublicationChoice } from "./publication-schedule";
 import { BlockComposer } from "./block-composer";
-import { ComposerSidebar } from "./block-library";
+import { BlockLibrary, ComposerSidebar } from "./block-library";
 import styles from "./editor-workspace.module.css";
 import { contentEditors } from "./editor-registry";
 import { DraftPreview } from "./draft-preview";
@@ -35,7 +35,6 @@ import { ContentSync } from "./content-sync";
 import { afterDialogMotion } from "../../hooks/dialog-motion";
 import { CollaborationBar } from "./collaboration-bar";
 import { InlineUploadToasts } from "./inline-upload-toasts";
-import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
 import { FrontendPreviewButton } from "./frontend-preview-button";
 import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 import { CodePreferencesProvider } from "../../components/code-preferences";
@@ -52,6 +51,7 @@ export function DraftEditor({
   type: ContentTypeDefinition;
   id: string | null;
 }) {
+  const embedded = isEmbeddedEditor();
   const languages = useLanguageCatalog();
   const [language, setLanguage] = useState<Locale>("");
   const editor = useDraftEditor(type, id, language || undefined);
@@ -80,13 +80,14 @@ export function DraftEditor({
     ? editorPreviewContent(editor.detail, editor.fields, media)
     : null;
   useEmbeddedPreviewPublisher(
-    id,
+    editor.detail?.edit_mode === "components" ? null : id,
     liveContent
       ? { type: "everunfold:content-preview", content: liveContent }
       : null,
     {
       dirty: editor.unsaved || editor.uncertain,
       busy: editor.busy || uploading,
+      published: Boolean(editor.detail?.published_revision),
     },
   );
   const [section, setSection] = useState<"body" | "settings">("body");
@@ -338,18 +339,16 @@ export function DraftEditor({
                     <UiText text="查看前台" />
                   </RouteLink>
                 )}
-              <EmbeddedEditorActions>
-                <EditorActions
-                  detail={editor.detail}
-                  scheduled={publicationChoice.enabled}
-                  busy={editor.busy}
-                  uncertain={editor.uncertain}
-                  dirty={editor.dirty}
-                  disabled={saveDisabled}
-                  onSave={(action) => void save(action)}
-                  onWithdraw={() => setConfirm("withdraw")}
-                />
-              </EmbeddedEditorActions>
+              <EditorActions
+                detail={editor.detail}
+                scheduled={publicationChoice.enabled}
+                busy={editor.busy}
+                uncertain={editor.uncertain}
+                dirty={editor.dirty}
+                disabled={saveDisabled}
+                onSave={(action) => void save(action)}
+                onWithdraw={() => setConfirm("withdraw")}
+              />
             </ScrollHeaderActions>
             <span
               role="status"
@@ -363,101 +362,108 @@ export function DraftEditor({
         <h1
           className={styles.visuallyHidden}
         >{`${id ? "编辑" : "新建"}${type.label}`}</h1>
-        <EditorTitle
-          type={type}
-          fields={editor.fields}
-          detail={editor.detail}
-          language={
-            editor.detail?.language || language || languages.default_code
-          }
-          onChange={editor.setFields}
-          disabled={Boolean(blocked || (id && !editor.detail))}
-        />
-        <EditorLanguages
-          key={id ?? "new"}
-          id={id}
-          contentRevision={editor.detail?.revision}
-          type={type.id}
-          language={
-            editor.detail?.language || language || languages.default_code
-          }
-          onLanguage={setLanguage}
-          disabled={Boolean(editor.busy || leaving || uploading)}
-          onNavigate={(href) => {
-            if (
-              href === `/admin/content/${type.id}/${id}/edit#content-languages`
-            ) {
-              location.hash = "content-languages";
-              return;
+        <div data-live-part="settings">
+          <EditorTitle
+            type={type}
+            fields={editor.fields}
+            detail={editor.detail}
+            language={
+              editor.detail?.language || language || languages.default_code
             }
-            if (editor.privateUnsaved || editor.uncertain) {
-              requestLeave(href);
-              return;
+            onChange={editor.setFields}
+            disabled={Boolean(blocked || (id && !editor.detail))}
+          />
+          <EditorLanguages
+            key={id ?? "new"}
+            id={id}
+            contentRevision={editor.detail?.revision}
+            type={type.id}
+            language={
+              editor.detail?.language || language || languages.default_code
             }
-            if (editor.session)
-              void editor.session
-                .prepareNavigation()
-                .then(() => navigate(href))
-                .catch((cause: unknown) =>
-                  setNavigationError(
-                    cause instanceof Error
-                      ? cause.message
-                      : "请先保存本地草稿。",
-                  ),
-                );
-            else requestLeave(href);
-          }}
-        />
-        <CollaborationBar
-          session={editor.session}
-          status={editor.collaboration}
-          fields={editor.fields}
-          localChanges={editor.stagedBlocks.length > 0}
-          recoveryContent={editor.recoveryContent}
-          disabled={Boolean(blocked || dragging)}
-          onLocate={(peer) => {
-            setMode("edit");
-            setSection("body");
-            requestAnimationFrame(() =>
-              requestAnimationFrame(() => editor.session?.locatePeer(peer)),
-            );
-          }}
-          onVersions={() => {
-            if (!id || !editor.session) return;
-            const href = `/admin/content/${type.id}/${id}/versions`;
-            if (editor.privateUnsaved || editor.uncertain) requestLeave(href);
-            else
-              void editor.session
-                .prepareNavigation()
-                .then(() => navigate(href))
-                .catch((cause: unknown) =>
-                  setNavigationError(
-                    cause instanceof Error
-                      ? cause.message
-                      : "无法保存草稿，请导出后继续。",
-                  ),
-                );
-          }}
-        />
+            onLanguage={setLanguage}
+            disabled={Boolean(editor.busy || leaving || uploading)}
+            onNavigate={(href) => {
+              if (
+                href ===
+                `/admin/content/${type.id}/${id}/edit#content-languages`
+              ) {
+                location.hash = "content-languages";
+                return;
+              }
+              if (editor.privateUnsaved || editor.uncertain) {
+                requestLeave(href);
+                return;
+              }
+              if (editor.session)
+                void editor.session
+                  .prepareNavigation()
+                  .then(() => navigate(href))
+                  .catch((cause: unknown) =>
+                    setNavigationError(
+                      cause instanceof Error
+                        ? cause.message
+                        : "请先保存本地草稿。",
+                    ),
+                  );
+              else requestLeave(href);
+            }}
+          />
+        </div>
+        <div data-live-part="settings">
+          <CollaborationBar
+            session={editor.session}
+            status={editor.collaboration}
+            fields={editor.fields}
+            localChanges={editor.stagedBlocks.length > 0}
+            recoveryContent={editor.recoveryContent}
+            disabled={Boolean(blocked || dragging)}
+            onLocate={(peer) => {
+              setMode("edit");
+              setSection("body");
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => editor.session?.locatePeer(peer)),
+              );
+            }}
+            onVersions={() => {
+              if (!id || !editor.session) return;
+              const href = `/admin/content/${type.id}/${id}/versions`;
+              if (editor.privateUnsaved || editor.uncertain) requestLeave(href);
+              else
+                void editor.session
+                  .prepareNavigation()
+                  .then(() => navigate(href))
+                  .catch((cause: unknown) =>
+                    setNavigationError(
+                      cause instanceof Error
+                        ? cause.message
+                        : "无法保存草稿，请导出后继续。",
+                    ),
+                  );
+            }}
+          />
+        </div>
         {navigationError && (
           <p className="admin-draft-message" role="alert">
             {navigationError}
           </p>
         )}
-        <div className={styles.mobileTabs} aria-label="编辑区域">
-          <Button
-            aria-pressed={section === "body"}
-            onClick={() => setSection("body")}
-          >
-            <UiText text="正文" />
-          </Button>
-          <Button
-            aria-pressed={section === "settings"}
-            onClick={() => setSection("settings")}
-          >
-            <UiText text="内容设置" />
-          </Button>
-        </div>
+        {!embedded && (
+          <div className={styles.mobileTabs} aria-label="编辑区域">
+            <Button
+              aria-pressed={section === "body"}
+              onClick={() => setSection("body")}
+            >
+              <UiText text="正文" />
+            </Button>
+            <Button
+              aria-pressed={section === "settings"}
+              onClick={() => setSection("settings")}
+            >
+              <UiText text="内容设置" />
+            </Button>
+          </div>
+        )}
         <ConfirmDialog
           open={confirm !== null}
           title={
@@ -508,8 +514,22 @@ export function DraftEditor({
           onBusyChange={setDragging}
         >
           <div className={styles.layout} data-section={section}>
+            {embedded && (
+              <div data-live-part="library">
+                <BlockLibrary
+                  quiet
+                  onInsert={() =>
+                    window.parent.postMessage(
+                      { type: "everunfold:focus-editor", id },
+                      window.location.origin,
+                    )
+                  }
+                />
+              </div>
+            )}
             <section
               className={styles.main}
+              data-live-part="content"
               aria-label={`${type.label}编辑器`}
               data-mode={mode}
             >
@@ -604,7 +624,10 @@ export function DraftEditor({
                 )}
               </div>
             </section>
-            <ComposerSidebar settingsOnly={section === "settings"}>
+            <ComposerSidebar
+              embedded={embedded}
+              settingsOnly={section === "settings"}
+            >
               <EditorPanels
                 type={type}
                 fields={editor.fields}
@@ -637,12 +660,14 @@ export function DraftEditor({
             </ComposerSidebar>
           </div>
         </BlockComposer>
-        <ContentSync
-          refreshKey={
-            (editor.detail?.revision ?? 0) *
-            (editor.detail?.scheduled_for ? -1 : 1)
-          }
-        />
+        <div data-live-part="settings">
+          <ContentSync
+            refreshKey={
+              (editor.detail?.revision ?? 0) *
+              (editor.detail?.scheduled_for ? -1 : 1)
+            }
+          />
+        </div>
       </div>
     </CodePreferencesProvider>
   );

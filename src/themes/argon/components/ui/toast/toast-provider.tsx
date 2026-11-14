@@ -11,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { isEmbeddedEditor } from "@/core/preview/bridge";
 import { ToastStore, type ToastEntry } from "./store";
 import { afterDialogMotion } from "../../../hooks/dialog-motion";
 import { Button } from "../primitives";
@@ -50,11 +51,24 @@ function ToastViewport({ store }: { store: ToastStore }) {
     document.querySelector(
       "[data-surface='admin'], [data-public-theme], .blog-shell, .auth-root",
     ) ?? document.body;
+  let liveSurface: Element | null = null;
+  if (isEmbeddedEditor()) {
+    try {
+      liveSurface = window.parent.document.querySelector(
+        "[data-live-workspace]",
+      );
+    } catch {
+      /* An unrelated parent cannot host private feedback. */
+    }
+  }
   const dialog = Array.from(document.querySelectorAll("dialog[open]")).at(-1);
   return ([undefined, "top-center"] as const).map((placement) => {
     const placed = entries.filter((entry) => entry.placement === placement);
     if (!placed.length) return null;
-    const target = placement === "top-center" ? surface : (dialog ?? surface);
+    const target =
+      placement === "top-center"
+        ? (liveSurface ?? surface)
+        : (dialog ?? surface);
     return createPortal(
       <ToastLane
         placement={placement}
@@ -83,7 +97,7 @@ function ToastLane({
   useLayoutEffect(() => {
     if (placement !== "top-center" || !target.matches("[data-surface='admin']"))
       return;
-    const header = target.querySelector(".admin-header");
+    const header = target.querySelector(".admin-header, [data-live-toolbar]");
     const toolbar = target.querySelector(".admin-page-editor-toolbar");
     const dock = header?.querySelector("[data-admin-header-dock]");
     const update = () => {

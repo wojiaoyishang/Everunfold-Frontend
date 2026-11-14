@@ -18,11 +18,16 @@ export function createBuilderNode(
   return {
     id: builderId(),
     type: definition.type,
-    props: Object.fromEntries(
-      (definition.fields ?? []).flatMap((field) =>
-        field.default === undefined ? [] : [[field.key, field.default]],
+    props: {
+      ...structuredClone(definition.defaults ?? {}),
+      ...Object.fromEntries(
+        (definition.fields ?? []).flatMap((field) =>
+          field.default === undefined
+            ? []
+            : [[field.key, structuredClone(field.default)]],
+        ),
       ),
-    ),
+    },
     ...(definition.container ? { children: [] } : {}),
   };
 }

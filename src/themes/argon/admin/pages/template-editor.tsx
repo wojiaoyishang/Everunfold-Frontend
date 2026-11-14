@@ -21,7 +21,10 @@ import { RouteLink } from "../../components/ui/route-link";
 import { AdminPageHeading } from "../components/page-heading";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { PageCodeFields } from "./code-fields";
-import { BuilderEditor } from "@/themes/argon/admin/builder/editor";
+import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
+import { templatePreviewPage } from "@/core/preview/template";
+import { livePreviewPath } from "@/core/preview/routes";
+import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
 import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { useEditorResources } from "@/core/content-management/use-editor-resources";
 import { PageEditOptions } from "./edit-mode";
@@ -81,6 +84,57 @@ export function PageTemplateEditor({ id }: { id?: string }) {
     return () => controller.abort();
   }, [baseUrl, id, attempt]);
 
+  useEmbeddedPreviewPublisher(
+    id ?? draftId,
+    ready
+      ? {
+          type: "everunfold:page-preview",
+          page: templatePreviewPage(id ?? draftId, value, saved?.revision, {
+            ...saved?.media_urls,
+            ...resources.media,
+          }),
+        }
+      : null,
+    { dirty, busy: action.busy },
+    value.edit_mode === "components"
+      ? {
+          value: {
+            document: value.component_document ?? emptyDocument,
+            parameters: {},
+            linked: false,
+            disabled: !write || action.busy,
+            allowComments: true,
+            canSaveTemplate: false,
+            media: { ...saved?.media_urls, ...resources.media },
+            shortcodes: shortcodes ?? [],
+          },
+          onChange: (change) => {
+            if (change.media) resources.remember(change.media);
+            if (change.mediaUrls)
+              resources.rememberResolvedMedia(change.mediaUrls);
+            if (change.document)
+              setValue((current) => ({
+                ...current,
+                component_document: change.document,
+              }));
+          },
+        }
+      : undefined,
+  );
+
+  async function openLive() {
+    const popup = window.open("about:blank", "_blank");
+    if (!popup) {
+      action.notify("预览窗口被浏览器拦截，请允许弹出窗口后重试。");
+      return;
+    }
+    popup.opener = null;
+    if ((dirty || !saved) && !(await save())) {
+      popup.close();
+      return;
+    }
+    popup.location.replace(livePreviewPath("template", id ?? draftId));
+  }
   async function save() {
     if (!write || !ready || !dirty) return;
     if (!value.title.trim()) {
@@ -106,6 +160,7 @@ export function PageTemplateEditor({ id }: { id?: string }) {
       if (!id) destination = `/admin/pages/templates/${data.id}`;
     }, "模板已保存。");
     if (completed && destination) router.replace(destination);
+    return completed;
   }
 
   return (
@@ -125,17 +180,30 @@ export function PageTemplateEditor({ id }: { id?: string }) {
               <UiText text="使用模板新建页面" />
             </RouteLink>
           )}
-          {ready && write && (
-            <Button
-              type="submit"
-              form={formId}
-              className="admin-button admin-button-primary"
-              disabled={action.busy || !dirty}
-            >
-              <Icon name="save" />
-              <UiText text="保存模板" />
-            </Button>
-          )}
+          <Button
+            className="admin-button admin-editor-preview-action"
+            disabled={!ready || !write || action.busy}
+            onClick={() => void openLive()}
+          >
+            <Icon name="sidebar" />
+            <UiText text="实时编辑" />
+          </Button>
+          <EmbeddedEditorActions
+            primary={
+              ready &&
+              write && (
+                <Button
+                  type="button"
+                  onClick={() => void save()}
+                  className="admin-button admin-button-primary"
+                  disabled={action.busy || !dirty}
+                >
+                  <Icon name="save" />
+                  <UiText text="保存模板" />
+                </Button>
+              )
+            }
+          />
         </ScrollHeaderActions>
       </div>
       <AdminPageHeading
@@ -155,7 +223,7 @@ export function PageTemplateEditor({ id }: { id?: string }) {
             className="account-fieldset"
             disabled={!write || action.busy}
           >
-            <section className="account-card">
+            <section className="account-card" data-live-part="settings">
               <div className="account-form-grid">
                 <AccountField
                   label="模板名称"
@@ -174,7 +242,7 @@ export function PageTemplateEditor({ id }: { id?: string }) {
                 />
               </div>
             </section>
-            <section className="account-card">
+            <section className="account-card" data-live-part="settings">
               <PageEditOptions
                 mode={value.edit_mode ?? "source"}
                 layout={value.layout}
@@ -193,21 +261,7 @@ export function PageTemplateEditor({ id }: { id?: string }) {
                 }
               />
             </section>
-            {value.edit_mode === "components" ? (
-              <BuilderEditor
-                allowComments
-                value={value.component_document ?? emptyDocument}
-                onMedia={resources.remember}
-                renderContext={{
-                  media: { ...saved?.media_urls, ...resources.media },
-                  shortcodes,
-                }}
-                disabled={!write || action.busy}
-                onChange={(component_document) =>
-                  setValue((current) => ({ ...current, component_document }))
-                }
-              />
-            ) : (
+            {value.edit_mode !== "components" && (
               <PageCodeFields
                 value={value}
                 disabled={!write || action.busy}

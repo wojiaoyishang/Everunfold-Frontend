@@ -31,6 +31,8 @@ import {
 const noSubscription = () => () => {};
 
 export type DragItem = { id: string; kind: "block" | "palette"; label: string };
+const touchHold = { delay: 180, tolerance: 10 };
+
 const DragState = createContext<{
   active: DragItem | null;
   over: string | null;
@@ -201,9 +203,9 @@ export function DragAndDrop({
     [],
   );
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, {
-      activationConstraint: { delay: 240, tolerance: 6 },
+      activationConstraint: touchHold,
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: coordinates,
@@ -278,7 +280,9 @@ export function useDragItem(item: DragItem, disabled: boolean) {
     data: item,
     disabled,
   });
-  const handle: ComponentPropsWithRef<"button"> = {
+  const handle: ComponentPropsWithRef<"button"> & {
+    ref: typeof drag.setActivatorNodeRef;
+  } = {
     ...drag.attributes,
     ...drag.listeners,
     ref: drag.setActivatorNodeRef,

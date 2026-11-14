@@ -12,9 +12,12 @@ export const metadata = {
 };
 export default async function PagePreview({
   params,
+  searchParams,
 }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
   params: Promise<{ id: string }>;
 }) {
+  const query = await searchParams;
   const { id } = await params;
   if (!isManagedPagePreviewPath(`/admin/pages/${id}/preview`)) notFound();
   const snapshot = await readPublicSnapshot().catch(() => null);
@@ -23,6 +26,8 @@ export default async function PagePreview({
       <ManagedPagePreview
         key={id}
         id={id}
+        liveWorkspace={query["live-workspace"] === "1"}
+        template={query.template === "1"}
         site={snapshot?.site ?? null}
         articleSources={snapshot ? pageArticleSources(snapshot) : []}
       />

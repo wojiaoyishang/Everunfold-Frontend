@@ -1,0 +1,248 @@
+.properties {
+  min-inline-size: 0;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-block-end: 1px solid var(--admin-border);
+}
+
+.tab {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6px;
+  min-inline-size: 0;
+  min-block-size: 59px;
+  padding: 6px 3px;
+  border: 0;
+  border-block-end: 3px solid transparent;
+  border-radius: 0;
+  color: var(--admin-muted);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.tab > svg {
+  inline-size: 19px;
+  block-size: 19px;
+}
+
+.tab[aria-selected="true"] {
+  color: var(--admin-text);
+  border-block-end-color: currentColor;
+}
+
+.tab:hover {
+  color: var(--admin-text);
+  background: var(--admin-subtle);
+}
+
+.tab:focus-visible,
+.section > summary:focus-visible {
+  outline: 2px solid var(--admin-accent);
+  outline-offset: -3px;
+}
+
+.tabPanel {
+  min-inline-size: 0;
+}
+
+.section {
+  border-block-end: 1px solid var(--admin-border);
+}
+
+.section > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  min-block-size: 42px;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.35;
+  list-style: none;
+  cursor: pointer;
+}
+
+.section > summary::-webkit-details-marker {
+  display: none;
+}
+
+.section > summary:hover {
+  background: var(--admin-subtle);
+}
+
+.section > summary > svg {
+  flex: none;
+  inline-size: 13px;
+  block-size: 13px;
+  color: var(--admin-muted);
+}
+
+.section[open] > summary > svg {
+  rotate: 90deg;
+}
+
+.sectionBody {
+  min-inline-size: 0;
+  padding: 3px 14px 16px;
+}
+
+.sectionBody
+  :global(.ui-form-field)
+  :is(:global(.ui-input), :global(.ui-select-trigger)) {
+  min-block-size: 36px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.actions :global(.admin-icon-button) {
+  inline-size: 32px;
+  block-size: 32px;
+}
+
+.empty {
+  margin: 0;
+  padding: 16px 14px;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.sourceActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sourceActions > :global(.admin-button) {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.sourceActions > :global(.admin-icon-button) {
+  flex: none;
+  inline-size: 36px;
+  block-size: 36px;
+}
+
+.numeric {
+  display: grid;
+  gap: 3px;
+  min-inline-size: 0;
+  font-size: 12px;
+}
+
+.numericHeading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.numericHeading > :is(label, span):first-child {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.numericValue {
+  color: var(--admin-text);
+  white-space: nowrap;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.numericHeading > .resetNumber {
+  display: grid;
+  place-items: center;
+  inline-size: 30px;
+  block-size: 30px;
+  padding: 0;
+  color: var(--admin-muted);
+  border-radius: 5px;
+}
+
+.resetNumber:not(:disabled):hover {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+
+.resetNumber:disabled {
+  opacity: 0.38;
+}
+
+.resetNumber > svg,
+.stepper button > svg {
+  inline-size: 15px;
+  block-size: 15px;
+}
+
+.numeric > .range {
+  margin: 0 0 3px;
+  block-size: 34px;
+}
+
+.stepper {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  min-block-size: 36px;
+  overflow: hidden;
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+}
+
+.stepper > output {
+  text-align: center;
+}
+
+.stepper > button {
+  display: grid;
+  place-items: center;
+  inline-size: 40px;
+  align-self: stretch;
+  padding: 0;
+  color: var(--admin-text);
+  background: var(--admin-subtle);
+}
+
+.stepper > button:disabled {
+  opacity: 0.4;
+}
+
+.stepper > button:not(:disabled):hover {
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+
+.stepper > button:focus-visible {
+  outline-offset: -3px;
+}
+
+@media (pointer: coarse) {
+  .numeric > .range,
+  .stepper {
+    min-block-size: 44px;
+  }
+
+  .stepper > button,
+  .sourceActions > :global(.admin-icon-button) {
+    inline-size: 44px;
+  }
+
+  .sourceActions > :global(.admin-icon-button) {
+    block-size: 44px;
+  }
+
+  .numericHeading > .resetNumber {
+    inline-size: 40px;
+    block-size: 36px;
+  }
+}

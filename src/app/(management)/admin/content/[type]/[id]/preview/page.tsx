@@ -14,9 +14,12 @@ export const metadata: Metadata = {
 };
 export default async function PreviewPage({
   params,
+  searchParams,
 }: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
   params: Promise<{ type: string; id: string }>;
 }) {
+  const query = await searchParams;
   const { type, id } = await params;
   if (
     !contentType(type) ||
@@ -30,6 +33,7 @@ export default async function PreviewPage({
       <ContentPreview
         type={type}
         id={id}
+        liveWorkspace={query["live-workspace"] === "1"}
         site={publicData?.site ?? null}
         terms={publicData?.taxonomies ?? []}
       />

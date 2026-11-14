@@ -6,6 +6,12 @@ import {
   useState,
   type RefObject,
 } from "react";
+import {
+  checkedBuilderChange,
+  checkedBuilderState,
+  type LiveBuilderState,
+  type LiveBuilderChange,
+} from "./builder";
 import { randomUUID } from "@/core/browser/crypto";
 import { checkedPreviewPage } from "@/core/pages/preview-validation";
 import { checkedLiveContent } from "./content";
@@ -20,6 +26,7 @@ import type { PreviewKind } from "./routes";
 export interface LiveEditorState {
   dirty: boolean;
   busy: boolean;
+  published?: boolean;
 }
 export function useLiveBridge({
   kind,
@@ -40,6 +47,10 @@ export function useLiveBridge({
   onLocation: (path: string) => void;
   onFocusEditor: () => void;
 }) {
+  const [documentTitle, setDocumentTitle] = useState<string | null>(null);
+  const [awaitingBuilder, setAwaitingBuilder] = useState(false);
+  const [builder, setBuilder] = useState<LiveBuilderState | null>(null);
+  const builderSequence = useRef(0);
   const channel = useRef(randomUUID());
   const latest = useRef<object | null>(null);
   const expected = useRef<PreviewStamp | null>(null);
@@ -61,6 +72,8 @@ export function useLiveBridge({
   );
   const loadEditor = useCallback(() => {
     channel.current = randomUUID();
+    builderSequence.current = 0;
+    setAwaitingBuilder(false);
     latest.current = expected.current = null;
     setPending(null);
     setStatus("loading");
@@ -72,7 +85,9 @@ export function useLiveBridge({
         latest.current,
         window.location.origin,
       );
-    setStatus(latest.current ? "updating" : "loading");
+    setStatus((state) =>
+      latest.current ? (state === "ready" ? "ready" : "updating") : "loading",
+    );
     request();
   }, [request, view]);
   useEffect(() => {
@@ -106,13 +121,22 @@ export function useLiveBridge({
           if (target) onLeave(target.href, true);
           return;
         }
+        if (data.type === "everunfold:focus-editor" && data.id === id) {
+          onFocusEditor();
+          return;
+        }
         if (data.id !== id || data.preview_session !== channel.current) return;
         if (
           data.type === "everunfold:editor-state" &&
           typeof data.dirty === "boolean" &&
           typeof data.busy === "boolean"
         ) {
-          onEditorState({ dirty: data.dirty, busy: data.busy });
+          onEditorState({
+            dirty: data.dirty,
+            busy: data.busy,
+            published:
+              typeof data.published === "boolean" ? data.published : undefined,
+          });
           return;
         }
         const stamp = previewStamp(data);
@@ -128,13 +152,18 @@ export function useLiveBridge({
           setStatus("updating");
           return;
         }
-        const valid =
-          kind === "page"
+        const projection =
+          kind === "page" || kind === "template"
             ? data.type === "everunfold:page-preview" &&
               checkedPreviewPage(data.page, id)
             : data.type === "everunfold:content-preview" &&
               checkedLiveContent(data.content, kind, id);
-        if (!valid) return;
+        if (!projection) return;
+        setDocumentTitle(projection.title);
+        if ((data.builder_sequence ?? 0) >= builderSequence.current) {
+          setAwaitingBuilder(false);
+          setBuilder(checkedBuilderState(data.builder));
+        }
         expected.current = stamp;
         latest.current = data;
         setPending(stamp);
@@ -179,7 +208,42 @@ export function useLiveBridge({
   ]);
   const retry = () => {
     loadEditor();
-    view.current?.contentWindow?.location.reload();
+    const frame = view.current;
+    if (frame)
+      frame.setAttribute("src", frame.getAttribute("src") ?? "about:blank");
   };
-  return { status, loadEditor, loadPreview, retry };
+  const changeBuilder = (change: LiveBuilderChange) => {
+    if (!expected.current || !builder || !checkedBuilderChange(change, builder))
+      return;
+    builderSequence.current++;
+    setAwaitingBuilder(true);
+    setBuilder({
+      ...builder,
+      ...(change.document ? { document: change.document } : {}),
+      ...(change.parameters ? { parameters: change.parameters } : {}),
+      ...(change.mediaUrls
+        ? { media: { ...builder.media, ...change.mediaUrls } }
+        : {}),
+    });
+    editor.current?.contentWindow?.postMessage(
+      {
+        type: "everunfold:builder-change",
+        id,
+        ...expected.current,
+        change,
+        builder_sequence: builderSequence.current,
+      },
+      window.location.origin,
+    );
+  };
+  return {
+    status,
+    loadEditor,
+    loadPreview,
+    retry,
+    builder,
+    changeBuilder,
+    documentTitle,
+    awaitingBuilder,
+  };
 }

@@ -11,7 +11,7 @@ export function PreviewAction({
   ...props
 }: {
   label: string;
-  description: string;
+  description?: string;
   icon: ComponentProps<typeof Icon>["name"];
 } & Omit<ComponentProps<typeof Button>, "children">) {
   const t = useT();
@@ -19,7 +19,7 @@ export function PreviewAction({
     <Button
       {...props}
       className={`admin-button admin-editor-preview-action ${styles.action} ${props.className ?? ""}`}
-      title={t(description)}
+      title={description ? t(description) : undefined}
     >
       <Icon name={icon} />
       <UiText text={label} />

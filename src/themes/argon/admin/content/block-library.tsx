@@ -12,10 +12,12 @@ import styles from "./block-composer.module.css";
 
 export function BlockLibrary({
   compact = false,
+  quiet = false,
   onInsert,
   before,
 }: {
   compact?: boolean;
+  quiet?: boolean;
   onInsert?: () => void;
   before?: string | null;
 }) {
@@ -27,30 +29,33 @@ export function BlockLibrary({
       : host.body.findIndex((b) => b.id === insertionBefore);
   return (
     <div className={styles.library}>
-      <div className={styles.libraryHeading}>
-        <strong>
-          <UiText text="区块库" />
-        </strong>
-        <span>
-          {target < 0 ? (
-            <UiText text="请重新选择位置" />
-          ) : (
-            `插入到${insertionBefore === null ? "末尾" : `第 ${target + 1} 块之前`}`
-          )}
-        </span>
-      </div>
+      {(!quiet || target < 0) && (
+        <div className={styles.libraryHeading}>
+          <strong>
+            <UiText text="区块库" />
+          </strong>
+          <span>
+            {target < 0 ? (
+              <UiText text="请重新选择位置" />
+            ) : (
+              `插入到${insertionBefore === null ? "末尾" : `第 ${target + 1} 块之前`}`
+            )}
+          </span>
+        </div>
+      )}
       <div className={styles.cards}>
         {blockEditors.entries.map((plugin) => (
           <LibraryCard
             key={plugin.id}
             plugin={plugin}
             compact={compact}
+            quiet={quiet}
             onInsert={onInsert}
             before={insertionBefore}
           />
         ))}
       </div>
-      {!compact && (
+      {!compact && !quiet && (
         <p className={styles.libraryHelp}>
           <UiText text="拖到正文插入线，或点击添加。" />
         </p>
@@ -61,6 +66,7 @@ export function BlockLibrary({
 type LibraryCardProps = {
   plugin: (typeof blockEditors.entries)[number];
   compact: boolean;
+  quiet?: boolean;
   onInsert?: () => void;
   before: string | null;
 };
@@ -85,6 +91,7 @@ function LibraryChoice({
   before,
   onInsert,
   drag,
+  quiet,
 }: Omit<LibraryCardProps, "compact"> & {
   drag?: ReturnType<typeof useDragItem>;
 }) {
@@ -111,9 +118,11 @@ function LibraryChoice({
         <Icon name={plugin.format === "html" ? "code" : "book"} />
       </span>
       <strong>{plugin.label}</strong>
-      <small>
-        <UiText text={plugin.description ?? ""} />
-      </small>
+      {!quiet && (
+        <small>
+          <UiText text={plugin.description ?? ""} />
+        </small>
+      )}
       <Icon name="plus" />
     </Button>
   );
@@ -121,9 +130,11 @@ function LibraryChoice({
 export function ComposerSidebar({
   children,
   settingsOnly = false,
+  embedded = false,
 }: {
   children: ReactNode;
   settingsOnly?: boolean;
+  embedded?: boolean;
 }) {
   const host = useBlockComposer(),
     id = useId();
@@ -133,6 +144,7 @@ export function ComposerSidebar({
     () => false,
   );
   const tabValue = settingsOnly && narrow ? "settings" : host.tab;
+  if (embedded) return <div data-live-part="settings">{children}</div>;
   return (
     <aside
       className={styles.inspector}

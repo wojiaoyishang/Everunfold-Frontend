@@ -1,4 +1,5 @@
 "use client";
+import { isEmbeddedEditor } from "@/core/preview/bridge";
 
 import { useEffect, useEffectEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -36,7 +37,8 @@ import { Icon } from "../../components/icon";
 import { Button, TextArea } from "../../components/ui/primitives";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { RouteLink } from "../../components/ui/route-link";
-import { BuilderEditor } from "../builder/editor";
+import { livePreviewPath } from "@/core/preview/routes";
+import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
 import { AdminPageHeading } from "../components/page-heading";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { usePageAction } from "../pages/feedback";
@@ -117,7 +119,31 @@ export function ComponentDraftEditor({
           content: editorPreviewContent(detail, fields, media),
         }
       : null,
-    { dirty, busy: action.busy },
+    {
+      dirty,
+      busy: action.busy,
+      published: Boolean(detail?.published_revision),
+    },
+    {
+      value: {
+        document: fields.component_document ?? emptyBuilderDocument,
+        parameters: {},
+        linked: false,
+        disabled: !writable || action.busy,
+        allowComments: false,
+        canSaveTemplate: false,
+        media,
+        shortcodes: shortcodes ?? [],
+      },
+      onChange: (change) => {
+        if (change.media) resources.remember(change.media);
+        if (change.document)
+          setFields((current) => ({
+            ...current,
+            component_document: change.document,
+          }));
+      },
+    },
   );
   const choice = publication ?? {
     enabled: Boolean(detail?.scheduled_for),
@@ -151,7 +177,10 @@ export function ComponentDraftEditor({
     setBaseline(JSON.stringify(next));
   }
 
-  async function save(kind: "save" | "publish" | "schedule" | "cancel") {
+  async function save(
+    kind: "save" | "publish" | "schedule" | "cancel",
+    navigate = true,
+  ) {
     if (!writable || action.busy || (kind !== "save" && !publishable)) return;
     const next: DraftFields = { ...fields };
     if (!detail && type.id === "article" && resources.defaults) {
@@ -171,7 +200,7 @@ export function ComponentDraftEditor({
       return;
     }
     let created: string | undefined;
-    await action.run(
+    const completed = await action.run(
       async (signal) => {
         const options = { signal };
         if (!detail) {
@@ -245,8 +274,50 @@ export function ComponentDraftEditor({
             ? "已取消定时发布。"
             : "内容草稿已保存。",
     );
-    if (created) router.replace(`${section}/${created}/edit?mode=components`);
+    if (created && navigate)
+      router.replace(`${section}/${created}/edit?mode=components`);
+    return completed ? (created ?? detail?.id) : undefined;
   }
+
+  async function openLive() {
+    const popup = window.open("about:blank", "_blank");
+    if (!popup) {
+      action.notify("预览窗口被浏览器拦截，请允许弹出窗口后重试。");
+      return;
+    }
+    popup.opener = null;
+    const savedId = dirty || !detail ? await save("save", false) : detail.id;
+    if (!savedId) {
+      popup.close();
+      return;
+    }
+    popup.location.replace(
+      livePreviewPath(type.id as "article" | "shuoshuo", savedId),
+    );
+    if (!id) router.replace(`${section}/${savedId}/edit?mode=components`);
+  }
+
+  const saveDraft = (
+    <Button
+      className="admin-button"
+      disabled={!writable || action.busy || Boolean(detail && !dirty)}
+      onClick={() => void save("save")}
+    >
+      <Icon name="save" />
+      <UiText text="保存草稿" />
+    </Button>
+  );
+  const publishDraft =
+    detail && publishable ? (
+      <Button
+        className="admin-button admin-button-primary"
+        disabled={action.busy}
+        onClick={() => void save(choice.enabled ? "schedule" : "publish")}
+      >
+        <UiText text={choice.enabled ? "定时发布" : "发布"} />
+      </Button>
+    ) : null;
+  const settingsOpen = isEmbeddedEditor() || showSettings;
 
   return (
     <>
@@ -286,28 +357,13 @@ export function ComponentDraftEditor({
               <UiText text="查看前台" />
             </RouteLink>
           )}
-          <Button
-            className="admin-button"
-            disabled={!writable || action.busy || Boolean(detail && !dirty)}
-            onClick={() => void save("save")}
-          >
-            <Icon name="save" />
-            <UiText text="保存草稿" />
-          </Button>
-          {detail && publishable && (
-            <Button
-              className="admin-button admin-button-primary"
-              disabled={action.busy}
-              onClick={() => void save(choice.enabled ? "schedule" : "publish")}
-            >
-              <UiText text={choice.enabled ? "定时发布" : "发布"} />
-            </Button>
-          )}
+          <EmbeddedEditorActions primary={publishDraft ?? saveDraft}>
+            {publishDraft && saveDraft}
+          </EmbeddedEditorActions>
         </ScrollHeaderActions>
       </div>
       <AdminPageHeading
         title={`${id ? "编辑" : "新建"}${type.label} · 组件模式`}
-        description="在画布上实时编排内容。组件模式不参与多人协作，修改在保存草稿后保留。"
       />
       {id && !detail ? (
         <section className="account-card">
@@ -347,17 +403,19 @@ export function ComponentDraftEditor({
               disabled={action.busy || (Boolean(detail) && dirty)}
               onNavigate={(href) => router.push(href)}
             />
-            <Button
-              className="admin-button"
-              aria-expanded={showSettings}
-              aria-controls="builder-content-settings"
-              onClick={() => setShowSettings((open) => !open)}
-            >
-              <Icon name="settings" />
-              <UiText text="内容设置" />
-            </Button>
+            {!isEmbeddedEditor() && (
+              <Button
+                className="admin-button"
+                aria-expanded={showSettings}
+                aria-controls="builder-content-settings"
+                onClick={() => setShowSettings((open) => !open)}
+              >
+                <Icon name="settings" />
+                <UiText text="内容设置" />
+              </Button>
+            )}
           </section>
-          {showSettings && (
+          {settingsOpen && (
             <section
               id="builder-content-settings"
               className={styles.settings}
@@ -399,15 +457,19 @@ export function ComponentDraftEditor({
               />
             </section>
           )}
-          <BuilderEditor
-            value={fields.component_document ?? emptyBuilderDocument}
-            onChange={(component_document) =>
-              setFields((current) => ({ ...current, component_document }))
-            }
-            disabled={!writable || action.busy}
-            onMedia={resources.remember}
-            renderContext={{ media, shortcodes }}
-          />
+          <section className="account-card" hidden={isEmbeddedEditor()}>
+            <h2>
+              <UiText text="组件内容" />
+            </h2>
+            <Button
+              className="admin-button admin-button-primary"
+              disabled={!writable || action.busy}
+              onClick={() => void openLive()}
+            >
+              <Icon name="eye" />
+              <UiText text="进入实时编辑" />
+            </Button>
+          </section>
         </>
       )}
       <ConfirmDialog

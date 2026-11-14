@@ -58,6 +58,7 @@ export interface BuilderComponentDefinition {
   component?: string;
   shortcode?: string;
   container?: boolean;
+  defaults?: BuilderValues;
   fields?: readonly BuilderField[];
 }
 

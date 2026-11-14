@@ -39,7 +39,8 @@ export type BuilderRenderContext = {
 };
 
 const coreIcons: Record<string, IconName> = {
-  "core.container": "grid",
+  "core.container": "sidebar",
+  "core.grid": "grid",
   "core.heading": "type",
   "core.markdown": "book",
   "core.html": "code",
@@ -200,6 +201,7 @@ export function BuilderElement({
   let body: ReactNode;
   switch (node.type) {
     case "core.container":
+    case "core.grid":
       body = (
         <div className={styles.container} data-builder-container>
           {children}
@@ -374,9 +376,18 @@ export function BuilderElement({
     <div
       className={styles.element}
       data-builder-node={node.type}
-      style={builderStyle(props)}
+      data-builder-id={preview ? node.id : undefined}
+      style={builderStyle(props, node.type === "core.grid")}
     >
-      {body}
+      {preview &&
+      (node.type === "core.html" || node.type === "core.markdown") ? (
+        <>
+          <div data-builder-inline-rendered>{body}</div>
+          <div data-builder-inline-host />
+        </>
+      ) : (
+        body
+      )}
     </div>
   );
 }
@@ -422,5 +433,19 @@ export function BuilderContent({
       );
     });
   }
-  return <div className={styles.content}>{render(document.nodes)}</div>;
+  return (
+    <div
+      className={styles.content}
+      data-builder-document={preview || undefined}
+    >
+      {render(document.nodes)}
+      {preview && (
+        <div
+          className={styles.insertSpace}
+          data-builder-insert
+          aria-hidden="true"
+        />
+      )}
+    </div>
+  );
 }

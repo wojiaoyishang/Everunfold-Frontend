@@ -1,6 +1,19 @@
 .content {
   container-type: inline-size;
 }
+.insertSpace {
+  display: none;
+}
+:global(html[data-builder-editor="editable"]) .insertSpace {
+  display: block;
+  min-block-size: 124px;
+  margin-block: 20px 6px;
+}
+:global(html[data-builder-editor])
+  .element[data-builder-id]
+  > .container:empty {
+  min-block-size: 64px;
+}
 .content > .element + .element {
   margin-block-start: max(16px, var(--builder-margin, 0px));
 }
@@ -81,7 +94,7 @@
     --builder-visual-gap: var(--builder-gap-tablet, var(--builder-gap, 16px));
   }
 }
-:global([data-builder-device="tablet"]) .element {
+:global(html[data-builder-device="tablet"]) .content .element {
   margin-block-start: var(--builder-margin-tablet, var(--builder-margin, 0));
   padding: var(--builder-padding-tablet, var(--builder-padding, 0));
   text-align: var(
@@ -136,7 +149,7 @@
     );
   }
 }
-:global([data-builder-device="mobile"]) .element {
+:global(html[data-builder-device="mobile"]) .content .element {
   margin-block-start: var(
     --builder-margin-mobile,
     var(--builder-margin-tablet, var(--builder-margin, 0))
@@ -201,14 +214,14 @@
   font-weight: 600;
   text-decoration: none;
   color: var(--on-primary, var(--admin-on-accent, Canvas));
-  background: var(--primary, var(--admin-accent));
+  background: var(--accent, var(--admin-accent));
 }
 .action:hover {
   filter: brightness(1.08);
 }
 .icon {
   display: inline-flex;
-  color: var(--primary, var(--admin-accent));
+  color: var(--accent, var(--admin-accent));
 }
 .icon svg {
   inline-size: 2em;
@@ -223,7 +236,7 @@
   min-block-size: 10rem;
   padding: clamp(1rem, 5%, 3rem);
   border-radius: 8px;
-  background: var(--admin-accent-soft, var(--surface));
+  background: var(--accent-soft, var(--admin-accent-soft));
 }
 .banner[data-image="true"] {
   color: var(--on-primary, Canvas);
@@ -270,4 +283,113 @@
   inline-size: 17px;
   block-size: 17px;
   flex: 0 0 auto;
+}
+
+.content[data-builder-document]:empty {
+  min-height: 180px;
+}
+
+.element:has(> [data-builder-inline-host][data-editing])
+  > [data-builder-inline-rendered] {
+  display: none;
+}
+.inlineEditor {
+  position: relative;
+  min-inline-size: 0;
+  color: var(--text);
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.inlineToolbar {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: calc(100% + 7px);
+  inset-inline-start: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-inline-size: min(100cqi, 100%);
+  inline-size: max-content;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--text) 22%, transparent);
+}
+.inlineMarks,
+.inlineMarks :is(fieldset) {
+  display: contents;
+}
+.inlineButton {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  inline-size: 28px;
+  block-size: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.inlineButton svg {
+  inline-size: 15px;
+  block-size: 15px;
+}
+.inlineButton:is(:hover, [aria-pressed="true"]) {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.inlineButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+.inlineButtonText {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.inlineBody {
+  --admin-accent: var(--accent);
+  --admin-muted: var(--muted);
+  --admin-text: var(--text);
+  --admin-border: var(--line);
+  --admin-subtle: var(--accent-soft);
+  --admin-danger: var(--text);
+  margin: 0;
+}
+.inlineBody [data-editor-local-control] {
+  background: transparent;
+}
+.inlineBody [data-editor-local-control] > div:has(> :global(.tiptap)) {
+  min-height: 0;
+  padding: 0;
+  box-shadow: none;
+  color: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+.inlineBody :global(.tiptap) {
+  min-height: 1.5em;
+}
+.inlineBody :global(.tiptap) > :first-child {
+  margin-block-start: 0;
+}
+.inlineBody :global(.tiptap) > :last-child {
+  margin-block-end: 0;
+}
+.inlineSource {
+  box-sizing: border-box;
+  display: block;
+  inline-size: 100%;
+  min-block-size: 5em;
+  padding: 8px;
+  font-family: monospace;
+  color: var(--text);
+  background: var(--surface);
 }

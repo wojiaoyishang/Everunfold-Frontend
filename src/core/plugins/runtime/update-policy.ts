@@ -1,7 +1,7 @@
 import type { RuntimeCatalog } from "./types";
 /** Full and embedded editors share these routes; preview and settings pages can update live. */
 export function isPluginEditingRoute(path: string) {
-  return /^\/admin\/(?:content\/[^/]+\/(?:new|[^/]+\/(?:edit|live))|pages\/(?:new|[^/]+(?:\/live)?))\/?$/.test(
+  return /^\/admin\/(?:content\/[^/]+\/(?:new|[^/]+\/(?:edit|live))|pages\/(?:new|(?:templates\/)?[^/]+(?:\/live)?))\/?$/.test(
     path,
   );
 }

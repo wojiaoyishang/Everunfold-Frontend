@@ -2,9 +2,12 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   cloneBuilderNode,
+  createBuilderNode,
   moveBuilderNode,
   resolvedBuilderProps,
 } from "../src/core/builder/document";
+import { builderStyle } from "../src/core/builder/layout";
+import { coreBuilderComponents } from "../src/core/builder/registry";
 import type { BuilderNode } from "../src/core/builder/types";
 import { createPluginRegistry } from "../src/core/plugins/create-registry";
 
@@ -104,5 +107,37 @@ test("requires builder widgets to use renderers owned by the registering plugin"
   assert.throws(
     () => register("example.other.banner", "widgets.banner"),
     /Invalid plugin builder component/,
+  );
+});
+
+test("a grid has independent layout defaults and remains a grid at each preview width", () => {
+  const definition = coreBuilderComponents.find(
+    (item) => item.type === "core.grid",
+  )!;
+  const node = createBuilderNode(definition);
+  assert.deepEqual(node.children, []);
+  const css = builderStyle(
+    { ...node.props, tablet: { columns: 3 }, mobile: { direction: "row" } },
+    true,
+  ) as Record<string, unknown>;
+  assert.deepEqual(
+    [
+      css["--builder-display"],
+      css["--builder-display-tablet"],
+      css["--builder-display-mobile"],
+    ],
+    ["grid", "grid", "grid"],
+  );
+  assert.deepEqual(
+    [
+      css["--builder-columns"],
+      css["--builder-columns-tablet"],
+      css["--builder-columns-mobile"],
+    ],
+    [
+      "repeat(2, minmax(0, 1fr))",
+      "repeat(3, minmax(0, 1fr))",
+      "repeat(1, minmax(0, 1fr))",
+    ],
   );
 });

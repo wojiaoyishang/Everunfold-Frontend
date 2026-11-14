@@ -9,13 +9,14 @@ export function useDialogSurface(
 ) {
   useLayoutEffect(() => {
     const dialog = dialogRef.current;
-    const trigger = returnFocus?.current ?? document.activeElement;
+    const owner = dialog?.ownerDocument ?? document;
+    const trigger = returnFocus?.current ?? owner.activeElement;
     dialog?.showModal();
     initialFocus?.current?.focus({ preventScroll: true });
     return () => {
       dialog?.close();
-      if (trigger instanceof HTMLElement && trigger.isConnected)
-        trigger.focus({ preventScroll: true });
+      if (trigger?.isConnected && "focus" in trigger)
+        (trigger as HTMLElement).focus({ preventScroll: true });
     };
   }, [dialogRef, initialFocus, returnFocus]);
 }

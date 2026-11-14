@@ -26,7 +26,9 @@ export function ContentPreview({
   id,
   site,
   terms,
+  liveWorkspace = false,
 }: {
+  liveWorkspace?: boolean;
   type: string;
   id: string;
   site: Site | null;
@@ -96,54 +98,61 @@ export function ContentPreview({
     );
   return (
     <BlogShell site={site} backendBaseUrl={baseUrl}>
-      <section className={`surface ${styles.bar}`} aria-label="前台预览操作">
-        <div className={styles.label}>
-          <Icon name="eye" />
-          <div className={styles.details}>
-            <strong>
-              <UiText text="前台预览" />
-            </strong>
-            <span>
-              {detail ? (
-                `草稿 · 修订 ${detail.revision}`
-              ) : error ? (
-                <UiText text="读取失败" />
-              ) : (
-                <UiText text="正在读取草稿" />
-              )}
-            </span>
-          </div>
-        </div>
-        <div className={styles.actions}>
-          <Button
-            className={styles.button}
-            disabled={!detail && !error}
-            onClick={retry}
+      {!liveWorkspace && (
+        <>
+          <section
+            className={`surface ${styles.bar}`}
+            aria-label="前台预览操作"
           >
-            <Icon name="refresh" />
-            <UiText text="刷新预览" />
-          </Button>
-          <RouteLink
-            className={styles.button}
-            href={back}
-            onClick={(event) => {
-              if (window.parent !== window) {
-                event.preventDefault();
-                window.parent.postMessage(
-                  { type: "everunfold:focus-editor", id },
-                  window.location.origin,
-                );
-              }
-            }}
-          >
-            <Icon name="edit" />
-            <UiText text="返回编辑" />
-          </RouteLink>
-        </div>
-      </section>
-      <p className={styles.notice}>
-        <UiText text="仅有编辑权限的用户可查看；预览不会发布内容，也不提交浏览、点赞或评论。" />
-      </p>
+            <div className={styles.label}>
+              <Icon name="eye" />
+              <div className={styles.details}>
+                <strong>
+                  <UiText text="前台预览" />
+                </strong>
+                <span>
+                  {detail ? (
+                    `草稿 · 修订 ${detail.revision}`
+                  ) : error ? (
+                    <UiText text="读取失败" />
+                  ) : (
+                    <UiText text="正在读取草稿" />
+                  )}
+                </span>
+              </div>
+            </div>
+            <div className={styles.actions}>
+              <Button
+                className={styles.button}
+                disabled={!detail && !error}
+                onClick={retry}
+              >
+                <Icon name="refresh" />
+                <UiText text="刷新预览" />
+              </Button>
+              <RouteLink
+                className={styles.button}
+                href={back}
+                onClick={(event) => {
+                  if (window.parent !== window) {
+                    event.preventDefault();
+                    window.parent.postMessage(
+                      { type: "everunfold:focus-editor", id },
+                      window.location.origin,
+                    );
+                  }
+                }}
+              >
+                <Icon name="edit" />
+                <UiText text="返回编辑" />
+              </RouteLink>
+            </div>
+          </section>
+          <p className={styles.notice}>
+            <UiText text="仅有编辑权限的用户可查看；预览不会发布内容，也不提交浏览、点赞或评论。" />
+          </p>
+        </>
+      )}
       {error ? (
         <section className={`surface ${styles.state}`} role="alert">
           <Icon name="cloud-off" />

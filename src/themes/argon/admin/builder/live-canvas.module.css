@@ -1,0 +1,273 @@
+.canvas {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--admin-subtle);
+}
+.canvas > iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: var(--admin-canvas);
+}
+.canvas[data-device="tablet"] > :is(iframe, .overlay) {
+  max-width: 768px;
+}
+.canvas[data-device="mobile"] > :is(iframe, .overlay) {
+  max-width: 390px;
+}
+.canvas[data-dragging] > iframe {
+  pointer-events: none;
+}
+.overlay {
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  width: 100%;
+  transform: translateX(-50%);
+  overflow: hidden;
+  pointer-events: none;
+}
+.outline {
+  position: absolute;
+  z-index: 1;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  transition: outline-color var(--admin-motion-fast, 150ms);
+}
+.outline[data-selected] {
+  z-index: 2;
+  outline: 2px solid var(--admin-accent);
+  outline-offset: -2px;
+}
+.outline[data-hovered],
+.outline:focus-within {
+  z-index: 3;
+  outline-color: var(--admin-accent);
+}
+.tools {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  overflow: hidden;
+  border-radius: 0 0 0 5px;
+  color: var(--admin-on-accent);
+  background: var(--admin-accent);
+  opacity: 0;
+  transition: opacity var(--admin-motion-fast, 150ms);
+}
+.outline[data-container] > .tools {
+  inset-block-start: auto;
+  inset-block-end: 100%;
+  inset-inline: 50% auto;
+  transform: translateX(-50%);
+  border-radius: 6px 6px 0 0;
+}
+.outline[data-container] > .tools[data-edge] {
+  inset-block: 0 auto;
+  border-radius: 0 0 6px 6px;
+}
+.outline[data-hovered] > .tools,
+.outline[data-selected] > .tools,
+.outline:focus-within > .tools {
+  opacity: 1;
+  pointer-events: auto;
+}
+.tools .tool {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 27px;
+  block-size: 26px;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.tools .tool[data-movable] {
+  cursor: grab;
+  touch-action: none;
+}
+.tools .tool[data-movable]:active {
+  cursor: grabbing;
+}
+.tools .tool:is(:hover, :focus-visible) {
+  background: color-mix(in srgb, var(--admin-on-accent) 20%, transparent);
+}
+.tools .tool svg {
+  width: 15px;
+  height: 15px;
+}
+.canvas[data-dragging] .outline {
+  outline-color: transparent;
+}
+.canvas[data-dragging] .outline > .tools {
+  opacity: 0;
+  pointer-events: none;
+}
+.drop {
+  position: absolute;
+  visibility: hidden;
+  z-index: 4;
+}
+.drop[data-active] {
+  visibility: visible;
+}
+.drop[data-over]::after {
+  position: absolute;
+  inset: calc(50% - 1px) 0;
+  border-radius: 3px;
+  background: var(--admin-accent);
+  content: "";
+}
+.drop[data-kind="side"][data-over]::after {
+  inset: 0 calc(50% - 1px);
+}
+.drop[data-kind="inside"][data-over]::after {
+  inset: 0;
+  outline: 2px dashed var(--admin-accent);
+  outline-offset: -2px;
+  background: color-mix(in srgb, var(--admin-accent) 15%, transparent);
+}
+.insert {
+  box-sizing: border-box;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px dashed
+    color-mix(in srgb, var(--admin-muted) 52%, var(--admin-border));
+  border-radius: 7px;
+  color: var(--admin-muted);
+  background: color-mix(in srgb, var(--admin-canvas) 94%, transparent);
+  font-size: 12px;
+  text-align: center;
+}
+.insert[data-over] {
+  border-color: var(--admin-accent);
+  outline: 1px solid var(--admin-accent);
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.insertActions,
+.layoutOptions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+.insertActions button,
+.layoutOptions button,
+.cancelLayout {
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-subtle);
+  color: var(--admin-text);
+  pointer-events: auto;
+  cursor: pointer;
+  transition:
+    background var(--admin-motion-fast, 150ms),
+    color var(--admin-motion-fast, 150ms);
+}
+.insertActions button {
+  inline-size: 36px;
+  block-size: 36px;
+  padding: 0;
+  border-radius: 50%;
+}
+.insertActions button:first-child {
+  border-color: var(--admin-accent-soft);
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.insertActions button:hover,
+.layoutOptions button:hover,
+.cancelLayout:hover {
+  border-color: var(--admin-accent);
+  color: var(--admin-accent);
+  background: var(--admin-accent-soft);
+}
+.insertActions svg,
+.layoutOptions svg,
+.cancelLayout svg {
+  inline-size: 16px;
+  block-size: 16px;
+}
+.layoutOptions button {
+  min-inline-size: 42px;
+  min-block-size: 44px;
+  gap: 2px;
+  padding: 4px 6px;
+  border-radius: 5px;
+  font-size: 11px;
+}
+.cancelLayout {
+  position: absolute;
+  inset-block-start: 5px;
+  inset-inline-end: 5px;
+  inline-size: 24px;
+  block-size: 24px;
+  padding: 0;
+  border-radius: 5px;
+}
+.status {
+  position: absolute;
+  z-index: 5;
+  inset-block-start: 12px;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  color: var(--admin-text);
+  background: var(--admin-canvas);
+  box-shadow: var(--admin-shadow);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.status svg {
+  width: 16px;
+  height: 16px;
+}
+.status button {
+  color: var(--admin-accent);
+}
+@media (hover: none) {
+  .tools .tool {
+    inline-size: 32px;
+    block-size: 32px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .outline,
+  .tools,
+  .insertActions button,
+  .layoutOptions button,
+  .cancelLayout {
+    transition: none;
+  }
+}
+:global(.admin-root[data-admin-motion="reduced"])
+  :is(
+    .outline,
+    .tools,
+    .insertActions button,
+    .layoutOptions button,
+    .cancelLayout
+  ) {
+  transition: none;
+}

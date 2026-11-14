@@ -1,4 +1,5 @@
 "use client";
+import { embeddedEditorSurface, isEmbeddedEditor } from "@/core/preview/bridge";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import {
   useEffect,
@@ -56,7 +57,7 @@ import { SeoDisclosure, SeoFieldsEditor } from "../components/seo-fields";
 import { CaptchaOverrides } from "../components/captcha-overrides";
 import { PageCodeFields } from "./code-fields";
 import { usePageAction } from "./feedback";
-import { BuilderEditor } from "@/themes/argon/admin/builder/editor";
+
 import { PageEditOptions } from "./edit-mode";
 
 const emptyDocument = { version: 1 as const, nodes: [] };
@@ -296,11 +297,47 @@ export function ManagedPageEditor({
   const preview = usePagePreview(previewPage);
   useEmbeddedPreviewPublisher(
     previewId,
+    ready ? { type: "everunfold:page-preview", page: previewPage } : null,
     {
-      type: "everunfold:page-preview",
-      page: previewPage,
+      dirty,
+      busy: action.busy,
+      published: Boolean(saved?.applied_revision && saved.enabled),
     },
-    { dirty, busy: action.busy },
+    componentMode
+      ? {
+          value: {
+            document: value.component_document ?? emptyDocument,
+            parameters: value.component_parameters ?? {},
+            linked: Boolean(templateId),
+            disabled: !write || action.busy || Boolean(saved?.archived),
+            allowComments: true,
+            canSaveTemplate: write && !templateId,
+            media: previewPage.media_urls ?? {},
+            shortcodes: shortcodes ?? [],
+          },
+          onChange: (change) => {
+            if (change.media) resources.remember(change.media);
+            if (change.mediaUrls)
+              resources.rememberResolvedMedia(change.mediaUrls);
+            if (change.document || change.parameters)
+              setValue((current) => ({
+                ...current,
+                ...(change.document
+                  ? { component_document: change.document }
+                  : {}),
+                ...(change.parameters
+                  ? { component_parameters: change.parameters }
+                  : {}),
+              }));
+            if (change.saveTemplate) {
+              setTemplateName(value.title.trim());
+              setNewTemplateId(randomUUID());
+              action.clearDialogError();
+              setConfirm("template");
+            }
+          },
+        }
+      : undefined,
   );
   const openLive = async () => {
     const popup = window.open("about:blank", "_blank");
@@ -316,6 +353,34 @@ export function ManagedPageEditor({
     popup.location.replace(livePreviewPath("page", saved?.id ?? previewId));
   };
 
+  const submitAction = (apply: boolean, label: string) => (
+    <Button
+      type="submit"
+      form={formId}
+      onClick={(event) => {
+        if (event.currentTarget.ownerDocument !== document) {
+          event.preventDefault();
+          void save(apply);
+        }
+      }}
+      data-apply={apply || undefined}
+      className={apply ? "admin-button admin-button-primary" : "admin-button"}
+      disabled={
+        action.busy ||
+        Boolean(optionsError) ||
+        (apply
+          ? source === "registered" && value.enabled && !available
+          : Boolean(saved) && !dirty)
+      }
+    >
+      <Icon name="save" />
+      <UiText text={label} />
+    </Button>
+  );
+  const saveAction = submitAction(false, "保存草稿");
+  const publishAction = publish
+    ? submitAction(true, value.enabled ? "保存并应用" : "保存并停用")
+    : null;
   return (
     <>
       <div className="admin-editor-back admin-page-editor-toolbar">
@@ -340,69 +405,23 @@ export function ManagedPageEditor({
           <PreviewAction
             icon="sidebar"
             label="实时预览"
-            description="在独立窗口中查看页面并编辑"
             disabled={!ready || !write || action.busy || Boolean(optionsError)}
             onClick={() => void openLive()}
           />
           <PreviewAction
             icon="external"
             label="前台预览"
-            description="在新窗口中预览当前输入"
             disabled={!ready || Boolean(optionsError)}
             onClick={() => {
               if (!preview.openWindow())
                 action.notify("预览窗口被浏览器拦截，请允许弹出窗口后重试。");
             }}
           />
-          <EmbeddedEditorActions>
-            {ready && write && !saved?.archived && (
-              <>
-                <Button
-                  type="submit"
-                  form={formId}
-                  onClick={(event) => {
-                    if (event.currentTarget.ownerDocument !== document) {
-                      event.preventDefault();
-                      void save(false);
-                    }
-                  }}
-                  className="admin-button"
-                  disabled={
-                    action.busy ||
-                    (Boolean(saved) && !dirty) ||
-                    Boolean(optionsError)
-                  }
-                >
-                  <Icon name="save" />
-                  <UiText text="保存草稿" />
-                </Button>
-                {publish && (
-                  <Button
-                    type="submit"
-                    form={formId}
-                    onClick={(event) => {
-                      if (event.currentTarget.ownerDocument !== document) {
-                        event.preventDefault();
-                        void save(true);
-                      }
-                    }}
-                    data-apply="true"
-                    className="admin-button admin-button-primary"
-                    disabled={
-                      action.busy ||
-                      Boolean(optionsError) ||
-                      (source === "registered" && value.enabled && !available)
-                    }
-                  >
-                    <Icon name="save" />
-                    <UiText
-                      text={value.enabled ? "保存并应用" : "保存并停用"}
-                    />
-                  </Button>
-                )}
-              </>
-            )}
-          </EmbeddedEditorActions>
+          {ready && write && !saved?.archived && (
+            <EmbeddedEditorActions primary={publishAction ?? saveAction}>
+              {publishAction && saveAction}
+            </EmbeddedEditorActions>
+          )}
         </ScrollHeaderActions>
       </div>
       <AdminPageHeading title={id ? "编辑页面" : "新建页面"} />
@@ -427,7 +446,10 @@ export function ManagedPageEditor({
       )}
       {(!id || saved) && (
         <>
-          <div className={styles.state}>
+          <div
+            className={styles.state}
+            data-live-normal-only={!saved?.archived || undefined}
+          >
             <span className="admin-badge">
               <UiText text={typeTitle} />
             </span>
@@ -462,7 +484,12 @@ export function ManagedPageEditor({
                   className="account-fieldset"
                   disabled={!write || action.busy || saved?.archived}
                 >
-                  <section className="account-card">
+                  <section
+                    className="account-card"
+                    data-live-part={
+                      source === "registered" ? undefined : "settings"
+                    }
+                  >
                     {!saved && source === "custom" && (
                       <label className={styles.newLanguage}>
                         <UiText text="内容语言" />
@@ -504,9 +531,11 @@ export function ManagedPageEditor({
                         required
                         maxLength={500}
                         hint={
-                          saved
-                            ? "站内路径，例如 /links 或 /about。"
-                            : "根据标题生成，也可手动填写站内路径。"
+                          isEmbeddedEditor()
+                            ? undefined
+                            : saved
+                              ? "站内路径，例如 /links 或 /about。"
+                              : "根据标题生成，也可手动填写站内路径。"
                         }
                         labelAside={
                           !saved &&
@@ -595,48 +624,51 @@ export function ManagedPageEditor({
                         />
                       </span>
                     </div>
-                    <p className={styles.help}>
-                      <UiText text="开关和修改在点击“保存并应用”后生效。新页面默认停用。" />
-                    </p>
-                    <p className={styles.help}>
-                      <UiText text="关闭评论只停止新提交，已有评论仍可阅读。保存草稿不会影响前台，保存并应用后生效。" />
+                    <p className={styles.help} data-live-normal-only>
+                      <UiText text="关闭评论只停止新提交，已有评论仍可阅读。" />
                     </p>
                   </section>
                   {definition?.seo_editable !== false && (
-                    <SeoDisclosure label="搜索与分享">
-                      <SeoFieldsEditor
-                        value={value}
-                        onChange={(patch) => setValue({ ...value, ...patch })}
-                        disabled={!write || action.busy}
-                        content={{
-                          kind: "page",
-                          id: saved?.id,
-                          title: value.title,
-                          summary: value.description,
-                          path: path || undefined,
-                          language:
-                            saved?.language ??
-                            (source === "custom"
-                              ? language
-                              : catalog.default_code),
-                          published: Boolean(saved?.enabled),
-                          access:
-                            value.captcha_read === "required"
-                              ? "captcha"
-                              : "public",
-                          cover:
-                            typeof value.options?.cover_url === "string"
-                              ? value.options.cover_url
-                              : undefined,
-                          share_image_url:
-                            value.share_image_media_id &&
-                            value.share_image_media_id ===
-                              saved?.value.share_image_media_id
-                              ? saved.share_image_url
-                              : undefined,
-                        }}
-                      />
-                    </SeoDisclosure>
+                    <div
+                      data-live-part={
+                        source === "registered" ? undefined : "settings"
+                      }
+                    >
+                      <SeoDisclosure label="搜索与分享">
+                        <SeoFieldsEditor
+                          value={value}
+                          onChange={(patch) => setValue({ ...value, ...patch })}
+                          disabled={!write || action.busy}
+                          content={{
+                            kind: "page",
+                            id: saved?.id,
+                            title: value.title,
+                            summary: value.description,
+                            path: path || undefined,
+                            language:
+                              saved?.language ??
+                              (source === "custom"
+                                ? language
+                                : catalog.default_code),
+                            published: Boolean(saved?.enabled),
+                            access:
+                              value.captcha_read === "required"
+                                ? "captcha"
+                                : "public",
+                            cover:
+                              typeof value.options?.cover_url === "string"
+                                ? value.options.cover_url
+                                : undefined,
+                            share_image_url:
+                              value.share_image_media_id &&
+                              value.share_image_media_id ===
+                                saved?.value.share_image_media_id
+                                ? saved.share_image_url
+                                : undefined,
+                          }}
+                        />
+                      </SeoDisclosure>
+                    </div>
                   )}
                   {source === "registered" ? (
                     <section className="account-card">
@@ -693,7 +725,10 @@ export function ManagedPageEditor({
                     </section>
                   ) : (
                     <>
-                      <section className="account-card">
+                      <section
+                        className="account-card"
+                        data-live-part="settings"
+                      >
                         <PageEditOptions
                           mode={componentMode ? "components" : "source"}
                           layout={value.layout}
@@ -717,43 +752,28 @@ export function ManagedPageEditor({
                         />
                       </section>
                       {componentMode && (
-                        <BuilderEditor
-                          allowComments
-                          value={value.component_document ?? emptyDocument}
-                          parameters={value.component_parameters ?? {}}
-                          onChange={(component_document) =>
-                            setValue((current) => ({
-                              ...current,
-                              component_document,
-                            }))
-                          }
-                          onParametersChange={(component_parameters) =>
-                            setValue((current) => ({
-                              ...current,
-                              component_parameters,
-                            }))
-                          }
-                          linked={Boolean(templateId)}
-                          onMedia={resources.remember}
-                          renderContext={{
-                            media: previewPage.media_urls,
-                            shortcodes,
-                          }}
-                          disabled={!write || action.busy || saved?.archived}
-                          onSaveTemplate={
-                            write && !templateId
-                              ? () => {
-                                  setTemplateName(value.title.trim());
-                                  setNewTemplateId(randomUUID());
-                                  action.clearDialogError();
-                                  setConfirm("template");
-                                }
-                              : undefined
-                          }
-                        />
+                        <section
+                          className="account-card"
+                          hidden={isEmbeddedEditor()}
+                        >
+                          <h2>
+                            <UiText text="组件内容" />
+                          </h2>
+                          <Button
+                            className="admin-button admin-button-primary"
+                            disabled={!ready || !write || action.busy}
+                            onClick={() => void openLive()}
+                          >
+                            <Icon name="eye" />
+                            <UiText text="进入实时编辑" />
+                          </Button>
+                        </section>
                       )}
                       {templateId ? (
-                        <section className="account-card">
+                        <section
+                          className="account-card"
+                          data-live-part="settings"
+                        >
                           <header>
                             <h2>
                               <UiText text="自定义页面模板" />
@@ -792,15 +812,17 @@ export function ManagedPageEditor({
                 </fieldset>
               </Form>
               {saved && (
-                <PageLanguages
-                  page={saved}
-                  disabled={dirty || action.busy}
-                  onChanged={async () => {
-                    const response = await readManagedPage(baseUrl, saved.id);
-                    setSaved(response.data);
-                    setValue(response.data.value);
-                  }}
-                />
+                <div data-live-part="settings">
+                  <PageLanguages
+                    page={saved}
+                    disabled={dirty || action.busy}
+                    onChanged={async () => {
+                      const response = await readManagedPage(baseUrl, saved.id);
+                      setSaved(response.data);
+                      setValue(response.data.value);
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -808,8 +830,8 @@ export function ManagedPageEditor({
       )}
       <ConfirmDialog
         open={confirm === "template"}
+        portalTarget={embeddedEditorSurface() ?? undefined}
         title="另存为页面模板"
-        description="模板保存组件结构及选中保留的参数默认值。新建页面时可以选择这个模板。"
         confirmLabel="保存模板"
         submitOnEnter
         busy={action.busy}

@@ -47,6 +47,8 @@ export function useEditorResources() {
       ...current,
       [item.id.replace(/^media:/, "")]: { original: item.url },
     }));
+  const rememberResolvedMedia = (urls: Record<string, MediaURL>) =>
+    setMedia((current) => ({ ...current, ...urls }));
   const createCategory = async (name: string, parentId: string | null) => {
     const response = await createContentCategory(
       baseUrl,
@@ -61,5 +63,13 @@ export function useEditorResources() {
           name.trim().normalize("NFC").toLocaleLowerCase(),
     );
   };
-  return { terms, defaults, media, remember, createCategory, codePreferences };
+  return {
+    terms,
+    defaults,
+    media,
+    remember,
+    rememberResolvedMedia,
+    createCategory,
+    codePreferences,
+  };
 }

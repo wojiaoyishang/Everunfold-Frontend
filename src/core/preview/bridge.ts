@@ -43,6 +43,15 @@ export function isEmbeddedEditor(): boolean {
     window.name.startsWith("everunfold-live-editor-")
   );
 }
+/** Portal only into the same-origin workspace that owns this editor frame. */
+export function embeddedEditorSurface(): Element | null {
+  if (!isEmbeddedEditor()) return null;
+  try {
+    return window.frameElement?.closest("[data-live-workspace]") ?? null;
+  } catch {
+    return null;
+  }
+}
 export function requestEmbeddedLeave(path: string): boolean {
   if (!isEmbeddedEditor()) return false;
   window.parent.postMessage(

@@ -13,6 +13,13 @@ export const coreBuilderComponents: readonly BuilderComponentDefinition[] = [
     container: true,
   },
   {
+    type: "core.grid",
+    label: "网格",
+    group: "layout",
+    container: true,
+    defaults: { layout: { direction: "grid", columns: 2 } },
+  },
+  {
     type: "core.divider",
     label: "分隔线",
     group: "layout",

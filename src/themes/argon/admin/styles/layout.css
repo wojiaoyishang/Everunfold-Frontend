@@ -623,3 +623,39 @@ body:has(.admin-embedded-editor) .admin-editor-preview-action,
   right: 12px;
   top: calc(50% - 6px);
 }
+
+/* The live workspace owns its heading and panel switch; keep the editor mounted. */
+html[data-live-panel] .admin-embedded-editor {
+  padding: 12px;
+  background: var(--admin-canvas);
+}
+html[data-live-panel]
+  .admin-embedded-editor
+  :is(.admin-page-heading, .admin-editor-back) {
+  display: none;
+}
+html[data-live-panel="settings"]
+  .admin-embedded-editor
+  :is([data-live-part="content"], [data-live-part="library"]),
+html[data-live-panel="content"]
+  .admin-embedded-editor
+  :is([data-live-part="settings"], [data-live-part="library"]),
+html[data-live-panel="library"]
+  .admin-embedded-editor
+  :is([data-live-part="settings"], [data-live-part="content"]) {
+  display: none;
+}
+html[data-live-panel]
+  .admin-embedded-editor
+  :is(.ui-input, .ui-textarea, .ui-select-trigger) {
+  min-width: 0;
+}
+
+html:has([data-live-workspace]) {
+  scrollbar-gutter: auto;
+  overflow: hidden;
+}
+
+html[data-live-panel] .admin-embedded-editor [data-live-normal-only] {
+  display: none;
+}
