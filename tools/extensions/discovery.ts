@@ -1,7 +1,7 @@
 import { readdir, lstat } from "node:fs/promises";
 import path from "node:path";
 
-/** Only immediate, source-controlled package directories may contribute code. */
+/** Discover immediate package directories from the extension source tree. */
 export async function discoverExtensions(
   root: string,
   kind: "themes" | "plugins",

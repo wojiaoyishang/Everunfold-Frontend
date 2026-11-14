@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[插件和主题源码的 Git 白名单](decisions/0146-extension-source-git-allowlists.md)记录内置扩展与本地自定义扩展的目录约定。
+
 [站点维护与讨论设置](decisions/0144-site-maintenance-and-discussion.md)记录原生数据包、健康探测、评论审核策略与权限。
 
 [公开查询缓存与前端快照复用](decisions/0143-public-query-cache-and-snapshot-reuse.md)说明 Redis 隔离、查询指标和 Node.js 快照读取。

@@ -44,3 +44,15 @@ Thumbs.db
 # Installed plugin packages and all derived artifacts are local.
 /plugins/
 /public/themes/
+
+# Bundled extension sources. Use separate directories for local extensions.
+/src/plugins/*
+!/src/plugins/.gitkeep
+!/src/plugins/book/
+!/src/plugins/captcha/
+!/src/plugins/gallery/
+!/src/plugins/honors/
+!/src/plugins/people/
+/src/themes/*
+!/src/themes/argon/
+!/src/themes/paper/

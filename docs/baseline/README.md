@@ -1813,3 +1813,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0145-page-version-history.md` | `ADR0145-1` | `03cac7eb7c09c141623dc9da4ffe92fa1ff198257a1d8ad5f478ef5417e94dd6` |
+
+## 插件和主题源码的 Git 白名单
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0146-extension-source-git-allowlists.md` | `ADR0146-1` | `59c48cb0543fa0621f0b3afb99b0b043fb1b871ea7f259b79052070b9a8da611` |
