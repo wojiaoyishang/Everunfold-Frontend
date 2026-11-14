@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import type {
   AdminFormFieldActionProps,
   AdminFormFieldSource,
@@ -7,6 +7,7 @@ import {
   Button,
   Icon,
   Modal,
+  Select,
   TextField,
   randomUUID,
   useAdminRequest,
@@ -124,6 +125,15 @@ function GenerationDialog({
   const t = useWritingText();
   const admin = useAdminRequest();
   const job = useGenerationJob();
+  const providerFieldId = useId();
+  const providers = review.availability.providers;
+  const [providerId, setProviderId] = useState(
+    () =>
+      providers.find(({ id }) => id === review.availability.default_provider_id)
+        ?.id ??
+      providers[0]?.id ??
+      "",
+  );
   const [closing, setClosing] = useState(false);
   const [material, setMaterial] = useState<Material | null>(null);
   const [sourceError, setSourceError] = useState(false);
@@ -172,6 +182,7 @@ function GenerationDialog({
     const next: GenerationRequest = {
       request_id: randomUUID(),
       expected_revision: review.availability.revision,
+      provider_id: providerId,
       scene: review.scene,
       field: field.field,
       resource_id: checked.source.resourceId || undefined,
@@ -190,7 +201,15 @@ function GenerationDialog({
   };
 
   const generate = async () => {
-    if (!material || !ready || !available || job.busy || action.current) return;
+    if (
+      !material ||
+      !ready ||
+      !available ||
+      !providerId ||
+      job.busy ||
+      action.current
+    )
+      return;
     const operation = new AbortController();
     action.current = operation;
     setCheckingMaterial(true);
@@ -244,12 +263,41 @@ function GenerationDialog({
       onExited={close}
     >
       <div className={`admin-density-controls ${styles.flow}`}>
-        <div className={styles.reviewHeading}>
-          <strong>{t(field.label)}</strong>
-          <span>
-            {t("将发送给")} <bdi>{review.availability.provider}</bdi>
-          </span>
-        </div>
+        <strong className={styles.reviewHeading}>{t(field.label)}</strong>
+        {providers.length ? (
+          <div className={styles.field}>
+            <label htmlFor={providerFieldId}>{t("生成服务商")}</label>
+            <Select
+              id={providerFieldId}
+              name="provider_id"
+              label={t("生成服务商")}
+              className={styles.providerChooser}
+              options={providers.map(({ id, name, model }) => ({
+                value: id,
+                label: `${name} · ${model}`,
+              }))}
+              value={providerId}
+              disabled={
+                closing ||
+                !available ||
+                job.busy ||
+                checkingMaterial ||
+                transportFailure
+              }
+              onValueChange={(value) => {
+                if (value === providerId) return;
+                setProviderId(value);
+                job.reset();
+                setConfirm(null);
+                setApplyError(false);
+              }}
+            />
+          </div>
+        ) : (
+          <p role="status" className={styles.hint}>
+            {t("暂无可用的生成服务商。")}
+          </p>
+        )}
         {sourceError && (
           <p role="alert" className={styles.error}>
             {t("素材暂时无法读取。")}
@@ -356,7 +404,13 @@ function GenerationDialog({
           ) : (
             <Button
               className={`admin-button${result ? "" : " admin-button-primary"}`}
-              disabled={!ready || !available || job.busy || checkingMaterial}
+              disabled={
+                !ready ||
+                !available ||
+                !providerId ||
+                job.busy ||
+                checkingMaterial
+              }
               onClick={() => {
                 refreshAvailability(admin);
                 void generate();

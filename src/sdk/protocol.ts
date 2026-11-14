@@ -16,6 +16,7 @@ export const SDK_CLIENT_EXPORTS = [
   "Switch",
   "Modal",
   "ConfirmDialog",
+  "SettingsLayout",
   "useToast",
   "UiText",
   "useT",

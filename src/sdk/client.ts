@@ -17,6 +17,7 @@ export { Select } from "@/themes/argon/components/ui/select";
 export { Switch } from "@/themes/argon/components/ui/switch";
 export { Modal } from "@/themes/argon/components/ui/modal";
 export { ConfirmDialog } from "@/themes/argon/components/ui/confirm-dialog";
+export { SettingsLayout } from "@/themes/argon/admin/settings/section-navigation";
 export { useToast } from "@/themes/argon/components/ui/toast/toast-provider";
 export {
   UiText,

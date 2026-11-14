@@ -30,6 +30,12 @@ export function useGenerationJob() {
   const [failure, setFailure] = useState<unknown>(null);
   const [requestId, setRequestId] = useState("");
   useEffect(() => () => current.current?.abort(), []);
+  const reset = () => {
+    if (current.current) return;
+    setStatus(null);
+    setFailure(null);
+    setRequestId("");
+  };
 
   const run = async (
     id: string,
@@ -65,5 +71,5 @@ export function useGenerationJob() {
     }
   };
 
-  return { status, busy, failure, requestId, run };
+  return { status, busy, failure, requestId, reset, run };
 }

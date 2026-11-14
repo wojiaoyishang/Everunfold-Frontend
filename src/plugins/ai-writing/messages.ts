@@ -5,6 +5,29 @@ const english: Record<string, string> = {
   "AI 辅助生成": "Write with AI",
   "关闭 AI 辅助生成": "Close AI writing",
   "启用 AI 写作助手": "Enable AI writing",
+  通用: "General",
+  服务商: "Providers",
+  模型服务商: "Model providers",
+  添加服务商: "Add provider",
+  "未配置服务商。": "No providers configured.",
+  编辑服务商: "Edit provider",
+  未命名服务商: "Untitled provider",
+  服务商名称: "Provider name",
+  默认服务商: "Default provider",
+  设为默认: "Set as default",
+  删除服务商: "Remove provider",
+  "保存后，此服务商将从生成选项中移除。":
+    "This provider will be removed from the generation options when you save.",
+  "保存后将移除此服务商，并停用 AI 写作助手。":
+    "Saving will remove this provider and disable AI writing.",
+  "启用写作助手前，请至少配置一个服务商。":
+    "Configure at least one provider before enabling AI writing.",
+  "请填写服务商名称、有效的接口地址和模型。":
+    "Enter a provider name, a valid API base URL, and a model.",
+  "服务商名称不能重复。": "Provider names must be unique.",
+  "保存更改后即可测试连接。": "Save changes to test the connection.",
+  "使用 API Key 时，接口地址必须为 HTTPS。":
+    "Use an HTTPS API base URL when an API key is configured.",
   接口地址: "API base URL",
   "模型 ID": "Model ID",
   保留现有密钥: "Keep the current key",
@@ -13,6 +36,8 @@ const english: Record<string, string> = {
   "更换接口来源后，请填写新密钥或移除现有密钥。":
     "Enter a new key or remove the current key after changing the provider origin.",
   生成入口: "Writing actions",
+  生成服务商: "Generation provider",
+  "暂无可用的生成服务商。": "No writing providers are available.",
   文章: "Articles",
   说说: "Short posts",
   页面: "Pages",

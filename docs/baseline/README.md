@@ -1831,3 +1831,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0148-admin-plugin-navigation.md` | `ADR0148-1` | `90cb4e646adebf29db4213cc614e770e1b9c63c5ddeac75f6596fd6c708323aa` |
+
+## AI 写作多服务商
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0149-ai-writing-providers.md` | `ADR0149-1` | `9477c5984ddf3eddba4931ccf485f917a4b1bafa4cbd253552418ce705b17921` |

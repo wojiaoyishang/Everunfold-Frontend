@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[AI 写作多服务商](decisions/0149-ai-writing-providers.md)记录服务商配置、生成时选择与升级顺序。
+
 [后台插件页面与菜单](decisions/0148-admin-plugin-navigation.md)记录页面地址、菜单注册与权限。
 
 [后台字段钩子与 AI 写作](decisions/0147-admin-form-hooks-and-ai-writing.md)记录扩展注册、字段范围和模型部署。

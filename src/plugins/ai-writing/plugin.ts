@@ -3,7 +3,7 @@ import { writingScenes } from "./fields";
 
 export default definePlugin({
   id: "core.ai-writing",
-  version: "1.0.0",
+  version: "1.1.0",
   title: "AI 写作助手",
   description: "为摘要、搜索与分享文案提供生成建议。",
   surface: "admin",
