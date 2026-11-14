@@ -83,6 +83,23 @@
   height: auto;
 }
 
+.rst-content figure.annotated-shot {
+  margin: 1.25rem 0;
+}
+
+.rst-content .annotated-shot img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ccdae8;
+  border-radius: 0.4rem;
+}
+
+.rst-content .annotated-shot figcaption p {
+  margin: 0.55rem 0 0;
+  color: #344563;
+}
+
 .handbook-nav-toggle,
 .handbook-nav-close,
 .handbook-nav-backdrop {
