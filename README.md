@@ -7,7 +7,8 @@ Everunfold 博客与轻量 CMS 的前端仓库，使用 Next.js App Router、Rea
 ## 文档
 
 - [本地快速开始](docs/source/welcome/quickstart.rst) · 初始化、配置和启动两端
-- [运行与部署](docs/source/welcome/deployment.rst) · 连接、进程、代理与数据保留
+- [站点后台使用](docs/source/usage/index.rst) · 内容发布、账号、站点配置和扩展
+- [部署与运维](docs/source/operations/index.rst) · 拓扑、配置、节点同步和故障排查
 - [前端开发参考](docs/source/frontend/index.rst) · 源码、扩展和检查
 - [构建与发布文档](docs/source/release/documentation.rst) · Sphinx 本地预览与 GitHub Pages
 - [历史设计索引](docs/README.md) · 基线、决策和交接

@@ -2,8 +2,7 @@
 ==============
 
 文档使用 reStructuredText、Sphinx 与 Read the Docs 主题。首页
-``docs/source/index.rst`` 使用 ``toctree`` 将快速开始、开发参考和预发布说明
-分章。发布范围是 ``docs/source/`` 生成的 HTML。仓库内的旧 Markdown 设计记录和
+``docs/source/index.rst`` 使用 ``toctree`` 将入门、站点后台、开发参考、部署和发布说明分章。发布范围是 ``docs/source/`` 生成的 HTML。仓库内的旧 Markdown 设计记录和
 开发交接留作查阅历史。
 
 在本地预览

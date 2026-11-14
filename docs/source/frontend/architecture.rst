@@ -1,72 +1,46 @@
-代码结构与职责
+架构与源码导航
 ==============
+
+前端的路由、业务状态、服务端能力和主题展示分开维护。开发时从目标页面定位
+路由，再沿它调用的模块找到适用的校验和状态，最后决定应该修改哪个层次。
+
+.. list-table::
+   :header-rows: 1
+   :widths: 36 64
+
+   * - 目录
+     - 负责的内容
+   * - ``src/app/``、``src/proxy.ts``
+     - App Router 入口、布局、公开路径匹配、管理请求标记和 HTTP 边界。
+   * - ``src/core/``
+     - 访问判断、内容与页面查询、编辑协作、契约、表单、主题注册和国际化。
+   * - ``src/server/``
+     - 在 Node.js 读取并写入公开副本，加载已安装插件包和本地缓存。
+   * - ``src/themes/argon/``、``src/themes/paper/``
+     - 默认父主题和子主题。界面显示从当前主题和对应的访问面取得。
+   * - ``src/plugins/``、``src/sdk/``
+     - 内置可信插件源码和前端公共 SDK。
+   * - ``tools/``、``tests/``
+     - 契约同步、独立插件构建、生产验证和行为测试。
 
 从路由找到实现
 --------------
 
-``src/app/`` 按用户访问面划分路由。括号包裹的路由组用于共享布局和错误界面，
-不会出现在 URL 中。修改展示时，从路由找到主题组件；修改请求、数据校验或状态转换时，
-优先找共享业务模块。
-
-.. list-table::
-   :header-rows: 1
-   :widths: 37 63
-
-   * - 目录
-     - 职责
-   * - ``src/app/(blog)/``
-     - 公开首页、文章、说说、归档、分类、标签、搜索和托管页面。
-   * - ``src/app/(management)/``
-     - 登录、账号中心、后台工作台和授权预览。后台根路径为 ``/admin``。
-   * - ``src/core/``
-     - 配置、访问控制、契约、内容查询、编辑、协作、国际化和渲染规则。
-   * - ``src/server/``
-     - Node.js 服务端能力。处理内容与设置副本、接收节点投递、读取插件包和本地存储。
-   * - ``src/themes/argon/``
-     - 默认父主题和共享交互控件。公开阅读、认证和后台各有自己的样式作用域。
-   * - ``src/themes/paper/``
-     - 可运行的子主题示例，声明相对 Argon 的差异。
-   * - ``src/plugins/`` 与 ``src/sdk/``
-     - 独立编译的可信插件源码及公开 SDK。部署产物放在 ``plugins/``。
-   * - ``tools/`` 与 ``tests/``
-     - 生成契约、构建和登记扩展、运行隔离验证，以及行为回归测试。
-
-``src/proxy.ts`` 处理管理路由的请求标记、公开路径解析和语言路由，并在需要时发出
-正确的 404 或 503。后台 ``admin/layout.tsx`` 提供共享工作台，由浏览器通过 FastAPI
-重新确认会话和权限。公开站点的设置副本不包含后台权限。
+先从 :doc:`architecture/routes` 判断改动影响公开页面、后台工作台还是专用进程。
 
 常用修改入口
 ------------
 
-- 新增公开页面时，先判断它是否是核心固定路由或应由插件注册的托管页面。
-  程序固定路由在 ``src/app`` 下维护。可配置的插件页面使用 :doc:`extensions`
-  中的注册流程。
-- 修改导航时，公开主题导航在 ``src/themes/`` 和 ``src/core/navigation/``。
-  后台菜单声明在 ``src/core/admin/``，展示由 Argon 后台布局负责。
-- 处理页面标题、canonical、Open Graph 或索引策略时，查看 ``src/core/seo/``。
-  ``/sitemap.xml``、``/feed.xml`` 和相关入口从允许公开的资料生成。
-- 修改设置表单时，复用 ``src/core/forms/`` 和主题控件。使用控件提供的键盘、焦点、
-  禁用和动画行为；需要确认的操作沿用共享弹窗或确认浮层。
-- 修改正文表现时，沿 ``src/core/rendering/``、短代码和主题正文组件定位。
-  避免为预览或某个扩展再实现一套正文处理流程。
+切换后台显示语言或增加可翻译文案时，从 :doc:`architecture/localization` 查看语言目录与回退规则。
 
 地址、请求与构建输入
 --------------------
 
-``PUBLIC_SITE_URL`` 用于正式公开网址，例如 canonical。
-``BACKEND_BASE_URL`` 是浏览器使用的公开 API 根地址。
-服务端在 ``[backend].base_url`` 中指定独立连接地址时，浏览器的 API 根地址保持不变。
-站点部署通过 ``FRONTEND_NODE_ID`` 与后端节点声明关联。节点收发配置和令牌只在服务端加载。
+有跨域、配置或契约变更时，按 :doc:`architecture/requests` 分清浏览器、服务端和节点接收器。
 
-浏览器请求通过 ``/v1/*`` 使用后端业务接口。涉及身份的写操作继续使用
-HttpOnly Cookie Session 和 CSRF 约定。业务调用使用真实 HTTP 状态和响应中的 ``code``
-判断结果，``msg`` 用于展示。公开阅读的服务端渲染使用公开资料和快照，私有预览需要单独的授权。
+.. toctree::
+   :maxdepth: 1
 
-``contracts.lock.json`` 固定各业务契约的后端提交和摘要。安装依赖后可运行
-``npm run contracts:prepare`` 恢复生成物。稳定的客户端访问入口位于
-``src/core/contracts/``，生成物位于 ``var/cache/contracts/``。新增业务字段时，
-先更新后端契约并验证版本，再更新前端锁定和使用方。
-
-.. seealso::
-
-   :doc:`content` 说明协作草稿、公开快照与私有读取之间的数据边界。
+   architecture/routes
+   architecture/requests
+   architecture/localization

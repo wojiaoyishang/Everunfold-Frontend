@@ -8,25 +8,21 @@ Everunfold 提供独立的公开阅读前台、编辑后台和内容 API。文�
 当前仓库维护 Everunfold 前端。请使用配套的 `Everunfold 后端仓库
 <https://github.com/wojiaoyishang/Everunfold-Backend>`__，按预发布说明选用已经一起验证的提交。
 
-基本概念
+阅读顺序
 --------
 
-前端节点
-   每个 Next.js 实例有稳定节点 ID。节点接收已发布内容和公开设置的版本副本，
-   可以在暂时无法联系 API 时继续读取本地公开内容。后台业务依然需要后端连接。
-
-业务接口
-   浏览器后台使用经配置的 API 地址。后端负责身份、权限、草稿、发布和任务状态。
-   节点内部通信使用独立地址、来源校验和两个方向的令牌。
-
-插件和主题
-   前端扩展可以提供页面、组件和表单入口。后端插件可以提供路由、任务或其他服务。
-   运行时只发现部署者安装的可信扩展。可选的 AI 写作功能由管理员配置，仅供后台使用。
-
-开始阅读
---------
-
+- :doc:`concepts` 说明草稿、发布、节点、快照和契约之间的关系。
 - :doc:`quickstart` 给出从空数据库和新检出启动两端的步骤。
-- :doc:`deployment` 说明地址、代理、状态及数据保留。
-- :doc:`../frontend/index` 介绍当前仓库的代码入口与扩展约定。
+- :doc:`../usage/index` 按管理员和编辑者任务说明后台入口。
+- :doc:`deployment` 指向部署、运维和数据恢复手册。
 - :doc:`../release/index` 记录预发布核验和文档自动发布方式。
+
+文档编排参考
+------------
+
+本手册沿用 XiaoHeiHook 的专题分章，将操作指南和扩展接口分开维护。
+安装、模块说明和实作示例的安排参考 Pear Admin Flask。示例与配置以
+Everunfold 当前实现为准。
+
+- `XiaoHeiHook RST 源码 <https://github.com/wojiaoyishang/XiaoHeiCat/tree/master/docs/source>`__
+- `Pear Admin Flask RST 源码 <https://gitee.com/pear-admin/pear-admin-flask/tree/master/docs/source>`__

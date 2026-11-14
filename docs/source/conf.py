@@ -10,6 +10,6 @@ root_doc = "index"
 nitpicky = True
 
 html_theme = "sphinx_rtd_theme"
-html_theme_options = {"navigation_depth": 3, "collapse_navigation": False}
+html_theme_options = {"navigation_depth": 4, "collapse_navigation": True}
 html_search_language = "zh"
 html_show_sourcelink = True
