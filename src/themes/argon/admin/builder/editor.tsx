@@ -21,6 +21,7 @@ import type {
   LiveBuilderChange,
   LiveBuilderState,
 } from "@/core/preview/builder";
+import type { MediaURL } from "@/core/contracts/content-admin";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Icon } from "../../components/icon";
 import { Button, Popover, TextField } from "../../components/ui/primitives";
@@ -198,15 +199,22 @@ export function LiveEditorSurface({
     setQuery("");
     openPanel(builder?.linked ? "parameters" : "library");
   };
-  const change = (nodes: BuilderNode[]) => {
+  const change = (
+    nodes: BuilderNode[],
+    mediaUrls?: Record<string, MediaURL>,
+  ) => {
     if (readOnly) return;
     setHistory(({ before }) => ({
       before: [...before.slice(-39), value],
       after: [],
     }));
-    changeBuilder({ document: { version: 1, nodes } });
+    changeBuilder({ document: { version: 1, nodes }, mediaUrls });
   };
-  const changeInlineContent = (id: string, content: string) => {
+  const changeInlineContent = (
+    id: string,
+    content: string,
+    mediaUrls?: Record<string, MediaURL>,
+  ) => {
     const node = findBuilderNode(value.nodes, id);
     if (
       !node ||
@@ -220,6 +228,7 @@ export function LiveEditorSurface({
         ...node,
         props: { ...node.props, [field]: content },
       })),
+      mediaUrls,
     );
   };
   const historyStep = (direction: "before" | "after") => {

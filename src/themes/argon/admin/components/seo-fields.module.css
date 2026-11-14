@@ -12,14 +12,21 @@
   border-radius: 8px;
 }
 
+.disclosure {
+  --seo-heading-size: 42px;
+  --seo-padding-inline: 12px;
+  --seo-body-padding-block: 4px 12px;
+  background: var(--admin-canvas, var(--surface));
+}
+
 .toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   width: 100%;
-  min-height: 38px;
-  padding: 8px 12px;
+  min-height: var(--seo-heading-size);
+  padding: 8px var(--seo-padding-inline);
   text-align: start;
   font-weight: 600;
 }
@@ -50,7 +57,8 @@
 }
 
 .revealBody {
-  padding: 4px 12px 12px;
+  padding-block: var(--seo-body-padding-block);
+  padding-inline: var(--seo-padding-inline);
 }
 
 .media {
@@ -99,12 +107,4 @@
 
 .fields :global(.admin-field) :global(.ui-select-trigger) {
   width: 100%;
-}
-
-.disclosure {
-  background: var(--admin-canvas, var(--surface));
-}
-
-.toggle {
-  min-height: 42px;
 }

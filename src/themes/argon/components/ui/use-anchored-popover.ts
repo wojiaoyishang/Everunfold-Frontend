@@ -32,14 +32,17 @@ export function useAnchoredPopover(
   };
   const position = useCallback(() => {
     if (!trigger.current || !panel.current?.matches(":popover-open")) return;
+    const owner = trigger.current.ownerDocument;
+    const height =
+      owner.defaultView?.innerHeight ?? owner.documentElement.clientHeight;
     const bounds = trigger.current.getBoundingClientRect();
-    if (bounds.bottom <= 0 || bounds.top >= window.innerHeight) {
+    if (bounds.bottom <= 0 || bounds.top >= height) {
       panel.current.hidePopover();
       return;
     }
     const viewport = {
-      width: document.documentElement.clientWidth,
-      height: window.innerHeight,
+      width: owner.documentElement.clientWidth,
+      height,
     };
     // Measure wrapped content at its final width, while the panel is still hidden.
     const size = { width: minWidth, maxWidth };
@@ -64,16 +67,17 @@ export function useAnchoredPopover(
   }, [minWidth, overlapAnchor, maxWidth]);
   useLayoutEffect(() => {
     if (!open || !trigger.current || !panel.current) return;
+    const view = trigger.current.ownerDocument.defaultView;
     position();
-    window.addEventListener("resize", position);
-    window.addEventListener("scroll", position, true);
+    view?.addEventListener("resize", position);
+    view?.addEventListener("scroll", position, true);
     const observer = new ResizeObserver(position);
     observer.observe(trigger.current);
     observer.observe(panel.current);
     return () => {
       observer.disconnect();
-      window.removeEventListener("resize", position);
-      window.removeEventListener("scroll", position, true);
+      view?.removeEventListener("resize", position);
+      view?.removeEventListener("scroll", position, true);
     };
   }, [open, position]);
   return {

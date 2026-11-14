@@ -86,7 +86,8 @@ export function ActionPopover({
               b.closest('[role="dialog"]') === event.currentTarget,
           );
           const index = buttons.indexOf(
-            document.activeElement as HTMLButtonElement,
+            event.currentTarget.ownerDocument
+              .activeElement as HTMLButtonElement,
           );
           const next =
             event.key === "Home"

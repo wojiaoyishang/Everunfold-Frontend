@@ -6,6 +6,7 @@ import { isManagedPagePreviewPath } from "@/core/pages/preview";
 import { ManagedPagePreview } from "@/themes/argon/preview/page-preview";
 import { pageArticleSources } from "@/core/pages/articles";
 import "@/themes/argon/argon.css";
+import "@/themes/argon/preview/block-editor-styles";
 export const metadata = {
   title: "页面预览",
   robots: { index: false, follow: false, nocache: true },

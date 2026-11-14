@@ -46,6 +46,8 @@ export interface BlockEditorProps {
   media?: Record<string, MediaURL>;
   modeControls?: HTMLElement | null;
   initialSelection?: SourceSelection;
+  autoFocus?: boolean;
+  initialView?: "visual" | "source";
   onMedia?: (kind: "all" | "image" | "video") => void;
   onShortcode?: () => void;
   onUpload?: (files: File[]) => void;
@@ -72,6 +74,7 @@ export function SourceBlockEditor({
   editorRef,
   modeControls: _modeControls,
   initialSelection,
+  autoFocus,
   uploadStatus,
   statusTarget,
   hideStatusBar,
@@ -116,11 +119,12 @@ export function SourceBlockEditor({
     [],
   );
   useEffect(() => {
-    if (!initialSelection) return;
+    if (!initialSelection && !autoFocus) return;
     // The child CodeMirror effect has already created its view. Applying now
     // avoids a later animation frame overriding the user's first key press.
-    input.current?.select(initialSelection);
-  }, [initialSelection]);
+    if (initialSelection) input.current?.select(initialSelection);
+    else input.current?.focus();
+  }, [initialSelection, autoFocus]);
   const currentLine = props.value.split("\n")[status.line - 1] ?? "";
   const heading =
     format === "markdown"

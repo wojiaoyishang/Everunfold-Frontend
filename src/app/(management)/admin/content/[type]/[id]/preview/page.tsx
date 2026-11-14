@@ -7,6 +7,7 @@ import { contentType } from "@/core/content-management/registry";
 import { isContentPreviewPath } from "@/core/content-management/preview";
 import { ContentPreview } from "@/themes/argon/preview/content-preview";
 import "@/themes/argon/argon.css";
+import "@/themes/argon/preview/block-editor-styles";
 
 export const metadata: Metadata = {
   title: "前台预览",

@@ -137,6 +137,7 @@ export function ComponentDraftEditor({
       },
       onChange: (change) => {
         if (change.media) resources.remember(change.media);
+        if (change.mediaUrls) resources.rememberResolvedMedia(change.mediaUrls);
         if (change.document)
           setFields((current) => ({
             ...current,

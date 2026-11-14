@@ -20,7 +20,6 @@ import {
 import { layoutFields, layoutRecord } from "@/core/builder/layout";
 import { UiText, useT } from "@/core/i18n/provider";
 import type { MediaItem } from "@/core/contracts/settings";
-import { mediaMarkup } from "@/core/content-management/editor-fields";
 import { mediaReferenceId, siteMediaReference } from "@/core/media/references";
 import { Icon } from "../../components/icon";
 import { Button, TextArea, TextField } from "../../components/ui/primitives";
@@ -30,11 +29,7 @@ import { Select } from "../../components/ui/select";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Modal } from "../../components/ui/modal";
 import { ConfirmPopover } from "../../components/ui/confirm-popover";
-import type {
-  CapturedInsertion,
-  CodeEditorHandle,
-} from "../../components/ui/code-editor";
-import { RegisteredBlockEditor } from "../content/plugins/registry";
+import { BuilderBlockSourceEditor } from "./block-source-editor";
 import { ShortcodePicker } from "../shortcodes/picker";
 import { MediaPickerDialog } from "../media/media-picker-dialog";
 import { builderIcon, type BuilderRenderContext } from "../../builder/content";
@@ -811,44 +806,24 @@ function SourceEditor({
   onMedia: (item: MediaItem) => void;
 }) {
   const [draft, setDraft] = useState(value);
-  const [mediaKind, setMediaKind] = useState<"all" | "image" | "video" | null>(
-    null,
-  );
-  const [shortcodes, setShortcodes] = useState(false);
-  const editor = useRef<CodeEditorHandle>(null);
-  const insertion = useRef<CapturedInsertion>(undefined);
-  const capture = () => {
-    insertion.current?.dispose?.();
-    insertion.current = editor.current?.captureInsertion();
-  };
-  const clear = () => {
-    insertion.current?.dispose?.();
-    insertion.current = undefined;
-  };
+  const [modeControls, setModeControls] = useState<HTMLDivElement | null>(null);
   return (
     <Modal
       className={styles.sourceDialog}
       title={label}
       closeLabel="关闭组件编辑器"
       onClose={onClose}
+      headerActions={<div ref={setModeControls} />}
     >
       <div className={styles.sourceEditor}>
-        <RegisteredBlockEditor
+        <BuilderBlockSourceEditor
           format={format}
-          editorRef={editor}
           value={draft}
           onChange={setDraft}
           label={label}
-          disabled={false}
           media={context.media}
-          onMedia={(kind) => {
-            capture();
-            setMediaKind(kind);
-          }}
-          onShortcode={() => {
-            capture();
-            setShortcodes(true);
-          }}
+          onMedia={onMedia}
+          modeControls={modeControls}
         />
       </div>
       <div className={styles.modalActions}>
@@ -865,31 +840,6 @@ function SourceEditor({
           <UiText text="应用到组件" />
         </Button>
       </div>
-      {mediaKind && (
-        <MediaPickerDialog
-          kind={mediaKind}
-          onPick={(item) => {
-            onMedia(item);
-            insertion.current?.(mediaMarkup(item, format));
-          }}
-          onClose={() => {
-            clear();
-            setMediaKind(null);
-          }}
-        />
-      )}
-      {shortcodes && (
-        <ShortcodePicker
-          format={format}
-          media={context.media}
-          onMedia={onMedia}
-          onPick={(source) => insertion.current?.(source)}
-          onClose={() => {
-            clear();
-            setShortcodes(false);
-          }}
-        />
-      )}
     </Modal>
   );
 }

@@ -29,6 +29,7 @@ import { Icon } from "../../components/icon";
 import type { MediaURL } from "@/core/contracts/content-admin";
 import type { PublicShortcode } from "@/core/contracts/settings";
 import dynamic from "next/dynamic";
+import { isBuilderPreviewControl } from "./preview-controls";
 import styles from "./live-canvas.module.css";
 
 const InlineSource = dynamic(() => import("./inline-source"), { ssr: false });
@@ -111,7 +112,11 @@ export function LiveBuilderCanvas({
   onTemplates?: () => void;
   onRemove?: (id: string) => void;
   onContextMenu?: (id: string, point: Point) => void;
-  onInlineChange?: (id: string, source: string) => void;
+  onInlineChange?: (
+    id: string,
+    source: string,
+    media?: Record<string, MediaURL>,
+  ) => void;
   onInlineActiveChange?: (active: boolean) => void;
   inlineRequest?: InlineRequest | null;
   media?: Record<string, MediaURL>;
@@ -411,6 +416,7 @@ export function LiveBuilderCanvas({
         if (target.closest("a")) event.preventDefault();
         return;
       }
+      if (isBuilderPreviewControl(target)) return;
       const id = nodeAt(event.target);
       if (id || target?.closest?.(formControl)) suppress(event);
       if (id && event.type === "click") editFromFrame(id, event);
@@ -448,7 +454,15 @@ export function LiveBuilderCanvas({
     page.addEventListener("load", schedule, true);
     page.addEventListener("click", click, true);
     page.addEventListener("auxclick", click, true);
-    page.addEventListener("submit", suppress, true);
+    const submit = (event: SubmitEvent) => {
+      if (
+        !(event.target as Element | null)?.closest?.(
+          "[data-builder-inline-host]",
+        )
+      )
+        suppress(event);
+    };
+    page.addEventListener("submit", submit, true);
     page.addEventListener("contextmenu", context, true);
     page.addEventListener("pointerover", hover, true);
     page.documentElement.addEventListener("pointerleave", leave);
@@ -463,7 +477,7 @@ export function LiveBuilderCanvas({
       page.removeEventListener("load", schedule, true);
       page.removeEventListener("click", click, true);
       page.removeEventListener("auxclick", click, true);
-      page.removeEventListener("submit", suppress, true);
+      page.removeEventListener("submit", submit, true);
       page.removeEventListener("contextmenu", context, true);
       page.removeEventListener("pointerover", hover, true);
       page.documentElement.removeEventListener("pointerleave", leave);
@@ -528,8 +542,12 @@ export function LiveBuilderCanvas({
   // On a small screen, the library overlays the canvas. Keep the sensor mounted
   // but let the pointer reach the iframe-sized drop slots when a drag starts.
   const canvasEnabled = !interactive && !disabled;
-  const finishInline = (id: string, value?: string) => {
-    if (value !== undefined) onInlineChange?.(id, value);
+  const finishInline = (
+    id: string,
+    value?: string,
+    media?: Record<string, MediaURL>,
+  ) => {
+    if (value !== undefined) onInlineChange?.(id, value, media);
     setEditing((current) => (current?.id === id ? null : current));
   };
 
@@ -651,7 +669,9 @@ export function LiveBuilderCanvas({
           format={format}
           media={media}
           shortcodes={shortcodes}
-          onFinish={(source) => finishInline(editingNode.id, source)}
+          onFinish={(source, media) =>
+            finishInline(editingNode.id, source, media)
+          }
         />
       )}
       {inlineHost && editingNode && editingHeading && onInlineChange && (

@@ -325,103 +325,58 @@
   outline-offset: 3px;
   cursor: text;
 }
-.inlineEditor {
+.inlineEditor:global(.admin-root) {
   position: absolute;
   z-index: 2;
   inset-block-start: calc(100% + 8px);
   inset-inline: 0;
   min-inline-size: 0;
-  padding: 4px;
-  border: 1px solid var(--line);
+  min-block-size: 0;
+  max-block-size: min(52vh, 28rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--admin-border);
   border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: 0 6px 24px color-mix(in srgb, var(--text) 22%, transparent);
+  background: var(--admin-surface);
+  box-shadow: var(--admin-shadow);
+  text-align: start;
 }
-.inlineToolbar {
+.inlineEditorActions {
+  position: sticky;
+  z-index: 1;
+  inset-block-start: 0;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 2px;
-  padding: 4px;
-  border-block-end: 1px solid var(--line);
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 10px;
+  border-block-end: 1px solid var(--admin-border);
+  background: var(--admin-surface);
 }
-.inlineMarks,
-.inlineMarks :is(fieldset) {
-  display: contents;
+
+.inlineEditorActions > div:last-child {
+  display: flex;
+  gap: 4px;
 }
-.inlineButton {
-  display: inline-grid;
-  place-items: center;
-  flex: none;
-  inline-size: 28px;
-  block-size: 28px;
-  padding: 0;
-  border: 0;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text);
-  cursor: pointer;
+
+.inlineEditorActions :global(.admin-icon-button) {
+  inline-size: 32px;
+  block-size: 32px;
 }
-.inlineButton svg {
-  inline-size: 15px;
-  block-size: 15px;
+
+.inlineBlockEditor {
+  min-inline-size: 0;
 }
-.inlineButton:is(:hover, [aria-pressed="true"]) {
-  background: var(--accent-soft);
-  color: var(--accent);
+
+.inlineBlockEditor :global(.cm-content) {
+  min-block-size: 7em;
 }
-.inlineButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: -2px;
+
+.inlineBlockEditor [data-editor-visual-canvas] {
+  min-block-size: 8em;
+  padding: 12px 16px;
 }
-.inlineButtonText {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-}
-.inlineBody {
-  --admin-accent: var(--accent);
-  --admin-muted: var(--muted);
-  --admin-text: var(--text);
-  --admin-border: var(--line);
-  --admin-subtle: var(--accent-soft);
-  --admin-danger: var(--text);
-  margin: 0;
-  overflow: auto;
-  max-block-size: min(38vh, 20rem);
-  padding: 8px;
-}
-.inlineBody [data-editor-local-control] {
-  background: transparent;
-}
-.inlineBody [data-editor-local-control] > div:has(> :global(.tiptap)) {
-  min-height: 0;
-  padding: 0;
-  box-shadow: none;
-  color: inherit;
-  font-size: inherit;
-  line-height: inherit;
-}
-.inlineBody :global(.tiptap) {
-  min-height: 3em;
-}
-.inlineBody :global(.tiptap) > :first-child {
-  margin-block-start: 0;
-}
-.inlineBody :global(.tiptap) > :last-child {
-  margin-block-end: 0;
-}
-.inlineSource {
-  box-sizing: border-box;
-  display: block;
-  inline-size: 100%;
-  min-block-size: 5em;
-  max-block-size: min(38vh, 20rem);
-  padding: 8px;
-  font-family: monospace;
-  color: var(--text);
-  background: var(--surface);
+
+.inlineBlockEditor [data-editor-visual-canvas] :global(.tiptap) {
+  min-block-size: 6em;
 }

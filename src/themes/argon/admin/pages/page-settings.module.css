@@ -200,8 +200,43 @@
   font-size: 13px;
 }
 
+.seo > div {
+  --seo-heading-size: 46px;
+  --seo-padding-inline: 16px;
+  --seo-body-padding-block: 4px 16px;
+  border-color: var(--admin-border);
+  border-radius: 9px;
+}
+
+.settings[data-compact] .seo > div {
+  --seo-heading-size: 42px;
+  --seo-padding-inline: 6px;
+  --seo-body-padding-block: 2px 12px;
+}
+
+.seo > div > button {
+  background: transparent;
+  border-radius: inherit;
+  font-size: 14px;
+  font-weight: 650;
+}
+
 .settings[data-compact] .seo > div > button {
-  padding-inline: 6px;
+  font-size: 13px;
+}
+
+.seo > div > button:hover {
+  background: var(--admin-subtle);
+}
+
+.seo > div > button:focus-visible {
+  outline-offset: -2px;
+}
+
+.seo :is(:global(.ui-input), :global(.ui-textarea)) {
+  box-sizing: border-box;
+  padding-inline: 11px;
+  background: var(--admin-canvas);
 }
 
 .seo > div > button > svg {

@@ -15,7 +15,7 @@ import { RichToolbar } from "./rich-toolbar";
 import styles from "./rich-editor.module.css";
 
 export default function HtmlEditor(props: BlockEditorProps) {
-  const [mode, setMode] = useState<"visual" | "source">("visual");
+  const [mode, setMode] = useState(props.initialView ?? "visual");
   const active = useRef<CodeEditorHandle | null>(null);
   const [selection, setSelection] = useState<SourceSelection>();
   const fonts = useFontLibrary();
@@ -69,6 +69,7 @@ export default function HtmlEditor(props: BlockEditorProps) {
           onChange={props.onChange}
           editorRef={active}
           initialSelection={selection}
+          autoFocus={props.autoFocus}
           afterToolbar={props.uploadStatus}
           uploadEntries={props.uploadEntries}
           media={props.media}

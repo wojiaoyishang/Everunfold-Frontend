@@ -4,6 +4,7 @@ import { UiText } from "@/core/i18n/provider";
 import {
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useRef,
   useState,
   type Ref,
@@ -97,6 +98,7 @@ interface RichTextEditorProps {
   label: string;
   disabled: boolean;
   initialSelection?: SourceSelection;
+  autoFocus?: boolean;
   editorRef?: Ref<CodeEditorHandle>;
   media?: Record<string, MediaURL>;
   toolbar: (editor: Editor) => ReactNode;
@@ -122,6 +124,7 @@ export function RichTextEditor({
   label,
   disabled,
   initialSelection,
+  autoFocus,
   editorRef,
   media = {},
   toolbar,
@@ -370,13 +373,18 @@ export function RichTextEditor({
     };
   }, [editor, shared, mapSelection]);
   useEffect(() => {
-    if (!hasLiveEditor(editor) || !initialSelection) return;
+    if (!hasLiveEditor(editor) || (!initialSelection && !autoFocus)) return;
     const frame = requestAnimationFrame(() => {
-      if (hasLiveEditor(editor))
+      if (!hasLiveEditor(editor)) return;
+      if (initialSelection)
         selectSource(editor, source.current, initialSelection, mapSelection);
+      else editor.view.dom.focus({ preventScroll: true });
     });
     return () => cancelAnimationFrame(frame);
-  }, [editor, initialSelection, mapSelection]);
+  }, [editor, initialSelection, autoFocus, mapSelection]);
+  useLayoutEffect(() => {
+    if (hasLiveEditor(editor)) editor.view.updateRoot();
+  }, [editor]);
   useEffect(() => {
     if (template || !hasLiveEditor(editor)) return;
     const render = () => {
@@ -603,6 +611,7 @@ export function RichTextEditor({
       <EditorContent
         editor={editor?.extensionManager ? editor : null}
         className={styles.canvas}
+        data-editor-visual-canvas
       />
       <EditorStatusBar
         count={value.length}

@@ -1,10 +1,12 @@
 .panel {
   --local-danger: var(--admin-danger, var(--color-danger, #b54343));
-  padding: 16px;
   border-color: var(--line);
   box-shadow: var(--shadow);
   font-size: 13px;
   line-height: 1.6;
+}
+.panel:global(.ui-anchored-panel) {
+  padding: 16px;
 }
 .heading {
   display: flex;

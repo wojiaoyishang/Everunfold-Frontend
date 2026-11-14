@@ -1,6 +1,7 @@
 "use client";
 import { FileDropZone } from "../../../components/ui/file-drop-zone";
 import {
+  useCallback,
   useImperativeHandle,
   useRef,
   useState,
@@ -99,12 +100,6 @@ const shortcuts: readonly SourceShortcut[] = [
   { key: "Mod-i", command: actions[1].command },
 ];
 const splitQuery = "(min-width: 801px)";
-function subscribeSplitLayout(listener: () => void) {
-  const query = matchMedia(splitQuery);
-  query.addEventListener("change", listener);
-  return () => query.removeEventListener("change", listener);
-}
-const canSplitLayout = () => matchMedia(splitQuery).matches;
 const serverSplitLayout = () => false;
 const paneLabels = { source: "源码", visual: "可视化" } as const;
 type Pane = keyof typeof paneLabels;
@@ -112,16 +107,25 @@ type Pane = keyof typeof paneLabels;
 export default function MarkdownEditor(props: BlockEditorProps) {
   const t = useT();
   const [preferredMode, setMode] = useState<"write" | "split" | "visual">(
-    "write",
+    props.initialView === "visual" ? "visual" : "write",
   );
   const [statusTarget, setStatusTarget] = useState<HTMLDivElement | null>(null);
   const [toolbarTarget, setToolbarTarget] = useState<HTMLDivElement | null>(
     null,
   );
   const [toolbarPane, setToolbarPane] = useState<Pane>("source");
+  const owner = props.modeControls?.ownerDocument.defaultView;
+  const subscribeSplitLayout = useCallback(
+    (listener: () => void) => {
+      const query = (owner ?? window).matchMedia(splitQuery);
+      query.addEventListener("change", listener);
+      return () => query.removeEventListener("change", listener);
+    },
+    [owner],
+  );
   const wide = useSyncExternalStore(
     subscribeSplitLayout,
-    canSplitLayout,
+    () => (owner ?? window).matchMedia(splitQuery).matches,
     serverSplitLayout,
   );
   const mode = preferredMode === "split" && !wide ? "visual" : preferredMode;
@@ -171,7 +175,11 @@ export default function MarkdownEditor(props: BlockEditorProps) {
     if (
       mode !== "split" ||
       scrolling.current ||
-      !(event.target instanceof HTMLElement)
+      !(
+        event.target instanceof
+        (event.currentTarget.ownerDocument.defaultView?.HTMLElement ??
+          HTMLElement)
+      )
     )
       return;
     const from = event.target,
@@ -257,6 +265,7 @@ export default function MarkdownEditor(props: BlockEditorProps) {
           <SourceBlockEditor
             {...props}
             editorRef={source}
+            autoFocus={props.autoFocus && mode === "write"}
             statusTarget={statusTarget}
             toolbarTarget={targetFor("source")}
             hideStatusBar={mode === "visual"}
@@ -287,6 +296,7 @@ export default function MarkdownEditor(props: BlockEditorProps) {
               onChange={props.onChange}
               label={props.label + " Markdown 可视化"}
               disabled={props.disabled}
+              autoFocus={props.autoFocus && mode === "visual"}
               initialSelection={
                 selection?.pane === "visual" ? selection.range : undefined
               }

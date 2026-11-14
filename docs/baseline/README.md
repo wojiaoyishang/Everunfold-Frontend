@@ -1793,5 +1793,5 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
-| `docs/decisions/0142-live-component-editing.md` | `ADR0142-2` | `7a8943be5732177ec4bcec43656b39d4fe33c5f6549b7fae3f45b7b89f5ccfbd` |
-| `docs/development/component-editor.md` | `component-editor-4` | `49e6eb9d84cc3a764714c81a520b172cc5a9affb7cfb8b32d8c9f473a7de9c84` |
+| `docs/decisions/0142-live-component-editing.md` | `ADR0142-3` | `3a26fb262916727f00f9ce5d7d529451345b528e89d677b96287f3c506d6f0f4` |
+| `docs/development/component-editor.md` | `component-editor-5` | `f403a2c6500e16de49f1ff4894dc2e61c6042d99edcc0a26abfdee8d668edc9a` |
