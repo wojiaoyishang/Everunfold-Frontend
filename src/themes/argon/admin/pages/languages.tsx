@@ -31,10 +31,12 @@ import styles from "./pages.module.css";
 
 export function PageLanguages({
   page,
+  compact = false,
   disabled,
   onChanged,
 }: {
   page: ManagedPageItem;
+  compact?: boolean;
   disabled: boolean;
   onChanged: () => Promise<void>;
 }) {
@@ -115,11 +117,14 @@ export function PageLanguages({
     <section
       className={`account-card ${styles.languagePanel}`}
       id="page-languages"
+      data-compact={compact || undefined}
     >
       <div className={styles.languageHeader}>
-        <h2>
-          <UiText text="语言版本" />
-        </h2>
+        {!compact && (
+          <h2>
+            <UiText text="语言版本" />
+          </h2>
+        )}
         <PageLanguageMenu group={group} current={page.id} />
       </div>
       <div className={styles.languageList}>
@@ -229,9 +234,11 @@ export function PageLanguages({
           <UiText text="添加语言版本" />
         </Button>
       )}
-      <p className={styles.help}>
-        <UiText text="各语言独立编辑和启用，只在列表显示原文。新增语言请先在站点设置中启用。" />
-      </p>
+      {!compact && (
+        <p className={styles.help}>
+          <UiText text="各语言独立编辑和启用，只在列表显示原文。新增语言请先在站点设置中启用。" />
+        </p>
+      )}
       {disabled && (
         <p className={styles.help}>
           <UiText text="请先保存当前修改，再管理语言关联。" />

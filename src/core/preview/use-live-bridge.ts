@@ -21,7 +21,7 @@ import {
   samePreview,
   type PreviewStamp,
 } from "./bridge";
-import type { PreviewKind } from "./routes";
+import { frontendPreviewPath, type PreviewKind } from "./routes";
 
 export interface LiveEditorState {
   dirty: boolean;
@@ -52,12 +52,28 @@ export function useLiveBridge({
   const [builder, setBuilder] = useState<LiveBuilderState | null>(null);
   const builderSequence = useRef(0);
   const channel = useRef(randomUUID());
+  const popupName = useRef<string | null>(null);
+  const popup = useRef<{ window: Window; path: string } | null>(null);
   const latest = useRef<object | null>(null);
   const expected = useRef<PreviewStamp | null>(null);
   const [pending, setPending] = useState<PreviewStamp | null>(null);
   const [status, setStatus] = useState<
     "loading" | "updating" | "ready" | "error"
   >("loading");
+  const publishPopup = useCallback(() => {
+    const target = popup.current;
+    if (!target || target.window.closed || !latest.current) return;
+    try {
+      const { origin, pathname, search } = target.window.location;
+      if (
+        origin === window.location.origin &&
+        pathname + search === target.path
+      )
+        target.window.postMessage(latest.current, origin);
+    } catch {
+      // The reader may have followed a cross-origin link in the preview.
+    }
+  }, []);
   const request = useCallback(
     () =>
       editor.current?.contentWindow?.postMessage(
@@ -152,12 +168,12 @@ export function useLiveBridge({
           setStatus("updating");
           return;
         }
-        const projection =
-          kind === "page" || kind === "template"
-            ? data.type === "everunfold:page-preview" &&
-              checkedPreviewPage(data.page, id)
-            : data.type === "everunfold:content-preview" &&
-              checkedLiveContent(data.content, kind, id);
+        const pageKind = kind === "page" || kind === "template";
+        const projection = pageKind
+          ? data.type === "everunfold:page-preview" &&
+            checkedPreviewPage(data.page, id)
+          : data.type === "everunfold:content-preview" &&
+            checkedLiveContent(data.content, kind, id);
         if (!projection) return;
         setDocumentTitle(projection.title);
         if ((data.builder_sequence ?? 0) >= builderSequence.current) {
@@ -165,10 +181,31 @@ export function useLiveBridge({
           setBuilder(checkedBuilderState(data.builder));
         }
         expected.current = stamp;
-        latest.current = data;
+        const message = pageKind
+          ? { type: "everunfold:page-preview", id, ...stamp, page: projection }
+          : {
+              type: "everunfold:content-preview",
+              id,
+              ...stamp,
+              content: projection,
+            };
+        latest.current = message;
         setPending(stamp);
         setStatus("updating");
-        view.current?.contentWindow?.postMessage(data, window.location.origin);
+        view.current?.contentWindow?.postMessage(
+          message,
+          window.location.origin,
+        );
+        publishPopup();
+      } else if (
+        event.source === popup.current?.window &&
+        data.id === id &&
+        data.type ===
+          (kind === "page" || kind === "template"
+            ? "everunfold:page-preview-ready"
+            : "everunfold:content-preview-ready")
+      ) {
+        publishPopup();
       } else if (
         event.source === view.current?.contentWindow &&
         data.id === id
@@ -201,6 +238,7 @@ export function useLiveBridge({
     view,
     request,
     loadPreview,
+    publishPopup,
     onEditorState,
     onLeave,
     onLocation,
@@ -211,6 +249,19 @@ export function useLiveBridge({
     const frame = view.current;
     if (frame)
       frame.setAttribute("src", frame.getAttribute("src") ?? "about:blank");
+  };
+  const openPreview = () => {
+    if (!latest.current) return false;
+    const path = frontendPreviewPath(kind, id);
+    const name =
+      (popupName.current ??= `everunfold-live-reader-${randomUUID()}`);
+    const target = window.open(path, name);
+    if (!target) return false;
+    popup.current = { window: target, path };
+    target.focus();
+    publishPopup();
+    request();
+    return true;
   };
   const changeBuilder = (change: LiveBuilderChange) => {
     if (!expected.current || !builder || !checkedBuilderChange(change, builder))
@@ -241,6 +292,7 @@ export function useLiveBridge({
     loadEditor,
     loadPreview,
     retry,
+    openPreview,
     builder,
     changeBuilder,
     documentTitle,

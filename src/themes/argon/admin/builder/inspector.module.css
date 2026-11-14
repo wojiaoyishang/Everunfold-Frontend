@@ -128,12 +128,6 @@
   min-inline-size: 0;
 }
 
-.sourceActions > :global(.admin-icon-button) {
-  flex: none;
-  inline-size: 36px;
-  block-size: 36px;
-}
-
 .numeric {
   display: grid;
   gap: 3px;
@@ -232,13 +226,8 @@
     min-block-size: 44px;
   }
 
-  .stepper > button,
-  .sourceActions > :global(.admin-icon-button) {
+  .stepper > button {
     inline-size: 44px;
-  }
-
-  .sourceActions > :global(.admin-icon-button) {
-    block-size: 44px;
   }
 
   .numericHeading > .resetNumber {

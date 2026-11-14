@@ -308,34 +308,43 @@
   min-height: 180px;
 }
 
-.element:has(> [data-builder-inline-host][data-editing])
+.element:has(> [data-builder-inline-host][data-editing="heading"])
+  > [data-builder-inline-rendered],
+.element:has(> [data-builder-inline-output]:not(:empty))
   > [data-builder-inline-rendered] {
   display: none;
 }
-.inlineEditor {
+.element:has(> [data-builder-inline-host][data-editing="source"]) {
   position: relative;
-  min-inline-size: 0;
-  color: var(--text);
+  z-index: 3;
+}
+.inlineHeading {
+  display: block;
+  min-block-size: 1.25em;
   outline: 2px solid var(--accent);
   outline-offset: 3px;
+  cursor: text;
 }
-.inlineToolbar {
+.inlineEditor {
   position: absolute;
   z-index: 2;
-  inset-block-end: calc(100% + 7px);
-  inset-inline-start: 0;
+  inset-block-start: calc(100% + 8px);
+  inset-inline: 0;
+  min-inline-size: 0;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--text) 22%, transparent);
+}
+.inlineToolbar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 2px;
-  max-inline-size: min(100cqi, 100%);
-  inline-size: max-content;
   padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  background: var(--surface);
-  color: var(--text);
-  box-shadow: 0 3px 12px color-mix(in srgb, var(--text) 22%, transparent);
+  border-block-end: 1px solid var(--line);
 }
 .inlineMarks,
 .inlineMarks :is(fieldset) {
@@ -381,6 +390,9 @@
   --admin-subtle: var(--accent-soft);
   --admin-danger: var(--text);
   margin: 0;
+  overflow: auto;
+  max-block-size: min(38vh, 20rem);
+  padding: 8px;
 }
 .inlineBody [data-editor-local-control] {
   background: transparent;
@@ -394,7 +406,7 @@
   line-height: inherit;
 }
 .inlineBody :global(.tiptap) {
-  min-height: 1.5em;
+  min-height: 3em;
 }
 .inlineBody :global(.tiptap) > :first-child {
   margin-block-start: 0;
@@ -407,6 +419,7 @@
   display: block;
   inline-size: 100%;
   min-block-size: 5em;
+  max-block-size: min(38vh, 20rem);
   padding: 8px;
   font-family: monospace;
   color: var(--text);

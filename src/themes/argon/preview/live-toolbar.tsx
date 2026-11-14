@@ -34,6 +34,8 @@ export function LiveToolbar({
   onDevice,
   collapsed,
   onPreview,
+  onOpenPreview,
+  previewDisabled,
   onUndo,
   onRedo,
   onSaveTemplate,
@@ -57,6 +59,8 @@ export function LiveToolbar({
   onDevice: (device: BuilderDevice) => void;
   collapsed: boolean;
   onPreview: () => void;
+  onOpenPreview: () => void;
+  previewDisabled: boolean;
   onUndo?: () => void;
   onRedo?: () => void;
   onSaveTemplate?: () => void;
@@ -110,6 +114,15 @@ export function LiveToolbar({
               >
                 <Icon name="arrow-left" />
                 <UiText text="返回后台" />
+              </Button>
+              <Button
+                onClick={() => {
+                  close();
+                  onPreview();
+                }}
+              >
+                <Icon name="sidebar" />
+                <UiText text={collapsed ? "恢复编辑栏" : "纯预览"} />
               </Button>
               {onParameters && (
                 <Button
@@ -169,14 +182,16 @@ export function LiveToolbar({
         </Button>
       </div>
       <div className={styles.document}>
-        <span className={styles.documentTitle} title={title}>
-          {title || t("实时预览")}
-        </span>
-        {kind !== "template" && published !== null && (
-          <span className={styles.documentState} data-published={published}>
-            <UiText text={published ? "已发布" : "草稿"} />
+        <div className={styles.documentLabel}>
+          <span className={styles.documentTitle} title={title}>
+            {title || t("实时预览")}
           </span>
-        )}
+          {kind !== "template" && published !== null && (
+            <span className={styles.documentState} data-published={published}>
+              <UiText text={published ? "已发布" : "草稿"} />
+            </span>
+          )}
+        </div>
         {tool(
           "settings",
           "页面设置",
@@ -200,7 +215,13 @@ export function LiveToolbar({
         ))}
       </div>
       <div className={styles.actions}>
-        {tool("eye", "纯预览", onPreview, collapsed)}
+        {tool(
+          "eye",
+          "在新窗口查看前台预览",
+          onOpenPreview,
+          undefined,
+          previewDisabled,
+        )}
         <div className={styles.save} data-locked={saveBlocked || undefined}>
           <div
             className={styles.primary}
@@ -229,15 +250,6 @@ export function LiveToolbar({
                     <UiText text="另存为模板" />
                   </Button>
                 )}
-                <Button
-                  onClick={() => {
-                    close();
-                    if (!collapsed) onPreview();
-                  }}
-                >
-                  <Icon name="eye" />
-                  <UiText text="查看页面" />
-                </Button>
               </>
             )}
           </ActionPopover>

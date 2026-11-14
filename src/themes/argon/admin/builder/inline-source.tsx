@@ -14,10 +14,12 @@ import type { JSONContent } from "@tiptap/core";
 import { htmlRichSource } from "@/core/editor/visual-document";
 import { markdownRichSource } from "@/core/editor/visual-markdown";
 import type { MediaURL } from "@/core/contracts/content-admin";
+import type { PublicShortcode } from "@/core/contracts/settings";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Button, TextArea } from "../../components/ui/primitives";
 import { RichTextEditor } from "../../components/ui/rich-text-editor";
 import { Icon, type IconName } from "../../components/icon";
+import { BuilderSource } from "../../builder/content";
 import styles from "../../builder/content.module.css";
 
 const sourceOnlyNodes = new Set(["rawHtml", "htmlOpaque", "nativeShortcode"]);
@@ -38,33 +40,38 @@ function canEditVisually(value: string, format: "html" | "markdown") {
   }
 }
 
-/** The iframe keeps the reader's fonts and layout. Only this node is editable. */
 export default function InlineSource({
+  id,
   host,
   source,
   format,
   media,
-  onApply,
-  onCancel,
+  shortcodes,
+  onFinish,
 }: {
+  id: string;
   host: HTMLElement;
   source: string;
   format: "html" | "markdown";
   media?: Record<string, MediaURL>;
-  onApply: (value: string) => void;
-  onCancel: () => void;
+  shortcodes?: readonly PublicShortcode[];
+  onFinish: (value?: string) => void;
 }) {
   const t = useT();
   const [draft, setDraft] = useState(source);
   const latest = useRef(source);
   const applied = useRef(false);
   const textarea = useRef<HTMLTextAreaElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const [raw, setSourceMode] = useState(() => !canEditVisually(source, format));
   const canSwitchToVisual = useMemo(
     () => !raw || canEditVisually(draft, format),
     [raw, draft, format],
   );
   const [toolbar, setToolbar] = useState<HTMLDivElement | null>(null);
+  const output = host.parentElement?.querySelector(
+    "[data-builder-inline-output]",
+  );
   const initialSelection = useMemo(() => ({ start: 0, end: 0 }), []);
   const update = (next: string) => {
     latest.current = next;
@@ -73,12 +80,11 @@ export default function InlineSource({
   const finish = (apply: boolean) => {
     if (applied.current) return;
     applied.current = true;
-    if (apply) onApply(latest.current);
-    else onCancel();
+    onFinish(apply ? latest.current : undefined);
   };
   const leave = useEffectEvent(() => finish(true));
   useEffect(() => {
-    host.setAttribute("data-editing", "");
+    host.setAttribute("data-editing", "source");
     const frameDocument = host.ownerDocument;
     const topDocument = frameDocument.defaultView?.frameElement?.ownerDocument;
     let composing = false;
@@ -126,76 +132,110 @@ export default function InlineSource({
   }, [host]);
   useEffect(() => {
     if (raw) textarea.current?.focus({ preventScroll: true });
-  }, [raw]);
+    const element = panel.current;
+    if (
+      element &&
+      element.getBoundingClientRect().bottom >
+        host.ownerDocument.documentElement.clientHeight
+    )
+      element.scrollIntoView({ block: "nearest", behavior: "instant" });
+  }, [host, raw]);
   const label = format === "html" ? "编辑 HTML" : "编辑 Markdown";
-  return createPortal(
-    <div
-      className={styles.inlineEditor}
-      data-editor-local-control
-      onKeyDown={(event) => {
-        if (event.nativeEvent.isComposing) return;
-        if (
-          event.key === "Escape" ||
-          (event.key === "Enter" && (event.ctrlKey || event.metaKey))
-        ) {
-          event.preventDefault();
-          event.stopPropagation();
-          finish(event.key !== "Escape");
-        }
-      }}
-    >
-      <div
-        className={styles.inlineToolbar}
-        role="toolbar"
-        aria-label={t("排版工具")}
-        onPointerDown={(event) => {
-          if (event.pointerType === "mouse") event.preventDefault();
-        }}
-      >
-        <div className={styles.inlineMarks} ref={setToolbar} />
-        {canSwitchToVisual && (
-          <InlineButton
-            label={raw ? "可视化" : "源码"}
-            icon={raw ? "type" : "code"}
-            onClick={() => setSourceMode(!raw)}
-            active={raw}
-          />
+  return (
+    <>
+      {output &&
+        draft !== source &&
+        createPortal(
+          draft ? (
+            <BuilderSource
+              id={id}
+              source={draft}
+              format={format}
+              context={{ media, shortcodes }}
+              preview
+            />
+          ) : (
+            <span className={styles.placeholder}>
+              <UiText text={format === "html" ? "HTML" : "Markdown"} />
+            </span>
+          ),
+          output,
         )}
-        <InlineButton
-          label="应用到组件"
-          icon="check"
-          onClick={() => finish(true)}
-        />
-        <InlineButton label="取消" icon="close" onClick={() => finish(false)} />
-      </div>
-      {raw ? (
-        <TextArea
-          ref={textarea}
-          className={styles.inlineSource}
-          value={draft}
-          spellCheck={false}
-          rows={Math.min(12, Math.max(4, draft.split("\n").length))}
-          aria-label={t(label + " 源码")}
-          onChange={(event) => update(event.target.value)}
-        />
-      ) : (
-        <div className={`article-content ${styles.inlineBody}`}>
-          <RichTextEditor
-            value={draft}
-            onChange={update}
-            label={t(label)}
-            disabled={false}
-            format={format}
-            media={media}
-            initialSelection={initialSelection}
-            toolbarTarget={toolbar}
-            hideStatusBar
-            toolbar={(editor) => <InlineMarks editor={editor} />}
-          />
-        </div>
+      {createPortal(
+        <div
+          ref={panel}
+          className={styles.inlineEditor}
+          data-editor-local-control
+          onKeyDown={(event) => {
+            if (event.nativeEvent.isComposing) return;
+            if (
+              event.key === "Escape" ||
+              (event.key === "Enter" && (event.ctrlKey || event.metaKey))
+            ) {
+              event.preventDefault();
+              event.stopPropagation();
+              finish(event.key !== "Escape");
+            }
+          }}
+        >
+          <div
+            className={styles.inlineToolbar}
+            role="toolbar"
+            aria-label={t("排版工具")}
+            onPointerDown={(event) => {
+              if (event.pointerType === "mouse") event.preventDefault();
+            }}
+          >
+            <div className={styles.inlineMarks} ref={setToolbar} />
+            {canSwitchToVisual && (
+              <InlineButton
+                label={raw ? "可视化" : "源码"}
+                icon={raw ? "type" : "code"}
+                onClick={() => setSourceMode(!raw)}
+                active={raw}
+              />
+            )}
+            <InlineButton
+              label="应用到组件"
+              icon="check"
+              onClick={() => finish(true)}
+            />
+            <InlineButton
+              label="取消"
+              icon="close"
+              onClick={() => finish(false)}
+            />
+          </div>
+          {raw ? (
+            <TextArea
+              ref={textarea}
+              className={styles.inlineSource}
+              value={draft}
+              spellCheck={false}
+              rows={Math.min(12, Math.max(4, draft.split("\n").length))}
+              aria-label={t(label + " 源码")}
+              onChange={(event) => update(event.target.value)}
+            />
+          ) : (
+            <div className={`article-content ${styles.inlineBody}`}>
+              <RichTextEditor
+                value={draft}
+                onChange={update}
+                label={t(label)}
+                disabled={false}
+                format={format}
+                media={media}
+                initialSelection={initialSelection}
+                toolbarTarget={toolbar}
+                hideStatusBar
+                toolbar={(editor) => <InlineMarks editor={editor} />}
+              />
+            </div>
+          )}
+        </div>,
+        host,
       )}
-    </div>,
-    host,
+    </>
   );
 }
 

@@ -39,11 +39,16 @@ export function ContentPreview({
   const [liveContent, setLiveContent] = useState<Content | null>(null);
   const { setStamp, rendered } = usePreviewReceipt(id);
   useEffect(() => {
-    if (window.parent === window) return;
+    const source =
+      window.parent === window
+        ? (window.opener as Window | null)
+        : window.parent;
+    if (!source) return;
     const receive = (event: MessageEvent) => {
       if (
         event.origin !== window.location.origin ||
-        event.source !== window.parent ||
+        event.source !== source ||
+        event.data?.id !== id ||
         event.data?.type !== "everunfold:content-preview"
       )
         return;
@@ -55,7 +60,7 @@ export function ContentPreview({
       }
     };
     window.addEventListener("message", receive);
-    window.parent.postMessage(
+    source.postMessage(
       { type: "everunfold:content-preview-ready", id },
       window.location.origin,
     );
@@ -111,7 +116,9 @@ export function ContentPreview({
                   <UiText text="前台预览" />
                 </strong>
                 <span>
-                  {detail ? (
+                  {liveContent ? (
+                    <UiText text="编辑器输入" />
+                  ) : detail ? (
                     `草稿 · 修订 ${detail.revision}`
                   ) : error ? (
                     <UiText text="读取失败" />
@@ -140,6 +147,10 @@ export function ContentPreview({
                       { type: "everunfold:focus-editor", id },
                       window.location.origin,
                     );
+                  } else if (window.opener && !window.opener.closed) {
+                    event.preventDefault();
+                    window.opener.focus();
+                    window.close();
                   }
                 }}
               >

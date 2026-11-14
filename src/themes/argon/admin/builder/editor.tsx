@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type {
   BuilderDevice,
   BuilderDocument,
@@ -67,6 +67,8 @@ export function LiveEditorSurface({
   editorPanelId,
   ready,
   saveBlocked,
+  onOpenPreview,
+  previewDisabled,
   onInlineActiveChange,
   title,
   published,
@@ -83,6 +85,8 @@ export function LiveEditorSurface({
   editorPanelId: string;
   ready: boolean;
   saveBlocked: boolean;
+  onOpenPreview: () => void;
+  previewDisabled: boolean;
   onInlineActiveChange: (active: boolean) => void;
   title: string;
   published: boolean | null;
@@ -113,6 +117,7 @@ export function LiveEditorSurface({
     null,
   );
   const menuRef = useRef<HTMLDivElement>(null);
+  const panesRef = useRef<HTMLDivElement>(null);
   const structureRef = useRef<HTMLButtonElement>(null);
   const [history, setHistory] = useState<{
     before: BuilderDocument[];
@@ -131,11 +136,49 @@ export function LiveEditorSurface({
   const awaitingEditor = !ready && frame.status !== "error";
   const canInsertTemplate = kind === "page" || kind === "template";
 
-  useEffect(() => {
-    if (!menu) return;
+  useLayoutEffect(() => {
     const element = menuRef.current;
-    element?.showPopover();
-    element?.querySelector("button")?.focus({ preventScroll: true });
+    if (!menu || !element) return;
+    if (!element.matches(":popover-open")) element.showPopover();
+    const owner = element.ownerDocument;
+    const bounds = element.getBoundingClientRect();
+    element.style.left = `${Math.max(4, Math.min(menu.x, owner.documentElement.clientWidth - bounds.width - 4))}px`;
+    element.style.top = `${Math.max(4, Math.min(menu.y, owner.documentElement.clientHeight - bounds.height - 4))}px`;
+    element.querySelector("button")?.focus({ preventScroll: true });
+
+    const dismiss = () => {
+      if (element.matches(":popover-open")) element.hidePopover();
+    };
+    const outside = (event: PointerEvent) => {
+      if (!event.composedPath().includes(element)) dismiss();
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape" || !element.matches(":popover-open")) return;
+      event.preventDefault();
+      event.stopPropagation();
+      dismiss();
+    };
+    owner.addEventListener("pointerdown", outside, true);
+    // Native popover dismissal only sees events in its own document.
+    const frames = [
+      ...(panesRef.current?.querySelectorAll("iframe") ?? []),
+    ].flatMap((iframe) => {
+      const page = iframe.contentDocument;
+      return page ? [{ iframe, page }] : [];
+    });
+    for (const { iframe, page } of frames) {
+      page.addEventListener("pointerdown", outside, true);
+      page.addEventListener("keydown", escape, true);
+      iframe.addEventListener("load", dismiss);
+    }
+    return () => {
+      owner.removeEventListener("pointerdown", outside, true);
+      for (const { iframe, page } of frames) {
+        page.removeEventListener("pointerdown", outside, true);
+        page.removeEventListener("keydown", escape, true);
+        iframe.removeEventListener("load", dismiss);
+      }
+    };
   }, [menu]);
 
   const openPanel = (next: LivePanel) => {
@@ -163,18 +206,19 @@ export function LiveEditorSurface({
     }));
     changeBuilder({ document: { version: 1, nodes } });
   };
-  const changeInlineSource = (id: string, source: string) => {
+  const changeInlineContent = (id: string, content: string) => {
     const node = findBuilderNode(value.nodes, id);
     if (
       !node ||
-      !["core.markdown", "core.html"].includes(node.type) ||
-      (node.props.source ?? "") === source
+      !["core.heading", "core.markdown", "core.html"].includes(node.type)
     )
       return;
+    const field = node.type === "core.heading" ? "text" : "source";
+    if ((node.props[field] ?? "") === content) return;
     change(
       updateBuilderNode(value.nodes, id, (node) => ({
         ...node,
-        props: { ...node.props, source },
+        props: { ...node.props, [field]: content },
       })),
     );
   };
@@ -295,13 +339,11 @@ export function LiveEditorSurface({
           setShowOnMobile(false);
         }}
         collapsed={collapsed}
+        onOpenPreview={onOpenPreview}
+        previewDisabled={previewDisabled}
         onPreview={() => {
-          if (showOnMobile && matchMedia("(max-width: 760px)").matches)
-            setShowOnMobile(false);
-          else {
-            setCollapsed(!collapsed);
-            setShowOnMobile(collapsed);
-          }
+          setCollapsed(!collapsed);
+          setShowOnMobile(collapsed);
         }}
         onUndo={
           readOnly || !history.before.length
@@ -336,6 +378,7 @@ export function LiveEditorSurface({
         )}
       >
         <div
+          ref={panesRef}
           className={layout.panes}
           data-collapsed={collapsed}
           data-mobile-panel={showOnMobile}
@@ -494,13 +537,14 @@ export function LiveEditorSurface({
               }
               onRemove={removeNode}
               onContextMenu={openMenu}
-              onInlineChange={changeInlineSource}
+              onInlineChange={changeInlineContent}
               onInlineActiveChange={(active) => {
                 if (active) setShowOnMobile(false);
                 onInlineActiveChange(active);
               }}
               inlineRequest={inlineRequest}
               media={builder?.media}
+              shortcodes={builder?.shortcodes}
             />
             {builder && structure && !collapsed && (
               <StructureNavigator
@@ -522,13 +566,14 @@ export function LiveEditorSurface({
         <Popover
           ref={menuRef}
           className={layout.contextMenu}
+          role="dialog"
           aria-label={t("组件操作")}
-          style={{
-            left: Math.max(4, Math.min(menu.x, window.innerWidth - 176)),
-            top: Math.max(4, Math.min(menu.y, window.innerHeight - 148)),
-          }}
           onToggle={(event) => {
-            if (event.newState === "closed") setMenu(null);
+            if (
+              event.newState === "closed" &&
+              !event.currentTarget.matches(":popover-open")
+            )
+              setMenu((current) => (current === menu ? null : current));
           }}
         >
           <Button

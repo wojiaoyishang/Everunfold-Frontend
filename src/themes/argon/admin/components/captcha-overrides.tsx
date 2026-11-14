@@ -15,10 +15,12 @@ export function CaptchaOverrides({
   value,
   onChange,
   disabled = false,
+  showHint = true,
 }: {
   value: Policy;
   onChange: (value: Partial<Policy>) => void;
   disabled?: boolean;
+  showHint?: boolean;
 }) {
   const id = useId();
   return (
@@ -30,10 +32,11 @@ export function CaptchaOverrides({
         ] as const
       ).map((field) => (
         <div key={field.key} className={styles.field}>
-          <span>
+          <label htmlFor={`${id}-${field.key}`}>
             <UiText text={field.label} />
-          </span>
+          </label>
           <Select
+            id={`${id}-${field.key}`}
             name={`${id}-${field.key}`}
             label={field.label}
             value={value[field.key] ?? "inherit"}
@@ -47,9 +50,11 @@ export function CaptchaOverrides({
           />
         </div>
       ))}
-      <small>
-        <UiText text="保存草稿保留设置，发布或应用页面后生效。密码和评论开关仍然有效。" />
-      </small>
+      {showHint && (
+        <small>
+          <UiText text="保存草稿保留设置，发布或应用页面后生效。密码和评论开关仍然有效。" />
+        </small>
+      )}
     </div>
   );
 }

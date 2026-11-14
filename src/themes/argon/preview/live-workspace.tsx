@@ -12,11 +12,13 @@ import {
 import { useLiveLeave } from "@/core/preview/use-live-leave";
 import { previewNavigation } from "@/core/preview/bridge";
 import {
+  frontendPreviewPath,
   livePreviewPath,
   previewEditorPath,
   type PreviewKind,
 } from "@/core/preview/routes";
 import { ConfirmDialog } from "../components/ui/confirm-dialog";
+import { useToast } from "../components/ui/toast/toast-provider";
 import { LiveEditorSurface, type LivePanel } from "../admin/builder/editor";
 import styles from "./live-workspace.module.css";
 
@@ -47,11 +49,9 @@ export function LivePreviewWorkspace({
   }, [panel]);
   useEffect(setEmbeddedPanel, [setEmbeddedPanel]);
   const t = useT();
+  const toast = useToast();
   const editPath = previewEditorPath(kind, id);
-  const previewPath =
-    kind === "page" || kind === "template"
-      ? `/admin/pages/${id}/preview?live-workspace=1${kind === "template" ? "&template=1" : ""}`
-      : `/admin/content/${kind}/${id}/preview?live-workspace=1`;
+  const previewPath = frontendPreviewPath(kind, id, true);
   const leave = useLiveLeave(
     editPath,
     editorState.dirty || inlineActive,
@@ -132,6 +132,22 @@ export function LivePreviewWorkspace({
         ready={bridge.documentTitle !== null}
         saveBlocked={inlineActive || bridge.awaitingBuilder}
         onInlineActiveChange={setInlineActive}
+        onOpenPreview={() => {
+          if (!bridge.openPreview())
+            toast.show({
+              id: "live:preview-window",
+              title: "预览窗口被浏览器拦截，请允许弹出窗口后重试。",
+              tone: "error",
+              placement: "top-center",
+            });
+        }}
+        previewDisabled={
+          bridge.documentTitle === null ||
+          bridge.status === "loading" ||
+          bridge.awaitingBuilder ||
+          inlineActive ||
+          editorState.busy
+        }
         title={bridge.documentTitle ?? ""}
         published={editorState.published ?? null}
         kind={kind}

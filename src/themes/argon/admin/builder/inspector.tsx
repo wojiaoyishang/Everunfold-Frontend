@@ -727,22 +727,11 @@ function BuilderControl({
             id={id}
             className="admin-button"
             disabled={disabled}
-            onClick={() => setSourceEditor(true)}
+            onClick={onInlineEdit ?? (() => setSourceEditor(true))}
           >
             <Icon name="edit" />
             <UiText text="打开编辑器" />
           </Button>
-          {onInlineEdit && (
-            <Button
-              className="admin-icon-button"
-              aria-label={t("在画布中编辑")}
-              title={t("在画布中编辑")}
-              disabled={disabled}
-              onClick={onInlineEdit}
-            >
-              <Icon name="type" />
-            </Button>
-          )}
         </div>
         {sourceEditor && (
           <SourceEditor

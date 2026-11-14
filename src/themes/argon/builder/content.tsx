@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, type ReactNode } from "react";
+import { createElement, useEffect, useMemo, type ReactNode } from "react";
 import type {
   BuilderComponentDefinition,
   BuilderDocument,
@@ -100,7 +100,7 @@ function EmptyElement({ label, icon }: { label: string; icon: IconName }) {
   );
 }
 
-function Source({
+export function BuilderSource({
   id,
   source,
   format,
@@ -158,6 +158,13 @@ function Source({
   );
 }
 
+export function builderHeadingTag(level: unknown) {
+  const levels = { "3": "h3", "4": "h4", "5": "h5", "6": "h6" } as const;
+  return typeof level === "string" && Object.hasOwn(levels, level)
+    ? levels[level as keyof typeof levels]
+    : "h2";
+}
+
 function Action({
   label,
   href,
@@ -212,14 +219,13 @@ export function BuilderElement({
       );
       break;
     case "core.heading": {
-      const levels = { "3": "h3", "4": "h4", "5": "h5", "6": "h6" } as const;
-      const level = text("level");
-      const Tag = levels[level as keyof typeof levels] ?? "h2";
-      body = text("text") ? (
-        <Tag className={styles.heading}>{text("text")}</Tag>
-      ) : (
-        empty("添加标题", "type")
-      );
+      body = text("text")
+        ? createElement(
+            builderHeadingTag(props.level),
+            { className: styles.heading },
+            text("text"),
+          )
+        : empty("添加标题", "type");
       break;
     }
     case "core.markdown":
@@ -227,7 +233,7 @@ export function BuilderElement({
     case "core.shortcode": {
       const source = text("source");
       body = source ? (
-        <Source
+        <BuilderSource
           id={node.id}
           source={source}
           format={node.type === "core.html" ? "html" : "markdown"}
@@ -344,7 +350,7 @@ export function BuilderElement({
           ]),
         );
         body = (
-          <Source
+          <BuilderSource
             id={node.id}
             source={shortcodeCall(registered, values, text("body"))}
             format="markdown"
@@ -383,9 +389,10 @@ export function BuilderElement({
       style={builderStyle(props, node.type === "core.grid")}
     >
       {preview &&
-      (node.type === "core.html" || node.type === "core.markdown") ? (
+      ["core.html", "core.markdown", "core.heading"].includes(node.type) ? (
         <>
           <div data-builder-inline-rendered>{body}</div>
+          {node.type !== "core.heading" && <div data-builder-inline-output />}
           <div data-builder-inline-host />
         </>
       ) : (

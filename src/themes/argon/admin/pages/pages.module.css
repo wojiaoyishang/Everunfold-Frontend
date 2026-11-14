@@ -144,6 +144,16 @@
   font-size: 12px;
   flex-wrap: wrap;
 }
+.editorHeading {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 6px;
+}
+.editorHeading > :global(.admin-page-heading) {
+  margin-block-end: 0;
+}
 .configuration {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -219,6 +229,15 @@
 .languageList {
   margin: 16px 0;
 }
+.languagePanel[data-compact] .languageList {
+  margin-block: 8px 12px;
+}
+.languagePanel[data-compact] .languageMember {
+  padding-block: 9px;
+}
+.languagePanel[data-compact] .languageMember > div:first-child {
+  min-width: 0;
+}
 .languageMember {
   padding: 14px 0;
   border-top: 1px solid var(--admin-border);
@@ -242,12 +261,6 @@
   display: grid;
   gap: 8px;
 }
-.newLanguage {
-  display: grid;
-  gap: 8px;
-  max-width: 340px;
-  margin-bottom: 24px;
-}
 @media (max-width: 700px) {
   .row {
     flex-wrap: wrap;
@@ -267,20 +280,6 @@
   padding: 50px 0;
   text-align: center;
   color: var(--admin-muted);
-}
-.description {
-  margin-top: 22px;
-}
-.toggles {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px 28px;
-  margin-top: 24px;
-}
-.toggles > span {
-  display: flex;
-  gap: 14px;
-  align-items: center;
 }
 .toggle {
   justify-content: space-between;

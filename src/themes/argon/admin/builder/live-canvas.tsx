@@ -27,10 +27,12 @@ import { ConfirmPopover } from "../../components/ui/confirm-popover";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import type { MediaURL } from "@/core/contracts/content-admin";
+import type { PublicShortcode } from "@/core/contracts/settings";
 import dynamic from "next/dynamic";
 import styles from "./live-canvas.module.css";
 
 const InlineSource = dynamic(() => import("./inline-source"), { ssr: false });
+const InlineHeading = dynamic(() => import("./inline-heading"), { ssr: false });
 
 export interface LiveCanvasFrame {
   ref: RefObject<HTMLIFrameElement | null>;
@@ -41,6 +43,7 @@ export interface LiveCanvasFrame {
 }
 
 type Point = { x: number; y: number };
+type InlineRequest = { id: string; caret?: number };
 type Area = { left: number; top: number; width: number; height: number };
 type MeasuredNode = Area & {
   id: string;
@@ -92,6 +95,7 @@ export function LiveBuilderCanvas({
   onInlineActiveChange,
   inlineRequest,
   media,
+  shortcodes,
 }: {
   frame: LiveCanvasFrame;
   document: BuilderDocument;
@@ -109,8 +113,9 @@ export function LiveBuilderCanvas({
   onContextMenu?: (id: string, point: Point) => void;
   onInlineChange?: (id: string, source: string) => void;
   onInlineActiveChange?: (active: boolean) => void;
-  inlineRequest?: { id: string } | null;
+  inlineRequest?: InlineRequest | null;
   media?: Record<string, MediaURL>;
+  shortcodes?: readonly PublicShortcode[];
 }) {
   const t = useT();
   const [load, setLoad] = useState(0);
@@ -118,7 +123,7 @@ export function LiveBuilderCanvas({
   const [gridGuides, setGridGuides] = useState<GridGuide[]>([]);
   const [insertArea, setInsertArea] = useState<Area | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
-  const [editing, setEditing] = useState<string | null>(null);
+  const [editing, setEditing] = useState<InlineRequest | null>(null);
   const [inlineTarget, setInlineTarget] = useState<{
     id: string;
     host: HTMLElement;
@@ -144,22 +149,31 @@ export function LiveBuilderCanvas({
   const signalInline = useEffectEvent((active: boolean) =>
     onInlineActiveChange?.(active),
   );
-  const editFromFrame = useEffectEvent((id: string) => {
-    if (
+  const editFromFrame = useEffectEvent((id: string, event: MouseEvent) => {
+    const node = nodes.get(id);
+    if (!disabled && onInlineChange && node?.type === "core.heading") {
+      const heading = (event.target as Element | null)?.closest(
+        "h2, h3, h4, h5, h6",
+      );
+      onSelect(id, false);
+      setEditing({ id, caret: heading ? headingCaret(heading, event) : 0 });
+      signalInline(true);
+    } else if (
       !disabled &&
       onInlineChange &&
       selected === id &&
-      sourceFormat(nodes.get(id))
+      sourceFormat(node)
     ) {
-      setEditing(id);
+      setEditing({ id });
       signalInline(true);
     } else select(id);
   });
   const inlineId =
-    !disabled && !interactive && onInlineChange && editing ? editing : null;
+    !disabled && !interactive && onInlineChange ? (editing?.id ?? null) : null;
   const editingNode = inlineId ? nodes.get(inlineId) : undefined;
   const inlineHost = inlineTarget?.id === inlineId ? inlineTarget.host : null;
   const format = sourceFormat(editingNode);
+  const editingHeading = editingNode?.type === "core.heading";
   const inlineNodeId = useEffectEvent(() => inlineId);
   const canOpenContextMenu = !disabled && Boolean(onContextMenu);
   const setHover = (id: string | null) => {
@@ -222,14 +236,16 @@ export function LiveBuilderCanvas({
       let current = true;
       queueMicrotask(() => {
         if (!current) return;
-        setEditing(inlineRequest.id);
+        setEditing(inlineRequest);
       });
       return () => {
         current = false;
       };
     }
   }, [inlineRequest]);
-  const inlineOpen = Boolean(inlineId && editingNode && format);
+  const inlineOpen = Boolean(
+    inlineId && editingNode && (format || editingHeading),
+  );
   useEffect(() => {
     if (inlineOpen) {
       signalInline(true);
@@ -397,7 +413,7 @@ export function LiveBuilderCanvas({
       }
       const id = nodeAt(event.target);
       if (id || target?.closest?.(formControl)) suppress(event);
-      if (id && event.type === "click") editFromFrame(id);
+      if (id && event.type === "click") editFromFrame(id, event);
     };
     const context = (event: MouseEvent) => {
       if (
@@ -512,6 +528,10 @@ export function LiveBuilderCanvas({
   // On a small screen, the library overlays the canvas. Keep the sensor mounted
   // but let the pointer reach the iframe-sized drop slots when a drag starts.
   const canvasEnabled = !interactive && !disabled;
+  const finishInline = (id: string, value?: string) => {
+    if (value !== undefined) onInlineChange?.(id, value);
+    setEditing((current) => (current?.id === id ? null : current));
+  };
 
   return (
     <div
@@ -550,7 +570,7 @@ export function LiveBuilderCanvas({
             const node = nodes.get(area.id);
             if (
               !node ||
-              node.id === inlineId ||
+              (node.id === inlineId && editingHeading) ||
               area.height < 1 ||
               area.width < 1
             )
@@ -571,9 +591,13 @@ export function LiveBuilderCanvas({
                 visible={area.inView || drag.active?.id === node.id}
                 onHover={setHover}
                 onSelect={() => {
-                  if (!disabled && onInlineChange && sourceFormat(node)) {
+                  if (
+                    !disabled &&
+                    onInlineChange &&
+                    (sourceFormat(node) || node.type === "core.heading")
+                  ) {
                     onSelect(node.id, false);
-                    setEditing(node.id);
+                    setEditing({ id: node.id });
                     onInlineActiveChange?.(true);
                   } else onSelect(node.id);
                 }}
@@ -593,7 +617,7 @@ export function LiveBuilderCanvas({
                 active={dragging}
               />
             ))}
-          {!disabled && insertArea && (
+          {!disabled && !inlineOpen && insertArea && (
             <InsertArea
               area={insertArea}
               onAdd={onAdd}
@@ -617,6 +641,7 @@ export function LiveBuilderCanvas({
       {inlineHost && editingNode && format && onInlineChange && (
         <InlineSource
           key={editingNode.id}
+          id={editingNode.id}
           host={inlineHost}
           source={
             typeof editingNode.props.source === "string"
@@ -625,14 +650,22 @@ export function LiveBuilderCanvas({
           }
           format={format}
           media={media}
-          onApply={(source) => {
-            if (source !== (editingNode.props.source ?? ""))
-              onInlineChange(editingNode.id, source);
-            setEditing((node) => (node === editingNode.id ? null : node));
-          }}
-          onCancel={() =>
-            setEditing((node) => (node === editingNode.id ? null : node))
+          shortcodes={shortcodes}
+          onFinish={(source) => finishInline(editingNode.id, source)}
+        />
+      )}
+      {inlineHost && editingNode && editingHeading && onInlineChange && (
+        <InlineHeading
+          key={editingNode.id}
+          host={inlineHost}
+          level={editingNode.props.level}
+          text={
+            typeof editingNode.props.text === "string"
+              ? editingNode.props.text
+              : ""
           }
+          caret={editing?.caret}
+          onFinish={(text) => finishInline(editingNode.id, text)}
         />
       )}
     </div>
@@ -642,6 +675,20 @@ export function LiveBuilderCanvas({
 function suppress(event: Event) {
   event.preventDefault();
   event.stopPropagation();
+}
+
+function headingCaret(heading: Element, event: MouseEvent) {
+  const page = heading.ownerDocument;
+  const caret = page.caretPositionFromPoint?.(event.clientX, event.clientY);
+  const range = caret
+    ? null
+    : page.caretRangeFromPoint?.(event.clientX, event.clientY);
+  const node = caret?.offsetNode ?? range?.startContainer;
+  if (!node || !heading.contains(node)) return heading.textContent?.length ?? 0;
+  const before = page.createRange();
+  before.selectNodeContents(heading);
+  before.setEnd(node, caret?.offset ?? range?.startOffset ?? 0);
+  return before.toString().length;
 }
 
 function elementArea(element: Element): Area {
