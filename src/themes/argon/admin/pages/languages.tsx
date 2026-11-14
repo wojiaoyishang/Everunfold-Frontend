@@ -115,7 +115,7 @@ export function PageLanguages({
   );
   return (
     <section
-      className={`account-card ${styles.languagePanel}`}
+      className={`account-card admin-density-controls ${styles.languagePanel}`}
       id="page-languages"
       data-compact={compact || undefined}
     >
@@ -235,17 +235,18 @@ export function PageLanguages({
         </Button>
       )}
       {!compact && (
-        <p className={styles.help}>
+        <p className={styles.languageNote}>
           <UiText text="各语言独立编辑和启用，只在列表显示原文。新增语言请先在站点设置中启用。" />
         </p>
       )}
       {disabled && (
-        <p className={styles.help}>
+        <p className={styles.languageNote}>
           <UiText text="请先保存当前修改，再管理语言关联。" />
         </p>
       )}
       {adding && (
         <Modal
+          className={`admin-density-controls ${styles.languageDialog}`}
           title="添加页面语言"
           onClose={close}
           closing={closing}
@@ -325,7 +326,7 @@ export function PageLanguages({
                 )}
               </>
             )}
-            <p className={styles.help}>
+            <p className={styles.languageNote}>
               <UiText
                 text={
                   page.template

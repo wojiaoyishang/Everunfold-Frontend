@@ -88,84 +88,80 @@ export function PageSettings({
   const catalog = useLanguageCatalog();
   const languageId = useId();
   return (
-    <div className={styles.settingsFrame} data-live-part="settings">
-      <div className={styles.settings} data-compact={compact || undefined}>
-        <div className={styles.main}>
-          <PageSettingsGroup title="基本信息">
-            {compactIdentity && (
-              <div className={styles.identity}>{compactIdentity}</div>
-            )}
-            {language && (
-              <div className={styles.language}>
-                <label htmlFor={languageId}>
-                  <UiText text="内容语言" />
-                </label>
-                <Select
-                  id={languageId}
-                  name="page-language"
-                  label="内容语言"
-                  value={language.value}
-                  onValueChange={language.onChange}
-                  options={catalog.languages
-                    .filter((item) => item.enabled)
-                    .map((item) => ({
-                      value: item.code,
-                      label: item.name,
-                      flag: item.flag,
-                    }))}
-                />
-              </div>
-            )}
-            <AccountField
-              label="页面说明"
-              value={value.description ?? ""}
-              onChange={(description) => change({ description })}
-              multiline
-              maxLength={500}
+    <div
+      className={`admin-density-controls ${styles.settings}`}
+      data-compact={compact || undefined}
+    >
+      <PageSettingsGroup title="基本信息">
+        {compactIdentity && (
+          <div className={styles.identity}>{compactIdentity}</div>
+        )}
+        {language && (
+          <div className={styles.language}>
+            <label htmlFor={languageId}>
+              <UiText text="内容语言" />
+            </label>
+            <Select
+              id={languageId}
+              name="page-language"
+              label="内容语言"
+              value={language.value}
+              onValueChange={language.onChange}
+              options={catalog.languages
+                .filter((item) => item.enabled)
+                .map((item) => ({
+                  value: item.code,
+                  label: item.name,
+                  flag: item.flag,
+                }))}
             />
-          </PageSettingsGroup>
-          {seo && !compact && <div className={styles.seo}>{seo}</div>}
+          </div>
+        )}
+        <AccountField
+          label="页面说明"
+          value={value.description ?? ""}
+          onChange={(description) => change({ description })}
+          multiline
+          maxLength={500}
+        />
+      </PageSettingsGroup>
+      <PageSettingsGroup title="访问与评论" initiallyOpen={!compact}>
+        <div className={styles.switches}>
+          <SettingSwitch
+            label="启用页面"
+            checked={Boolean(value.enabled)}
+            onChange={(enabled) => change({ enabled })}
+          />
+          <SettingSwitch
+            label="允许评论"
+            checked={value.comments_open ?? true}
+            onChange={(comments_open) => change({ comments_open })}
+          />
         </div>
-        <div className={styles.side}>
-          <PageSettingsGroup title="访问与评论" initiallyOpen={!compact}>
-            <div className={styles.switches}>
-              <SettingSwitch
-                label="启用页面"
-                checked={Boolean(value.enabled)}
-                onChange={(enabled) => change({ enabled })}
-              />
-              <SettingSwitch
-                label="允许评论"
-                checked={value.comments_open ?? true}
-                onChange={(comments_open) => change({ comments_open })}
-              />
-            </div>
-            <CaptchaOverrides
-              value={value}
-              onChange={change}
-              disabled={disabled}
-              showHint={false}
+        <CaptchaOverrides
+          value={value}
+          onChange={change}
+          disabled={disabled}
+          showHint={false}
+        />
+        <p className={styles.help}>
+          <UiText text="关闭评论只停止新提交，已有评论仍可阅读。" />
+        </p>
+      </PageSettingsGroup>
+      <PageSettingsGroup title="阅读显示" initiallyOpen={!compact}>
+        <div className={styles.switches}>
+          {readingPreferences.map(({ key, label }) => (
+            <SettingSwitch
+              key={key}
+              label={label}
+              checked={value[key] !== false}
+              onChange={(checked) => change({ [key]: checked })}
             />
-            <p className={styles.help}>
-              <UiText text="关闭评论只停止新提交，已有评论仍可阅读。" />
-            </p>
-          </PageSettingsGroup>
-          <PageSettingsGroup title="阅读显示" initiallyOpen={!compact}>
-            <div className={styles.switches}>
-              {readingPreferences.map(({ key, label }) => (
-                <SettingSwitch
-                  key={key}
-                  label={label}
-                  checked={value[key] !== false}
-                  onChange={(checked) => change({ [key]: checked })}
-                />
-              ))}
-            </div>
-          </PageSettingsGroup>
+          ))}
         </div>
-        {seo && compact && <div className={styles.seo}>{seo}</div>}
-        {extra && <div className={styles.extra}>{extra}</div>}
-      </div>
+      </PageSettingsGroup>
+      {seo && <div className={styles.seo}>{seo}</div>}
+      {extra}
     </div>
   );
 }

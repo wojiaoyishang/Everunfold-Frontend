@@ -1,0 +1,28 @@
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 24px;
+  align-items: start;
+}
+
+.inspector {
+  min-width: 0;
+  position: sticky;
+  top: calc(82px + var(--admin-header-dock-height, 0px));
+}
+
+@media (max-width: 1050px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 270px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .inspector {
+    position: static;
+  }
+}

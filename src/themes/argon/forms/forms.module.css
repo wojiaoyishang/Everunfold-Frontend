@@ -4,12 +4,17 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: min(12px, var(--admin-field-gap, 12px));
 }
 .list {
   display: grid;
-  gap: 16px;
+  gap: min(16px, var(--admin-field-gap, 16px));
   min-width: 0;
+}
+.list > header,
+.item > header,
+.item > header > div {
+  flex-wrap: wrap;
 }
 .list h3,
 .object h3 {
@@ -29,8 +34,8 @@
 }
 .item {
   display: grid;
-  gap: 18px;
-  padding: 20px;
+  gap: min(18px, var(--admin-field-gap, 18px));
+  padding: min(20px, var(--admin-panel-padding, 20px));
   border: 1px solid var(--admin-border);
   border-radius: 10px;
   min-width: 0;
@@ -44,26 +49,42 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.item > header :global(.admin-button) {
+  min-inline-size: var(--admin-touch-target, 0px);
+}
 .item button svg {
   width: 16px;
   height: 16px;
 }
 .object {
   display: grid;
-  gap: 18px;
+  gap: min(18px, var(--admin-field-gap, 18px));
   min-width: 0;
 }
 @media (max-width: 540px) {
   .item {
-    padding: 14px;
-  }
-  .item > header {
-    flex-wrap: wrap;
+    padding: min(14px, var(--admin-panel-padding, 14px));
   }
 }
-.settings-form,
 :global(.settings-schema-form) {
   display: grid;
-  gap: 20px;
+  gap: min(20px, var(--admin-field-gap, 20px));
   min-width: 0;
+}
+:global(.admin-root .settings-schema-form .account-field) {
+  gap: var(--admin-label-gap, 8px);
+}
+:global(
+  .admin-root .settings-schema-form .ui-anchored-panel[role="dialog"] .ui-button
+) {
+  min-block-size: max(32px, var(--admin-touch-target, 0px));
+}
+:global(
+  .admin-root[data-density="compact"] .settings-schema-form .ui-textarea
+) {
+  box-sizing: border-box;
+  block-size: 5rem;
+  min-block-size: max(4rem, var(--admin-touch-target, 0px));
+  padding-block: var(--admin-control-padding-block, 5px);
+  resize: vertical;
 }

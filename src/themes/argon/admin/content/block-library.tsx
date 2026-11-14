@@ -9,6 +9,7 @@ import { Icon } from "../../components/icon";
 import { blockEditors } from "./plugins/registry";
 import { useBlockComposer } from "./block-composer";
 import styles from "./block-composer.module.css";
+import editorColumns from "../components/editor-columns.module.css";
 
 export function BlockLibrary({
   compact = false,
@@ -147,7 +148,7 @@ export function ComposerSidebar({
   if (embedded) return <div data-live-part="settings">{children}</div>;
   return (
     <aside
-      className={styles.inspector}
+      className={`${editorColumns.inspector} ${styles.inspector}`}
       data-composer-sidebar
       data-settings-only={settingsOnly}
       aria-label="区块与内容设置"

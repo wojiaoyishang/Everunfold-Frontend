@@ -39,7 +39,7 @@ import {
   pageUrlError,
   suggestedPagePath,
 } from "@/core/pages/path";
-import { UiText, useLanguageCatalog } from "@/core/i18n/provider";
+import { UiText, useLanguageCatalog, useT } from "@/core/i18n/provider";
 import { Form, Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
@@ -56,6 +56,7 @@ import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { useEditorResources } from "@/core/content-management/use-editor-resources";
 import { customPageTypeId } from "@/core/pages/registration";
 import styles from "./pages.module.css";
+import editorColumns from "../components/editor-columns.module.css";
 import { PageLanguages } from "./languages";
 import { SeoDisclosure, SeoFieldsEditor } from "../components/seo-fields";
 import { PageCodeFields } from "./code-fields";
@@ -98,6 +99,7 @@ export function ManagedPageEditor({
   timeZone?: string;
 }) {
   usePluginRuntime();
+  const t = useT();
   const actor = useAdminAccount(),
     { baseUrl, csrfToken } = useAdminRequest(),
     router = useRouter();
@@ -522,259 +524,268 @@ export function ManagedPageEditor({
           </section>
         </>
       )}
-      {(!id || saved) && (
-        <>
-          <div className={styles.editorLayout}>
-            <div className={styles.editorColumn}>
-              <Form
-                id={formId}
-                noValidate
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  const submitter = (event.nativeEvent as SubmitEvent)
-                    .submitter;
-                  void save(
-                    submitter instanceof HTMLElement &&
-                      submitter.dataset.apply === "true",
-                  );
-                }}
-              >
-                <fieldset className="account-fieldset" disabled={disabled}>
-                  {!compact && (
-                    <>
-                      <h1 className="sr-only">
-                        <UiText text={id ? "编辑页面" : "新建页面"} />
-                      </h1>
-                      <EditorIdentity
-                        label="页面标题"
-                        placeholder="添加标题"
-                        value={value.title}
-                        onChange={onTitle}
-                        maxLength={120}
-                        disabled={disabled}
-                        permalink={permalink}
-                      />
-                    </>
+      {ready && (
+        <Form
+          id={formId}
+          noValidate
+          onSubmit={(event) => {
+            event.preventDefault();
+            const submitter = (event.nativeEvent as SubmitEvent).submitter;
+            void save(
+              submitter instanceof HTMLElement &&
+                submitter.dataset.apply === "true",
+            );
+          }}
+        >
+          <fieldset className="account-fieldset" disabled={disabled}>
+            {!compact && (
+              <>
+                <h1 className="sr-only">
+                  <UiText text={id ? "编辑页面" : "新建页面"} />
+                </h1>
+                <EditorIdentity
+                  label="页面标题"
+                  placeholder="添加标题"
+                  value={value.title}
+                  onChange={onTitle}
+                  maxLength={120}
+                  disabled={disabled}
+                  permalink={permalink}
+                />
+              </>
+            )}
+            <div
+              className={`admin-density-controls ${styles.pageEditControls}`}
+              data-compact={compact || undefined}
+              data-live-part="settings"
+            >
+              {!compact && (
+                <div className={styles.state}>
+                  <span className="admin-badge">
+                    <UiText text={typeTitle} />
+                  </span>
+                  {saved && (
+                    <span>
+                      <UiText text="草稿版本" /> {saved.revision} ·{" "}
+                      <UiText text="应用版本" /> {saved.applied_revision ?? "—"}
+                    </span>
                   )}
-                  <div
-                    className={styles.pageEditControls}
-                    data-compact={compact || undefined}
-                    data-live-part="settings"
-                  >
-                    {!compact && (
-                      <div className={styles.state}>
-                        <span className="admin-badge">
-                          <UiText text={typeTitle} />
-                        </span>
-                        {saved && (
-                          <span>
-                            <UiText text="草稿版本" /> {saved.revision} ·{" "}
-                            <UiText text="应用版本" />{" "}
-                            {saved.applied_revision ?? "—"}
-                          </span>
-                        )}
-                        {saved?.archived && (
-                          <span className="admin-badge">
-                            <UiText text="回收站" />
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {editOptions}
-                  </div>
-                  <PageSettings
-                    value={value}
-                    change={update}
-                    disabled={disabled}
-                    compact={compact}
-                    compactIdentity={
-                      compact && (
-                        <>
-                          <AccountField
-                            label="页面标题"
-                            value={value.title}
-                            onChange={onTitle}
-                            required
-                            maxLength={120}
-                          />
-                          {permalink}
-                        </>
-                      )
-                    }
-                    language={
-                      !saved && source === "custom"
-                        ? { value: language, onChange: setLanguage }
-                        : undefined
-                    }
-                    seo={
-                      definition?.seo_editable !== false && (
-                        <SeoDisclosure label="搜索与分享">
-                          <SeoFieldsEditor
-                            value={value}
-                            onChange={update}
-                            disabled={!write || action.busy}
-                            content={{
-                              kind: "page",
-                              id: saved?.id,
-                              title: value.title,
-                              summary: value.description,
-                              path: path || undefined,
-                              language:
-                                saved?.language ??
-                                (source === "custom"
-                                  ? language
-                                  : catalog.default_code),
-                              published: Boolean(saved?.enabled),
-                              access:
-                                value.captcha_read === "required"
-                                  ? "captcha"
-                                  : "public",
-                              cover:
-                                typeof value.options?.cover_url === "string"
-                                  ? value.options.cover_url
-                                  : undefined,
-                              share_image_url:
-                                value.share_image_media_id &&
-                                value.share_image_media_id ===
-                                  saved?.value.share_image_media_id
-                                  ? saved.share_image_url
-                                  : undefined,
-                            }}
-                          />
-                        </SeoDisclosure>
-                      )
-                    }
-                    extra={
-                      compact &&
-                      templateId && (
-                        <PageSettingsGroup
-                          title="自定义页面模板"
-                          initiallyOpen={false}
-                        >
-                          <RouteLink
-                            className="admin-button"
-                            href={`/admin/pages/templates/${templateId}`}
-                          >
-                            <Icon name="code" />
-                            <UiText text={write ? "编辑模板" : "查看模板"} />
-                          </RouteLink>
-                        </PageSettingsGroup>
-                      )
-                    }
-                  />
-                </fieldset>
-                <fieldset
-                  className="account-fieldset"
-                  disabled={!write || action.busy || saved?.archived}
-                >
-                  {source === "registered" ? (
-                    <section
-                      className={`account-card ${styles.pageOptionsCard}`}
-                      data-live-part="content"
-                    >
-                      <header>
-                        <h2>
-                          <UiText text="页面选项" />
-                        </h2>
-                      </header>
-                      {definition ? (
-                        <PageConfigurationEditor
-                          model={readSettingsModel(
-                            Object.keys(definition.settings_schema ?? {}).length
-                              ? definition.settings_schema
-                              : pluginRegistry.pages.find(
-                                  (page) => page.registration.id === typeId,
-                                )?.settingsModel,
-                          )}
-                          value={value.options ?? {}}
-                          source={
-                            optionsSource ??
-                            JSON.stringify(value.options ?? {}, null, 2)
-                          }
-                          error={optionsError}
-                          disabled={!write || action.busy}
-                          onChange={(options) => {
-                            setOptionsSource(null);
-                            update({ options });
-                          }}
-                          onSourceChange={(text) => {
-                            setOptionsSource(text);
-                            const parsed = parsePageConfiguration(text);
-                            if (parsed.value) update({ options: parsed.value });
-                          }}
-                        />
-                      ) : (
-                        <p>
-                          <UiText text="页面实现尚未安装，配置已保留。" />
-                        </p>
-                      )}
-                      {!available && (
-                        <p role="alert" className={styles.error}>
-                          <UiText text="前端页面实现尚未就绪，或节点版本不一致。可以保存草稿。" />
-                        </p>
-                      )}
-                    </section>
-                  ) : (
-                    (!compact || (!componentMode && !templateId)) && (
-                      <PageCodeFields
-                        value={value}
-                        onChange={update}
-                        disabled={!write || action.busy}
-                        allowScripts={actor.role === "admin"}
-                        cover={
-                          componentMode ? (
-                            <Button
-                              className="admin-button admin-button-primary"
-                              disabled={disabled}
-                              onClick={() => void openLive()}
-                            >
-                              <Icon name="sidebar" />
-                              <UiText text="前往实时预览" />
-                            </Button>
-                          ) : templateId ? (
-                            <RouteLink
-                              className="admin-button"
-                              href={`/admin/pages/templates/${templateId}`}
-                            >
-                              <Icon name="code" />
-                              <UiText text={write ? "编辑模板" : "查看模板"} />
-                            </RouteLink>
-                          ) : undefined
-                        }
-                      />
-                    )
-                  )}
-                </fieldset>
-              </Form>
-              {saved && (
-                <div data-live-part="settings">
-                  {compact ? (
-                    saved.translations && (
-                      <PageSettingsGroup
-                        title="语言版本"
-                        initiallyOpen={false}
-                        compact
-                      >
-                        <PageLanguages
-                          page={saved}
-                          compact
-                          disabled={dirty || action.busy}
-                          onChanged={refreshPage}
-                        />
-                      </PageSettingsGroup>
-                    )
-                  ) : (
-                    <PageLanguages
-                      page={saved}
-                      disabled={dirty || action.busy}
-                      onChanged={refreshPage}
-                    />
+                  {saved?.archived && (
+                    <span className="admin-badge">
+                      <UiText text="回收站" />
+                    </span>
                   )}
                 </div>
               )}
+              {editOptions}
             </div>
+          </fieldset>
+          <div
+            className={
+              compact
+                ? undefined
+                : `${editorColumns.layout} ${styles.editorLayout}`
+            }
+          >
+            <fieldset
+              className={`account-fieldset admin-density-controls ${styles.editorPane}`}
+              disabled={disabled}
+            >
+              {source === "registered" ? (
+                <section
+                  className={`account-card ${styles.pageOptionsCard}`}
+                  data-live-part="content"
+                >
+                  <header>
+                    <h2>
+                      <UiText text="页面选项" />
+                    </h2>
+                  </header>
+                  {definition ? (
+                    <PageConfigurationEditor
+                      model={readSettingsModel(
+                        Object.keys(definition.settings_schema ?? {}).length
+                          ? definition.settings_schema
+                          : pluginRegistry.pages.find(
+                              (page) => page.registration.id === typeId,
+                            )?.settingsModel,
+                      )}
+                      value={value.options ?? {}}
+                      source={
+                        optionsSource ??
+                        JSON.stringify(value.options ?? {}, null, 2)
+                      }
+                      error={optionsError}
+                      disabled={!write || action.busy}
+                      onChange={(options) => {
+                        setOptionsSource(null);
+                        update({ options });
+                      }}
+                      onSourceChange={(text) => {
+                        setOptionsSource(text);
+                        const parsed = parsePageConfiguration(text);
+                        if (parsed.value) update({ options: parsed.value });
+                      }}
+                    />
+                  ) : (
+                    <p>
+                      <UiText text="页面实现尚未安装，配置已保留。" />
+                    </p>
+                  )}
+                  {!available && (
+                    <p role="alert" className={styles.error}>
+                      <UiText text="前端页面实现尚未就绪，或节点版本不一致。可以保存草稿。" />
+                    </p>
+                  )}
+                </section>
+              ) : (
+                (!compact || (!componentMode && !templateId)) && (
+                  <PageCodeFields
+                    value={value}
+                    onChange={update}
+                    disabled={!write || action.busy}
+                    allowScripts={actor.role === "admin"}
+                    cover={
+                      componentMode ? (
+                        <Button
+                          className="admin-button admin-button-primary"
+                          disabled={disabled}
+                          onClick={() => void openLive()}
+                        >
+                          <Icon name="sidebar" />
+                          <UiText text="前往实时预览" />
+                        </Button>
+                      ) : templateId ? (
+                        <RouteLink
+                          className="admin-button"
+                          href={`/admin/pages/templates/${templateId}`}
+                        >
+                          <Icon name="code" />
+                          <UiText text={write ? "编辑模板" : "查看模板"} />
+                        </RouteLink>
+                      ) : undefined
+                    }
+                  />
+                )
+              )}
+            </fieldset>
+            <aside
+              className={
+                compact
+                  ? undefined
+                  : `${editorColumns.inspector} ${styles.editorSettings}`
+              }
+              aria-label={t("内容设置")}
+              data-live-part="settings"
+            >
+              <fieldset className="account-fieldset" disabled={disabled}>
+                <PageSettings
+                  value={value}
+                  change={update}
+                  disabled={disabled}
+                  compact={compact}
+                  compactIdentity={
+                    compact && (
+                      <>
+                        <AccountField
+                          label="页面标题"
+                          value={value.title}
+                          onChange={onTitle}
+                          required
+                          maxLength={120}
+                        />
+                        {permalink}
+                      </>
+                    )
+                  }
+                  language={
+                    !saved && source === "custom"
+                      ? { value: language, onChange: setLanguage }
+                      : undefined
+                  }
+                  seo={
+                    definition?.seo_editable !== false && (
+                      <SeoDisclosure label="搜索与分享">
+                        <SeoFieldsEditor
+                          value={value}
+                          onChange={update}
+                          disabled={!write || action.busy}
+                          content={{
+                            kind: "page",
+                            id: saved?.id,
+                            title: value.title,
+                            summary: value.description,
+                            path: path || undefined,
+                            language:
+                              saved?.language ??
+                              (source === "custom"
+                                ? language
+                                : catalog.default_code),
+                            published: Boolean(saved?.enabled),
+                            access:
+                              value.captcha_read === "required"
+                                ? "captcha"
+                                : "public",
+                            cover:
+                              typeof value.options?.cover_url === "string"
+                                ? value.options.cover_url
+                                : undefined,
+                            share_image_url:
+                              value.share_image_media_id &&
+                              value.share_image_media_id ===
+                                saved?.value.share_image_media_id
+                                ? saved.share_image_url
+                                : undefined,
+                          }}
+                        />
+                      </SeoDisclosure>
+                    )
+                  }
+                  extra={
+                    compact &&
+                    templateId && (
+                      <PageSettingsGroup
+                        title="自定义页面模板"
+                        initiallyOpen={false}
+                      >
+                        <RouteLink
+                          className="admin-button"
+                          href={`/admin/pages/templates/${templateId}`}
+                        >
+                          <Icon name="code" />
+                          <UiText text={write ? "编辑模板" : "查看模板"} />
+                        </RouteLink>
+                      </PageSettingsGroup>
+                    )
+                  }
+                />
+              </fieldset>
+              {saved &&
+                (compact ? (
+                  saved.translations && (
+                    <PageSettingsGroup
+                      title="语言版本"
+                      initiallyOpen={false}
+                      compact
+                    >
+                      <PageLanguages
+                        page={saved}
+                        compact
+                        disabled={dirty || action.busy}
+                        onChanged={refreshPage}
+                      />
+                    </PageSettingsGroup>
+                  )
+                ) : (
+                  <PageLanguages
+                    page={saved}
+                    disabled={dirty || action.busy}
+                    onChanged={refreshPage}
+                  />
+                ))}
+            </aside>
           </div>
-        </>
+        </Form>
       )}
       <ConfirmDialog
         open={confirm === "template"}

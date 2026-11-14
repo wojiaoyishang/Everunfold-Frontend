@@ -29,6 +29,7 @@ import type { PublicationChoice } from "./publication-schedule";
 import { BlockComposer } from "./block-composer";
 import { BlockLibrary, ComposerSidebar } from "./block-library";
 import styles from "./editor-workspace.module.css";
+import editorColumns from "../components/editor-columns.module.css";
 import { contentEditors } from "./editor-registry";
 import { DraftPreview } from "./draft-preview";
 import { ContentSync } from "./content-sync";
@@ -513,7 +514,10 @@ export function DraftEditor({
           command={editor.commandBlock}
           onBusyChange={setDragging}
         >
-          <div className={styles.layout} data-section={section}>
+          <div
+            className={`${editorColumns.layout} ${styles.layout}`}
+            data-section={section}
+          >
             {embedded && (
               <div data-live-part="library">
                 <BlockLibrary

@@ -1,19 +1,16 @@
 .settings {
-  container-type: inline-size;
+  --page-settings-padding: min(16px, var(--admin-panel-padding));
+  --page-settings-gap: min(16px, var(--admin-panel-gap));
+  --page-settings-heading: 46px;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: start;
-  gap: 16px;
+  gap: var(--page-settings-gap);
   min-inline-size: 0;
-  margin-block: 16px 20px;
   font-size: 13px;
 }
-
-.main,
-.side {
-  display: grid;
-  gap: 16px;
-  min-inline-size: 0;
+:global(.admin-root[data-density="compact"]) .settings {
+  --page-settings-heading: 38px;
 }
 
 .group {
@@ -28,8 +25,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-block-size: 46px;
-  padding-inline: 16px;
+  min-block-size: max(
+    var(--page-settings-heading, 46px),
+    var(--admin-touch-target)
+  );
+  padding-inline: var(--page-settings-padding, 16px);
   border-radius: inherit;
   font-size: 14px;
   font-weight: 650;
@@ -66,9 +66,10 @@
 
 .fields {
   display: grid;
-  gap: 14px;
+  gap: min(14px, var(--admin-field-gap));
   min-inline-size: 0;
-  padding: 4px 16px 16px;
+  padding: 4px var(--page-settings-padding, 16px)
+    var(--page-settings-padding, 16px);
 }
 
 .identity,
@@ -116,13 +117,12 @@
 }
 
 .settings :is(:global(.ui-input), :global(.ui-select-trigger)) {
-  min-block-size: 38px;
-  padding-block: 6px;
-  font-size: 13px;
+  min-block-size: max(var(--admin-control-height), var(--admin-touch-target));
+  padding-block: min(6px, var(--admin-control-padding-block));
 }
 
 .settings :global(.account-field) {
-  gap: 6px;
+  gap: min(6px, var(--admin-label-gap));
 }
 
 .settings :global(.ui-textarea) {
@@ -136,30 +136,8 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
-@container (min-width: 570px) {
-  .settings :global(.account-form-grid) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.settingsFrame {
-  container-type: inline-size;
-  min-inline-size: 0;
-}
-
-@container (min-width: 740px) {
-  .settings:not([data-compact]) {
-    grid-template-columns: minmax(0, 1.7fr) minmax(17rem, 1fr);
-  }
-}
-
-.settings[data-compact],
-.settings[data-compact] > :is(.main, .side) {
-  gap: 0;
-}
-
 .settings[data-compact] {
-  margin-block: 0;
+  gap: 0;
 }
 
 .settings[data-compact] .group,
@@ -171,7 +149,7 @@
 }
 
 :is(.settings[data-compact] .group, .group[data-compact]) > summary {
-  min-block-size: 42px;
+  min-block-size: max(42px, var(--admin-touch-target));
   padding-inline: 6px;
   font-size: 13px;
 }
@@ -179,10 +157,6 @@
 :is(.settings[data-compact], .group[data-compact]) .fields {
   padding: 2px 6px 12px;
   gap: 10px;
-}
-
-.settings[data-compact] :is(:global(.ui-input), :global(.ui-select-trigger)) {
-  min-block-size: 34px;
 }
 
 .settings[data-compact] :global(.ui-textarea) {
@@ -200,15 +174,18 @@
 }
 
 .seo > div {
-  --seo-heading-size: 46px;
-  --seo-padding-inline: 16px;
-  --seo-body-padding-block: 4px 16px;
+  --seo-heading-size: max(
+    var(--page-settings-heading),
+    var(--admin-touch-target)
+  );
+  --seo-padding-inline: var(--page-settings-padding);
+  --seo-body-padding-block: 4px var(--page-settings-padding);
   border-color: var(--admin-border);
   border-radius: 9px;
 }
 
 .settings[data-compact] .seo > div {
-  --seo-heading-size: 42px;
+  --seo-heading-size: max(42px, var(--admin-touch-target));
   --seo-padding-inline: 6px;
   --seo-body-padding-block: 2px 12px;
 }

@@ -212,12 +212,14 @@
 }
 .admin-site-link {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 7px;
   font-size: 12px;
   color: var(--admin-muted);
   border-radius: 5px;
   padding: 8px;
+  white-space: nowrap;
 }
 .admin-site-link:hover {
   color: var(--admin-accent);

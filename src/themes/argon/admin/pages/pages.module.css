@@ -82,6 +82,10 @@
   background: var(--admin-accent-soft);
   color: var(--admin-accent);
 }
+:is(.sourceCard, .pageOptionsCard) .tabs > button {
+  min-block-size: max(var(--admin-control-height), var(--admin-touch-target));
+  padding-block: var(--admin-control-padding-block);
+}
 .search {
   display: flex;
   min-width: 0;
@@ -312,6 +316,12 @@
 .languagePanel {
   scroll-margin-top: calc(var(--admin-header-height, 64px) + 20px);
 }
+.languagePanel:not([data-compact]) {
+  padding: var(--admin-panel-padding, 24px);
+}
+.languagePanel .languageHeader > h2 {
+  margin: 0;
+}
 .languageHeader,
 .languageMember,
 .languageActions {
@@ -320,11 +330,15 @@
   gap: 12px;
   flex-wrap: wrap;
 }
+.languageActions {
+  gap: clamp(6px, calc(var(--admin-field-gap, 16px) - 6px), 12px);
+  min-inline-size: 0;
+}
 .languageHeader {
   justify-content: space-between;
 }
 .languageList {
-  margin: 16px 0;
+  margin-block: min(16px, var(--admin-field-gap, 16px));
 }
 .languagePanel[data-compact] .languageList {
   margin-block: 8px 12px;
@@ -336,12 +350,12 @@
   min-width: 0;
 }
 .languageMember {
-  padding: 14px 0;
+  padding-block: clamp(8px, calc(var(--admin-field-gap, 16px) - 2px), 14px);
   border-top: 1px solid var(--admin-border);
 }
 .languageMember > div:first-child {
   flex: 1;
-  min-width: 160px;
+  min-inline-size: min(100%, 10rem);
 }
 .languageMember small {
   display: block;
@@ -351,12 +365,35 @@
 }
 .languageForm {
   display: grid;
-  gap: 18px;
-  padding: 24px 4px;
+  gap: min(18px, var(--admin-field-gap, 18px));
+}
+.languageDialog:global(.admin-library-modal) {
+  padding: var(--admin-panel-padding, 24px);
+}
+.languageDialog > :global(.admin-library-modal-heading) {
+  margin-block-end: var(--admin-field-gap, 22px);
 }
 .languageForm > label {
   display: grid;
-  gap: 8px;
+  gap: var(--admin-label-gap, 8px);
+}
+.languageNote {
+  margin-block-start: clamp(
+    6px,
+    calc(var(--admin-field-gap, 16px) - 4px),
+    12px
+  );
+  color: var(--admin-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.languageForm > :is(.toggle, .languageNote) {
+  margin-block: 0;
+}
+@media (max-width: 540px) {
+  .languageDialog:global(.admin-library-modal) {
+    padding: min(18px, var(--admin-panel-padding, 24px));
+  }
 }
 @media (max-width: 700px) {
   .row {
@@ -475,13 +512,25 @@
   }
 }
 .editorLayout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 22px;
-  align-items: start;
+  margin-block-start: 16px;
 }
-.editorColumn {
+
+.editorPane {
   min-width: 0;
+}
+
+.editorLayout .editorPane > :is(.sourceCard, .pageOptionsCard) {
+  margin: 0;
+  padding: min(16px, var(--admin-panel-padding));
+}
+
+.editorSettings {
+  display: grid;
+  gap: min(16px, var(--admin-panel-gap));
+}
+
+.editorSettings > .languagePanel {
+  margin: 0;
 }
 
 .editOption {
@@ -510,7 +559,7 @@
   inline-size: 8.5rem;
 }
 .editOptions .editOption :global(.ui-select-trigger) {
-  min-block-size: 34px;
+  min-block-size: max(32px, var(--admin-touch-target));
   padding-block: 4px;
 }
 .pageEditControls {

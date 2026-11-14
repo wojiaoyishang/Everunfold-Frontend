@@ -107,11 +107,6 @@
   background: var(--admin-border);
 }
 
-.inspector {
-  min-width: 0;
-  position: sticky;
-  top: calc(82px + var(--admin-header-dock-height, 0px));
-}
 .inspectorTabs {
   display: flex;
   gap: 4px;
@@ -420,9 +415,6 @@
 @media (max-width: 800px) {
   .inspector[data-settings-only="true"] .inspectorTabs {
     display: none;
-  }
-  .inspector {
-    position: static;
   }
   .mobileToolbar {
     display: inline-flex;

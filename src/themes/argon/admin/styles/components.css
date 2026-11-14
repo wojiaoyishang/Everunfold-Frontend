@@ -48,6 +48,58 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+.admin-root
+  :is(.admin-density-controls, .settings-schema-form)
+  :is(
+    .admin-button,
+    .ui-input:not([type="checkbox"], [type="radio"]),
+    .ui-select-trigger
+  ) {
+  min-block-size: max(var(--admin-control-height), var(--admin-touch-target));
+  padding-block: var(--admin-control-padding-block);
+}
+.admin-root :is(.admin-density-controls, .settings-schema-form) .admin-button {
+  min-inline-size: var(--admin-touch-target);
+}
+.admin-root[data-density="compact"]
+  :is(.admin-density-controls, .settings-schema-form)
+  .admin-button {
+  padding-inline: 10px;
+  gap: 6px;
+}
+.admin-root
+  :is(.admin-density-controls, .settings-schema-form)
+  .admin-icon-button {
+  inline-size: max(32px, var(--admin-touch-target));
+  block-size: max(32px, var(--admin-touch-target));
+}
+.admin-root
+  :is(.admin-density-controls, .settings-schema-form)
+  .ui-select-options
+  > button {
+  min-block-size: max(var(--admin-control-height), var(--admin-touch-target));
+  padding-block: var(--admin-control-padding-block);
+}
+@media (max-width: 860px), (pointer: coarse) {
+  .admin-root :is(.admin-density-controls, .settings-schema-form) .ui-switch {
+    box-sizing: border-box;
+    width: 44px;
+    height: 44px;
+    border: solid transparent;
+    border-width: 11px 3px;
+    border-radius: 26px;
+    background-clip: padding-box;
+  }
+  .admin-root
+    :is(.admin-density-controls, .settings-schema-form)
+    :is(
+      .ui-input:not([type="checkbox"], [type="radio"]),
+      .ui-textarea,
+      .ui-select-trigger
+    ) {
+    font-size: 16px;
+  }
+}
 .admin-root :is(.admin-action-button, .admin-status-badge) {
   --admin-action-color: var(--admin-muted);
 }

@@ -20,7 +20,9 @@
   align-items: center;
   gap: 4px;
   flex: none;
-  min-block-size: 28px;
+  min-block-size: max(28px, var(--admin-touch-target, 0px));
+  min-inline-size: var(--admin-touch-target, 0px);
+  justify-content: center;
   padding: 3px 5px;
   border: 0;
   border-radius: 4px;
@@ -59,7 +61,7 @@
   flex: 1;
   min-inline-size: 0;
   max-inline-size: 36rem;
-  min-block-size: 32px;
+  min-block-size: max(32px, var(--admin-touch-target, 0px));
   padding: 4px 8px;
   border: 1px solid var(--admin-border);
   border-radius: 5px;

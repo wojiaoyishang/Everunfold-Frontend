@@ -41,6 +41,7 @@ function LinkPicker({
   const results = useTranslationCandidates(type, language, search);
   return (
     <Modal
+      className={`admin-density-controls ${styles.pickerDialog}`}
       title={`关联已有${languageName(catalog, language)}内容`}
       closeLabel="关闭译文选择器"
       closing={closing}
@@ -149,7 +150,7 @@ export function EditorLanguages({
   const locked = disabled || translations.busy;
   return (
     <>
-      <div className={styles.bar}>
+      <div className={`admin-density-controls ${styles.bar}`}>
         {!id ? (
           <>
             <span>
@@ -206,7 +207,7 @@ export function EditorLanguages({
           <div>
             <section
               id="content-languages"
-              className={styles.panel}
+              className={`admin-density-controls ${styles.panel}`}
               aria-label="语言与译文"
             >
               <h2>

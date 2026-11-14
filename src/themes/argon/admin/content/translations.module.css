@@ -2,9 +2,9 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: clamp(6px, calc(var(--admin-field-gap, 16px) - 6px), 10px);
   margin-top: -8px;
-  margin-bottom: 18px;
+  margin-bottom: min(18px, var(--admin-field-gap, 18px));
   color: var(--admin-muted);
   font-size: 12px;
 }
@@ -38,8 +38,11 @@
   align-items: center;
   gap: 5px;
   flex: none;
-  padding: 4px 7px;
-  min-height: 28px;
+  padding: 3px 7px;
+  min-block-size: max(
+    var(--admin-touch-target, 0px),
+    calc(var(--admin-control-height, 36px) - 8px)
+  );
   border: 1px solid var(--admin-border);
   border-radius: 5px;
   background: var(--admin-canvas);
@@ -88,7 +91,7 @@
   overflow: auto;
   display: grid;
   gap: 4px;
-  padding: 12px;
+  padding: clamp(8px, calc(var(--admin-field-gap, 16px) - 4px), 12px);
 }
 .menu > strong {
   font-size: 12px;
@@ -101,7 +104,8 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 4px 12px;
-  padding: 8px;
+  min-block-size: var(--admin-control-height, 36px);
+  padding: var(--admin-control-padding-block, 8px) 8px;
   border-radius: 4px;
   text-align: left;
   font-size: 12px;
@@ -122,7 +126,7 @@
   overflow-wrap: anywhere;
 }
 .viewPublished {
-  flex: 0 0 32px;
+  flex: 0 0 max(32px, var(--admin-touch-target, 0px));
   display: grid;
   place-items: center;
   border-radius: 4px;
@@ -145,6 +149,14 @@
   color: var(--admin-accent);
 }
 .manage {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: var(--admin-touch-target, 0px);
+  min-block-size: max(
+    var(--admin-touch-target, 0px),
+    calc(var(--admin-control-height, 36px) - 8px)
+  );
   background: transparent;
   color: var(--admin-accent);
   font-size: 12px;
@@ -153,20 +165,23 @@
 }
 .menu > .manage {
   border-top: 1px solid var(--admin-border);
+  justify-content: flex-start;
   margin-top: 5px;
-  padding-top: 10px;
 }
 .panel {
-  margin: 0 0 20px;
-  padding: 18px;
+  margin-block-end: min(20px, var(--admin-field-gap, 20px));
+  padding: min(18px, var(--admin-panel-padding, 24px));
   border: 1px solid var(--admin-border);
   border-radius: 8px;
   background: var(--admin-canvas);
   scroll-margin-top: 8px;
 }
-.panel h2 {
+.panel > h2 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 15px;
-  margin-bottom: 12px;
+  margin-block-end: clamp(6px, calc(var(--admin-field-gap, 16px) - 4px), 12px);
 }
 .rows {
   display: grid;
@@ -176,8 +191,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 0;
+  gap: min(12px, var(--admin-field-gap, 12px));
+  padding-block: clamp(6px, calc(var(--admin-field-gap, 16px) - 6px), 10px);
   border-bottom: 1px solid var(--admin-border);
   font-size: 12px;
 }
@@ -185,7 +200,7 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: max(6px, var(--admin-label-gap, 8px));
   min-width: 0;
 }
 .row small,
@@ -197,13 +212,11 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 16px;
+  gap: clamp(6px, calc(var(--admin-field-gap, 16px) - 6px), 10px);
+  margin-top: min(16px, var(--admin-field-gap, 16px));
 }
 .create :global(.admin-button) {
   font-size: 12px;
-  padding: 7px 10px;
-  min-height: 34px;
 }
 .create label {
   display: inline-flex;
@@ -213,12 +226,19 @@
   color: var(--admin-muted);
 }
 .picker {
-  padding: 18px;
   display: grid;
-  gap: 14px;
+  justify-items: start;
+  gap: min(14px, var(--admin-field-gap, 14px));
+}
+.pickerDialog:global(.admin-library-modal) {
+  padding: var(--admin-panel-padding, 24px);
+}
+.pickerDialog > :global(.admin-library-modal-heading) {
+  margin-block-end: var(--admin-field-gap, 22px);
 }
 .picker :global(.ui-input) {
-  padding: 9px 11px;
+  width: 100%;
+  padding-inline: 11px;
   border: 1px solid var(--admin-border);
   border-radius: 6px;
   min-width: 0;
@@ -227,8 +247,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 10px 0;
+  width: 100%;
+  gap: min(12px, var(--admin-field-gap, 12px));
+  padding-block: clamp(6px, calc(var(--admin-field-gap, 16px) - 6px), 10px);
   border-bottom: 1px solid var(--admin-border);
 }
 .candidate > span {
@@ -242,7 +263,7 @@
 }
 @media (max-width: 640px) {
   .panel {
-    padding: 14px;
+    padding: min(14px, var(--admin-panel-padding, 24px));
   }
   .row {
     align-items: flex-start;
@@ -255,5 +276,10 @@
   }
   .bar {
     margin-top: 0;
+  }
+}
+@media (max-width: 540px) {
+  .pickerDialog:global(.admin-library-modal) {
+    padding: min(18px, var(--admin-panel-padding, 24px));
   }
 }

@@ -56,6 +56,31 @@ html:has([data-surface="admin"]) {
   scroll-behavior: auto;
   scroll-padding-top: 72px;
 }
+html:has([data-surface="admin"]),
+.admin-root {
+  --admin-panel-padding: 22px;
+  --admin-panel-gap: 20px;
+  --admin-field-gap: 22px;
+  --admin-label-gap: 8px;
+  --admin-control-height: 38px;
+  --admin-control-padding-block: 8px;
+  --admin-touch-target: 0px;
+}
+html:has(.admin-root[data-density="compact"]),
+.admin-root[data-density="compact"] {
+  --admin-panel-padding: 14px;
+  --admin-panel-gap: 12px;
+  --admin-field-gap: 12px;
+  --admin-label-gap: 5px;
+  --admin-control-height: 32px;
+  --admin-control-padding-block: 5px;
+}
+@media (max-width: 860px), (pointer: coarse) {
+  html:has([data-surface="admin"]),
+  .admin-root {
+    --admin-touch-target: 44px;
+  }
+}
 html:has([data-admin-mode="dark"]),
 .admin-root[data-admin-mode="dark"] {
   color-scheme: dark;

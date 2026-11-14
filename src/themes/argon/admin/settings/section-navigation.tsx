@@ -138,7 +138,7 @@ export function SettingsLayout({
   return (
     <div
       ref={root}
-      className={`admin-settings-page ${styles.layout}`}
+      className={`admin-settings-page admin-density-controls ${styles.layout}`}
       data-full-width={fullWidth}
     >
       <div className={styles.main}>{children}</div>

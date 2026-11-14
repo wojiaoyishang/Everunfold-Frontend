@@ -3,7 +3,7 @@
 }
 .access-invitation-fields {
   display: grid;
-  gap: 18px;
+  gap: min(18px, var(--admin-field-gap));
 }
 .access-invitations {
   display: grid;
@@ -18,7 +18,7 @@
 .admin-settings-section {
   display: block;
   padding: 0;
-  margin-bottom: 20px;
+  margin-bottom: var(--admin-panel-gap);
   background: var(--admin-canvas);
   border: 1px solid var(--admin-border);
   border-radius: 8px;
@@ -36,8 +36,9 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: flex-start;
-  gap: 12px 20px;
-  padding: 16px 22px;
+  gap: 8px var(--admin-field-gap);
+  padding: clamp(10px, calc(var(--admin-panel-padding) - 6px), 16px)
+    var(--admin-panel-padding);
   border-bottom: 1px solid var(--admin-border);
   background: color-mix(in srgb, var(--admin-subtle) 55%, var(--admin-canvas));
   border-radius: 8px 8px 0 0;
@@ -52,7 +53,10 @@
 .admin-settings-section-heading h2 {
   font-size: 15px;
   font-weight: 600;
-  margin: 0 0 7px;
+  margin: 0 0 var(--admin-label-gap);
+}
+.admin-settings-section-heading h2:last-child {
+  margin-bottom: 0;
 }
 .admin-settings-section-heading p,
 .admin-settings-hint {
@@ -62,9 +66,9 @@
   margin: 0;
 }
 .admin-settings-fields {
-  padding: 22px;
+  padding: var(--admin-panel-padding);
   display: grid;
-  gap: 22px;
+  gap: var(--admin-field-gap);
   min-width: 0;
   align-content: start;
 }
@@ -76,10 +80,13 @@
 }
 .admin-settings-field {
   display: grid;
-  gap: 8px;
+  gap: var(--admin-label-gap);
   min-width: 0;
 }
 .admin-settings-link {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--admin-touch-target);
   justify-self: start;
   color: var(--admin-accent);
   text-decoration: underline;
@@ -101,8 +108,8 @@
 .admin-settings-page .ui-input,
 .admin-settings-page .ui-textarea {
   width: 100%;
-  min-height: 38px;
-  padding: 9px 11px;
+  min-block-size: max(var(--admin-control-height), var(--admin-touch-target));
+  padding: var(--admin-control-padding-block) 11px;
   color: var(--admin-text);
   background: var(--admin-canvas);
   border: 1px solid var(--admin-border);
@@ -128,16 +135,16 @@
 .admin-settings-two-col {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
+  gap: calc(var(--admin-field-gap) + 2px);
 }
 .admin-settings-toggle {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: var(--admin-field-gap);
 }
 .admin-settings-toggle small {
-  margin-top: 6px;
+  margin-top: min(6px, var(--admin-label-gap));
 }
 .admin-settings-savebar {
   position: sticky;
@@ -146,8 +153,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 14px 18px;
+  gap: min(16px, var(--admin-field-gap));
+  padding: min(14px, calc(var(--admin-panel-padding) - 4px))
+    min(18px, var(--admin-panel-padding));
   background: var(--admin-canvas);
   border: 1px solid var(--admin-border);
   border-radius: 8px;
@@ -348,16 +356,17 @@
 @media (max-width: 580px) {
   .admin-settings-two-col {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: min(20px, var(--admin-field-gap));
   }
   .admin-settings-section {
     padding: 0;
   }
   .admin-settings-section-heading {
-    padding: 15px 18px;
+    padding-block: clamp(10px, calc(var(--admin-panel-padding) - 6px), 15px);
+    padding-inline: min(18px, var(--admin-panel-padding));
   }
   .admin-settings-fields {
-    padding: 18px;
+    padding: min(18px, var(--admin-panel-padding));
   }
   .admin-settings-savebar {
     align-items: stretch;

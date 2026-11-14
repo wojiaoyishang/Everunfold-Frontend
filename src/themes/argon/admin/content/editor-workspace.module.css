@@ -250,12 +250,6 @@
 .panelBody :global(.ui-select-trigger) {
   width: 100%;
 }
-.layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 24px;
-  align-items: start;
-}
 .main {
   min-width: 0;
   background: transparent;
@@ -546,16 +540,7 @@
     transform: none;
   }
 }
-@media (max-width: 1050px) {
-  .layout {
-    grid-template-columns: minmax(0, 1fr) 270px;
-    gap: 16px;
-  }
-}
 @media (max-width: 800px) {
-  .layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .mobileTabs {
     display: flex;
     gap: 6px;
