@@ -13,12 +13,11 @@ import type {
 import { useCacheManagement } from "@/core/settings/use-cache-management";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { Button } from "../../components/ui/primitives";
-import { RouteLink } from "../../components/ui/route-link";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
-import { SettingsLayout } from "./section-navigation";
+import { SettingsLayout, SettingsSectionLink } from "./section-navigation";
 import { DeliveryBadge, SettingsSection } from "./shared";
 import { CachePolicySection } from "./cache-policy";
 import { QueryCacheSection } from "./query-cache";
@@ -26,6 +25,7 @@ import {
   DeploymentSettings,
   type DeploymentSummary,
 } from "./deployment-settings";
+import { MaintenanceSections } from "./maintenance";
 import styles from "./cache.module.css";
 
 type CacheResource = CacheDiskResource["resource"];
@@ -79,6 +79,7 @@ function SiteDeliverySection({
     <SettingsSection
       id="settings-delivery"
       title="站点与主题发布"
+      group="节点状态"
       description="各节点已应用的版本与后端期望版本。"
     >
       {rows?.length ? (
@@ -165,13 +166,21 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
         busy={cache.policy.saving}
       />
       <AdminPageHeading
-        title="节点状态"
-        description="查看发布回执、节点缓存、后端查询和部署状态。"
+        title="节点状态与维护"
+        action={
+          <SettingsSectionLink
+            className={`admin-button ${styles.maintenanceJump}`}
+            href="#maintenance-health"
+          >
+            <UiText text="站点维护" />
+          </SettingsSectionLink>
+        }
       />
       <SiteDeliverySection {...cache.siteDelivery} />
       <SettingsSection
         id="cache-node"
         title="节点缓存"
+        group="节点状态"
         description="本机版本来自节点磁盘，确认版本来自后端投递回执。"
       >
         {cache.nodes?.length ? (
@@ -325,14 +334,14 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
                           </Button>
                         )}
                         {name === "cache-policy" && (
-                          <RouteLink
+                          <SettingsSectionLink
                             className="admin-settings-link"
                             href="#settings-nodes"
                           >
                             <UiText
                               text={editable ? "编辑节点策略" : "查看节点策略"}
                             />
-                          </RouteLink>
+                          </SettingsSectionLink>
                         )}
                       </div>
                     )}
@@ -386,6 +395,7 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
         busy={cache.busy}
       />
       <DeploymentSettings runtime={runtime} />
+      <MaintenanceSections />
       <ConfirmDialog
         open={action !== undefined}
         title={label}

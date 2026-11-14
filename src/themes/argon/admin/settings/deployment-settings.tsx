@@ -27,6 +27,7 @@ export function DeploymentSettings({
     <SettingsSection
       id="settings-deployment"
       title="部署配置"
+      group="节点状态"
       description="这些信息属于当前前端节点，由服务器配置文件维护。"
     >
       <dl className="admin-runtime-list">

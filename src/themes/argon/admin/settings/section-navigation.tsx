@@ -1,7 +1,13 @@
 "use client";
 import { UiText, useT } from "@/core/i18n/provider";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import { TextLink } from "../../components/ui/primitives";
 import styles from "./section-navigation.module.css";
 import { adminScrollBehavior } from "@/core/admin/scroll";
@@ -19,6 +25,39 @@ function groupSections(sections: SectionLink[]): SectionGroup[] {
     }
     return groups;
   }, []);
+}
+
+export function SettingsSectionLink({
+  href,
+  ...props
+}: Omit<ComponentProps<typeof TextLink>, "href" | "onClick"> & {
+  href: string;
+}) {
+  return (
+    <TextLink
+      {...props}
+      href={href}
+      onClick={(event) => {
+        if (
+          event.button !== 0 ||
+          event.metaKey ||
+          event.ctrlKey ||
+          event.shiftKey ||
+          event.altKey
+        )
+          return;
+        const target = document.getElementById(href.slice(1));
+        if (!target) return;
+        event.preventDefault();
+        history.replaceState(history.state, "", href);
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({
+          block: "start",
+          behavior: adminScrollBehavior(target),
+        });
+      }}
+    />
+  );
 }
 
 /** Builds a local directory from the sections actually mounted in this page. */
@@ -165,34 +204,15 @@ export function SettingsLayout({
               )}
               <div className={styles.links}>
                 {group.items.map((section) => (
-                  <TextLink
+                  <SettingsSectionLink
                     key={section.id}
                     href={`#${section.id}`}
                     aria-current={
                       active === section.id ? "location" : undefined
                     }
-                    onClick={(event) => {
-                      if (
-                        event.button !== 0 ||
-                        event.metaKey ||
-                        event.ctrlKey ||
-                        event.shiftKey ||
-                        event.altKey
-                      )
-                        return;
-                      const target = document.getElementById(section.id);
-                      if (!target) return;
-                      event.preventDefault();
-                      history.replaceState(history.state, "", `#${section.id}`);
-                      target.focus({ preventScroll: true });
-                      target.scrollIntoView({
-                        block: "start",
-                        behavior: adminScrollBehavior(root.current),
-                      });
-                    }}
                   >
                     <UiText text={section.title} />
-                  </TextLink>
+                  </SettingsSectionLink>
                 ))}
               </div>
             </div>

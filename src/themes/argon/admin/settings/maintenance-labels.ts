@@ -31,7 +31,7 @@ export const healthChecks = {
   mail: { label: "邮件配置", href: "/admin/notifications/platforms" },
   query_cache: {
     label: "后端查询缓存",
-    href: "/admin/settings/nodes#query-cache",
+    href: "#query-cache",
   },
 } satisfies Record<
   MaintenanceHealthCheck["id"],

@@ -70,14 +70,6 @@ export const builtinAdminModule = {
       menu: { group: "core.settings", order: 50 },
     },
     {
-      id: "core.settings.maintenance",
-      href: "/admin/settings/maintenance",
-      label: "站点维护",
-      description: "站点健康、数据导入与导出",
-      icon: "maintenance",
-      menu: { group: "core.settings", order: 55 },
-    },
-    {
       id: "core.comments",
       href: "/admin/comments",
       label: "评论管理",
@@ -191,10 +183,11 @@ export const builtinAdminModule = {
     {
       id: "core.settings.nodes",
       href: "/admin/settings/nodes",
-      label: "节点状态",
-      description: "发布状态、节点缓存、策略与部署配置",
+      label: "节点状态与维护",
+      description: "节点缓存、部署、站点健康与数据导入导出",
       icon: "system",
-      menu: { group: "core.settings", order: 45 },
+      matchesChild: (path: string) => path === "/admin/settings/maintenance",
+      menu: { group: "core.settings", order: 70 },
     },
     {
       id: "core.settings.captcha",

@@ -16,14 +16,13 @@ import { Icon } from "../../components/icon";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { useToast } from "../../components/ui/toast/toast-provider";
-import { AdminPageHeading } from "../components/page-heading";
 import { MaintenanceExport } from "./maintenance-export";
 import {
   MaintenanceCountSummary,
   MaintenanceImport,
 } from "./maintenance-import";
 import { healthChecks, healthStatuses } from "./maintenance-labels";
-import { SettingsLayout } from "./section-navigation";
+import { SettingsSectionLink } from "./section-navigation";
 import { SettingsSection } from "./shared";
 import styles from "./maintenance.module.css";
 
@@ -91,6 +90,7 @@ function MaintenanceHealthSection() {
     <SettingsSection
       id="maintenance-health"
       title="站点健康"
+      group="站点维护"
       action={
         <div className={styles.actions}>
           <Button
@@ -128,13 +128,17 @@ function MaintenanceHealthSection() {
             {health.checks.map(({ id, status, detail }) => {
               const check = healthChecks[id];
               const presentation = healthStatuses[status];
+              const link = "href" in check ? check.href : undefined;
+              const Link = link?.startsWith("#")
+                ? SettingsSectionLink
+                : RouteLink;
               return (
                 <li key={id} className={styles.row}>
                   <div className={styles.rowBody}>
-                    {"href" in check ? (
-                      <RouteLink className={styles.link} href={check.href}>
+                    {link ? (
+                      <Link className={styles.link} href={link}>
                         <UiText text={check.label} />
-                      </RouteLink>
+                      </Link>
                     ) : (
                       <strong>
                         <UiText text={check.label} />
@@ -220,6 +224,7 @@ function MaintenanceData() {
       <SettingsSection
         id="maintenance-history"
         title="导入记录"
+        group="站点维护"
         action={
           <Button
             className="admin-button"
@@ -263,13 +268,12 @@ function MaintenanceData() {
   );
 }
 
-export function MaintenancePage() {
+export function MaintenanceSections() {
   const { role } = useAdminAccount();
   return (
-    <SettingsLayout>
-      <AdminPageHeading title="站点维护" />
+    <>
       <MaintenanceHealthSection />
       {role === "admin" && <MaintenanceData />}
-    </SettingsLayout>
+    </>
   );
 }

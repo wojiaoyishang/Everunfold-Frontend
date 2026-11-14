@@ -195,6 +195,7 @@ export function QueryCacheSection() {
     <SettingsSection
       id="query-cache"
       title="后端查询缓存"
+      group="节点状态"
       description="站点统计、分类标签与公开内容列表的 Redis 和 SQL 指标。"
     >
       <div className={styles.report} aria-busy={loading}>

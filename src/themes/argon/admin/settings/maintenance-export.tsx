@@ -79,7 +79,7 @@ export function MaintenanceExport() {
   };
 
   return (
-    <SettingsSection id="maintenance-export" title="数据导出">
+    <SettingsSection id="maintenance-export" title="数据导出" group="站点维护">
       <Form
         className={styles.fields}
         onSubmit={(event) => {

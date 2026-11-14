@@ -24,7 +24,6 @@ export type AdminPageIcon =
   | "notification-platform"
   | "node-settings"
   | "runtime"
-  | "maintenance"
   | "system";
 export interface AdminMenuGroup {
   readonly id: string;

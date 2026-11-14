@@ -108,11 +108,18 @@ test("admin navigation separates primary content, tools, appearance and system s
     "core.settings.plugins",
     "core.settings.site",
     "core.settings.system",
-    "core.settings.nodes",
     "core.settings.runtime",
-    "core.settings.maintenance",
     "core.settings.api-keys",
+    "core.settings.nodes",
   ]);
+  assert.equal(
+    adminDestination("/admin/settings/maintenance")?.href,
+    "/admin/settings/nodes",
+  );
+  assert.equal(
+    adminDestination("/admin/settings/nodes")?.label,
+    "节点状态与维护",
+  );
   const settingsIcons =
     adminNavigationGroups
       .find((group) => group.label === "设置")

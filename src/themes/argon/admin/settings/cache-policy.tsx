@@ -120,6 +120,7 @@ export function CachePolicySection({
     <SettingsSection
       id="settings-nodes"
       title="节点策略"
+      group="节点状态"
       description="保存后由后端投递到所选节点。投递进度可在上方查看。"
       action={<span className={styles.policyNode}>{node}</span>}
     >

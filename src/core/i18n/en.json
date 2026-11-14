@@ -2888,6 +2888,8 @@
   "还没有账号？": "New here?",
   "已有账号？": "Already have an account?",
   "节点状态": "Node status",
+  "节点状态与维护": "Node Status and Maintenance",
+  "节点缓存、部署、站点健康与数据导入导出": "Node cache, deployment, site health, and data import and export",
   "发布状态、节点缓存、策略与部署配置": "Delivery status, node cache, policies and deployment configuration",
   "公开内容": "Public content",
   "接收器在线": "Receiver online",

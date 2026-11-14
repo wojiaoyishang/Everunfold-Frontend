@@ -233,6 +233,7 @@ export function MaintenanceImport({
     <SettingsSection
       id="maintenance-import"
       title="数据导入"
+      group="站点维护"
       description="先预览再导入。新正文以草稿保存，冲突项会跳过。"
     >
       <div className={styles.actions}>
