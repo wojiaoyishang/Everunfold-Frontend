@@ -96,7 +96,7 @@ export function GenerationAction({ field }: AdminFormFieldActionProps) {
           }}
         >
           <Icon name="star" />
-          {t("AI 辅助生成")}
+          <span>{t("AI 辅助生成")}</span>
         </Button>
       )}
       {review && (
@@ -388,6 +388,9 @@ function GenerationDialog({
           </p>
         )}
         <div className={styles.actions}>
+          {job.busy && !closing && (
+            <div className={styles.generationProgress} aria-hidden="true" />
+          )}
           <div className={styles.notice} role="status">
             {checkingMaterial && t("正在读取素材…")}
             {job.busy &&

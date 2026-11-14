@@ -1,4 +1,7 @@
 .fieldAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
   min-block-size: 32px;
   padding-inline: 8px;
@@ -15,6 +18,7 @@
 .fieldAction :global(.icon) {
   width: 15px;
   height: 15px;
+  flex: none;
 }
 
 .dialog:global(.admin-library-modal) {
@@ -209,6 +213,45 @@
 
 .notice {
   margin-inline-end: auto;
+}
+
+.generationProgress {
+  flex: 0 0 100%;
+  block-size: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--admin-accent-soft);
+}
+
+.generationProgress::after {
+  content: "";
+  display: block;
+  inline-size: 30%;
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--admin-accent);
+  animation: generation-sweep 1.25s ease-in-out infinite;
+}
+
+@keyframes generation-sweep {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(334%);
+  }
+}
+
+:global([data-admin-motion="reduced"]) .generationProgress::after {
+  margin-inline: auto;
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global([data-admin-motion="system"]) .generationProgress::after {
+    margin-inline: auto;
+    animation: none;
+  }
 }
 
 .error {
