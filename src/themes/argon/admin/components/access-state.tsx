@@ -1,6 +1,7 @@
 import { UiText } from "@/core/i18n/provider";
 import { Icon } from "../../components/icon";
 import { Button, TextLink } from "../../components/ui/primitives";
+import { AdminStatusBrand } from "./status-brand";
 export function AdminAccessState({
   status,
   error,
@@ -17,10 +18,7 @@ export function AdminAccessState({
       data-admin-mode="system"
     >
       <section className="admin-access-card" aria-labelledby="access-title">
-        <span className="admin-brand-mark">
-          <Icon name="book" />
-        </span>
-        <span className="admin-eyebrow">EVERUNFOLD</span>
+        <AdminStatusBrand />
         <h1 id="access-title">
           <UiText text="工作空间" />
         </h1>
@@ -29,7 +27,7 @@ export function AdminAccessState({
             name={error ? "cloud-off" : "refresh"}
             className={error ? "" : "admin-spinning"}
           />
-          <p>{error || status}</p>
+          <p>{error || <UiText text={status} />}</p>
         </div>
         <div className="admin-access-actions">
           {error && (

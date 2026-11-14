@@ -16,6 +16,7 @@ import { AdminShell } from "@/themes/argon/admin/layout/admin-shell";
 import type { AuthUser } from "@/core/contracts/auth";
 import { LocalDraftRecovery } from "@/themes/argon/admin/content/local-recovery";
 import { AdminSeoContext, type AdminSeo } from "@/core/admin/seo-context";
+import { SiteBrandContext } from "@/core/site/brand";
 
 export function AdminWorkspace({
   baseUrl,
@@ -29,51 +30,6 @@ export function AdminWorkspace({
   children: ReactNode;
 }) {
   const access = useAdminAccess(baseUrl);
-  if (!access.user && access.recovery)
-    return (
-      <LocalDraftRecovery recovery={access.recovery} onRetry={access.retry} />
-    );
-  if (!access.user)
-    return (
-      <AdminAccessState
-        error={access.error}
-        status={access.status}
-        onRetry={access.retry}
-      />
-    );
-  const storageKey = adminPreferencesKey(baseUrl, access.user.id);
-  return (
-    <ConfirmedWorkspace
-      key={storageKey}
-      storageKey={storageKey}
-      baseUrl={baseUrl}
-      csrfToken={access.csrfToken}
-      user={access.user}
-      initialBrand={initialBrand}
-      onSignOut={access.signOut}
-    >
-      <AdminSeoContext value={seo}>{children}</AdminSeoContext>
-    </ConfirmedWorkspace>
-  );
-}
-function ConfirmedWorkspace({
-  baseUrl,
-  csrfToken,
-  storageKey,
-  user,
-  initialBrand,
-  onSignOut,
-  children,
-}: {
-  storageKey: string;
-  baseUrl: string;
-  csrfToken: string;
-  user: AuthUser;
-  initialBrand: AdminSiteBrand | null;
-  onSignOut: () => Promise<void>;
-  children: ReactNode;
-}) {
-  const { preferences, update } = useAdminPreferences(storageKey);
   const [confirmedBrand, setConfirmedBrand] = useState<AdminSiteBrand | null>(
     null,
   );
@@ -86,20 +42,69 @@ function ConfirmedWorkspace({
     confirmedBrand && confirmedBrand.revision >= (initialBrand?.revision ?? 0)
       ? confirmedBrand
       : initialBrand;
+  if (!access.user && access.recovery)
+    return (
+      <LocalDraftRecovery recovery={access.recovery} onRetry={access.retry} />
+    );
+  if (!access.user)
+    return (
+      <SiteBrandContext value={brand}>
+        <AdminAccessState
+          error={access.error}
+          status={access.status}
+          onRetry={access.retry}
+        />
+      </SiteBrandContext>
+    );
+  const storageKey = adminPreferencesKey(baseUrl, access.user.id);
+  return (
+    <SiteBrandContext value={brand}>
+      <ConfirmedWorkspace
+        key={storageKey}
+        storageKey={storageKey}
+        baseUrl={baseUrl}
+        csrfToken={access.csrfToken}
+        user={access.user}
+        siteBrand={brand}
+        onSignOut={access.signOut}
+      >
+        <AdminSiteBrandUpdate value={updateBrand}>
+          <AdminSeoContext value={seo}>{children}</AdminSeoContext>
+        </AdminSiteBrandUpdate>
+      </ConfirmedWorkspace>
+    </SiteBrandContext>
+  );
+}
+function ConfirmedWorkspace({
+  baseUrl,
+  csrfToken,
+  storageKey,
+  user,
+  siteBrand,
+  onSignOut,
+  children,
+}: {
+  storageKey: string;
+  baseUrl: string;
+  csrfToken: string;
+  user: AuthUser;
+  siteBrand: AdminSiteBrand | null;
+  onSignOut: () => Promise<void>;
+  children: ReactNode;
+}) {
+  const { preferences, update } = useAdminPreferences(storageKey);
   return (
     <AdminRequestContext value={{ baseUrl, csrfToken }}>
       <AdminAccountContext value={user}>
-        <AdminSiteBrandUpdate value={updateBrand}>
-          <AdminShell
-            user={user}
-            siteBrand={brand}
-            preferences={preferences}
-            onPreferencesChange={update}
-            onSignOut={onSignOut}
-          >
-            {children}
-          </AdminShell>
-        </AdminSiteBrandUpdate>
+        <AdminShell
+          user={user}
+          siteBrand={siteBrand}
+          preferences={preferences}
+          onPreferencesChange={update}
+          onSignOut={onSignOut}
+        >
+          {children}
+        </AdminShell>
       </AdminAccountContext>
     </AdminRequestContext>
   );

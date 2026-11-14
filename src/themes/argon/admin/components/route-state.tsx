@@ -2,6 +2,7 @@ import { UiText } from "@/core/i18n/provider";
 import { Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
+import { AdminStatusBrand } from "./status-brand";
 
 export function AdminRouteState({
   error = false,
@@ -16,10 +17,7 @@ export function AdminRouteState({
       data-error={error || undefined}
       aria-live={error ? "assertive" : "polite"}
     >
-      <span className="admin-route-state-mark">
-        <Icon name={error ? "cloud-off" : "activity"} />
-      </span>
-      <span className="admin-eyebrow">EVERUNFOLD WORKSPACE</span>
+      <AdminStatusBrand />
       <h1>
         <UiText text={error ? "无法完成此页面请求" : "正在加载工作区内容"} />
       </h1>

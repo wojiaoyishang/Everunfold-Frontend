@@ -159,8 +159,18 @@
 .admin-access-card .admin-brand-mark {
   width: 40px;
   height: 40px;
-  margin-bottom: 14px;
   font-size: 22px;
+}
+.admin-access-card > .admin-brand-mark {
+  margin-bottom: 14px;
+}
+.admin-status-brand {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
 }
 .admin-access-card h1 {
   font-size: 23px;
@@ -214,23 +224,9 @@
   );
   content: "";
 }
-.admin-route-state-mark {
-  display: grid;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 14px;
-  place-items: center;
-  border-radius: 13px;
-  background: var(--admin-accent-soft);
-  color: var(--admin-accent);
-}
-.admin-route-state[data-error="true"] .admin-route-state-mark {
-  background: color-mix(in srgb, var(--admin-danger) 9%, var(--admin-canvas));
-  color: var(--admin-danger);
-}
-.admin-route-state-mark > .icon {
-  width: 23px;
-  height: 23px;
+.admin-route-state .admin-brand-mark {
+  width: 40px;
+  height: 40px;
 }
 .admin-route-state h1 {
   margin: 9px 0 0;
