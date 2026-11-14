@@ -21,6 +21,7 @@ import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout } from "./section-navigation";
 import { DeliveryBadge, SettingsSection } from "./shared";
 import { CachePolicySection } from "./cache-policy";
+import { QueryCacheSection } from "./query-cache";
 import {
   DeploymentSettings,
   type DeploymentSummary,
@@ -165,7 +166,7 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
       />
       <AdminPageHeading
         title="节点状态"
-        description="查看发布回执、节点缓存、请求策略与部署配置。"
+        description="查看发布回执、节点缓存、后端查询和部署状态。"
       />
       <SiteDeliverySection {...cache.siteDelivery} />
       <SettingsSection
@@ -377,6 +378,7 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
           </p>
         )}
       </SettingsSection>
+      <QueryCacheSection />
       <CachePolicySection
         node={cache.node}
         policy={cache.policy}

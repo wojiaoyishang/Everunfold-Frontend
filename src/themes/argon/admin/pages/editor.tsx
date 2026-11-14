@@ -459,6 +459,33 @@ export function ManagedPageEditor({
   const publishAction = publish
     ? submitAction(true, value.enabled ? "保存并应用" : "保存并停用")
     : null;
+  const pageControls = (!compact || editOptions) && (
+    <fieldset
+      className={`account-fieldset admin-density-controls ${styles.pageEditControls}`}
+      disabled={disabled}
+      data-compact={compact || undefined}
+    >
+      {!compact && (
+        <div className={styles.state}>
+          <span className="admin-badge">
+            <UiText text={typeTitle} />
+          </span>
+          {saved && (
+            <span>
+              <UiText text="草稿版本" /> {saved.revision} ·{" "}
+              <UiText text="应用版本" /> {saved.applied_revision ?? "—"}
+            </span>
+          )}
+          {saved?.archived && (
+            <span className="admin-badge">
+              <UiText text="回收站" />
+            </span>
+          )}
+        </div>
+      )}
+      {editOptions}
+    </fieldset>
+  );
   return (
     <>
       <div className="admin-editor-back admin-page-editor-toolbar">
@@ -555,46 +582,27 @@ export function ManagedPageEditor({
               </>
             )}
           </fieldset>
-          {saved && (!compact || saved.translations) && (
-            <div data-live-part="settings">
+          <div className={styles.pageIdentityRow} data-live-part="settings">
+            {saved && (!compact || saved.translations) ? (
               <PageLanguages
                 page={saved}
                 compact={compact}
                 disabled={dirty || action.busy}
                 onChanged={refreshPage}
+                controls={pageControls}
               />
-            </div>
-          )}
-          <fieldset className="account-fieldset" disabled={disabled}>
-            {!saved && source === "custom" && (
-              <NewPageLanguage value={language} onChange={setLanguage} />
+            ) : !saved && source === "custom" ? (
+              <NewPageLanguage
+                value={language}
+                onChange={setLanguage}
+                disabled={disabled}
+                compact={compact}
+                controls={pageControls}
+              />
+            ) : (
+              pageControls
             )}
-            <div
-              className={`admin-density-controls ${styles.pageEditControls}`}
-              data-compact={compact || undefined}
-              data-live-part="settings"
-            >
-              {!compact && (
-                <div className={styles.state}>
-                  <span className="admin-badge">
-                    <UiText text={typeTitle} />
-                  </span>
-                  {saved && (
-                    <span>
-                      <UiText text="草稿版本" /> {saved.revision} ·{" "}
-                      <UiText text="应用版本" /> {saved.applied_revision ?? "—"}
-                    </span>
-                  )}
-                  {saved?.archived && (
-                    <span className="admin-badge">
-                      <UiText text="回收站" />
-                    </span>
-                  )}
-                </div>
-              )}
-              {editOptions}
-            </div>
-          </fieldset>
+          </div>
           <div
             className={
               compact

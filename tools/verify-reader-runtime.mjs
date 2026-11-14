@@ -8,6 +8,7 @@ import path from "node:path";
 import { createInterface } from "node:readline";
 import { parse } from "smol-toml";
 import { Parser } from "htmlparser2";
+import { randomUUID } from "node:crypto";
 
 function visibleText(html) {
   let result = "";
@@ -49,12 +50,15 @@ export async function verifyReaderRuntime({
   const api = "http://127.0.0.1:8991";
   const warm = "http://127.0.0.1:3991";
   const cold = "http://127.0.0.1:3992";
+  const node = "reader-warm";
+  const epoch = randomUUID();
+  const warmDirectory = path.join(workspace, "reader-cache-warm");
+  const releaseDirectory = path.join(warmDirectory, "releases", node, epoch);
   const children = new Set();
   let backend;
   let backendDelay = 0;
-  const config = parse(
-    await readFile(path.join(projectRoot, "config.toml"), "utf8"),
-  );
+  const mainConfig = path.join(projectRoot, "config.toml");
+  const config = parse(await readFile(mainConfig, "utf8"));
   const originalCache = path.resolve(
     projectRoot,
     config.cache?.directory ?? "var/public-snapshots",
@@ -74,7 +78,8 @@ export async function verifyReaderRuntime({
         env: {
           ...process.env,
           NODE_ENV: "test",
-          CONFIG_FILE: path.join(projectRoot, "config.toml"),
+          CONFIG_FILE: mainConfig,
+          EVERUNFOLD_PROJECT_ROOT: projectRoot,
         },
         maxBuffer: 16 * 1024 * 1024,
       },
@@ -93,6 +98,50 @@ export async function verifyReaderRuntime({
         (snapshot.comments[item.id]?.length ?? 0) > 0,
     ) ?? snapshot.contents.find((item) => item.kind === "article");
   assert.ok(content, "Need an existing public article for the offline check");
+  const revision = snapshot.generation;
+  async function prepareRelease(value) {
+    const payload = {
+      protocol: "content-1",
+      resource: "public-content",
+      node_id: node,
+      source_epoch: epoch,
+      revision: value.generation,
+      value: { ...value, source_epoch: epoch },
+    };
+    const bytes = JSON.stringify(payload);
+    const rawPath = path.join(workspace, "reader-release.json");
+    await writeFile(rawPath, bytes);
+    const { stdout: digest } = await promisify(execFile)(
+      process.execPath,
+      [
+        "--import",
+        "tsx",
+        "--input-type=module",
+        "-e",
+        `import { readFileSync } from "node:fs";
+         import storage from "./src/server/storage/immutable-json.ts";
+         process.stdout.write(storage.jsonDigest(JSON.parse(readFileSync(process.argv[1], "utf8"))));`,
+        rawPath,
+      ],
+      { cwd: workspace },
+    );
+    const stem = path.join(
+      releaseDirectory,
+      "public-content." + value.generation,
+    );
+    return {
+      bytes,
+      target: stem + ".snapshot.json",
+      intent: () =>
+        writeFile(
+          stem + ".intent.json",
+          JSON.stringify({
+            revision: value.generation,
+            digest,
+          }),
+        ),
+    };
+  }
   for (const port of [8991, 3991, 3992]) {
     const { createServer } = await import("node:net");
     const probe = createServer();
@@ -243,12 +292,20 @@ export async function verifyReaderRuntime({
     ]) {
       const directory = path.join(workspace, `reader-cache-${name}`);
       await mkdir(directory);
-      if (name === "warm")
-        await writeFile(path.join(directory, "current.json"), original);
+      if (name === "warm") {
+        await mkdir(releaseDirectory, { recursive: true });
+        const initial = await prepareRelease(snapshot);
+        await writeFile(
+          path.join(directory, "managed.json"),
+          JSON.stringify({ node_id: node, source_epoch: epoch }),
+        );
+        await initial.intent();
+        await writeFile(initial.target, initial.bytes);
+      }
       const filename = path.join(workspace, `reader-${name}.toml`);
       await writeFile(
         filename,
-        `BACKEND_BASE_URL = "${api}"\nFRONTEND_NODE_ID = "reader-${name}"\nPUBLIC_SITE_URL = "${origin}"\n[cache]\ndirectory = '${directory.replaceAll("\\", "/")}'\n`,
+        `BACKEND_BASE_URL = "${api}"\nFRONTEND_NODE_ID = "reader-${name}"\nPUBLIC_SITE_URL = "${origin}"\n[cache]\ndirectory = '${directory.replaceAll("\\", "/")}'\n[settings]\nsource_epoch = "${epoch}"\n`,
       );
       start(
         process.execPath,
@@ -293,6 +350,27 @@ export async function verifyReaderRuntime({
     await htmlAt(warm, "/?type=article", 200);
     await htmlAt(cold, content.path, 503);
     await htmlAt(cold, "/", 503);
+    if (!interactive) {
+      const withdrawn = await prepareRelease({
+        ...snapshot,
+        generation: revision + 1,
+        contents: snapshot.contents.filter((item) => item.id !== content.id),
+        comments: Object.fromEntries(
+          Object.entries(snapshot.comments).filter(([id]) => id !== content.id),
+        ),
+      });
+      await withdrawn.intent();
+      await htmlAt(warm, content.path, 503);
+      await writeFile(withdrawn.target, withdrawn.bytes);
+      const gone = await fetch(new URL(content.path, warm));
+      assert.equal(gone.status, 404);
+      assert.ok(!visibleText(await gone.text()).includes(content.title));
+      await writeFile(withdrawn.target, "broken");
+      await htmlAt(warm, content.path, 503);
+      console.log(
+        "PASS: warmed SSR returns 503 for an incomplete newer release, 404 for the completed withdrawal, and 503 for a corrupted payload.",
+      );
+    }
     for (const route of ["/login", "/admin"]) {
       const response = await fetch(`${cold}${route}`);
       assert.equal(

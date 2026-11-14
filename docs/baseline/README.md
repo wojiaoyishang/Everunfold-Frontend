@@ -1795,3 +1795,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | --- | --- | --- |
 | `docs/decisions/0142-live-component-editing.md` | `ADR0142-4` | `7d0905daaf4280c7306f58ec0c679407105d6321e367359be178f4d520197228` |
 | `docs/development/component-editor.md` | `component-editor-6` | `db8c2b6701927637534c7b12f7907872634a7b957d157d3d0866052a8c7fed91` |
+
+## 公开查询缓存与前端快照复用
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0143-public-query-cache-and-snapshot-reuse.md` | `ADR0143-1` | `f6fd9bb2cdefa40c5756a392d47bc1325118d4743af421a7eadde47d60b56acc` |

@@ -10,6 +10,11 @@ export interface ContentFilter {
   pageSize?: number;
 }
 
+const contentPaths = new WeakMap<
+  readonly Content[],
+  ReadonlyMap<string, Content>
+>();
+
 export function queryContents(
   snapshot: PublicSnapshot,
   filter: ContentFilter = {},
@@ -54,9 +59,18 @@ export function resolveContent(
   requestedPath: string,
 ): Content | undefined {
   const requested = normalizePath(requestedPath);
-  return snapshot.contents.find(
-    (item) => normalizePath(item.path) === requested,
-  );
+  const contents = snapshot.contents;
+  if (!Object.isFrozen(contents))
+    return contents.find((item) => normalizePath(item.path) === requested);
+
+  let paths = contentPaths.get(contents);
+  if (!paths) {
+    const entries = new Map<string, Content>();
+    for (const item of contents) entries.set(normalizePath(item.path), item);
+    paths = entries;
+    contentPaths.set(contents, paths);
+  }
+  return paths.get(requested);
 }
 
 /** Accept a framework route segment in either encoded or decoded form, once. */

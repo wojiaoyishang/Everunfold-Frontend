@@ -1,7 +1,7 @@
 import type { ContentPresentation } from "@/core/contracts/presentation";
 import type { Content, PublicSnapshot } from "./types";
 import { builderSearchText } from "@/core/builder/discovery";
-import { normalizePath } from "./urls";
+import { resolveContent } from "./query";
 import { languageContents, snapshotLocale } from "@/core/i18n/snapshot";
 
 export type { ContentPresentation };
@@ -39,12 +39,10 @@ export function publicFeed(snapshot: PublicSnapshot): FeedEntry[] {
 }
 
 export function resolvePresentation(snapshot: PublicSnapshot, path: string) {
-  return snapshot.contents
-    .map((content) => ({
-      content: presentLegacyContent(content),
-      example: false,
-    }))
-    .find(({ content }) => normalizePath(content.path) === normalizePath(path));
+  const content = resolveContent(snapshot, path);
+  return content
+    ? { content: presentLegacyContent(content), example: false }
+    : undefined;
 }
 
 export function feedType(value: unknown): FeedType {

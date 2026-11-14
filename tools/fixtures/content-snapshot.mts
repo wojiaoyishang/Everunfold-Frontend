@@ -1,24 +1,28 @@
 /** Isolated integration read using the same store as SSR. */
-import fs from "node:fs";
+import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { parse } from "smol-toml";
-import { parseConfiguration } from "../../src/core/config/schema";
+import {
+  contentDirectory,
+  readConfigurationFiles,
+} from "../../src/core/config/files";
 import { FileContentStore } from "../../src/server/content/store";
 if (process.env.NODE_ENV !== "test") throw new Error("Test fixture only");
-const config = parseConfiguration(
-  parse(fs.readFileSync(process.env.CONFIG_FILE!, "utf8")),
-  process.env,
-);
+const root = process.env.EVERUNFOLD_PROJECT_ROOT ?? process.cwd();
+const { settings: config, connections } = readConfigurationFiles(root);
 const store = new FileContentStore(
-  config.cache.directory,
+  path.resolve(root, contentDirectory(config, !!connections)),
   config.frontendNodeId,
-  config.settings.sourceEpoch!,
+  config.settings.sourceEpoch ?? "",
+  config.cache.maxSnapshotBytes,
 );
 // An intent deliberately precedes its snapshot: readers fail closed during that
 // window. Poll for the current release, never select an older public snapshot.
 for (let attempt = 0; ; attempt++) {
   try {
-    console.log(JSON.stringify(await store.read()));
+    const value = await store.read();
+    if (connections && !value)
+      throw new Error("Configured source has no snapshot");
+    console.log(JSON.stringify(value));
     break;
   } catch (error) {
     if (attempt >= 40 || (error as NodeJS.ErrnoException).code !== "ENOENT")

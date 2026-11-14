@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type {
   ManagedPageItem,
   ManagedPageSummary,
@@ -34,31 +34,44 @@ import styles from "./pages.module.css";
 export function NewPageLanguage({
   value,
   onChange,
+  disabled,
+  compact,
+  controls,
 }: {
   value: string;
   onChange: (value: string) => void;
+  disabled: boolean;
+  compact: boolean;
+  controls: ReactNode;
 }) {
   const catalog = useLanguageCatalog();
   return (
-    <div className={`admin-density-controls ${translationStyles.bar}`}>
-      <span>
-        <Icon name="languages" />
-        <UiText text="内容语言" />
-      </span>
-      <Select
-        name="page-language"
-        label="内容语言"
-        value={value}
-        onValueChange={onChange}
-        options={catalog.languages
-          .filter((item) => item.enabled)
-          .map((item) => ({
-            value: item.code,
-            label: item.name,
-            flag: item.flag,
-          }))}
-      />
-    </div>
+    <>
+      <div
+        className={`admin-density-controls ${translationStyles.bar} ${compact ? "" : styles.identityBar}`}
+      >
+        <span>
+          <Icon name="languages" />
+          <UiText text="内容语言" />
+        </span>
+        <Select
+          name="page-language"
+          label="内容语言"
+          value={value}
+          disabled={disabled}
+          onValueChange={onChange}
+          options={catalog.languages
+            .filter((item) => item.enabled)
+            .map((item) => ({
+              value: item.code,
+              label: item.name,
+              flag: item.flag,
+            }))}
+        />
+        {!compact && controls}
+      </div>
+      {compact && controls}
+    </>
   );
 }
 
@@ -67,11 +80,13 @@ export function PageLanguages({
   compact = false,
   disabled,
   onChanged,
+  controls,
 }: {
   page: ManagedPageItem;
   compact?: boolean;
   disabled: boolean;
   onChanged: () => Promise<void>;
+  controls: ReactNode;
 }) {
   const { baseUrl, csrfToken } = useAdminRequest(),
     catalog = useLanguageCatalog(),
@@ -118,9 +133,14 @@ export function PageLanguages({
   }, [adding, mode, baseUrl]);
   if (!group)
     return (
-      <p className={translationStyles.bar}>
-        <UiText text="此页面的多语言由前端代码管理。" />
-      </p>
+      <div
+        className={`admin-density-controls ${translationStyles.bar} ${styles.identityBar}`}
+      >
+        <span>
+          <UiText text="此页面的多语言由前端代码管理。" />
+        </span>
+        {controls}
+      </div>
     );
   const available = catalog.languages.filter(
     (item) =>
@@ -163,7 +183,9 @@ export function PageLanguages({
       id="page-languages"
       data-compact={compact || undefined}
     >
-      <div className={`admin-density-controls ${translationStyles.bar}`}>
+      <div
+        className={`admin-density-controls ${translationStyles.bar} ${compact ? "" : styles.identityBar}`}
+      >
         <span>
           <Icon name="languages" />
           <LanguageLabel
@@ -184,7 +206,9 @@ export function PageLanguages({
         >
           <UiText text="管理语言与译文" />
         </Button>
+        {!compact && controls}
       </div>
+      {compact && controls}
       <div className={translationStyles.reveal} data-open={open} inert={!open}>
         <div>
           <section

@@ -317,6 +317,13 @@
   min-inline-size: 0;
   scroll-margin-top: calc(var(--admin-header-dock-height, 0px) + 8px);
 }
+.identityBar {
+  margin-block: 0;
+  row-gap: var(--admin-label-gap, 8px);
+}
+.pageIdentityRow:not(:empty) {
+  margin-block-end: var(--admin-label-gap, 8px);
+}
 .languageEditor[data-compact] {
   padding: 0 6px;
 }
@@ -645,15 +652,40 @@
 .pageEditControls {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
-  gap: 10px 20px;
-  margin-block-start: 14px;
+  gap: 6px 16px;
+  min-inline-size: 0;
+  margin-inline-start: auto;
 }
 .pageEditControls:empty {
   display: none;
 }
 .pageEditControls[data-compact] {
+  justify-content: flex-start;
   margin: 0;
   padding: 0 6px 12px;
   border-block-end: 1px solid var(--admin-border);
+}
+@media (max-width: 640px) {
+  .pageEditControls:not([data-compact]) {
+    justify-content: flex-start;
+    inline-size: 100%;
+    margin-inline-start: 0;
+  }
+  .pageEditControls:not([data-compact]) .editOptions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    inline-size: 100%;
+    gap: var(--admin-label-gap);
+  }
+  .pageEditControls:not([data-compact]) .editOption {
+    display: grid;
+    gap: 4px;
+  }
+  .pageEditControls:not([data-compact])
+    .editOption:first-child:not(:only-child)
+    :global(.ui-select) {
+    inline-size: 100%;
+  }
 }

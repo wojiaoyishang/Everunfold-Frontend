@@ -1,6 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import {
+  mkdtemp,
+  readFile,
+  rm,
+  stat,
+  utimes,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
@@ -44,13 +51,21 @@ test("public releases survive concurrent/replayed delivery and withdrawal cannot
   await assert.rejects(store.apply({ ...release(epoch, 4), node_id: "other" }));
   await assert.rejects(store.apply({ ...release(epoch, 4), revision: 5 }));
 });
-test("a durable newer intent fails closed through restart until its exact complete snapshot arrives", async () => {
+test("a warmed reader rejects an incomplete or damaged newest release and never falls back", async (t) => {
   const root = await mkdtemp(
     path.join(tmpdir(), "everunfold-content-barrier-"),
   );
+  t.after(() => rm(root, { recursive: true, force: true }));
   const epoch = randomUUID();
   const store = new FileContentStore(root, "test", epoch);
   await store.apply(release(epoch, 1));
+  const first = await store.read();
+  assert.ok(first?.contents.length);
+  assert.strictEqual(
+    await new FileContentStore(root, "test", epoch).read(),
+    first,
+  );
+  assert.ok(Object.isFrozen(first.contents[0]));
   const next = release(epoch, 2, true);
   const folder = path.join(root, "releases", "test", epoch);
   await publishImmutableJson(
@@ -62,11 +77,20 @@ test("a durable newer intent fails closed through restart until its exact comple
   await assert.rejects(store.read());
   await store.apply(next);
   assert.deepEqual((await store.read())?.contents, []);
+  const payload = path.join(folder, "public-content.2.snapshot.json");
+  const { mtime, atime } = await stat(payload);
+  const original = await readFile(payload, "utf8");
+  // A same-size JSON edit is invalid even if the old modification time is restored.
   await writeFile(
-    path.join(folder, "public-content.2.snapshot.json"),
-    "broken",
+    payload,
+    original.replace('"generation":2', '"generation":3'),
   );
+  await utimes(payload, atime, mtime);
   await assert.rejects(store.read());
+  await writeFile(payload, JSON.stringify(next, null, 2));
+  assert.equal((await store.read())?.generation, 2);
+  await rm(payload);
+  await assert.rejects(store.read(), { code: "ENOENT" });
   await assert.rejects(new FileContentStore(root, "test", randomUUID()).read());
 });
 

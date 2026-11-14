@@ -13,6 +13,7 @@ import {
   revisionFiles,
   revisionUsage,
 } from "../storage/revisions";
+import { VerifiedJsonCache } from "../storage/verified-json";
 
 const ajv = new Ajv({ strict: true });
 addFormats(ajv);
@@ -25,6 +26,18 @@ ajv.addSchema(
 const validate = ajv.compile<ContentDelivery>({
   $ref: "content-release#/properties/delivery",
 });
+const decodedSnapshots = new VerifiedJsonCache<PublicSnapshot>(
+  2,
+  16 * 1024 * 1024,
+);
+
+export function readLegacySnapshot(directory: string, maxBytes: number) {
+  return decodedSnapshots.read(
+    path.resolve(directory, "current.json"),
+    maxBytes,
+    parsePublicSnapshot,
+  );
+}
 
 export interface ContentStore {
   maxBytes: number;
@@ -75,14 +88,14 @@ export class FileContentStore implements ContentStore {
       !Number.isSafeInteger(input.revision)
     )
       throw new Error("Invalid content delivery");
-    parsePublicSnapshot(input.value);
     return input;
   }
-  private async json(filename: string, maximum = this.maxBytes) {
+  private async readIntent(filename: string) {
     const file = await open(filename, "r");
     try {
-      if ((await file.stat()).size > maximum)
-        throw new Error("Content revision is too large");
+      const info = await file.stat();
+      if (!info.isFile() || info.size > 4096)
+        throw new Error("Invalid content intent file");
       return JSON.parse(await file.readFile("utf8")) as unknown;
     } finally {
       await file.close();
@@ -113,24 +126,29 @@ export class FileContentStore implements ContentStore {
     }
   }
   private async readRevision(revision: number) {
-    const intent = await this.json(
-      path.join(this.folder(), `public-content.${revision}.intent.json`),
-      4096,
+    const folder = this.folder();
+    const intent = await this.readIntent(
+      path.join(folder, `public-content.${revision}.intent.json`),
     );
-    const value = this.checked(
-      await this.json(
-        path.join(this.folder(), `public-content.${revision}.snapshot.json`),
-      ),
+    const intentDigest = jsonDigest(intent);
+    return decodedSnapshots.read(
+      path.resolve(folder, `public-content.${revision}.snapshot.json`),
+      this.maxBytes,
+      (input) => {
+        const value = this.checked(input);
+        if (
+          value.revision !== revision ||
+          intentDigest !== jsonDigest({ revision, digest: jsonDigest(value) })
+        )
+          throw new Error("Incomplete or conflicting content release");
+        return parsePublicSnapshot(value.value);
+      },
+      intentDigest,
     );
-    if (
-      value.revision !== revision ||
-      jsonDigest(intent) !== jsonDigest({ revision, digest: jsonDigest(value) })
-    )
-      throw new Error("Incomplete or conflicting content release");
-    return parsePublicSnapshot(value.value);
   }
   async apply(input: unknown) {
     const value = this.checked(input);
+    parsePublicSnapshot(value.value);
     if (Buffer.byteLength(JSON.stringify(value)) > this.maxBytes)
       throw new Error("Content release is too large");
     await publishImmutableJson(this.marker(), {

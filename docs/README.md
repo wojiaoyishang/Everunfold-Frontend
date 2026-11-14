@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[公开查询缓存与前端快照复用](decisions/0143-public-query-cache-and-snapshot-reuse.md)说明 Redis 隔离、查询指标和 Node.js 快照读取。
+
 [可视化组件编辑器](development/component-editor.md)、[ADR 0141](decisions/0141-component-pages-and-protected-shortcodes.md)及 [ADR 0142](decisions/0142-live-component-editing.md)说明真实预览中的组件编辑、模板参数、代码注册页语言及短代码受限区域。
 
 [后台标识与节点部署配置](decisions/0140-admin-brand-and-node-deployment.md)说明侧栏标识来源及部署配置位置。

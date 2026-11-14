@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   readSettings,
+  readQueryCacheReport,
   uploadMedia,
   queryMedia,
   saveSettings,
@@ -93,6 +94,50 @@ test("configuration conflicts and offline writes are surfaced once without repla
       error instanceof RequestError && error.kind === "network",
   );
   assert.equal(requests, 2);
+});
+
+test("query cache reports keep the requested time range and use authenticated no-store reads", async () => {
+  const base = "https://api.example.test";
+  const total = {
+    queries: 3,
+    hits: 1,
+    misses: 1,
+    bypasses: 1,
+    errors: 0,
+    sql_queries: 5,
+    mean_ms: 2.25,
+    p95_ms: 5,
+    hit_rate: 0.5,
+  };
+  const at = "2026-11-01T00:00:00Z";
+  const report = await readQueryCacheReport(
+    base,
+    { hours: 1 },
+    {
+      fetcher: async (url, options) => {
+        assert.equal(
+          String(url),
+          `${base}/v1/admin/frontend-nodes/query-cache?hours=1`,
+        );
+        assert.equal(options?.method, "GET");
+        assert.equal(options?.credentials, "include");
+        assert.equal(options?.cache, "no-store");
+        return ok({
+          cache_status: "ready",
+          metrics_status: "ready",
+          hours: 1,
+          bucket_seconds: 60,
+          checked_at: at,
+          total,
+          businesses: [
+            { business: "site", ...total, trend: [{ at, ...total }] },
+          ],
+          trend: [{ at, ...total }],
+        });
+      },
+    },
+  );
+  assert.equal(report.data.businesses[0]?.trend[0]?.hit_rate, 0.5);
 });
 
 test("an explicit empty published menu never falls back to theme reference entries", () => {
