@@ -314,54 +314,155 @@
   max-width: 240px;
 }
 .languagePanel {
-  scroll-margin-top: calc(var(--admin-header-height, 64px) + 20px);
+  --page-language-action-size: max(
+    28px,
+    calc(var(--admin-control-height) - 6px),
+    var(--admin-touch-target)
+  );
+  scroll-margin-top: calc(
+    var(--admin-header-height, 64px) + var(--admin-header-dock-height, 0px) +
+      20px
+  );
 }
-.languagePanel:not([data-compact]) {
-  padding: var(--admin-panel-padding, 24px);
+.languagePanel:global(.account-card):not([data-compact]) {
+  /* Match the adjacent settings cards in both density modes. */
+  padding: min(10px, var(--admin-label-gap))
+    min(16px, var(--admin-panel-padding));
 }
 .languagePanel .languageHeader > h2 {
   margin: 0;
+  font-size: 14px;
+  font-weight: 650;
 }
 .languageHeader,
-.languageMember,
+.languageHeaderActions,
 .languageActions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 6px;
   flex-wrap: wrap;
-}
-.languageActions {
-  gap: clamp(6px, calc(var(--admin-field-gap, 16px) - 6px), 12px);
-  min-inline-size: 0;
 }
 .languageHeader {
   justify-content: space-between;
 }
+.languageHeaderActions {
+  margin-inline-start: auto;
+}
+.languagePanel :is(.languageIcon, .languageSelector) {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  block-size: var(--page-language-action-size);
+  min-inline-size: var(--page-language-action-size);
+  padding: 0;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--admin-muted);
+  transition:
+    background var(--admin-motion-fast),
+    color var(--admin-motion-fast);
+}
+.languagePanel .languageSelector {
+  gap: 4px;
+  padding-inline: 6px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.languagePanel
+  :is(.languageIcon, .languageSelector):is(:hover, [aria-expanded="true"]):not(
+    :disabled
+  ) {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+}
+.languagePanel :is(.languageIcon, .languageSelector) > svg,
+.languageMenu svg {
+  flex: none;
+  inline-size: 15px;
+  block-size: 15px;
+}
+.languagePanel .languageSelector > svg {
+  inline-size: 12px;
+  block-size: 12px;
+}
 .languageList {
-  margin-block: min(16px, var(--admin-field-gap, 16px));
-}
-.languagePanel[data-compact] .languageList {
-  margin-block: 8px 12px;
-}
-.languagePanel[data-compact] .languageMember {
-  padding-block: 9px;
-}
-.languagePanel[data-compact] .languageMember > div:first-child {
-  min-width: 0;
+  margin: 3px 0 0;
+  padding: 0;
+  list-style: none;
 }
 .languageMember {
-  padding-block: clamp(8px, calc(var(--admin-field-gap, 16px) - 2px), 14px);
-  border-top: 1px solid var(--admin-border);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  padding-block: var(--admin-label-gap);
+  border-block-start: 1px solid var(--admin-border);
 }
-.languageMember > div:first-child {
-  flex: 1;
-  min-inline-size: min(100%, 10rem);
+.languageInfo {
+  min-inline-size: 0;
 }
-.languageMember small {
-  display: block;
-  color: var(--admin-muted);
-  margin-top: 4px;
+.languageName {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0 4px;
+  font-size: 13px;
   overflow-wrap: anywhere;
+}
+.languagePanel :global(.language-flag) {
+  --language-flag-size: 14px;
+}
+.languageMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  color: var(--admin-muted);
+  font-size: 11px;
+}
+.languageMeta > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.languageMeta > span::after {
+  content: " ·";
+}
+.languageMenu {
+  padding: 4px;
+}
+.languageSwitcher a {
+  min-block-size: max(var(--admin-control-height), var(--admin-touch-target));
+}
+.languageMenu > :is(a, button) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  inline-size: 100%;
+  min-block-size: max(30px, var(--admin-touch-target));
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--admin-text);
+  font-size: 12px;
+  text-align: start;
+}
+.languageMenu > :is(a, button):hover:not(:disabled) {
+  background: var(--admin-subtle);
+}
+.languageMenu > [data-danger] {
+  color: var(--admin-danger);
+}
+.languageSettingsLink {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--admin-touch-target);
+  color: var(--admin-accent);
+}
+.languageSettingsLink:hover {
+  text-decoration: underline;
 }
 .languageForm {
   display: grid;
@@ -386,6 +487,10 @@
   color: var(--admin-muted);
   font-size: 12px;
   line-height: 1.6;
+}
+.languagePanel > .languageNote {
+  margin: 3px 0;
+  font-size: 11px;
 }
 .languageForm > :is(.toggle, .languageNote) {
   margin-block: 0;

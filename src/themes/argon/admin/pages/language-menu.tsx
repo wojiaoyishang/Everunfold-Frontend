@@ -7,26 +7,38 @@ import { RouteLink } from "../../components/ui/route-link";
 import { Icon } from "../../components/icon";
 import styles from "../content/translations.module.css";
 import { LanguageTrigger } from "../content/language-trigger";
+import pageStyles from "./pages.module.css";
 
 export function PageLanguageMenu({
   group,
   current,
+  inPanel = false,
 }: {
   group: PageTranslationCatalog;
   current: string;
+  inPanel?: boolean;
 }) {
   const t = useT();
+  const code = group.members.find((member) => member.id === current)?.language;
   return (
     <ActionPopover
       label={t("切换编辑语言")}
       panelWidth={300}
-      className={styles.trigger}
-      panelClassName={styles.popover}
+      className={inPanel ? pageStyles.languageSelector : styles.trigger}
+      panelClassName={
+        inPanel
+          ? `${styles.popover} ${pageStyles.languageSwitcher}`
+          : styles.popover
+      }
       triggerContent={
-        <LanguageTrigger
-          code={group.members.find((m) => m.id === current)?.language}
-          count={group.members.length}
-        />
+        inPanel ? (
+          <>
+            <LanguageLabel code={code} compact />
+            <Icon name="chevron-down" />
+          </>
+        ) : (
+          <LanguageTrigger code={code} count={group.members.length} />
+        )
       }
     >
       {(close) => (
