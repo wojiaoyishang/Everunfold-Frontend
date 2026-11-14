@@ -33,8 +33,8 @@
 }
 .paletteGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  grid-template-columns: repeat(auto-fill, min(98px, 100%));
+  gap: 9px;
 }
 .paletteItem {
   position: relative;
@@ -304,9 +304,6 @@
 }
 .paletteGroup:not([open]) summary svg {
   transform: rotate(-90deg);
-}
-.paletteGrid {
-  gap: 9px;
 }
 .paletteAdd {
   min-block-size: 74px;
