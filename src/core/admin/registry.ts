@@ -1,6 +1,7 @@
 /** Trusted, build-time page metadata. A registry entry never grants permission. */
 export type AdminPageIcon =
   | "comment"
+  | "discussion"
   | "lock"
   | "users"
   | "book"
@@ -22,8 +23,11 @@ export type AdminPageIcon =
   | "mail"
   | "notification"
   | "notification-platform"
+  | "notification-template"
+  | "notification-delivery"
   | "node-settings"
   | "runtime"
+  | "page"
   | "system";
 export interface AdminMenuGroup {
   readonly id: string;

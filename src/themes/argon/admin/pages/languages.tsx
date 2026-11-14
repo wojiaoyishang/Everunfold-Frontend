@@ -186,13 +186,15 @@ export function PageLanguages({
       <div
         className={`admin-density-controls ${translationStyles.bar} ${compact ? "" : styles.identityBar}`}
       >
-        <span>
-          <Icon name="languages" />
-          <LanguageLabel
-            code={currentMember?.language ?? page.language ?? undefined}
-          />
-          <UiText text={currentMember?.is_original ? " · 原文" : " · 译文"} />
-        </span>
+        {!compact && (
+          <span>
+            <Icon name="languages" />
+            <LanguageLabel
+              code={currentMember?.language ?? page.language ?? undefined}
+            />
+            <UiText text={currentMember?.is_original ? " · 原文" : " · 译文"} />
+          </span>
+        )}
         <PageLanguageMenu
           group={group}
           current={page.id}

@@ -22,6 +22,9 @@ export function pagesFailure(error: unknown): string {
     if (isPageUrlFailure(error))
       return pageUrlErrors[error.code as keyof typeof pageUrlErrors];
     if (error.code === 40497) return "页面模板不存在。";
+    if (error.code === 40498) return "此版本不存在。";
+    if (error.code === 40988)
+      return "模板或受影响的页面已变化，请重新查看并确认。";
     if (error.code === 40992) return "页面模板已被修改，请刷新后合并输入。";
     if (error.code === 40399)
       return "更新已发布页面使用的模板需要页面发布权限。";

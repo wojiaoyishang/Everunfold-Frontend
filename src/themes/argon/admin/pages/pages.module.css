@@ -324,11 +324,14 @@
 .pageIdentityRow:not(:empty) {
   margin-block-end: var(--admin-label-gap, 8px);
 }
+.pageIdentityRow[data-compact]:not(:empty) {
+  margin-block-end: 0;
+}
 .languageEditor[data-compact] {
   padding: 0 6px;
 }
 .languageEditor[data-compact] > div:first-child {
-  margin-block: 0 8px;
+  margin-block: 0 5px;
 }
 .languagePanel {
   --page-language-action-size: max(
@@ -662,10 +665,55 @@
   display: none;
 }
 .pageEditControls[data-compact] {
-  justify-content: flex-start;
+  display: block;
   margin: 0;
-  padding: 0 6px 12px;
+  padding: 0 6px 8px;
   border-block-end: 1px solid var(--admin-border);
+}
+.editOptions[data-compact] {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  font-size: 12px;
+}
+.editOptions[data-compact] .editOption {
+  display: grid;
+  gap: 4px;
+}
+.editOptions[data-compact] .editOption :global(.ui-select) {
+  inline-size: 100%;
+}
+:global(.admin-root) .editOptions[data-compact] :global(.ui-select-trigger),
+:global(.admin-root)
+  .editOptions[data-compact]
+  :global(.ui-select-options)
+  > button[role="option"] {
+  box-sizing: border-box;
+  min-block-size: max(
+    30px,
+    var(--live-page-touch-target, var(--admin-touch-target))
+  );
+  padding: 3px 7px;
+  gap: 5px;
+  font-size: 13px;
+  line-height: 1.3;
+}
+.editOptions[data-compact] :global(.ui-select-trigger) > :global(.icon),
+.editOptions[data-compact]
+  :global(.ui-select-options)
+  > button
+  > :global(.icon) {
+  flex: none;
+  inline-size: 12px;
+  block-size: 12px;
+}
+.editOptions[data-compact] :global(.ui-select-trigger) > span {
+  display: block;
+}
+.editOptions[data-compact] :global(.ui-select-options) {
+  box-sizing: border-box;
+  gap: 2px;
+  padding: 3px;
 }
 @media (max-width: 640px) {
   .pageEditControls:not([data-compact]) {

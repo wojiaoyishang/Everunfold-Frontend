@@ -1,31 +1,34 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import type {
-  VersionDetail,
-  VersionItem,
-} from "@/core/contracts/collaboration";
 import { Button } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import styles from "./versions.module.css";
 
 const date = (value: string) => new Date(value).toLocaleString("zh-CN");
+type RevisionLabel = { revision: number; note?: string | null };
+type RevisionDetail = {
+  version: RevisionLabel & { actor?: string | null; created_at: string };
+};
+
 export function VersionPairPicker({
   versions,
   before,
   after,
   beforeDetail,
   afterDetail,
+  headLabel = "最新版 · 实时草稿",
   disabled,
   onBefore,
   onAfter,
   onSwap,
 }: {
-  versions: VersionItem[];
+  versions: RevisionLabel[];
   before: string;
   after: string;
-  beforeDetail: VersionDetail | null;
-  afterDetail: VersionDetail | null;
+  beforeDetail: RevisionDetail | null;
+  afterDetail: RevisionDetail | null;
+  headLabel?: string;
   disabled: boolean;
   onBefore: (value: string) => void;
   onAfter: (value: string) => void;
@@ -35,7 +38,7 @@ export function VersionPairPicker({
   for (const detail of [beforeDetail, afterDetail])
     if (detail) items.set(String(detail.version.revision), detail.version);
   const options = [
-    { value: "head", label: "最新版 · 实时草稿" },
+    { value: "head", label: headLabel },
     ...[...items.values()]
       .sort((a, b) => b.revision - a.revision)
       .map((item) => ({
@@ -49,7 +52,7 @@ export function VersionPairPicker({
   const field = (
     side: "before" | "after",
     value: string,
-    detail: VersionDetail | null,
+    detail: RevisionDetail | null,
     onChange: (value: string) => void,
   ) => (
     <div className={styles.pairField}>
@@ -69,10 +72,12 @@ export function VersionPairPicker({
         disabled={disabled}
       />
       <small>
-        {value === "head" ? (
+        {detail ? (
+          [detail.version.actor, date(detail.version.created_at)]
+            .filter(Boolean)
+            .join(" · ")
+        ) : value === "head" ? (
           <UiText text="跟随线上已保存的最新内容" />
-        ) : detail ? (
-          `${detail.version.actor} · ${date(detail.version.created_at)}`
         ) : (
           `V${value} · 版本快照`
         )}

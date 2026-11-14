@@ -1,0 +1,43 @@
+.impactList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-block-size: min(35dvh, 260px);
+  overflow: auto;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+}
+
+.impactList li {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+}
+
+.impactList li + li {
+  border-block-start: 1px solid var(--admin-border);
+}
+
+.impactList li div {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.impactList li small {
+  display: block;
+  color: var(--admin-muted);
+}
+
+.impactList li > span {
+  flex: none;
+}
+
+.catalogItem > button {
+  padding-block-end: 10px;
+}
+
+.confirmation :global(.ui-confirm-button) {
+  min-block-size: max(38px, var(--admin-touch-target, 0px));
+}

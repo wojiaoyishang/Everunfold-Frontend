@@ -60,11 +60,9 @@ export function BuilderTemplates({
         setError("");
         try {
           const { data } = await readPageTemplate(baseUrl, selected);
-          const document = data.value.component_document;
-          if (
-            data.value.edit_mode !== "components" ||
-            !document?.nodes.length
-          ) {
+          const value = data.applied_value ?? data.value;
+          const document = value.component_document;
+          if (value.edit_mode !== "components" || !document?.nodes.length) {
             setError("该模板没有可插入的组件");
             return false;
           }

@@ -24,6 +24,7 @@ export function Select({
   onValueChange,
   disabled = false,
   className,
+  panelMinWidth,
   programOptions = false,
   id: providedId,
   "aria-describedby": describedBy,
@@ -37,6 +38,7 @@ export function Select({
   onValueChange?: (value: string) => void;
   disabled?: boolean;
   className?: string;
+  panelMinWidth?: number;
   programOptions?: boolean;
   id?: string;
   "aria-describedby"?: string;
@@ -57,7 +59,7 @@ export function Select({
     onBeforeToggle,
     onToggle,
     onPanelKeyDown,
-  } = useAnchoredPopover();
+  } = useAnchoredPopover(panelMinWidth);
   const [local, setLocal] = useState(
     defaultValue ?? options.find((item) => !item.disabled)?.value ?? "",
   );

@@ -132,6 +132,27 @@
 
 .settings[data-compact] {
   gap: 0;
+  --page-settings-heading: 34px;
+  --page-settings-control: max(
+    30px,
+    var(--live-page-touch-target, var(--admin-touch-target))
+  );
+}
+
+.settings[data-compact]
+  :is(:global(.ui-input), :global(.ui-select-trigger), .switchRow) {
+  min-block-size: var(--page-settings-control);
+}
+
+.settings[data-compact] :global(.account-field) {
+  gap: 4px;
+}
+:global(.admin-root) .settings[data-compact] .identity :global(.ui-input) {
+  box-sizing: border-box;
+  min-block-size: var(--page-settings-control);
+  padding: 4px 8px;
+  font-size: var(--live-page-input-size, inherit);
+  line-height: 1.35;
 }
 
 .settings[data-compact] .group,
@@ -143,18 +164,21 @@
 }
 
 :is(.settings[data-compact] .group, .group[data-compact]) > summary {
-  min-block-size: max(42px, var(--admin-touch-target));
+  min-block-size: max(
+    var(--page-settings-heading, 34px),
+    var(--admin-touch-target)
+  );
   padding-inline: 6px;
   font-size: 13px;
 }
 
 :is(.settings[data-compact], .group[data-compact]) .fields {
-  padding: 2px 6px 12px;
-  gap: 10px;
+  padding: 2px 6px 8px;
+  gap: 8px;
 }
 
 .settings[data-compact] :global(.ui-textarea) {
-  min-block-size: 52px;
+  min-block-size: 44px;
 }
 
 .group[data-compact] :global(.account-card) {
@@ -179,9 +203,12 @@
 }
 
 .settings[data-compact] .seo > div {
-  --seo-heading-size: max(42px, var(--admin-touch-target));
+  --seo-heading-size: max(
+    var(--page-settings-heading),
+    var(--admin-touch-target)
+  );
   --seo-padding-inline: 6px;
-  --seo-body-padding-block: 2px 12px;
+  --seo-body-padding-block: 2px 8px;
 }
 
 .seo > div > button {

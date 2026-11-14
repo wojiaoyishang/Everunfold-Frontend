@@ -45,9 +45,24 @@ export function LivePreviewWorkspace({
   const editorId = useId();
   const setEmbeddedPanel = useCallback(() => {
     const document = editor.current?.contentDocument;
-    if (document) document.documentElement.dataset.livePanel = panel;
-  }, [panel]);
-  useEffect(setEmbeddedPanel, [setEmbeddedPanel]);
+    if (!document) return;
+    const root = document.documentElement;
+    root.dataset.livePanel = panel;
+    root.toggleAttribute(
+      "data-live-compact-page",
+      kind === "page" || kind === "template",
+    );
+    root.toggleAttribute(
+      "data-live-touch",
+      window.matchMedia("(max-width: 860px), (pointer: coarse)").matches,
+    );
+  }, [kind, panel]);
+  useEffect(() => {
+    const device = window.matchMedia("(max-width: 860px), (pointer: coarse)");
+    setEmbeddedPanel();
+    device.addEventListener("change", setEmbeddedPanel);
+    return () => device.removeEventListener("change", setEmbeddedPanel);
+  }, [setEmbeddedPanel]);
   const t = useT();
   const toast = useToast();
   const editPath = previewEditorPath(kind, id);

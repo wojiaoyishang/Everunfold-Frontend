@@ -631,6 +631,14 @@ html[data-live-panel] .admin-embedded-editor {
   padding: 12px;
   background: var(--admin-canvas);
 }
+html[data-live-compact-page] {
+  --live-page-touch-target: 0px;
+  --live-page-input-size: 14px;
+}
+html[data-live-compact-page][data-live-touch] {
+  --live-page-touch-target: 44px;
+  --live-page-input-size: 16px;
+}
 html[data-live-panel="content"]:has(
     .admin-embedded-editor [data-live-page-source]
   ) {

@@ -158,11 +158,17 @@ export function ManagedPageHeading({
   page,
   translations,
 }: Parameters<typeof ManagedPageView>[0]) {
+  const showLanguages =
+    page.source === "custom" && (translations?.length ?? 0) > 1;
+  if (page.hide_title && !page.description && !showLanguages) return null;
   return (
-    <header className={styles.heading}>
-      <h1>{page.title}</h1>
+    <header
+      className={styles.heading}
+      data-title-hidden={page.hide_title || undefined}
+    >
+      {!page.hide_title && <h1>{page.title}</h1>}
       {page.description && <p>{page.description}</p>}
-      {page.source === "custom" && page.language && (
+      {showLanguages && page.language && (
         <ContentLanguages
           content={{ id: page.id, language: page.language, translations }}
         />

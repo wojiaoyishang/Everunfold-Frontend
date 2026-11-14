@@ -34,6 +34,8 @@ test("registered admin destinations bypass public snapshots and survive a safe l
     "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/edit",
     "/admin/content/article/00000000-0000-0000-0000-000000000001/versions",
     "/admin/content/shuoshuo/00000000-0000-0000-0000-000000000001/versions",
+    "/admin/pages/00000000-0000-0000-0000-000000000001/versions",
+    "/admin/pages/templates/00000000-0000-0000-0000-000000000001/versions",
   ]) {
     assert.equal(isManagementRoute(path), true);
     assert.equal(loginReturnPath(path), path);
@@ -53,6 +55,10 @@ test("registered admin destinations bypass public snapshots and survive a safe l
 });
 
 test("admin navigation separates primary content, tools, appearance and system settings", () => {
+  const icons = adminNavigation
+    .filter((item) => item.menu)
+    .map((item) => item.icon);
+  assert.equal(new Set(icons).size, icons.length);
   assert.deepEqual(
     adminNavigationGroups.map((group) => group.label),
     [

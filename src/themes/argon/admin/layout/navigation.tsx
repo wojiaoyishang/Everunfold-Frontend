@@ -19,6 +19,7 @@ import { Button } from "../../components/ui/primitives";
 import { AdminNavigationFlyout } from "./navigation-flyout";
 const navigationIcons: Record<AdminPageIcon, IconName> = {
   comment: "comment",
+  discussion: "discussion",
   users: "user",
   lock: "lock",
   font: "type",
@@ -43,6 +44,9 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   mail: "mail",
   notification: "bell",
   "notification-platform": "send",
+  "notification-template": "mail",
+  "notification-delivery": "list",
+  page: "file",
 };
 export function AdminNavigation({
   pathname,

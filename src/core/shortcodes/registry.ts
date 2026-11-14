@@ -1,7 +1,7 @@
 import { pluginRegistry } from "@/core/plugins/registry";
 import type { PublicShortcode, ShortcodeItem } from "@/core/contracts/settings";
 
-import { regionDefinitions, regionKind } from "./region-definitions";
+import { regionKind } from "./region-definitions";
 
 export { regionKind } from "./region-definitions";
 
@@ -10,39 +10,34 @@ export type CatalogItem = Omit<ShortcodeItem, "origin"> & {
 };
 /** Trusted frontend registrations share the catalog, but expose no write capability. */
 export const frontendShortcodes = (): readonly CatalogItem[] =>
-  [
-    ...regionDefinitions.map((definition) => ({
-      definition,
-      pluginId: "core",
-    })),
-    ...pluginRegistry.shortcodes,
-  ].map(({ definition, pluginId }) => ({
-    id: definition.id,
-    origin: "frontend",
-    editable: false,
-    revision: definition.revision,
-    applied_revision: definition.revision,
-    archived: false,
-    source: {
-      name: definition.name,
-      title: definition.title,
-      description: definition.description,
-      kind: definition.kind,
-      parameters: definition.parameters,
-      html: definition.html || `由插件 ${pluginId} 的渲染器生成`,
-      css: definition.css,
-      example_body: "",
-    },
-    compiled: definition,
-    versions: [],
-  }));
-export const builtinShortcodes = (): readonly PublicShortcode[] => [
-  ...regionDefinitions,
-  ...pluginRegistry.shortcodes.map((item) => item.definition),
-];
+  pluginRegistry.shortcodes
+    .filter(({ definition }) => !regionKind(definition.name))
+    .map(({ definition, pluginId }) => ({
+      id: definition.id,
+      origin: "frontend",
+      editable: false,
+      revision: definition.revision,
+      applied_revision: definition.revision,
+      archived: false,
+      source: {
+        name: definition.name,
+        title: definition.title,
+        description: definition.description,
+        kind: definition.kind,
+        parameters: definition.parameters,
+        html: definition.html || `由插件 ${pluginId} 的渲染器生成`,
+        css: definition.css,
+        example_body: "",
+      },
+      compiled: definition,
+      versions: [],
+    }));
+export const builtinShortcodes = (): readonly PublicShortcode[] =>
+  pluginRegistry.shortcodes
+    .map((item) => item.definition)
+    .filter((item) => !regionKind(item.name));
 
 export function shortcodeDefinitions(applied: readonly PublicShortcode[] = []) {
-  applied = applied.filter((item) => !regionKind(item.name));
   const names = new Set<string>();
   const reservedNames = new Set(applied.map((item) => item.name));
   const reservedIds = new Set(applied.map((item) => item.id));

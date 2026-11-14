@@ -26,7 +26,7 @@ export const builtinAdminModule = {
       href: "/admin/notifications/templates",
       label: "通知模板",
       description: "按事件、平台和语言维护通知内容",
-      icon: "settings",
+      icon: "notification-template",
       menu: { group: "core.notifications", order: 20 },
     },
     {
@@ -42,7 +42,7 @@ export const builtinAdminModule = {
       href: "/admin/notifications/deliveries",
       label: "投递记录",
       description: "查看通知投递状态与不确定结果",
-      icon: "runtime",
+      icon: "notification-delivery",
       menu: { group: "core.notifications", order: 40 },
     },
     {
@@ -82,7 +82,7 @@ export const builtinAdminModule = {
       href: "/admin/settings/discussion",
       label: "讨论设置",
       description: "全站评论权限与审核规则",
-      icon: "comment",
+      icon: "discussion",
       menu: { group: "core.people", order: 15 },
     },
     {

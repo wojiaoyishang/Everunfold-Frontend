@@ -195,6 +195,7 @@ export function ManagedPageEditor({
   const editOptions = source === "custom" && (
     <PageEditOptions
       inline
+      compact={compact}
       mode={componentMode ? "components" : "source"}
       layout={value.layout}
       lockedMode={Boolean(templateId)}
@@ -494,6 +495,15 @@ export function ManagedPageEditor({
           <UiText text="返回页面列表" />
         </RouteLink>
         <ScrollHeaderActions className={styles.editorActions}>
+          {saved && (
+            <RouteLink
+              className="admin-button"
+              href={`/admin/pages/${saved.id}/versions`}
+            >
+              <Icon name="clock" />
+              <UiText text="版本" />
+            </RouteLink>
+          )}
           {saved && publish && !saved.archived && (
             <Button
               className="admin-button"
@@ -582,7 +592,11 @@ export function ManagedPageEditor({
               </>
             )}
           </fieldset>
-          <div className={styles.pageIdentityRow} data-live-part="settings">
+          <div
+            className={styles.pageIdentityRow}
+            data-compact={compact || undefined}
+            data-live-part="settings"
+          >
             {saved && (!compact || saved.translations) ? (
               <PageLanguages
                 page={saved}

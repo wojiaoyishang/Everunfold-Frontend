@@ -87,7 +87,7 @@ export function PageSettings({
       className={`admin-density-controls ${styles.settings}`}
       data-compact={compact || undefined}
     >
-      <PageSettingsGroup title="基本信息">
+      <PageSettingsGroup title="基本信息" compact={compact}>
         {compactIdentity && (
           <div className={styles.identity}>{compactIdentity}</div>
         )}
@@ -99,7 +99,11 @@ export function PageSettings({
           maxLength={500}
         />
       </PageSettingsGroup>
-      <PageSettingsGroup title="访问与评论" initiallyOpen={!compact}>
+      <PageSettingsGroup
+        title="访问与评论"
+        initiallyOpen={!compact}
+        compact={compact}
+      >
         <div className={styles.switches}>
           <SettingSwitch
             label="启用页面"
@@ -118,12 +122,23 @@ export function PageSettings({
           disabled={disabled}
           showHint={false}
         />
-        <p className={styles.help}>
-          <UiText text="关闭评论只停止新提交，已有评论仍可阅读。" />
-        </p>
+        {!compact && (
+          <p className={styles.help}>
+            <UiText text="关闭评论只停止新提交，已有评论仍可阅读。" />
+          </p>
+        )}
       </PageSettingsGroup>
-      <PageSettingsGroup title="阅读显示" initiallyOpen={!compact}>
+      <PageSettingsGroup
+        title="阅读显示"
+        initiallyOpen={!compact}
+        compact={compact}
+      >
         <div className={styles.switches}>
+          <SettingSwitch
+            label="隐藏页面标题"
+            checked={value.hide_title === true}
+            onChange={(hide_title) => change({ hide_title })}
+          />
           {readingPreferences.map(({ key, label }) => (
             <SettingSwitch
               key={key}

@@ -35,7 +35,8 @@ export function NewManagedPage({
     const controller = new AbortController();
     void readPageTemplate(baseUrl, templateId, { signal: controller.signal })
       .then(({ data }) => {
-        if (!controller.signal.aborted) setTemplate(data);
+        if (!controller.signal.aborted)
+          setTemplate({ ...data, value: data.applied_value ?? data.value });
       })
       .catch((failure) => {
         if (!controller.signal.aborted) setTemplateError(pagesFailure(failure));

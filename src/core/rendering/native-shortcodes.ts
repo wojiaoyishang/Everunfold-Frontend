@@ -6,6 +6,7 @@ import {
   type ShortcodeDiagnostic,
 } from "@/core/shortcodes/parser";
 import { regionKind, shortcodeDefinitions } from "@/core/shortcodes/registry";
+import { regionNames } from "@/core/shortcodes/region-definitions";
 import { pluginRegistry } from "@/core/plugins/registry";
 
 const escape = (value: string) =>
@@ -73,7 +74,15 @@ export function renderNativeShortcodes(
   const definitions = new Map(
     shortcodeDefinitions(custom).map((item) => [item.name, item]),
   );
-  const parsed = parseShortcodes(source, [...definitions.values()], isMarkdown);
+  // Recognize the saved marker protocol even with an older replicated settings snapshot.
+  const parsed = parseShortcodes(
+    source,
+    [
+      ...definitions.values(),
+      ...regionNames.map((name) => ({ name, kind: "container" as const })),
+    ],
+    isMarkdown,
+  );
   const diagnostics: ShortcodeDiagnostic[] = [...parsed.diagnostics];
   const css = new Map<string, string>(),
     mediaURLs: Record<string, string> = {};
@@ -91,7 +100,6 @@ export function renderNativeShortcodes(
     for (const node of nodes) {
       text += source.slice(cursor, node.from);
       cursor = node.to;
-      const definition = definitions.get(node.name)!;
       try {
         if (regionKind(node.name)) {
           const id = node.attributes.region;
@@ -110,6 +118,7 @@ export function renderNativeShortcodes(
           text += key;
           continue;
         }
+        const definition = definitions.get(node.name)!;
         if (node.error) throw new Error(node.error);
         const body =
           definition.kind === "container"

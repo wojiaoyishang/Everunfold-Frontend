@@ -50,13 +50,13 @@ export const contentAdminModule: AdminModuleRegistration = {
         path === "/admin/pages/new" ||
         path === "/admin/pages/types" ||
         path === "/admin/pages/templates/new" ||
-        /^\/admin\/pages\/templates\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}(?:\/live)?$/i.test(
+        /^\/admin\/pages\/templates\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}(?:\/(?:live|versions))?$/i.test(
           path,
         ) ||
-        /^\/admin\/pages\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}(?:\/(?:preview|live))?$/i.test(
+        /^\/admin\/pages\/[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}(?:\/(?:preview|live|versions))?$/i.test(
           path,
         ),
-      icon: "content",
+      icon: "page",
       menu: { group: "content.types", order: 90 },
     },
   ],

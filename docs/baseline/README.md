@@ -1807,3 +1807,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0144-site-maintenance-and-discussion.md` | `ADR0144-2` | `35c64a6c6a9e20ebaf91ff8314660c408c088da188ec509286ab78c34643a499` |
+
+## 页面与模板版本历史
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0145-page-version-history.md` | `ADR0145-1` | `03cac7eb7c09c141623dc9da4ffe92fa1ff198257a1d8ad5f478ef5417e94dd6` |

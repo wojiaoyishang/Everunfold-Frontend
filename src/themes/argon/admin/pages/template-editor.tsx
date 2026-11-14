@@ -6,11 +6,13 @@ import { can } from "@/core/accounts/permissions";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { randomUUID } from "@/core/browser/crypto";
 import {
+  applyPageTemplate,
   readPageTemplate,
   savePageTemplate,
   type PageTemplateItem,
   type TitledPageCode,
 } from "@/core/contracts/pages";
+import { RequestError } from "@/core/http/request";
 import { UiText } from "@/core/i18n/provider";
 import { pagesFailure } from "@/core/pages/failure";
 import { AccountField } from "../../account/fields";
@@ -18,6 +20,7 @@ import { UnsavedAccountChanges } from "../../account/unsaved";
 import { Icon } from "../../components/icon";
 import { Button, Form } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
+import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { AdminPageHeading } from "../components/page-heading";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { PageCodeFields } from "./code-fields";
@@ -29,6 +32,8 @@ import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { useEditorResources } from "@/core/content-management/use-editor-resources";
 import { PageEditOptions } from "./edit-mode";
 import { usePageAction } from "./feedback";
+import { TemplateImpactList, useTemplateImpact } from "./template-impact";
+import versionStyles from "./versions.module.css";
 import styles from "./pages.module.css";
 
 const emptyDocument = { version: 1 as const, nodes: [] };
@@ -50,7 +55,9 @@ export function PageTemplateEditor({ id }: { id?: string }) {
   const [value, setValue] = useState(emptyTemplate);
   const [loadFailed, setLoadFailed] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [applying, setApplying] = useState(false);
   const action = usePageAction();
+  const impact = useTemplateImpact(applying ? saved?.id : undefined);
   const shortcodes = useAppliedShortcodes();
   const resources = useEditorResources();
   const notifyLoadError = useEffectEvent((error: unknown) =>
@@ -61,8 +68,8 @@ export function PageTemplateEditor({ id }: { id?: string }) {
   const write =
     can(actor, "pages:write") &&
     (allowScripts ||
-      saved?.value.edit_mode === "components" ||
-      !saved?.value.javascript_enabled);
+      (!saved?.value.javascript_enabled &&
+        !saved?.applied_value?.javascript_enabled));
   const dirty =
     JSON.stringify(value) !== JSON.stringify(saved?.value ?? emptyTemplate);
 
@@ -136,31 +143,71 @@ export function PageTemplateEditor({ id }: { id?: string }) {
     popup.location.replace(livePreviewPath("template", id ?? draftId));
   }
   async function save() {
-    if (!write || !ready || !dirty) return;
+    if (!write || !ready || (!dirty && saved)) return false;
     if (!value.title.trim()) {
       action.notify("请输入模板名称。");
-      return;
+      return false;
     }
     const input = {
       id: id ?? draftId,
       expected_revision: saved?.revision ?? 0,
       value,
+      apply: !saved,
     };
     let destination: string | undefined;
-    const completed = await action.run(async (signal) => {
-      const { data } = await savePageTemplate(
-        baseUrl,
-        { ...input, operation_id: action.operation(input) },
-        csrfToken,
-        { signal },
-      );
-      if (signal.aborted) return;
-      setSaved(data);
-      setValue(data.value);
-      if (!id) destination = `/admin/pages/templates/${data.id}`;
-    }, "模板已保存。");
+    const completed = await action.run(
+      async (signal) => {
+        const { data } = await savePageTemplate(
+          baseUrl,
+          { ...input, operation_id: action.operation(input) },
+          csrfToken,
+          { signal },
+        );
+        if (signal.aborted) return;
+        setSaved(data);
+        setValue(data.value);
+        if (!id) destination = `/admin/pages/templates/${data.id}`;
+      },
+      saved ? "模板草稿已保存。" : "模板已保存。",
+    );
     if (completed && destination) router.replace(destination);
     return completed;
+  }
+
+  async function reviewApply() {
+    if (!saved || !write || action.busy || (dirty && !(await save()))) return;
+    action.clearDialogError();
+    impact.reload();
+    setApplying(true);
+  }
+
+  async function apply() {
+    if (!saved || impact.data?.revision !== saved.revision) return false;
+    const input = {
+      expected_revision: saved.revision,
+      digest: impact.data.digest,
+    };
+    return action.runInDialog(async (signal) => {
+      try {
+        const { data } = await applyPageTemplate(
+          baseUrl,
+          saved.id,
+          {
+            ...input,
+            operation_id: action.operation({ ...input, id: saved.id }),
+          },
+          csrfToken,
+          { signal },
+        );
+        if (signal.aborted) return;
+        setSaved(data);
+        setValue(data.value);
+      } catch (error) {
+        if (error instanceof RequestError && error.code === 40988)
+          impact.reload();
+        throw error;
+      }
+    });
   }
 
   return (
@@ -171,6 +218,15 @@ export function PageTemplateEditor({ id }: { id?: string }) {
           <UiText text="返回页面列表" />
         </RouteLink>
         <ScrollHeaderActions className={styles.editorActions}>
+          {saved && (
+            <RouteLink
+              className="admin-button"
+              href={`/admin/pages/templates/${saved.id}/versions`}
+            >
+              <Icon name="clock" />
+              <UiText text="版本" />
+            </RouteLink>
+          )}
           {saved && write && (
             <RouteLink
               className="admin-button"
@@ -194,22 +250,64 @@ export function PageTemplateEditor({ id }: { id?: string }) {
               write && (
                 <Button
                   type="button"
-                  onClick={() => void save()}
+                  onClick={() => void (saved ? reviewApply() : save())}
                   className="admin-button admin-button-primary"
-                  disabled={action.busy || !dirty}
+                  disabled={action.busy || (!dirty && !saved?.applied_value)}
                 >
                   <Icon name="save" />
-                  <UiText text="保存模板" />
+                  <UiText text={saved ? "应用模板" : "保存模板"} />
                 </Button>
               )
             }
-          />
+          >
+            {saved && write && (
+              <Button
+                className="admin-button"
+                disabled={action.busy || !dirty}
+                onClick={() => void save()}
+              >
+                <Icon name="save" />
+                <UiText text="保存草稿" />
+              </Button>
+            )}
+          </EmbeddedEditorActions>
         </ScrollHeaderActions>
       </div>
       <AdminPageHeading
         title={id ? "编辑自定义页面模板" : "创建自定义页面模板"}
-        description="页面各自设置标题和 URL。保存模板会更新使用它的页面结构，已发布的页面会同步到前端。"
       />
+      <ConfirmDialog
+        open={applying}
+        className={versionStyles.confirmation}
+        title="应用模板？"
+        description="应用后，使用此模板的页面将使用新版本。已发布的页面会同步到前端。"
+        intent="warning"
+        confirmLabel="确认应用"
+        error={
+          impact.error ||
+          (impact.data && impact.data.revision !== saved?.revision
+            ? "页面模板已被修改，请刷新后合并输入。"
+            : action.dialogError)
+        }
+        confirmDisabled={
+          !impact.data || impact.data.revision !== saved?.revision
+        }
+        auxiliaryAction={
+          impact.error && (
+            <Button className="ui-confirm-button" onClick={impact.reload}>
+              <UiText text="重新读取" />
+            </Button>
+          )
+        }
+        onCancel={() => setApplying(false)}
+        onConfirm={apply}
+        onConfirmed={() => {
+          setApplying(false);
+          action.notify("模板已应用。", "success");
+        }}
+      >
+        {!impact.error && <TemplateImpactList impact={impact.data} />}
+      </ConfirmDialog>
       {ready ? (
         <Form
           id={formId}

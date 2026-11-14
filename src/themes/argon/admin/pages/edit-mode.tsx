@@ -14,6 +14,7 @@ export function PageEditOptions({
   onLayout,
   lockedMode = false,
   inline = false,
+  compact = false,
 }: {
   mode: PageEditMode;
   layout?: PageLayout;
@@ -21,16 +22,21 @@ export function PageEditOptions({
   onLayout: (layout: PageLayout) => void;
   lockedMode?: boolean;
   inline?: boolean;
+  compact?: boolean;
 }) {
   const t = useT();
   return (
-    <div className={inline ? styles.editOptions : "account-form-grid"}>
+    <div
+      className={inline ? styles.editOptions : "account-form-grid"}
+      data-compact={compact || undefined}
+    >
       {(onMode || lockedMode) && (
         <label className={styles.editOption}>
           <UiText text="编辑方式" />
           <Select
             name="page-edit-mode"
             label={t("编辑方式")}
+            panelMinWidth={compact ? 0 : undefined}
             value={mode}
             disabled={lockedMode}
             options={[
@@ -51,6 +57,7 @@ export function PageEditOptions({
         <Select
           name="page-layout"
           label={t("页面布局")}
+          panelMinWidth={compact ? 0 : undefined}
           value={layout}
           options={[
             { value: "wide", label: t("全宽") },

@@ -46,7 +46,7 @@ export function BookPage({
           {cover && <BookCover key={cover} source={cover} />}
           <div className={styles.coverContent}>
             <div>
-              <h1>{page.title}</h1>
+              {!page.hide_title && <h1>{page.title}</h1>}
               {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
               {page.description && (
                 <p className={styles.description}>{page.description}</p>
