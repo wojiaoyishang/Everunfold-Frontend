@@ -57,3 +57,7 @@ Thumbs.db
 /src/themes/*
 !/src/themes/argon/
 !/src/themes/paper/
+
+# Local Sphinx output
+/_build/
+.venv-docs/

@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
+
 [AI 写作多服务商](decisions/0149-ai-writing-providers.md)记录服务商配置、生成时选择与升级顺序。
 
 [后台插件页面与菜单](decisions/0148-admin-plugin-navigation.md)记录页面地址、菜单注册与权限。

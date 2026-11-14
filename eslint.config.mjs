@@ -29,6 +29,7 @@ export default defineConfig([
   },
   globalIgnores([
     ".next/**",
+    "_build/**",
     "plugins/**",
     "out/**",
     "coverage/**",

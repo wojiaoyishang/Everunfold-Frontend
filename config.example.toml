@@ -1,6 +1,6 @@
 # 服务端实例配置示例；显式加载器读取 config.toml 或 CONFIG_FILE，拒绝未知字段。
 # 本文件不作为自动回退；原始规划示例保留在 docs/baseline/。
-# 当前支持公开快照读取和独立设置接收器；完整文章接收/回源/缓存管理仍未实现，预留限额不等于已启用。
+# 独立接收器将公开设置和内容快照应用到本节点，配置方式见 docs/source/welcome/。
 
 # everunfold-frontend/config.example.toml
 # 仅在服务端加载；地址仅为可替换示例
