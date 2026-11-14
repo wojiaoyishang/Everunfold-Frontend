@@ -15,7 +15,13 @@ import { ManagedPageEditor } from "./editor";
 import { usePageErrorToast } from "./feedback";
 import styles from "./pages.module.css";
 
-export function NewManagedPage({ typeId }: { typeId: string }) {
+export function NewManagedPage({
+  typeId,
+  timeZone,
+}: {
+  typeId: string;
+  timeZone?: string;
+}) {
   const { items, loading, error, reload } = usePageTypes();
   const selected = items.find((type) => type.id === typeId);
   const templateId = selected?.template_id;
@@ -38,7 +44,12 @@ export function NewManagedPage({ typeId }: { typeId: string }) {
   }, [baseUrl, templateId, attempt]);
   if (selected?.available && (!templateId || template?.id === templateId))
     return (
-      <ManagedPageEditor key={typeId} pageType={selected} template={template} />
+      <ManagedPageEditor
+        key={typeId}
+        pageType={selected}
+        template={template}
+        timeZone={timeZone}
+      />
     );
   return (
     <>

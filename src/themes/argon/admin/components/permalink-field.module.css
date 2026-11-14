@@ -1,0 +1,79 @@
+.line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-block-size: 32px;
+  min-inline-size: 0;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.value {
+  min-inline-size: 0;
+  color: var(--admin-accent);
+  overflow-wrap: anywhere;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  min-block-size: 28px;
+  padding: 3px 5px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--admin-text);
+  font: inherit;
+  white-space: nowrap;
+  transition:
+    color var(--admin-motion-fast),
+    background var(--admin-motion-fast);
+}
+
+.action:hover:not(:disabled) {
+  background: var(--admin-subtle);
+  color: var(--admin-accent);
+}
+
+.action:disabled {
+  opacity: 0.55;
+}
+
+.action svg {
+  inline-size: 12px;
+  block-size: 12px;
+}
+
+.edit {
+  display: flex;
+  flex: 1 1 180px;
+  align-items: center;
+  gap: 4px;
+  min-inline-size: 0;
+}
+
+.line .input {
+  flex: 1;
+  min-inline-size: 0;
+  max-inline-size: 36rem;
+  min-block-size: 32px;
+  padding: 4px 8px;
+  border: 1px solid var(--admin-border);
+  border-radius: 5px;
+  background: var(--admin-canvas);
+  color: var(--admin-text);
+  font: inherit;
+}
+
+.line .input[aria-invalid="true"] {
+  border-color: var(--admin-danger);
+}
+
+.error {
+  flex-basis: 100%;
+  color: var(--admin-danger);
+  font-size: inherit;
+}

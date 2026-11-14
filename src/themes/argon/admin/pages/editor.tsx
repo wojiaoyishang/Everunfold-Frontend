@@ -34,7 +34,11 @@ import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
 import { PreviewAction } from "../components/preview-action";
 import { usePagePreview } from "@/core/pages/use-preview";
 import { isPageUrlFailure, pagesFailure } from "@/core/pages/failure";
-import { pageUrlError, suggestedPagePath } from "@/core/pages/path";
+import {
+  datedPageTitle,
+  pageUrlError,
+  suggestedPagePath,
+} from "@/core/pages/path";
 import { UiText, useLanguageCatalog } from "@/core/i18n/provider";
 import { Form, Button } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
@@ -42,6 +46,8 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { AccountField } from "../../account/fields";
 import { UnsavedAccountChanges } from "../../account/unsaved";
 import { AdminPageHeading } from "../components/page-heading";
+import { EditorIdentity } from "../components/editor-identity";
+import { PermalinkField } from "../components/permalink-field";
 import { PageConfigurationEditor } from "./configuration";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { readSettingsModel } from "@/core/forms/schema";
@@ -84,10 +90,12 @@ export function ManagedPageEditor({
   id,
   pageType,
   template,
+  timeZone,
 }: {
   id?: string;
   pageType?: PageTypeItem;
   template?: PageTemplateItem;
+  timeZone?: string;
 }) {
   usePluginRuntime();
   const actor = useAdminAccount(),
@@ -95,6 +103,7 @@ export function ManagedPageEditor({
     router = useRouter();
   const formId = useId();
   const [draftId] = useState(randomUUID);
+  const generatedTitle = useRef<string | null>(null);
   const previewId = id ?? draftId;
   const catalog = useLanguageCatalog();
   const shortcodes = useAppliedShortcodes();
@@ -118,7 +127,6 @@ export function ManagedPageEditor({
       edit_mode: undefined,
       component_document: undefined,
       layout: undefined,
-      title: definition.title,
       path: "",
       comments_open: definition.comments_open ?? true,
       options: {
@@ -176,10 +184,22 @@ export function ManagedPageEditor({
   const templateId = saved?.template?.id ?? template?.id;
   const componentMode = source === "custom" && value.edit_mode === "components";
   const typeTitle =
-    saved?.template?.title ??
-    definition?.title ??
-    pageType?.title ??
-    (source === "custom" ? "自定义页面" : typeId);
+    typeId === customPageTypeId
+      ? "自定义页面"
+      : (saved?.template?.title ??
+        definition?.title ??
+        pageType?.title ??
+        typeId);
+  const editOptions = source === "custom" && (
+    <PageEditOptions
+      inline
+      mode={componentMode ? "components" : "source"}
+      layout={value.layout}
+      lockedMode={Boolean(templateId)}
+      onMode={templateId ? undefined : (edit_mode) => update({ edit_mode })}
+      onLayout={(layout) => update({ layout })}
+    />
+  );
   const defaultPath = suggestedPagePath(
     value.title,
     catalog.languages.find(
@@ -189,6 +209,40 @@ export function ManagedPageEditor({
   );
   const path = manualPath ? value.path : defaultPath;
   const visiblePathError = pathError || (manualPath ? pageUrlError(path) : "");
+  const disabled = !write || action.busy || Boolean(saved?.archived);
+  const onTitle = (title: string) => {
+    if (!manualPath) setPathError("");
+    update({ title });
+  };
+  const permalink = (
+    <PermalinkField
+      value={path}
+      disabled={disabled}
+      validate={pageUrlError}
+      onChange={(path) => {
+        setManualPath(true);
+        setPathError("");
+        update({ path });
+      }}
+      error={visiblePathError}
+      emptyLabel={!saved ? "保存时自动生成" : undefined}
+      after={
+        !saved &&
+        manualPath && (
+          <Button
+            className={styles.pathReset}
+            onClick={() => {
+              setManualPath(false);
+              setPathError("");
+              update({ path: "" });
+            }}
+          >
+            <UiText text="按标题生成" />
+          </Button>
+        )
+      }
+    />
+  );
   const dirty =
     JSON.stringify(value) !== JSON.stringify(saved?.value ?? initial) ||
     Boolean(optionsError) ||
@@ -216,7 +270,7 @@ export function ManagedPageEditor({
   }, [baseUrl, id, attempt]);
   const save = async (apply: boolean) => {
     if (!ready) return false;
-    if (!value.title.trim()) {
+    if (saved && !value.title.trim()) {
       action.notify("请输入页面标题。");
       return false;
     }
@@ -233,11 +287,27 @@ export function ManagedPageEditor({
     let createdId: string | undefined;
     const completed = await action.run(
       async (signal) => {
+        const title =
+          value.title.trim() ||
+          (generatedTitle.current ??= datedPageTitle(new Date(), timeZone));
         const input = {
           id: saved?.id ?? previewId,
           expected_revision: saved?.revision ?? 0,
           type_id: saved ? undefined : typeId,
-          value: { ...value, path: manualPath ? path.trim() : undefined },
+          value: {
+            ...value,
+            title,
+            path: manualPath ? path.trim() : undefined,
+            ...(componentMode
+              ? {
+                  html: undefined,
+                  css: undefined,
+                  javascript: undefined,
+                  javascript_enabled: undefined,
+                  javascript_position: undefined,
+                }
+              : {}),
+          },
           apply,
           language:
             source === "registered" ? undefined : (saved?.language ?? language),
@@ -430,48 +500,30 @@ export function ManagedPageEditor({
           )}
         </ScrollHeaderActions>
       </div>
-      <div className={styles.editorHeading} data-live-normal-only>
-        <AdminPageHeading title={id ? "编辑页面" : "新建页面"} />
-        {ready && (
-          <div className={styles.state}>
-            <span className="admin-badge">
-              <UiText text={typeTitle} />
-            </span>
-            {saved && (
-              <span>
-                <UiText text="草稿版本" /> {saved.revision} ·{" "}
-                <UiText text="应用版本" /> {saved.applied_revision ?? "—"}
-              </span>
-            )}
-          </div>
-        )}
-      </div>
       {id && !ready && (
-        <section className="account-card">
-          {loadFailed ? (
-            <Button
-              className="admin-button"
-              onClick={() => {
-                setLoadFailed(false);
-                setAttempt((value) => value + 1);
-              }}
-            >
-              <UiText text="重新读取页面" />
-            </Button>
-          ) : (
-            <p role="status">
-              <UiText text="正在读取页面…" />
-            </p>
-          )}
-        </section>
+        <>
+          <AdminPageHeading title="编辑页面" />
+          <section className="account-card">
+            {loadFailed ? (
+              <Button
+                className="admin-button"
+                onClick={() => {
+                  setLoadFailed(false);
+                  setAttempt((value) => value + 1);
+                }}
+              >
+                <UiText text="重新读取页面" />
+              </Button>
+            ) : (
+              <p role="status">
+                <UiText text="正在读取页面…" />
+              </p>
+            )}
+          </section>
+        </>
       )}
       {(!id || saved) && (
         <>
-          {saved?.archived && (
-            <span className="admin-badge">
-              <UiText text="回收站" />
-            </span>
-          )}
           <div className={styles.editorLayout}>
             <div className={styles.editorColumn}>
               <Form
@@ -487,71 +539,72 @@ export function ManagedPageEditor({
                   );
                 }}
               >
-                <fieldset
-                  className="account-fieldset"
-                  disabled={!write || action.busy || saved?.archived}
-                >
+                <fieldset className="account-fieldset" disabled={disabled}>
+                  {!compact && (
+                    <>
+                      <h1 className="sr-only">
+                        <UiText text={id ? "编辑页面" : "新建页面"} />
+                      </h1>
+                      <EditorIdentity
+                        label="页面标题"
+                        placeholder="添加标题"
+                        value={value.title}
+                        onChange={onTitle}
+                        maxLength={120}
+                        disabled={disabled}
+                        permalink={permalink}
+                      />
+                    </>
+                  )}
+                  <div
+                    className={styles.pageEditControls}
+                    data-compact={compact || undefined}
+                    data-live-part="settings"
+                  >
+                    {!compact && (
+                      <div className={styles.state}>
+                        <span className="admin-badge">
+                          <UiText text={typeTitle} />
+                        </span>
+                        {saved && (
+                          <span>
+                            <UiText text="草稿版本" /> {saved.revision} ·{" "}
+                            <UiText text="应用版本" />{" "}
+                            {saved.applied_revision ?? "—"}
+                          </span>
+                        )}
+                        {saved?.archived && (
+                          <span className="admin-badge">
+                            <UiText text="回收站" />
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    {editOptions}
+                  </div>
                   <PageSettings
                     value={value}
                     change={update}
-                    disabled={!write || action.busy || Boolean(saved?.archived)}
+                    disabled={disabled}
                     compact={compact}
+                    compactIdentity={
+                      compact && (
+                        <>
+                          <AccountField
+                            label="页面标题"
+                            value={value.title}
+                            onChange={onTitle}
+                            required
+                            maxLength={120}
+                          />
+                          {permalink}
+                        </>
+                      )
+                    }
                     language={
                       !saved && source === "custom"
                         ? { value: language, onChange: setLanguage }
                         : undefined
-                    }
-                    onTitle={(title) => {
-                      if (!manualPath) setPathError("");
-                      update({ title });
-                    }}
-                    address={{
-                      value: path,
-                      onChange: (path) => {
-                        setManualPath(true);
-                        setPathError("");
-                        update({ path });
-                      },
-                      error: visiblePathError,
-                      hint:
-                        !compact && !saved
-                          ? "根据标题生成，也可手动填写站内路径。"
-                          : undefined,
-                      afterLabel: !saved && manualPath && (
-                        <Button
-                          className={styles.pathReset}
-                          onClick={() => {
-                            setManualPath(false);
-                            setPathError("");
-                            update({ path: "" });
-                          }}
-                        >
-                          <UiText text="按标题生成" />
-                        </Button>
-                      ),
-                    }}
-                    layout={
-                      source === "custom" && (
-                        <PageEditOptions
-                          mode={componentMode ? "components" : "source"}
-                          layout={value.layout}
-                          onMode={
-                            templateId
-                              ? undefined
-                              : (edit_mode) =>
-                                  setValue((current) => ({
-                                    ...current,
-                                    edit_mode,
-                                    component_document:
-                                      edit_mode === "components"
-                                        ? (current.component_document ??
-                                          emptyDocument)
-                                        : null,
-                                  }))
-                          }
-                          onLayout={(layout) => update({ layout })}
-                        />
-                      )
                     }
                     seo={
                       definition?.seo_editable !== false && (
@@ -609,20 +662,20 @@ export function ManagedPageEditor({
                       )
                     }
                   />
+                </fieldset>
+                <fieldset
+                  className="account-fieldset"
+                  disabled={!write || action.busy || saved?.archived}
+                >
                   {source === "registered" ? (
-                    <section className="account-card">
+                    <section
+                      className={`account-card ${styles.pageOptionsCard}`}
+                      data-live-part="content"
+                    >
                       <header>
                         <h2>
                           <UiText text="页面选项" />
                         </h2>
-                        <p className={styles.help}>
-                          <UiText
-                            text={
-                              definition?.description ||
-                              "由前端提供交互，在这里维护公开展示的内容。"
-                            }
-                          />
-                        </p>
                       </header>
                       {definition ? (
                         <PageConfigurationEditor
@@ -642,13 +695,12 @@ export function ManagedPageEditor({
                           disabled={!write || action.busy}
                           onChange={(options) => {
                             setOptionsSource(null);
-                            setValue({ ...value, options });
+                            update({ options });
                           }}
                           onSourceChange={(text) => {
                             setOptionsSource(text);
                             const parsed = parsePageConfiguration(text);
-                            if (parsed.value)
-                              setValue({ ...value, options: parsed.value });
+                            if (parsed.value) update({ options: parsed.value });
                           }}
                         />
                       ) : (
@@ -663,36 +715,23 @@ export function ManagedPageEditor({
                       )}
                     </section>
                   ) : (
-                    <>
-                      {componentMode && (
-                        <section className="account-card" data-live-normal-only>
-                          <Button
-                            className="admin-button admin-button-primary"
-                            disabled={!ready || !write || action.busy}
-                            onClick={() => void openLive()}
-                          >
-                            <Icon name="eye" />
-                            <UiText text="进入实时编辑" />
-                          </Button>
-                        </section>
-                      )}
-                      {templateId && !compact ? (
-                        <section
-                          className="account-card"
-                          data-live-part="settings"
-                        >
-                          <header>
-                            <h2>
-                              <UiText text="自定义页面模板" />
-                            </h2>
-                          </header>
-                          <div className={styles.templateReference}>
-                            <div>
-                              <strong>{typeTitle}</strong>
-                              <p>
-                                <UiText text="此页面使用模板的结构。更新模板会同步到使用它的页面，各页面填写的参数会保留。" />
-                              </p>
-                            </div>
+                    (!compact || (!componentMode && !templateId)) && (
+                      <PageCodeFields
+                        value={value}
+                        onChange={update}
+                        disabled={!write || action.busy}
+                        allowScripts={actor.role === "admin"}
+                        cover={
+                          componentMode ? (
+                            <Button
+                              className="admin-button admin-button-primary"
+                              disabled={disabled}
+                              onClick={() => void openLive()}
+                            >
+                              <Icon name="sidebar" />
+                              <UiText text="前往实时预览" />
+                            </Button>
+                          ) : templateId ? (
                             <RouteLink
                               className="admin-button"
                               href={`/admin/pages/templates/${templateId}`}
@@ -700,22 +739,10 @@ export function ManagedPageEditor({
                               <Icon name="code" />
                               <UiText text={write ? "编辑模板" : "查看模板"} />
                             </RouteLink>
-                          </div>
-                        </section>
-                      ) : (
-                        !templateId &&
-                        !componentMode && (
-                          <PageCodeFields
-                            value={value}
-                            onChange={(patch) =>
-                              setValue({ ...value, ...patch })
-                            }
-                            disabled={!write || action.busy}
-                            allowScripts={actor.role === "admin"}
-                          />
-                        )
-                      )}
-                    </>
+                          ) : undefined
+                        }
+                      />
+                    )
                   )}
                 </fieldset>
               </Form>

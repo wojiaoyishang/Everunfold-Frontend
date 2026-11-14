@@ -74,7 +74,7 @@
 .identity,
 .language {
   display: grid;
-  gap: 12px;
+  gap: 4px;
   min-inline-size: 0;
 }
 
@@ -137,7 +137,6 @@
 }
 
 @container (min-width: 570px) {
-  .identity,
   .settings :global(.account-form-grid) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

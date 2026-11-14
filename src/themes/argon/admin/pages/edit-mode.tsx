@@ -12,28 +12,36 @@ export function PageEditOptions({
   layout = "wide",
   onMode,
   onLayout,
+  lockedMode = false,
+  inline = false,
 }: {
   mode: PageEditMode;
   layout?: PageLayout;
   onMode?: (mode: PageEditMode) => void;
   onLayout: (layout: PageLayout) => void;
+  lockedMode?: boolean;
+  inline?: boolean;
 }) {
   const t = useT();
   return (
-    <div className="account-form-grid">
-      {onMode && (
+    <div className={inline ? styles.editOptions : "account-form-grid"}>
+      {(onMode || lockedMode) && (
         <label className={styles.editOption}>
           <UiText text="编辑方式" />
           <Select
             name="page-edit-mode"
             label={t("编辑方式")}
             value={mode}
+            disabled={lockedMode}
             options={[
               { value: "components", label: t("组件模式") },
-              { value: "source", label: t("HTML、CSS 和 JavaScript") },
+              {
+                value: "source",
+                label: t(inline ? "源码模式" : "HTML、CSS 和 JavaScript"),
+              },
             ]}
             onValueChange={(value) =>
-              onMode(value === "source" ? "source" : "components")
+              onMode?.(value === "source" ? "source" : "components")
             }
           />
         </label>

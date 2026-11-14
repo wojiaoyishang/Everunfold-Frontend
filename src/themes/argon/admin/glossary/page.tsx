@@ -30,6 +30,7 @@ import { SeoDisclosure, SeoFieldsEditor } from "../components/seo-fields";
 import { mediaReferenceId } from "@/core/media/references";
 import { AdminPageHeading } from "../components/page-heading";
 import { AdminActionButton } from "../components/action-button";
+import { PermalinkField } from "../components/permalink-field";
 import {
   SettingsSection,
   SettingsText,
@@ -681,6 +682,35 @@ export function GlossaryAdminPage() {
                   </small>
                 </div>
               </div>
+              <PermalinkField
+                key={selected?.id ?? newTermSession}
+                value={fields.slug}
+                displayValue={
+                  fields.slug
+                    ? decodeURI(
+                        glossaryTermPath(
+                          {
+                            slug: fields.slug,
+                            language: fields.language ?? "*",
+                          },
+                          languages,
+                        ) ?? "",
+                      ) || `/glossary/${fields.slug}`
+                    : ""
+                }
+                disabled={!writable || saving}
+                maxLength={120}
+                placeholder="例如：proper-noun"
+                validate={(slug) =>
+                  /[\s/?#%<>\\]/u.test(slug) || slug === "." || slug === ".."
+                    ? "请输入有效的术语路径片段。"
+                    : ""
+                }
+                onChange={(slug) => {
+                  slugTouched.current = Boolean(slug);
+                  update({ slug: slug || slugify(fields.title) });
+                }}
+              />
               <SettingsMediaField
                 allowUrl={false}
                 label="特色图片"
@@ -711,18 +741,6 @@ export function GlossaryAdminPage() {
                 hint="关闭后只影响当前术语；图片仍正常显示，但不会打开查看器。"
                 value={fields.show_image_viewer !== false}
                 onChange={(show_image_viewer) => update({ show_image_viewer })}
-              />
-              <SettingsText
-                label="路径片段"
-                required
-                hint={`公开地址：/glossary/${fields.slug || "term-slug"}`}
-                value={fields.slug}
-                maxLength={120}
-                placeholder="例如：proper-noun"
-                onChange={(slug) => {
-                  slugTouched.current = true;
-                  update({ slug });
-                }}
               />
             </SettingsSection>
             <SettingsSection

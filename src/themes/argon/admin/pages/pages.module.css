@@ -144,16 +144,6 @@
   font-size: 12px;
   flex-wrap: wrap;
 }
-.editorHeading {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  column-gap: 12px;
-  row-gap: 6px;
-}
-.editorHeading > :global(.admin-page-heading) {
-  margin-block-end: 0;
-}
 .configuration {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -162,8 +152,43 @@
 .configuration > p {
   margin: 0;
 }
+.sourceCard,
+.pageOptionsCard {
+  padding: 16px;
+  margin-block: 16px;
+  border-radius: 9px;
+}
+.sourceCard > header,
+.pageOptionsCard > header {
+  margin-block-end: 10px;
+}
+.sourceCard h2,
+.pageOptionsCard h2 {
+  margin: 0;
+  font-size: 14px;
+}
+.codeStage {
+  position: relative;
+  min-inline-size: 0;
+}
+.codeStageBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+}
+.codeCover {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--admin-subtle) 93%, transparent);
+}
 .sourcePane {
   min-inline-size: 0;
+  min-block-size: calc(17.5 * 14px + 32px);
 }
 :global(html[data-live-panel="content"])
   :global(.admin-embedded-editor)
@@ -177,11 +202,22 @@
 :global(html[data-live-panel="content"])
   :global(.admin-embedded-editor)
   .sourceCard
-  > .configuration {
+  .codeStage,
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard
+  .codeStageBody {
   display: flex;
   flex-direction: column;
-  block-size: 100%;
+  flex: 1;
+  min-block-size: 0;
   gap: 0;
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard {
+  display: flex;
+  flex-direction: column;
 }
 :global(html[data-live-panel="content"])
   :global(.admin-embedded-editor)
@@ -243,17 +279,6 @@
 }
 .pathReset:is(:hover, :focus-visible) {
   text-decoration: underline;
-}
-.templateReference {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px 20px;
-}
-.templateReference p {
-  margin: 6px 0 0;
-  color: var(--admin-muted);
 }
 .help,
 .configurationHint {
@@ -462,5 +487,44 @@
 .editOption {
   display: grid;
   gap: 8px;
+  min-inline-size: 0;
+}
+.editOptions .editOption {
+  display: flex;
+  align-items: center;
+  gap: 6px 10px;
+  flex-wrap: wrap;
   min-width: 0;
+}
+.editOptions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  font-size: 13px;
+}
+.editOptions .editOption :global(.ui-select) {
+  min-inline-size: 0;
+}
+.editOptions .editOption:first-child:not(:only-child) :global(.ui-select) {
+  inline-size: 8.5rem;
+}
+.editOptions .editOption :global(.ui-select-trigger) {
+  min-block-size: 34px;
+  padding-block: 4px;
+}
+.pageEditControls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 20px;
+  margin-block-start: 14px;
+}
+.pageEditControls:empty {
+  display: none;
+}
+.pageEditControls[data-compact] {
+  margin: 0;
+  padding: 0 6px 12px;
+  border-block-end: 1px solid var(--admin-border);
 }

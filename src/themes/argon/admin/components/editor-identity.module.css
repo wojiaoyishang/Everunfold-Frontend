@@ -1,0 +1,31 @@
+.identity {
+  min-inline-size: 0;
+  margin: 4px 0 24px;
+  padding-block-end: 16px;
+  border-block-end: 1px solid var(--admin-border);
+}
+
+.identity .title {
+  display: block;
+  width: 100%;
+  padding: 10px 0;
+  font-size: clamp(25px, 2.1vw, 32px);
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: var(--admin-text);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.identity .title::placeholder {
+  color: var(--admin-muted);
+  font-weight: 400;
+}
+
+.identity .title:focus {
+  outline: none;
+  box-shadow: 0 1px 0 var(--admin-accent);
+}

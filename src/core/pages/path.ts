@@ -1,6 +1,28 @@
 import { titlePath } from "@/core/content-management/editor-fields";
 import { pageUrlErrors } from "./failure";
 
+export function datedPageTitle(date: Date, timeZone = "Asia/Shanghai"): string {
+  const options = {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  } as const;
+  try {
+    return new Intl.DateTimeFormat("sv-SE", { ...options, timeZone }).format(
+      date,
+    );
+  } catch {
+    return new Intl.DateTimeFormat("sv-SE", {
+      ...options,
+      timeZone: "UTC",
+    }).format(date);
+  }
+}
+
 export function suggestedPagePath(title: string, prefix = ""): string {
   if (!title.trim()) return "";
   return prefix + (titlePath(title) || "/page.html");

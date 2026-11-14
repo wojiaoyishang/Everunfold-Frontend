@@ -72,9 +72,7 @@ export function PageSettings({
   disabled,
   compact,
   language,
-  address,
-  onTitle,
-  layout,
+  compactIdentity,
   seo,
   extra,
 }: {
@@ -83,15 +81,7 @@ export function PageSettings({
   disabled: boolean;
   compact: boolean;
   language?: { value: string; onChange: (value: string) => void };
-  address: {
-    value: string;
-    onChange: (value: string) => void;
-    error?: string;
-    hint?: string;
-    afterLabel?: ReactNode;
-  };
-  onTitle: (value: string) => void;
-  layout?: ReactNode;
+  compactIdentity?: ReactNode;
   seo?: ReactNode;
   extra?: ReactNode;
 }) {
@@ -102,25 +92,9 @@ export function PageSettings({
       <div className={styles.settings} data-compact={compact || undefined}>
         <div className={styles.main}>
           <PageSettingsGroup title="基本信息">
-            <div className={styles.identity}>
-              <AccountField
-                label="页面标题"
-                value={value.title}
-                onChange={onTitle}
-                required
-                maxLength={120}
-              />
-              <AccountField
-                label="页面 URL"
-                value={address.value}
-                onChange={address.onChange}
-                error={address.error}
-                hint={address.hint}
-                labelAside={address.afterLabel}
-                required
-                maxLength={500}
-              />
-            </div>
+            {compactIdentity && (
+              <div className={styles.identity}>{compactIdentity}</div>
+            )}
             {language && (
               <div className={styles.language}>
                 <label htmlFor={languageId}>
@@ -150,11 +124,6 @@ export function PageSettings({
               maxLength={500}
             />
           </PageSettingsGroup>
-          {layout && (
-            <PageSettingsGroup title="编辑与布局" initiallyOpen={!compact}>
-              {layout}
-            </PageSettingsGroup>
-          )}
           {seo && !compact && <div className={styles.seo}>{seo}</div>}
         </div>
         <div className={styles.side}>
