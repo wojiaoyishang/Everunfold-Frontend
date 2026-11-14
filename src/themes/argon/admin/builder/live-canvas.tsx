@@ -9,6 +9,7 @@ import {
   type CSSProperties,
   type RefObject,
 } from "react";
+import { createPortal } from "react-dom";
 import { useDndMonitor, useDndContext } from "@dnd-kit/core";
 import type {
   BuilderComponentDefinition,
@@ -41,7 +42,13 @@ export interface LiveCanvasFrame {
 
 type Point = { x: number; y: number };
 type Area = { left: number; top: number; width: number; height: number };
-type MeasuredNode = Area & { id: string; horizontal: boolean; inView: boolean };
+type MeasuredNode = Area & {
+  id: string;
+  horizontal: boolean;
+  inView: boolean;
+  gridDrop?: Area;
+};
+type GridGuide = { id: string; host: HTMLElement; count: number };
 type DropArea = { position: string; area: Area; kind?: "inside" | "side" };
 type ContainerLayout = "column" | "row" | "grid";
 
@@ -108,6 +115,7 @@ export function LiveBuilderCanvas({
   const t = useT();
   const [load, setLoad] = useState(0);
   const [areas, setAreas] = useState<MeasuredNode[]>([]);
+  const [gridGuides, setGridGuides] = useState<GridGuide[]>([]);
   const [insertArea, setInsertArea] = useState<Area | null>(null);
   const [hovered, setHovered] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
@@ -294,6 +302,7 @@ export function LiveBuilderCanvas({
           revealed.current = activeId;
         }
       }
+      const guides: GridGuide[] = [];
       const next = nodeElements.map((element) => {
         const container = element.querySelector(
           ":scope > [data-builder-container]",
@@ -302,14 +311,49 @@ export function LiveBuilderCanvas({
           ? page.defaultView?.getComputedStyle(container)
           : null;
         const area = elementArea(element);
+        let gridDrop: Area | undefined;
+        if (canInsert && container && computed?.display === "grid") {
+          const host = container.querySelector<HTMLElement>(
+            ":scope > [data-builder-grid-guide-host]",
+          );
+          if (host) {
+            // Use the resolved tracks so guides follow the iframe's responsive rules.
+            const tracks = computed.gridTemplateColumns.trim();
+            const columns = /^\d/.test(tracks) ? tracks.split(/\s+/).length : 0;
+            const children = container.querySelectorAll(
+              ":scope > [data-builder-id]",
+            ).length;
+            const count =
+              columns && children
+                ? (columns - (children % columns)) % columns
+                : columns;
+            if (count) {
+              guides.push({ id: element.dataset.builderId!, host, count });
+              const first = host.firstElementChild;
+              const last = host.lastElementChild;
+              if (first && last && host.childElementCount === count)
+                gridDrop = unionArea(first, last);
+            }
+          }
+        }
         return {
           ...area,
           id: element.dataset.builderId!,
           horizontal:
             computed?.display === "flex" && computed.flexDirection === "row",
           inView: area.top < iframe.clientHeight && bottom(area) > 0,
+          gridDrop,
         };
       });
+      setGridGuides((previous) =>
+        previous.length === guides.length &&
+        previous.every(
+          ({ host, count }, index) =>
+            host === guides[index].host && count === guides[index].count,
+        )
+          ? previous
+          : guides,
+      );
       setAreas((previous) =>
         JSON.stringify(previous) === JSON.stringify(next) ? previous : next,
       );
@@ -439,23 +483,29 @@ export function LiveBuilderCanvas({
     }
     if (!parent) return;
     targets.push(
-      parent.horizontal && items.length
+      parent.gridDrop
         ? {
             position: `${parentId}/`,
-            kind: "side",
-            area: {
-              ...parent,
-              left: parent.left + parent.width - 9,
-              width: 18,
-            },
+            kind: "inside",
+            area: parent.gridDrop,
           }
-        : {
-            position: `${parentId}/`,
-            kind: items.length ? undefined : "inside",
-            area: items.length
-              ? { ...parent, top: bottom(parent) - 10, height: 20 }
-              : parent,
-          },
+        : parent.horizontal && items.length
+          ? {
+              position: `${parentId}/`,
+              kind: "side",
+              area: {
+                ...parent,
+                left: parent.left + parent.width - 9,
+                width: 18,
+              },
+            }
+          : {
+              position: `${parentId}/`,
+              kind: items.length ? undefined : "inside",
+              area: items.length
+                ? { ...parent, top: bottom(parent) - 10, height: 20 }
+                : parent,
+            },
     );
   };
   collect(value.nodes);
@@ -553,6 +603,17 @@ export function LiveBuilderCanvas({
           )}
         </div>
       )}
+      {!interactive &&
+        canInsert &&
+        gridGuides.map(({ id, host, count }) =>
+          createPortal(
+            Array.from({ length: count }, (_, index) => (
+              <span key={index} data-builder-grid-guide />
+            )),
+            host,
+            id,
+          ),
+        )}
       {inlineHost && editingNode && format && onInlineChange && (
         <InlineSource
           key={editingNode.id}
@@ -586,6 +647,19 @@ function suppress(event: Event) {
 function elementArea(element: Element): Area {
   const { left, top, width, height } = element.getBoundingClientRect();
   return { left, top, width, height };
+}
+
+function unionArea(first: Element, last: Element): Area {
+  const a = first.getBoundingClientRect();
+  const b = last.getBoundingClientRect();
+  const left = Math.min(a.left, b.left);
+  const top = Math.min(a.top, b.top);
+  return {
+    left,
+    top,
+    width: Math.max(a.right, b.right) - left,
+    height: Math.max(a.bottom, b.bottom) - top,
+  };
 }
 
 function boxStyle({ left, top, width, height }: Area): CSSProperties {

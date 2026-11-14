@@ -205,6 +205,9 @@ export function BuilderElement({
       body = (
         <div className={styles.container} data-builder-container>
           {children}
+          {preview && node.type === "core.grid" && (
+            <div data-builder-grid-guide-host aria-hidden="true" />
+          )}
         </div>
       );
       break;

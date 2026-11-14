@@ -11,8 +11,27 @@
 }
 :global(html[data-builder-editor])
   .element[data-builder-id]
-  > .container:empty {
+  > .container:not(:has(> .element)) {
   min-block-size: 64px;
+}
+.container > [data-builder-grid-guide-host] {
+  display: none;
+}
+:global(html[data-builder-editor="editable"])
+  .container
+  > [data-builder-grid-guide-host] {
+  display: contents;
+}
+.container [data-builder-grid-guide] {
+  box-sizing: border-box;
+  align-self: stretch;
+  min-inline-size: 0;
+  min-block-size: 70px;
+  margin: 3px;
+  border: 1px dashed color-mix(in srgb, var(--accent) 78%, var(--line));
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+  pointer-events: none;
 }
 .content > .element + .element {
   margin-block-start: max(16px, var(--builder-margin, 0px));
