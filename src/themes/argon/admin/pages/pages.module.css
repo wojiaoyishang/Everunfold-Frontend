@@ -162,6 +162,78 @@
 .configuration > p {
   margin: 0;
 }
+.sourcePane {
+  min-inline-size: 0;
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard {
+  block-size: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard
+  > .configuration {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  gap: 0;
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard
+  .tabs {
+  flex: none;
+  padding: 6px 8px;
+  border-block-end: 1px solid var(--admin-border);
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard
+  .sourcePane {
+  display: flex;
+  flex: 1;
+  min-block-size: 8rem;
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard
+  .sourcePane
+  > div {
+  flex: 1;
+  --source-editor-min-height: 100%;
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard
+  :global(.cm-editor) {
+  block-size: 100%;
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard
+  :global(.cm-scroller) {
+  max-block-size: none;
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard
+  .sourceOptions {
+  flex: none;
+  padding: 12px;
+  border-block-start: 1px solid var(--admin-border);
+}
+:global(html[data-live-panel="content"])
+  :global(.admin-embedded-editor)
+  .sourceCard
+  .sourceOptions
+  > .toggle {
+  margin-block-start: 0;
+}
 .pathReset {
   border: 0;
   padding: 4px 0;

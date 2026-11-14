@@ -5,6 +5,7 @@ export function SplitHandle({
   value,
   min,
   max,
+  reset = 390,
   label,
   controls,
   className,
@@ -14,6 +15,7 @@ export function SplitHandle({
   value: number;
   min: number;
   max: number;
+  reset?: number;
   label: string;
   controls: string;
   className?: string;
@@ -35,6 +37,7 @@ export function SplitHandle({
       onPointerDown={(event) => {
         if (event.button !== 0) return;
         event.preventDefault();
+        event.currentTarget.focus({ preventScroll: true });
         start.current = { x: event.clientX, value };
         event.currentTarget.setPointerCapture(event.pointerId);
         onDragging(true);
@@ -75,7 +78,7 @@ export function SplitHandle({
           onChange(Math.min(max, Math.max(min, next)));
         }
       }}
-      onDoubleClick={() => onChange(390)}
+      onDoubleClick={() => onChange(Math.min(max, Math.max(min, reset)))}
     />
   );
 }

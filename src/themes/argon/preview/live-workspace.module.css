@@ -3,7 +3,6 @@
   --live-toolbar-ink: var(--admin-text);
   --live-toolbar-line: var(--admin-border);
   --live-main-action: var(--admin-accent);
-  --live-rail: 300px;
   display: grid;
   grid-template-rows: 50px minmax(0, 1fr);
   height: 100dvh;
@@ -200,6 +199,7 @@
   opacity: 0.45;
 }
 .panes {
+  --live-rail: var(--live-editor-width, 300px);
   position: relative;
   display: grid;
   grid-template-columns: var(--live-rail) minmax(0, 1fr);
@@ -255,6 +255,36 @@
   min-width: 0;
   position: relative;
 }
+.railResize {
+  position: absolute;
+  z-index: 4;
+  inset: 0 auto 0 -5px;
+  inline-size: 10px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
+}
+.railResize::after {
+  position: absolute;
+  inset: 0 auto 0 4px;
+  inline-size: 2px;
+  content: "";
+  transition: background-color var(--admin-motion-fast);
+}
+.railResize:is(:hover, :focus-visible)::after,
+.panes[data-resizing] .railResize::after {
+  background: var(--admin-accent);
+}
+.panes[data-resizing] {
+  cursor: col-resize;
+  user-select: none;
+}
+.panes[data-resizing] iframe {
+  pointer-events: none;
+}
 .railToggle {
   position: absolute;
   top: 50%;
@@ -287,7 +317,6 @@
 }
 @media (max-width: 760px) {
   .workspace {
-    --live-rail: min(300px, calc(100vw - 36px));
     grid-template-rows: 78px minmax(0, 1fr);
   }
   .toolbar {
@@ -335,6 +364,7 @@
     font-size: 11px;
   }
   .panes {
+    --live-rail: min(300px, calc(100vw - 36px));
     grid-template-columns: minmax(0, 1fr);
   }
   .rail {
@@ -348,7 +378,8 @@
     visibility: hidden;
     pointer-events: none;
   }
-  .railToggle {
+  .railToggle,
+  .railResize {
     display: none;
   }
 }

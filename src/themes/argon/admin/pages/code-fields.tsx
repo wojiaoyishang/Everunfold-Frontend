@@ -25,7 +25,11 @@ export function PageCodeFields({
   const t = useT();
   const [mode, setMode] = useState<"html" | "css" | "javascript">("html");
   return (
-    <section className="account-card" data-live-part="content">
+    <section
+      className={`account-card ${styles.sourceCard}`}
+      data-live-part="content"
+      data-live-page-source
+    >
       <header data-live-normal-only>
         <h2>
           <UiText text="页面源码" />
@@ -43,15 +47,16 @@ export function PageCodeFields({
             </Button>
           ))}
         </nav>
-        <SourceEditor
-          kind={mode}
-          value={value[mode] ?? ""}
-          onChange={(text) => onChange({ [mode]: text })}
-          disabled={disabled}
-        />
+        <div className={styles.sourcePane}>
+          <SourceEditor
+            kind={mode}
+            value={value[mode] ?? ""}
+            onChange={(text) => onChange({ [mode]: text })}
+            disabled={disabled}
+          />
+        </div>
         {mode === "javascript" && (
-          <div>
-            {" "}
+          <div className={styles.sourceOptions}>
             <div className={styles.toggle}>
               <span>JavaScript</span>
               <Switch

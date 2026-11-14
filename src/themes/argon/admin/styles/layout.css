@@ -629,6 +629,15 @@ html[data-live-panel] .admin-embedded-editor {
   padding: 12px;
   background: var(--admin-canvas);
 }
+html[data-live-panel="content"]:has(
+    .admin-embedded-editor [data-live-page-source]
+  ) {
+  scrollbar-gutter: auto;
+}
+html[data-live-panel="content"]
+  .admin-embedded-editor:has([data-live-page-source]) {
+  padding: 0;
+}
 html[data-live-panel]
   .admin-embedded-editor
   :is(.admin-page-heading, .admin-editor-back) {

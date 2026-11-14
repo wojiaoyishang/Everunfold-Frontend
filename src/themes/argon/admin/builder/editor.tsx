@@ -1,6 +1,12 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import type {
   BuilderDevice,
   BuilderDocument,
@@ -27,6 +33,7 @@ import { Icon } from "../../components/icon";
 import { Button, Popover, TextField } from "../../components/ui/primitives";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { DragAndDrop, type DragItem } from "../../components/ui/drag-and-drop";
+import { SplitHandle } from "../../components/ui/split-handle";
 import { useBuilderComponents } from "../../builder/content";
 import { LiveBuilderCanvas, type LiveCanvasFrame } from "./live-canvas";
 import { BuilderInspector } from "./inspector";
@@ -47,6 +54,7 @@ const groups = [
 export type LivePanel =
   "content" | "library" | "properties" | "settings" | "parameters";
 const endPosition: BuilderPosition = { parentId: null, beforeId: null };
+const railSizes = { initial: 300, min: 250, max: 720, previewMin: 360 };
 function after(
   nodes: BuilderNode[],
   id: string,
@@ -107,6 +115,9 @@ export function LiveEditorSurface({
   const [dragging, setDragging] = useState(false);
   const [structure, setStructure] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+  const [railWidth, setRailWidth] = useState(railSizes.initial);
+  const [railMax, setRailMax] = useState(railSizes.max);
+  const [resizingRail, setResizingRail] = useState(false);
   const [showOnMobile, setShowOnMobile] = useState(false);
   const [inlineRequest, setInlineRequest] = useState<{ id: string } | null>(
     null,
@@ -136,6 +147,23 @@ export function LiveEditorSurface({
   const embedded = activePanel === "settings" || !builder;
   const awaitingEditor = !ready && frame.status !== "error";
   const canInsertTemplate = kind === "page" || kind === "template";
+  const shownRailWidth = Math.min(railWidth, railMax);
+
+  useLayoutEffect(() => {
+    const panes = panesRef.current;
+    if (!panes) return;
+    const updateLimit = () =>
+      setRailMax(
+        Math.max(
+          railSizes.min,
+          Math.min(railSizes.max, panes.clientWidth - railSizes.previewMin),
+        ),
+      );
+    updateLimit();
+    const observer = new ResizeObserver(updateLimit);
+    observer.observe(panes);
+    return () => observer.disconnect();
+  }, []);
 
   useLayoutEffect(() => {
     const element = menuRef.current;
@@ -392,6 +420,10 @@ export function LiveEditorSurface({
           data-collapsed={collapsed}
           data-mobile-panel={showOnMobile}
           data-dragging={dragging || undefined}
+          data-resizing={resizingRail || undefined}
+          style={
+            { "--live-editor-width": `${shownRailWidth}px` } as CSSProperties
+          }
         >
           <aside
             id={editorPanelId}
@@ -514,6 +546,19 @@ export function LiveEditorSurface({
             ) : null}
           </aside>
           <div className={layout.stage}>
+            {!collapsed && (
+              <SplitHandle
+                className={layout.railResize}
+                value={shownRailWidth}
+                min={railSizes.min}
+                max={railMax}
+                reset={railSizes.initial}
+                label={t("拖动调整编辑区宽度；方向键微调")}
+                controls={editorPanelId}
+                onChange={setRailWidth}
+                onDragging={setResizingRail}
+              />
+            )}
             <Button
               className={layout.railToggle}
               title={t(collapsed ? "展开编辑栏" : "收起编辑栏")}

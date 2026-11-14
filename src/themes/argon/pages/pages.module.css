@@ -38,8 +38,9 @@
   border-radius: 0;
   overflow: visible;
 }
-.page[data-page-layout="blank"] .heading {
-  border: 0;
+.page:is([data-page-layout="wide_transparent"], [data-page-layout="blank"])
+  .heading {
+  border-bottom: 0;
 }
 
 .componentBody {
