@@ -155,7 +155,9 @@ def read_tokens() -> dict[str, str]:
 
 def configure() -> None:
     section("Everunfold Docker · 前端")
-    api = ask("浏览器访问的 API 地址", "http://127.0.0.1:8001", valid=origin).rstrip("/")
+    api = ask("公开 API 入口（可填写反向代理地址）", "http://127.0.0.1:8001", valid=origin).rstrip(
+        "/"
+    )
     site = ask("前端公开地址", "http://127.0.0.1:3000", valid=origin).rstrip("/")
     internal = ask(
         "服务端 API 地址（留空沿用公开 API）", valid=lambda v: not v or origin(v)

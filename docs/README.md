@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[后端监听与节点公开地址](decisions/0151-listener-and-public-node-origins.md)说明 Docker 监听、反代、节点控制台与浏览器来源校验。
+
 [源码挂载的双容器部署](decisions/0150-source-mounted-docker.md)记录两端 Docker 进程、前端构建与插件发布的边界。实际命令见[本仓库 Docker 指南](../docker/README.md)。
 
 [AI 写作多服务商](decisions/0149-ai-writing-providers.md)记录服务商配置、生成时选择与升级顺序。

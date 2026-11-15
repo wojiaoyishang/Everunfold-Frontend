@@ -1,5 +1,9 @@
 # 前端交接状态
 
+## 后端监听与节点公开地址
+
+- 前端 Docker 向导明确标识公开 API 入口可以填写反代地址。后端由节点控制台管理公开前端地址。 [ADR 0151](../decisions/0151-listener-and-public-node-origins.md)。
+
 ## Docker 配置向导
 
 - `docker/configure.py` 在终端引导填写站点地址、来源 UUID、节点、接收器与双向令牌。可从后端向导产出的 `runtime.env` 导入两项令牌，再逐项保留或修改。现有配置文件继续由维护者编辑。
