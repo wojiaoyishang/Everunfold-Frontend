@@ -245,9 +245,5 @@ class Context:
         self.imported_from_data = False
 
     def peers(self) -> list[str]:
-        addresses = ["127.0.0.1", "::1"]
-        if not self.native:
-            addresses.extend(
-                filter(None, os.environ.get("EVERUNFOLD_NETWORK_CIDRS", "").split(","))
-            )
-        return addresses
+        # Docker subnets are derived afresh at launch, not persisted as manual grants.
+        return ["127.0.0.1", "::1"]

@@ -5,6 +5,47 @@
 所有配置操作都从各仓库根目录的 ``setup.sh`` 进入，统一配置文件是根目录
 ``config.yaml``。助手在 ``deploy/``，镜像与容器编排在 ``docker/``。
 
+
+复制结果与导入命令
+------------------
+
+选中配置项按 Ctrl+C 或点“查看 / 复制选中项”；输入框可用 Shift+方向键选择后复制。
+F4 打开完整执行结果；复制按钮使用终端剪贴板能力。SSH 或网页终端未允许剪贴板时，
+点“终端复制”回到普通终端选中文字，回车返回助手。Ctrl+Q 退出。
+后端导出后自动展开复制弹层并保留界面，显示文件宿主绝对路径和前端导入命令（路径自动安全引号）：
+
+.. code-block:: bash
+
+   # 在前端项目根目录执行；原生模式使用 --native
+   ./setup.sh --docker --connection-file /opt/everunfold/Everunfold-Data/backend/connections/web-main.json
+
+跨主机需先私下传输 JSON，再使用前端宿主上的绝对路径。命令不含令牌。
+前端检测结果显示完整内部目标 URL 和 DNS、拒绝连接、超时、TLS 或 HTTP 失败原因；
+不跟随重定向，遇到跳转时提示填写最终内部地址。
+
+容器别名与宿主网关
+~~~~~~~~~~~~~~~~~~
+
+推荐前后端加入同一个自定义网络，例如 ``1panel-network``，分别设置网络别名
+``everunfold-backend``、``everunfold-frontend``，内部地址使用
+``http://everunfold-backend:8001`` 和 ``http://everunfold-frontend:3000``。
+别名使用容器内部端口，不使用宿主映射端口；默认 ``bridge`` 没有别名解析。
+临时工具容器不会占用应用别名。
+
+后端配对可开启“允许私有网络 HTTP 接收”（Docker 新配置默认开启、原生关闭）。
+仅适用于可信私有网络中的单段容器别名、私有 IP、``host.docker.internal``。
+公开地址和公网传输继续使用 HTTPS；内部来源和令牌检查保留。
+
+两端“自动允许所选网络内部调用”默认 1，启动时读取所选网络 CIDR，追加手动来源列表。
+动态范围不写成永久手动授权；关闭则只采用手动列表。切换网络后用根 ``setup.sh start``
+重新创建，不能只重启旧容器。跨主机或其他代理来源需手填，仍以真实 socket IP 为准。
+
+“映射 host.docker.internal”默认 0；开启后工具、检查和运行容器均添加
+``--add-host host.docker.internal:host-gateway``。此时填写宿主映射端口，例如
+``http://host.docker.internal:3434``，并确保宿主端口绑定到容器可访问的接口。
+开启自动允许时还追加默认 bridge 网关 IP；自定义网关或代理来源须手动配置。
+修改网络或网关后，在配置界面检测前先保存、重新打开；构建/启动直接应用新设置。
+
 一、Docker 从零构建与维护
 -------------------------
 

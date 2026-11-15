@@ -5,6 +5,7 @@ import contextlib
 import io
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
+from config_copy import CopyText, ResultsLog, frontend_import_command
 from config_model import Check, Configuration, Field
 from rich.text import Text
 from textual import work
@@ -12,7 +13,16 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import ModalScreen
-from textual.widgets import Button, DataTable, Footer, Header, Input, Label, RichLog, Static
+from textual.widgets import (
+    Button,
+    DataTable,
+    Footer,
+    Header,
+    Input,
+    Label,
+    RichLog,
+    Static,
+)
 
 ACTIONS = {
     "save": 0,
@@ -152,10 +162,11 @@ class Editor(ModalScreen[bool]):
             yield Label(item.label, classes="dialog-title")
             yield Static(item.hint or "直接编辑当前值，回车应用。", markup=False)
             yield HistoryInput(item.value, item.history, id="value")
-            yield Static("← → 移动 · ↑ ↓ 本项历史 · Ctrl+U 清空 · Esc 返回", classes="muted")
+            yield Static("← → 移动 · ↑ ↓ 历史 · Shift+←/→ 选择 · Ctrl+C 复制", classes="muted")
             yield Static("", id="error", markup=False)
             with Horizontal(classes="buttons"):
                 yield Button("应用", id="apply", variant="primary")
+                yield Button("查看 / 复制", id="copy-value")
                 if item.generate:
                     yield Button("重新生成", id="generate", variant="warning")
                 if item.key == "database":
@@ -186,6 +197,8 @@ class Editor(ModalScreen[bool]):
             self.dismiss(False)
         elif event.button.id == "generate" and self.item.generate:
             self.query_one("#value", Input).value = self.item.generate()
+        elif event.button.id == "copy-value":
+            self.app.push_screen(CopyText(self.item.label, self.query_one("#value", Input).value))
         elif event.button.id == "parts":
             try:
                 form = DatabaseForm(self.query_one("#value", Input).value, self.config.native)
@@ -218,6 +231,7 @@ class SetupApp(App[int]):
     ModalScreen { align: center middle; background: $background 65%; }
     .dialog-title { text-style: bold; color: $accent; margin-bottom: 1; }
     #error { color: $error; height: auto; min-height: 1; }
+    #copy-text { height: 10; min-height: 4; }
     .muted { color: $text-muted; height: auto; }
     Screen.compact #intro { padding: 0 1; height: 2; }
     Screen.compact #configuration { min-height: 4; margin: 0 1; }
@@ -232,7 +246,8 @@ class SetupApp(App[int]):
         Binding("ctrl+t", "test", "检测连接"),
         Binding("ctrl+s", "save", "保存"),
         Binding("ctrl+q", "leave", "退出"),
-        Binding("ctrl+c", "leave", show=False),
+        Binding("ctrl+c", "copy_value", "复制选中项", show=False),
+        Binding("f4", "copy_results", "查看 / 复制结果"),
     ]
 
     def __init__(self, config: Configuration) -> None:
@@ -243,6 +258,7 @@ class SetupApp(App[int]):
         self.testing = False
         self.saved = False
         self.exporting = False
+        self.import_command = ""
         self.theme = "textual-dark"
 
     def compose(self) -> ComposeResult:
@@ -254,7 +270,7 @@ class SetupApp(App[int]):
             markup=False,
         )
         yield DataTable(id="configuration", cursor_type="row", zebra_stripes=True)
-        yield RichLog(id="checks", wrap=True, markup=False)
+        yield ResultsLog(id="checks", wrap=True, markup=False)
         with Vertical(id="actions"):
             with Horizontal(classes="buttons"):
                 yield Button("1 顺序配置", id="sequential")
@@ -265,6 +281,9 @@ class SetupApp(App[int]):
                 yield Button("仅保存", id="save")
                 yield Button("保存并构建", id="build", variant="success")
                 yield Button("构建并启动", id="deploy", variant="success")
+            with Horizontal(classes="buttons"):
+                yield Button("查看 / 复制选中项", id="copy_value")
+                yield Button("查看 / 复制结果", id="copy_results")
             if self.config.backend:
                 with Horizontal(classes="buttons"):
                     yield Button("初始化数据库并构建启动", id="init-deploy", variant="success")
@@ -374,6 +393,17 @@ class SetupApp(App[int]):
                 lambda yes: self.exit(result) if yes else None,
             )
 
+    def action_copy_value(self) -> None:
+        item = self.config.fields[self.query_one(DataTable).cursor_row]
+        if item.active():
+            self.push_screen(CopyText(item.label, item.value))
+
+    def action_copy_results(self) -> None:
+        log = self.query_one(ResultsLog)
+        text = "\n".join(log.transcript)
+        command = self.import_command if self.import_command in text else ""
+        self.push_screen(CopyText("执行结果", text, command))
+
     def action_test(self) -> None:
         if not self.exporting:
             self.test_connections()
@@ -381,6 +411,7 @@ class SetupApp(App[int]):
     @work(exclusive=True, group="connections")
     async def test_connections(self) -> None:
         self.testing = True
+        self.import_command = ""
         log = self.query_one("#checks", RichLog)
         log.clear()
         log.write("正在从当前运行环境检测连接…")
@@ -449,6 +480,7 @@ class SetupApp(App[int]):
             return
         if action == "export-node":
             self.exporting = True
+            self.import_command = ""
             log = self.query_one("#checks", RichLog)
             log.write("配置已保存，正在登记并导出节点…")
             buttons = list(self.query(Button))
@@ -466,12 +498,17 @@ class SetupApp(App[int]):
             else:
                 log.clear()
                 log.write(Text(f"导出成功，文件绝对路径：\n{path}", style="green"))
-                self.notify("节点连接文件已导出，完整路径见下方结果。", title="导出成功")
+                self.import_command = frontend_import_command(path, self.config.native)
+                log.write("在前端项目根目录执行：\n" + self.import_command)
+                log.write("按 F4 查看并复制；跨主机部署需先传输连接文件，并替换命令中的路径。")
+                self.notify("节点连接文件已导出，按 F4 复制前端导入命令。", title="导出成功")
             finally:
                 self.exporting = False
                 for button in buttons:
                     button.disabled = False
                 self.query_one("#export-node", Button).focus()
+            if self.import_command:
+                self.action_copy_results()
             return
         self.exit(ACTIONS[action])
 

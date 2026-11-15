@@ -246,14 +246,33 @@ class ModelTests(Fixtures, unittest.TestCase):
         self.assertEqual(reopened.get("auto_init_empty_db"), "0")
         self.assertEqual(reopened.get("EVERUNFOLD_API_APPLICATION_MASTER_KEY"), master)
 
-    def test_network_defaults_only_apply_to_new_lists(self):
+    def test_network_subnets_are_runtime_grants_and_manual_lists_stay_editable(self):
         with patch.dict(os.environ, EVERUNFOLD_NETWORK_CIDRS="172.25.0.0/16,"):
             model = self.complete()
         self.assertIn("127.0.0.1", model.get("peers"))
-        self.assertIn("172.25.0.0/16", model.get("peers"))
+        self.assertNotIn("172.25.0.0/16", model.get("peers"))
+        self.assertEqual(model.get("network_peers"), "1")
+        self.assertIn(
+            "172.25.0.0/16", next(f.hint for f in model.fields if f.key == "network_peers")
+        )
         self.edit(model, "peers", "192.0.2.15")
         model.save()
         self.assertEqual(self.model().get("peers"), "192.0.2.15")
+
+    def test_container_network_options_are_saved_and_validated(self):
+        model = self.complete()
+        self.edit(model, "network_alias", "everunfold-custom")
+        self.edit(model, "host_gateway", "1")
+        self.edit(model, "network_peers", "0")
+        with self.assertRaises(ValueError):
+            self.edit(model, "network_alias", "--alias=bad")
+        with self.assertRaises(ValueError):
+            self.edit(model, "host_gateway", "yes")
+        model.save()
+        reopened = self.model()
+        self.assertEqual(reopened.get("network_alias"), "everunfold-custom")
+        self.assertEqual(reopened.get("host_gateway"), "1")
+        self.assertEqual(reopened.get("network_peers"), "0")
 
     def test_custom_mounts_are_applied_after_root_save(self):
         model = self.complete()
@@ -447,6 +466,17 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
                 await pilot.click("#yes")
                 await pilot.pause()
                 self.assertTrue(app.is_running)
+                if attempt > 1:
+                    from config_copy import CopyText, frontend_import_command
+                    from textual.widgets import TextArea
+
+                    self.assertIsInstance(app.screen, CopyText)
+                    command = frontend_import_command(str(target), False)
+                    self.assertIn(command, app.screen.query_one(TextArea).text)
+                    await pilot.click("#copy-command")
+                    self.assertEqual(app.clipboard, command)
+                    await pilot.press("escape")
+                    await pilot.pause()
                 lines = "".join(line.text for line in app.query_one(RichLog).lines)
                 self.assertIn("导出失败" if attempt == 1 else "导出成功", lines)
                 if attempt > 1:
@@ -455,6 +485,35 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
             await pilot.press("3")
         self.assertEqual(app.return_value, 0)
         self.assertEqual(exports, 3)
+
+    async def test_copy_value_preserves_complete_text_and_returns_to_editor(self):
+        from config_copy import CopyText
+        from textual.widgets import TextArea
+
+        model = self.complete()
+        app = SetupApp(model)
+        async with app.run_test(size=(80, 24)) as pilot:
+            table = app.query_one(DataTable)
+            row = next(i for i, field in enumerate(model.fields) if field.key == "api")
+            table.move_cursor(row=row)
+            await pilot.press("ctrl+c")
+            await pilot.pause()
+            self.assertIsInstance(app.screen, CopyText)
+            self.assertEqual(app.screen.query_one(TextArea).text, model.get("api"))
+            await pilot.click("#copy-all")
+            self.assertEqual(app.clipboard, model.get("api"))
+            await pilot.press("escape")
+            await pilot.pause()
+            await pilot.press("2")
+            await pilot.pause()
+            self.assertIsInstance(app.screen, Editor)
+            await pilot.click("#copy-value")
+            await pilot.pause()
+            self.assertIsInstance(app.screen, CopyText)
+            await pilot.press("escape")
+            await pilot.pause()
+            self.assertIsInstance(app.screen, Editor)
+            app.exit(0)
 
     async def test_network_change_still_requires_reopening_after_save(self):
         model = self.complete()

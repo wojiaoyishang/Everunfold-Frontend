@@ -64,6 +64,22 @@ def internal_url(value: str) -> bool:
     return not (ip_address(host) and ipaddress.ip_address(host).is_unspecified)
 
 
+def private_receiver_url(value: str) -> bool:
+    if public_url(value):
+        return True
+    if not internal_url(value):
+        return False
+    host = urlsplit(value).hostname or ""
+    if ip_address(host):
+        return any(
+            ipaddress.ip_address(host) in ipaddress.ip_network(network)
+            for network in ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "fc00::/7")
+        )
+    return host == "host.docker.internal" or bool(
+        re.fullmatch(r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?", host)
+    )
+
+
 def peer_list(value: str) -> bool:
     try:
         for item in value.split(",") if value else []:

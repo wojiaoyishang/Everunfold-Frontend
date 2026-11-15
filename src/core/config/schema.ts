@@ -184,6 +184,22 @@ function peerAddresses(value: unknown): string[] {
   return value as string[];
 }
 
+function containerPeers(value: string | undefined): string[] {
+  const peers = peerAddresses(
+    value
+      ?.split(",")
+      .map((v) => v.trim())
+      .filter(Boolean),
+  );
+  if (
+    peers.some((peer) => peer.includes("/") && Number(peer.split("/")[1]) === 0)
+  )
+    throw new ConfigurationError(
+      "EVERUNFOLD_INTERNAL_PEER_CIDRS 不允许全网范围",
+    );
+  return peers;
+}
+
 /** One socket for web pages, node diagnostics and authenticated internal sync. */
 export function listenerConfiguration(
   environment: Record<string, string | undefined>,
@@ -322,7 +338,12 @@ export function parseConfiguration(
         backend.base_url === undefined
           ? publicUrl
           : baseUrl(backend.base_url, "backend.base_url"),
-      allowedPeerIps: peerAddresses(backend.allowed_peer_ips),
+      allowedPeerIps: [
+        ...new Set([
+          ...peerAddresses(backend.allowed_peer_ips),
+          ...containerPeers(environment.EVERUNFOLD_INTERNAL_PEER_CIDRS),
+        ]),
+      ],
       nextjsToFastapiTokenEnv: tokenReference(
         backend.nextjs_to_fastapi_token_env,
         "backend.nextjs_to_fastapi_token_env",

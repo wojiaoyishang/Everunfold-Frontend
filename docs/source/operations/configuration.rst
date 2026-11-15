@@ -191,3 +191,18 @@ Docker 端口映射通常要求进程绑定 ``0.0.0.0``，各端健康检查访�
   ``EVERUNFOLD_AI_PROVIDER_ORIGINS``。
 - 节点诊断使用独立的 ``[nodes_monitor]`` 配置。设置前端与后端时各自生成密码哈希、
   配置 HTTPS 或回环 Origin，并分别注入对应的会话密钥。
+
+Docker 派生的内部来源
+---------------------
+
+根配置 ``docker.EVERUNFOLD_ALLOW_NETWORK_PEERS`` 默认 ``"1"``。根启动脚本读取所选网络，
+通过 ``EVERUNFOLD_INTERNAL_PEER_CIDRS`` 向两端运行进程追加有效 CIDR，拒绝全网 ``/0``；
+手动 ``allowed_peer_ips`` 不变，关闭开关后仅采用手动列表。
+``EVERUNFOLD_HOST_GATEWAY`` 控制宿主网关映射，``EVERUNFOLD_NETWORK_ALIAS`` 控制自定义网络别名。
+这些是部署参数，不是发布 URL。直接 Compose 启动不会自动计算或接入这些网络。
+
+后端 ``[frontends.<节点>].allow_private_http`` 默认为 false，部署助手的 Docker 配对默认开启；
+开启仅允许可信私有网络 HTTP 接收地址。数据库节点绑定保存同名字段，公开控制台不能修改。
+更改已启用节点的内部绑定或该权限前须停用该节点。直接绑定命令可用
+``python -m tools.import_frontend_nodes --bind NODE RECEIVER INBOUND_ENV OUTBOUND_ENV --allow-private-http``。
+公网仍须 HTTPS；该字段不改变浏览器鉴权 Cookie 或公开地址配置。

@@ -51,14 +51,27 @@ if args[0] in {"run", "create"}:
 if args[0] == "start":
     target = args[-1]
     container = containers[target]
-    assert container["networks"] == ["bridge", "1panel-network"], container
+    expected = os.environ.get("DOCKER_TEST_NETWORKS", '["bridge", "1panel-network"]')
+    assert container["networks"] == json.loads(expected), container
     if "--attach" in args:
         container["status"] = execute(container["args"]); save()
         raise SystemExit(container["status"])
     print(target)
 if args[0] == "inspect":
     if args[-1] in containers:
-        print(containers[args[-1]]["status"])
+        container = containers[args[-1]]
+        expression = args[args.index("--format")+1]
+        if "Labels" in expression:
+            print(next(value.split("=", 1)[1] for value in container["args"]
+                       if value.startswith("org.everunfold.project=")))
+        elif ".Mounts" in expression:
+            destination = "/workspace" if '"/workspace"' in expression else "/data"
+            mounts = [container["args"][i+1] for i, arg in enumerate(container["args"])
+                      if arg == "--mount"]
+            mount = next(value for value in mounts if "target="+destination in value.split(","))
+            print(next(value.split("=", 1)[1] for value in mount.split(",")
+                       if value.startswith("source=")))
+        else: print(container["status"])
     elif os.environ.get("DOCKER_TEST_OLD"):
         expression = args[args.index("--format")+1]
         matching = os.environ["DOCKER_TEST_OLD"] == "matching"
@@ -152,6 +165,12 @@ class LauncherTests(unittest.TestCase):
 
     def run_action(self, action, failure=None, old=None):
         environment = dict(self.env)
+        layout = yaml.safe_load((self.repo / "config.yaml").read_text())["docker"]
+        networks = [
+            layout["EVERUNFOLD_NETWORK"],
+            *[v.strip() for v in layout["EVERUNFOLD_EXTRA_NETWORKS"].split(",") if v.strip()],
+        ]
+        environment["DOCKER_TEST_NETWORKS"] = json.dumps(list(dict.fromkeys(networks)))
         if failure:
             environment["DOCKER_TEST_FAIL"] = failure
         if old:
@@ -189,9 +208,78 @@ class LauncherTests(unittest.TestCase):
         self.assertIn(config, create)
         self.assertFalse((self.data / "config.toml").exists())
         self.assertLess(
-            calls.index(["network", "connect", "1panel-network", "custom-everunfold"]),
+            calls.index(
+                [
+                    "network",
+                    "connect",
+                    "--alias",
+                    "everunfold-" + ("backend" if BACKEND else "frontend"),
+                    "1panel-network",
+                    "custom-everunfold",
+                ]
+            ),
             calls.index(["start", "custom-everunfold"]),
         )
+
+    def test_host_mapping_applies_to_tools_and_runtime_but_aliases_only_to_runtime(self):
+        path = self.repo / "config.yaml"
+        document = yaml.safe_load(path.read_text())
+        document["docker"].update(
+            EVERUNFOLD_HOST_GATEWAY="1", EVERUNFOLD_NETWORK_ALIAS="custom-node"
+        )
+        path.write_text(yaml.safe_dump(document))
+        result, calls = self.run_action("start")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        creates = [call for call in calls if call[0] == "create"]
+        self.assertTrue(all("host.docker.internal:host-gateway" in call for call in creates))
+        for call in calls:
+            if call[:2] == ["network", "connect"]:
+                self.assertEqual("--alias" in call, call[-1] == "custom-everunfold")
+        runtime = next(call for call in creates if "--name" in call)
+        self.assertTrue(
+            any(
+                value.startswith("EVERUNFOLD_INTERNAL_PEER_CIDRS=172.25.0.0/16")
+                for value in runtime
+            )
+        )
+        self.log.write_text("")
+        document["docker"]["EVERUNFOLD_ALLOW_NETWORK_PEERS"] = "0"
+        path.write_text(yaml.safe_dump(document))
+        result, calls = self.run_action("start")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        runtime = next(call for call in calls if call[0] == "create" and "--name" in call)
+        self.assertIn("EVERUNFOLD_INTERNAL_PEER_CIDRS=", runtime)
+
+    def test_custom_primary_network_registers_alias_only_on_application_create(self):
+        path = self.repo / "config.yaml"
+        document = yaml.safe_load(path.read_text())
+        document["docker"].update(
+            EVERUNFOLD_NETWORK="1panel-network", EVERUNFOLD_EXTRA_NETWORKS="bridge"
+        )
+        path.write_text(yaml.safe_dump(document))
+        result, calls = self.run_action("start")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        for call in calls:
+            if call[0] == "create":
+                self.assertEqual("--network-alias" in call, "--name" in call)
+            if call[:2] == ["network", "connect"]:
+                self.assertNotIn("--alias", call)  # Built-in bridge never receives aliases.
+
+    @unittest.skipUnless(BACKEND, "backend export")
+    def test_export_prints_host_path_and_shell_safe_frontend_import_command(self):
+        from config_copy import frontend_import_command
+
+        path = self.repo / "config.yaml"
+        document = yaml.safe_load(path.read_text())
+        document["assistant"] = {"node": "web-main"}
+        path.write_text(yaml.safe_dump(document))
+        target = self.data / "connections/web-main.json"
+        target.parent.mkdir(parents=True)
+        target.write_text("{}")
+        result, _ = self.run_action("export-node")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(str(target), result.stdout)
+        self.assertIn(frontend_import_command(str(target), False), result.stdout)
 
     @unittest.skipIf(BACKEND, "frontend host connection bundle")
     def test_connection_file_is_mounted_read_only_only_in_the_configurator(self):

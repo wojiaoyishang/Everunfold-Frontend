@@ -174,7 +174,10 @@ def configure(native: bool = False) -> Configuration:
         ", ".join(backend.get("allowed_peer_ips", ctx.peers())),
         valid=lambda v: bool(v) and peer_list(v),
         group="节点",
-        hint="填写接收器实际看到的 Worker 或内部代理来源。仍须对应节点令牌。",
+        hint=(
+            "填写接收器实际看到的 Worker 或内部代理来源。"
+            "容器设置可自动追加所选网络 CIDR；仍须对应节点令牌。"
+        ),
     )
     for key, label, name in zip(
         ("inbound", "outbound"), ("前端 → 后端令牌", "后端 → 前端令牌"), names, strict=True

@@ -63,13 +63,16 @@ read_paths() {
   local result
   result="$(docker run --rm --network none "${base[@]}" "${mount_args[@]}" "$setup_image" python "$deploy_dir/bootstrap.py" paths)"
   mapfile -t locations <<< "$result"
-  if (( ${#locations[@]} != 17 )); then echo "无法确定容器设置。" >&2; exit 1; fi
+  if (( ${#locations[@]} != 20 )); then echo "无法确定容器设置。" >&2; exit 1; fi
   network=${locations[0]}; data_dir=${locations[1]}; env_parent=${locations[2]}
   output_dir=${locations[3]}; source_dir=${locations[4]}; profile_parent=${locations[5]}
   container_name=${locations[6]}; image_name=${locations[8]}; bind_host=${locations[9]}
   publish_port=${locations[10]}; listen_port=${locations[11]}; env_file=${locations[12]}
   runtime_user=${locations[13]}; artifact_dir=${locations[14]}
   listen_host=${locations[15]}; runtime_config=${locations[16]}
+  network_alias=${locations[17]}; host_gateway=${locations[18]}; allow_network_peers=${locations[19]}
+  host_args=()
+  if [[ "$host_gateway" == 1 ]]; then host_args+=(--add-host host.docker.internal:host-gateway); fi
   IFS=',' read -ra extra_networks <<< "${locations[7]}"
 }
 refresh_layout() {
@@ -96,13 +99,26 @@ ensure_networks() {
     [[ -n "$net" && "$net" != "$network" ]] || continue
     docker network inspect "$net" >/dev/null 2>&1 || { echo "额外网络不存在：$net。请先创建该网络或修改配置。" >&2; return 1; }
   done
+  cidrs="$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}},{{end}}' "$network" "${extra_networks[@]}")"
+  cidrs=${cidrs//$'\n'/}
+  if [[ "$host_gateway" == 1 ]]; then
+    local gateway_ips
+    gateway_ips="$(docker network inspect --format '{{range .IPAM.Config}}{{.Gateway}},{{end}}' bridge)"
+    cidrs+=${gateway_ips//$'\n'/}
+  fi
+  internal_peers=""
+  if [[ "$allow_network_peers" == 1 ]]; then internal_peers=$cidrs; fi
 }
 connect_extras() {
-  local target=$1 net
+  local target=$1 runtime=${2:-no} net
   declare -A connected=(["$network"]=1)
   for net in "${extra_networks[@]}"; do
     [[ -n "$net" && ! ${connected["$net"]+yes} ]] || continue
-    docker network connect "$net" "$target" || return $?
+    local aliases=()
+    if [[ "$runtime" == yes && "$net" != bridge && -n "$network_alias" ]]; then
+      aliases+=(--alias "$network_alias")
+    fi
+    docker network connect "${aliases[@]}" "$net" "$target" || return $?
     connected["$net"]=1
   done
 }
@@ -112,7 +128,7 @@ run_temporary() (
   local interactive=$1
   shift
   local id result=0 status
-  id="$(docker create --network "$network" "$@")" || exit $?
+  id="$(docker create --network "$network" "${host_args[@]}" "$@")" || exit $?
   trap 'docker rm -f "$id" >/dev/null 2>&1 || true' EXIT
   connect_extras "$id" || exit $?
   if [[ "$interactive" == yes ]]; then
@@ -132,8 +148,6 @@ refresh_layout
 ensure_networks
 if [[ "$action" == configure ]]; then
   [[ -t 0 && -t 1 ]] || { echo "配置界面需要交互终端。" >&2; exit 1; }
-  cidrs="$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}},{{end}}' "$network" "${extra_networks[@]}")"
-  cidrs=${cidrs//$'\n'/}
   ui_args=()
   if [[ -n "$connection_file" ]]; then
     add_mount "$connection_file" ro
@@ -206,6 +220,7 @@ case "$action" in
 esac
 runtime_args=(--init --user "$runtime_user" --label "org.everunfold.project=$project_root"
               --label "org.everunfold.component=$role"
+              -e "EVERUNFOLD_INTERNAL_PEER_CIDRS=$internal_peers"
               --mount "type=bind,source=$data_dir,target=/data")
 if [[ "$role" == backend ]]; then
   workspace_dir="$source_dir"
@@ -254,6 +269,7 @@ case "$action" in
     exported_path=$(run_tool connection-path)
     [[ -f "$exported_path" ]] || { echo "导出的节点连接文件不存在。" >&2; exit 1; }
     printf '已导出节点连接文件：%s\n' "$exported_path"
+    run_tool import-command
     if [[ -n "${EVERUNFOLD_SETUP_RESULT_FILE:-}" ]]; then
       printf '%s\n' "$exported_path" >"$EVERUNFOLD_SETUP_RESULT_FILE"
     fi ;;
@@ -272,9 +288,14 @@ case "$action" in
     printf '创建容器 %s：%s → /workspace，%s → /data，%s:%s → %s\n' "$container_name" "$workspace_dir" "$data_dir" "$bind_host" "$publish_port" "$listen_port"
     remove_previous
     ports=(-p "$bind_host:$publish_port:$listen_port")
+    aliases=()
+    if [[ "$network" != bridge && -n "$network_alias" ]]; then
+      aliases+=(--network-alias "$network_alias")
+    fi
+    if [[ -n "$internal_peers" ]]; then printf '自动允许的内部来源 IP/CIDR：%s\n' "$internal_peers"; fi
     docker create --name "$container_name" --network "$network" --restart unless-stopped \
-      --stop-timeout 130 "${ports[@]}" "${runtime_args[@]}" "$image_name" >/dev/null
-    connect_extras "$container_name"
+      --stop-timeout 130 "${host_args[@]}" "${aliases[@]}" "${ports[@]}" "${runtime_args[@]}" "$image_name" >/dev/null
+    connect_extras "$container_name" yes
     docker start "$container_name"
     if [[ "$role" == frontend ]]; then
       echo "首次同步公开快照前 /health/ready 可能为 503，请完成节点启用及同步。"

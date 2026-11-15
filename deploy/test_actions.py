@@ -2,6 +2,8 @@
 
 import asyncio
 import os
+import shlex
+import socket
 import subprocess
 import tempfile
 import unittest
@@ -9,6 +11,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from config_actions import export_node
+from config_copy import frontend_import_command
 from config_probes import frontend_checks
 from config_validation import internal_url
 
@@ -73,12 +76,15 @@ class ActionTests(unittest.IsolatedAsyncioTestCase):
         class Handler(BaseHTTPRequestHandler):
             def do_GET(self):
                 paths.append(self.path)
-                self.send_response(200)
+                self.send_response(302 if redirect else 200)
+                if redirect:
+                    self.send_header("Location", "/must-not-follow")
                 self.end_headers()
 
             def log_message(self, *args):
                 pass
 
+        redirect = False
         server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
         thread = Thread(target=server.serve_forever)
         thread.start()
@@ -87,9 +93,44 @@ class ActionTests(unittest.IsolatedAsyncioTestCase):
             results = await frontend_checks("https://unreachable.invalid", internal)
             self.assertEqual([(r.name, r.state) for r in results], [("后端内部入口", "ok")])
             self.assertEqual(paths, ["/health/ready"])
+            self.assertIn("GET " + internal + "/health/ready", results[0].detail)
             self.assertTrue(internal_url("http://everunfold-backend:8001"))
             self.assertFalse(internal_url("http://user:password@backend:8001"))
+            redirect = True
+            result = (await frontend_checks("https://unreachable.invalid", internal))[0]
+            self.assertEqual(result.state, "error")
+            self.assertIn("302", result.detail)
+            self.assertEqual(paths, ["/health/ready", "/health/ready"])
         finally:
             await asyncio.to_thread(server.shutdown)
             server.server_close()
             thread.join()
+
+    async def test_probe_failure_shows_actual_target_and_sanitized_dns_reason(self):
+        import urllib.error
+
+        with patch(
+            "urllib.request.OpenerDirector.open",
+            side_effect=urllib.error.URLError(socket.gaierror("private detail")),
+        ):
+            result = (
+                await frontend_checks("https://public.invalid", "http://everunfold-backend:8001")
+            )[0]
+        self.assertEqual(result.state, "error")
+        self.assertIn("GET http://everunfold-backend:8001/health/ready", result.detail)
+        self.assertIn("主机名无法解析", result.detail)
+        self.assertNotIn("private detail", result.detail)
+        self.assertNotIn("public.invalid", result.detail)
+
+    def test_import_commands_round_trip_paths_without_shell_interpolation(self):
+        path = "/opt/my data/quotes' $(touch should-not-exist) `echo no`/web.json"
+        for native in (True, False):
+            self.assertEqual(
+                shlex.split(frontend_import_command(path, native)),
+                [
+                    "./setup.sh",
+                    "--native" if native else "--docker",
+                    "--connection-file",
+                    path,
+                ],
+            )

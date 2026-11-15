@@ -121,17 +121,37 @@ async def backend_checks(database: str, redis: str, broker: str, root: Path) -> 
 
 
 async def frontend_checks(api: str, internal: str) -> list[Check]:
+    class NoRedirect(urllib.request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):
+            return None
+
     def check(name: str, url: str) -> Check:
         if not internal_url(url):
             return Check(name, "error", "请填写有效的后端内部 HTTP/HTTPS 地址")
+        target = url.rstrip("/") + "/health/ready"
+
+        def result(state: str, detail: str) -> Check:
+            return Check(name, state, f"GET {target}\n{detail}")
+
         try:
-            with urllib.request.urlopen(url.rstrip("/") + "/health/ready", timeout=5) as response:
+            with urllib.request.build_opener(NoRedirect).open(target, timeout=5) as response:
                 if response.status == 200:
-                    return Check(name, "ok", "后端就绪接口通过")
+                    return result("ok", "HTTP 200 · 后端就绪接口通过")
         except urllib.error.HTTPError as error:
-            return Check(name, "error", f"后端返回 HTTP {error.code}")
-        except Exception:
-            return Check(name, "error", "连接失败，请检查网络、证书和后端状态")
-        return Check(name, "error", "后端尚未就绪")
+            error.close()
+            if 300 <= error.code < 400:
+                return result(
+                    "error", f"HTTP {error.code} 重定向；请填写内部入口的最终地址，检测不跟随跳转"
+                )
+            return result("error", f"后端返回 HTTP {error.code}，请查看后端日志及数据库/Redis 状态")
+        except Exception as error:
+            reason = error.reason if isinstance(error, urllib.error.URLError) else error
+            hint = failure(reason) if isinstance(reason, Exception) else "网络连接失败"
+            return result(
+                "error",
+                hint + "；容器别名须在同一自定义网络，使用容器内部端口；"
+                "host.docker.internal 使用宿主映射端口",
+            )
+        return result("error", "后端尚未就绪")
 
     return [await asyncio.to_thread(check, "后端内部入口", internal or api)]

@@ -9,6 +9,23 @@ const base = {
   backend: { allowed_peer_ips: ["127.0.0.1", "::1", "10.0.0.0/24"] },
   cache: { directory: "./var/public-snapshots" },
 };
+test("container subnets supplement manual peer grants only for the current runtime", () => {
+  const environment = {
+    EVERUNFOLD_INTERNAL_PEER_CIDRS: "172.25.0.0/16,fd00::/64,172.25.0.0/16,",
+  };
+  assert.deepEqual(
+    parseConfiguration(base, environment).backend.allowedPeerIps,
+    ["127.0.0.1", "::1", "10.0.0.0/24", "172.25.0.0/16", "fd00::/64"],
+  );
+  assert.deepEqual(
+    parseConfiguration(base).backend.allowedPeerIps,
+    base.backend.allowed_peer_ips,
+  );
+  for (const invalid of ["0.0.0.0/0", "::/0", "not-an-ip"])
+    assert.throws(() =>
+      parseConfiguration(base, { EVERUNFOLD_INTERNAL_PEER_CIDRS: invalid }),
+    );
+});
 test("one frontend listener ignores legacy receiver ports and validates its environment", () => {
   const input = {
     ...base,

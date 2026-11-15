@@ -102,14 +102,17 @@ def main() -> None:
             execute([python, "-m", "alembic", "-c", "migrations/alembic.ini", "upgrade", "head"])
         else:
             execute([python, "deploy/node_bundle.py"])
+            from config_copy import frontend_import_command
+            from config_validation import identifier
+
+            node = ctx.meta.get("node", "")
+            path = (ctx.data / "connections" / (node + ".json")).resolve()
+            if not identifier(node) or not path.is_file():
+                raise ValueError("导出的节点连接文件不存在。")
+            print("在前端项目根目录执行（跨主机请先传输文件并替换路径）：")
+            print(frontend_import_command(str(path), True))
             result_file = os.environ.get("EVERUNFOLD_SETUP_RESULT_FILE")
             if result_file:
-                from config_validation import identifier
-
-                node = ctx.meta.get("node", "")
-                path = (ctx.data / "connections" / (node + ".json")).resolve()
-                if not identifier(node) or not path.is_file():
-                    raise ValueError("导出的节点连接文件不存在。")
                 Path(result_file).write_text(str(path))
             return
         execute(
