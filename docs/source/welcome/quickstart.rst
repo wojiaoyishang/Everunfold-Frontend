@@ -19,7 +19,8 @@
 确认当前账号能执行 ``docker info`` 与 ``docker compose version``。
 宿主无需安装 Python、Node.js 或项目依赖。
 数据库和 Redis 不包含在应用镜像中：先准备专用 PostgreSQL 数据库及可用的 Redis。
-若数据库也是容器，将其接入部署网络 ``everunfold``，连接地址使用容器名。
+若数据库也是容器，在助手的主网络或额外网络填写服务所在的自定义网络，
+例如 ``1panel-network``，连接地址使用容器名；默认 ``bridge`` 不提供容器名解析。
 
 后端配置、初始化和启动
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -30,7 +31,8 @@
    cd Everunfold-Backend
    ./setup.sh --docker
 
-首次运行自动构建一次性配置工具镜像。在界面填写后端发布 URL、数据库和 Redis。
+首次运行自动构建一次性配置工具镜像。先在总览填写代码、数据挂载点、容器名称、网络和端口，
+然后填写后端发布 URL、数据库和 Redis。配置保存到项目根目录 ``config.yaml``。
 PostgreSQL 可通过分项表单填写。点击“检测连接”查看连接、认证、查询和迁移结果。
 新库尚未初始化会显示提示，不会因检测而修改数据库。
 
@@ -72,11 +74,13 @@ API 默认绑定容器 ``0.0.0.0:8001``，宿主仅映射 ``127.0.0.1:8001``。
 
    ./setup.sh --docker build
    ./setup.sh --docker start
-   docker compose -f docker/compose.yaml logs --tail=100
+   docker logs --tail=100 everunfold-backend   # 改为选定的容器名称
 
 ``build`` 显式构建；``start`` 和容器重启不会重新编译。
 后端挂载源码到只读 ``/workspace``、数据到 ``/data``；
-前端部署时把已完成的产物挂到 ``/workspace``、配置和持久数据挂到 ``/data``。
+后端从 ``/workspace/config.yaml`` 读配置，不需要 ``/data/config.toml``。
+前端部署时把已完成的产物挂到 ``/workspace``、持久数据挂到 ``/data``；
+助手将根 YAML 派生的 ``config.runtime.toml`` 只读挂到 ``/workspace/config.runtime.toml``。
 完整的 HTTPS、备份、升级及插件步骤见
 `后端部署教程 <https://github.com/wojiaoyishang/Everunfold-Backend/blob/main/deploy/README.md>`__ 和
 `前端部署教程 <https://github.com/wojiaoyishang/Everunfold-Frontend/blob/main/deploy/README.md>`__。

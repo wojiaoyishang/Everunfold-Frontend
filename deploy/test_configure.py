@@ -44,6 +44,13 @@ class Fixtures:
     def model(self, native=False):
         return configure.configure(native=native)
 
+    def materialize(self, native=False):
+        from config_context import Context
+
+        ctx = Context(self.docker, "backend" if BACKEND else "frontend", native=native)
+        ctx.materialize()
+        return ctx
+
     def edit(self, model, key, value):
         model.edit(next(item for item in model.fields if item.key == key), value)
 
@@ -74,8 +81,9 @@ class ModelTests(Fixtures, unittest.TestCase):
         model = self.complete()
         before = model.get("inbound")
         model.save()
+        self.materialize()
         (self.root / "config.yaml").unlink()  # Exercise legacy migration, before YAML exists.
-        config = self.docker / "data/config.toml"
+        config = self.root / "config.runtime.toml"
         env = self.docker / "runtime.env"
         config.write_text(config.read_text() + "\n[custom]\nkeep = '中文'\n")
         env.write_text(env.read_text() + "EXTRA='literal-$$-value' # keep\n")
@@ -85,12 +93,13 @@ class ModelTests(Fixtures, unittest.TestCase):
         self.edit(second, "api", "https://api.changed.test")
         self.edit(second, "host", "127.0.0.2")
         second.save()
+        self.materialize()
         import tomllib
 
         self.assertEqual(tomllib.loads(config.read_text())["custom"]["keep"], "中文")
-        self.assertIn("EXTRA='literal-$$-value' # keep", env.read_text())
+        self.assertEqual(env_values(env.read_text())["EXTRA"], "literal-$$-value")
         self.assertEqual(
-            next(config.parent.glob("config.toml.*.bak")).read_bytes(), original_config
+            next(config.parent.glob("config.runtime.toml.*.bak")).read_bytes(), original_config
         )
         self.assertEqual(next(env.parent.glob("runtime.env.*.bak")).read_bytes(), original_env)
         self.assertEqual(stat.S_IMODE(env.stat().st_mode), 0o600)
@@ -99,9 +108,12 @@ class ModelTests(Fixtures, unittest.TestCase):
         model = self.complete(native=True)
         self.assertFalse((self.root / "var").exists())
         model.save()
+        self.assertFalse((self.root / "var").exists())
+        self.assertTrue((self.root / "config.yaml").is_file())
+        self.materialize(native=True)
         instance = self.root / "var/instance"
         self.assertTrue((instance / "runtime.env").is_file())
-        self.assertIn(str(instance), (instance / "config.toml").read_text())
+        self.assertIn(str(instance), (self.root / "config.runtime.toml").read_text())
         self.assertFalse((self.docker / ".env").exists())
 
     def test_secrets_or_import_are_stable_and_scoped(self):
@@ -135,6 +147,7 @@ class ModelTests(Fixtures, unittest.TestCase):
             self.edit(model, "connection_file", str(filename))
             self.assertEqual(model.get("node"), "second-node")
             model.save()
+            self.materialize()
             self.assertEqual(
                 env_values((self.docker / "runtime.env").read_text())["NODE_IN"], "i" * 43
             )
@@ -193,6 +206,7 @@ class ModelTests(Fixtures, unittest.TestCase):
         )
         model = self.complete()
         model.save()
+        self.materialize()
         result = tomllib.loads((data / "profiles.toml").read_text())
         self.assertEqual(result["profiles"]["second"], inactive)
         self.assertEqual(result["profiles"]["first"]["BACKEND_BASE_URL"], model.get("api"))
@@ -207,6 +221,38 @@ class ModelTests(Fixtures, unittest.TestCase):
         self.edit(model, "peers", "192.0.2.15")
         model.save()
         self.assertEqual(self.model().get("peers"), "192.0.2.15")
+
+    def test_custom_mounts_are_applied_after_root_save(self):
+        model = self.complete()
+        data = self.root / "external data"
+        source = self.root / "other source"
+        source.mkdir()
+        for key, value in {
+            "data_dir": str(data),
+            "source_dir": str(source),
+            "container_name": "my-everunfold",
+            "network": "bridge",
+            "extra_networks": "1panel-network",
+            "publish_port": "3434",
+        }.items():
+            self.edit(model, key, value)
+        self.assertFalse(model.errors())
+        model.save()
+        self.assertFalse(data.exists())
+        context = self.materialize()
+        self.assertEqual(context.data, data)
+        self.assertTrue(data.is_dir())
+        self.assertFalse((data / "config.toml").exists())
+        self.assertEqual(
+            (source / "config.yaml").read_bytes(), (self.root / "config.yaml").read_bytes()
+        )
+        self.assertEqual(context.compose["EVERUNFOLD_EXTRA_NETWORKS"], "1panel-network")
+        self.assertEqual(self.model().get("data_dir"), str(data))
+        raw = context.env_path.with_name(context.env_path.name + ".docker").read_text()
+        for name, value in context.env.items():
+            self.assertIn(f"{name}={value}\n", raw)
+        self.edit(model, "source_dir", str(data))
+        self.assertIn("代码目录和数据目录必须不同。", model.errors())
 
     def test_unmodified_env_expressions_and_quoted_values(self):
         source = (
@@ -256,6 +302,7 @@ class ModelTests(Fixtures, unittest.TestCase):
         artifact = self.docker / "output/new/.next"
         artifact.mkdir(parents=True)
         (artifact / "BUILD_ID").write_text("new-build")
+        self.materialize()
         before = (self.docker / ".env").read_bytes()
         with patch.object(bootstrap, "DOCKER", self.docker):
             with (
@@ -266,6 +313,7 @@ class ModelTests(Fixtures, unittest.TestCase):
             self.assertEqual((target / "manifest.json").read_text(), "old")
             self.assertEqual((self.docker / ".env").read_bytes(), before)
             bootstrap.activate("new")
+            self.materialize()
         self.assertEqual((target / "manifest.json").read_text(), "new")
         self.assertIn("output/new", (self.docker / ".env").read_text())
 
@@ -307,8 +355,9 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
             await pilot.click("#build")
             await pilot.pause()
         self.assertEqual(app.return_value, 20)
-        env = self.docker / "runtime.env"
+        env = self.root / "config.yaml"
         self.assertTrue(env.exists())
+        self.assertFalse((self.docker / "runtime.env").exists())
         app = SetupApp(self.model())
         before = env.read_bytes()
         async with app.run_test() as pilot:

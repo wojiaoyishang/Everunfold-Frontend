@@ -16,8 +16,11 @@ services:
     init: true
     restart: unless-stopped
     stop_grace_period: ${FRONTEND_STOP_GRACE_PERIOD:-35s}
+    container_name: ${FRONTEND_CONTAINER_NAME:-everunfold-frontend}
+    network_mode: ${EVERUNFOLD_NETWORK:-bridge}
     env_file: ${FRONTEND_ENV_FILE:-./runtime.env}
     environment:
+      CONFIG_FILE: /workspace/config.runtime.toml
       FRONTEND_PORT: "${FRONTEND_WEB_PORT:-3000}"
       FRONTEND_RECEIVER_PORT: "${FRONTEND_RECEIVER_PORT:-3001}"
     ports:
@@ -34,9 +37,12 @@ services:
         target: /data
         bind:
           create_host_path: false
-    networks:
-      everunfold:
-        aliases: [everunfold-frontend]
+      - type: bind
+        source: ../config.runtime.toml
+        target: /workspace/config.runtime.toml
+        read_only: true
+        bind:
+          create_host_path: false
 
   builder:
     <<: *frontend-image
@@ -64,8 +70,3 @@ services:
         target: /plugins
         bind:
           create_host_path: false
-
-networks:
-  everunfold:
-    external: true
-    name: ${EVERUNFOLD_NETWORK:-everunfold}

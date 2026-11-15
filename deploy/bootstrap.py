@@ -18,7 +18,7 @@ def paths() -> None:
     context = Context(DOCKER, ROLE)
     values = context.compose
     prefix = ROLE.upper()
-    network = values.get("EVERUNFOLD_NETWORK", "everunfold")
+    network = values.get("EVERUNFOLD_NETWORK", "bridge")
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]{0,127}", network):
         raise ValueError("EVERUNFOLD_NETWORK 名称无效。")
     data = (DOCKER / values.get(prefix + "_DATA_DIR", "data")).resolve()
@@ -31,8 +31,62 @@ def paths() -> None:
         context = Context(DOCKER, ROLE)
         if context.config.get("backend_node_file"):
             profile = context.connection_profile().parent
-    resolved = (network, data, env.parent, output, source, profile)
-    if any(any(char in str(value) for char in ("\n", "\r", ",")) for value in resolved):
+    from container_fields import network_name
+
+    extra = ",".join(
+        n.strip() for n in values.get("EVERUNFOLD_EXTRA_NETWORKS", "").split(",") if n.strip()
+    )
+    if not network_name(network) or any(
+        not network_name(n.strip()) for n in extra.split(",") if n.strip()
+    ):
+        raise ValueError("容器网络名称无效。")
+    container = values.get(prefix + "_CONTAINER_NAME", "everunfold-" + ROLE)
+    if not network_name(container):
+        raise ValueError("容器名称无效。")
+    image = values.get(
+        prefix + "_IMAGE", "everunfold-" + ROLE + (":python312" if ROLE == "backend" else ":node22")
+    )
+    port = values.get(
+        "BACKEND_API_PORT" if ROLE == "backend" else "FRONTEND_WEB_PORT",
+        "8001" if ROLE == "backend" else "3000",
+    )
+    port = context.env.get("API_PORT" if ROLE == "backend" else "FRONTEND_PORT", port)
+    published = values.get(prefix + "_PUBLISH_PORT", port)
+    binding = values.get(prefix + "_BIND_ADDRESS", "127.0.0.1")
+    uid = values.get("EVERUNFOLD_UID", str(os.getuid()))
+    gid = values.get("EVERUNFOLD_GID", str(os.getgid()))
+    artifact = (DOCKER / values.get("FRONTEND_ARTIFACT_DIR", "output/pre-1")).resolve()
+    receiver = (
+        values.get("FRONTEND_RECEIVER_PUBLISH_PORT", "3001")
+        + ":"
+        + context.env.get("FRONTEND_RECEIVER_PORT", values.get("FRONTEND_RECEIVER_PORT", "3001"))
+    )
+    host = context.env.get("API_HOST" if ROLE == "backend" else "FRONTEND_HOST", "0.0.0.0")
+    resolved = (
+        network,
+        data,
+        env.parent,
+        output,
+        source,
+        profile,
+        container,
+        extra,
+        image,
+        binding,
+        published,
+        port,
+        env,
+        uid + ":" + gid,
+        artifact,
+        receiver,
+        host,
+        context.config_path,
+    )
+    if any(
+        any(char in str(value) for char in ("\n", "\r", ","))
+        for i, value in enumerate(resolved)
+        if i != 7
+    ):
         raise ValueError("挂载路径不能包含逗号或换行。")
     for value in resolved:
         print(value)
@@ -91,7 +145,10 @@ def main() -> None:
         if args.action == "paths":
             paths()
         elif args.action == "render":
-            Context(DOCKER, ROLE).materialize()
+            context = Context(DOCKER, ROLE)
+            if not context.document:
+                raise ValueError("请先在项目根目录运行 ./setup.sh --docker 并保存 config.yaml。")
+            context.materialize()
         else:
             activate(args.release or "")
     except (OSError, ValueError) as error:

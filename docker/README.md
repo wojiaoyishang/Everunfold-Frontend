@@ -6,7 +6,7 @@
 
 1. 安装 Docker Engine、Compose v2、Bash 4+ 和 Git，确认 `docker info` 可用。
 2. 克隆本仓库，在仓库根目录执行下列命令。后端需要事先准备 PostgreSQL 和 Redis；前端需要后端导出的节点连接 JSON。
-3. 配置助手自动生成可编辑的密钥，提供连接检测，并保存根目录 `config.yaml`。
+3. 在配置总览填写代码目录、数据目录、容器名称、主网络、额外网络、端口；前端还可选产物输出目录。助手提供连接检测，保存根目录 `config.yaml`。
 
 ```bash
 ./setup.sh --docker
@@ -17,6 +17,8 @@
 ```
 
 工具镜像自动构建，退出即删除工具容器；应用镜像的构建日志实时显示。`start` 和容器重启不会重新编译前端。镜像、挂载、持久化、HTTPS 和首次同步的完整说明见[Docker 从零构建与部署](../deploy/README.md#一docker-从零构建与部署)。
+
+根 `config.yaml` 生成根目录 `config.runtime.toml`，由助手只读挂入运行产物；不要求数据目录保存配置。代码供编译，成功产物挂 `/workspace`，数据挂 `/data`。选择主网络 `bridge` 和额外网络 `1panel-network` 时，脚本先接入全部网络再启动。更新 Dockerfile 后先构建一次镜像。
 
 此目录保留 Dockerfile、Compose、入口脚本和一次性工具镜像的构建文件。数据默认位于 `docker/data`，配置来自根目录 YAML。不要手动维护自动生成的 `.env` 和运行配置。
 

@@ -70,13 +70,17 @@ class Context:
             if native
             else (docker / self.compose.get(prefix + "_DATA_DIR", "data")).resolve()
         )
-        self.config_path = self.data / "config.toml"
+        self.config_path = docker.parent / "config.runtime.toml"
+        self.legacy_config_path = self.data / "config.toml"
         self.env_path = (
             self.data / "runtime.env"
             if native
             else (docker / self.compose.get(prefix + "_ENV_FILE", "runtime.env")).resolve()
         )
         legacy = self.files.read(self.config_path)
+        self.imported_from_data = not legacy and not self.document
+        if not legacy and not self.document:
+            legacy = self.files.read(self.legacy_config_path)
         try:
             self.config = copy.deepcopy(
                 self.document["application"] if self.document else tomllib.loads(legacy)
@@ -133,20 +137,60 @@ class Context:
         config = copy.deepcopy(self.config)
         for section, key, directory in self.directories():
             config.setdefault(section, {}).setdefault(key, self.runtime_path(directory))
+        # Process ports have one source: root environment. Compose names are derived.
+        mapping = dict(self.compose)
+        port_names = (
+            {"API_PORT": "BACKEND_API_PORT"}
+            if self.role == "backend"
+            else {
+                "FRONTEND_PORT": "FRONTEND_WEB_PORT",
+                "FRONTEND_RECEIVER_PORT": "FRONTEND_RECEIVER_PORT",
+            }
+        )
+        for variable, compose_name in port_names.items():
+            if variable in self.env:
+                mapping[compose_name] = self.env[variable]
         outputs = {
             self.config_path: toml_text(config),
             self.env_path: self.env_source,
-            self.compose_path: self.compose_source,
+            self.compose_path: update_env(self.compose_source, mapping),
             self.meta_path: json.dumps(self.meta, indent=2) + "\n",
         }
         if self.config.get("backend_node_file"):
             profile = self.connection_profile()
             outputs[profile] = toml_text(self.read_profiles(profile))
+            config["backend_node_file"] = (
+                str(profile) if self.native else "/data/" + str(profile.relative_to(self.data))
+            )
+            outputs[self.config_path] = toml_text(config)
+        raw_env = self.env_path.with_name(self.env_path.name + ".docker")
+        self.files.read(raw_env)
+        if any("\n" in v or "\r" in v for v in self.env.values()):
+            raise ValueError("环境变量必须是单行值。")
+        outputs[raw_env] = "".join(f"{key}={value}\n" for key, value in self.env.items())
+        if not self.native:
+            source = (
+                self.docker / self.compose.get(self.role.upper() + "_SOURCE_DIR", "..")
+            ).resolve()
+            if source != self.docker.parent:
+                source_config = source / "config.yaml"
+                self.files.read(source_config)
+                outputs[source_config] = self.files.read(self.root_path)
         self.files.write(outputs)
+        for _, _, directory in self.directories():
+            (self.data / directory).mkdir(parents=True, exist_ok=True)
+        if self.role == "frontend":
+            (self.data / "plugins").mkdir(parents=True, exist_ok=True)
 
     def write(self, outputs: dict[Path, str]) -> None:
         document = copy.deepcopy(self.document)
         config = tomllib.loads(outputs.get(self.config_path, toml_text(self.config)))
+        if self.role == "backend" and self.imported_from_data and config.get("frontend_nodes_file"):
+            nodes_file = Path(config["frontend_nodes_file"])
+            if not nodes_file.is_absolute():
+                config["frontend_nodes_file"] = (
+                    str(self.data / nodes_file) if self.native else "/data/" + str(nodes_file)
+                )
         # Omitted directories follow the selected deployment's /data or native instance.
         for section, key, directory in self.directories():
             if config.get(section, {}).get(key) == self.runtime_path(directory):
@@ -159,6 +203,14 @@ class Context:
             docker=env_values(outputs.get(self.compose_path, self.compose_source)),
             assistant=json.loads(outputs.get(self.meta_path, json.dumps(self.meta))),
         )
+        for derived in ("BACKEND_API_PORT", "FRONTEND_WEB_PORT", "FRONTEND_RECEIVER_PORT"):
+            variable = {
+                "BACKEND_API_PORT": "API_PORT",
+                "FRONTEND_WEB_PORT": "FRONTEND_PORT",
+                "FRONTEND_RECEIVER_PORT": "FRONTEND_RECEIVER_PORT",
+            }[derived]
+            if variable in document["environment"]:
+                document["docker"].pop(derived, None)
         if config.get("backend_node_file"):
             profile = self.connection_profile()
             document["connection_profiles"] = (
@@ -168,13 +220,13 @@ class Context:
             )
         header = (
             "# Everunfold 部署配置：请在项目根目录运行 ./setup.sh 编辑。\n"
-            "# Docker 与原生部署共用；运行 TOML/env 文件由助手生成。\n"
+            "# Docker 与原生部署共用；派生运行文件由助手生成。\n"
             "# 包含私有凭据，请备份并保持权限 0600，不要提交到 Git。\n"
         )
         outputs[self.root_path] = header + yaml.safe_dump(
             document, allow_unicode=True, sort_keys=False, default_flow_style=False
         )
-        self.files.write(outputs)
+        self.files.write({self.root_path: outputs[self.root_path]})
 
     def peers(self) -> list[str]:
         addresses = ["127.0.0.1", "::1"]

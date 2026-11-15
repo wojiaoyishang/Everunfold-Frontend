@@ -9,10 +9,13 @@
   根 YAML 含私有凭据，权限为 0600，不提交 Git。
 - 旧向导的 Docker / 原生实例文件可在首次保存时导入；保存后根 YAML 优先。
   ``config.example.toml`` 保留为底层应用字段参考，普通部署不需要复制和手工填写。
-- 后端从显式参数、``CONFIG_FILE`` 或仓库根的 ``config.toml`` 加载，按此顺序取一个文件，
-  再应用受支持的环境变量覆盖。媒体相对目录以该配置文件所在目录为准。
-- Next.js、Node 接收器和上报服务使用同一前端加载器。``CONFIG_FILE`` 缺省为项目根的
-  ``config.toml``，前端设置与快照的相对目录采用运行项目根。
+- 后端依次使用显式参数、``CONFIG_FILE``、根 ``config.yaml``（存在时），最后回退根 ``config.toml``。
+  YAML 中 ``environment`` 的值在启动器中载入，显式容器环境变量可覆盖它们。
+  Docker 的媒体默认使用 ``/data/uploads``；原生使用实例目录的 ``uploads``。
+  YAML 中媒体相对路径以数据目录为基准，旧 TOML 相对路径仍以配置目录为基准。
+- Next.js、Node 接收器和上报服务使用同一前端加载器。助手从根 YAML 生成根
+  ``config.runtime.toml``，Docker 将其只读挂到 ``/workspace/config.runtime.toml``；
+  启动器指定 ``CONFIG_FILE``。底层加载器保留旧 ``config.toml`` 的兼容入口。
 - 普通服务从进程环境读取变量。开发 Supervisor 的脚本显式载入后端的
   ``.env.container.local``。检查容器中每个进程的工作目录和环境来源。
 
@@ -38,11 +41,26 @@ Redis / Broker PING；前端检测后端公开、内部就绪入口。检测不�
 使用助手可免于手写这些字段。手工修改 YAML 后，下次启动或构建自动重新生成运行文件；
 不要修改派生的 TOML、``.env``、``runtime.env``。
 
-Docker 默认生成到 ``docker/data`` 与 ``docker/runtime.env``，原生生成到
-``var/instance``。保存前为变更文件生成 0600 备份，并拒绝覆盖并发修改；写入失败回滚。
+根 ``config.runtime.toml`` 是派生配置；后端直接使用根 YAML。环境文件分别生成到
+``docker/runtime.env`` 或 ``var/instance/runtime.env``。Docker CLI 使用另生成的
+``runtime.env.docker``，其格式不含 Compose 的包裹引号和变量转义，不要混用。
+保存前为变更文件生成 0600 备份，并拒绝覆盖并发修改；写入失败回滚。
 默认数据目录随部署方式变化，已有数据不会自动迁移。
 新的内部来源列表默认包含 ``127.0.0.1, ::1``；Docker 新配置还包含所选网络的子网，
 已有列表保持原值，节点令牌校验继续生效。
+
+容器挂载与网络
+~~~~~~~~~~~~~~
+
+配置总览包含代码目录、数据目录、容器名称、主网络、额外网络、端口、镜像名称；
+前端另外填写编译产物输出目录。数据目录不再要求包含 ``config.toml``。
+主网络默认 ``bridge``，额外网络逗号分隔且须已经存在，例如 ``1panel-network``。
+脚本先创建容器、逐个接入额外网络、再启动。配置工具与启动前检查也使用这些网络。
+修改网络后，界面连接检测需先保存再重新打开；启动前检查会使用新配置。
+默认 bridge 不支持容器名解析，数据库容器名应在双方共享的自定义网络中使用。
+
+修改数据目录不会搬运媒体或快照；若代码目录不等于当前项目，助手会同步根 YAML 到所选代码目录。
+旧容器只有归属于当前部署或源码、数据挂载均匹配时才会被替换；同名无关容器会被拒绝。
 
 地址的三种职责
 ~~~~~~~~~~~~~~
@@ -52,9 +70,10 @@ Docker 默认生成到 ``docker/data`` 与 ``docker/runtime.env``，原生生成
 发布 URL 用于生成资源链接；进程绑定地址决定监听哪张网卡和端口；宿主映射决定
 Docker 如何将外部连接转给容器。发布 URL 不从监听参数或请求 Host 推导。
 
-后端 Docker 的 ``runtime.env`` 设置 ``API_HOST``，Compose 的 ``.env`` 设置
-``BACKEND_API_PORT``、``BACKEND_BIND_ADDRESS``、``BACKEND_PUBLISH_PORT``。
-这些运行文件由根 YAML 自动生成。其中 ``BACKEND_API_PORT`` 被注入为容器的 ``API_PORT``，其余两项仅控制宿主映射。
+后端根 YAML 的 ``environment.API_HOST`` / ``API_PORT`` 设置进程绑定；
+``docker.BACKEND_BIND_ADDRESS``、``BACKEND_PUBLISH_PORT`` 设置宿主映射。
+Compose 使用的 ``BACKEND_API_PORT`` 自动从进程端口生成，无需重复修改；
+前端 Web 和接收器端口也按此规则生成，宿主地址和宿主端口独立。
 前端对应为 ``FRONTEND_HOST``、``FRONTEND_WEB_PORT``、``FRONTEND_BIND_ADDRESS``、
 ``FRONTEND_PUBLISH_PORT``，容器端口变量为 ``FRONTEND_PORT``。
 接收器另用 ``FRONTEND_RECEIVER_PORT`` 和 ``FRONTEND_RECEIVER_PUBLISH_PORT``，

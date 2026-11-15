@@ -1,5 +1,15 @@
 # 前端交接状态
 
+## 根配置直读与容器挂载向导（2026-11-15）
+
+- 修复外部数据目录没有 `config.toml` 时 Worker 无法启动的问题：后端业务加载器支持根 `config.yaml`，容器入口在所有子进程启动前加载根环境值。默认挂载配置 `/workspace/config.yaml`，媒体 `/data/uploads`，无需复制配置到 `/data`。保留旧 TOML 显式入口，YAML 的显式环境覆盖仍生效。新增 PyYAML 运行依赖及锁文件，需重建后端镜像。
+- 两端总览新增代码目录、数据目录、容器名、主网络和额外网络；前端增加产物输出目录。保存只写根配置，随后宿主重新挂载所选目录并生成派生文件；前端派生 TOML 改为根 `config.runtime.toml`，只读挂入运行产物。原数据不自动搬迁，配置备份和原密钥保留。
+- 启动器先 `docker create --network bridge`，逐个 `docker network connect` 后才 `docker start`；工具、检查及应用容器一致。Compose 保留构建职责。支持自定义 `3434 → 8001`，检查失败不停止旧容器，无关同名容器拒绝覆盖，匹配挂载的旧手动容器可重新创建。派生 CLI env 与 Compose env 分开，避免引号及 `$` 被改写。
+- 验证：后端配置回归 41 项通过；两端各 21 项助手/编排测试，后端 19 通过 2 跳过、前端 20 通过 1 跳过。包含真实 PTY、80×24 布局、根配置与自定义挂载、失败传播、双网络先接入后启动、旧容器保护、重启不编译。两端彩色预览在内置浏览器检查；SVG 中文字距为导出器限制，实际终端宽度由 PTY / Rich 检查。
+- 静态与文档检查：Ruff、Mypy 配置相关检查、Bash 语法、锁文件一致性、Compose v2 渲染及双端 Sphinx 严格构建通过。进程监听端口从根环境统一派生，无需另改 Compose 端口字段。
+- 隔离 PostgreSQL / Redis：移走旧实例 `config.toml` 后真实启动两端五个进程；后端就绪 200，database/redis/schema 全部 ok，前端首次缺快照 503，接收器无凭据 403。另直接运行真实后端 shell 入口及 YAML 适配器，API / Worker / Scheduler 持续运行且就绪 200；健康检查直接从根配置取得自定义端口。
+- 限制：本环境无 Docker daemon，镜像构建及真实容器双网络通信仍须部署机验收；命令桩、原生进程和 Compose 渲染不能替代。未改用户实际实例配置或数据库。本轮前端业务源码未变，复用上轮已完成的生产构建进行启动验收。使用方式见 [部署教程](../../deploy/README.md)，决定见 [ADR 0155](../decisions/0155-root-runtime-and-container-settings.md)。
+
 ## 统一根目录配置与部署助手（2026-11-15）
 
 - 前后端根目录统一 `./setup.sh`，可选择 Docker / 原生，显式参数为 `--docker` / `--native`。助手代码与工具锁文件已迁入 `deploy/`；`docker/` 保留镜像和编排。根 `config.yaml` 为唯一部署配置来源，包含私有值、权限 0600、Git 忽略。运行 TOML/env 由助手自动生成；旧向导实例文件首次保存可导入，原密钥保留。见 [ADR 0154](../decisions/0154-unified-deployment-assistant.md)、[部署教程](../../deploy/README.md)。

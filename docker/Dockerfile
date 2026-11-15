@@ -19,7 +19,7 @@ COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/everunfold-frontend
 COPY deploy/check.mjs /usr/local/lib/everunfold-check.mjs
 
 ENV NEXT_TELEMETRY_DISABLED=1 \
-    CONFIG_FILE=/data/config.toml \
+    CONFIG_FILE=/workspace/config.runtime.toml \
     FRONTEND_BUILD_WORKERS=2 \
     FRONTEND_HOST=0.0.0.0 \
     FRONTEND_PORT=3000 \

@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[根配置直读与容器挂载向导](decisions/0155-root-runtime-and-container-settings.md)补充配置读取、挂载点、端口及默认桥接与额外网络的创建顺序。
+
 [根目录配置与统一部署助手](decisions/0154-unified-deployment-assistant.md)说明根 `setup.sh` / `config.yaml`、彩色配置与真实连接检测、节点配对、Docker 自动构建和原生运行。实际步骤见[部署教程](../deploy/README.md)。
 
 [配置总览菜单与终端编辑](decisions/0153-terminal-configuration-menu.md)说明 Docker 向导的顺序配置、按项修改、方向键编辑和已有文件保存。

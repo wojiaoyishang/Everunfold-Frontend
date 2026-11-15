@@ -39,12 +39,16 @@ def main() -> None:
             raise SystemExit(1)
     ctx = Context(DOCKER, "backend" if BACKEND else "frontend", native=True)
     ctx.materialize()
+    if action == "render" and ctx.document:
+        print("根目录配置已应用。")
+        return
     if not ctx.config_path.exists() or not ctx.env_path.exists():
         raise SystemExit("请先运行 ./setup.sh --native 完成配置。")
     environment = {
         **os.environ,
         **ctx.env,
-        "CONFIG_FILE": str(ctx.config_path),
+        "CONFIG_FILE": str(ctx.root_path if BACKEND and ctx.document else ctx.config_path),
+        "EVERUNFOLD_DATA_DIR": str(ctx.data),
         "PYTHONUNBUFFERED": "1",
         "NEXT_TELEMETRY_DISABLED": "1",
     }
@@ -93,7 +97,7 @@ def main() -> None:
                     python,
                     "init.database.py",
                     "--config",
-                    str(ctx.config_path),
+                    environment["CONFIG_FILE"],
                     "--no-create-database",
                 ]
             )
@@ -108,7 +112,7 @@ def main() -> None:
                 "-m",
                 "tools.register_backend_plugins",
                 "--config",
-                str(ctx.config_path),
+                environment["CONFIG_FILE"],
                 "--apply",
             ]
         )

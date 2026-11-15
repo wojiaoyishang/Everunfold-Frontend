@@ -22,6 +22,7 @@ from config_validation import (
     uuid_value,
     valid_port,
 )
+from container_fields import add_container_fields
 
 DOCKER = Path(__file__).resolve().parents[1] / "docker"
 TOKEN_NAMES = ("NEXTJS_TO_FASTAPI_WEB_MAIN_TOKEN", "FASTAPI_TO_NEXTJS_WEB_MAIN_TOKEN")
@@ -105,6 +106,8 @@ def configure(native: bool = False) -> Configuration:
             by_key[key].value = text
         names[:] = references
         return source
+
+    container_mapping, container_errors, pending_network = add_container_fields(ctx, add, value)
 
     add(
         "connection_file",
@@ -264,7 +267,7 @@ def configure(native: bool = False) -> Configuration:
     )
 
     def check() -> list[str]:
-        errors = []
+        errors = container_errors()
         if value("inbound") == value("outbound"):
             errors.append("两个方向的节点令牌必须不同。")
         if (
@@ -278,6 +281,8 @@ def configure(native: bool = False) -> Configuration:
         return errors
 
     async def probe():
+        if pending_network():
+            return pending_network()
         return await frontend_checks(value("api"), value("internal"))
 
     def save() -> None:
@@ -346,11 +351,7 @@ def configure(native: bool = False) -> Configuration:
         }
         if profile_path and profiles is not None:
             outputs[profile_path] = toml_text(profiles)
-        (ctx.data / "plugins").mkdir(parents=True, exist_ok=True)
-        if not native:
-            (DOCKER / compose.get("FRONTEND_OUTPUT_DIR", "output")).mkdir(
-                parents=True, exist_ok=True
-            )
+        outputs[ctx.compose_path] = update_env(outputs[ctx.compose_path], container_mapping())
         ctx.write(outputs)
 
     return Configuration(

@@ -19,9 +19,15 @@
 构建阶段、镜像标签、启动日志均带 Everunfold 组件标识和源码版本。
 一次性配置容器不挂 Docker socket，实际镜像构建由宿主脚本执行。
 
+在总览中填写代码目录、数据目录、容器名、主网络、额外网络和端口。
+主网络默认 ``bridge``，额外网络可填 ``1panel-network``；所有网络在进程启动前接入。
+主网络可以创建，额外网络须已存在。启动统一使用根助手，直接 ``compose up`` 不处理额外网络。
+
 后端只有源码 ``/workspace`` 与持久化 ``/data`` 两个挂载。
+配置从 ``/workspace/config.yaml`` 读取，不依赖 ``/data/config.toml``。
 前端镜像有编译和部署两种模式：编译模式接收只读源码，安装锁定依赖，导出新产物；
-部署模式运行所选产物。``start`` 和重启不编译。
+部署模式运行所选产物，另外将根 ``config.runtime.toml`` 只读挂到产物内同名文件。
+``start`` 和重启不编译。
 主体与整个插件批次构建成功后才更新所选版本；失败不选择未完成的产物。
 
 后端升级
@@ -36,7 +42,7 @@
    ./setup.sh --docker start
    curl --fail http://127.0.0.1:8001/health/ready
 
-迁移命令停止本 Compose 后端，显式升级核心、登记插件并检查依赖。
+迁移命令停止当前配置选定的后端容器，显式升级核心、登记插件并检查依赖。
 成功后由 ``start`` 恢复 API、Worker、Scheduler，保持每个范围一个 Scheduler。
 它不会迁移 PostgreSQL 服务本身，也不会自动升级其他实例。
 
@@ -47,7 +53,7 @@
 
    ./setup.sh --docker build
    ./setup.sh --docker start
-   docker compose -f docker/compose.yaml logs --tail=100 frontend
+   docker logs --tail=100 everunfold-frontend
 
 修改域名、连接和进程参数只需重新保存、启动，无需编译。
 主体或主题源码变化要显式构建；独立插件沿用插件发布机制，可在 ``docker/`` 内执行
@@ -57,7 +63,8 @@
 宿主 HTTPS 代理默认转发 API 到 ``127.0.0.1:8001``、Web 到 ``127.0.0.1:3000``、
 内部接收器到 ``127.0.0.1:3001``。对应发布 URL 与实际监听分别配置。
 数据默认位于 ``docker/data/``；前端产物在 ``docker/output/``。
-删除应用容器不删除这些宿主目录。备份根 ``config.yaml``、数据、所选产物和 PostgreSQL。
+实际目录可由向导修改；修改挂载不会搬运旧数据，前后端数据目录应独立。
+删除应用容器不删除这些宿主目录。日志和重启命令使用选定的容器名称。备份根 ``config.yaml``、数据、所选产物和 PostgreSQL。
 
 二、不使用 Docker
 -----------------
@@ -66,7 +73,7 @@
 ~~~~~~~~~~
 
 安装 uv；前端另外安装 Node.js 22 / npm 10。根目录运行 ``./setup.sh --native``，
-同样使用根 YAML，自动生成 ``var/instance/`` 下的运行文件。
+同样使用根 YAML，派生 TOML 位于项目根，环境文件和数据位于 ``var/instance/``。
 ``EVERUNFOLD_INSTANCE_DIR`` 可指定实例目录，托管进程须使用相同值。
 更换部署方式不会搬运现有数据，切换前需安排媒体、快照和插件目录迁移。
 
