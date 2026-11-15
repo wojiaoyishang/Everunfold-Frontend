@@ -9,6 +9,7 @@ class Check:
     name: str
     state: str
     detail: str
+    code: str = ""
 
 
 @dataclass

@@ -207,7 +207,7 @@ class LauncherTests(unittest.TestCase):
     def test_failure_stops_before_activation_or_initialization(self):
         before = (self.repo / "config.yaml").read_bytes()
         result, calls = self.run_action(
-            "init-db" if BACKEND else "deploy", "--require-empty" if BACKEND else "build-plugins"
+            "init-db" if BACKEND else "deploy", "--initialize" if BACKEND else "build-plugins"
         )
         self.assertEqual(result.returncode, 23, result.stderr)
         self.assertEqual((self.repo / "config.yaml").read_bytes(), before)
@@ -218,6 +218,23 @@ class LauncherTests(unittest.TestCase):
         result, calls = self.run_action("start", failure, old="matching")
         self.assertEqual(result.returncode, 23, result.stderr)
         self.assertFalse(any("--name" in call or call[0] == "stop" for call in calls))
+
+    @unittest.skipUnless(BACKEND, "backend startup preparation")
+    def test_build_and_start_prepares_database_before_creating_service(self):
+        result, calls = self.run_action("deploy")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        prep = next(i for i, c in enumerate(calls) if "--prepare" in c)
+        service = next(i for i, c in enumerate(calls) if "--name" in c)
+        self.assertLess(prep, service)
+        self.assertFalse(any("--initialize" in c for c in calls))
+
+    @unittest.skipUnless(BACKEND, "backend initialization action")
+    def test_manual_initialization_reports_next_start_command(self):
+        result, calls = self.run_action("init-db")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(any("--initialize" in c for c in calls))
+        self.assertFalse(any("--name" in c for c in calls))
+        self.assertIn("./setup.sh --docker start", result.stdout)
 
     def test_foreign_container_name_is_not_replaced(self):
         result, calls = self.run_action("start", old="foreign")

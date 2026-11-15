@@ -91,16 +91,9 @@ def main() -> None:
         if not Path(python).exists():
             build()
         if action == "init-db":
-            execute([python, "deploy/runtime_check.py", "--require-empty"])
-            execute(
-                [
-                    python,
-                    "init.database.py",
-                    "--config",
-                    environment["CONFIG_FILE"],
-                    "--no-create-database",
-                ]
-            )
+            execute([python, "deploy/runtime_check.py", "--initialize"])
+            print("数据库已就绪。此操作只初始化；执行 ./setup.sh --native start 启动服务。")
+            return
         elif action == "migrate":
             execute([python, "-m", "alembic", "-c", "migrations/alembic.ini", "upgrade", "head"])
         else:
@@ -122,7 +115,10 @@ def main() -> None:
         check()
         return
     if action == "start":
-        check()
+        if BACKEND:
+            execute([python, "deploy/runtime_check.py", "--prepare"])
+        else:
+            check()
     if BACKEND:
         commands = {
             "api": [

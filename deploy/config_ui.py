@@ -266,11 +266,14 @@ class SetupApp(App[int]):
         self.sub_title = self.config.title
         table = self.query_one(DataTable)
         self.refresh_fields()
-        message = (
-            "新站点密钥已生成，可进入对应项查看或修改。"
-            if self.config.backend
-            else "导入后端连接文件可自动填写节点信息和令牌。"
-        )
+        if self.config.backend:
+            message = (
+                "启动时会自动初始化空库；检测连接不会修改数据库。"
+                if self.config.get("auto_init_empty_db") == "1"
+                else "空库自动初始化已关闭；可点“初始化新库”单独执行。"
+            )
+        else:
+            message = "导入后端连接文件可自动填写节点信息和令牌。"
         self.query_one("#checks", RichLog).write("尚未检测。" + message)
         table.focus()
 
@@ -377,8 +380,6 @@ class SetupApp(App[int]):
     @work(exclusive=True, group="finish")
     async def finish(self, action: str) -> None:
         errors = self.config.errors()
-        if action == "init-db" and self.config.get("mode") != "1":
-            errors.append("已有站点请使用升级迁移。")
         if action == "export-node" and not self.config.get("receiver"):
             errors.append("请填写该节点的内部接收器 URL。")
         if errors:
@@ -389,7 +390,9 @@ class SetupApp(App[int]):
             return
         if action in ("init-db", "migrate", "export-node"):
             description = {
-                "init-db": "保存配置，并对指定空数据库执行初始化和创建管理员？",
+                "init-db": (
+                    "保存配置并检查数据库；仅空库会初始化和创建管理员，已初始化则跳过。继续？"
+                ),
                 "migrate": "保存配置，并执行数据库迁移？请先完成数据库备份。",
                 "export-node": "保存配置，登记所选节点的内部连接并导出配对文件？",
             }[action]

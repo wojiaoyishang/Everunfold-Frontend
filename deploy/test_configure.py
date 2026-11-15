@@ -20,7 +20,7 @@ from unittest.mock import patch
 import configure
 from config_files import Files, env_values, update_env
 from config_model import Check
-from config_ui import DatabaseForm, Editor, HistoryInput, SetupApp
+from config_ui import Confirm, DatabaseForm, Editor, HistoryInput, SetupApp
 from textual.widgets import Button, DataTable, Input
 
 BACKEND = hasattr(configure, "node_token_names")
@@ -101,7 +101,7 @@ class ModelTests(Fixtures, unittest.TestCase):
         self.assertEqual(
             next(config.parent.glob("config.runtime.toml.*.bak")).read_bytes(), original_config
         )
-        self.assertEqual(next(env.parent.glob("runtime.env.*.bak")).read_bytes(), original_env)
+        self.assertIn(original_env, [p.read_bytes() for p in env.parent.glob("runtime.env.*.bak")])
         self.assertEqual(stat.S_IMODE(env.stat().st_mode), 0o600)
 
     def test_no_files_until_save_and_native_paths(self):
@@ -212,6 +212,17 @@ class ModelTests(Fixtures, unittest.TestCase):
         self.assertEqual(result["profiles"]["first"]["BACKEND_BASE_URL"], model.get("api"))
         document = yaml.safe_load((self.root / "config.yaml").read_text())
         self.assertEqual(document["connection_profiles"], result)
+
+    @unittest.skipUnless(BACKEND, "backend initialization preference")
+    def test_auto_init_defaults_on_and_can_be_disabled_without_rotating_keys(self):
+        model = self.complete()
+        master = model.get("EVERUNFOLD_API_APPLICATION_MASTER_KEY")
+        self.assertEqual(model.get("auto_init_empty_db"), "1")
+        self.edit(model, "auto_init_empty_db", "0")
+        model.save()
+        reopened = self.model()
+        self.assertEqual(reopened.get("auto_init_empty_db"), "0")
+        self.assertEqual(reopened.get("EVERUNFOLD_API_APPLICATION_MASTER_KEY"), master)
 
     def test_network_defaults_only_apply_to_new_lists(self):
         with patch.dict(os.environ, EVERUNFOLD_NETWORK_CIDRS="172.25.0.0/16,"):
@@ -364,6 +375,23 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
             await pilot.press("3")
         self.assertEqual(app.return_value, 10)
         self.assertEqual(env.read_bytes(), before)
+
+    @unittest.skipUnless(BACKEND, "backend initialization action")
+    async def test_saved_config_can_confirm_initialization_without_changing_deployment_type(self):
+        self.complete().save()
+        model = self.model()
+        self.assertEqual(model.get("mode"), "2")
+        app = SetupApp(model)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.click("#init-db")
+            await pilot.pause()
+            self.assertIsInstance(app.screen, Confirm)
+            await pilot.click("#no")
+            self.assertNotIsInstance(app.screen, Confirm)
+            await pilot.click("#init-db")
+            await pilot.pause()
+            await pilot.click("#yes")
+        self.assertEqual(app.return_value, 30)
 
     @unittest.skipUnless(BACKEND, "PostgreSQL form")
     async def test_database_parts_encode_password(self):

@@ -1,6 +1,6 @@
 # 架构约束与范围
 
-版本：bootstrap-24，2026-11-10（Asia/Shanghai）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
+版本：bootstrap-25，2026-11-15（UTC）。依据为 [设计基线 v2.11](../baseline/01_Design_Baseline_v2.11.md) 与 [工程规范 v0.14](../baseline/02_Engineering_Plan_v0.14.md)。本页提炼边界，不替代原文和正式契约，也不宣称这些功能已经全部实现。
 
 ## 已确认的范围
 
@@ -23,7 +23,7 @@
 | Redis                   | Celery Broker、FastAPI 广播、协同、Scheduler 唤醒及任务运行快照，各自隔离命名空间；通知不是持久事实 |
 | Next.js                 | 可信内容渲染、主题、页面与公开数据/渲染缓存；公开快照不能回写主库                                   |
 
-后端只有一个 `app` 根包。模块静态 Manifest 预检后，由唯一 `router_init(ctx)` 装配当前 FastAPI 进程；`ctx` 不进入普通路由、任务或请求资源。Worker 加载独立任务模块，Scheduler 不调用 FastAPI 注册器。核心及插件数据库迁移由管理员在部署流程显式执行，进程启动不自动迁移；移除代码不清理插件历史数据。
+后端只有一个 `app` 根包。模块静态 Manifest 预检后，由唯一 `router_init(ctx)` 装配当前 FastAPI 进程；`ctx` 不进入普通路由、任务或请求资源。Worker 加载独立任务模块，Scheduler 不调用 FastAPI 注册器。已有数据库的核心及插件迁移由管理员显式执行，业务进程启动不执行 DDL。2026-11-15 用户要求部署助手默认自动初始化空库：仅在实际确认空库、依赖可用且开关开启时，在启动业务进程前完成初始化；已有库不自动升级，见 [ADR 0156](../decisions/0156-empty-database-bootstrap.md)。移除代码不清理插件历史数据。
 
 FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发一次后发到其他进程，忽略自身 Redis 回环。任务使用 Celery 原生 API；Scheduler 唤醒与协同拥有各自通道。不能把广播回调当成全局只执行一次的业务任务。
 

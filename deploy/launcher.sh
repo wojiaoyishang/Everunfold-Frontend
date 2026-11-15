@@ -207,10 +207,8 @@ remove_previous() {
 }
 case "$action" in
   init-db)
-    run_runtime python deploy/runtime_check.py --require-empty
-    run_runtime python init.database.py --config /workspace/config.yaml --no-create-database
-    run_runtime python -m tools.register_backend_plugins --config /workspace/config.yaml --apply
-    check_runtime ;;
+    run_runtime python deploy/runtime_check.py --initialize
+    echo "数据库已就绪。此操作只初始化；执行 ./setup.sh --docker start 启动容器。" ;;
   migrate)
     remove_previous
     run_runtime alembic -c migrations/alembic.ini upgrade head
@@ -222,7 +220,12 @@ case "$action" in
     echo "节点连接文件位于 $data_dir/connections/。" ;;
   check) check_runtime ;;
   start)
-    check_runtime
+    if [[ "$role" == backend ]]; then
+      echo "启动准备：检查依赖，并按配置初始化空数据库。"
+      run_runtime python deploy/runtime_check.py --prepare
+    else
+      check_runtime
+    fi
     printf '创建容器 %s：%s → /workspace，%s → /data，%s:%s → %s\n' "$container_name" "$workspace_dir" "$data_dir" "$bind_host" "$publish_port" "$listen_port"
     remove_previous
     ports=(-p "$bind_host:$publish_port:$listen_port")

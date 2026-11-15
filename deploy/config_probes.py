@@ -47,6 +47,34 @@ def expected_revision(root: Path) -> str:
     raise ValueError("无法确定代码的数据库迁移版本。")
 
 
+async def database_is_empty(connection) -> bool:
+    # pg_class also sees objects inaccessible to the deployment role. Do not mistake
+    # a database with somebody else's tables, views or sequences for a new database.
+    return not await connection.fetchval(
+        "SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_class c "
+        "JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
+        "WHERE n.nspname <> 'information_schema' AND n.nspname !~ '^pg_' "
+        "AND c.relkind IN ('r', 'p', 'v', 'm', 'S', 'f', 'c'))"
+    )
+
+
+async def database_state(connection, root: Path) -> Check:
+    if await database_is_empty(connection):
+        return Check("数据库迁移", "warning", "数据库为空，尚未初始化", "empty")
+    if not await connection.fetchval("SELECT to_regclass('alembic_version')"):
+        return Check(
+            "数据库迁移", "error", "数据库已有对象但无迁移记录，拒绝按空库初始化", "unmanaged"
+        )
+    rows = await connection.fetch("SELECT version_num FROM alembic_version")
+    expected = expected_revision(root)
+    current = {str(row["version_num"]) for row in rows}
+    if current == {expected}:
+        return Check("数据库迁移", "ok", "已同步：" + expected, "current")
+    return Check(
+        "数据库迁移", "warning", "已有数据库需要显式升级迁移；代码要求 " + expected, "migration"
+    )
+
+
 async def postgres(url: str, root: Path) -> list[Check]:
     if not db_url(url):
         return [Check("PostgreSQL", "error", "请先填写有效的 PostgreSQL URL")]
@@ -59,20 +87,10 @@ async def postgres(url: str, root: Path) -> list[Check]:
         )
         async with connection.transaction(readonly=True):
             await connection.fetchval("SELECT 1")
-            results = [Check("PostgreSQL", "ok", "连接、认证和查询通过")]
-            if not await connection.fetchval("SELECT to_regclass('alembic_version')"):
-                results.append(Check("数据库迁移", "warning", "数据库尚未初始化"))
-            else:
-                rows = await connection.fetch("SELECT version_num FROM alembic_version")
-                expected = expected_revision(root)
-                current = {str(row["version_num"]) for row in rows}
-                if current == {expected}:
-                    results.append(Check("数据库迁移", "ok", "已同步：" + expected))
-                else:
-                    results.append(
-                        Check("数据库迁移", "warning", "需要检查迁移；代码要求 " + expected)
-                    )
-            return results
+            return [
+                Check("PostgreSQL", "ok", "连接、认证和查询通过"),
+                await database_state(connection, root),
+            ]
     except Exception as error:
         return [Check("PostgreSQL", "error", failure(error))]
     finally:

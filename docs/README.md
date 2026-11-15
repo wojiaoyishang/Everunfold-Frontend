@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[空库自动初始化](decisions/0156-empty-database-bootstrap.md)说明默认开关、真实空库判定、初始化按钮修复和启动前复检。
+
 [根配置直读与容器挂载向导](decisions/0155-root-runtime-and-container-settings.md)补充配置读取、挂载点、端口及默认桥接与额外网络的创建顺序。
 
 [根目录配置与统一部署助手](decisions/0154-unified-deployment-assistant.md)说明根 `setup.sh` / `config.yaml`、彩色配置与真实连接检测、节点配对、Docker 自动构建和原生运行。实际步骤见[部署教程](../deploy/README.md)。

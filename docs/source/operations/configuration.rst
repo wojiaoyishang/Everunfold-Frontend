@@ -35,6 +35,11 @@ PostgreSQL 支持分项填写并编码用户名、密码。连接检测执行真
 Redis / Broker PING；前端检测后端公开、内部就绪入口。检测不初始化或升级数据库。
 修改配置后旧检测结果失效，错误不输出完整凭据。
 
+后端新增“空库自动初始化”，默认 ``1`` 开启，``0`` 关闭，保存为根 YAML 的
+``environment.EVERUNFOLD_AUTO_INIT_EMPTY_DB`` 字符串值。缺省也开启，供旧配置直接使用。
+它只影响部署助手的构建并启动和 ``start``：确认空库后初始化，已就绪库直接启动，
+非空且缺少迁移记录或版本落后的库停止并提示处理。界面检测和 ``check`` 不执行初始化。
+
 根 YAML 的 ``application`` 保存应用字段，``environment`` 保存进程参数和凭据，
 ``docker`` 保存镜像、挂载和端口映射，``assistant`` 保存配对及助手参数。
 独立后端连接清单由 ``connection_profiles`` 保存，编辑仅更新 active 项。
