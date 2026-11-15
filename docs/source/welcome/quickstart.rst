@@ -1,126 +1,145 @@
-本地快速开始
-============
+快速开始：两种部署方式
+======================
 
-本页使用两个同级仓库和一套空的开发数据库。保留两个工作目录，各自运行其命令。
-请从本次预发布说明取得前后端的配套提交。
+前后端都是独立仓库，每个仓库均在根目录运行 ``./setup.sh``。
+不带参数时先选择部署方式；``--docker`` 和 ``--native`` 可以直接进入对应流程。
+两种方式共用各自根目录的 ``config.yaml``，不要再手工维护多个运行配置文件。
 
-.. code-block:: text
+助手先显示配置总览，支持顺序配置、按项修改、彩色状态和连接检测。
+新站点密钥自动生成且可编辑；已有实例保留原值。
+后端导出节点连接 JSON，前端导入即可取得节点 ID、来源 UUID 和双向令牌。
 
-   Everunfold/
-     Everunfold-Backend/
-     Everunfold-Frontend/
+一、Docker 从零构建
+-------------------
 
-.. figure:: /_static/diagrams/ops-first-boot.svg
-   :width: 100%
-   :class: flow-diagram
-   :alt: 本地首次启动依次准备依赖、配置后端、初始化数据库、绑定前端、启动五个进程并同步公开快照。
+准备环境
+~~~~~~~~
 
-   本地首次启动。前端在数据库初始化后取得来源 UUID，首次公开同步完成后即可读取节点快照。
+宿主需要 Linux / WSL、Bash 4+、Git、Docker Engine 和 Compose v2。
+确认当前账号能执行 ``docker info`` 与 ``docker compose version``。
+宿主无需安装 Python、Node.js 或项目依赖。
+数据库和 Redis 不包含在应用镜像中：先准备专用 PostgreSQL 数据库及可用的 Redis。
+若数据库也是容器，将其接入部署网络 ``everunfold``，连接地址使用容器名。
 
-开发环境
---------
+后端配置、初始化和启动
+~~~~~~~~~~~~~~~~~~~~~~
 
-- 后端使用 Python 3.12、uv、PostgreSQL 和 Redis。先启动 PostgreSQL 和 Redis，
-  并在 PostgreSQL 创建开发数据库、给数据库角色授权。软件依赖从 ``uv.lock`` 恢复。
-- 前端使用 Node.js 22 和 npm 10，具体起始版本见 ``.nvmrc``，依赖从
-  ``package-lock.json`` 安装。
-- 本页统一使用 ``127.0.0.1``。打开浏览器时也使用这个主机名，使 Cookie 和
-  精确 Origin 配置匹配。命令示例采用 POSIX Shell。
+.. code-block:: bash
 
-准备后端
---------
+   git clone https://github.com/wojiaoyishang/Everunfold-Backend.git
+   cd Everunfold-Backend
+   ./setup.sh --docker
 
-1. 在 ``Everunfold-Backend`` 内安装依赖，复制配置模板和节点清单。
+首次运行自动构建一次性配置工具镜像。在界面填写后端发布 URL、数据库和 Redis。
+PostgreSQL 可通过分项表单填写。点击“检测连接”查看连接、认证、查询和迁移结果。
+新库尚未初始化会显示提示，不会因检测而修改数据库。
 
-   .. code-block:: bash
+新站点选择“初始化新库”：保存根目录 YAML、自动构建后端镜像、确认数据库为空、
+显式执行初始化与插件登记。已有数据的数据库会被拒绝按新库初始化。
+随后运行：
 
-      uv sync --locked
-      cp config.example.toml config.toml
-      cp frontend-nodes.example.toml frontend-nodes.toml
+.. code-block:: bash
 
-2. 按本机部署修改 ``config.toml``。填好开发数据库 DSN、Redis 地址和 Celery Broker，
-   保留浏览器 API 示例地址 ``http://127.0.0.1:8001``，将前端 Origin
-   ``http://127.0.0.1:3000`` 加入 ``[cors].allowed_origins``。
-   启用根级 ``frontend_nodes_file = "./frontend-nodes.toml"``。
-   在节点清单的 ``[frontends.web-main]`` 下设置 ``enabled = true`` 和
-   ``settings_receiver_url = "http://127.0.0.1:3001"``，保留两项令牌环境变量名称。
+   ./setup.sh --docker start
+   curl --fail http://127.0.0.1:8001/health/ready
 
-3. 将 ``EVERUNFOLD_ADMIN_PASSWORD`` 设为自己的首次管理员密码。运行初始化前，
-   通过本机受控环境为 ``NEXTJS_TO_FASTAPI_WEB_MAIN_TOKEN`` 和
-   ``FASTAPI_TO_NEXTJS_WEB_MAIN_TOKEN`` 分别生成至少 32 个字符的独立随机值。
-   后面启动进程的终端需要继承同一套对应凭据。
+API 默认绑定容器 ``0.0.0.0:8001``，宿主仅映射 ``127.0.0.1:8001``。
+发布 URL 与监听参数独立。正式入口用 HTTPS 反向代理，并在助手填写节点控制台
+实际看到的 TLS 代理来源 IP。管理员和独立节点控制台密码均可在助手查看。
 
-   .. code-block:: bash
+前端配对和构建
+~~~~~~~~~~~~~~
 
-      uv run --locked python init.database.py --config config.toml --no-create-database
-      uv run --locked python -m tools.register_backend_plugins --config config.toml --apply
+1. 在后端助手填写节点 ID 和接收器 URL，例如 ``web-main``、
+   ``https://receiver.example.com``，选择“登记并导出节点”。
+   得到 ``docker/data/connections/web-main.json``，私下复制到前端仓库的
+   ``docker/data/connection.json``。该文件含节点令牌。
+2. 在前端仓库根目录运行 ``./setup.sh --docker``，导入该文件，填写本站发布 URL。
+   容器内的 ``127.0.0.1`` 指当前容器；跨容器凭据连接应使用受信任的 HTTPS 入口。
+3. 点击“检测连接”，选择“构建并启动”。宿主自动构建镜像，再用一次性编译容器
+   编译主体和插件，实时输出日志。成功后选择新的主体产物并启动 Web、接收器。
+4. Web 默认映射到宿主回环 ``3000``，接收器默认映射到宿主回环 ``3001``。
+   分别配置网页和内部接收器的 HTTPS 入口，后者须与后端登记的 URL 一致。
+   内部来源列表填写实际直连来源；仍须验证对应方向的令牌。
+5. 到后端 ``/_nodes`` 添加、启用该节点的公开网页 URL。登录前端后台，
+   在“设置 → 节点状态与维护”执行“重新同步全部”，再检查公开页和前端
+   ``/health/ready``。首次缺少公开快照时返回 503，不能视为已就绪。
 
-   初始化会执行迁移和首次建号，已有账号及密码保持原样。
-   从数据库运行 ``SELECT source_epoch FROM site_settings WHERE id = 1;``，
-   取出此后端的来源 UUID，供下方前端接收器使用。
+日常启动与数据保留
+~~~~~~~~~~~~~~~~~~
 
-准备前端
---------
+.. code-block:: bash
 
-1. 切换到 ``Everunfold-Frontend`` 并复制实例配置。
+   ./setup.sh --docker build
+   ./setup.sh --docker start
+   docker compose -f docker/compose.yaml logs --tail=100
 
-   .. code-block:: bash
+``build`` 显式构建；``start`` 和容器重启不会重新编译。
+后端挂载源码到只读 ``/workspace``、数据到 ``/data``；
+前端部署时把已完成的产物挂到 ``/workspace``、配置和持久数据挂到 ``/data``。
+完整的 HTTPS、备份、升级及插件步骤见
+`后端部署教程 <https://github.com/wojiaoyishang/Everunfold-Backend/blob/main/deploy/README.md>`__ 和
+`前端部署教程 <https://github.com/wojiaoyishang/Everunfold-Frontend/blob/main/deploy/README.md>`__。
 
-      npm ci --ignore-scripts
-      cp config.example.toml config.toml
+二、不使用 Docker
+-----------------
 
-2. 在根级设置 ``PUBLIC_SITE_URL = "http://127.0.0.1:3000"``，保留
-   浏览器可达的 API 地址 ``BACKEND_BASE_URL = "http://127.0.0.1:8001"``。
-   确认 ``FRONTEND_NODE_ID = "web-main"`` 与后端节点清单的键一致。
-   在 ``[settings]`` 中填入上一步查询到的 ``source_epoch``。
-   ``[backend]`` 中的两个凭据引用需与后端对应，运行进程应继承实际值。
+准备环境
+~~~~~~~~
 
-启动并连接两端
---------------
+两端配置助手需要 uv，由工具锁文件准备 Python 3.12 环境。
+后端需要 PostgreSQL、Redis；前端另外需要 Node.js 22 和 npm 10，精确版本以
+``.nvmrc`` 和 ``package.json`` 为准。该入口不调用 Docker。
 
-1. 在后端目录的不同终端分别启动 API、Worker 和 Scheduler。
+后端
+~~~~
 
-   .. code-block:: bash
+在后端仓库根目录运行 ``./setup.sh --native``，填写数据库、Redis，保留本机
+发布 URL ``http://127.0.0.1:8001``。保存后执行：
 
-      uv run --locked python -m uvicorn app.entrypoints.api:app --host 127.0.0.1 --port 8001 --reload --no-proxy-headers
-      uv run --locked celery -A app.entrypoints.worker:celery_app worker --pool=solo --concurrency=1 --loglevel=INFO
-      uv run --locked python -m app.entrypoints.scheduler
+.. code-block:: bash
 
-   开发环境使用 ``solo`` Worker。每个运行范围启动一个 Scheduler。
-   访问 ``http://127.0.0.1:8001/health/ready``，确认数据库、Redis 和迁移均就绪。
+   ./setup.sh --native build
+   ./setup.sh --native init-db
+   ./setup.sh --native start
 
-2. 在前端目录的两个终端分别启动网页进程和节点接收器。
+``build`` 安装锁定依赖；``init-db`` 显式初始化空数据库并登记插件；
+``start`` 检查运行配置与依赖，再以前台方式启动 API、Worker、Scheduler。
+Ctrl+C 统一停止。已有实例应走备份及迁移流程，不执行空库初始化。
 
-   .. code-block:: bash
+在后端助手填写节点 ID 和本机接收器 ``http://127.0.0.1:3001``，导出连接文件：
 
-      npm run dev
-      npm run settings:receiver
+.. code-block:: bash
 
-   前端准备脚本先在同级后端从锁定提交读取契约。若后端不在同级目录，将
-   ``EVERUNFOLD_BACKEND_PATH`` 设置为其本地绝对路径，并确保 Git 历史中有契约锁所用提交。
+   ./setup.sh --native export-node
 
-3. 打开 ``http://127.0.0.1:3000/login``，用初始化时的管理员账号和密码进入后台。
-   管理员用户名默认是 ``admin``。
-   在「设置 → 节点状态与维护」确认当前节点，执行「重新同步全部」。
-   核对节点回执与应用到磁盘的版本，再发布一篇测试文章并从公开页访问。
-   首次缺少公开快照时，读者页可能暂时返回 503。
+文件位于 ``var/instance/connections/节点ID.json``，无需手工查询来源 UUID。
 
-.. tip::
+前端
+~~~~
 
-   本地需要带域名或端口的代理、独立节点配置文件、测试数据库或生产构建时，
-   接着阅读 :doc:`deployment` 及本手册的开发章节。
+在前端仓库根目录运行 ``./setup.sh --native``，导入上述文件的绝对路径，
+本站 URL 使用 ``http://127.0.0.1:3000``。选择“构建并启动”，或保存后执行：
 
-首次运行的验证
---------------
+.. code-block:: bash
+
+   ./setup.sh --native build
+   ./setup.sh --native start
+
+前端安装锁定依赖，编译主体和独立插件，然后启动 Web 与接收器。
+启动不会重新编译。配置文件和令牌由脚本加载，不需要 ``source`` 环境文件。
+契约由 ``contracts.lock.json`` 锁定；同级后端不在默认位置时，可设置
+``EVERUNFOLD_BACKEND_PATH`` 指向包含锁定提交的 Git 检出。
+
+节点启用、首次同步与 Docker 路径相同：在 ``/_nodes`` 登记本站公开 URL 并启用，
+用默认 ``admin`` 和助手中保存的初始密码登录前端后台，执行重新同步全部。
+最后分别检查两个真正监听地址：
 
 .. code-block:: bash
 
    curl --fail http://127.0.0.1:8001/health/ready
    curl --fail http://127.0.0.1:3000/health/ready
 
-分别核对后端及前端的响应。前端就绪检查关注本地公开快照，首次发布前可能返回 503。
-如果使用 Supervisor 和 Nginx 的单入口联调模板，端口 3000 上的同名探针由 FastAPI
-响应，请改用端口 3100 直连 Next.js 核对快照。
-能进入后台但首页缺少内容时，在节点页检查接收状态，完成第一次同步和发布，
-然后重试。若仍失败，按 :doc:`../operations/diagnostics` 检查实际请求入口和投递状态。
-随后可按 :doc:`../usage/index` 配置站点和主题。
+原生运行文件和持久数据默认在 ``var/instance/``，统一配置仍在项目根目录
+``config.yaml``。长期托管及升级见 :doc:`../operations/deploy`，排错见
+:doc:`../operations/diagnostics`。

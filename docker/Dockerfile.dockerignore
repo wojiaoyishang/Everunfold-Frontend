@@ -1,2 +1,6 @@
-*
-!entrypoint.sh
+**
+!docker/
+!docker/Dockerfile
+!docker/entrypoint.sh
+!deploy/
+!deploy/check.mjs

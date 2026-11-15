@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[根目录配置与统一部署助手](decisions/0154-unified-deployment-assistant.md)说明根 `setup.sh` / `config.yaml`、彩色配置与真实连接检测、节点配对、Docker 自动构建和原生运行。实际步骤见[部署教程](../deploy/README.md)。
+
 [配置总览菜单与终端编辑](decisions/0153-terminal-configuration-menu.md)说明 Docker 向导的顺序配置、按项修改、方向键编辑和已有文件保存。
 
 [发布 URL、进程监听与宿主映射](decisions/0152-published-urls-and-listeners.md)区分资源链接、容器监听、Docker 端口映射与前端内部连接；[节点公开地址](decisions/0151-listener-and-public-node-origins.md)说明多前端清单与浏览器来源校验。

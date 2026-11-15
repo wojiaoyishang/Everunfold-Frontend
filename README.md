@@ -36,28 +36,25 @@
 
 Everunfold 是一个 **vibe coding 项目**。项目发起人 [@wojiaoyishang](https://github.com/wojiaoyishang) 确定架构、模块边界和关键设计，借助 AI 实现，并通过代码审查和联调持续优化。
 
-## 本地开发
+## 部署与本地运行
 
-源码挂载与容器部署见 [Docker 指南](docker/README.md)。
+前后端各自提供统一的根目录入口，生成并维护根目录 `config.yaml`。密钥自动生成且可编辑，PostgreSQL / Redis 与后端就绪情况可在彩色配置助手中检测。
 
-使用 Node.js 22 和 npm 10，具体版本见 [`.nvmrc`](.nvmrc)。首次运行时，将前端和后端检出到同一父目录，按 [本地快速开始](https://wojiaoyishang.github.io/Everunfold-Frontend/welcome/quickstart.html) 启动后端并配置节点。前端按 [`contracts.lock.json`](contracts.lock.json) 从指定后端提交生成客户端契约。
+| 部署方式        | 在本仓库根目录执行    |
+| --------------- | --------------------- |
+| Docker 从零构建 | `./setup.sh --docker` |
+| 不使用 Docker   | `./setup.sh --native` |
 
-在本仓库根目录安装依赖，再按 [配置示例](config.example.toml) 创建本地 `config.toml`，填写地址、节点 ID、来源 UUID 和凭据引用。
+直接运行 `./setup.sh` 也可先选择部署方式。完整教程按这两种路径分开说明，见[部署教程](deploy/README.md)；镜像构建文件见 [docker/](docker/README.md)。已有配置先导入再保存，原密钥保持稳定；无需逐项编辑多个运行文件。
 
-```bash
-npm ci --ignore-scripts
-```
-
-在两个终端分别运行 `npm run dev` 和 `npm run settings:receiver`。手动联调时网页默认监听 `3000`，接收器默认监听 `3001`。在后台完成首次同步后，打开公开页检查快照。
-
-本地检查命令如下。
+开发检查：
 
 ```bash
 npm run check
 npm run verify:production
 ```
 
-`verify:production` 在独立目录检查生产构建。部署与排查见 [运维手册](https://wojiaoyishang.github.io/Everunfold-Frontend/operations/index.html)。
+首次同步和运行验收见[快速开始](https://wojiaoyishang.github.io/Everunfold-Frontend/welcome/quickstart.html)。
 
 ## 源码入口
 

@@ -1,5 +1,16 @@
 # 前端交接状态
 
+## 统一根目录配置与部署助手（2026-11-15）
+
+- 前后端根目录统一 `./setup.sh`，可选择 Docker / 原生，显式参数为 `--docker` / `--native`。助手代码与工具锁文件已迁入 `deploy/`；`docker/` 保留镜像和编排。根 `config.yaml` 为唯一部署配置来源，包含私有值、权限 0600、Git 忽略。运行 TOML/env 由助手自动生成；旧向导实例文件首次保存可导入，原密钥保留。见 [ADR 0154](../decisions/0154-unified-deployment-assistant.md)、[部署教程](../../deploy/README.md)。
+- 彩色 Textual 总览、按序/按项编辑、自动生成且可编辑的密钥、PostgreSQL 分项表单、真实数据库/Redis/Broker/迁移检测、异步结果失效。节点连接 JSON 导入导出免去手抄令牌与 UUID。根 YAML 的修改会在启动前应用，独立连接仅修改 active 项。
+- 支持仅保存、构建、构建并启动；新库初始化和迁移保持显式操作。镜像标签和日志带 Everunfold 标识，宿主构建日志实时输出。前端主体和插件先完成再切换产物，启动不重编译。原生入口自动加载环境并托管本端进程。
+- 本端配置及启动器测试 16 项通过、1 项按组件跳过，含真实 PTY 颜色/终端恢复、80×24 布局、旧配置迁移、双模式往返、插件回滚及 Docker 命令桩编排。Ruff、Bash、Compose v2 渲染及两端 Sphinx 严格构建通过。桌面/小终端 SVG 预览检查已修正按钮裁剪和列宽；CJK 字宽以真实 PTY 与 Rich 单元格宽度核对。
+- 隔离 PostgreSQL/Redis 实测初始化、就绪检查和节点导出；用根入口真实启动 API、Worker、Scheduler、Web、接收器。后端 `/health/ready` 200，database/redis/schema 均 ok；前端首次尚无公开快照为 503，接收器无凭据返回 403。真实 Next.js 生产构建与六个独立插件构建通过。
+- 限制：环境无 Docker CLI/daemon/socket，未执行实际镜像构建和跨容器通信；Compose 与命令桩不能替代实机验收。未执行测试新节点的完整公开同步。本轮只使用隔离数据与临时检出，未改现有运行实例或服务。后续在部署机执行教程的镜像构建、HTTPS 配对、首次同步验收。
+- 本记录替代下方历史“无额外 Python 依赖、docker/configure.py 为入口”的描述；新的工具依赖已锁定。旧 Supervisor 联调模板仍保留，入口与本次生产部署助手分开。
+
+
 ## 配置总览菜单与终端编辑
 
 - 两端 `docker/configure.py` 启动先显示全部向导配置项及当前值，提供「1.按次序配置 / 2.修改某配置项 / 3.退出」。退出时可保存、放弃或返回；已有实例可按编号修改单项，后端导入令牌仍可分别编辑。发布 URL、服务端内部连接、进程监听和宿主映射保持独立。见 [ADR 0153](../decisions/0153-terminal-configuration-menu.md) 和 [使用教程](../../docker/README.md)。

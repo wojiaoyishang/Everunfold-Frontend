@@ -141,7 +141,7 @@ class Files:
                 replaced.append(path)
             for path in values:
                 print(f"  已保存 {path}")
-        except (OSError, ValueError):
+        except BaseException:
             for path in reversed(replaced):
                 original = self.originals[path]
                 if original is None:

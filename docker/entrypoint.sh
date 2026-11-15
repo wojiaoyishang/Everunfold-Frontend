@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+printf 'Everunfold Frontend | runtime image %s | mode %s\n' "${EVERUNFOLD_IMAGE_REVISION:-unknown}" "${1:-deploy}"
+
 source_root=/workspace
 build_root=/build/work
 output=/output

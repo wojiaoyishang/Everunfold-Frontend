@@ -67,4 +67,11 @@ Thumbs.db
 /docker/instance/
 /docker/data/
 /docker/output/
+/deploy/__pycache__/
+/deploy/assistant/.venv/
 /docker/__pycache__/
+/deploy/assistant/__pycache__/
+
+# Project deployment configuration (contains private values)
+/config.yaml
+/config.yaml.*.bak

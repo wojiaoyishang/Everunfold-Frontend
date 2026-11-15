@@ -1,102 +1,120 @@
 部署、启动与升级
 ================
 
-开发容器
---------
+首次安装按 :doc:`../welcome/quickstart`，分别完成后端、节点配对和前端首次同步。
+所有配置操作都从各仓库根目录的 ``setup.sh`` 进入，统一配置文件是根目录
+``config.yaml``。助手在 ``deploy/``，镜像与容器编排在 ``docker/``。
 
-后端仓库的 ``deploy/`` 提供 Supervisor 配置与 Nginx 模板。
-这套脚本面向本地联调，包含 Next.js 开发模式、单并发 Worker 及可丢弃的专用查询缓存 Redis。
+一、Docker 从零构建与维护
+-------------------------
 
-1. 按 :doc:`../welcome/quickstart` 安装两端依赖、显式初始化数据库，
-   并准备节点身份、来源 UUID 和凭据。若从手动运行切换到 Supervisor，释放原有监听端口。
-2. 将两个方向的令牌环境变量写入由部署者私下保存的后端 ``.env.container.local``。
-   确认后端 ``.venv`` 与前端 ``node_modules`` 已安装。
-3. 从 ``deploy/nginx.container.conf.template`` 生成运行文件
-   ``var/container/nginx.conf``。将 ``__RUNTIME_DIR__`` 替换为该运行目录的绝对路径，
-   将 ``__PUBLIC_HOST__`` 替换为联调主机名。确保运行目录可由服务账号写入。
-   容器模板的对外代理端口为 3000，Next.js 端口为 3100，API 端口为 8001。
-   ``deploy/start-test.sh`` 预期接收器监听容器内的 ``0.0.0.0:3001``。
-   保持 3001 和后端直接端口仅在部署网络可达。
-4. 在后端目录执行下列命令。只检查当前状态用 ``--check``。
+配置与构建
+~~~~~~~~~~
 
-   .. code-block:: bash
+安装 Docker Engine、Compose v2 和 Bash 4+，准备可达的 PostgreSQL / Redis 后运行
+``./setup.sh --docker``。选择保存、构建或构建并启动。
+新后端使用“初始化新库”，迁移与初始化不会在普通服务启动时自动执行。
 
-      ./deploy/start-test.sh
-      ./deploy/start-test.sh --check
-      ./deploy/container-dev.sh status
+镜像默认为 ``everunfold-backend:python312`` 和 ``everunfold-frontend:node22``，
+构建阶段、镜像标签、启动日志均带 Everunfold 组件标识和源码版本。
+一次性配置容器不挂 Docker socket，实际镜像构建由宿主脚本执行。
 
-``EVERUNFOLD_FRONTEND_ROOT`` 可覆盖默认的同级前端检出目录，
-``EVERUNFOLD_RUNTIME_DIR`` 可覆盖 Supervisor、Nginx 运行文件与日志所在目录。
-默认七个程序为 ``api``、``frontend``、``receiver``、``worker``、``scheduler``、
-``query-cache`` 和 ``proxy``。查看、重启或停止时继续使用配置它们的同一后端目录。
+后端只有源码 ``/workspace`` 与持久化 ``/data`` 两个挂载。
+前端镜像有编译和部署两种模式：编译模式接收只读源码，安装锁定依赖，导出新产物；
+部署模式运行所选产物。``start`` 和重启不编译。
+主体与整个插件批次构建成功后才更新所选版本；失败不选择未完成的产物。
+
+后端升级
+~~~~~~~~
+
+先按 :doc:`recovery` 备份数据库、根配置和媒体，在维护窗口执行：
 
 .. code-block:: bash
 
-   ./deploy/container-dev.sh restart receiver
-   ./deploy/container-dev.sh status
+   ./setup.sh --docker build
+   ./setup.sh --docker migrate
+   ./setup.sh --docker start
+   curl --fail http://127.0.0.1:8001/health/ready
 
-独立托管进程
-------------
+迁移命令停止本 Compose 后端，显式升级核心、登记插件并检查依赖。
+成功后由 ``start`` 恢复 API、Worker、Scheduler，保持每个范围一个 Scheduler。
+它不会迁移 PostgreSQL 服务本身，也不会自动升级其他实例。
 
-1. 从同一批预发布记录选择前端、后端及配套契约提交。恢复明确锁定的依赖后先构建前端。
-   在预发布环境验证之前，不对外切流。
+前端升级与插件
+~~~~~~~~~~~~~~
 
-   .. code-block:: bash
+.. code-block:: bash
 
-      npm ci --ignore-scripts
-      npm run build
+   ./setup.sh --docker build
+   ./setup.sh --docker start
+   docker compose -f docker/compose.yaml logs --tail=100 frontend
 
-2. 挂载 PostgreSQL、媒体目录与前端节点的设置及快照目录。配置 TLS、两个方向的令牌、
-   Cookie、CORS 和端口。按 :doc:`configuration` 分别填写两端实例配置。
-3. 新站点执行初始化。已有实例在发布窗口中按 :doc:`recovery` 建立恢复点，
-   检查迁移头并显式执行 Alembic。
+修改域名、连接和进程参数只需重新保存、启动，无需编译。
+主体或主题源码变化要显式构建；独立插件沿用插件发布机制，可在 ``docker/`` 内执行
+``docker compose run --rm builder build-plugins 插件目录名``。
+回滚主体时，在根 YAML 的 ``docker.FRONTEND_ARTIFACT_DIR`` 指向保留产物，再启动并核对兼容性。
 
-   .. code-block:: bash
+宿主 HTTPS 代理默认转发 API 到 ``127.0.0.1:8001``、Web 到 ``127.0.0.1:3000``、
+内部接收器到 ``127.0.0.1:3001``。对应发布 URL 与实际监听分别配置。
+数据默认位于 ``docker/data/``；前端产物在 ``docker/output/``。
+删除应用容器不删除这些宿主目录。备份根 ``config.yaml``、数据、所选产物和 PostgreSQL。
 
-      uv run --locked alembic -c migrations/alembic.ini current
-      uv run --locked alembic -c migrations/alembic.ini upgrade head
+二、不使用 Docker
+-----------------
 
-4. 用部署环境的进程管理器分别运行下列三条后端命令。
-   同一作用域保持一个 Scheduler，保留 Worker 完成或恢复工作的退出时间。
+构建与运行
+~~~~~~~~~~
 
-   .. code-block:: bash
+安装 uv；前端另外安装 Node.js 22 / npm 10。根目录运行 ``./setup.sh --native``，
+同样使用根 YAML，自动生成 ``var/instance/`` 下的运行文件。
+``EVERUNFOLD_INSTANCE_DIR`` 可指定实例目录，托管进程须使用相同值。
+更换部署方式不会搬运现有数据，切换前需安排媒体、快照和插件目录迁移。
 
-      uv run --locked uvicorn app.entrypoints.api:app --host 127.0.0.1 --port 8001 --no-proxy-headers
-      uv run --locked celery -A app.entrypoints.worker:celery_app worker --loglevel=INFO
-      uv run --locked python -m app.entrypoints.scheduler
+.. code-block:: bash
 
-   示例 API 命令用于本机代理；分机部署时按私有监听地址、防火墙、TLS 终止位置和服务器设置调整。
-   通过代码部署后端插件后，使用下列命令登记清单，以当前部署配置运行。
+   ./setup.sh --native build
+   ./setup.sh --native start
 
-   .. code-block:: bash
+后端安装锁定 Python 依赖；前端安装锁定 npm 依赖、编译主体和插件。
+``start`` 自动载入配置、执行部署检查并启动本端进程，Ctrl+C 统一停止。
+前端首次同步前的 503 属于未就绪状态，不能用配置检查通过代替公开读取验收。
 
-      uv run --locked python -m tools.register_backend_plugins --config config.toml --apply
+长期托管
+~~~~~~~~
 
-5. 在每个前端节点运行两个进程。切换监听端口时同步更新本机代理目标、
-   接收器地址与访问检查。
+使用 systemd / Supervisor 分别运行后端的三个入口：
 
-   .. code-block:: bash
+.. code-block:: bash
 
-      npm run start
-      npm run settings:receiver
+   ./setup.sh --native api
+   ./setup.sh --native worker
+   ./setup.sh --native scheduler
 
-6. 通过 :doc:`nodes` 确认后台看到节点，安排首次同步或重新同步。
-   再从公开入口检查一条已发布内容。访问管理员账户验证登录、资产上传和草稿 WebSocket，
-   检查入口上的私有路由可见性与缓存策略。
+前端分别运行：
 
-更新顺序与就绪信号
-------------------
+.. code-block:: bash
 
-更新前端之前，确保后端契约、运行迁移和插件清单与前端构建匹配。
-选择可控制写入的更新窗口，迁移后以同批版本启动 API、Worker 和 Scheduler，
-然后启动节点前端及接收器并核对同步。更新两端配置后，在运行环境确认相应进程已重新载入配置。
+   ./setup.sh --native web
+   ./setup.sh --native receiver
 
-- FastAPI ``/health/live`` 验证进程响应，``/health/ready`` 还检查 PostgreSQL、
-  迁移版本和运行 Redis。
-- Next.js 直接监听地址上的 ``/health/ready`` 检查本地公开快照可读。在单入口模板中，
-  从代理访问同名路径获取的是 API 就绪状态。
-- 接收器由后端在内部探测。检查后台「节点状态与维护」是否显示上报与相同的期望、实际版本。
-- 检查「运行与任务」中的 Scheduler 和 Worker 活动，再通过测试内容观察一次实际发布。
-  公开页、``/sitemap.xml`` 和 ``/feed.xml`` 以读者实际拿到的新版本为准。
+使用相同服务账号和实例目录，根 YAML 的环境值由启动器加载，无需在服务文件中重复凭据。
+单进程入口用于托管；发布前先执行 ``./setup.sh --native check``。
+已有 Supervisor / Nginx 本地联调模板继续保留在后端 ``deploy/``，
+其中开发模式和端口约定独立，不是本页生产运行入口。
 
-预发布配对版本和发布记录见 :doc:`../release/prerelease`。
+升级与验收
+~~~~~~~~~~
+
+先停止托管进程，备份根配置、数据库和媒体，更新同批代码及契约。
+后端执行 ``./setup.sh --native build``、``./setup.sh --native migrate``，再重启。
+前端执行 ``./setup.sh --native build`` 后重启；原生构建直接更新本检出的 ``.next``，
+需要回滚时应保留另一套代码和构建目录。
+
+- API ``/health/ready`` 核对数据库、迁移与 Redis。
+- 前端直连 ``/health/ready`` 核对本地公开快照，首次启用后执行完整同步。
+- 后台节点页核对期望、实际版本；运行与任务页面核对 Worker 和 Scheduler。
+- 用测试内容验证一次真实发布，再验证登录、媒体上传和草稿 WebSocket。
+
+完整命令和文件布局见
+`后端部署教程 <https://github.com/wojiaoyishang/Everunfold-Backend/blob/main/deploy/README.md>`__ 与
+`前端部署教程 <https://github.com/wojiaoyishang/Everunfold-Frontend/blob/main/deploy/README.md>`__。

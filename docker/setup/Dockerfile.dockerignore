@@ -1,0 +1,8 @@
+**
+!deploy/
+!deploy/assistant/
+!deploy/assistant/pyproject.toml
+!deploy/assistant/uv.lock
+!docker/
+!docker/setup/
+!docker/setup/Dockerfile

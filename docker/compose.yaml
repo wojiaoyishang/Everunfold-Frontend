@@ -3,8 +3,12 @@ name: everunfold-frontend
 x-frontend-image: &frontend-image
   image: ${FRONTEND_IMAGE:-everunfold-frontend:node22}
   build:
-    context: .
-    dockerfile: Dockerfile
+    context: ..
+    dockerfile: docker/Dockerfile
+    args:
+      BUILD_REVISION: ${EVERUNFOLD_BUILD_REVISION:-unknown}
+      BUILD_CREATED: ${EVERUNFOLD_BUILD_CREATED:-unknown}
+  user: "${EVERUNFOLD_UID:-1000}:${EVERUNFOLD_GID:-1000}"
 
 services:
   frontend:
@@ -15,8 +19,10 @@ services:
     env_file: ${FRONTEND_ENV_FILE:-./runtime.env}
     environment:
       FRONTEND_PORT: "${FRONTEND_WEB_PORT:-3000}"
+      FRONTEND_RECEIVER_PORT: "${FRONTEND_RECEIVER_PORT:-3001}"
     ports:
       - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PUBLISH_PORT:-3000}:${FRONTEND_WEB_PORT:-3000}"
+      - "127.0.0.1:${FRONTEND_RECEIVER_PUBLISH_PORT:-3001}:${FRONTEND_RECEIVER_PORT:-3001}"
     volumes:
       - type: bind
         source: ${FRONTEND_ARTIFACT_DIR:-./output/pre-1}
@@ -54,7 +60,7 @@ services:
         bind:
           create_host_path: false
       - type: bind
-        source: ${FRONTEND_DATA_DIR:-./data}/plugins
+        source: ${FRONTEND_PLUGIN_OUTPUT_DIR:-${FRONTEND_DATA_DIR:-./data}/plugins}
         target: /plugins
         bind:
           create_host_path: false
