@@ -4,6 +4,16 @@
 
 ## 1. 准备配置
 
+先在终端运行配置向导，需 Python 3.10 或更新版本：
+
+```bash
+python3 configure.py
+```
+
+向导逐项询问站点地址、后端地址、来源 UUID、节点、接收器和双向令牌。后端生成的令牌可以逐项手输，也可以从后端向导生成的 `runtime.env` 导入，留空使用导入值。它只读取两项令牌。确认后创建私有配置、数据和输出目录。已有配置时请直接编辑原文件。
+
+共用 Docker 网络需要单独创建。使用向导后，可跳过下列复制模板的命令。
+
 ```bash
 docker network inspect everunfold >/dev/null 2>&1 || docker network create everunfold
 mkdir -p data/plugins output
