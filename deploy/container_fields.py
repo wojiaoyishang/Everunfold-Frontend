@@ -18,6 +18,10 @@ def mount_path(value: str) -> bool:
 
 def add_container_fields(ctx, add, value):
     prefix = ctx.role.upper()
+    attached_networks = (
+        ctx.compose.get("EVERUNFOLD_NETWORK", "bridge"),
+        ctx.compose.get("EVERUNFOLD_EXTRA_NETWORKS", ""),
+    )
     fields = [
         (
             "source_dir",
@@ -76,10 +80,7 @@ def add_container_fields(ctx, add, value):
     def pending_network():
         if ctx.native:
             return []
-        if (value("network"), value("extra_networks")) != (
-            ctx.compose.get("EVERUNFOLD_NETWORK", "bridge"),
-            ctx.compose.get("EVERUNFOLD_EXTRA_NETWORKS", ""),
-        ):
+        if (value("network"), value("extra_networks")) != attached_networks:
             return [Check("容器网络", "warning", "请先仅保存并重新打开助手，再从新网络检测连接。")]
         return []
 

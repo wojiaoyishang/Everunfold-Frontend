@@ -14,6 +14,7 @@ from config_model import Configuration, Field
 from config_probes import frontend_checks
 from config_validation import (
     identifier,
+    internal_url,
     ip_address,
     peer_list,
     positive,
@@ -100,8 +101,17 @@ def configure(native: bool = False) -> Configuration:
                 raise ValueError
             if proposed["inbound"] == proposed["outbound"] or references[0] == references[1]:
                 raise ValueError
+        except FileNotFoundError:
+            hint = (
+                ""
+                if native
+                else "；宿主文件请用 ./setup.sh --docker --connection-file 文件绝对路径 导入"
+            )
+            raise ValueError("当前环境找不到该连接文件" + hint) from None
+        except PermissionError:
+            raise ValueError("当前运行用户没有读取该连接文件的权限。") from None
         except (OSError, ValueError, KeyError, TypeError):
-            raise ValueError("无法导入：请检查连接文件路径、格式、来源 UUID 和双向令牌。") from None
+            raise ValueError("连接文件无效：请检查格式、大小、来源 UUID 和双向令牌。") from None
         for key, text in proposed.items():
             by_key[key].value = text
         names[:] = references
@@ -116,7 +126,7 @@ def configure(native: bool = False) -> Configuration:
         resolve=import_connection,
         empty="选中后导入；也可逐项填写",
         hint="填写后端导出的 connections/节点ID.json 路径；旧 runtime.env 仅导入令牌。"
-        "Docker 可先把文件复制到本仓库 docker/data/。",
+        "Docker 宿主文件可用 ./setup.sh --docker --connection-file 文件绝对路径 只读导入。",
     )
     add(
         "api",
@@ -138,10 +148,10 @@ def configure(native: bool = False) -> Configuration:
         "internal",
         "后端内部连接 URL",
         backend.get("base_url", ""),
-        valid=lambda v: not v or public_url(v),
+        valid=lambda v: not v or internal_url(v),
         resolve=lambda v: v.rstrip("/"),
         empty="沿用后端发布 URL",
-        hint="服务端访问后端，使用 HTTPS；本机可用回环 HTTP。",
+        hint="前端服务端访问后端。支持容器内网 HTTP/HTTPS，例如 http://everunfold-backend:8001；检测只访问此地址。",
     )
     add(
         "node",
@@ -180,42 +190,17 @@ def configure(native: bool = False) -> Configuration:
         )
     add(
         "host",
-        "Web 绑定 IP",
+        "前端绑定 IP",
         env.get("FRONTEND_HOST", "127.0.0.1" if native else "0.0.0.0"),
         valid=ip_address,
         group="进程",
     )
     add(
         "port",
-        "Web 监听端口",
-        env.get("FRONTEND_PORT", "3000") if native else compose.get("FRONTEND_WEB_PORT", "3000"),
+        "前端监听端口",
+        env.get("FRONTEND_PORT", compose.get("FRONTEND_WEB_PORT", "3000")),
         valid=valid_port,
         group="进程",
-    )
-    add(
-        "receiver_host",
-        "接收器绑定 IP",
-        env.get(
-            "FRONTEND_RECEIVER_HOST",
-            settings.get("receiver_host", "127.0.0.1" if native else "0.0.0.0"),
-        ),
-        valid=ip_address,
-        group="进程",
-    )
-    add(
-        "receiver_port",
-        "接收器监听端口",
-        (
-            env.get("FRONTEND_RECEIVER_PORT", settings.get("receiver_port", 3001))
-            if native
-            else compose.get(
-                "FRONTEND_RECEIVER_PORT",
-                env.get("FRONTEND_RECEIVER_PORT", settings.get("receiver_port", 3001)),
-            )
-        ),
-        valid=valid_port,
-        group="进程",
-        hint="与 Web 使用不同端口；对外提供受限 HTTPS 入口。",
     )
     add(
         "publish_host",
@@ -256,28 +241,10 @@ def configure(native: bool = False) -> Configuration:
         group="构建",
     )
 
-    add(
-        "receiver_publish_port",
-        "接收器宿主回环映射端口",
-        compose.get("FRONTEND_RECEIVER_PUBLISH_PORT", "3001"),
-        valid=valid_port,
-        active=lambda: not native,
-        group="Docker",
-        hint="只映射到宿主 127.0.0.1，供宿主 HTTPS 反向代理转发内部投递。",
-    )
-
     def check() -> list[str]:
         errors = container_errors()
         if value("inbound") == value("outbound"):
             errors.append("两个方向的节点令牌必须不同。")
-        if (
-            valid_port(value("port"))
-            and valid_port(value("receiver_port"))
-            and int(value("port")) == int(value("receiver_port"))
-        ):
-            errors.append("Web 与接收器必须使用不同端口。")
-        if not native and value("publish_port") == value("receiver_publish_port"):
-            errors.append("Web 与接收器的宿主映射端口必须不同。")
         return errors
 
     async def probe():
@@ -306,16 +273,13 @@ def configure(native: bool = False) -> Configuration:
         else:
             local_settings["source_epoch"] = str(UUID(value("epoch")))
         for key in ("receiver_host", "receiver_port"):
-            if key in local_settings:
-                local_settings[key] = int(value(key)) if key == "receiver_port" else value(key)
+            local_settings.pop(key, None)
         config.setdefault("cache", {}).setdefault("directory", ctx.runtime_path("public-snapshots"))
         environment = {
             names[0]: value("inbound"),
             names[1]: value("outbound"),
             "FRONTEND_HOST": value("host"),
             "FRONTEND_PORT": value("port"),
-            "FRONTEND_RECEIVER_HOST": value("receiver_host"),
-            "FRONTEND_RECEIVER_PORT": value("receiver_port"),
         }
         for name, key in (
             ("PUBLIC_SITE_URL", "site"),
@@ -336,8 +300,6 @@ def configure(native: bool = False) -> Configuration:
                     "FRONTEND_BIND_ADDRESS": f"[{host}]" if ":" in host else host,
                     "FRONTEND_PUBLISH_PORT": value("publish_port"),
                     "FRONTEND_IMAGE": value("image"),
-                    "FRONTEND_RECEIVER_PORT": value("receiver_port"),
-                    "FRONTEND_RECEIVER_PUBLISH_PORT": value("receiver_publish_port"),
                 }
             )
         if not native:
@@ -354,6 +316,16 @@ def configure(native: bool = False) -> Configuration:
         outputs[ctx.compose_path] = update_env(outputs[ctx.compose_path], container_mapping())
         ctx.write(outputs)
 
+    notice = ""
+    selected_file = os.environ.get("EVERUNFOLD_CONNECTION_FILE", "")
+    if selected_file:
+        by_key["connection_file"].value = selected_file
+        try:
+            import_connection(selected_file)
+            notice = "连接文件已导入，可检查并修改后保存。"
+        except ValueError as error:
+            notice = str(error)
+
     return Configuration(
         "Everunfold Frontend",
         fields,
@@ -362,6 +334,7 @@ def configure(native: bool = False) -> Configuration:
         probe=probe,
         native=native,
         location=str(ctx.root_path),
+        notice=notice,
     )
 
 

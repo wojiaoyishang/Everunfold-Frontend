@@ -19,10 +19,10 @@ const stopInventory = watchInventory(root, output);
 const next = spawn(
   process.execPath,
   [
-    path.join(root, "node_modules/next/dist/bin/next"),
-    dev ? "dev" : "start",
-    "--hostname",
-    process.env.FRONTEND_HOST ?? "0.0.0.0",
+    "--import",
+    "tsx",
+    path.join(root, "tools/server.mts"),
+    ...(dev ? ["--dev"] : []),
     ...process.argv.slice(3),
   ],
   {

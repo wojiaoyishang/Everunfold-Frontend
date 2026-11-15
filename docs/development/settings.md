@@ -2,7 +2,7 @@
 
 发布回执、节点策略、磁盘副本和部署配置见[节点状态指南](cache-management.md)。
 
-版本：settings-runtime-20，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)、[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)与[ADR0111](../decisions/0111-sparse-custom-translation-overrides.md)。本地前端 3000、API 8001、内部设置接收器 3001；旧 WordPress 仅作参考。
+版本：settings-runtime-20，2026-11-11。实现决定见 [ADR0024](../decisions/0024-versioned-settings-delivery.md)、[ADR0066](../decisions/0066-configurable-languages-and-grouped-translations.md)、[ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0100](../decisions/0100-theme-owned-settings-profiles.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md)、[ADR0106](../decisions/0106-system-settings-captcha-and-grouped-navigation.md)与[ADR0111](../decisions/0111-sparse-custom-translation-overrides.md)。本地前端 3000、API 8001、内部设置接收与前端共用 3000；旧 WordPress 仅作参考。
 
 ## 使用入口
 
@@ -52,20 +52,20 @@ settings契约1.25.0新增`theme_options`、文章显示/首页默认值/代码�
 ## 初次启动与配置
 
 1. 后端执行 `uv sync --locked`，再显式执行 `uv run python init.database.py`。已有数据库可加 `--no-create-database`。迁移 `0004_settings` 建立节点策略、审计、投递表，`0005_icon_media` 增加媒体原件记录，`0006_media_details` 增加附件资料与编辑来源，`0007_media_library` / `0008_media_safe_delete` 增加上传复用及安全删除回执；仅为空站点插入初值，不重置现有账号/文章。API 启动不做迁移。
-2. 后端 `config.toml` 的 `[frontends.web-main]` 设置 `enabled=true`、`settings_receiver_url="http://127.0.0.1:3001"`；两个方向的 token 仍只填写环境变量名称。非回环地址必须 HTTPS。
-3. 前端 `config.toml` 增加 `[settings]`：`directory="./var/settings"`、`receiver_host="127.0.0.1"`、`receiver_port=3001`、`source_epoch="实际后端 UUID"`。从已鉴权 GET 设置响应的 `data.source_epoch` 或 SQL `SELECT source_epoch FROM site_settings WHERE id=1` 获取，不从未经认证请求自动认领 epoch。
+2. 后端 `config.toml` 的 `[frontends.web-main]` 设置 `enabled=true`、`settings_receiver_url="http://127.0.0.1:3000"`；两个方向的 token 仍只填写环境变量名称。非回环地址必须 HTTPS。
+3. 前端 `config.toml` 增加 `[settings]`：`directory="./var/settings"`、`source_epoch="实际后端 UUID"`。从已鉴权 GET 设置响应的 `data.source_epoch` 或 SQL `SELECT source_epoch FROM site_settings WHERE id=1` 获取，不从未经认证请求自动认领 epoch。
 4. 前端 `[backend]` 配置允许的真实 peer IP/CIDR、FastAPI → Next.js token 环境变量名称，与后端目标节点一致。接收器不信任 X-Forwarded-For；TLS/反代部署须重新评估真实连接来源边界。
-5. 继续正常启动 API 和 Next.js。本机开发可在后端项目额外运行：
+5. 单独启动 API。本机联调可用下面的辅助命令启动前端、Worker 和 Scheduler：
 
 ```powershell
 uv run python -m tools.run_settings_dev --frontend-root E:/Programming/Node/Everunfold-Frontend
 ```
 
-此辅助程序启动三个独立子进程：Node 接收器、Celery solo Worker、自研 Scheduler。Ctrl+C 只停止它启动的子进程，不停止 3000/8001；仅适用于单个已启用节点的本机联调。它为两个发送/接收进程提供同一份随机凭据，保存在被忽略的 `var/settings-dev-secrets.json`，不输出、不提交；不是生产密钥管理器。不要重复启动第二套相同 namespace 的 Scheduler。
+此辅助程序启动共用一个端口的前端网页与接收器、Celery solo Worker、自研 Scheduler。使用此命令时不再另外运行同一前端。Ctrl+C 停止它启动的前端和投递进程，API 保持独立；仅适用于单个已启用节点的本机联调。它为两个发送/接收进程提供同一份随机凭据，保存在被忽略的 `var/settings-dev-secrets.json`，不输出、不提交；不是生产密钥管理器。不要重复启动第二套相同 namespace 的 Scheduler。
 
-独立部署的入口分别是：前端 `npm run settings:receiver`；后端 `uv run celery -A app.entrypoints.worker:celery_app worker` 和 `uv run python -m app.entrypoints.scheduler`。凭据由各服务的运行环境注入；进程监督、TLS、生产 Worker pool/权限和磁盘策略另行部署验证。Scheduler 不需要发送密钥，只有真正投递的 Worker 读取凭据。
+独立部署的入口分别是：前端 `npm start`（网页与内部同步共用端口）；后端 `uv run celery -A app.entrypoints.worker:celery_app worker` 和 `uv run python -m app.entrypoints.scheduler`。凭据由各服务的运行环境注入；进程监督、TLS、生产 Worker pool/权限和磁盘策略另行部署验证。Scheduler 不需要发送密钥，只有真正投递的 Worker 读取凭据。
 
-修改实际 TOML/环境变量后需重启相应 API、接收器、Worker 或 Scheduler。完成部署后，在「节点状态」选择当前节点并点击「重新同步全部」。等待节点确认后核对站点设置和策略的磁盘版本。
+修改实际 TOML/环境变量后需重启相应 API、前端、Worker 或 Scheduler。完成部署后，在「节点状态」选择当前节点并点击「重新同步全部」。等待节点确认后核对站点设置和策略的磁盘版本。
 
 ## 副本结构与恢复
 

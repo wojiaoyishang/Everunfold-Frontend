@@ -149,6 +149,10 @@ class Files:
                 else:
                     path.write_bytes(original)
             raise
+        else:
+            # A second save compares against our last successful write, while
+            # still detecting edits made by another process between saves.
+            self.originals.update({path: text.encode() for path, text in values.items()})
         finally:
             for staged in temporary.values():
                 staged.unlink(missing_ok=True)

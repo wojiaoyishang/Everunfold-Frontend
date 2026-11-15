@@ -9,22 +9,21 @@ const base = {
   backend: { allowed_peer_ips: ["127.0.0.1", "::1", "10.0.0.0/24"] },
   cache: { directory: "./var/public-snapshots" },
 };
-test("receiver environment overrides the instance listener and validates the port", () => {
+test("one frontend listener ignores legacy receiver ports and validates its environment", () => {
   const input = {
     ...base,
     settings: { receiver_host: "127.0.0.1", receiver_port: 3010 },
   };
   const config = parseConfiguration(input, {
-    FRONTEND_RECEIVER_HOST: "0.0.0.0",
+    FRONTEND_HOST: "0.0.0.0",
+    FRONTEND_PORT: "3100",
     FRONTEND_RECEIVER_PORT: "3001",
   });
-  assert.equal(config.settings.receiverHost, "0.0.0.0");
-  assert.equal(config.settings.receiverPort, 3001);
-  assert.equal(parseConfiguration(input).settings.receiverPort, 3010);
+  assert.equal(config.listener.host, "0.0.0.0");
+  assert.equal(config.listener.port, 3100);
+  assert.equal(parseConfiguration(input).listener.port, 3000);
   for (const port of ["", "3e3", "65536"]) {
-    assert.throws(() =>
-      parseConfiguration(input, { FRONTEND_RECEIVER_PORT: port }),
-    );
+    assert.throws(() => parseConfiguration(input, { FRONTEND_PORT: port }));
   }
 });
 test("published URLs, backend connection and listeners stay separate", () => {
@@ -45,8 +44,8 @@ test("published URLs, backend connection and listeners stay separate", () => {
   assert.equal(config.backendBaseUrl, "https://api.example.com");
   assert.equal(config.backend.baseUrl, "http://backend.internal:8000");
   assert.equal(config.publicSiteUrl, "https://blog.example.com");
-  assert.equal(config.settings.receiverHost, "127.0.0.2");
-  assert.equal(config.settings.receiverPort, 3001);
+  assert.equal(config.listener.host, "0.0.0.0");
+  assert.equal(config.listener.port, 3000);
   assert.equal(
     browserBackendBaseUrl(config, "127.0.0.1:13000", "http:"),
     "https://api.example.com",

@@ -20,11 +20,11 @@
            /v1/*、/ws/v1/*、/media/*、/health/*、API 文档 → FastAPI :8001
            页面、Next 静态资源、热更新连接 → Next.js :3100
 
-Worker / Scheduler → Node 设置与内容接收器 :3001
+Worker → Next.js 内部设置与内容接口 :3100
 容器内也可使用回环入口；页面中的公开API/媒体地址以本地实际配置为准。
 ```
 
-四个监听器均绑定 `0.0.0.0`。宿主机只需映射 3000；3001 是内部接收器，8001/3100 是上游开发进程。容器内没有宿主机 Docker socket，映射由用户在宿主机完成；修改已有容器映射通常需要按原配置重建，须保留 `/config`、`/workspace` 和原桌面/网络配置，不能用一个简化的 `docker run` 覆盖原容器。
+三个监听器均绑定 `0.0.0.0`。宿主机只需映射 3000；8001/3100 是上游开发进程，内部同步与网页共用 3100。容器内没有宿主机 Docker socket，映射由用户在宿主机完成；修改已有容器映射通常需要按原配置重建，须保留 `/config`、`/workspace` 和原桌面/网络配置，不能用一个简化的 `docker run` 覆盖原容器。
 
 Nginx 保留原 API 与 WS 路径，不引入 `/api` 前缀；`/internal` 和 `/internal/*` 在公开入口返回 404。Uvicorn 保留 `--no-proxy-headers`，实际 socket 来源经过代理后是回环地址，当前远程浏览器会共享该来源的限流桶。生产若需按客户端 IP 限流，应单独设计受信代理边界，不能直接信任任意转发头。
 
@@ -50,7 +50,7 @@ Nginx 保留原 API 与 WS 路径，不引入 `/api` 前缀；`/internal` 和 `/
 
 ## 启停与重启
 
-容器没有正在运行的 systemd。使用当前用户的独立 Supervisor，经 Unix socket 管理六个进程：API、前端、接收器、Worker、单进程 Scheduler、Nginx。命令见后端 [deploy 说明](../../deploy/README.md)；前端仓库读者应在同级后端运行这些命令。
+容器没有正在运行的 systemd。使用当前用户的独立 Supervisor，经 Unix socket 管理六个进程：API、前端、Worker、单进程 Scheduler、查询缓存 Redis、Nginx。命令见后端 [deploy 说明](../../deploy/README.md)；前端仓库读者应在同级后端运行这些命令。
 
 ```bash
 cd /config/Desktop/workspace/Everunfold/Everunfold-Backend
@@ -67,7 +67,7 @@ cd /config/Desktop/workspace/Everunfold/Everunfold-Backend
 /workspace/start-everunfold.sh --check
 ```
 
-该可执行入口是指向后端`deploy/start-test.sh`的相对软链接，保存在工作区挂载内，实际脚本随Git维护。它复用上面的Supervisor启动方式，不重启已运行服务；用运行目录的文件锁防止同时重复启动，且不把锁传给守护进程。默认等待120秒（`EVERUNFOLD_START_TIMEOUT`可设为1至600），检查六个进程全部RUNNING、3000/3100/8001/3001均监听0.0.0.0，以及API/代理健康与后台页面均返回HTTP200。`--check`只检查当前状态，失败返回非零；失败会显示进程状态和日志目录。
+该可执行入口是指向后端`deploy/start-test.sh`的相对软链接，保存在工作区挂载内，实际脚本随Git维护。它复用上面的Supervisor启动方式，不重启已运行服务；用运行目录的文件锁防止同时重复启动，且不把锁传给守护进程。默认等待120秒（`EVERUNFOLD_START_TIMEOUT`可设为1至600），检查六个进程全部RUNNING、3000/3100/8001均监听0.0.0.0，以及API/代理健康与后台页面均返回HTTP200。`--check`只检查当前状态，失败返回非零；失败会显示进程状态和日志目录。
 
 脚本复用既有依赖与忽略的实例配置，仍使用HTTP和用户已配置的宿主机端口映射；不把具体入口或密码写入脚本。重新部署同样目录时，可按后端`deploy/README.md`重建工作区软链接。
 
@@ -88,3 +88,5 @@ Scheduler 使用 SIGINT 退出，以执行租约清理；异常退出后的启�
 部署验收见 [容器部署验证](../handoff/container-deployment-verification.md)，各仓库最新结果见 `docs/handoff/STATUS.md`。先确认远程登录、编辑保存、WebSocket 和公开投递，再继续 WordPress 只读预检及导入计划。
 
 后端测试使用独立 `everunfold_test` 和独立 scope。原撤回开发工具有额外回环地址保护；Docker DNS 地址直接运行该 P0 会被拒绝。本次使用仅绑定回环、临时端口的 TCP 转接连接同一测试服务完成验证，结束后销毁转接进程并恢复本地测试配置；未放宽该工具的保护或指向业务库运行故障注入。
+
+2026-11-15 单端口更新：模板已移除独立 receiver 进程。已有本地实例需更新接收器 URL 到前端端口并重新加载 Supervisor 配置；本轮未修改正在运行的实例。

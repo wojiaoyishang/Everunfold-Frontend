@@ -241,6 +241,8 @@ class SetupApp(App[int]):
         self.sequence: list[Field] = []
         self.results: list[Check] = []
         self.testing = False
+        self.saved = False
+        self.exporting = False
         self.theme = "textual-dark"
 
     def compose(self) -> ComposeResult:
@@ -285,12 +287,18 @@ class SetupApp(App[int]):
         else:
             message = "导入后端连接文件可自动填写节点信息和令牌。"
         self.query_one("#checks", RichLog).write("尚未检测。" + message)
+        if self.config.notice:
+            self.query_one("#checks", RichLog).write(self.config.notice)
         table.focus()
 
     def on_resize(self, event) -> None:
         self.screen.set_class(event.size.height < 34, "compact")
         if self.is_mounted:
             self.refresh_fields(event.size.width)
+            if self.saved:
+                self.call_after_refresh(
+                    self.query_one("#checks", RichLog).scroll_end, animate=False
+                )
 
     def refresh_fields(self, width: int | None = None) -> None:
         table = self.query_one(DataTable)
@@ -324,11 +332,15 @@ class SetupApp(App[int]):
         self.action_edit()
 
     def action_edit(self) -> None:
+        if self.exporting:
+            return
         item = self.config.fields[self.query_one(DataTable).cursor_row]
         if item.active():
             self.push_screen(Editor(self.config, item), self.edited)
 
     def action_sequential(self) -> None:
+        if self.exporting:
+            return
         self.sequence = list(self.config.fields)
         self.next_item()
 
@@ -350,16 +362,21 @@ class SetupApp(App[int]):
             self.sequence = []
 
     def action_leave(self) -> None:
+        if self.exporting:
+            self.notify("正在导出，请等待执行结果。")
+            return
+        result = 0 if self.saved else 10
         if self.config.snapshot() == self.config.initial:
-            self.exit(10)
+            self.exit(result)
         else:
             self.push_screen(
                 Confirm("放弃本次尚未保存的修改并退出？"),
-                lambda yes: self.exit(10) if yes else None,
+                lambda yes: self.exit(result) if yes else None,
             )
 
     def action_test(self) -> None:
-        self.test_connections()
+        if not self.exporting:
+            self.test_connections()
 
     @work(exclusive=True, group="connections")
     async def test_connections(self) -> None:
@@ -387,8 +404,10 @@ class SetupApp(App[int]):
     def action_save(self) -> None:
         self.finish("save")
 
-    @work(exclusive=True, group="finish")
+    @work(group="finish")
     async def finish(self, action: str) -> None:
+        if self.exporting or len(self.screen_stack) > 1:
+            return
         errors = self.config.errors()
         if action == "export-node" and not self.config.get("receiver"):
             errors.append("请填写该节点的内部接收器 URL。")
@@ -418,6 +437,41 @@ class SetupApp(App[int]):
         except (OSError, ValueError) as error:
             message = error.strerror if isinstance(error, OSError) else str(error)
             self.query_one("#checks", RichLog).write(Text(f"未保存：{message}", style="red"))
+            return
+        self.saved = True
+        self.config.initial = self.config.snapshot()
+        if action == "save":
+            self.query_one("#checks", RichLog).clear()
+            self.query_one("#checks", RichLog).write(
+                Text(f"保存成功：{self.config.location}", style="green")
+            )
+            self.notify("配置保存成功，可继续修改。", title="已保存")
+            return
+        if action == "export-node":
+            self.exporting = True
+            log = self.query_one("#checks", RichLog)
+            log.write("配置已保存，正在登记并导出节点…")
+            buttons = list(self.query(Button))
+            for button in buttons:
+                button.disabled = True
+            try:
+                if self.config.export_node is None:
+                    raise ValueError("请通过项目根目录的 ./setup.sh 启动助手。")
+                path = await self.config.export_node()
+            except (OSError, ValueError) as error:
+                message = error.strerror if isinstance(error, OSError) else str(error)
+                log.clear()
+                log.write(Text(f"导出失败：{message}", style="red"))
+                self.notify("导出失败，请查看执行结果。", severity="error")
+            else:
+                log.clear()
+                log.write(Text(f"导出成功，文件绝对路径：\n{path}", style="green"))
+                self.notify("节点连接文件已导出，完整路径见下方结果。", title="导出成功")
+            finally:
+                self.exporting = False
+                for button in buttons:
+                    button.disabled = False
+                self.query_one("#export-node", Button).focus()
             return
         self.exit(ACTIONS[action])
 

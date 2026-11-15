@@ -21,7 +21,7 @@ import configure
 from config_files import Files, env_values, update_env
 from config_model import Check
 from config_ui import Confirm, DatabaseForm, Editor, HistoryInput, SetupApp
-from textual.widgets import Button, DataTable, Input
+from textual.widgets import Button, DataTable, Input, RichLog
 
 BACKEND = hasattr(configure, "node_token_names")
 DOCKER = Path(__file__).resolve().parent
@@ -103,6 +103,28 @@ class ModelTests(Fixtures, unittest.TestCase):
         )
         self.assertIn(original_env, [p.read_bytes() for p in env.parent.glob("runtime.env.*.bak")])
         self.assertEqual(stat.S_IMODE(env.stat().st_mode), 0o600)
+
+    def test_repeated_save_preserves_last_saved_values_and_detects_external_edits(self):
+        model = self.complete()
+        model.save()
+        first = (self.root / "config.yaml").read_bytes()
+        self.edit(model, "api", "https://second.example.test")
+        model.save()
+        self.assertEqual(self.model().get("api"), "https://second.example.test")
+        self.assertIn(first, [p.read_bytes() for p in self.root.glob("config.yaml.*.bak")])
+        if BACKEND:
+            original_token = model.get("inbound")
+            self.edit(model, "node", "second-node")
+            model.save()
+            self.edit(model, "node", "web-main")
+            model.save()
+            self.assertEqual(self.model().get("inbound"), original_token)
+        path = self.root / "config.yaml"
+        external = path.read_text() + "# external change\n"
+        path.write_text(external)
+        with self.assertRaisesRegex(ValueError, "其他程序"):
+            model.save()
+        self.assertEqual(path.read_text(), external)
 
     def test_no_files_until_save_and_native_paths(self):
         model = self.complete(native=True)
@@ -299,6 +321,28 @@ class ModelTests(Fixtures, unittest.TestCase):
             files.write({a: "after-a", b: "after-b"})
         self.assertEqual(b.read_text(), "external edit")
 
+    @unittest.skipIf(BACKEND, "frontend single listener and connection import")
+    def test_legacy_receiver_settings_are_removed_on_save_and_import_errors_are_specific(self):
+        import yaml
+
+        self.complete().save()
+        path = self.root / "config.yaml"
+        document = yaml.safe_load(path.read_text())
+        document["application"].setdefault("settings", {}).update(
+            receiver_host="127.0.0.2", receiver_port=3001
+        )
+        document["environment"].update(FRONTEND_PORT="3250", FRONTEND_RECEIVER_PORT="3001")
+        document["docker"]["FRONTEND_RECEIVER_PUBLISH_PORT"] = "3001"
+        path.write_text(yaml.safe_dump(document))
+        model = self.model()
+        self.assertEqual(model.get("port"), "3250")
+        self.assertFalse(any("receiver" in field.key for field in model.fields))
+        with self.assertRaisesRegex(ValueError, "--connection-file"):
+            self.edit(model, "connection_file", str(self.root / "missing.json"))
+        model.save()
+        self.assertNotIn("RECEIVER", path.read_text())
+        self.assertNotIn("receiver_port", path.read_text())
+
     @unittest.skipIf(BACKEND, "frontend release handling")
     def test_failed_artifact_activation_preserves_previous_release(self):
         import bootstrap
@@ -359,6 +403,66 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
                 self.assertLessEqual(app.query_one("#" + name, Button).region.bottom, 24)
             self.assertLessEqual(sum(column.width + 2 for column in table.columns.values()), 78)
             app.exit(10)
+
+    async def test_save_stays_open_and_can_save_again_then_discard_only_unsaved_edits(self):
+        model = self.complete()
+        app = SetupApp(model)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.click("#save")
+            await pilot.pause()
+            self.assertTrue(app.is_running)
+            self.assertIn("保存成功", "".join(line.text for line in app.query_one(RichLog).lines))
+            self.edit(model, "api", "https://saved-again.example.test")
+            await pilot.press("ctrl+s")
+            await pilot.pause()
+            self.assertEqual(self.model().get("api"), "https://saved-again.example.test")
+            saved = (self.root / "config.yaml").read_bytes()
+            self.edit(model, "api", "https://discard.example.test")
+            await pilot.press("3")
+            self.assertIsInstance(app.screen, Confirm)
+            await pilot.click("#yes")
+        self.assertEqual(app.return_value, 0)
+        self.assertEqual((self.root / "config.yaml").read_bytes(), saved)
+
+    @unittest.skipUnless(BACKEND, "backend node export action")
+    async def test_export_stays_open_displays_absolute_path_and_handles_retry(self):
+        model = self.complete()
+        target = self.root / "external data/connections/web-main.json"
+        exports = 0
+
+        async def export():
+            nonlocal exports
+            exports += 1
+            if exports == 1:
+                raise ValueError("数据库尚未初始化")
+            return str(target)
+
+        model.export_node = export
+        app = SetupApp(model)
+        async with app.run_test(size=(80, 24)) as pilot:
+            for attempt in (1, 2, 3):
+                await pilot.click("#export-node")
+                await pilot.pause()
+                self.assertIsInstance(app.screen, Confirm)
+                await pilot.click("#yes")
+                await pilot.pause()
+                self.assertTrue(app.is_running)
+                lines = "".join(line.text for line in app.query_one(RichLog).lines)
+                self.assertIn("导出失败" if attempt == 1 else "导出成功", lines)
+                if attempt > 1:
+                    self.assertIn(str(target), lines)
+                self.assertFalse(app.query_one("#export-node", Button).disabled)
+            await pilot.press("3")
+        self.assertEqual(app.return_value, 0)
+        self.assertEqual(exports, 3)
+
+    async def test_network_change_still_requires_reopening_after_save(self):
+        model = self.complete()
+        self.edit(model, "network", "another-network")
+        model.save()
+        results = await model.probe()
+        self.assertEqual(results[0].name, "容器网络")
+        self.assertEqual(results[0].state, "warning")
 
     async def test_save_returns_action_and_exit_is_read_only(self):
         app = SetupApp(self.complete())

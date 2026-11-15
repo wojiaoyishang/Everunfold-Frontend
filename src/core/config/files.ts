@@ -31,8 +31,8 @@ export function connectionIdentity(config: FrontendConfiguration): string {
     config.settings.directory,
     config.cache.directory,
     config.cache.maxSnapshotBytes,
-    config.settings.receiverHost,
-    config.settings.receiverPort,
+    config.listener.host,
+    config.listener.port,
   ]);
 }
 

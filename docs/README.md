@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[单端口前端与保留配置界面的操作反馈](decisions/0158-single-port-and-persistent-setup.md)说明监听合并、内部地址检测、连接文件导入，以及保存和节点导出后的成功提示。
+
 [组合部署操作与统一 HTTP 响应](decisions/0157-deploy-action-and-http-envelopes.md)说明显式初始化并构建启动、根路径文案、错误外壳和在线 API 文档关闭。
 
 [空库自动初始化](decisions/0156-empty-database-bootstrap.md)说明默认开关、真实空库判定、初始化按钮修复和启动前复检。

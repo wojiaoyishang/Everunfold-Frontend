@@ -142,10 +142,7 @@ class Context:
         port_names = (
             {"API_PORT": "BACKEND_API_PORT"}
             if self.role == "backend"
-            else {
-                "FRONTEND_PORT": "FRONTEND_WEB_PORT",
-                "FRONTEND_RECEIVER_PORT": "FRONTEND_RECEIVER_PORT",
-            }
+            else {"FRONTEND_PORT": "FRONTEND_WEB_PORT"}
         )
         for variable, compose_name in port_names.items():
             if variable in self.env:
@@ -203,11 +200,20 @@ class Context:
             docker=env_values(outputs.get(self.compose_path, self.compose_source)),
             assistant=json.loads(outputs.get(self.meta_path, json.dumps(self.meta))),
         )
-        for derived in ("BACKEND_API_PORT", "FRONTEND_WEB_PORT", "FRONTEND_RECEIVER_PORT"):
+        if self.role == "frontend":
+            for name in (
+                "FRONTEND_RECEIVER_HOST",
+                "FRONTEND_RECEIVER_PORT",
+                "FRONTEND_RECEIVER_PUBLISH_PORT",
+            ):
+                document["environment"].pop(name, None)
+                document["docker"].pop(name, None)
+            for name in ("receiver_host", "receiver_port"):
+                document["application"].get("settings", {}).pop(name, None)
+        for derived in ("BACKEND_API_PORT", "FRONTEND_WEB_PORT"):
             variable = {
                 "BACKEND_API_PORT": "API_PORT",
                 "FRONTEND_WEB_PORT": "FRONTEND_PORT",
-                "FRONTEND_RECEIVER_PORT": "FRONTEND_RECEIVER_PORT",
             }[derived]
             if variable in document["environment"]:
                 document["docker"].pop(derived, None)
@@ -227,6 +233,16 @@ class Context:
             document, allow_unicode=True, sort_keys=False, default_flow_style=False
         )
         self.files.write({self.root_path: outputs[self.root_path]})
+        self.document = document
+        self.env.clear()
+        self.env.update(document["environment"])
+        self.env_source = update_env("", self.env)
+        self.compose.clear()
+        self.compose.update(document["docker"])
+        self.compose_source = update_env("", self.compose)
+        self.meta.clear()
+        self.meta.update(document["assistant"])
+        self.imported_from_data = False
 
     def peers(self) -> list[str]:
         addresses = ["127.0.0.1", "::1"]

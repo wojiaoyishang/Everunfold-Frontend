@@ -185,12 +185,41 @@ class LauncherTests(unittest.TestCase):
             if BACKEND
             else "CONFIG_FILE=/workspace/config.runtime.toml"
         )
+        self.assertEqual(create.count("-p"), 1)
         self.assertIn(config, create)
         self.assertFalse((self.data / "config.toml").exists())
         self.assertLess(
             calls.index(["network", "connect", "1panel-network", "custom-everunfold"]),
             calls.index(["start", "custom-everunfold"]),
         )
+
+    @unittest.skipIf(BACKEND, "frontend host connection bundle")
+    def test_connection_file_is_mounted_read_only_only_in_the_configurator(self):
+        import pty
+
+        connection = self.root / "backend data/connections/web-main.json"
+        connection.parent.mkdir(parents=True)
+        connection.write_text("{}")
+        master, slave = pty.openpty()
+        try:
+            result = subprocess.run(
+                [str(self.repo / "setup.sh"), "--docker", "--connection-file", str(connection)],
+                env=self.env,
+                stdin=slave,
+                stdout=slave,
+                stderr=subprocess.PIPE,
+                timeout=20,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+        finally:
+            os.close(master)
+            os.close(slave)
+        calls = [json.loads(line) for line in self.log.read_text().splitlines()]
+        mount = f"type=bind,source={connection},target={connection},readonly"
+        recipients = [call for call in calls if mount in call]
+        self.assertEqual(len(recipients), 1)
+        self.assertIn(str(self.repo / "deploy/configure.py"), recipients[0])
+        self.assertIn("EVERUNFOLD_CONNECTION_FILE=" + str(connection), recipients[0])
 
     def test_root_process_port_controls_mapping_without_duplicate_edits(self):
         path = self.repo / "config.yaml"

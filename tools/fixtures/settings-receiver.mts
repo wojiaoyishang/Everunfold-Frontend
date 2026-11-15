@@ -35,4 +35,8 @@ const server = settingsReceiver(
     config.cache.maxSnapshotBytes,
   ),
 );
-server.listen(config.settings.receiverPort, config.settings.receiverHost);
+// Fault-injection tests can select a separate ephemeral test socket.
+server.listen(
+  Number(process.env.TEST_RECEIVER_PORT ?? config.listener.port),
+  config.listener.host,
+);

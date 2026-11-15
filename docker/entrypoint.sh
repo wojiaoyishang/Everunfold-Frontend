@@ -84,20 +84,6 @@ report_build_exit() {
   fi
 }
 
-start_web() {
-  exec node --import tsx tools/plugins/run.mts start --port "${FRONTEND_PORT:-3000}"
-}
-
-start_receiver() {
-  exec node --import tsx tools/settings-receiver.mts
-}
-
-stop_services() {
-  trap '' TERM INT
-  kill -TERM "${children[@]}" 2>/dev/null || true
-  wait "${children[@]}" 2>/dev/null || true
-}
-
 deploy() {
   cd "$source_root"
   if [[ ! -s .next/BUILD_ID || ! -x node_modules/.bin/next ]]; then
@@ -105,15 +91,7 @@ deploy() {
     exit 1
   fi
   export NODE_ENV=production EVERUNFOLD_PROJECT_ROOT="$PWD" PLUGINS_DIRECTORY=/data/plugins
-  children=()
-  trap 'stop_services; exit 0' TERM INT
-  start_web & children+=("$!")
-  start_receiver & children+=("$!")
-  local status=0
-  wait -n "${children[@]}" || status=$?
-  echo 'A frontend process exited; stopping the remaining process.' >&2
-  stop_services
-  exit "$((status == 0 ? 1 : status))"
+  exec node --import tsx tools/plugins/run.mts start --port "${FRONTEND_PORT:-3000}"
 }
 
 case "${1:-deploy}" in

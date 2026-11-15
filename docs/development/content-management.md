@@ -50,13 +50,13 @@ uv run python init.database.py --no-create-database
 uv run uvicorn app.entrypoints.api:app --host 127.0.0.1 --port 8001 --no-proxy-headers
 ```
 
-另开终端运行投递辅助命令，Next3000可持续保留：
+另开终端运行辅助命令，同时启动前端与投递进程：
 
 ```powershell
 uv run python -m tools.run_settings_dev --frontend-root E:\Programming\Node\Everunfold-Frontend
 ```
 
-辅助命令运行独立 Node3001 接收器、Celery Worker 和 Scheduler，不替代 API/Next。配置沿用 frontends.<node>.settings_receiver_url 和稳定节点凭据；生产分别部署，浏览器不配置内部Token。详见设置指南。
+辅助命令运行共用一个端口的 Next.js 网页与接收器、Celery Worker 和 Scheduler；API 单独运行，不要再单独启动同一前端。配置沿用 frontends.<node>.settings_receiver_url 和稳定节点凭据；生产分别部署，浏览器不配置内部Token。详见设置指南。
 
 后端端点包括：GET `/v1/admin/content/editor-options`；POST `/v1/admin/content/categories`、`create`、`detail`、`save`、`publish`、`withdraw`、`trash`、`restore`；读公开受限正文使用单独 reader/access，所有类型和客户端从契约生成，不复制字段定义。
 

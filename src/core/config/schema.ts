@@ -8,6 +8,7 @@ export class ConfigurationError extends Error {
 }
 
 export interface FrontendConfiguration {
+  listener: { host: string; port: number };
   theme: { active: string };
   plugins: { directory: string };
   publicSiteUrl: string | undefined;
@@ -31,8 +32,6 @@ export interface FrontendConfiguration {
   settings: {
     directory: string;
     sourceEpoch: string | undefined;
-    receiverHost: string;
-    receiverPort: number;
   };
   cache: {
     directory: string;
@@ -185,6 +184,19 @@ function peerAddresses(value: unknown): string[] {
   return value as string[];
 }
 
+/** One socket for web pages, node diagnostics and authenticated internal sync. */
+export function listenerConfiguration(
+  environment: Record<string, string | undefined>,
+) {
+  const host = environment.FRONTEND_HOST ?? "0.0.0.0";
+  const rawPort = environment.FRONTEND_PORT ?? "3000";
+  if (!isIP(host)) throw new ConfigurationError("FRONTEND_HOST 必须为监听 IP");
+  const port = Number(rawPort);
+  if (!/^[0-9]{1,5}$/.test(rawPort) || port < 1 || port > 65535)
+    throw new ConfigurationError("FRONTEND_PORT 必须为 1–65535 的十进制端口号");
+  return { host, port };
+}
+
 export function parseConfiguration(
   input: unknown,
   environment: Record<string, string | undefined> = {},
@@ -225,6 +237,7 @@ export function parseConfiguration(
   const settings = configObject(root.settings ?? {}, "settings");
   configKeys(
     settings,
+    // Accept old listener keys for migration only; they never open a second port.
     ["directory", "source_epoch", "receiver_host", "receiver_port"],
     "settings",
   );
@@ -237,27 +250,6 @@ export function parseConfiguration(
     !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(sourceEpoch)
   )
     throw new ConfigurationError("settings.source_epoch 必须为后端来源 UUID");
-  const receiverHost = string(
-    environment.FRONTEND_RECEIVER_HOST ?? settings.receiver_host ?? "127.0.0.1",
-    "settings.receiver_host",
-  );
-  if (!isIP(receiverHost))
-    throw new ConfigurationError("settings.receiver_host 必须为监听 IP");
-  const receiverPortOverride = environment.FRONTEND_RECEIVER_PORT;
-  if (
-    receiverPortOverride !== undefined &&
-    !/^[0-9]+$/.test(receiverPortOverride)
-  )
-    throw new ConfigurationError("FRONTEND_RECEIVER_PORT 必须为十进制端口号");
-  const receiverPort = number(
-    receiverPortOverride === undefined
-      ? settings.receiver_port
-      : Number(receiverPortOverride),
-    3001,
-    "settings.receiver_port",
-  );
-  if (receiverPort > 65535)
-    throw new ConfigurationError("settings.receiver_port 不合法");
   configKeys(
     backend,
     [
@@ -310,6 +302,7 @@ export function parseConfiguration(
   if (publicSiteUrl && new URL(publicSiteUrl).pathname !== "/")
     throw new ConfigurationError("PUBLIC_SITE_URL 必须为前台公开站点根地址");
   return {
+    listener: listenerConfiguration(environment),
     theme: { active: activeTheme },
     plugins: { directory: pluginDirectory },
     settings: {
@@ -318,8 +311,6 @@ export function parseConfiguration(
         "settings.directory",
       ),
       sourceEpoch,
-      receiverHost,
-      receiverPort,
     },
     publicSiteUrl,
     backendBaseUrl: publicUrl,

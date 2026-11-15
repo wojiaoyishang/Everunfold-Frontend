@@ -5,7 +5,9 @@ import path from "node:path";
 import os from "node:os";
 import { randomUUID } from "node:crypto";
 import { FileSettingsStore } from "../src/server/settings/store";
-import { settingsReceiver } from "../src/server/settings/receiver";
+import { settingsHandler } from "../src/server/settings/receiver";
+import { createServer } from "node:http";
+import { frontendHandler } from "../src/server/http";
 import { once } from "node:events";
 import type { AddressInfo } from "node:net";
 const policy = (epoch: string, revision: number) => ({
@@ -88,14 +90,24 @@ test("receiver requires actual socket IP AND token; forwarding headers do not gr
   const store = new FileSettingsStore(directory, "test", epoch);
   const token = randomUUID() + randomUUID();
   for (const peers of [["127.0.0.2"], ["127.0.0.1"]]) {
-    const server = settingsReceiver(store, token, peers, undefined, {
-      node_id: "test",
-      source_epoch: epoch,
-    });
+    const server = createServer(
+      frontendHandler(
+        (_request, response) => {
+          response.end("web");
+        },
+        settingsHandler(store, token, peers, undefined, {
+          node_id: "test",
+          source_epoch: epoch,
+        }),
+      ),
+    );
     server.listen(0, "127.0.0.1");
     await once(server, "listening");
     try {
       const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/internal/settings/apply`;
+      const origin = new URL(url).origin;
+      assert.equal(await (await fetch(origin)).text(), "web");
+      assert.equal((await fetch(origin + "/internal/unknown")).status, 403);
       const headers = {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,

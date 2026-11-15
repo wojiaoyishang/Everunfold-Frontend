@@ -28,6 +28,8 @@
 在项目根目录运行 ``./setup.sh --docker`` 或 ``./setup.sh --native``。
 Docker 模式自动构建配置工具镜像；原生模式由 uv 准备锁定的工具依赖。
 Textual 彩色界面先列出全部配置，提供顺序配置、按项修改、连接检测、保存、构建和启动。
+“仅保存”成功后保留界面，支持继续修改和多次保存；后端节点导出成功后显示文件的宿主绝对路径。
+前端检测只访问后端内部连接地址，内部地址留空时沿用发布 URL，不另行探测公开入口。
 编辑框支持左右移动、上下调取本项会话历史、Ctrl+U 清空；URL 完整回显，密钥在总览遮盖，
 编辑时可查看。新站点自动生成密钥，已有站点加载原值。退出后恢复终端属性。
 
@@ -78,12 +80,11 @@ Docker 如何将外部连接转给容器。发布 URL 不从监听参数或请�
 后端根 YAML 的 ``environment.API_HOST`` / ``API_PORT`` 设置进程绑定；
 ``docker.BACKEND_BIND_ADDRESS``、``BACKEND_PUBLISH_PORT`` 设置宿主映射。
 Compose 使用的 ``BACKEND_API_PORT`` 自动从进程端口生成，无需重复修改；
-前端 Web 和接收器端口也按此规则生成，宿主地址和宿主端口独立。
-前端对应为 ``FRONTEND_HOST``、``FRONTEND_WEB_PORT``、``FRONTEND_BIND_ADDRESS``、
-``FRONTEND_PUBLISH_PORT``，容器端口变量为 ``FRONTEND_PORT``。
-接收器另用 ``FRONTEND_RECEIVER_PORT`` 和 ``FRONTEND_RECEIVER_PUBLISH_PORT``，
-宿主映射固定绑定回环，供受限 HTTPS 代理转发。
-直接启动进程时使用 Uvicorn/Next.js 的监听参数，直接 ``docker run`` 时设置容器变量。
+前端只有 ``FRONTEND_HOST`` 和 ``FRONTEND_PORT`` 一组监听设置，网页与内部同步共用。
+``FRONTEND_WEB_PORT`` 从根环境自动派生；``FRONTEND_BIND_ADDRESS`` 和
+``FRONTEND_PUBLISH_PORT`` 控制唯一的宿主端口映射。
+旧接收器监听变量和字段仅兼容读取、不再生效，助手保存时移除。
+直接启动使用 ``npm start -- --port 3000``；不要另启接收器进程。
 Docker 端口映射通常要求进程绑定 ``0.0.0.0``，各端健康检查访问容器内监听地址。
 
 后端配置
@@ -157,8 +158,8 @@ Docker 端口映射通常要求进程绑定 ``0.0.0.0``，各端健康检查访�
      - Node 接收器允许的真实连接来源。填写 Worker 或接收器前的受信内部代理。
    * - ``[settings].directory``、``source_epoch``
      - 设置副本目录和数据库来源 UUID。接收器启动需要来源 UUID。
-   * - ``[settings].receiver_host``、``receiver_port``
-     - Node 接收器监听 IP 和端口，缺省为 ``127.0.0.1:3001``。
+   * - ``environment.FRONTEND_HOST``、``FRONTEND_PORT``
+     - 网页、节点控制台与内部接收器共用监听 IP 和端口，Docker 缺省为 ``0.0.0.0:3000``。
    * - ``[cache].directory``、``max_snapshot_bytes``
      - 公开内容快照目录及单份快照大小限制。
    * - ``[theme].active``、``[plugins].directory``

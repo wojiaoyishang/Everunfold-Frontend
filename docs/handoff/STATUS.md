@@ -1,5 +1,14 @@
 # 前端交接状态
 
+## 单端口前端与配置操作反馈（2026-11-15）
+
+- 前端网页、内部同步和节点诊断统一 `FRONTEND_HOST` / `FRONTEND_PORT`，默认 3000；Docker 只映射一个端口。接收处理器沿用真实 socket IP AND Token，旧接收器配置保存时清理，开发模板同步移除独立 receiver。
+- 两端“仅保存”成功后保留界面，可继续修改并多次保存；外部修改检测仍有效。后端节点登记导出在界面内执行，成功显示文件的宿主绝对路径，失败可重试。Docker 由宿主执行固定导出操作，不给工具容器挂 Docker socket。
+- 前端 `./setup.sh --docker --connection-file /宿主绝对路径/节点.json` 只读挂载并导入指定文件；连接检测只请求后端内部 URL，留空时沿用发布 URL。Docker 与非 Docker 教程、配置手册和 [ADR 0158](../decisions/0158-single-port-and-persistent-setup.md) 已同步。
+- 助手各 36 项：前端 27 通过/9 跳过，后端 32 通过/4 跳过。前端 412 项测试、TypeScript、ESLint、Prettier、生产构建通过；后端默认 pytest 353 通过/85 跳过；Ruff、Bash、Compose 渲染和两端 Sphinx 严格构建通过。
+- 隔离真实 PostgreSQL/Redis：后端 API 双 worker、Celery、Scheduler 运行，ready 200 且数据库/Redis/迁移全部正常；原生 TUI 连续导出两次保留界面并显示真实路径。新前端唯一端口完成网页访问、内部鉴权和快照持久化，ready 从 503 变为 200，重启仍为 200且不编译。发布 URL 故意不可达不影响内部就绪检测。开发页面与 HMR WebSocket 共用端口通过，六个插件构建成功。桌面/小终端和浏览器检查通过。
+- 修正检查期间发现的本地依赖缺项（按锁 npm ci）、测试未使用导入和 Next 自定义服务的重复 HMR 处理器；最终检查通过。环境无 Docker daemon，实际镜像构建与容器网络仍需部署机验证；未修改用户运行配置和数据。升级旧双端口版本需重新构建主体/镜像，并修改后端接收 URL、代理上游，见教程升级段。
+
 ## 同步组合部署操作与 HTTP 约定（2026-11-15）
 
 - 共用助手同步后端“初始化数据库并构建启动”及 `init-deploy` 操作；前端不显示数据库操作。两端部署、在线 API 文档关闭、离线插件 OpenAPI 说明和 [ADR 0157](../decisions/0157-deploy-action-and-http-envelopes.md) 已同步。

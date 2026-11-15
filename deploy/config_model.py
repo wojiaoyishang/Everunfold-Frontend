@@ -38,9 +38,11 @@ class Configuration:
         check: Callable[[], list[str]] = lambda: [],
         changed: Callable[[str], None] = lambda _: None,
         probe: Callable[[], Awaitable[list[Check]]] | None = None,
+        export_node: Callable[[], Awaitable[str]] | None = None,
         native: bool = False,
         backend: bool = False,
         location: str = "",
+        notice: str = "",
     ) -> None:
         self.title = title
         self.fields = fields
@@ -48,9 +50,11 @@ class Configuration:
         self.check = check
         self.changed = changed
         self.probe = probe
+        self.export_node = export_node
         self.native = native
         self.backend = backend
         self.location = location
+        self.notice = notice
         self.initial = self.snapshot()
 
     def snapshot(self) -> tuple[str, ...]:

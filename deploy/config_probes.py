@@ -10,7 +10,7 @@ from pathlib import Path
 
 import asyncpg
 from config_model import Check
-from config_validation import db_url, public_url, redis_url
+from config_validation import db_url, internal_url, redis_url
 from redis.asyncio import Redis
 
 
@@ -122,8 +122,8 @@ async def backend_checks(database: str, redis: str, broker: str, root: Path) -> 
 
 async def frontend_checks(api: str, internal: str) -> list[Check]:
     def check(name: str, url: str) -> Check:
-        if not public_url(url):
-            return Check(name, "error", "请填写 HTTPS 或本机回环 HTTP 地址")
+        if not internal_url(url):
+            return Check(name, "error", "请填写有效的后端内部 HTTP/HTTPS 地址")
         try:
             with urllib.request.urlopen(url.rstrip("/") + "/health/ready", timeout=5) as response:
                 if response.status == 200:
@@ -134,9 +134,4 @@ async def frontend_checks(api: str, internal: str) -> list[Check]:
             return Check(name, "error", "连接失败，请检查网络、证书和后端状态")
         return Check(name, "error", "后端尚未就绪")
 
-    return list(
-        await asyncio.gather(
-            asyncio.to_thread(check, "后端公开入口", api),
-            asyncio.to_thread(check, "后端内部入口", internal or api),
-        )
-    )
+    return [await asyncio.to_thread(check, "后端内部入口", internal or api)]

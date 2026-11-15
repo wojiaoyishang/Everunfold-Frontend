@@ -59,7 +59,7 @@ async function probeLocalReceiver(
 ): Promise<LocalNode["receiver"]> {
   const token = process.env[config.backend.fastapiToNextjsTokenEnv ?? ""] ?? "";
   if (token.length < 32) return "not_configured";
-  const configuredHost = config.settings.receiverHost;
+  const configuredHost = config.listener.host;
   const host = configuredHost.startsWith("127.")
     ? configuredHost
     : configuredHost === "0.0.0.0"
@@ -70,7 +70,7 @@ async function probeLocalReceiver(
   if (!host) return "not_configured";
   try {
     const response = await fetch(
-      `http://${host}:${config.settings.receiverPort}/internal/settings/status`,
+      `http://${host}:${config.listener.port}/internal/settings/status`,
       {
         headers: { Authorization: "Bearer " + token },
         redirect: "error",

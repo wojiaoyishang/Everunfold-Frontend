@@ -22,10 +22,8 @@ services:
     environment:
       CONFIG_FILE: /workspace/config.runtime.toml
       FRONTEND_PORT: "${FRONTEND_WEB_PORT:-3000}"
-      FRONTEND_RECEIVER_PORT: "${FRONTEND_RECEIVER_PORT:-3001}"
     ports:
       - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PUBLISH_PORT:-3000}:${FRONTEND_WEB_PORT:-3000}"
-      - "127.0.0.1:${FRONTEND_RECEIVER_PUBLISH_PORT:-3001}:${FRONTEND_RECEIVER_PORT:-3001}"
     volumes:
       - type: bind
         source: ${FRONTEND_ARTIFACT_DIR:-./output/pre-1}

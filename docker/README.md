@@ -11,7 +11,7 @@
 ```bash
 ./setup.sh --docker
 # 在界面导入后端连接 JSON，选择“构建并启动”
-# 或仅保存后，分开执行：
+# 或仅保存并退出界面后，分开执行：
 ./setup.sh --docker build
 ./setup.sh --docker start
 ```
@@ -31,3 +31,13 @@
 ```
 
 与 Docker 使用同一份根目录 `config.yaml`，无需重新抄写密钥。依赖安装、初始化、编译、启动与长期托管见[不使用 Docker](../deploy/README.md#二不使用-docker)。
+
+“仅保存”成功后保留界面。后端登记并导出节点后也保留界面，显示文件的宿主绝对路径。
+
+前端只使用一个端口（默认 `3000`），网页与 `/internal/*` 同步接口共用。导入同一宿主的后端连接文件：
+
+```bash
+./setup.sh --docker --connection-file /opt/everunfold/Everunfold-Data/backend/connections/web-main.json
+```
+
+检测只访问后端内部地址；导入文件只读挂入临时配置容器。旧双端口版本升级需重建镜像和主体，更新后端接收 URL / 代理上游到前端唯一端口。

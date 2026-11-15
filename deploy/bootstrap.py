@@ -56,11 +56,6 @@ def paths() -> None:
     uid = values.get("EVERUNFOLD_UID", str(os.getuid()))
     gid = values.get("EVERUNFOLD_GID", str(os.getgid()))
     artifact = (DOCKER / values.get("FRONTEND_ARTIFACT_DIR", "output/pre-1")).resolve()
-    receiver = (
-        values.get("FRONTEND_RECEIVER_PUBLISH_PORT", "3001")
-        + ":"
-        + context.env.get("FRONTEND_RECEIVER_PORT", values.get("FRONTEND_RECEIVER_PORT", "3001"))
-    )
     host = context.env.get("API_HOST" if ROLE == "backend" else "FRONTEND_HOST", "0.0.0.0")
     resolved = (
         network,
@@ -78,7 +73,6 @@ def paths() -> None:
         env,
         uid + ":" + gid,
         artifact,
-        receiver,
         host,
         context.config_path,
     )
@@ -138,12 +132,20 @@ def activate(release: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("paths", "activate", "render"))
+    parser.add_argument("action", choices=("paths", "activate", "render", "connection-path"))
     parser.add_argument("release", nargs="?")
     args = parser.parse_args()
     try:
         if args.action == "paths":
             paths()
+        elif args.action == "connection-path":
+            from config_validation import identifier
+
+            context = Context(DOCKER, ROLE)
+            node = context.meta.get("node", "")
+            if ROLE != "backend" or not identifier(node):
+                raise ValueError("节点 ID 无效。")
+            print((context.data / "connections" / (node + ".json")).resolve())
         elif args.action == "render":
             context = Context(DOCKER, ROLE)
             if not context.document:

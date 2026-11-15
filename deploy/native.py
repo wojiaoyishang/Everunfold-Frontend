@@ -102,6 +102,15 @@ def main() -> None:
             execute([python, "-m", "alembic", "-c", "migrations/alembic.ini", "upgrade", "head"])
         else:
             execute([python, "deploy/node_bundle.py"])
+            result_file = os.environ.get("EVERUNFOLD_SETUP_RESULT_FILE")
+            if result_file:
+                from config_validation import identifier
+
+                node = ctx.meta.get("node", "")
+                path = (ctx.data / "connections" / (node + ".json")).resolve()
+                if not identifier(node) or not path.is_file():
+                    raise ValueError("导出的节点连接文件不存在。")
+                Path(result_file).write_text(str(path))
             return
         execute(
             [
@@ -171,7 +180,6 @@ def main() -> None:
                 "--port",
                 environment.get("FRONTEND_PORT", "3000"),
             ],
-            "receiver": ["node", "--import", "tsx", "tools/settings-receiver.mts"],
         }
     if action in commands:
         os.chdir(ROOT)

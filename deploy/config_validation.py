@@ -56,6 +56,14 @@ def public_url(value: str) -> bool:
     return url.scheme == "https" or local
 
 
+def internal_url(value: str) -> bool:
+    """Server-to-server address: HTTP is also usable on a container network."""
+    if not origin(value):
+        return False
+    host = urlsplit(value).hostname or ""
+    return not (ip_address(host) and ipaddress.ip_address(host).is_unspecified)
+
+
 def peer_list(value: str) -> bool:
     try:
         for item in value.split(",") if value else []:

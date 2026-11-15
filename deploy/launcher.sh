@@ -9,17 +9,26 @@ role=frontend
 [[ ! -d "$project_root/app" ]] || role=backend
 native=false
 if [[ "${1:-}" == --native ]]; then native=true; shift; fi
-action=${1:-configure}
+action=configure
+if [[ $# -gt 0 && "$1" != --connection-file ]]; then action=$1; shift; fi
 case "$action" in
-  configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|api|worker|scheduler|web|receiver|render) ;;
-  *) echo "用法：./setup.sh [--docker|--native] [configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|render]"; exit 2 ;;
+  configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|api|worker|scheduler|web|render) ;;
+  *) echo "用法：./setup.sh [--docker|--native] [configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|render] [--connection-file 文件路径]"; exit 2 ;;
 esac
-if (( $# > 1 )); then echo "不支持额外参数。" >&2; exit 2; fi
+connection_file=
+if (( $# )); then
+  if [[ $# != 2 || "$1" != --connection-file || "$action" != configure || "$role" != frontend ]]; then
+    echo "--connection-file 文件路径仅用于前端配置。" >&2; exit 2
+  fi
+  [[ -f "$2" && -r "$2" ]] || { echo "连接文件不存在或不可读：$2" >&2; exit 2; }
+  connection_file=$(realpath -- "$2")
+  export EVERUNFOLD_CONNECTION_FILE="$connection_file"
+fi
 if "$native"; then
   command -v uv >/dev/null || { echo "需要 uv；安装方法见 deploy/README.md。" >&2; exit 1; }
   exec uv run --project "$deploy_dir/assistant" --locked python "$deploy_dir/native.py" "$action"
 fi
-case "$action" in api|worker|scheduler|web|receiver) echo "单进程入口请使用 --native。" >&2; exit 2 ;; esac
+case "$action" in api|worker|scheduler|web) echo "单进程入口请使用 --native。" >&2; exit 2 ;; esac
 command -v docker >/dev/null || { echo "需要 Docker Engine 和 Compose v2。" >&2; exit 1; }
 docker info >/dev/null || { echo "无法连接 Docker daemon。" >&2; exit 1; }
 docker compose version >/dev/null
@@ -54,13 +63,13 @@ read_paths() {
   local result
   result="$(docker run --rm --network none "${base[@]}" "${mount_args[@]}" "$setup_image" python "$deploy_dir/bootstrap.py" paths)"
   mapfile -t locations <<< "$result"
-  if (( ${#locations[@]} != 18 )); then echo "无法确定容器设置。" >&2; exit 1; fi
+  if (( ${#locations[@]} != 17 )); then echo "无法确定容器设置。" >&2; exit 1; fi
   network=${locations[0]}; data_dir=${locations[1]}; env_parent=${locations[2]}
   output_dir=${locations[3]}; source_dir=${locations[4]}; profile_parent=${locations[5]}
   container_name=${locations[6]}; image_name=${locations[8]}; bind_host=${locations[9]}
   publish_port=${locations[10]}; listen_port=${locations[11]}; env_file=${locations[12]}
-  runtime_user=${locations[13]}; artifact_dir=${locations[14]}; receiver_ports=${locations[15]}
-  listen_host=${locations[16]}; runtime_config=${locations[17]}
+  runtime_user=${locations[13]}; artifact_dir=${locations[14]}
+  listen_host=${locations[15]}; runtime_config=${locations[16]}
   IFS=',' read -ra extra_networks <<< "${locations[7]}"
 }
 refresh_layout() {
@@ -125,10 +134,30 @@ if [[ "$action" == configure ]]; then
   [[ -t 0 && -t 1 ]] || { echo "配置界面需要交互终端。" >&2; exit 1; }
   cidrs="$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}},{{end}}' "$network" "${extra_networks[@]}")"
   cidrs=${cidrs//$'\n'/}
+  ui_args=()
+  if [[ -n "$connection_file" ]]; then
+    add_mount "$connection_file" ro
+    refresh_mounts
+    ui_args+=(-e "EVERUNFOLD_CONNECTION_FILE=$connection_file")
+  fi
+  bridge_dir=$(mktemp -d "${TMPDIR:-/tmp}/everunfold-setup-action.XXXXXXXX")
+  touch "$bridge_dir/alive"
+  bash "$deploy_dir/action_bridge.sh" "$bridge_dir" "$deploy_dir/launcher.sh" &
+  bridge_pid=$!
+  cleanup_bridge() {
+    kill "$bridge_pid" 2>/dev/null || true
+    wait "$bridge_pid" 2>/dev/null || true
+    rm -rf -- "$bridge_dir"
+  }
+  trap cleanup_bridge EXIT
+  ui_args+=(--mount "type=bind,source=$bridge_dir,target=$bridge_dir"
+            -e "EVERUNFOLD_SETUP_ACTION_DIR=$bridge_dir")
   result=0
-  run_temporary yes --interactive --tty "${base[@]}" "${mount_args[@]}" \
+  run_temporary yes --interactive --tty "${base[@]}" "${mount_args[@]}" "${ui_args[@]}" \
     -e "TERM=${TERM:-xterm-256color}" -e "EVERUNFOLD_NETWORK_CIDRS=$cidrs" \
     "$setup_image" python "$deploy_dir/configure.py" || result=$?
+  cleanup_bridge
+  trap - EXIT
   case "$result" in
     0) action=render ;;
     10) echo "已退出，未保存本次修改。"; exit 0 ;;
@@ -190,7 +219,7 @@ else
   runtime_args+=(--mount "type=bind,source=$artifact_dir,target=/workspace"
                  --mount "type=bind,source=$runtime_config,target=/workspace/config.runtime.toml,readonly"
                  --env-file "$env_file.docker" -e CONFIG_FILE=/workspace/config.runtime.toml
-                 -e "FRONTEND_PORT=$listen_port" -e "FRONTEND_RECEIVER_PORT=${receiver_ports##*:}")
+                 -e "FRONTEND_PORT=$listen_port")
 fi
 run_runtime() { run_temporary no "${runtime_args[@]}" "$image_name" "$@"; }
 check_runtime() {
@@ -222,7 +251,12 @@ case "$action" in
     echo "迁移完成。运行 ./setup.sh --docker start 启动。" ;;
   export-node)
     run_runtime python deploy/node_bundle.py
-    echo "节点连接文件位于 $data_dir/connections/。" ;;
+    exported_path=$(run_tool connection-path)
+    [[ -f "$exported_path" ]] || { echo "导出的节点连接文件不存在。" >&2; exit 1; }
+    printf '已导出节点连接文件：%s\n' "$exported_path"
+    if [[ -n "${EVERUNFOLD_SETUP_RESULT_FILE:-}" ]]; then
+      printf '%s\n' "$exported_path" >"$EVERUNFOLD_SETUP_RESULT_FILE"
+    fi ;;
   check) check_runtime ;;
   start)
     if [[ "$role" == backend ]]; then
@@ -238,7 +272,6 @@ case "$action" in
     printf '创建容器 %s：%s → /workspace，%s → /data，%s:%s → %s\n' "$container_name" "$workspace_dir" "$data_dir" "$bind_host" "$publish_port" "$listen_port"
     remove_previous
     ports=(-p "$bind_host:$publish_port:$listen_port")
-    [[ "$role" != frontend ]] || ports+=(-p "127.0.0.1:$receiver_ports")
     docker create --name "$container_name" --network "$network" --restart unless-stopped \
       --stop-timeout 130 "${ports[@]}" "${runtime_args[@]}" "$image_name" >/dev/null
     connect_extras "$container_name"
