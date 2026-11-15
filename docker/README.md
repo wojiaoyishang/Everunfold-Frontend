@@ -84,6 +84,23 @@ docker compose logs --tail=100 frontend
 
 每次显式编译都在新容器中完成。日常启动和重启继续使用原产物。构建期间固定源码检出，避免边复制边切换分支。
 
+### 用 `docker run` 只编译产物
+
+如果只想把镜像当作一次性编译工具，在本仓库 `docker/` 目录执行：
+
+```bash
+docker build -t everunfold-frontend:node22 .
+mkdir -p output
+docker run --rm --init \
+  --mount "type=bind,source=$(cd .. && pwd),target=/workspace,readonly" \
+  --mount "type=bind,source=$(pwd)/output,target=/output" \
+  everunfold-frontend:node22 build pre-1
+```
+
+将第一个挂载的宿主路径换成其他 Everunfold 前端检出即可编译那个目录。输出目录需要允许容器 UID 1000 写入。编译成功后，直接把宿主的 `output/pre-1/` 用作部署产物。每次构建使用新的产物名，已有目录会保留。
+
+### 构建所需的后端契约
+
 `contracts.lock.json` 固定后端提交及 SHA-256。公开契约默认按锁文件恢复。离线或私有部署可给 builder 只读挂入包含锁定提交的完整后端 Git 检出，设置 `EVERUNFOLD_BACKEND_PATH` 指向该挂载。宿主 Git 检出应由容器 UID 1000 所有或在构建器的 Git 设置中单独信任该目录。以容器用户可读取的独立检出为例，可在 Compose override 的 builder 中添加：
 
 ```yaml
@@ -106,6 +123,6 @@ services:
 
 现有插件编译器先写内容哈希资源，最后原子切换 manifest。发布单个兼容插件不需要重建主体或重启。已打开的编辑器按现有提示重新打开。多节点要分别安装同一构建摘要并确认登记。插件源码只允许可信部署者提供。
 
-新增插件目录后执行单插件构建即可发布产物。替换已有插件前可备份原 manifest，保留它引用的哈希资源。插件回滚时原子恢复旧 manifest。删除源码不会撤下已发布的包。需要下线时，先在后台检查引用并停用，需要移除产物时再从插件卷移走对应目录。
+新增插件目录后执行单插件构建即可发布产物。替换已有插件前可备份原 manifest，保留它引用的哈希资源。插件回滚时原子恢复旧 manifest。删除源码不会撤下已发布的包。需要下线时，先在后台检查引用并停用，再从宿主 `data/plugins/` 移走对应产物目录。
 
 构建并发用 Compose 环境变量 `FRONTEND_BUILD_WORKERS`，默认 2。`FRONTEND_BUILD_NODE_OPTIONS` 默认 `--max-old-space-size=3072`，用于约束构建进程的 V8 堆上限。同一容器内运行一个 Next.js Web 进程和一个接收器进程。接收器的运行环境变量 `FRONTEND_RECEIVER_HOST`、`FRONTEND_RECEIVER_PORT` 可在 `runtime.env` 中设置。前端没有 Celery Worker。
