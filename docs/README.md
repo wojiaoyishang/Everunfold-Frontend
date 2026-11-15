@@ -2,7 +2,7 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
-[后端监听与节点公开地址](decisions/0151-listener-and-public-node-origins.md)说明 Docker 监听、反代、节点控制台与浏览器来源校验。
+[发布 URL、进程监听与宿主映射](decisions/0152-published-urls-and-listeners.md)区分资源链接、容器监听、Docker 端口映射与前端内部连接；[节点公开地址](decisions/0151-listener-and-public-node-origins.md)说明多前端清单与浏览器来源校验。
 
 [源码挂载的双容器部署](decisions/0150-source-mounted-docker.md)记录两端 Docker 进程、前端构建与插件发布的边界。实际命令见[本仓库 Docker 指南](../docker/README.md)。
 

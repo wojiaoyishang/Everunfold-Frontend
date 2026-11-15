@@ -10,7 +10,7 @@
 python3 configure.py
 ```
 
-向导逐项询问站点地址、后端地址、来源 UUID、节点、接收器和双向令牌。后端生成的令牌可以逐项手输，也可以从后端向导生成的 `runtime.env` 导入，留空使用导入值。它只读取两项令牌。确认后创建私有配置、数据和输出目录。已有配置时请直接编辑原文件。
+向导分别询问前后端发布 URL、服务端连接后端的内部 URL、来源 UUID、节点和双向令牌，再配置 Web/接收器监听与 Docker 宿主端口映射。后端生成的令牌可以逐项手输，也可以从后端向导生成的 `runtime.env` 导入，留空使用导入值。它只读取两项令牌。确认后创建私有配置、`.env`、数据和输出目录。已有配置时请直接编辑原文件。
 
 共用 Docker 网络需要单独创建。使用向导后，可跳过下列复制模板的命令。
 
@@ -26,8 +26,8 @@ cp -n runtime.env.example runtime.env
 | 文件               | 填写内容                                                                                                                                                                                                                          |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `data/config.toml` | `PUBLIC_SITE_URL` 填前端公开地址，`BACKEND_BASE_URL` 填反向代理对外提供的 API 根地址。填写与后端节点清单一致的 `FRONTEND_NODE_ID`，以及 `[settings].source_epoch`。在 `[backend]` 中填写实际来源 IP/CIDR 和两个方向的令牌变量名。 |
-| `runtime.env`      | 填两个方向令牌的实际值，与后端对应变量一致。接收器默认监听 `0.0.0.0:3001`。                                                                                                                                                       |
-| `.env`             | 创建此文件并写入 `FRONTEND_ARTIFACT_DIR=./output/pre-1`，供 Compose 选择构建版本。已有 `.env` 时编辑这一行，保留其他设置。                                                                                                        |
+| `runtime.env`      | 填两个方向令牌的实际值，与后端对应变量一致。`FRONTEND_HOST` 设置 Web 绑定 IP；接收器由 `FRONTEND_RECEIVER_HOST`、`FRONTEND_RECEIVER_PORT` 单独设置，默认监听 `0.0.0.0:3001`。 |
+| `.env`             | 设置 Web 容器端口和宿主映射；`FRONTEND_ARTIFACT_DIR=./output/pre-1` 选择构建版本，省略时使用该默认值。编辑时保留向导写入的其他设置。 |
 
 在 `data/config.toml` 的现有小节中修改目录，保留同小节的其他字段：
 
@@ -40,6 +40,23 @@ directory = "/data/public-snapshots"
 ```
 
 默认宿主 Web 端口为 3000，接收器 3001 仅供部署网络及受限 HTTPS 入口使用。容器互联使用部署网络可解析的地址。启用独立后端连接文件时，按现有规则配置内部 API HTTPS 地址。宿主源码和实例配置需允许容器 UID 1000 读取。
+
+### 发布、连接与监听分别配置
+
+| 配置 | 位置与示例 | 作用 |
+| --- | --- | --- |
+| 前端发布 URL | `data/config.toml` 的 `PUBLIC_SITE_URL = "https://blog.example.com"` | 本站 canonical、Open Graph、站点地图和订阅的绝对链接；与后端 `/_nodes` 中该节点的公开地址保持一致 |
+| 后端发布 URL | 同文件的 `BACKEND_BASE_URL = "https://api.example.com"` | 浏览器访问 API 的公开入口，与后端的同名配置一致 |
+| 后端内部连接 URL | 同文件的 `[backend].base_url = "https://backend.internal.example.com"` | Next.js、接收器及上报服务连接后端；省略时沿用后端发布 URL，仅在服务端使用 |
+| Web 进程监听 | `runtime.env` 的 `FRONTEND_HOST=0.0.0.0`；`.env` 的 `FRONTEND_WEB_PORT=3000` | 容器内 Web 进程绑定地址；Compose 将端口注入为 `FRONTEND_PORT` |
+| Docker 宿主端口映射 | `.env` 的 `FRONTEND_BIND_ADDRESS=127.0.0.1`、`FRONTEND_PUBLISH_PORT=13000` | 将宿主 `127.0.0.1:13000` 转发到容器 Web 端口 |
+| 内部接收器监听 | `runtime.env` 的 `FRONTEND_RECEIVER_HOST=0.0.0.0`、`FRONTEND_RECEIVER_PORT=3001` | 独立进程接收后端投递；Compose 不把此端口映射到宿主 |
+
+例如 `https://blog.example.com` → 宿主反向代理 → `127.0.0.1:13000` → 容器 Web `0.0.0.0:3000`。`PUBLIC_SITE_URL` 不决定监听地址或端口。Docker 映射通常保留 Web 的 `0.0.0.0` 绑定；健康检查访问实际容器监听地址。Web 和接收器使用不同端口。
+
+`/_nodes` 管理后端认可的多个前端公开地址和启停状态，各前端的 `PUBLIC_SITE_URL` 仍需按该节点独立配置。后端接收器绑定 CLI 中的 URL 是后端访问接收器的目标入口，由受限 HTTPS 代理转发到容器的接收器监听端口。
+
+这些 URL 从部署时挂载的配置读取。更换域名时修改 `data/config.toml`，同步后端 `/_nodes` 与反向代理配置，再执行 `docker compose up -d --force-recreate frontend`，无需重新编译。若 `runtime.env` 中有同名 `PUBLIC_SITE_URL` 或 `BACKEND_BASE_URL`，环境值优先，需一并调整。
 
 ## 2. 首次编译并启动
 
@@ -135,4 +152,4 @@ services:
 
 新增插件目录后执行单插件构建即可发布产物。替换已有插件前可备份原 manifest，保留它引用的哈希资源。插件回滚时原子恢复旧 manifest。删除源码不会撤下已发布的包。需要下线时，先在后台检查引用并停用，再从宿主 `data/plugins/` 移走对应产物目录。
 
-构建并发用 Compose 环境变量 `FRONTEND_BUILD_WORKERS`，默认 2。`FRONTEND_BUILD_NODE_OPTIONS` 默认 `--max-old-space-size=3072`，用于约束构建进程的 V8 堆上限。同一容器内运行一个 Next.js Web 进程和一个接收器进程。接收器的运行环境变量 `FRONTEND_RECEIVER_HOST`、`FRONTEND_RECEIVER_PORT` 可在 `runtime.env` 中设置。前端没有 Celery Worker。
+构建并发用 Compose 环境变量 `FRONTEND_BUILD_WORKERS`，默认 2。`FRONTEND_BUILD_NODE_OPTIONS` 默认 `--max-old-space-size=3072`，用于约束构建进程的 V8 堆上限。同一容器内运行一个 Next.js Web 进程和一个接收器进程。运行监听参数按上表配置；直接 `docker run` 部署时，Web 端口使用 `FRONTEND_PORT`。前端没有 Celery Worker。

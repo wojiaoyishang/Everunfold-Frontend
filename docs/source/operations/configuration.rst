@@ -12,6 +12,22 @@
 - 普通服务从进程环境读取变量。开发 Supervisor 的脚本显式载入后端的
   ``.env.container.local``。检查容器中每个进程的工作目录和环境来源。
 
+发布 URL、监听与端口映射
+----------------------------------------
+
+三个层次独立配置。例如后端发布在 ``https://api.example.com``，宿主反向代理访问
+``127.0.0.1:18001``，Docker 再映射到容器中 Uvicorn 监听的 ``0.0.0.0:8001``。
+发布 URL 用于生成资源链接；进程绑定地址决定监听哪张网卡和端口；宿主映射决定
+Docker 如何将外部连接转给容器。发布 URL 不从监听参数或请求 Host 推导。
+
+后端 Docker 的 ``runtime.env`` 设置 ``API_HOST``，Compose 的 ``.env`` 设置
+``BACKEND_API_PORT``、``BACKEND_BIND_ADDRESS``、``BACKEND_PUBLISH_PORT``。
+其中 ``BACKEND_API_PORT`` 被注入为容器的 ``API_PORT``，其余两项仅控制宿主映射。
+前端对应为 ``FRONTEND_HOST``、``FRONTEND_WEB_PORT``、``FRONTEND_BIND_ADDRESS``、
+``FRONTEND_PUBLISH_PORT``，容器端口变量为 ``FRONTEND_PORT``。
+直接启动进程时使用 Uvicorn/Next.js 的监听参数，直接 ``docker run`` 时设置容器变量。
+Docker 端口映射通常要求进程绑定 ``0.0.0.0``，各端健康检查访问容器内监听地址。
+
 后端配置
 --------
 
@@ -22,7 +38,8 @@
    * - 字段
      - 作用
    * - ``BACKEND_BASE_URL``
-     - 公开 API 根地址，用于认证与公开链接派生。示例为 ``https://api.example.com``。
+     - 后端发布根 URL，用于媒体等绝对资源链接、第三方签名查询 URL 和 Cookie 的 HTTPS 配置。
+       反代部署填外部入口，例如 ``https://api.example.com``；不带 ``/api`` 或 ``/v1``。
    * - ``[cors].allowed_origins``
      - 可信网页的精确 Origin 列表。默认的开发地址应按实例替换。
    * - ``[auth].cookie_name``、``cookie_samesite``、``cookie_secure``
@@ -30,7 +47,8 @@
    * - ``[database].url``、``[media].uploads_path``
      - 数据库连接和媒体目录。部署时为上传启用持久存储与适当权限。
    * - ``[media].base_url``
-     - 公开媒体地址。留空时使用 API 根下的 ``/media``。
+     - 独立媒体域名或 CDN 前缀。省略时使用 ``BACKEND_BASE_URL + /media``，
+       上传目录仍由 ``uploads_path`` 决定。
    * - ``[redis].url``、``[redis].namespace_scope``、``[project].key``
      - 运行 Redis 及命名空间。开发、预发布与生产使用独立作用域。
    * - ``[celery].broker_url``
@@ -52,6 +70,12 @@
 节点条目可以内联在主配置中，也可以使用根键 ``frontend_nodes_file`` 引用只含
 ``[frontends.*]`` 的独立 TOML。相对引用从主 TOML 所在目录解析。
 若节点清单已导入数据库，请按 :doc:`nodes` 更新存储的部署绑定。
+多个前端的公开地址和启停由后端 ``/_nodes`` 管理；
+``[cors].use_frontend_registry = true`` 时，已绑定且启用节点的精确 Origin 参与来源校验。
+
+旧版向导省略了后端发布 URL，升级时在主 TOML 的首个小节之前补齐
+``BACKEND_BASE_URL``，再重新创建容器。加载器保留旧配置相对 ``/media`` 的兼容行为，
+多前端部署应显式设置发布 URL，避免媒体地址解析到各前端站点。
 
 前端配置
 --------
@@ -62,10 +86,16 @@
 
    * - 字段
      - 作用
-   * - ``PUBLIC_SITE_URL``、``FRONTEND_NODE_ID``
-     - 站点公开根地址与稳定节点 ID。节点 ID 与后端条目的键一致。
-   * - ``BACKEND_BASE_URL``、``[backend].base_url``
-     - 分别用于浏览器和 Next.js 服务端。内部地址可显式指向单独的私有监听。
+   * - ``PUBLIC_SITE_URL``
+     - 本前端的发布根 URL，用于 canonical、Open Graph、站点地图和订阅链接；
+       与后端 ``/_nodes`` 中对应节点的公开地址一致。
+   * - ``FRONTEND_NODE_ID``
+     - 稳定节点 ID，与后端节点清单条目的键一致。
+   * - ``BACKEND_BASE_URL``
+     - 浏览器调用 API 的公开入口，与后端发布 URL 一致。
+   * - ``[backend].base_url``
+     - 前端服务端连接后端的目标 URL，省略时沿用 ``BACKEND_BASE_URL``。
+       可独立设置内网入口，仅服务端可见，与前端自身监听地址独立。
    * - ``[backend].allowed_peer_ips``
      - Node 接收器允许的真实连接来源。填写 Worker 或接收器前的受信内部代理。
    * - ``[settings].directory``、``source_epoch``
@@ -84,6 +114,10 @@
 以及对应的 ``[profiles.<连接 ID>.backend]``。主配置保留站点地址、节点 ID、目录和监听；
 将根级 API 地址、内部 ``[backend]`` 和 ``[settings].source_epoch`` 从主配置移至连接配置，
 同时解除环境中的 ``BACKEND_BASE_URL`` 覆盖。
+
+发布 URL 和内部连接从挂载的运行配置读取，修改域名后更新相应节点清单与反向代理，
+重新创建前端容器即可，无需重新编译主体。配置中的 ``PUBLIC_SITE_URL`` 和
+``BACKEND_BASE_URL`` 若被同名环境变量覆盖，需一并调整覆盖值。
 
 凭据的方向与存放位置
 --------------------

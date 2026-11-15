@@ -1,5 +1,12 @@
 # 前端交接状态
 
+## 发布 URL 与监听配置澄清
+
+- Docker 向导区分本站 `PUBLIC_SITE_URL`、后端 `BACKEND_BASE_URL`、服务端 `[backend].base_url`、Web/接收器监听和宿主端口映射。新增 `FRONTEND_HOST` 控制 Web 绑定 IP，健康检查跟随绑定地址；向导写入私有 `.env` 以保持监听与映射端口一致。配置示例、Docker README 和手册已同步，见 [ADR 0152](../decisions/0152-published-urls-and-listeners.md)。
+- 配置、canonical、站点地图与订阅相关 16 项测试通过，定向 ESLint、Prettier、Python Ruff 和入口 Bash 语法通过。首次执行测试发现本地缺少生成的契约，按锁文件运行 `npm run prepare:local` 恢复后通过。
+- 真实终端验证向导生成文件、令牌导入及拒绝覆盖，Compose 及真实加载器核对独立 URL、Web/接收器端口和宿主映射。当前启动包装器配合已有生产产物，实际监听 `127.0.0.2`，确认未监听同端口的 `127.0.0.1`；同一产物切换两组运行 URL 后，登录页 API、robots 和文章 canonical 正确变化，内部连接地址未进入浏览器 HTML，BUILD_ID 与时间戳保持不变。Dockerfile 中健康检查原命令在指定 IPv4、IPv4/IPv6 通配监听下通过。
+- 双端 Sphinx 严格构建通过。当前无 Docker daemon，未执行镜像构建和真实容器网络验证。采用本次运行脚本与 Dockerfile 更新需按部署手册更新镜像及主体产物；此后仅修改发布 URL 时无需重新编译。本轮不改现有实例配置或重启开发服务。
+
 ## 后端监听与节点公开地址
 
 - 前端 Docker 向导明确标识公开 API 入口可以填写反代地址。后端由节点控制台管理公开前端地址。 [ADR 0151](../decisions/0151-listener-and-public-node-origins.md)。

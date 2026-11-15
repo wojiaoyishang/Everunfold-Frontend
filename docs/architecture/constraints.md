@@ -32,8 +32,8 @@ FastAPI 普通广播只同步进程状态：`emit(scope="process")` 本地分发
 - 浏览器向 Next.js 获取公开页面，直接向 FastAPI 执行业务操作；Next.js 不是必经业务代理。公开 SSR 不混入身份和私有内容。
 - 业务路径 `/v1/*`；FastAPI 内部 `/internal/v1/*`；Next.js 缓存 `/internal/cache/v1/*`；协同路径 `/ws/v1/collab/{draft_id}`（试用契约 collaboration-1）。除已定前缀外，具体端点/字段仍需正式契约。
 - 可选开发代理把 `/api/v1/*` 仅剥离一次 `/api`，转发为后端 `/v1/*`；不得代理内部接口。生产仍验收浏览器跨源访问。
-- `BACKEND_BASE_URL` 是不含凭据、`/v1`、`/api` 的绝对 HTTP(S) 地址，没有固定生产域名。前端服务端可用 `[backend].base_url` 显式覆盖；该覆盖不改变浏览器公开地址。
-- 后端 `frontends.<node_id>` 绑定地址、投递 `enabled`、双向 Token 环境变量引用；根级 `FRONTEND_NODE_ID` 标识前端。更换域名不改变身份，`enabled` 不授予或撤销入站权限。
+- `BACKEND_BASE_URL` 是后端发布根 URL，用于资源绝对链接和浏览器 API 入口；不含凭据、`/v1`、`/api`，没有固定生产域名。前端服务端可用 `[backend].base_url` 独立设置连接目标；前端 `PUBLIC_SITE_URL` 用于本站公开链接。发布 URL、进程监听与 Docker 宿主映射分别配置，见 ADR 0152。
+- 后端节点清单按稳定 ID 保存前端公开 URL、投递 `enabled`、内部接收器目标 URL 和双向 Token 环境变量引用；根级 `FRONTEND_NODE_ID` 标识前端。更换域名不改变身份，`enabled` 不授予或撤销内部入站权限。启用来源登记校验时，浏览器只允许已绑定且启用节点的精确 Origin。
 - 前端连接、来源限制与双向 Token 引用统一位于仅服务端 `[backend]`，不另设 `[internal_auth]`，不整体公开给浏览器。实际密钥从受控环境解析，不保存于任务载荷。
 - Redis 项目主键来自后端 `[project].key`，示例保留 `lovepikachu`；scope 非空时生成 `{project.key}:{scope}:`。业务 Key、频道及 Celery 适配前缀集中派生，不因项目改名擅改运行命名空间。
 - 后端发布版本化 OpenAPI 与 WS/事件 Schema，前端从精确提交/SHA锁文件恢复类型和客户端，不手工另建业务字段定义。按2026-11-07用户最新要求，根cache合并到var/cache，生成物写入被Git忽略的var/cache/contracts与var/cache/build，删除src/generated；稳定core/contracts模块隔离访问。原var公开副本不迁移。

@@ -27,16 +27,30 @@ test("receiver environment overrides the instance listener and validates the por
     );
   }
 });
-test("configuration uses an explicit public address while internal overrides stay separate", () => {
+test("published URLs, backend connection and listeners stay separate", () => {
   const config = parseConfiguration(
     {
       ...base,
       backend: { ...base.backend, base_url: "http://backend.internal:8000" },
     },
-    { BACKEND_BASE_URL: "https://api.example.com" },
+    {
+      BACKEND_BASE_URL: "https://api.example.com",
+      PUBLIC_SITE_URL: "https://blog.example.com",
+      FRONTEND_HOST: "0.0.0.0",
+      FRONTEND_PORT: "3000",
+      FRONTEND_RECEIVER_HOST: "127.0.0.2",
+      FRONTEND_RECEIVER_PORT: "3001",
+    },
   );
   assert.equal(config.backendBaseUrl, "https://api.example.com");
   assert.equal(config.backend.baseUrl, "http://backend.internal:8000");
+  assert.equal(config.publicSiteUrl, "https://blog.example.com");
+  assert.equal(config.settings.receiverHost, "127.0.0.2");
+  assert.equal(config.settings.receiverPort, 3001);
+  assert.equal(
+    browserBackendBaseUrl(config, "127.0.0.1:13000", "http:"),
+    "https://api.example.com",
+  );
 });
 test("the configured loopback origin alone uses the same-origin API", () => {
   const config = parseConfiguration({

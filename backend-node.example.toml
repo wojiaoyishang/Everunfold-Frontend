@@ -2,14 +2,15 @@
 active = "main"
 
 [profiles.main]
-# Browser API origin and source UUID of this backend.
+# Published backend URL (same as the backend BACKEND_BASE_URL), used by browsers.
 BACKEND_BASE_URL = "https://api.example.com"
 # Optional development alias. The loopback proxy must serve both the page and /v1/.
 # browser_loopback_origin = "http://127.0.0.1:3000"
 source_epoch = "00000000-0000-0000-0000-000000000000"
 
 [profiles.main.backend]
-# Next.js and the reporter use this address. Omit to use BACKEND_BASE_URL.
+# Server-side connection to the backend, independent of the frontend's own listener.
+# Next.js and the reporter use this URL. Omit to use BACKEND_BASE_URL.
 base_url = "https://api.internal.example.com"
 allowed_peer_ips = ["192.0.2.10"]
 nextjs_to_fastapi_token_env = "NEXTJS_TO_FASTAPI_WEB_MAIN_TOKEN"

@@ -96,7 +96,11 @@ def write_new(files: dict[Path, str]) -> None:
         print(f"  已写入 {file.relative_to(DOCKER)}")
 
 
-TARGETS = (DATA / "config.toml", DOCKER / "runtime.env")
+TARGETS = (DATA / "config.toml", DOCKER / "runtime.env", DOCKER / ".env")
+
+
+def valid_port(value: str) -> bool:
+    return bool(re.fullmatch(r"[0-9]{1,5}", value)) and 1 <= int(value) <= 65535
 
 
 def uuid_value(value: str) -> bool:
@@ -112,6 +116,20 @@ def is_ip(value: str) -> bool:
         return True
     except ValueError:
         return False
+
+
+def public_url(value: str) -> bool:
+    if not origin(value):
+        return False
+    url = urlsplit(value)
+    host = url.hostname or ""
+    local = host == "localhost"
+    if is_ip(host):
+        address = ipaddress.ip_address(host)
+        if address.is_unspecified:
+            return False
+        local = address.is_loopback
+    return "*" not in host and (url.scheme == "https" or local)
 
 
 def read_tokens() -> dict[str, str]:
@@ -155,12 +173,14 @@ def read_tokens() -> dict[str, str]:
 
 def configure() -> None:
     section("Everunfold Docker · 前端")
-    api = ask("公开 API 入口（可填写反向代理地址）", "http://127.0.0.1:8001", valid=origin).rstrip(
-        "/"
-    )
-    site = ask("前端公开地址", "http://127.0.0.1:3000", valid=origin).rstrip("/")
+    section("对外发布 URL")
+    print("  填写实际公开根 URL，反代部署填 HTTPS 入口；本机调试可用回环 HTTP。")
+    print("  后端发布 URL 供浏览器调用 API，前端发布 URL 用于站点页面和 SEO 链接。")
+    api = ask("后端发布 URL（与后端 BACKEND_BASE_URL 一致）", valid=public_url).rstrip("/")
+    site = ask("前端发布 URL", valid=public_url).rstrip("/")
+    section("前端服务端连接后端")
     internal = ask(
-        "服务端 API 地址（留空沿用公开 API）", valid=lambda v: not v or origin(v)
+        "后端内部连接 URL（留空沿用后端发布 URL）", valid=lambda v: not v or origin(v)
     ).rstrip("/")
     node = ask(
         "前端节点 ID",
@@ -171,22 +191,33 @@ def configure() -> None:
     epoch = str(UUID(ask("后端来源 UUID", valid=uuid_value)))
     allowed = peers("接收器实际看到的 Worker 或内部代理 IP/CIDR，逗号分隔")
 
-    section("部署令牌与端口")
+    section("部署令牌")
     env = read_tokens()
     if env[TOKEN_NAMES[0]] == env[TOKEN_NAMES[1]]:
         raise SystemExit("两个方向的令牌必须不同，配置未写入。")
-    env["FRONTEND_RECEIVER_HOST"] = ask("接收器监听地址", "0.0.0.0", valid=is_ip)
+    section("前端进程监听（容器内）")
+    env["FRONTEND_HOST"] = ask("Web 绑定 IP", "0.0.0.0", valid=is_ip)
+    port = ask("Web 监听端口", "3000", valid=valid_port)
+    env["FRONTEND_RECEIVER_HOST"] = ask("接收器绑定 IP", "0.0.0.0", valid=is_ip)
     env["FRONTEND_RECEIVER_PORT"] = ask(
-        "接收器端口",
-        "3001",
-        valid=lambda v: bool(re.fullmatch(r"[0-9]{1,5}", v)) and 1 <= int(v) <= 65535,
+        "接收器监听端口（与 Web 端口不同）",
+        "3001" if int(port) != 3001 else "3002",
+        valid=lambda v: valid_port(v) and int(v) != int(port),
     )
+    section("Docker 宿主端口映射")
+    print("  映射 Web 端口；接收器仅通过部署网络访问。发布 URL 独立配置。")
+    publish_host = ask("宿主机映射监听 IP", "127.0.0.1", valid=is_ip)
+    publish_host = f"[{publish_host}]" if ":" in publish_host else publish_host
+    publish_port = ask("宿主机映射端口", "3000", valid=valid_port)
 
-    config = f"""BACKEND_BASE_URL = {json.dumps(api)}
+    config = f"""# 浏览器调用 API 的公开根 URL，与后端发布 URL 一致。
+BACKEND_BASE_URL = {json.dumps(api)}
+# 本前端站点的发布根 URL，用于页面 canonical、站点地图和订阅链接。
 PUBLIC_SITE_URL = {json.dumps(site)}
 FRONTEND_NODE_ID = {json.dumps(node)}
 
 [backend]
+# 仅前端服务端连接后端使用，独立于公开 URL 和前端监听地址。
 base_url = {json.dumps(internal or api)}
 allowed_peer_ips = {json.dumps(allowed)}
 nextjs_to_fastapi_token_env = "{TOKEN_NAMES[0]}"
@@ -201,13 +232,23 @@ directory = "/data/public-snapshots"
 """
 
     section("保存")
-    print(f"  前端 {site} · API {api} · 节点 {node} · 接收端口 {env['FRONTEND_RECEIVER_PORT']}")
+    print(f"  前端发布 URL {site} · 后端发布 URL {api}")
+    print(f"  后端内部连接 {internal or api} · 节点 {node}")
+    print(f"  Web 监听 {env['FRONTEND_HOST']}:{port} · 宿主映射 {publish_host}:{publish_port}")
+    print(f"  接收器监听 {env['FRONTEND_RECEIVER_HOST']}:{env['FRONTEND_RECEIVER_PORT']}")
     if ask("写入前端配置（y/N）", "n").lower() != "y":
         print("  已取消，未写入。")
         return
     (DATA / "plugins").mkdir(parents=True, exist_ok=True)
     (DOCKER / "output").mkdir(exist_ok=True)
-    write_new(dict(zip(TARGETS, (config, env_text(env)), strict=True)))
+    compose = env_text(
+        {
+            "FRONTEND_WEB_PORT": port,
+            "FRONTEND_BIND_ADDRESS": publish_host,
+            "FRONTEND_PUBLISH_PORT": publish_port,
+        }
+    )
+    write_new(dict(zip(TARGETS, (config, env_text(env), compose), strict=True)))
     print("  按 docker/README.md 构建产物并启动，之后在后端完成节点同步。")
 
 

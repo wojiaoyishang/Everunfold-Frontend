@@ -22,7 +22,7 @@ const next = spawn(
     path.join(root, "node_modules/next/dist/bin/next"),
     dev ? "dev" : "start",
     "--hostname",
-    "0.0.0.0",
+    process.env.FRONTEND_HOST ?? "0.0.0.0",
     ...process.argv.slice(3),
   ],
   {
