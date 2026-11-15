@@ -33,7 +33,7 @@ prepare_source() {
   cd "$build_root"
 
   build_log 'Installing locked npm dependencies.'
-  npm ci --ignore-scripts --include=dev --no-audit
+  npm ci --ignore-scripts --include=dev --no-audit --loglevel=verbose --timing
 }
 
 build() {
