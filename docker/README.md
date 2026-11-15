@@ -4,13 +4,26 @@
 
 ## 1. 准备配置
 
-先在终端运行配置向导，需 Python 3.10 或更新版本：
+先在 POSIX 交互终端运行配置向导，需 Python 3.11 或更新版本及其标准库 `termios`：
 
 ```bash
 python3 configure.py
 ```
 
-向导分别询问前后端发布 URL、服务端连接后端的内部 URL、来源 UUID、节点和双向令牌，再配置 Web/接收器监听与 Docker 宿主端口映射。后端生成的令牌可以逐项手输，也可以从后端向导生成的 `runtime.env` 导入，留空使用导入值。它只读取两项令牌。确认后创建私有配置、`.env`、数据和输出目录。已有配置时请直接编辑原文件。
+启动后先显示全部向导配置项、当前值及未填项，再显示菜单：
+
+```text
+1.按次序配置  2.修改某配置项  3.退出
+```
+
+- 选 `1` 按顺序编辑，结束后返回总览；选 `2` 输入配置项编号，只修改该项。
+- 输入框预填当前值，直接回车保留；`←/→` 移动光标，`↑/↓` 调取该项在本次会话中的输入，`Ctrl+U` 清空。程序显式设置终端回显和行编辑属性，正常退出、Ctrl+C 或 EOF 后恢复原设置。历史不写入磁盘。
+- 所有输入回显；独立令牌在总览中遮盖，进入该项编辑时可查看和修改。
+- 选 `3` 后，有修改时选择 `y` 保存并退出、`n` 放弃、`c` 返回。必填项或端口等校验未通过时返回菜单。未修改就退出时不会创建文件。
+
+发布 URL、服务端内部连接、Web/接收器监听与 Docker 宿主映射仍分别配置。“导入后端令牌文件路径”只导入后端 `runtime.env` 的两项令牌，随后可以分别编辑；清空导入路径保留当前令牌值。已有配置会直接加载，可按编号修改，无需重新填写。
+
+保存前在原文件旁创建 `文件名.<标识>.bak` 备份，文件权限为 `0600`。保留向导未编辑的 TOML 字段及其他环境变量，包括所选构建产物目录；TOML 会重新排版，原注释保存在备份中。文件被其他程序修改时拒绝覆盖。支持 `.env` 中自定义的 `FRONTEND_DATA_DIR`、`FRONTEND_ENV_FILE`，以及独立后端连接文件的当前 active 项；其他连接项保留。
 
 共用 Docker 网络需要单独创建。使用向导后，可跳过下列复制模板的命令。
 
@@ -26,8 +39,8 @@ cp -n runtime.env.example runtime.env
 | 文件               | 填写内容                                                                                                                                                                                                                          |
 | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `data/config.toml` | `PUBLIC_SITE_URL` 填前端公开地址，`BACKEND_BASE_URL` 填反向代理对外提供的 API 根地址。填写与后端节点清单一致的 `FRONTEND_NODE_ID`，以及 `[settings].source_epoch`。在 `[backend]` 中填写实际来源 IP/CIDR 和两个方向的令牌变量名。 |
-| `runtime.env`      | 填两个方向令牌的实际值，与后端对应变量一致。`FRONTEND_HOST` 设置 Web 绑定 IP；接收器由 `FRONTEND_RECEIVER_HOST`、`FRONTEND_RECEIVER_PORT` 单独设置，默认监听 `0.0.0.0:3001`。 |
-| `.env`             | 设置 Web 容器端口和宿主映射；`FRONTEND_ARTIFACT_DIR=./output/pre-1` 选择构建版本，省略时使用该默认值。编辑时保留向导写入的其他设置。 |
+| `runtime.env`      | 填两个方向令牌的实际值，与后端对应变量一致。`FRONTEND_HOST` 设置 Web 绑定 IP；接收器由 `FRONTEND_RECEIVER_HOST`、`FRONTEND_RECEIVER_PORT` 单独设置，默认监听 `0.0.0.0:3001`。                                                     |
+| `.env`             | 设置 Web 容器端口和宿主映射；`FRONTEND_ARTIFACT_DIR=./output/pre-1` 选择构建版本，省略时使用该默认值。编辑时保留向导写入的其他设置。                                                                                              |
 
 在 `data/config.toml` 的现有小节中修改目录，保留同小节的其他字段：
 
@@ -43,14 +56,14 @@ directory = "/data/public-snapshots"
 
 ### 发布、连接与监听分别配置
 
-| 配置 | 位置与示例 | 作用 |
-| --- | --- | --- |
-| 前端发布 URL | `data/config.toml` 的 `PUBLIC_SITE_URL = "https://blog.example.com"` | 本站 canonical、Open Graph、站点地图和订阅的绝对链接；与后端 `/_nodes` 中该节点的公开地址保持一致 |
-| 后端发布 URL | 同文件的 `BACKEND_BASE_URL = "https://api.example.com"` | 浏览器访问 API 的公开入口，与后端的同名配置一致 |
-| 后端内部连接 URL | 同文件的 `[backend].base_url = "https://backend.internal.example.com"` | Next.js、接收器及上报服务连接后端；省略时沿用后端发布 URL，仅在服务端使用 |
-| Web 进程监听 | `runtime.env` 的 `FRONTEND_HOST=0.0.0.0`；`.env` 的 `FRONTEND_WEB_PORT=3000` | 容器内 Web 进程绑定地址；Compose 将端口注入为 `FRONTEND_PORT` |
-| Docker 宿主端口映射 | `.env` 的 `FRONTEND_BIND_ADDRESS=127.0.0.1`、`FRONTEND_PUBLISH_PORT=13000` | 将宿主 `127.0.0.1:13000` 转发到容器 Web 端口 |
-| 内部接收器监听 | `runtime.env` 的 `FRONTEND_RECEIVER_HOST=0.0.0.0`、`FRONTEND_RECEIVER_PORT=3001` | 独立进程接收后端投递；Compose 不把此端口映射到宿主 |
+| 配置                | 位置与示例                                                                       | 作用                                                                                              |
+| ------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 前端发布 URL        | `data/config.toml` 的 `PUBLIC_SITE_URL = "https://blog.example.com"`             | 本站 canonical、Open Graph、站点地图和订阅的绝对链接；与后端 `/_nodes` 中该节点的公开地址保持一致 |
+| 后端发布 URL        | 同文件的 `BACKEND_BASE_URL = "https://api.example.com"`                          | 浏览器访问 API 的公开入口，与后端的同名配置一致                                                   |
+| 后端内部连接 URL    | 同文件的 `[backend].base_url = "https://backend.internal.example.com"`           | Next.js、接收器及上报服务连接后端；省略时沿用后端发布 URL，仅在服务端使用                         |
+| Web 进程监听        | `runtime.env` 的 `FRONTEND_HOST=0.0.0.0`；`.env` 的 `FRONTEND_WEB_PORT=3000`     | 容器内 Web 进程绑定地址；Compose 将端口注入为 `FRONTEND_PORT`                                     |
+| Docker 宿主端口映射 | `.env` 的 `FRONTEND_BIND_ADDRESS=127.0.0.1`、`FRONTEND_PUBLISH_PORT=13000`       | 将宿主 `127.0.0.1:13000` 转发到容器 Web 端口                                                      |
+| 内部接收器监听      | `runtime.env` 的 `FRONTEND_RECEIVER_HOST=0.0.0.0`、`FRONTEND_RECEIVER_PORT=3001` | 独立进程接收后端投递；Compose 不把此端口映射到宿主                                                |
 
 例如 `https://blog.example.com` → 宿主反向代理 → `127.0.0.1:13000` → 容器 Web `0.0.0.0:3000`。`PUBLIC_SITE_URL` 不决定监听地址或端口。Docker 映射通常保留 Web 的 `0.0.0.0` 绑定；健康检查访问实际容器监听地址。Web 和接收器使用不同端口。
 

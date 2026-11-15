@@ -67,3 +67,4 @@ Thumbs.db
 /docker/instance/
 /docker/data/
 /docker/output/
+/docker/__pycache__/

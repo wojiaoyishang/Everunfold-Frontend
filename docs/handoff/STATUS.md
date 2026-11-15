@@ -1,5 +1,12 @@
 # 前端交接状态
 
+## 配置总览菜单与终端编辑
+
+- 两端 `docker/configure.py` 启动先显示全部向导配置项及当前值，提供「1.按次序配置 / 2.修改某配置项 / 3.退出」。退出时可保存、放弃或返回；已有实例可按编号修改单项，后端导入令牌仍可分别编辑。发布 URL、服务端内部连接、进程监听和宿主映射保持独立。见 [ADR 0153](../decisions/0153-terminal-configuration-menu.md) 和 [使用教程](../../docker/README.md)。
+- 输入框支持左右移动、上下调取本项会话历史、Ctrl+U 清空、中文与粘贴。URL 完整回显，独立密钥在总览遮盖、编辑时回显。使用标准库 termios 显式配置终端属性，退出、中断和 EOF 后恢复原值；向导要求 Python 3.11+、POSIX 终端，无额外 Python 依赖。
+- 保存前生成权限为 0600 的原文件备份，保留其他 TOML 字段、环境变量及构建产物目录；独立后端连接文件只更新 active 项，其余连接保留。两端各 7 项伪终端与文件测试通过，Python 3.12/3.13 已覆盖方向键、窄窗口、回显、保存/放弃、终端恢复和原配置保留；Ruff、双端 Sphinx 严格构建通过。生成文件和独立连接文件通过真实前端加载器，Compose 校验通过。
+- 本轮只改配置向导和文档，未修改实际实例配置或重启服务。当前无 Docker daemon，镜像构建和实际容器通信仍需部署机验证。
+
 ## 发布 URL 与监听配置澄清
 
 - Docker 向导区分本站 `PUBLIC_SITE_URL`、后端 `BACKEND_BASE_URL`、服务端 `[backend].base_url`、Web/接收器监听和宿主端口映射。新增 `FRONTEND_HOST` 控制 Web 绑定 IP，健康检查跟随绑定地址；向导写入私有 `.env` 以保持监听与映射端口一致。配置示例、Docker README 和手册已同步，见 [ADR 0152](../decisions/0152-published-urls-and-listeners.md)。
@@ -13,7 +20,7 @@
 
 ## Docker 配置向导
 
-- `docker/configure.py` 在终端引导填写站点地址、来源 UUID、节点、接收器与双向令牌。可从后端向导产出的 `runtime.env` 导入两项令牌，再逐项保留或修改。现有配置文件继续由维护者编辑。
+- `docker/configure.py` 在终端引导填写站点地址、来源 UUID、节点、接收器与双向令牌。可从后端向导产出的 `runtime.env` 导入两项令牌，再逐项保留或修改。已有配置的加载、按项修改与备份保存见 ADR 0153。
 
 ## Docker 宿主目录部署
 
