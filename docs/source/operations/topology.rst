@@ -76,9 +76,9 @@
      - FastAPI 或指定的服务监听
      - 单入口开发模板把 ``/health/`` 转给 FastAPI。需要独立检查 Next.js 的公开快照时，
        直接访问 Next.js 监听地址上的 ``/health/ready``。
-   * - ``/docs``、``/openapi.json``
+   * - ``/docs``、``/redoc``、``/openapi.json``
      - FastAPI
-     - 按部署需要开放交互文档。RST 开发手册由独立的静态站点提供。
+     - 已关闭，返回统一 JSON 404；契约改用 CLI 离线导出。RST 开发手册由独立静态站点提供。
    * - ``/internal``、``/internal/``
      - 私有监听或受限入口
      - 开发模板在公开代理拒绝这些路径。按真实连接来源 IP/CIDR 和方向令牌共同校验。

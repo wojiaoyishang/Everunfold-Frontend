@@ -236,6 +236,31 @@ class LauncherTests(unittest.TestCase):
         self.assertFalse(any("--name" in c for c in calls))
         self.assertIn("./setup.sh --docker start", result.stdout)
 
+    @unittest.skipUnless(BACKEND, "backend combined initialization action")
+    def test_initialize_and_deploy_builds_once_then_initializes_and_starts(self):
+        config = self.repo / "config.yaml"
+        document = yaml.safe_load(config.read_text())
+        document["environment"]["EVERUNFOLD_AUTO_INIT_EMPTY_DB"] = "0"
+        config.write_text(yaml.safe_dump(document))
+        result, calls = self.run_action("init-deploy")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        builds = [i for i, c in enumerate(calls) if c[0] == "compose" and "build" in c]
+        self.assertEqual(len(builds), 1)
+        initialize = next(i for i, c in enumerate(calls) if "--initialize" in c)
+        service = next(i for i, c in enumerate(calls) if "--name" in c)
+        self.assertLess(builds[0], initialize)
+        self.assertLess(initialize, service)
+        self.assertFalse(any("--prepare" in c for c in calls))
+        self.assertEqual(
+            yaml.safe_load(config.read_text())["environment"]["EVERUNFOLD_AUTO_INIT_EMPTY_DB"], "0"
+        )
+
+    @unittest.skipUnless(BACKEND, "backend combined initialization action")
+    def test_combined_initialization_failure_leaves_previous_container_running(self):
+        result, calls = self.run_action("init-deploy", "--initialize", old="matching")
+        self.assertEqual(result.returncode, 23, result.stderr)
+        self.assertFalse(any("--name" in c or c[0] == "stop" for c in calls))
+
     def test_foreign_container_name_is_not_replaced(self):
         result, calls = self.run_action("start", old="foreign")
         self.assertNotEqual(result.returncode, 0)

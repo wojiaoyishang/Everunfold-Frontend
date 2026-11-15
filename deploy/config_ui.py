@@ -14,7 +14,15 @@ from textual.containers import Horizontal, Vertical, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Button, DataTable, Footer, Header, Input, Label, RichLog, Static
 
-ACTIONS = {"save": 0, "build": 20, "deploy": 21, "init-db": 30, "migrate": 31, "export-node": 32}
+ACTIONS = {
+    "save": 0,
+    "build": 20,
+    "deploy": 21,
+    "init-deploy": 22,
+    "init-db": 30,
+    "migrate": 31,
+    "export-node": 32,
+}
 
 
 class HistoryInput(Input):
@@ -257,7 +265,9 @@ class SetupApp(App[int]):
                 yield Button("构建并启动", id="deploy", variant="success")
             if self.config.backend:
                 with Horizontal(classes="buttons"):
+                    yield Button("初始化数据库并构建启动", id="init-deploy", variant="success")
                     yield Button("初始化新库", id="init-db")
+                with Horizontal(classes="buttons"):
                     yield Button("升级迁移", id="migrate")
                     yield Button("登记并导出节点", id="export-node")
         yield Footer()
@@ -388,10 +398,14 @@ class SetupApp(App[int]):
             for error in errors:
                 log.write(Text(error, style="red"))
             return
-        if action in ("init-db", "migrate", "export-node"):
+        if action in ("init-db", "init-deploy", "migrate", "export-node"):
             description = {
                 "init-db": (
                     "保存配置并检查数据库；仅空库会初始化和创建管理员，已初始化则跳过。继续？"
+                ),
+                "init-deploy": (
+                    "保存配置并构建，初始化空库后启动服务。此操作不受自动初始化开关限制；"
+                    "已有库不重置，旧版本仍需升级迁移。继续？"
                 ),
                 "migrate": "保存配置，并执行数据库迁移？请先完成数据库备份。",
                 "export-node": "保存配置，登记所选节点的内部连接并导出配对文件？",

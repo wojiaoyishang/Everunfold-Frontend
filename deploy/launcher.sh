@@ -11,8 +11,8 @@ native=false
 if [[ "${1:-}" == --native ]]; then native=true; shift; fi
 action=${1:-configure}
 case "$action" in
-  configure|build|deploy|start|check|init-db|migrate|export-node|api|worker|scheduler|web|receiver|render) ;;
-  *) echo "用法：./setup.sh [--docker|--native] [configure|build|start|check|init-db|migrate|export-node|render]"; exit 2 ;;
+  configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|api|worker|scheduler|web|receiver|render) ;;
+  *) echo "用法：./setup.sh [--docker|--native] [configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|render]"; exit 2 ;;
 esac
 if (( $# > 1 )); then echo "不支持额外参数。" >&2; exit 2; fi
 if "$native"; then
@@ -132,7 +132,7 @@ if [[ "$action" == configure ]]; then
   case "$result" in
     0) action=render ;;
     10) echo "已退出，未保存本次修改。"; exit 0 ;;
-    20) action=build ;; 21) action=deploy ;; 30) action=init-db ;;
+    20) action=build ;; 21) action=deploy ;; 22) action=init-deploy ;; 30) action=init-db ;;
     31) action=migrate ;; 32) action=export-node ;; *) exit "$result" ;;
   esac
   refresh_layout
@@ -160,8 +160,13 @@ build_frontend() {
   run_tool render
   read_paths
 }
+initialize_then_start=false
 case "$action" in
-  build|deploy)
+  build|deploy|init-deploy)
+    if [[ "$action" == init-deploy ]]; then
+      [[ "$role" == backend ]] || { echo "此操作请在后端仓库执行。" >&2; exit 2; }
+      initialize_then_start=true
+    fi
     build_image
     [[ "$role" != frontend ]] || build_frontend
     if [[ "$action" == build ]]; then echo "构建完成。运行 ./setup.sh --docker start 启动。"; exit 0; fi
@@ -222,7 +227,11 @@ case "$action" in
   start)
     if [[ "$role" == backend ]]; then
       echo "启动准备：检查依赖，并按配置初始化空数据库。"
-      run_runtime python deploy/runtime_check.py --prepare
+      if "$initialize_then_start"; then
+        run_runtime python deploy/runtime_check.py --initialize
+      else
+        run_runtime python deploy/runtime_check.py --prepare
+      fi
     else
       check_runtime
     fi

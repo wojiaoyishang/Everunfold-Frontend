@@ -86,9 +86,9 @@ uv run --locked python -m tools.register_backend_plugins --config config.toml --
 
 ## 插件自己的接口契约
 
-路由出现在API的 `/openapi.json`，operation_id自动加插件命名空间，多方法定义拆成唯一操作，保留原生模型/依赖及插件标签。自动准入错误使用项目ErrorResponse模型。
+路由包含在离线导出的 OpenAPI 中；运行服务的 `/docs`、`/redoc`、`/openapi.json` 已关闭。operation_id自动加插件命名空间，多方法定义拆成唯一操作，保留原生模型/依赖及插件标签。自动准入错误使用项目ErrorResponse模型。
 
-也可离线导出该插件自己的完整OpenAPI，无需连接数据库或启用插件：
+使用 CLI 离线导出该插件自己的完整 OpenAPI，无需连接数据库或启用插件：
 
 ```sh
 uv run --locked python -m tools.export_plugin_routes --plugin-id example.routes

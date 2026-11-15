@@ -28,6 +28,7 @@ def main() -> None:
             10: "cancelled",
             20: "build",
             21: "deploy",
+            22: "init-deploy",
             30: "init-db",
             31: "migrate",
             32: "export-node",
@@ -37,6 +38,9 @@ def main() -> None:
             return
         if action == "failed":
             raise SystemExit(1)
+    initialize_then_start = action == "init-deploy"
+    if initialize_then_start and not BACKEND:
+        raise SystemExit("此操作请在后端仓库执行。")
     ctx = Context(DOCKER, "backend" if BACKEND else "frontend", native=True)
     ctx.materialize()
     if action == "render" and ctx.document:
@@ -79,7 +83,7 @@ def main() -> None:
         else:
             execute(["node", "--import", "tsx", "deploy/check.mjs"])
 
-    if action in ("build", "deploy"):
+    if action in ("build", "deploy", "init-deploy"):
         build()
         if action == "build":
             print("构建完成。运行 ./setup.sh --native start 启动。")
@@ -116,7 +120,13 @@ def main() -> None:
         return
     if action == "start":
         if BACKEND:
-            execute([python, "deploy/runtime_check.py", "--prepare"])
+            execute(
+                [
+                    python,
+                    "deploy/runtime_check.py",
+                    "--initialize" if initialize_then_start else "--prepare",
+                ]
+            )
         else:
             check()
     if BACKEND:

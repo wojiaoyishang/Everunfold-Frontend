@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[组合部署操作与统一 HTTP 响应](decisions/0157-deploy-action-and-http-envelopes.md)说明显式初始化并构建启动、根路径文案、错误外壳和在线 API 文档关闭。
+
 [空库自动初始化](decisions/0156-empty-database-bootstrap.md)说明默认开关、真实空库判定、初始化按钮修复和启动前复检。
 
 [根配置直读与容器挂载向导](decisions/0155-root-runtime-and-container-settings.md)补充配置读取、挂载点、端口及默认桥接与额外网络的创建顺序。

@@ -393,6 +393,25 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
             await pilot.click("#yes")
         self.assertEqual(app.return_value, 30)
 
+    @unittest.skipUnless(BACKEND, "backend combined initialization action")
+    async def test_initialize_and_deploy_confirms_without_changing_auto_init_preference(self):
+        model = self.complete()
+        self.edit(model, "auto_init_empty_db", "0")
+        model.save()
+        saved = (self.root / "config.yaml").read_bytes()
+        app = SetupApp(self.model())
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.click("#init-deploy")
+            await pilot.pause()
+            self.assertIsInstance(app.screen, Confirm)
+            await pilot.click("#no")
+            self.assertEqual((self.root / "config.yaml").read_bytes(), saved)
+            await pilot.click("#init-deploy")
+            await pilot.pause()
+            await pilot.click("#yes")
+        self.assertEqual(app.return_value, 22)
+        self.assertEqual(self.model().get("auto_init_empty_db"), "0")
+
     @unittest.skipUnless(BACKEND, "PostgreSQL form")
     async def test_database_parts_encode_password(self):
         model = self.complete()
