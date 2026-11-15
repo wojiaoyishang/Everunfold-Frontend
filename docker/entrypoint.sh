@@ -3,9 +3,12 @@ set -euo pipefail
 
 source_root=/workspace
 build_root=/build/work
-releases=/releases
-plugins=/plugins
+output=/output
 export npm_config_cache=/build/npm-cache
+
+build_log() {
+  printf '[build] %s\n' "$*"
+}
 
 validate_release() {
   if [[ ! "${1:-}" =~ ^[A-Za-z0-9][A-Za-z0-9._-]{0,79}$ ]]; then
@@ -19,40 +22,33 @@ prepare_source() {
   local -a filters=(--exclude=/public/themes/)
   if [[ "$kind" == host ]]; then filters+=(--exclude=/src/plugins/); fi
 
+  build_log "Copying sources from $source_root."
   mkdir -p "$build_root"
-  exec 9>/build/build.lock
-  flock 9
   cd "$source_root"
-  rsync -rlt --checksum --safe-links --delete --delete-excluded "${filters[@]}" \
+  rsync -rlt --safe-links "${filters[@]}" \
     src tools public package.json package-lock.json contracts.lock.json .npmrc .prettierrc.json \
     next.config.ts tsconfig.json tsconfig.plugins.json "$build_root/"
   cd "$build_root"
 
-  local fingerprint
-  fingerprint="$(node -p 'process.version + ":" + process.platform + ":" + process.arch'
-    npm --version
-    sha256sum package.json package-lock.json .npmrc)"
-  if [[ ! -x node_modules/.bin/next || ! -f .dependencies ||
-        "$(<.dependencies)" != "$fingerprint" ]]; then
-    : >.dependencies
-    npm ci --ignore-scripts --include=dev --no-audit --prefer-offline
-    printf '%s\n' "$fingerprint" >.dependencies
-  fi
+  build_log 'Installing locked npm dependencies.'
+  npm ci --ignore-scripts --include=dev --no-audit
 }
 
-build_host() {
+build() {
   local version=${1:-}
   validate_release "$version"
-  prepare_source host
-  if [[ -e "$releases/$version" ]]; then
+  if [[ -e "$output/$version" ]]; then
     printf 'Host release %s already exists. Choose a new ID.\n' "$version" >&2
     exit 2
   fi
 
+  prepare_source host
+  build_log 'Preparing contracts and assets, then compiling Next.js.'
   npm run build:host
   test -s .next/BUILD_ID
+  build_log "Exporting the build to $output/$version."
   (
-    candidate="$(mktemp -d "$releases/.$version.XXXXXXXX")"
+    candidate="$(mktemp -d "$output/.$version.XXXXXXXX")"
     trap 'rm -rf -- "$candidate"' EXIT
     # Receiver and inventory resolve their TypeScript imports from the release.
     rsync -a --exclude=/.next/cache/ \
@@ -60,10 +56,11 @@ build_host() {
       next.config.ts tsconfig.json tsconfig.plugins.json "$candidate/"
     mkdir -p "$candidate/var/cache"
     rsync -a var/cache/build var/cache/contracts "$candidate/var/cache/"
-    mv -T -- "$candidate" "$releases/$version"
+    mv -T --no-clobber -- "$candidate" "$output/$version"
+    test ! -d "$candidate"
     trap - EXIT
   )
-  printf 'Host release %s is ready to start.\n' "$version"
+  build_log "Build complete: $output/$version."
 }
 
 build_plugins() {
@@ -73,7 +70,16 @@ build_plugins() {
   for name in "$@"; do
     arguments+=(--plugin "$name")
   done
-  npm run plugins:build -- --output "$plugins" "${arguments[@]}"
+  build_log 'Compiling and publishing plugin packages.'
+  npm run plugins:build -- --output /plugins "${arguments[@]}"
+  build_log 'Plugin build complete.'
+}
+
+report_build_exit() {
+  local status=$?
+  if (( status != 0 )); then
+    printf '[build] Failed with exit code %s.\n' "$status" >&2
+  fi
 }
 
 start_web() {
@@ -90,15 +96,13 @@ stop_services() {
   wait "${children[@]}" 2>/dev/null || true
 }
 
-serve() {
-  local version=${FRONTEND_RELEASE:-}
-  validate_release "$version"
-  if [[ ! -s "$releases/$version/.next/BUILD_ID" ]]; then
-    printf 'Host release %s is missing. Run build-host first.\n' "$version" >&2
+deploy() {
+  cd "$source_root"
+  if [[ ! -s .next/BUILD_ID || ! -x node_modules/.bin/next ]]; then
+    echo 'Mount a successfully built artifact at /workspace before deploying.' >&2
     exit 1
   fi
-  cd "$releases/$version"
-  export NODE_ENV=production EVERUNFOLD_PROJECT_ROOT="$PWD" PLUGINS_DIRECTORY="$plugins"
+  export NODE_ENV=production EVERUNFOLD_PROJECT_ROOT="$PWD" PLUGINS_DIRECTORY=/data/plugins
   children=()
   trap 'stop_services; exit 0' TERM INT
   start_web & children+=("$!")
@@ -110,9 +114,9 @@ serve() {
   exit "$((status == 0 ? 1 : status))"
 }
 
-case "${1:-serve}" in
-  build-host) build_host "${2:-}" ;;
-  build-plugins) shift; build_plugins "$@" ;;
-  serve) serve ;;
+case "${1:-deploy}" in
+  build) trap report_build_exit EXIT; build "${2:-}" ;;
+  build-plugins) trap report_build_exit EXIT; shift; build_plugins "$@" ;;
+  deploy) deploy ;;
   *) exec "$@" ;;
 esac

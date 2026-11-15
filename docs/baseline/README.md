@@ -1842,4 +1842,4 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
-| `docs/decisions/0150-source-mounted-docker.md` | `ADR0150-1` | `a012973d4289601024b727ff6e8117946430f15a7ce1acceeb409abd32f20546` |
+| `docs/decisions/0150-source-mounted-docker.md` | `ADR0150-2` | `a1c602c0a7dc75210ae24fd4b3d695fd2354e6a3861f029a1b3dd340943e4482` |

@@ -6,20 +6,20 @@
 
 ```bash
 docker network inspect everunfold >/dev/null 2>&1 || docker network create everunfold
-mkdir -p instance
-cp -n ../config.example.toml instance/config.toml
+mkdir -p data/plugins output
+cp -n ../config.example.toml data/config.toml
 cp -n runtime.env.example runtime.env
 ```
 
 编辑以下文件：
 
-| 文件                   | 填写内容                                                                                                                                                                                                                        |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `instance/config.toml` | `PUBLIC_SITE_URL` 填前端公开地址，`BACKEND_BASE_URL` 填浏览器可访问的后端 API 地址。填写与后端节点清单一致的 `FRONTEND_NODE_ID`，以及 `[settings].source_epoch`。在 `[backend]` 中填写实际来源 IP/CIDR 和两个方向的令牌变量名。 |
-| `runtime.env`          | 填两个方向令牌的实际值，与后端对应变量一致。接收器默认监听 `0.0.0.0:3001`。                                                                                                                                                     |
-| `.env`                 | 创建此文件并写入 `FRONTEND_RELEASE=pre-1`，供 Compose 选择构建版本。已有 `.env` 时编辑这一行，保留其他设置。                                                                                                                    |
+| 文件               | 填写内容                                                                                                                                                                                                                        |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `data/config.toml` | `PUBLIC_SITE_URL` 填前端公开地址，`BACKEND_BASE_URL` 填浏览器可访问的后端 API 地址。填写与后端节点清单一致的 `FRONTEND_NODE_ID`，以及 `[settings].source_epoch`。在 `[backend]` 中填写实际来源 IP/CIDR 和两个方向的令牌变量名。 |
+| `runtime.env`      | 填两个方向令牌的实际值，与后端对应变量一致。接收器默认监听 `0.0.0.0:3001`。                                                                                                                                                     |
+| `.env`             | 创建此文件并写入 `FRONTEND_ARTIFACT_DIR=./output/pre-1`，供 Compose 选择构建版本。已有 `.env` 时编辑这一行，保留其他设置。                                                                                                      |
 
-在 `instance/config.toml` 的现有小节中修改目录，保留同小节的其他字段：
+在 `data/config.toml` 的现有小节中修改目录，保留同小节的其他字段：
 
 ```toml
 [settings]
@@ -38,13 +38,22 @@ directory = "/data/public-snapshots"
 ```bash
 docker compose config --quiet
 docker compose build frontend
-docker compose run --rm builder build-host pre-1
+docker compose run --rm builder build pre-1
 docker compose run --rm builder build-plugins
 docker compose up -d frontend
 docker compose ps
 ```
 
-`build-host pre-1` 在临时构建容器内将只读源码复制到可写的 `/build/work`，安装锁定依赖并执行 Next.js 生产构建。成功后把产物保存在持久卷的 `/releases/pre-1`。启动命令用这份产物运行 Web 和接收器。
+编译日志会实时显示在终端。需要同时保存到宿主机时，用下面的命令替代对应的 `build` 命令。Bash 的 `pipefail` 会保留构建失败的退出状态。
+
+```bash
+set -o pipefail
+docker compose run --rm builder build pre-1 2>&1 | tee build-pre-1.log
+```
+
+编译模式把源码只读挂到 `/workspace`，在容器临时目录里执行 `npm ci` 和 Next.js 生产构建。成功后，`build pre-1` 把产物写到宿主 `output/pre-1/`。临时容器退出后可以删除。可用 Compose 的 `FRONTEND_SOURCE_DIR` 和 `FRONTEND_OUTPUT_DIR` 指定其他宿主路径。
+
+默认启动进入部署模式，把选定的产物目录挂到 `/workspace`，启动 Next.js 和接收器。该挂载可写，以供 Next.js 和插件运行时写缓存。Web 和接收器的运行配置来自宿主 `data/`。编译与部署使用相同平台架构的镜像。
 
 ## 3. 首次同步并验收
 
@@ -60,28 +69,20 @@ docker compose logs --tail=100 frontend
 ## 4. 重启、更新和回滚
 
 - **日常重启**执行 `docker compose restart frontend`，继续使用创建该容器时选定的已构建版本。
-- **修改主体、路由或主题**时，先执行 `docker compose run --rm builder build-host pre-2`。成功后将 `.env` 改成 `FRONTEND_RELEASE=pre-2`，再执行 `docker compose up -d frontend`。单实例切换会短暂重启。
+- **修改主体、路由或主题**时，先执行 `docker compose run --rm builder build pre-2`。成功后将 `.env` 改成 `FRONTEND_ARTIFACT_DIR=./output/pre-2`，再执行 `docker compose up -d frontend`。单实例切换会短暂重启。
 - **需要回滚主体**时，将 `.env` 改回旧版本，再执行 `docker compose up -d frontend`。切换前核对后端契约、公开快照和插件 SDK 的兼容性。
 - **单独更新插件**时，执行 `docker compose run --rm builder build-plugins 插件目录名`。兼容的插件包可由运行中的前端发现。
 
-## 5. 文件存在哪里
+## 5. 备份和目录迁移
 
-| 路径              | 内容                                                      |
-| ----------------- | --------------------------------------------------------- |
-| `/workspace`      | 只读挂载的宿主源码                                        |
-| `/build`          | 构建工作区、容器内依赖、npm 及 Turbopack 缓存             |
-| `/releases`       | 已构建的 Next.js 版本，含各自的静态资源、运行依赖和接收器 |
-| `/plugins`        | 独立发布的插件包                                          |
-| `/data`           | 公开快照和设置，跨主体版本保留                            |
-| `/etc/everunfold` | 从宿主 `instance/` 挂载的配置                             |
-
-日常停机可用 `docker compose stop frontend` 或 `docker compose down`。带 `-v` 的 `down` 会删除这些卷。迁机时备份 `instance/`、`.env` 和私有 `runtime.env`，并按需求保留 `releases`、`plugins` 和 `data` 卷。仅丢失前端快照时，可从后端重新同步。
+- `output/pre-1/` 等目录是自带依赖的产物。保留需要回滚的版本，并随时可移到另一台同平台机器部署。
+- `data/` 是独立的宿主目录，挂到 `/data`。其中 `config.toml` 保存实例配置，`settings/` 和 `public-snapshots/` 保存公开副本，`plugins/` 保存独立编译的插件。使用 `FRONTEND_DATA_DIR` 可指定其他数据目录。
+- 日常停机用 `docker compose stop frontend`。移除容器后宿主目录仍保留。迁移时备份 `data/`、选定的产物目录、`.env` 和私有 `runtime.env`。旧版 Compose 已有数据时，先将原命名卷中的副本和插件及原实例配置复制到新目录。
+- 仅丢失前端公开副本时，可从后端重新同步。回滚主体会继续使用当前插件和公开副本。
 
 ## 6. 构建与插件维护细节
 
-构建器按 Node/npm 版本及依赖锁决定是否执行 `npm ci`。后续主体构建复用 `.next/cache`，构建成功后才发布候选版本。
-
-默认挂载当前检出。可用 Compose 环境中的 `FRONTEND_SOURCE_DIR` 指向只读的发布检出。构建期间固定该检出，避免一边复制一边切换分支。每个主体版本包含自己的运行依赖与静态资源。
+每次显式编译都在新容器中完成。日常启动和重启继续使用原产物。构建期间固定源码检出，避免边复制边切换分支。
 
 `contracts.lock.json` 固定后端提交及 SHA-256。公开契约默认按锁文件恢复。离线或私有部署可给 builder 只读挂入包含锁定提交的完整后端 Git 检出，设置 `EVERUNFOLD_BACKEND_PATH` 指向该挂载。宿主 Git 检出应由容器 UID 1000 所有或在构建器的 Git 设置中单独信任该目录。以容器用户可读取的独立检出为例，可在 Compose override 的 builder 中添加：
 
@@ -99,7 +100,7 @@ services:
 | 改动                            | 操作                                                       |
 | ------------------------------- | ---------------------------------------------------------- |
 | 前端插件源码                    | `docker compose run --rm builder build-plugins 插件目录名` |
-| 前端主体、路由、主题源码        | `build-host 新版本`，然后切换 `FRONTEND_RELEASE`           |
+| 前端主体、路由、主题源码        | `build 新版本`，然后修改 `FRONTEND_ARTIFACT_DIR`           |
 | 前端依赖锁或契约锁              | 重新执行对应构建，检查后端契约与 SDK 兼容性                |
 | Node.js、系统依赖或 Docker 入口 | 重新构建镜像，并按需发布新的主体版本                       |
 
