@@ -38,6 +38,7 @@ export function useCacheManagement(localNode: string) {
   }>();
   const [selected, select] = useState("");
   const [snapshot, setSnapshot] = useState<CacheNodeState>();
+  const [observedAt, setObservedAt] = useState(0);
   const [loading, setLoading] = useState(false);
   const [listError, setListError] = useState(false);
   const [readError, setReadError] = useState(false);
@@ -118,6 +119,7 @@ export function useCacheManagement(localNode: string) {
           signal: request.signal,
         });
         if (!request.signal.aborted) {
+          setObservedAt(Date.now());
           setSnapshot(response.data);
           setReadError(false);
         }
@@ -161,15 +163,49 @@ export function useCacheManagement(localNode: string) {
   const pending = Object.values(state?.sync ?? {}).some(
     (item) => item.state === "pending" || item.state === "retrying",
   );
+  const recovery = state?.storage?.sync_check;
+  const hasRecovery = Boolean(recovery);
+  const nextCheckAt = Date.parse(recovery?.next_check_at ?? "") || 0;
   useEffect(() => {
-    if (!node || !pending) return;
-    let count = 0;
-    const timer = window.setInterval(() => {
-      if (++count > 20) window.clearInterval(timer);
-      else void refresh(true);
-    }, 2500);
-    return () => window.clearInterval(timer);
-  }, [node, pending, watch, refresh]);
+    if (!node || (!pending && !hasRecovery)) return;
+    const interval = 2500;
+    let deliveryReads = 0;
+    let lateRecoveryReads = 0;
+    let disposed = false;
+    let timer: number | undefined;
+    function schedule() {
+      window.clearTimeout(timer);
+      if (disposed || document.visibilityState !== "visible") return;
+      const pollDelivery = pending && deliveryReads < 20;
+      const pollRecovery = hasRecovery && lateRecoveryReads < 20;
+      if (!pollDelivery && !pollRecovery) return;
+      const delay = pollDelivery
+        ? interval
+        : Math.max(interval, nextCheckAt - Date.now());
+      timer = window.setTimeout(async () => {
+        if (document.visibilityState !== "visible") return;
+        const now = Date.now();
+        if (nextCheckAt && now >= nextCheckAt) setObservedAt(now);
+        if (!current.current && !operation.current) {
+          if (pollDelivery) deliveryReads++;
+          if (pollRecovery && now >= nextCheckAt) lateRecoveryReads++;
+          await refresh(true);
+        }
+        schedule();
+      }, delay);
+    }
+    function visibilityChanged() {
+      if (document.visibilityState === "visible") lateRecoveryReads = 0;
+      schedule();
+    }
+    schedule();
+    document.addEventListener("visibilitychange", visibilityChanged);
+    return () => {
+      disposed = true;
+      window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", visibilityChanged);
+    };
+  }, [hasRecovery, nextCheckAt, node, pending, refresh, watch]);
   const sitePending = siteDelivery.rows?.some(
     (row) => row.status === "pending" || row.status === "failed",
   );
@@ -181,7 +217,7 @@ export function useCacheManagement(localNode: string) {
       else void refreshSiteDelivery(true);
     }, 2500);
     return () => window.clearInterval(timer);
-  }, [sitePending, refreshSiteDelivery]);
+  }, [sitePending, watch, refreshSiteDelivery]);
 
   function resetPolicy() {
     setDrafts((current) => {
@@ -251,6 +287,10 @@ export function useCacheManagement(localNode: string) {
           files: data.removed_files,
           bytes: data.removed_bytes,
         });
+        if (action === "clear") {
+          setWatch((value) => value + 1);
+          void refreshSiteDelivery();
+        }
       } else {
         await rebuildNodeCache(baseUrl, node, { scope: action }, csrfToken, {
           signal: request.signal,
@@ -291,6 +331,8 @@ export function useCacheManagement(localNode: string) {
     nodes,
     node,
     state,
+    nextSyncCheckAt:
+      nextCheckAt > observedAt ? recovery?.next_check_at : undefined,
     loading,
     listError,
     readError,
@@ -317,6 +359,7 @@ export function useCacheManagement(localNode: string) {
     },
     reloadNodes: () => void loadNodes(),
     refresh: () => {
+      setWatch((value) => value + 1);
       void loadNodes();
       void refresh();
       void refreshSiteDelivery();

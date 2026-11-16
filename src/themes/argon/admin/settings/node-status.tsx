@@ -20,6 +20,7 @@ import { AdminPageHeading } from "../components/page-heading";
 import { SettingsLayout, SettingsSectionLink } from "./section-navigation";
 import { DeliveryBadge, SettingsSection } from "./shared";
 import { CachePolicySection } from "./cache-policy";
+import { CacheCheckTimes } from "./check-times";
 import { QueryCacheSection } from "./query-cache";
 import {
   DeploymentSettings,
@@ -258,16 +259,11 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
                 </dt>
                 <dd>{bytes(reclaimable)}</dd>
               </div>
-              <div>
-                <dt>
-                  <UiText text="检查时间" />
-                </dt>
-                <dd>
-                  <time dateTime={state.checked_at}>
-                    {new Date(state.checked_at).toLocaleString()}
-                  </time>
-                </dd>
-              </div>
+              <CacheCheckTimes
+                checkedAt={state.checked_at}
+                lastSyncCheckAt={disk?.sync_check?.last_checked_at}
+                nextSyncCheckAt={cache.nextSyncCheckAt}
+              />
             </dl>
             <div className={styles.resources}>
               {resourceNames.map((name) => {
@@ -384,7 +380,7 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
               <UiText text="已提交重新同步。" />
             ) : cache.result.type === "cleared" ? (
               <UiText
-                text="已清空节点缓存，删除 {count} 个文件。请重新同步全部副本。"
+                text="已清空节点缓存，删除 {count} 个文件。可在同步状态中查看恢复进度。"
                 values={{ count: cache.result.files }}
               />
             ) : cache.result.files === 0 ? (
@@ -416,7 +412,7 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
         description={
           clear ? (
             <UiText
-              text="将删除节点 {node} 的公开内容、站点设置和节点策略的全部缓存副本，包括当前版本。该节点的读者页面可能暂时不可用，请在清空后点击“重新同步全部”。"
+              text="将删除节点 {node} 的公开内容、站点设置和节点策略的全部缓存副本，包括当前版本。后端会重新投递当前版本，期间读者页面可能暂时不可用。"
               values={{ node: cache.node }}
             />
           ) : prune ? (
