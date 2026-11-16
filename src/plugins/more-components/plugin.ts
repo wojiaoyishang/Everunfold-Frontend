@@ -95,10 +95,11 @@ const definitions = [
 
 export default {
   id,
-  version: "1.0.0",
+  version: "1.0.1",
   title: "更多组件",
   description: "折叠说明、提示框、人物分组、姓名与寄语和视频播放器。",
   author: "Everunfold",
+  preview: "asset:assets/preview.webp",
   readme:
     "在页面或文章的组件编辑器中使用。可将说明、按钮等放入折叠区和提示框，将多个人物寄语放入同一个分组，并从媒体库选取视频与封面。",
   setup({ builder, components }) {

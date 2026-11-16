@@ -17,3 +17,7 @@ npm run plugins:build -- --plugin more-components
 ```
 
 生产环境将 `plugins/more-components` 放进插件目录，前端宿主需要支持视频媒体字段和 `parseSiteMediaReference` SDK 导出。页面通过原有的组件文档保存和发布。
+
+插件管理的封面来自 `assets/preview.webp`。使用内置 imagegen 生成，构建时打包成独立 WebP 资源。
+
+> Create a wide 16:9 flat illustration for the Everunfold “更多组件” plugin cover. Arrange five simple UI tiles in a balanced central composition: a lavender disclosure panel with a chevron, an amber notice, a row of small avatar circles, a mint speech bubble, and a violet video tile with a large play icon. Warm off-white and pale lavender background, rich grape and lilac with small mint and apricot accents, clean two-dimensional geometry, soft rounded corners, crisp silhouettes, generous margins and no text, branding, watermark, gradients or realistic shadows. Make the composition legible at thumbnail size.
