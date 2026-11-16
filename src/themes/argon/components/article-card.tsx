@@ -1,5 +1,4 @@
 import { ArticleAgeNotice } from "./article-age-notice";
-import { AppLink as Link } from "./navigation-link";
 import type { BuilderRenderContext } from "../builder/content";
 import { BuilderContent } from "../builder/content";
 import type { ContentMetadata } from "@/core/content/types";
@@ -9,7 +8,6 @@ import {
   articleDisplay as resolveDisplay,
   readingMinutes,
 } from "./article-reading";
-import { taxonomyHref } from "@/core/content/urls";
 import { StaticContentMarkup } from "./content-markup-static";
 import {
   ServerThemeComponent,
@@ -17,7 +15,7 @@ import {
 } from "@/core/extensions/server-components";
 import { ArticleActions } from "./article-actions";
 import { ArticleMedia } from "./article-media";
-import { Icon } from "./icon";
+import { ArticleTags } from "./article-tags";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 import type {
   ArticleDisplayPreferences,
@@ -137,18 +135,7 @@ export function ArticleBody({
         )}
       </ArticleMedia>
       <ArticleAfterword content={content} display={articleDisplay} />
-      {content.tags.length > 0 && (
-        <footer className="article-footer">
-          <div className="article-tags">
-            {content.tags.map((tag) => (
-              <Link key={tag.id} href={taxonomyHref(tag)}>
-                <Icon name="tag" />
-                {tag.name}
-              </Link>
-            ))}
-          </div>
-        </footer>
-      )}
+      <ArticleTags tags={content.tags} />
       {interactive && articleDisplay?.show_share !== false && (
         <ArticleActions
           path={content.path}

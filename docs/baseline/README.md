@@ -1873,3 +1873,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0165-pairing-runtime-and-frontend-origins.md` | `ADR0165-1` | `34b2b7832b0e2c501244b8229a568850b746fbccdc41c956ac37c8b614bea118` |
+
+## 博客迁移后的阅读与组件页修复
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0166-post-migration-reader-and-page-fixes.md` | `ADR0166-1` | `47b11d8f73f7a43118b922cb188c9c24e0232c03092c5a944b550c2b8bf2ab36` |

@@ -18,6 +18,7 @@ import {
   clearGlossaryCache,
   loadGlossaryMatches,
 } from "@/core/glossary/runtime";
+import { readProtectedGlossaryMatches } from "@/core/contracts/glossary";
 import { filterGlossaryTerms } from "@/core/glossary/search";
 
 function term(
@@ -276,6 +277,41 @@ test("empty article matches are cached alongside the article revision", async ()
   assert.strictEqual(second, first);
   assert.equal(requests, 1);
   clearGlossaryCache();
+});
+
+test("protected glossary reads carry a scoped receipt and bypass public caches", async () => {
+  const contentId = "00000000-0000-4000-8000-000000000001";
+  const receipts: string[] = [];
+  const fetcher: typeof fetch = async (url, options) => {
+    const target = new URL(String(url));
+    assert.equal(
+      target.pathname,
+      `/v1/plugins/everunfold.glossary/for-content/${contentId}`,
+    );
+    assert.equal(target.search, "");
+    assert.equal(options?.method, "POST");
+    assert.equal(options?.cache, "no-store");
+    assert.equal(options?.credentials, "omit");
+    assert.equal(options?.body, undefined);
+    const headers = new Headers(options?.headers);
+    assert.equal(headers.get("X-Everunfold-Read-Target"), contentId);
+    receipts.push(headers.get("X-Everunfold-Read-Receipt") ?? "");
+    return Response.json({
+      success: true,
+      code: 200,
+      msg: "OK",
+      data: { content_id: contentId, revision: "revision-1", terms: [] },
+    });
+  };
+  for (const receipt of ["reader-one", "reader-two"]) {
+    await readProtectedGlossaryMatches(
+      "https://api.example.test",
+      contentId,
+      receipt,
+      { fetcher },
+    );
+  }
+  assert.deepEqual(receipts, ["reader-one", "reader-two"]);
 });
 
 test("media references normalize to the shared virtual address form", () => {

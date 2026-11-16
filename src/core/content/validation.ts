@@ -29,7 +29,7 @@ export function parsePublicSnapshot(input: unknown): PublicSnapshot {
           item.component_document != null ||
           Object.keys(item.media_urls).length ||
           item.excerpt ||
-          item.cover_url ||
+          (item.kind !== "article" && item.cover_url) ||
           item.seo_description ||
           item.seo_title ||
           item.seo_canonical_path ||

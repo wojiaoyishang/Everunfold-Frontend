@@ -44,11 +44,15 @@ export function ArticleHeader({
       {!below && image}
       <div className="article-heading">
         <div className="article-categories">
-          {content.categories.map((category) => (
-            <Link key={category.id} href={taxonomyHref(category)}>
-              {category.name}
-            </Link>
-          ))}
+          {content.categories.map((category) =>
+            category.count > 0 ? (
+              <Link key={category.id} href={taxonomyHref(category)}>
+                {category.name}
+              </Link>
+            ) : (
+              <span key={category.id}>{category.name}</span>
+            ),
+          )}
         </div>
         <h1>{content.title}</h1>
         <PostMeta

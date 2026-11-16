@@ -8,6 +8,12 @@ import type {
 
 export const emptyBuilderDocument: BuilderDocument = { version: 1, nodes: [] };
 
+export function builderProgressValue(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value)
+    ? Math.min(100, Math.max(0, value))
+    : 0;
+}
+
 export function builderId() {
   return randomUUID();
 }

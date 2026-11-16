@@ -92,6 +92,21 @@ export const coreBuilderComponents: readonly BuilderComponentDefinition[] = [
     fields: links,
   },
   {
+    type: "core.progress",
+    label: "进度条",
+    fields: [
+      { key: "label", label: "标签", type: "text", default: "进度" },
+      {
+        key: "value",
+        label: "百分比",
+        type: "number",
+        min: 0,
+        max: 100,
+        default: 50,
+      },
+    ],
+  },
+  {
     type: "core.icon",
     label: "图标",
     fields: [

@@ -12,10 +12,17 @@ export function ExtensionPlaceholder({
     <div
       className={styles.placeholder}
       role="status"
+      data-loading={loading || undefined}
       data-anchor-pending={loading || undefined}
     >
-      <UiText text={loading ? "正在加载组件…" : "组件暂不可用"} />{" "}
-      {!loading && <code>{name}</code>}
+      <UiText text={loading ? "正在加载组件…" : "组件暂不可用"} />
+      {loading ? (
+        <div className={styles.progress} aria-hidden="true">
+          <span />
+        </div>
+      ) : (
+        <code>{name}</code>
+      )}
     </div>
   );
 }

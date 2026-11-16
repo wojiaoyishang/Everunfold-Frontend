@@ -114,6 +114,8 @@ export default function GlossaryTooltips({
   contentId,
   revision,
   options,
+  matchIndex,
+  markupSelector,
   terms: providedTerms,
   triggerSelector = ".glossary-term[data-glossary-term]",
   preserveNativeClick = false,
@@ -123,6 +125,8 @@ export default function GlossaryTooltips({
   contentId?: string;
   revision?: string;
   options: GlossaryRuntimeOptions;
+  matchIndex?: MatchIndex;
+  markupSelector?: string;
   terms?: readonly PopoverTerm[];
   triggerSelector?: string;
   preserveNativeClick?: boolean;
@@ -133,7 +137,8 @@ export default function GlossaryTooltips({
   const { uiLocale } = useLocale();
   const catalog = useLanguageCatalog();
   const t = useT();
-  const [index, setIndex] = useState<MatchIndex | null>(null);
+  const [publicIndex, setPublicIndex] = useState<MatchIndex | null>(null);
+  const index = matchIndex ?? publicIndex;
   const [active, setActive] = useState<ActiveTooltip | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -239,11 +244,11 @@ export default function GlossaryTooltips({
   }, [active, closing, placement]);
 
   useEffect(() => {
-    if (providedTerms || !contentId || !revision) return;
+    if (matchIndex || providedTerms || !contentId || !revision) return;
     let active = true;
     void loadGlossaryMatches(baseUrl, contentId, revision)
       .then((value) => {
-        if (active) setIndex(value);
+        if (active) setPublicIndex(value);
       })
       .catch(() => {
         /* Tooltip loading never blocks the cached article. */
@@ -251,7 +256,7 @@ export default function GlossaryTooltips({
     return () => {
       active = false;
     };
-  }, [baseUrl, contentId, providedTerms, revision]);
+  }, [baseUrl, contentId, matchIndex, providedTerms, revision]);
 
   useEffect(() => {
     const target = root.current;
@@ -261,7 +266,11 @@ export default function GlossaryTooltips({
     const nodes: Text[] = [];
     while (walker.nextNode()) {
       const node = walker.currentNode as Text;
-      if (node.data.trim()) nodes.push(node);
+      if (
+        node.data.trim() &&
+        (!markupSelector || node.parentElement?.closest(markupSelector))
+      )
+        nodes.push(node);
     }
     for (const node of nodes) {
       remaining -= decorateTextNode(node, index.terms, remaining, (title) =>
@@ -276,7 +285,14 @@ export default function GlossaryTooltips({
         term.replaceWith(document.createTextNode(term.textContent ?? ""));
       }
     };
-  }, [index, options.max_matches_per_page, providedTerms, root, uiLocale]);
+  }, [
+    index,
+    markupSelector,
+    options.max_matches_per_page,
+    providedTerms,
+    root,
+    uiLocale,
+  ]);
 
   useEffect(() => {
     const target = root.current;

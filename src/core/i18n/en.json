@@ -2308,6 +2308,8 @@
   "客户端发送": "Client sent",
   "服务器响应": "Server replied",
   "进度": "Progress",
+  "进度条": "Progress bar",
+  "百分比": "Percentage",
   "日志与报文按任务事件顺序记录。": "Logs and messages are shown in task event order.",
   "收起进度": "Hide progress",
   "查看进度": "View progress",

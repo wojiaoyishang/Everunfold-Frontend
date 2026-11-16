@@ -49,7 +49,7 @@
 .article-header.has-cover h1 {
   text-shadow: 0 2px 14px #0e082666;
 }
-.article-header.has-cover .article-categories a {
+.article-header.has-cover .article-categories > :is(a, span) {
   background: #ffffff24;
   border-color: #ffffff30;
 }
@@ -57,7 +57,7 @@
   background: var(--accent);
   color: #fff;
 }
-.article-categories a {
+.article-categories > :is(a, span) {
   padding: 3px 10px;
   border-radius: 4px;
   border: 1px solid var(--line);
@@ -343,7 +343,7 @@
   flex-wrap: wrap;
   gap: 9px;
 }
-.article-tags a {
+.article-tags > :is(a, span) {
   color: var(--accent);
   background: var(--accent-soft);
   display: inline-flex;

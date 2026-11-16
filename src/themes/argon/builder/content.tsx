@@ -7,7 +7,11 @@ import type {
   BuilderNode,
   BuilderValues,
 } from "@/core/builder/types";
-import { builderEntries, resolvedBuilderProps } from "@/core/builder/document";
+import {
+  builderEntries,
+  builderProgressValue,
+  resolvedBuilderProps,
+} from "@/core/builder/document";
 import { builderStyle } from "@/core/builder/layout";
 import { coreBuilderComponents } from "@/core/builder/registry";
 import type { PublicShortcode } from "@/core/contracts/settings";
@@ -20,7 +24,7 @@ import { renderContent } from "@/core/rendering/content";
 import { shortcodeCall } from "@/core/shortcodes/parser";
 import { parseSiteMediaReference } from "@/core/media/references";
 import { publicHref, resourceUrl } from "@/core/content/urls";
-import { useLocale, UiText } from "@/core/i18n/provider";
+import { useLocale, useT, UiText } from "@/core/i18n/provider";
 import { ContentMarkup } from "../components/content-markup";
 import { ContentMarkupView } from "../components/content-markup-view";
 import { TextLink } from "../components/ui/primitives";
@@ -47,6 +51,7 @@ const coreIcons: Record<string, IconName> = {
   "core.shortcode": "shortcode",
   "core.image": "image",
   "core.button": "link",
+  "core.progress": "activity",
   "core.icon": "star",
   "core.banner": "image",
   "core.comment": "comment",
@@ -201,6 +206,7 @@ export function BuilderElement({
   children?: ReactNode;
 }) {
   const { locale } = useLocale();
+  const t = useT();
   const props = resolvedBuilderProps(node, parameters);
   const text = (key: string) => stringProp(props, key);
   const empty = (label: string, icon: IconName) =>
@@ -264,6 +270,20 @@ export function BuilderElement({
         <Action label={text("label")} href={text("href")} preview={preview} />
       );
       break;
+    case "core.progress": {
+      const label = text("label").trim() || t("进度");
+      const value = builderProgressValue(props.value);
+      body = (
+        <div className={styles.progress}>
+          <div className={styles.progressLabel} aria-hidden="true">
+            <span>{label}</span>
+            <span>{value}%</span>
+          </div>
+          <progress aria-label={label} max={100} value={value} />
+        </div>
+      );
+      break;
+    }
     case "core.icon": {
       const name = text("name");
       body = (

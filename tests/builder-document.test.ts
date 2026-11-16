@@ -6,6 +6,7 @@ import {
   moveBuilderNode,
   resolvedBuilderProps,
 } from "../src/core/builder/document";
+import { builderSyndicationHtml } from "../src/core/builder/discovery";
 import { builderStyle } from "../src/core/builder/layout";
 import { coreBuilderComponents } from "../src/core/builder/registry";
 import type { BuilderNode } from "../src/core/builder/types";
@@ -29,6 +30,24 @@ const outer: BuilderNode = {
   props: {},
   children: [section],
 };
+
+test("keeps builder progress values and labels in static output", () => {
+  const definition = coreBuilderComponents.find(
+    ({ type }) => type === "core.progress",
+  );
+  assert.ok(definition);
+  const progress = createBuilderNode(definition);
+  assert.deepEqual(progress.props, { label: "进度", value: 50 });
+  const nodes = [
+    { ...progress, props: { label: "Python", value: 65 } },
+    { ...progress, props: { label: "C# & C++", value: 105 } },
+    { ...progress, props: { label: "Other", value: -5 } },
+  ];
+  assert.equal(
+    builderSyndicationHtml({ version: 1, nodes }, {}),
+    "<p>Python 65%</p><p>C# &amp; C++ 100%</p><p>Other 0%</p>",
+  );
+});
 
 test("moves components between parents without allowing their own descendants as targets", () => {
   assert.equal(

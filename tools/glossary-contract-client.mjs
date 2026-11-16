@@ -106,6 +106,29 @@ export function readContentGlossaryMatches(
   );
 }
 
+export function readProtectedGlossaryMatches(
+  baseUrl: string,
+  contentId: string,
+  readReceipt: string,
+  options: RequestOptions = {},
+) {
+  return postJSON(
+    baseUrl,
+    \`/v1/plugins/everunfold.glossary/for-content/\${encodeURIComponent(contentId)}\`,
+    undefined,
+    contentMatchesValidator,
+    {
+      ...options,
+      credentials: "omit",
+      headers: {
+        ...options.headers,
+        "X-Everunfold-Read-Target": contentId,
+        "X-Everunfold-Read-Receipt": readReceipt,
+      },
+    },
+  );
+}
+
 export function readGlossaryHooksForTarget(
   baseUrl: string,
   query: {

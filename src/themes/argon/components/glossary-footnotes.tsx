@@ -47,22 +47,26 @@ function richTextExcerpt(
 export default function GlossaryFootnotes({
   contentId,
   revision,
+  matchIndex,
 }: {
   contentId: string;
-  revision: string;
+  revision?: string;
+  matchIndex?: MatchIndex;
 }) {
   const baseUrl = useReaderBaseUrl();
   const { site } = useRouteState();
   const { uiLocale } = useLocale();
   const catalog = useLanguageCatalog();
   const t = useT();
-  const [index, setIndex] = useState<MatchIndex | null>(null);
+  const [publicIndex, setPublicIndex] = useState<MatchIndex | null>(null);
+  const index = matchIndex ?? publicIndex;
 
   useEffect(() => {
+    if (matchIndex || !revision) return;
     let active = true;
     void loadGlossaryMatches(baseUrl, contentId, revision)
       .then((value) => {
-        if (active) setIndex(value);
+        if (active) setPublicIndex(value);
       })
       .catch(() => {
         /* Footnotes never block the already-rendered article. */
@@ -70,7 +74,7 @@ export default function GlossaryFootnotes({
     return () => {
       active = false;
     };
-  }, [baseUrl, contentId, revision]);
+  }, [baseUrl, contentId, matchIndex, revision]);
 
   const items = useMemo(
     () =>

@@ -2,7 +2,7 @@
 import { ArticleAgeNotice } from "./article-age-notice";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 
-import { useMemo, type ReactNode } from "react";
+import { lazy, Suspense, useMemo, useRef, type ReactNode } from "react";
 import type { Content, Site } from "@/core/content/types";
 import { useProtectedContent } from "@/core/content/use-protected-content";
 import { renderContent } from "@/core/rendering/content";
@@ -18,11 +18,16 @@ import {
 import { ArticleActions } from "./article-actions";
 import { ArticleHeader } from "./article-header";
 import { ArticleMedia } from "./article-media";
+import { ArticleTags } from "./article-tags";
 import { PagePresentation } from "./route-state";
 import { useCaptcha } from "@/core/captcha/use-captcha";
 import { ReadingAccessForm } from "./reading-access-form";
 import { CommentSection } from "./comments/comment-section";
 import styles from "./protected-article.module.css";
+
+const ProtectedArticleGlossary = lazy(
+  () => import("./protected-article-glossary"),
+);
 
 export function ProtectedArticle({
   content,
@@ -36,6 +41,8 @@ export function ProtectedArticle({
   recommendations?: ReactNode;
 }) {
   const runtime = usePluginRuntime();
+  const glossaryRoot = useRef<HTMLDivElement>(null);
+  const glossary = site.settings?.site.glossary;
   const access = useProtectedContent(
     baseUrl,
     content.id,
@@ -74,36 +81,61 @@ export function ProtectedArticle({
           <div className={`article-body ${styles.revealed}`}>
             <ArticleAgeNotice content={readable} display={display} />
             <ArticleMedia enabled={access.content.show_image_viewer !== false}>
-              {readable.edit_mode === "components" &&
-              readable.component_document ? (
-                <div className="article-content">
-                  <BuilderContent
-                    document={readable.component_document}
-                    context={{
-                      contentId: content.id,
-                      contentRevision: readable.updated_at,
-                      media: readable.media_urls,
-                      shortcodes: site.settings?.shortcodes,
-                      readReceipt: access.content.read_receipt,
-                    }}
-                  />
-                </div>
-              ) : (
-                <ShortcodeRegionBoundary
-                  target={content.id}
-                  readReceipt={access.content.read_receipt}
-                >
-                  <ContentMarkup
-                    className="article-content"
-                    html={rendered.html}
-                    features={rendered.features}
-                    contentId={content.id}
-                    contentRevision={readable.updated_at}
-                  />
-                </ShortcodeRegionBoundary>
-              )}
+              <div ref={glossaryRoot}>
+                {readable.edit_mode === "components" &&
+                readable.component_document ? (
+                  <div className="article-content">
+                    <BuilderContent
+                      document={readable.component_document}
+                      context={{
+                        contentId: content.id,
+                        contentRevision: readable.updated_at,
+                        media: readable.media_urls,
+                        shortcodes: site.settings?.shortcodes,
+                        readReceipt: access.content.read_receipt,
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <ShortcodeRegionBoundary
+                    target={content.id}
+                    readReceipt={access.content.read_receipt}
+                  >
+                    <ContentMarkup
+                      className="article-content"
+                      html={rendered.html}
+                      features={rendered.features}
+                      contentId={content.id}
+                      contentRevision={readable.updated_at}
+                    />
+                  </ShortcodeRegionBoundary>
+                )}
+              </div>
             </ArticleMedia>
+            {access.content.read_receipt &&
+              glossary?.auto_match !== false &&
+              (readable.show_glossary_tooltips !== false ||
+                readable.show_glossary_footnotes !== false) && (
+                <Suspense fallback={null}>
+                  <ProtectedArticleGlossary
+                    key={access.content.read_receipt}
+                    baseUrl={baseUrl}
+                    contentId={content.id}
+                    options={{
+                      auto_match: true,
+                      max_matches_per_page:
+                        glossary?.max_matches_per_page ?? 20,
+                      popup_source: glossary?.popup_source ?? "content",
+                      show_tooltips: readable.show_glossary_tooltips ?? true,
+                      show_footnotes: readable.show_glossary_footnotes ?? true,
+                    }}
+                    readReceipt={access.content.read_receipt}
+                    root={glossaryRoot}
+                  />
+                </Suspense>
+              )}
             <ArticleAfterword content={readable} display={display} />
+            <ArticleTags tags={readable.tags} />
             {display.show_share !== false && (
               <ArticleActions
                 path={content.path}

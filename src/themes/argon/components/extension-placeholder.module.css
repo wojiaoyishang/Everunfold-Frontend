@@ -15,3 +15,40 @@
 .placeholder code {
   font-size: 12px;
 }
+
+.placeholder[data-loading] {
+  display: grid;
+  border-style: solid;
+}
+.progress {
+  inline-size: min(100%, 16rem);
+  block-size: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(
+    in srgb,
+    var(--admin-accent, var(--accent)) 15%,
+    var(--admin-border, var(--line))
+  );
+}
+.progress > span {
+  display: block;
+  inline-size: calc(100% / 3);
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--admin-accent, var(--accent));
+  animation: loading-progress 1.1s ease-in-out infinite alternate;
+}
+:global(html[data-motion="reduced"]) .progress > span {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(html:not([data-motion="full"])) .progress > span {
+    animation: none;
+  }
+}
+@keyframes loading-progress {
+  to {
+    transform: translateX(200%);
+  }
+}

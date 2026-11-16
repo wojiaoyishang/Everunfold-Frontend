@@ -230,7 +230,8 @@ html:not([data-motion="reduced"]) {
     animation-delay: 120ms;
   }
   .hero[data-hero-animation="typewriter"] .hero-glyph {
-    animation: hero-fade 1ms steps(1, end) var(--hero-typing-delay) both;
+    /* Finished glyphs fall back to their normal visible state. */
+    animation: hero-glyph-reveal 1ms linear var(--hero-typing-delay) backwards;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -243,6 +244,14 @@ html:not([data-motion="reduced"]) {
 @keyframes hero-fade {
   from {
     opacity: 0;
+  }
+}
+@keyframes hero-glyph-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 

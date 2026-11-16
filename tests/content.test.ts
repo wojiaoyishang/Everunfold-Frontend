@@ -51,6 +51,34 @@ test("snapshot validation rejects malformed, duplicate and orphan structures", (
   hostile.contents[0].path = "//example.com";
   assert.throws(() => parsePublicSnapshot(hostile));
 });
+test("accepts the listing cover of a locked article without exposing its body media", () => {
+  const data = snapshot();
+  data.comments = {};
+  const locked = content({
+    access: "password",
+    password_required: true,
+    excerpt: "",
+    content: [],
+    media_urls: {},
+    cover_url: "/uploads/cover.webp",
+    word_count: 0,
+    comment_count: 0,
+  });
+  data.contents = [locked];
+  assert.equal(
+    parsePublicSnapshot(data).contents[0].cover_url,
+    locked.cover_url,
+  );
+
+  for (const patch of [
+    { kind: "shuoshuo" as const },
+    { media_urls: { secret: { original: "/uploads/private.webp" } } },
+  ]) {
+    data.contents = [{ ...locked, ...patch }];
+    assert.throws(() => parsePublicSnapshot(data), /Restricted content leaked/);
+  }
+});
+
 test("URLs reject active schemes and preserve unrelated external origins", () => {
   assert.equal(publicHref("javascript:alert(1)"), null);
   assert.equal(publicHref("//example.com/"), null);

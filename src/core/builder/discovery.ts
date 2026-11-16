@@ -4,6 +4,7 @@ import { resourceUrl, publicHref } from "@/core/content/urls";
 import { parseSiteMediaReference } from "@/core/media/references";
 import { renderContent } from "@/core/rendering/content";
 import { escapeMarkup } from "@/core/rendering/features/model";
+import { builderProgressValue } from "./document";
 import type { BuilderDocument, BuilderNode } from "./types";
 
 type Media = Parameters<typeof renderContent>[0]["media_urls"];
@@ -60,6 +61,8 @@ export function builderSyndicationHtml(
             return `<figure>${image("source", text("alt"))}${text("caption") ? `<figcaption>${text("caption")}</figcaption>` : ""}</figure>`;
           case "core.banner":
             return `<h2>${text("title")}</h2>${image("image")}<p>${text("text")}</p>`;
+          case "core.progress":
+            return `<p>${text("label")} ${builderProgressValue(node.props.value)}%</p>`;
           case "core.button": {
             const href = publicHref(field(node, "href"));
             return href
