@@ -1861,3 +1861,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0163-named-docker-access-networks.md` | `ADR0163-1` | `e8bd40865f9b2194a9968f2bb76777d329f73532eec78b18931ceae62381f9eb` |
+
+## 沿用已保存配对登记前端
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0164-register-from-saved-frontend-pairing.md` | `ADR0164-1` | `9e449f63a7eab0feda352b816dd64e164d4a842d594cef6d4a4d9d7397b41a14` |
