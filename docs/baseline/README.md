@@ -1904,3 +1904,10 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0170-fixed-inspector-and-unlocked-glossary.md` | `ADR0170-1` | `3cb2669a8d6646985d3c798731f21ba43330daa2f4a37bb26374f09ad11d2999` |
+
+## 术语插件清单同步与标题开锁图标
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0171-glossary-deployment-catalog.md` | `ADR0171-1` | `da58c635e317b614d75f475cc9a2ea0afc06aea8ede4e22aa78dc3fc15edf0f4` |
+| `docs/development/glossary.md` | `glossary-runtime-16` | `001bec986d82ee9c45f89737c10e8e590aae39a65f5361f143eac358dd319b72` |

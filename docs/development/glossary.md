@@ -1,6 +1,6 @@
 # 术语表与文章按需 Tooltip
 
-版本：glossary-runtime-15，2026-11-11。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)、[ADR0103](../decisions/0103-dynamic-glossary-footnotes.md)、[ADR0104](../decisions/0104-localized-navigation-and-glossary-hooks.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md) 与 [ADR0108](../decisions/0108-virtual-media-references.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
+版本：glossary-runtime-16，2026-11-16。实现决定见 [ADR0099](../decisions/0099-article-scoped-glossary-tooltips.md)、[ADR0101](../decisions/0101-glossary-rules-and-reader-ui.md)、[ADR0103](../decisions/0103-dynamic-glossary-footnotes.md)、[ADR0104](../decisions/0104-localized-navigation-and-glossary-hooks.md)、[ADR0105](../decisions/0105-admin-navigation-and-glossary-media.md) 与 [ADR0108](../decisions/0108-virtual-media-references.md)。当前功能属于后端插件 `everunfold.glossary`，文章和正文快照不做术语迁移。
 
 ## 管理入口
 
@@ -68,16 +68,18 @@ JavaScript挂载是仅管理员可保存的危险模式。它使用共享JavaScr
 
 ## 发布与排错
 
-1. 后端按次序显式执行迁移至 `0038_glossary_matching_rules`（包含旧版本 0036、0037），启动 API 后显式同步插件目录；须先在隔离库验证，不能跳过迁移直接部署新 API：
+1. 需要升级数据库时，先显式迁移至当前后端代码要求的版本。统一部署的显式启动准备会在数据库检查及节点配对后登记本次产物的后端插件清单；容器普通重启不执行登记。
+2. 正文解锁成功但术语返回 HTTP 503 / 业务码 `50389` 时，先检查「插件管理」的后端清单状态。它表示进程的插件构建指纹与数据库登记不一致，请用**当前运行的后端版本**补登记。统一 Docker 部署在宿主机执行（`everunfold` 为默认容器名）：
 
    ```bash
-   uv run --locked python -m tools.register_backend_plugins --config config.toml --apply
+   docker exec -e EVERUNFOLD_DATA_DIR=/data/backend -w /workspace/backend everunfold \
+     /opt/backend/venv/bin/python -m tools.register_backend_plugins \
+     --config /config/backend/config.yaml --apply
    ```
 
-2. 保持 Receiver、Worker 和 Scheduler 正常，确认插件状态为已同步；`50389` 表示插件部署清单尚未应用到节点。
-3. 访问含术语的文章，等待空闲术语请求；若正文有词但没有提示，检查文章语言、词条是否为发布状态、正文是否在链接/代码/公式中，以及页面大小限制。
-4. 访问不含术语的文章，确认接口 `terms` 为空且页面没有 `.glossary-term`；不要用公开 `/glossary` 全量列表填充文章 Tooltip。
-5. 若配置为 `popup_source=content` 但没有「完整说明」，检查设置投递是否已应用，以及词条 `body` 是否至少有一个非空块。
+   原生部署在当前版本的后端目录，用该版本的 Python、`CONFIG_FILE` 和数据目录执行 `python -m tools.register_backend_plugins --apply`。登记只同步插件清单并排队投递公开设置，无需重启或重新导入术语；将文章重新打开并解锁验证。
+3. 术语接口返回 200 但匹配为空时，检查站点自动匹配开关、逐篇悬浮提示/脚注开关、文章语言、词条发布状态，以及术语是否位于链接、代码或公式中。不要用公开词库填补受限匹配。
+4. 若 `popup_source=content` 但没有「完整说明」，检查设置投递是否已应用，以及词条 `body` 是否至少有一个非空块。
 
 ## 当前边界
 

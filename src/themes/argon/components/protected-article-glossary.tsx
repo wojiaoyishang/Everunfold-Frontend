@@ -37,14 +37,17 @@ export default function ProtectedArticleGlossary({
       })
       .catch((error: unknown) => {
         if (abort.signal.aborted) return;
+        const response = error instanceof RequestError ? error : undefined;
         // Never log the read receipt or the protected body.
         console.warn("[Everunfold glossary]", {
           operation: "protected_content_matches",
           content_id: contentId,
-          status: error instanceof RequestError ? error.status : undefined,
-          code: error instanceof RequestError ? error.code : undefined,
+          status: response?.status,
+          code: response?.code,
           reason:
-            "解密后的术语加载失败；请检查后端术语插件版本、启用状态与网络请求。",
+            response?.code === 50389
+              ? "后端术语插件的构建指纹尚未同步；请用当前运行的后端版本登记插件清单。"
+              : "解密后的术语加载失败；请检查后端术语插件版本、启用状态与网络请求。",
         });
       });
     return () => abort.abort();
