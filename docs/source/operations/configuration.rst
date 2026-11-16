@@ -199,14 +199,21 @@ Docker 端口映射通常要求进程绑定 ``0.0.0.0``，各端健康检查访�
 - 后端 ``/_nodes`` 优先使用 ``BACKEND_BASE_URL``，前端 ``/admin/_nodes`` 优先使用
   ``PUBLIC_SITE_URL``。发布地址改变后同步跟随；旧 ``nodes_monitor.origin`` 仅在未配置
   对应发布 URL 时兼容使用，助手保存时清除重复字段。生产使用 HTTPS，本机可使用回环 HTTP。
-  后端 HTTPS 反代须配置实际直连代理 IP，保留公开 Host 并发送 ``X-Forwarded-Proto: https``。
+  HTTPS 反代保留公开 Host 并发送 ``X-Forwarded-Proto: https``。后端控制台校验代理的实际直连 IP，
+  前端填写可信代理时也通过 Node 的真实 socket 校验。
 
-Docker 派生的内部来源
----------------------
+Docker 网络来源
+----------------
 
-根配置 ``docker.EVERUNFOLD_ALLOW_NETWORK_PEERS`` 默认 ``"1"``。根启动脚本读取所选网络，
-通过 ``EVERUNFOLD_INTERNAL_PEER_CIDRS`` 向两端运行进程追加有效 CIDR，拒绝全网 ``/0``；
-手动 ``allowed_peer_ips`` 不变，关闭开关后仅采用手动列表。
+``docker.EVERUNFOLD_INTERNAL_PEER_NETWORKS`` 对应“允许内部调用的 Docker 网络”，填写逗号分隔的
+已连接网络名，例如 ``"1panel-network"``。启动脚本读取当前子网并通过
+``EVERUNFOLD_INTERNAL_PEER_CIDRS`` 追加到手填来源列表，拒绝全网 ``/0``。留空时
+``docker.EVERUNFOLD_ALLOW_NETWORK_PEERS`` 选择全部已连接网络（``"1"``，默认）或仅手填来源（``"0"``）。
+
+``docker.EVERUNFOLD_TLS_PROXY_NETWORK`` 对应“宿主机反代所在的 Docker 网络”，填写一张已连接的网桥。
+启动脚本从该网桥读取实际网关地址，通过 ``EVERUNFOLD_NODES_TLS_PROXY_IPS`` 追加到
+``application.nodes_monitor.trusted_tls_proxy_ips``。该列表只用于各自的 HTTPS 节点控制台。
+两种选项都在重新运行 ``./setup.sh --docker start`` 时计算，根配置只保存网络名称与手填地址。
 ``EVERUNFOLD_HOST_GATEWAY`` 控制宿主网关映射，``EVERUNFOLD_NETWORK_ALIAS`` 控制自定义网络别名。
 这些是部署参数，不是发布 URL。直接 Compose 启动不会自动计算或接入这些网络。
 

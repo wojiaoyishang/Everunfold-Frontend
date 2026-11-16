@@ -20,6 +20,7 @@ export interface FrontendConfiguration {
     origin: string | undefined;
     passwordHash: string | undefined;
     sessionSecretEnv: string;
+    trustedTlsProxyIps: string[];
   };
   backend: {
     baseUrl: string;
@@ -112,12 +113,19 @@ export function loopback(hostname: string): boolean {
 
 function monitorConfig(
   value: unknown,
-  publicSiteUrl?: string,
+  publicSiteUrl: string | undefined,
+  dockerProxyIps: string | undefined,
 ): FrontendConfiguration["nodesMonitor"] {
   const monitor = configObject(value ?? {}, "nodes_monitor");
   configKeys(
     monitor,
-    ["enabled", "origin", "password_hash", "session_secret_env"],
+    [
+      "enabled",
+      "origin",
+      "password_hash",
+      "session_secret_env",
+      "trusted_tls_proxy_ips",
+    ],
     "nodes_monitor",
   );
   const enabled = monitor.enabled ?? false;
@@ -144,10 +152,29 @@ function monitorConfig(
       !/^scrypt\$[0-9a-f]{32}\$[0-9a-f]{64}$/.test(hash))
   )
     throw new ConfigurationError("节点诊断密码必须使用生成工具生成哈希");
+  const manual = monitor.trusted_tls_proxy_ips ?? [];
+  if (!Array.isArray(manual))
+    throw new ConfigurationError(
+      "nodes_monitor.trusted_tls_proxy_ips 必须为 IP 列表",
+    );
+  const gateways =
+    dockerProxyIps
+      ?.split(",")
+      .map((value) => value.trim())
+      .filter(Boolean) ?? [];
+  const trustedTlsProxyIps = [...new Set<unknown>([...manual, ...gateways])];
+  if (
+    !trustedTlsProxyIps.every(
+      (address): address is string =>
+        typeof address === "string" && isIP(address) !== 0,
+    )
+  )
+    throw new ConfigurationError("节点诊断的 HTTPS 反代须使用单个 IP 地址");
   return {
     enabled,
     origin: origin?.origin,
     passwordHash: hash,
+    trustedTlsProxyIps,
     sessionSecretEnv:
       tokenReference(
         monitor.session_secret_env,
@@ -337,7 +364,11 @@ export function parseConfiguration(
     backendBaseUrl: publicUrl,
     browserLoopbackOrigin: loopbackOrigin?.origin,
     frontendNodeId: nodeId,
-    nodesMonitor: monitorConfig(root.nodes_monitor, publicSiteUrl),
+    nodesMonitor: monitorConfig(
+      root.nodes_monitor,
+      publicSiteUrl,
+      environment.EVERUNFOLD_NODES_TLS_PROXY_IPS,
+    ),
     backend: {
       baseUrl:
         backend.base_url === undefined

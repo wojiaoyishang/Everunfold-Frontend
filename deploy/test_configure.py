@@ -472,6 +472,22 @@ class ModelTests(Fixtures, unittest.TestCase):
         model.save()
         self.assertEqual(self.model().get("peers"), "192.0.2.15")
 
+    def test_explicit_network_rules_can_be_saved_only_for_attached_networks(self):
+        model = self.complete()
+        self.edit(model, "internal_peer_networks", "1panel-network")
+        self.edit(model, "tls_proxy_network", "1panel-network")
+        self.assertIn("请将这些网络加入主网络或额外网络：1panel-network", model.errors())
+        self.edit(model, "extra_networks", "1panel-network")
+        self.edit(model, "network_peers", "0")
+        self.edit(model, "tls_peers", "192.0.2.12")
+        self.assertEqual(model.errors(), [])
+        model.save()
+        reopened = self.model()
+        self.assertEqual(reopened.get("internal_peer_networks"), "1panel-network")
+        self.assertEqual(reopened.get("tls_proxy_network"), "1panel-network")
+        self.assertEqual(reopened.get("tls_peers"), "192.0.2.12")
+        self.assertIn("127.0.0.1", reopened.get("peers"))
+
     def test_container_network_options_are_saved_and_validated(self):
         model = self.complete()
         self.edit(model, "network_alias", "everunfold-custom")

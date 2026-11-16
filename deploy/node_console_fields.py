@@ -5,6 +5,7 @@ import re
 import secrets
 
 from config_context import Context
+from config_validation import ip_address
 
 
 def add_node_console_fields(ctx: Context, add, value):
@@ -59,6 +60,15 @@ def add_node_console_fields(ctx: Context, add, value):
         group="节点控制台",
         hint="留空自动生成；更换密码或会话密钥后，已有控制台登录失效。",
     )
+    add(
+        "tls_peers",
+        "HTTPS 反向代理的直接来源 IP",
+        ", ".join(monitor.get("trusted_tls_proxy_ips", [])),
+        group="节点控制台",
+        valid=lambda v: not v or all(ip_address(address.strip()) for address in v.split(",")),
+        empty="未手动指定",
+        hint="可填逗号分隔的直连 IP。Docker 宿主机反代也可在容器设置中按网络选择。",
+    )
 
     def save(environment: dict[str, str]) -> None:
         nonlocal password_hash, saved_password
@@ -67,6 +77,13 @@ def add_node_console_fields(ctx: Context, add, value):
         # The deployment's published URL is authoritative; never pin an old listener URL.
         current.pop("origin", None)
         current["session_secret_env"] = secret_key
+        manual_proxies = [
+            address.strip() for address in value("tls_peers").split(",") if address.strip()
+        ]
+        if manual_proxies:
+            current["trusted_tls_proxy_ips"] = manual_proxies
+        else:
+            current.pop("trusted_tls_proxy_ips", None)
         environment[secret_key] = value("monitor_secret")
         password = value("monitor_password")
         if password:

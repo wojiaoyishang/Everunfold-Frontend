@@ -84,7 +84,7 @@ read_paths() {
   local result
   result="$(docker run --rm --network none "${base[@]}" "${mount_args[@]}" "$setup_image" python "$deploy_dir/bootstrap.py" paths)"
   mapfile -t locations <<< "$result"
-  if (( ${#locations[@]} != 20 )); then echo "无法确定容器设置。" >&2; exit 1; fi
+  if (( ${#locations[@]} != 22 )); then echo "无法确定容器设置。" >&2; exit 1; fi
   network=${locations[0]}; data_dir=${locations[1]}; env_parent=${locations[2]}
   output_dir=${locations[3]}; source_dir=${locations[4]}; profile_parent=${locations[5]}
   container_name=${locations[6]}; image_name=${locations[8]}; bind_host=${locations[9]}
@@ -92,6 +92,8 @@ read_paths() {
   runtime_user=${locations[13]}; artifact_dir=${locations[14]}
   listen_host=${locations[15]}; runtime_config=${locations[16]}
   network_alias=${locations[17]}; host_gateway=${locations[18]}; allow_network_peers=${locations[19]}
+  internal_peer_networks=${locations[20]#EVERUNFOLD_INTERNAL_PEER_NETWORKS=}
+  tls_proxy_network=${locations[21]#EVERUNFOLD_TLS_PROXY_NETWORK=}
   host_args=()
   if [[ "$host_gateway" == 1 ]]; then host_args+=(--add-host host.docker.internal:host-gateway); fi
   IFS=',' read -ra extra_networks <<< "${locations[7]}"
@@ -131,6 +133,31 @@ ensure_networks() {
   fi
   internal_peers=""
   if [[ "$allow_network_peers" == 1 ]]; then internal_peers=$cidrs; fi
+}
+resolve_network_access() {
+  local net subnets
+  if [[ -n "$internal_peer_networks" ]]; then
+    local -a selected
+    IFS=',' read -ra selected <<< "$internal_peer_networks"
+    internal_peers=
+    for net in "${selected[@]}"; do
+      subnets="$(docker network inspect --format '{{range .IPAM.Config}}{{if .Subnet}}{{.Subnet}},{{end}}{{end}}' "$net")"
+      if [[ -z "$subnets" ]]; then
+        printf '内部调用网络 %s 没有可用的 IP 子网。\n' "$net" >&2
+        return 1
+      fi
+      internal_peers+=$subnets
+    done
+  fi
+  tls_proxy_ips=
+  if [[ -n "$tls_proxy_network" ]]; then
+    tls_proxy_ips="$(docker network inspect --format '{{if eq .Driver "bridge"}}{{range .IPAM.Config}}{{if .Gateway}}{{.Gateway}},{{end}}{{end}}{{end}}' "$tls_proxy_network")"
+    if [[ -z "$tls_proxy_ips" ]]; then
+      printf '宿主机反代网络 %s 必须是有网关 IP 的 Docker 网桥。\n' "$tls_proxy_network" >&2
+      return 1
+    fi
+    printf '宿主机反代网络 %s → %s\n' "$tls_proxy_network" "${tls_proxy_ips%,}"
+  fi
 }
 connect_extras() {
   local target=$1 runtime=${2:-no} net
@@ -245,9 +272,11 @@ case "$action" in
     [[ "$role" == backend ]] || { echo "此操作请在后端仓库执行。" >&2; exit 2; }
     build_image ;;
 esac
+resolve_network_access
 runtime_args=(--init --user "$runtime_user" --label "org.everunfold.project=$project_root"
               --label "org.everunfold.component=$role"
               -e "EVERUNFOLD_INTERNAL_PEER_CIDRS=$internal_peers"
+              -e "EVERUNFOLD_NODES_TLS_PROXY_IPS=$tls_proxy_ips"
               --mount "type=bind,source=$data_dir,target=/data")
 if [[ "$role" == backend ]]; then
   workspace_dir="$source_dir"

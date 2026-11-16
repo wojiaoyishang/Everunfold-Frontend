@@ -13,6 +13,25 @@ def network_name(value: str) -> bool:
     )
 
 
+def network_list(value: str) -> bool:
+    return not value or all(network_name(name.strip()) for name in value.split(","))
+
+
+def access_networks(primary: str, extra: str, internal: str, proxy: str) -> tuple[str, str]:
+    """Validate the names against the networks attached by the launcher."""
+    internal, proxy = internal.strip(), proxy.strip()
+    if not network_list(internal) or (proxy and not network_name(proxy)):
+        raise ValueError("内部调用或宿主机反代的 Docker 网络名称无效。")
+    peer_names = (
+        list(dict.fromkeys(name.strip() for name in internal.split(","))) if internal else []
+    )
+    attached = {primary, *(name.strip() for name in extra.split(","))}
+    missing = set(peer_names + ([proxy] if proxy else [])) - attached
+    if missing:
+        raise ValueError("请将这些网络加入主网络或额外网络：" + "、".join(sorted(missing)))
+    return ",".join(peer_names), proxy
+
+
 def mount_path(value: str) -> bool:
     return bool(value) and not any(char in value for char in (",", "\n", "\r", "\x00"))
 
@@ -42,6 +61,13 @@ def add_container_fields(ctx, add, value):
         ("network_alias", "网络别名（推荐）", "EVERUNFOLD_NETWORK_ALIAS", "everunfold-" + ctx.role),
         ("host_gateway", "映射 host.docker.internal（1/0）", "EVERUNFOLD_HOST_GATEWAY", "0"),
         ("network_peers", "自动允许所选网络内部调用（1/0）", "EVERUNFOLD_ALLOW_NETWORK_PEERS", "1"),
+        (
+            "internal_peer_networks",
+            "允许内部调用的 Docker 网络",
+            "EVERUNFOLD_INTERNAL_PEER_NETWORKS",
+            "",
+        ),
+        ("tls_proxy_network", "宿主机反代所在的 Docker 网络", "EVERUNFOLD_TLS_PROXY_NETWORK", ""),
     ]
     if ctx.role == "frontend":
         fields.append(
@@ -65,14 +91,20 @@ def add_container_fields(ctx, add, value):
                 if key in {"host_gateway", "network_peers"}
                 else (lambda v: not v or network_alias(v))
                 if key == "network_alias"
-                else (lambda v: all(network_name(n.strip()) for n in v.split(",")) if v else True)
-                if key == "extra_networks"
+                else network_list
+                if key in {"extra_networks", "internal_peer_networks"}
+                else (lambda v: not v or network_name(v))
+                if key == "tls_proxy_network"
                 else network_name
             ),
             resolve=(lambda v: str((ctx.docker / Path(v).expanduser()).resolve()) if v else "")
             if is_path
             else lambda v: v.strip(),
-            empty="不接入额外网络" if key == "extra_networks" else "待填写",
+            empty={
+                "extra_networks": "不接入额外网络",
+                "internal_peer_networks": "沿用自动允许开关",
+                "tls_proxy_network": "仅使用手填代理 IP",
+            }.get(key, "待填写"),
             hint=(
                 (
                     "自定义网络上的名称，如 everunfold-backend。两端须加入同一网络，"
@@ -85,11 +117,18 @@ def add_container_fields(ctx, add, value):
                 )
                 if key == "host_gateway"
                 else (
-                    "1 开启、0 关闭。启动时自动追加实际所选网络的 CIDR，仍需令牌；"
-                    "额外来源列表保留。当前网络："
+                    "未指定内部调用网络时生效。1 允许已连接网络、0 仅用手填来源。"
+                    "仍需令牌。已连接网络范围："
                 )
                 + (os.environ.get("EVERUNFOLD_NETWORK_CIDRS", "").strip(",") or "启动时读取")
                 if key == "network_peers"
+                else (
+                    ("后端 → 前端。" if ctx.role == "frontend" else "前端 → 后端。")
+                    + "逗号分隔，例如 1panel-network。填写后只追加这些网络的来源范围。"
+                )
+                if key == "internal_peer_networks"
+                else "例如 1panel-network。信任该网桥的宿主网关，用于节点控制台 HTTPS。"
+                if key == "tls_proxy_network"
                 else "例如 1panel-network；保存后重新打开助手，连接检测才会使用新网络。"
                 if key in {"network", "extra_networks"}
                 else "宿主目录；容器内路径固定。修改数据目录不会搬运原有媒体。"
@@ -102,9 +141,21 @@ def add_container_fields(ctx, add, value):
         return {name: value(key) for key, _, name, _ in fields} if not ctx.native else {}
 
     def errors():
-        if not ctx.native and value("source_dir") == value("data_dir"):
-            return ["代码目录和数据目录必须不同。"]
-        return []
+        if ctx.native:
+            return []
+        errors = []
+        if value("source_dir") == value("data_dir"):
+            errors.append("代码目录和数据目录必须不同。")
+        try:
+            access_networks(
+                value("network"),
+                value("extra_networks"),
+                value("internal_peer_networks"),
+                value("tls_proxy_network"),
+            )
+        except ValueError as error:
+            errors.append(str(error))
+        return errors
 
     def pending_network():
         if ctx.native:

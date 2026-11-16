@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { withNodeRequestPeer } from "./nodes/request-peer";
 import { syncFailure } from "./sync-diagnostics";
 
 type Handler = (request: IncomingMessage, response: ServerResponse) => unknown;
@@ -8,9 +9,9 @@ export function frontendHandler(web: Handler, internal: Handler) {
   return async (request: IncomingMessage, response: ServerResponse) => {
     try {
       const path = new URL(request.url ?? "/", "http://localhost").pathname;
-      await (
-        path === "/internal" || path.startsWith("/internal/") ? internal : web
-      )(request, response);
+      if (path === "/internal" || path.startsWith("/internal/"))
+        await internal(request, response);
+      else await withNodeRequestPeer(request, () => web(request, response));
     } catch (error) {
       if (request.url?.startsWith("/internal"))
         syncFailure(

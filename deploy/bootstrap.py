@@ -31,7 +31,7 @@ def paths() -> None:
         context = Context(DOCKER, ROLE)
         if context.config.get("backend_node_file"):
             profile = context.connection_profile().parent
-    from container_fields import network_alias, network_name
+    from container_fields import access_networks, network_alias, network_name
 
     extra = ",".join(
         n.strip() for n in values.get("EVERUNFOLD_EXTRA_NETWORKS", "").split(",") if n.strip()
@@ -48,6 +48,12 @@ def paths() -> None:
     peers = values.get("EVERUNFOLD_ALLOW_NETWORK_PEERS", "1")
     if (alias and not network_alias(alias)) or gateway not in {"0", "1"} or peers not in {"0", "1"}:
         raise ValueError("网络别名或网络开关无效。")
+    peer_networks, proxy_network = access_networks(
+        network,
+        extra,
+        values.get("EVERUNFOLD_INTERNAL_PEER_NETWORKS", ""),
+        values.get("EVERUNFOLD_TLS_PROXY_NETWORK", ""),
+    )
     image = values.get(
         prefix + "_IMAGE", "everunfold-" + ROLE + (":python312" if ROLE == "backend" else ":node22")
     )
@@ -83,11 +89,13 @@ def paths() -> None:
         alias,
         gateway,
         peers,
+        "EVERUNFOLD_INTERNAL_PEER_NETWORKS=" + peer_networks,
+        "EVERUNFOLD_TLS_PROXY_NETWORK=" + proxy_network,
     )
     if any(
         any(char in str(value) for char in ("\n", "\r", ","))
         for i, value in enumerate(resolved)
-        if i != 7
+        if i not in {7, 20}
     ):
         raise ValueError("挂载路径不能包含逗号或换行。")
     for value in resolved:

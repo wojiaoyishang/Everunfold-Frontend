@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[按 Docker 网络配置内部调用和宿主机反代](decisions/0163-named-docker-access-networks.md)说明两端如何按网络名解析子网和网桥网关。
+
 [显式配置路径与浏览器连接编辑](decisions/0162-explicit-config-and-local-connections.md)说明 CONFIG_FILE、可写配置目录、本机密码入口、保存与重启，以及后端拒绝日志和各进程等级。
 
 [同步诊断日志与节点控制台配置](decisions/0161-sync-diagnostics-and-console-setup.md)说明 Node.js 失败原因、发布 URL 的优先级及两端 setup 的控制台开关和密码。

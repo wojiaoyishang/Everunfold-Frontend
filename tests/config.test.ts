@@ -71,6 +71,33 @@ test("container subnets supplement manual peer grants only for the current runti
       parseConfiguration(base, { EVERUNFOLD_INTERNAL_PEER_CIDRS: invalid }),
     );
 });
+test("Docker TLS gateways and internal sync subnets are independent grants", () => {
+  const input = {
+    ...base,
+    PUBLIC_SITE_URL: "https://blog.example.test",
+    nodes_monitor: { enabled: true, trusted_tls_proxy_ips: ["192.0.2.10"] },
+  };
+  const config = parseConfiguration(input, {
+    EVERUNFOLD_INTERNAL_PEER_CIDRS: "172.18.0.0/16,",
+    EVERUNFOLD_NODES_TLS_PROXY_IPS: "172.22.0.1,192.0.2.10,fd00::1,",
+  });
+  assert.deepEqual(config.nodesMonitor.trustedTlsProxyIps, [
+    "192.0.2.10",
+    "172.22.0.1",
+    "fd00::1",
+  ]);
+  assert.deepEqual(config.backend.allowedPeerIps, [
+    ...base.backend.allowed_peer_ips,
+    "172.18.0.0/16",
+  ]);
+  assert.throws(
+    () =>
+      parseConfiguration(input, {
+        EVERUNFOLD_NODES_TLS_PROXY_IPS: "172.22.0.0/16",
+      }),
+    /单个 IP 地址/,
+  );
+});
 test("one frontend listener ignores legacy receiver ports and validates its environment", () => {
   const input = {
     ...base,

@@ -36,7 +36,17 @@ def execute(arguments):
         print("EVERUNFOLD_NODE_CONNECTION_BASE64=" + os.environ.get("DOCKER_TEST_BASE64", ""))
     return 0
 if args[:2] == ["network", "inspect"] and "--format" in args:
-    print("172.25.0.0/16,")
+    index = args.index("--format") + 1
+    template = args[index]
+    networks = json.loads(os.environ.get("DOCKER_TEST_IPAM", "{}"))
+    for name in args[index + 1:]:
+        network = networks.get(name, {"subnet": "172.25.0.0/16", "gateway": "172.25.0.1"})
+        if ".Gateway" in template:
+            bridge = network.get("driver", "bridge") == "bridge"
+            value = network.get("gateway", "") if bridge else ""
+        else:
+            value = network.get("subnet", "")
+        print(value + "," if value else "")
 if args[:2] == ["network", "connect"]:
     containers[args[-1]]["networks"].append(args[-2]); save()
 if args[0] in {"run", "create"}:
@@ -283,6 +293,53 @@ class LauncherTests(unittest.TestCase):
                 self.assertEqual("--network-alias" in call, "--name" in call)
             if call[:2] == ["network", "connect"]:
                 self.assertNotIn("--alias", call)  # Built-in bridge never receives aliases.
+
+    def test_explicit_networks_resolve_on_each_start_and_keep_tls_separate_from_sync(self):
+        path = self.repo / "config.yaml"
+        document = yaml.safe_load(path.read_text())
+        document["docker"].update(
+            EVERUNFOLD_EXTRA_NETWORKS="1panel-network,edge",
+            EVERUNFOLD_INTERNAL_PEER_NETWORKS=" 1panel-network , 1panel-network ",
+            EVERUNFOLD_TLS_PROXY_NETWORK="edge",
+            EVERUNFOLD_HOST_GATEWAY="1",
+        )
+        path.write_text(yaml.safe_dump(document))
+        source = path.read_bytes()
+        for peer_subnet, proxy_ip in (
+            ("172.18.0.0/16", "172.22.0.1"),
+            ("172.28.0.0/16", "172.30.0.1"),
+        ):
+            self.log.write_text("")
+            self.env["DOCKER_TEST_IPAM"] = json.dumps(
+                {
+                    "bridge": {"subnet": "172.17.0.0/16", "gateway": "172.17.0.1"},
+                    "1panel-network": {"subnet": peer_subnet},
+                    "edge": {"subnet": proxy_ip.rsplit(".", 1)[0] + ".0/24", "gateway": proxy_ip},
+                }
+            )
+            result, calls = self.run_action("start")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            runtime = next(call for call in calls if call[0] == "create" and "--name" in call)
+            self.assertIn(f"EVERUNFOLD_INTERNAL_PEER_CIDRS={peer_subnet},", runtime)
+            self.assertIn(f"EVERUNFOLD_NODES_TLS_PROXY_IPS={proxy_ip},", runtime)
+            self.assertIn(f"宿主机反代网络 edge → {proxy_ip}", result.stdout)
+            self.assertEqual(path.read_bytes(), source)
+
+    def test_unusable_proxy_network_does_not_stop_running_container(self):
+        path = self.repo / "config.yaml"
+        document = yaml.safe_load(path.read_text())
+        for selected in ("detached", "1panel-network"):
+            with self.subTest(selected=selected):
+                self.log.write_text("")
+                document["docker"]["EVERUNFOLD_TLS_PROXY_NETWORK"] = selected
+                path.write_text(yaml.safe_dump(document))
+                self.env["DOCKER_TEST_IPAM"] = (
+                    '{"1panel-network":{"gateway":"172.18.0.1","driver":"overlay"}}'
+                )
+                result, calls = self.run_action("start", old="matching")
+                self.assertNotEqual(result.returncode, 0)
+                self.assertIn(selected, result.stderr)
+                self.assertFalse(any(call[0] == "stop" for call in calls))
 
     @unittest.skipUnless(BACKEND, "backend export")
     def test_export_prints_base64_without_requiring_a_shared_connection_file(self):

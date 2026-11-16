@@ -1,7 +1,10 @@
 /** Server diagnostics contain operation metadata, never credentials or payloads. */
 const reasons: Record<string, string> = {
   peer_not_allowed:
-    "来源 IP 不在 backend.allowed_peer_ips 中；检查容器网络和自动允许所选网络设置",
+    "来源 IP 未获允许；核对 setup 中允许内部调用的 Docker 网络及手填来源",
+  monitor_proxy_untrusted:
+    "节点控制台的直连来源未获信任；核对 setup 中宿主机反代所在网络或手填代理 IP",
+  monitor_https_required: "节点控制台需要反代发送 X-Forwarded-Proto: https",
   token_missing:
     "缺少 Authorization；检查后端到前端的节点令牌及反向代理是否保留请求头",
   token_mismatch: "后端到前端的节点令牌不匹配；请重新导入同一节点的连接文件",

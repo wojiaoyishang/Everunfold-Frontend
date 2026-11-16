@@ -32,7 +32,7 @@ npm 安装默认启用 `--loglevel=verbose --timing`，实时显示详细日志�
 
 此目录保留 Dockerfile、Compose、入口脚本和一次性工具镜像的构建文件。数据默认位于 `docker/data`，配置来自根目录 YAML。不要手动维护自动生成的 `.env` 和运行配置。
 
-推荐两端加入 `1panel-network`，设置别名 `everunfold-backend`、`everunfold-frontend`，使用容器内部端口 `8001` / `3000` 互访，并保持自动允许所选网络为 `1`。也可开启 `host.docker.internal` 映射，此时使用宿主映射端口，例如 `3434`。详见[容器互通教程](../deploy/README.md#容器互通推荐共享网络和别名)。本轮前端更新需重新 `build` 主体与镜像，再 `start`；后端更新后执行 `deploy`。日常重启不编译。
+推荐两端加入 `1panel-network`，设置别名 `everunfold-backend`、`everunfold-frontend`，使用容器内部端口 `8001` / `3000` 互访，并在两端的“允许内部调用的 Docker 网络”填写 `1panel-network`。宿主反代通过该网桥访问时，“宿主机反代所在的 Docker 网络”也可填这个名称。也可开启 `host.docker.internal` 映射，此时使用宿主映射端口，例如 `3434`。详见[容器互通教程](../deploy/README.md#容器互通推荐共享网络和别名)。本轮前端更新需重新 `build` 主体与镜像，再 `start`；后端更新后执行 `deploy`。日常重启不编译。
 
 ## 二、不使用 Docker
 

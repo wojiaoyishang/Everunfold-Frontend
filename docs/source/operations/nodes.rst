@@ -122,6 +122,8 @@
 
 后端 ``[Everunfold access]`` 区分节点未登记/停用、来源 IP、令牌和控制台 TLS 代理错误。
 导出 Base64 只登记内部绑定，还须在 ``/_nodes`` 新增并启用同名节点。
-自动允许 Docker 网络追加内部 API 来源 CIDR，不改变控制台的可信 TLS 代理 IP 列表。
+两端“允许内部调用的 Docker 网络”按子网检查内部请求的真实来源，令牌仍须匹配。
+“宿主机反代所在的 Docker 网络”则取所选网桥的网关作为 HTTPS 控制台的可信代理 IP。
+前端对应日志查看 ``[Everunfold sync]``，后端查看 ``[Everunfold access]``。
 控制台 ``monitor_disabled`` 返回 404，``monitor_proxy_untrusted`` 表示直连代理来源不受信。
 日志不含秘密，重复拒绝节流；查看 API 日志时保留 INFO / WARNING 级别。
