@@ -87,7 +87,6 @@ export function ProtectedArticle({
                 : "locked"
               : undefined
           }
-          liveMetrics={false}
           display={display}
           minutes={readingMinutes(rendered.html, display)}
         />

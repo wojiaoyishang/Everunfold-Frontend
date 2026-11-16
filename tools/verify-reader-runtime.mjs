@@ -268,7 +268,7 @@ export async function verifyReaderRuntime({
       assert.match(html, /noindex/);
       if (pendingSync) {
         assert.match(html, /站点数据尚未同步/);
-        assert.match(html, /\[Everunfold sync\].*后端 Worker 的投递日志/);
+        assert.match(html, /请管理员查看同步日志，确认同步状态/);
       } else {
         assert.match(html, /页面加载失败/);
         assert.doesNotMatch(html, /站点数据尚未同步/);

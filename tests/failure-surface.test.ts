@@ -62,7 +62,7 @@ test("fallback HTML distinguishes sync problems and contains no external asset d
     );
     assert.equal(DomUtils.textContent(title!), heading);
     if (kind === "content-sync")
-      assert.match(html, /\[Everunfold sync\].*后端 Worker 的投递日志/);
+      assert.match(html, /请管理员查看同步日志，确认同步状态/);
     else if (kind === "plugin-sync") {
       assert.match(html, /管理员请查看后端部署日志/);
       assert.doesNotMatch(html, /50389/);

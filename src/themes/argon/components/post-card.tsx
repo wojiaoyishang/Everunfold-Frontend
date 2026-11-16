@@ -1,13 +1,13 @@
 import { UiText } from "@/core/i18n/provider";
 import Image from "next/image";
 import { AppLink as Link } from "./navigation-link";
-import type { ReadableContentMetadata } from "@/core/content/types";
+import type { ContentMetadata } from "@/core/content/types";
 import { resourceUrl, taxonomyHref } from "@/core/content/urls";
 import { Icon } from "./icon";
 import { PostMeta } from "./post-meta";
 import { shortcodeExcerpt } from "@/core/rendering/native-shortcodes";
 
-export function PostCard({ content }: { content: ReadableContentMetadata }) {
+export function PostCard({ content }: { content: ContentMetadata }) {
   const cover = resourceUrl(content.cover_url);
   const locked =
     content.access === "password" || content.access === "scheduled";

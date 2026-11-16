@@ -13,6 +13,7 @@ import {
   type ComponentType,
 } from "react";
 import { ReaderStore } from "@/core/reader/store";
+import { recordArticleView } from "@/core/contracts/reader-preview";
 import { emptyReaderSnapshot, type LoadState } from "@/core/reader/state";
 import type { RequestOptions } from "@/core/http/request";
 import { useRouteState } from "./route-state";
@@ -176,9 +177,56 @@ export function usePageRequest<T>(
   return (key ? snapshot.requests[key] : undefined) as LoadState<T> | undefined;
 }
 
-export function ViewMetric({ contentId }: { contentId: string }) {
+export function ViewMetric({
+  contentId,
+  record = false,
+  visible = true,
+}: {
+  contentId: string;
+  record?: boolean;
+  visible?: boolean;
+}) {
   const { store, route, snapshot } = useReaderData();
   const element = useRef<HTMLSpanElement>(null);
+  const visit = useRef<{
+    route: string;
+    contentId: string;
+    response: Promise<number | null>;
+  } | null>(null);
+  const [confirmed, setConfirmed] = useState<{
+    route: string;
+    contentId: string;
+    views: number;
+  } | null>(null);
+  useEffect(() => {
+    if (!record) return;
+    // Replay of an effect can subscribe again without recording a second visit.
+    if (
+      visit.current?.route !== route ||
+      visit.current.contentId !== contentId
+    ) {
+      visit.current = {
+        route,
+        contentId,
+        response: recordArticleView(
+          store.baseUrl,
+          { content_id: contentId },
+          { timeoutMs: 8000 },
+        )
+          .then(({ data }) =>
+            data.content_id === contentId ? data.views : null,
+          )
+          .catch(() => null),
+      };
+    }
+    let current = true;
+    void visit.current.response.then((views) => {
+      if (current && views !== null) setConfirmed({ route, contentId, views });
+    });
+    return () => {
+      current = false;
+    };
+  }, [record, route, contentId, store]);
   useEffect(() => {
     const target = element.current;
     if (!target) return;
@@ -199,9 +247,18 @@ export function ViewMetric({ contentId }: { contentId: string }) {
       observer.disconnect();
       release();
     };
-  }, [store, route, contentId]);
+  }, [store, route, contentId, visible]);
+  if (!visible) return null;
   const state = snapshot.metrics[contentId];
-  const value = state?.status === "ready" ? state.value.views : null;
+  const reported = state?.status === "ready" ? state.value.views : null;
+  const recorded =
+    confirmed?.route === route && confirmed.contentId === contentId
+      ? confirmed.views
+      : null;
+  const value =
+    reported === null && recorded === null
+      ? null
+      : Math.max(reported ?? 0, recorded ?? 0);
   return (
     <span
       ref={element}
@@ -210,7 +267,6 @@ export function ViewMetric({ contentId }: { contentId: string }) {
       data-content-id={contentId}
       aria-hidden={value === null}
       aria-label={value === null ? undefined : `浏览量：${value}`}
-      title={value === null ? undefined : "开发预览数据，尚未接入真实访问统计"}
     >
       <span className="dynamic-metric-sizer">
         {value !== null && (

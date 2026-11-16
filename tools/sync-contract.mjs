@@ -276,10 +276,18 @@ if (reader) {
     !Array.isArray(operations) ||
     operations.some(
       (op) =>
-        !/^readPreview[A-Za-z]+$/.test(op.name) ||
-        !/^\/v1\/reader-preview\/[a-z]+$/.test(op.path) ||
-        !schema.properties[op.query] ||
-        !schema.properties[op.response],
+        !(
+          (!op.method &&
+            schema.properties[op.query] &&
+            ((/^readPreview[A-Za-z]+$/.test(op.name) &&
+              /^\/v1\/reader-preview\/[a-z]+$/.test(op.path)) ||
+              (op.name === "readArticleMetrics" &&
+                op.path === "/v1/reader/metrics"))) ||
+          (op.method === "POST" &&
+            op.name === "recordArticleView" &&
+            op.path === "/v1/reader/views" &&
+            schema.properties[op.input])
+        ) || !schema.properties[op.response],
     )
   )
     throw new Error("Invalid reader operation metadata");
@@ -289,8 +297,8 @@ if (reader) {
 const ${op.name}Validator = ajv.compile<ReaderPreviewContract[${JSON.stringify(op.response)}]>({
   $ref: ${JSON.stringify(`reader-preview#/properties/${op.response}`)},
 });
-export function ${op.name}(baseUrl: string, query: ReaderPreviewContract[${JSON.stringify(op.query)}], options: RequestOptions = {}) {
-  return requestJSON(baseUrl, ${JSON.stringify(op.path)}, query, ${op.name}Validator, options);
+export function ${op.name}(baseUrl: string, payload: ReaderPreviewContract[${JSON.stringify(op.input ?? op.query)}], options: RequestOptions = {}) {
+  return ${op.method === "POST" ? "postJSON" : "requestJSON"}(baseUrl, ${JSON.stringify(op.path)}, payload, ${op.name}Validator, { ...options, credentials: "omit" });
 }`,
     )
     .join("\n");
@@ -301,7 +309,7 @@ import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "./reader-preview-v0.1.schema.json";
 import type { ReaderPreviewContract } from "./reader-preview-contract";
-import { requestJSON, type RequestOptions } from "@/core/http/request";
+import { requestJSON, postJSON, type RequestOptions } from "@/core/http/request";
 const ajv = new Ajv({ strict: true });
 addFormats(ajv);
 ajv.addSchema(Object.fromEntries(Object.entries(schema).filter(([key]) => !key.startsWith("x-"))), "reader-preview");

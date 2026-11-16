@@ -3,6 +3,7 @@
   flex: none;
   inline-size: 0.85em;
   block-size: 0.85em;
+  transform: translateY(0.035em);
 }
 .lock svg {
   grid-area: 1 / 1;

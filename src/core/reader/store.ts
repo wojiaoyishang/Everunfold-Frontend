@@ -1,4 +1,5 @@
 import {
+  readArticleMetrics,
   readPreviewIdentity,
   readPreviewMetrics,
 } from "@/core/contracts/reader-preview";
@@ -14,7 +15,7 @@ import {
 
 interface ReaderClient {
   identity: typeof readPreviewIdentity;
-  metrics: typeof readPreviewMetrics;
+  metrics: typeof readPreviewMetrics | typeof readArticleMetrics;
 }
 export interface ReaderStoreOptions {
   client?: ReaderClient;
@@ -59,7 +60,7 @@ export class ReaderStore {
   ) {
     this.client = options.client ?? {
       identity: readPreviewIdentity,
-      metrics: readPreviewMetrics,
+      metrics: readArticleMetrics,
     };
     this.tasks = new RequestTasks(
       (requests) => this.publish({ requests }),

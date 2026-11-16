@@ -90,6 +90,7 @@
   flex: none;
   inline-size: 0.8em;
   block-size: 0.8em;
+  transform: translateY(0.075em);
 }
 .post-title a {
   transition: color 0.2s;

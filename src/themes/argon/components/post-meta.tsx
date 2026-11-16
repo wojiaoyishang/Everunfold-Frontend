@@ -1,6 +1,6 @@
 import { Fragment, type ReactNode } from "react";
 import { UiText } from "@/core/i18n/provider";
-import type { ReadableContentMetadata } from "@/core/content/types";
+import type { ContentMetadata } from "@/core/content/types";
 import { taxonomyHref } from "@/core/content/urls";
 import { AppLink as Link } from "./navigation-link";
 import { Icon } from "./icon";
@@ -27,7 +27,7 @@ export function PostMeta({
   display,
   minutes,
 }: {
-  content: ReadableContentMetadata;
+  content: ContentMetadata;
   article?: boolean;
   liveMetrics?: boolean;
   interactive?: boolean;
@@ -89,9 +89,15 @@ export function PostMeta({
           {content.comment_count}
         </Link>
       ),
-    views: !locked && liveMetrics && display?.show_views !== false && (
-      <ViewMetric contentId={content.id} />
-    ),
+    views: liveMetrics &&
+      content.kind === "article" &&
+      (article || display?.show_views !== false) && (
+        <ViewMetric
+          contentId={content.id}
+          record={article}
+          visible={display?.show_views !== false}
+        />
+      ),
   };
   const order = new Set([...(display?.meta_order ?? []), ...defaultOrder]);
   return (

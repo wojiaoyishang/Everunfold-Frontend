@@ -65,11 +65,11 @@
       "sha256": "1e56a43ce37b77d46c9c3851be8f9208120ed0262afde5d011601a643e323732"
     },
     "reader-preview-v0.1.schema.json": {
-      "schema_version": "0.1.0-preview.1",
+      "schema_version": "0.2.0",
       "source_repository": "https://github.com/wojiaoyishang/Everunfold-Backend",
       "source_path": "contracts/reader-preview-v0.1.schema.json",
-      "source_commit": "38ff7226fcdb373d436d191718c8585811ac00c8",
-      "sha256": "9324386a70b1d3f1b657939864683926ce9dc692061499d696506bb6aaf37e7c"
+      "source_commit": "6b86018c85e71fcb1685127bff86df5fd07a5a06",
+      "sha256": "b4bee9bdfdeceb4d41b9b1ca60d546230af4e44e72147a4b6daefce0982c68ab"
     },
     "settings-v1.schema.json": {
       "schema_version": "1.47.0",

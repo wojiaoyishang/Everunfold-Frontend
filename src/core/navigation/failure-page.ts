@@ -36,8 +36,7 @@ const pages: Record<FailureKind, FailureCopy> = {
     status: 503,
     title: "站点数据尚未同步",
     description: "当前站点节点还没有可读取的公开内容，请稍后重试。",
-    adminHint:
-      "管理员请查看前端 Node.js 日志中的 [Everunfold sync] 和后端 Worker 的投递日志。",
+    adminHint: "请管理员查看同步日志，确认同步状态。",
   },
   "plugin-sync": {
     status: 503,
