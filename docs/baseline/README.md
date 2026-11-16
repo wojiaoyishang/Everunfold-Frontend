@@ -1917,3 +1917,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0172-sync-failure-pages-and-first-card.md` | `ADR0172-1` | `31d65813206ad68bea809bff0de0a6fa5d108e73e13a65661365b526c730e8d1` |
+
+## 节点同步恢复与文章浏览量
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0173-node-recovery-and-article-views.md` | `ADR0173-1` | `37fac45634a7dd284aa960ed2aa2aeb1d8f825ed4fbf9aff2994f8733bd9d716` |
