@@ -14,22 +14,22 @@ from config_actions import export_node
 from config_copy import frontend_import_command
 from config_probes import frontend_checks
 from config_validation import internal_url
+from connection_bundle import encode_bundle
+from test_configure import connection_bundle
 
 
 class ActionTests(unittest.IsolatedAsyncioTestCase):
-    async def test_docker_export_bridge_retries_and_returns_host_absolute_path(self):
+    async def test_docker_export_bridge_retries_and_returns_base64_without_shared_file(self):
         with tempfile.TemporaryDirectory(prefix="everunfold-action-test-") as temp:
             root = Path(temp)
             bridge = root / "bridge"
             bridge.mkdir()
-            target = root / "external data/connections/web-main.json"
+            encoded = encode_bundle(connection_bundle())
             launcher = root / "launcher.sh"
             launcher.write_text(
                 '#!/bin/bash\nset -eu\n[[ "$1" == export-node ]]\n'
                 '[[ ! -f "${TEST_EXPORT_ROOT}/fail" ]] || exit 23\n'
-                'mkdir -p "${TEST_EXPORT_ROOT}/external data/connections"\n'
-                'printf "{}" >"${TEST_EXPORT_ROOT}/external data/connections/web-main.json"\n'
-                'printf "%s" "${TEST_EXPORT_ROOT}/external data/connections/web-main.json"'
+                'printf "%s" "$TEST_EXPORT_BASE64"'
                 ' >"$EVERUNFOLD_SETUP_RESULT_FILE"\n'
             )
             process = subprocess.Popen(
@@ -39,7 +39,7 @@ class ActionTests(unittest.IsolatedAsyncioTestCase):
                     str(bridge),
                     str(launcher),
                 ],
-                env={**os.environ, "TEST_EXPORT_ROOT": str(root)},
+                env={**os.environ, "TEST_EXPORT_ROOT": str(root), "TEST_EXPORT_BASE64": encoded},
             )
             try:
                 for _ in range(50):
@@ -53,9 +53,9 @@ class ActionTests(unittest.IsolatedAsyncioTestCase):
                     (root / "fail").unlink()
                     for _ in range(2):
                         self.assertEqual(
-                            await asyncio.wait_for(export_node(root, False), 5), str(target)
+                            await asyncio.wait_for(export_node(root, False), 5), encoded
                         )
-                        self.assertTrue(target.is_file())
+                        self.assertFalse((root / "external data").exists())
                     (bridge / "status").unlink()
                     (bridge / "request").write_text("touch should-not-exist")
                     for _ in range(50):

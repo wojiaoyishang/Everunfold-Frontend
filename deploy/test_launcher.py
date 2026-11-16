@@ -32,6 +32,8 @@ def execute(arguments):
     script = next((i for i, arg in enumerate(arguments) if arg.endswith("/bootstrap.py")), None)
     if script is not None:
         return subprocess.call([sys.executable, *arguments[script:]])
+    if "deploy/node_bundle.py" in arguments:
+        print("EVERUNFOLD_NODE_CONNECTION_BASE64=" + os.environ.get("DOCKER_TEST_BASE64", ""))
     return 0
 if args[:2] == ["network", "inspect"] and "--format" in args:
     print("172.25.0.0/16,")
@@ -184,6 +186,23 @@ class LauncherTests(unittest.TestCase):
         calls = [json.loads(line) for line in self.log.read_text().splitlines()]
         return result, calls
 
+    def test_custom_config_is_shared_with_runtime_without_a_shadow_copy(self):
+        selected = self.root / "private config" / "selected.yaml"
+        selected.parent.mkdir()
+        document = yaml.safe_load((self.repo / "config.yaml").read_text())
+        document["environment"]["API_PORT" if BACKEND else "FRONTEND_PORT"] = "3210"
+        selected.write_text(yaml.safe_dump(document))
+        self.env["CONFIG_FILE"] = str(selected)
+        result, calls = self.run_action("start")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        create = next(call for call in calls if call[0] == "create" and "--name" in call)
+        self.assertIn("CONFIG_FILE=/config/selected.yaml", create)
+        suffix = ",readonly" if BACKEND else ""
+        self.assertIn(f"type=bind,source={selected.parent},target=/config{suffix}", create)
+        self.assertIn("0.0.0.0:3434:3210", create)
+        self.assertNotIn("3210", (self.repo / "config.yaml").read_text())
+        self.assertIn(str(selected), result.stdout)
+
     def test_build_then_start_without_rebuilding(self):
         result, calls = self.run_action("build")
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -199,11 +218,11 @@ class LauncherTests(unittest.TestCase):
         create = next(c for c in calls if c[0] == "create" and "--name" in c)
         self.assertIn("0.0.0.0:3434:" + ("8001" if BACKEND else "3000"), create)
         self.assertIn(f"type=bind,source={self.data},target=/data", create)
-        config = (
-            "CONFIG_FILE=/workspace/config.yaml"
-            if BACKEND
-            else "CONFIG_FILE=/workspace/config.runtime.toml"
-        )
+        config = "CONFIG_FILE=/config/config.yaml"
+        suffix = ",readonly" if BACKEND else ""
+        self.assertIn(f"type=bind,source={self.repo},target=/config{suffix}", create)
+        if not BACKEND:
+            self.assertNotIn("--env-file", create)
         self.assertEqual(create.count("-p"), 1)
         self.assertIn(config, create)
         self.assertFalse((self.data / "config.toml").exists())
@@ -266,20 +285,54 @@ class LauncherTests(unittest.TestCase):
                 self.assertNotIn("--alias", call)  # Built-in bridge never receives aliases.
 
     @unittest.skipUnless(BACKEND, "backend export")
-    def test_export_prints_host_path_and_shell_safe_frontend_import_command(self):
-        from config_copy import frontend_import_command
+    def test_export_prints_base64_without_requiring_a_shared_connection_file(self):
+        from config_copy import frontend_base64_import_command
+        from connection_bundle import encode_bundle
+        from test_configure import connection_bundle
 
         path = self.repo / "config.yaml"
         document = yaml.safe_load(path.read_text())
         document["assistant"] = {"node": "web-main"}
         path.write_text(yaml.safe_dump(document))
-        target = self.data / "connections/web-main.json"
-        target.parent.mkdir(parents=True)
-        target.write_text("{}")
+        encoded = encode_bundle(connection_bundle())
+        self.env["DOCKER_TEST_BASE64"] = encoded
+        result_file = self.root / "private-result"
+        self.env["EVERUNFOLD_SETUP_RESULT_FILE"] = str(result_file)
         result, _ = self.run_action("export-node")
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn(str(target), result.stdout)
-        self.assertIn(frontend_import_command(str(target), False), result.stdout)
+        self.assertIn(encoded, result.stdout)
+        self.assertIn(frontend_base64_import_command(False), result.stdout)
+        self.assertEqual(result_file.read_text().strip(), encoded)
+        self.assertEqual(result_file.stat().st_mode & 0o777, 0o600)
+        self.assertFalse((self.data / "connections").exists())
+
+    @unittest.skipIf(BACKEND, "frontend Base64 import environment")
+    def test_base64_goes_only_to_the_configurator_without_file_mounts_or_command_value(self):
+        import pty
+
+        from connection_bundle import encode_bundle
+        from test_configure import connection_bundle
+
+        encoded = encode_bundle(connection_bundle())
+        master, slave = pty.openpty()
+        try:
+            result = subprocess.run(
+                [str(self.repo / "setup.sh"), "--docker", "--connection-base64"],
+                env={**self.env, "EVERUNFOLD_CONNECTION_BASE64": encoded},
+                stdin=slave,
+                stdout=slave,
+                stderr=subprocess.PIPE,
+                timeout=20,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+        finally:
+            os.close(master)
+            os.close(slave)
+        calls = [json.loads(line) for line in self.log.read_text().splitlines()]
+        recipients = [call for call in calls if "EVERUNFOLD_CONNECTION_BASE64" in call]
+        self.assertEqual(len(recipients), 1)
+        self.assertIn(str(self.repo / "deploy/configure.py"), recipients[0])
+        self.assertNotIn(encoded, self.log.read_text())
 
     @unittest.skipIf(BACKEND, "frontend host connection bundle")
     def test_connection_file_is_mounted_read_only_only_in_the_configurator(self):

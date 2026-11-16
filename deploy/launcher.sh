@@ -5,24 +5,45 @@ deploy_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 project_root="$(cd "$deploy_dir/.." && pwd)"
 docker_dir="$project_root/docker"
 cd "$project_root"
+if [[ ${CONFIG_FILE+x} && -z "${CONFIG_FILE//[[:space:]]/}" ]]; then
+  echo "CONFIG_FILE 不能为空。" >&2; exit 2
+fi
+export CONFIG_FILE
+CONFIG_FILE=$(realpath -m -- "${CONFIG_FILE:-$project_root/config.yaml}")
+printf 'Everunfold · CONFIG_FILE=%s\n' "$CONFIG_FILE"
 role=frontend
 [[ ! -d "$project_root/app" ]] || role=backend
 native=false
 if [[ "${1:-}" == --native ]]; then native=true; shift; fi
 action=configure
-if [[ $# -gt 0 && "$1" != --connection-file ]]; then action=$1; shift; fi
+if [[ $# -gt 0 && "$1" != --connection-file && "$1" != --connection-base64 ]]; then action=$1; shift; fi
 case "$action" in
   configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|api|worker|scheduler|web|render) ;;
-  *) echo "用法：./setup.sh [--docker|--native] [configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|render] [--connection-file 文件路径]"; exit 2 ;;
+  *) echo "用法：./setup.sh [--docker|--native] [configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|render] [--connection-base64 | --connection-file 文件路径]"; exit 2 ;;
 esac
 connection_file=
 if (( $# )); then
-  if [[ $# != 2 || "$1" != --connection-file || "$action" != configure || "$role" != frontend ]]; then
-    echo "--connection-file 文件路径仅用于前端配置。" >&2; exit 2
+  if [[ "$action" != configure || "$role" != frontend ]]; then
+    echo "连接导入选项仅用于前端配置。" >&2; exit 2
   fi
-  [[ -f "$2" && -r "$2" ]] || { echo "连接文件不存在或不可读：$2" >&2; exit 2; }
-  connection_file=$(realpath -- "$2")
-  export EVERUNFOLD_CONNECTION_FILE="$connection_file"
+  if [[ $# == 1 && "$1" == --connection-base64 ]]; then
+    unset EVERUNFOLD_CONNECTION_FILE
+    if [[ -z "${EVERUNFOLD_CONNECTION_BASE64:-}" ]]; then
+      [[ -t 0 ]] || { echo "请在交互终端粘贴 Base64，或设置 EVERUNFOLD_CONNECTION_BASE64。" >&2; exit 2; }
+      printf '粘贴后端连接 Base64 后按回车（输入不回显）：' >&2
+      IFS= read -r -s EVERUNFOLD_CONNECTION_BASE64 || { printf '\n' >&2; exit 2; }
+      printf '\n' >&2
+    fi
+    [[ -n "$EVERUNFOLD_CONNECTION_BASE64" && ${#EVERUNFOLD_CONNECTION_BASE64} -le 89432 ]] || { echo "连接编码为空或过长。" >&2; exit 2; }
+    export EVERUNFOLD_CONNECTION_BASE64
+  elif [[ $# == 2 && "$1" == --connection-file ]]; then
+    unset EVERUNFOLD_CONNECTION_BASE64
+    [[ -f "$2" && -r "$2" ]] || { echo "连接文件不存在或不可读：$2" >&2; exit 2; }
+    connection_file=$(realpath -- "$2")
+    export EVERUNFOLD_CONNECTION_FILE="$connection_file"
+  else
+    echo "请选择 --connection-base64 或 --connection-file 文件路径。" >&2; exit 2
+  fi
 fi
 if "$native"; then
   command -v uv >/dev/null || { echo "需要 uv；安装方法见 deploy/README.md。" >&2; exit 1; }
@@ -38,7 +59,7 @@ setup_image="everunfold-setup:1-$checksum"
 if ! docker image inspect "$setup_image" >/dev/null 2>&1; then
   docker build --progress=plain -t "$setup_image" -f "$docker_dir/setup/Dockerfile" "$project_root"
 fi
-base=(--user "$(id -u):$(id -g)" -e PYTHONDONTWRITEBYTECODE=1 --workdir "$project_root")
+base=(-e "CONFIG_FILE=$CONFIG_FILE" --user "$(id -u):$(id -g)" -e PYTHONDONTWRITEBYTECODE=1 --workdir "$project_root")
 mount_args=()
 declare -A mount_modes=()
 declare -a mount_order=()
@@ -78,6 +99,8 @@ read_paths() {
 refresh_layout() {
   mount_modes=(); mount_order=()
   add_mount "$project_root"
+  mkdir -p -- "$(dirname -- "$CONFIG_FILE")"
+  add_mount "$(dirname -- "$CONFIG_FILE")"
   refresh_mounts
   read_paths
   for directory in "$docker_dir" "$data_dir" "$env_parent"; do
@@ -149,6 +172,9 @@ ensure_networks
 if [[ "$action" == configure ]]; then
   [[ -t 0 && -t 1 ]] || { echo "配置界面需要交互终端。" >&2; exit 1; }
   ui_args=()
+  if [[ -n "${EVERUNFOLD_CONNECTION_BASE64:-}" ]]; then
+    ui_args+=(-e EVERUNFOLD_CONNECTION_BASE64)
+  fi
   if [[ -n "$connection_file" ]]; then
     add_mount "$connection_file" ro
     refresh_mounts
@@ -171,6 +197,7 @@ if [[ "$action" == configure ]]; then
     -e "TERM=${TERM:-xterm-256color}" -e "EVERUNFOLD_NETWORK_CIDRS=$cidrs" \
     "$setup_image" python "$deploy_dir/configure.py" || result=$?
   cleanup_bridge
+  unset EVERUNFOLD_CONNECTION_BASE64
   trap - EXIT
   case "$result" in
     0) action=render ;;
@@ -224,22 +251,27 @@ runtime_args=(--init --user "$runtime_user" --label "org.everunfold.project=$pro
               --mount "type=bind,source=$data_dir,target=/data")
 if [[ "$role" == backend ]]; then
   workspace_dir="$source_dir"
-  [[ -f "$source_dir/config.yaml" ]] || { echo "代码目录缺少根 config.yaml，请重新运行配置助手保存。" >&2; exit 1; }
+  [[ -f "$runtime_config" ]] || { echo "CONFIG_FILE 指定的配置不存在，请先运行配置助手保存。" >&2; exit 1; }
   runtime_args+=(--mount "type=bind,source=$source_dir,target=/workspace,readonly"
-                 -e CONFIG_FILE=/workspace/config.yaml -e EVERUNFOLD_DATA_DIR=/data
+                 --mount "type=bind,source=$(dirname -- "$runtime_config"),target=/config,readonly"
+                 -e "CONFIG_FILE=/config/$(basename -- "$runtime_config")" -e EVERUNFOLD_DATA_DIR=/data
                  -e "API_HOST=$listen_host" -e "API_PORT=$listen_port")
 else
   workspace_dir="$artifact_dir"
   [[ -s "$artifact_dir/.next/BUILD_ID" ]] || { echo "前端产物未构建，请先执行 build。" >&2; exit 1; }
   runtime_args+=(--mount "type=bind,source=$artifact_dir,target=/workspace"
-                 --mount "type=bind,source=$runtime_config,target=/workspace/config.runtime.toml,readonly"
-                 --env-file "$env_file.docker" -e CONFIG_FILE=/workspace/config.runtime.toml
-                 -e "FRONTEND_PORT=$listen_port")
+                 --mount "type=bind,source=$(dirname -- "$runtime_config"),target=/config"
+                 -e "CONFIG_FILE=/config/$(basename -- "$runtime_config")" -e EVERUNFOLD_DATA_DIR=/data
+                 -e "FRONTEND_HOST=$listen_host" -e "FRONTEND_PORT=$listen_port")
 fi
 run_runtime() { run_temporary no "${runtime_args[@]}" "$image_name" "$@"; }
 check_runtime() {
   if [[ "$role" == backend ]]; then run_runtime python deploy/runtime_check.py
-  else run_runtime node --import tsx /usr/local/lib/everunfold-check.mjs; fi
+  else
+    local strict=()
+    [[ "$action" != check ]] || strict+=(--require-backend)
+    run_runtime node --import tsx /usr/local/lib/everunfold-check.mjs "${strict[@]}"
+  fi
 }
 remove_previous() {
   docker container inspect "$container_name" >/dev/null 2>&1 || return 0
@@ -261,17 +293,24 @@ case "$action" in
   migrate)
     remove_previous
     run_runtime alembic -c migrations/alembic.ini upgrade head
-    run_runtime python -m tools.register_backend_plugins --config /workspace/config.yaml --apply
+    run_runtime python -m tools.register_backend_plugins --config "/config/$(basename -- "$runtime_config")" --apply
     check_runtime
     echo "迁移完成。运行 ./setup.sh --docker start 启动。" ;;
   export-node)
-    run_runtime python deploy/node_bundle.py
-    exported_path=$(run_tool connection-path)
-    [[ -f "$exported_path" ]] || { echo "导出的节点连接文件不存在。" >&2; exit 1; }
-    printf '已导出节点连接文件：%s\n' "$exported_path"
-    run_tool import-command
+    export_output=$(run_runtime python deploy/node_bundle.py)
+    encoded=
+    while IFS= read -r line; do
+      if [[ "$line" == EVERUNFOLD_NODE_CONNECTION_BASE64=* ]]; then
+        [[ -z "$encoded" ]] || { echo "导出结果重复。" >&2; exit 1; }
+        encoded=${line#EVERUNFOLD_NODE_CONNECTION_BASE64=}
+      fi
+    done <<< "$export_output"
+    [[ "$encoded" =~ ^[A-Za-z0-9+/]+=*$ && ${#encoded} -le 87384 ]] || { echo "未获得有效的节点连接 Base64。" >&2; exit 1; }
+    printf '\n节点连接 Base64（包含令牌，请按密钥保管）：\n%s\n\n' "$encoded"
+    printf '在前端项目根目录执行，按提示粘贴编码：\n./setup.sh --docker --connection-base64\n'
+    printf '还需在后端 /_nodes 添加或启用该节点的公开地址。\n'
     if [[ -n "${EVERUNFOLD_SETUP_RESULT_FILE:-}" ]]; then
-      printf '%s\n' "$exported_path" >"$EVERUNFOLD_SETUP_RESULT_FILE"
+      (umask 077; printf '%s\n' "$encoded" >"$EVERUNFOLD_SETUP_RESULT_FILE")
     fi ;;
   check) check_runtime ;;
   start)

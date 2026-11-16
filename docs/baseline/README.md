@@ -1849,3 +1849,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0151-listener-and-public-node-origins.md` | `ADR0151-1` | `ceea9fe49254fbdeb0788968f54ea6bf9bbbcc3863c794c81b27b75e76ed57d2` |
+
+## 显式配置路径、Base64 配对与本机连接编辑
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0162-explicit-config-and-local-connections.md` | `ADR0162-1` | `aafaaf506643d8847e50fa3c54191edfa468f0cbcb82c37c6a160a44f7e09a82` |

@@ -10,7 +10,12 @@ import {
 } from "@/core/contracts/settings";
 import { RequestError } from "@/core/http/request";
 import { nodesConsolePath } from "@/core/auth/routes";
-import type { LocalGate, LocalNode } from "./local";
+import type {
+  ConnectionDraft,
+  ConnectionList,
+  LocalGate,
+  LocalNode,
+} from "./local";
 
 type OnlineIdentity = {
   base: string;
@@ -19,14 +24,19 @@ type OnlineIdentity = {
 };
 
 type ConsoleView =
-  | { mode: "loading" | "disabled" | "unavailable" | "sign-in" | "forbidden" }
-  | { mode: "locked"; passwordConfigured: boolean }
-  | { mode: "offline"; local: LocalNode }
+  | { mode: "loading" | "disabled" | "unavailable" }
+  | {
+      mode: "locked";
+      backendMode: LocalGate["mode"] | "sign-in" | "forbidden";
+      passwordConfigured: boolean;
+    }
+  | { mode: "local"; backendMode: LocalGate["mode"]; local: LocalNode }
   | {
       mode: "online";
       identity: OnlineIdentity;
       fleet: MonitorStatus;
       local?: LocalNode;
+      passwordConfigured: boolean;
     };
 
 class LocalRequestError extends Error {
@@ -59,6 +69,20 @@ async function requestLocal<T>(
     );
   return value as T;
 }
+
+export const readLocalConnections = () =>
+  requestLocal<ConnectionList>({ action: "connections" });
+export const saveLocalConnection = (
+  connection: ConnectionDraft,
+  revision: string,
+  create: boolean,
+) =>
+  requestLocal<{ filename: string; restartRequired: boolean }>({
+    action: "save-connection",
+    connection,
+    revision,
+    create,
+  });
 
 async function runOnline<T>(
   identity: OnlineIdentity,
@@ -108,21 +132,23 @@ export function useNodeConsole() {
       if (!signal.aborted) setView(next);
     };
     setRefreshing(true);
+    let gate: LocalGate | undefined;
+    const lock = (backendMode: LocalGate["mode"] | "sign-in" | "forbidden") =>
+      publish({
+        mode: "locked",
+        backendMode,
+        passwordConfigured: gate?.passwordConfigured ?? false,
+      });
     try {
-      const gate = await requestLocal<LocalGate>(undefined, signal);
-      if (gate.mode === "unavailable") return publish({ mode: "unavailable" });
-      if (gate.mode === "offline") {
-        if (!gate.unlocked)
-          return publish({
-            mode: "locked",
-            passwordConfigured: gate.passwordConfigured,
-          });
+      gate = await requestLocal<LocalGate>(undefined, signal);
+      if (gate.unlocked) {
         const local = await requestLocal<LocalNode>(
           { action: "inspect" },
           signal,
         );
-        return publish({ mode: "offline", local });
+        return publish({ mode: "local", backendMode: gate.mode, local });
       }
+      if (gate.mode !== "online") return lock(gate.mode);
       if (
         !gate.backendBaseUrl ||
         !gate.nodeId ||
@@ -130,16 +156,13 @@ export function useNodeConsole() {
         !gate.revision ||
         !gate.challenge
       )
-        return publish({ mode: "unavailable" });
+        return lock("unavailable");
       const { data: session } = await readAdminSession(gate.backendBaseUrl, {
         signal,
       });
-      if (
-        !session.authenticated ||
-        session.user?.role !== "admin" ||
-        session.user.must_change_password
-      )
-        return publish({ mode: "forbidden" });
+      if (!session.authenticated) return lock("sign-in");
+      if (session.user?.role !== "admin" || session.user.must_change_password)
+        return lock("forbidden");
       const identity = {
         base: gate.backendBaseUrl,
         csrf: session.csrf_token,
@@ -159,14 +182,21 @@ export function useNodeConsole() {
           signal,
         ).catch(() => undefined),
       ]);
-      publish({ mode: "online", identity, fleet, local });
+      publish({
+        mode: "online",
+        identity,
+        fleet,
+        local,
+        passwordConfigured: gate.passwordConfigured,
+      });
     } catch (error) {
       if (error instanceof LocalRequestError && error.status === 404)
         publish({ mode: "disabled" });
       else if (error instanceof RequestError && error.status === 401)
-        publish({ mode: "sign-in" });
+        lock("sign-in");
       else if (error instanceof RequestError && error.status === 403)
-        publish({ mode: "forbidden" });
+        lock("forbidden");
+      else if (gate) lock("unavailable");
       else publish({ mode: "unavailable" });
     } finally {
       if (active.current === controller) {
@@ -199,12 +229,12 @@ export function useNodeConsole() {
   }
 
   async function switchProfile(profile: string) {
-    if ((view.mode !== "online" && view.mode !== "offline") || !view.local)
+    if ((view.mode !== "online" && view.mode !== "local") || !view.local)
       throw new LocalRequestError(409, "本机配置已变化，请刷新后重试");
     const local = view.local;
     const option = local.profiles.find((item) => item.id === profile);
     if (!option) throw new LocalRequestError(409, "该连接已移除，请刷新后重试");
-    if (view.mode === "offline") {
+    if (view.mode === "local") {
       await requestLocal({
         action: "switch",
         profile,

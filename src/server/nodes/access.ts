@@ -1,3 +1,4 @@
+import { configurationEnvironment } from "@/core/config/deployment";
 import "server-only";
 import { createHmac, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import type { readConfiguration } from "@/core/config/server";
@@ -37,7 +38,7 @@ export async function backendMode(config: Config): Promise<BackendMode> {
         Math.min(config.backend.connectTimeoutSeconds, 3) * 1000,
       ),
     });
-    // Even a failed HTTP response is not a reason to fall back to a local password.
+    // Health describes connectivity; local deployment credentials are checked separately.
     if (!response.ok) {
       syncFailure({ ...context, status: response.status }, "backend_http");
       await response.body?.cancel();
@@ -84,7 +85,8 @@ export const sessionSeconds = 15 * 60;
 
 function offlineKey(config: Config): string | undefined {
   const monitor = config.nodesMonitor;
-  const secret = process.env[monitor.sessionSecretEnv] ?? "";
+  const secret =
+    configurationEnvironment(config)[monitor.sessionSecretEnv] ?? "";
   if (!monitor.passwordHash || !/^[A-Za-z0-9_-]{43,128}$/.test(secret)) return;
   return sign(
     secret,
@@ -170,7 +172,9 @@ export function proofChallenge(
   request: Pick<NodeProofRequest, "profile" | "revision">,
 ) {
   const secret =
-    process.env[config.backend.fastapiToNextjsTokenEnv ?? ""] ?? "";
+    configurationEnvironment(config)[
+      config.backend.fastapiToNextjsTokenEnv ?? ""
+    ] ?? "";
   // Bind proofs to this deployed console as well as the backend-issued node and epoch.
   return sign(
     secret,
@@ -189,7 +193,9 @@ export function acceptsProof(
   proof: NodeProof,
 ): boolean {
   const secret =
-    process.env[config.backend.fastapiToNextjsTokenEnv ?? ""] ?? "";
+    configurationEnvironment(config)[
+      config.backend.fastapiToNextjsTokenEnv ?? ""
+    ] ?? "";
   const remaining = proof.expires - Math.floor(Date.now() / 1000);
   if (
     secret.length < 32 ||

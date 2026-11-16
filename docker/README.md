@@ -2,19 +2,19 @@
 
 前后端统一使用项目根目录的 `setup.sh` 与 `config.yaml`。配置助手在 `deploy/`，不需要进入 `docker/` 运行。完整的逐步教程见[部署教程](../deploy/README.md)。
 
-setup 的“节点控制台”分组可设置启用开关、离线密码和会话密钥。入口为前端发布 URL 下的 `/admin/_nodes`；在线仍验证后端管理员。同步失败查看 `docker logs --follow --tail=100 everunfold-frontend` 中的 `[Everunfold sync]`，含内部目标、HTTP 状态、网络或落盘错误，详见[同步排查](../deploy/README.md#同步失败时看-nodejs-日志)。
+setup 的“节点控制台”分组可设置启用开关、本机配置密码和会话密钥。入口为前端发布 URL 下的 `/admin/_nodes`；后端不可用也可编辑本机连接，全站状态仍验证后端管理员。同步失败查看 `docker logs --follow --tail=100 everunfold-frontend` 中的 `[Everunfold sync]`，含内部目标、HTTP 状态、网络或落盘错误，详见[同步排查](../deploy/README.md#同步失败时看-nodejs-日志)。
 
 选中配置项可查看/复制，F4 查看完整执行结果；终端不支持剪贴板时使用“终端复制”。后端导出后自动显示前端导入命令，带空格的路径也可直接复制。
 
 ## 一、Docker 从零构建
 
 1. 安装 Docker Engine、Compose v2、Bash 4+ 和 Git，确认 `docker info` 可用。
-2. 克隆本仓库，在仓库根目录执行下列命令。后端需要事先准备 PostgreSQL 和 Redis；前端需要后端导出的节点连接 JSON。
+2. 克隆本仓库，在仓库根目录执行下列命令。后端需要事先准备 PostgreSQL 和 Redis；前端需要后端导出的节点连接 Base64。
 3. 在配置总览填写代码目录、数据目录、容器名称、主网络、额外网络、端口；前端还可选产物输出目录。助手提供连接检测，保存根目录 `config.yaml`。
 
 ```bash
 ./setup.sh --docker
-# 在界面导入后端连接 JSON，选择“构建并启动”
+# 在界面导入后端连接 Base64，选择“构建并启动”
 # 或仅保存并退出界面后，分开执行：
 ./setup.sh --docker build
 ./setup.sh --docker start
@@ -28,7 +28,7 @@ npm 安装默认启用 `--loglevel=verbose --timing`，实时显示详细日志�
 
 已有部署更新后，在项目根目录执行 `git pull`、`./setup.sh --docker build`，成功后执行 `./setup.sh --docker start`。助手会重建镜像并准备缓存挂载，无需新增配置项；完整挂载说明见[部署教程](../deploy/README.md#npm-下载缓存)。
 
-根 `config.yaml` 生成根目录 `config.runtime.toml`，由助手只读挂入运行产物；不要求数据目录保存配置。代码供编译，成功产物挂 `/workspace`，数据挂 `/data`。选择主网络 `bridge` 和额外网络 `1panel-network` 时，脚本先接入全部网络再启动。更新 Dockerfile 后先构建一次镜像。
+运行程序直接读取 `CONFIG_FILE` 指定的 YAML，默认宿主项目根 `config.yaml`；助手将其所在目录可写挂到 `/config` 并传入容器路径。浏览器编辑和 setup 写回同一文件，不随新产物覆盖。代码供编译，成功产物挂 `/workspace`，数据挂 `/data`。选择主网络 `bridge` 和额外网络 `1panel-network` 时，脚本先接入全部网络再启动。更新 Dockerfile 后先构建一次镜像。
 
 此目录保留 Dockerfile、Compose、入口脚本和一次性工具镜像的构建文件。数据默认位于 `docker/data`，配置来自根目录 YAML。不要手动维护自动生成的 `.env` 和运行配置。
 
@@ -44,12 +44,14 @@ npm 安装默认启用 `--loglevel=verbose --timing`，实时显示详细日志�
 
 与 Docker 使用同一份根目录 `config.yaml`，无需重新抄写密钥。依赖安装、初始化、编译、启动与长期托管见[不使用 Docker](../deploy/README.md#二不使用-docker)。
 
-“仅保存”成功后保留界面。后端登记并导出节点后也保留界面，显示文件的宿主绝对路径。
+“仅保存”成功后保留界面。后端“登记并导出 Base64”后也保留界面，显示完整编码和前端导入命令。
 
-前端只使用一个端口（默认 `3000`），网页与 `/internal/*` 同步接口共用。导入同一宿主的后端连接文件：
+前端只使用一个端口（默认 `3000`），网页与 `/internal/*` 同步接口共用。粘贴后端输出的节点连接 Base64，无需共享文件：
 
 ```bash
-./setup.sh --docker --connection-file /opt/everunfold/Everunfold-Data/backend/connections/web-main.json
+./setup.sh --docker --connection-base64
 ```
 
-检测只访问后端内部地址；导入文件只读挂入临时配置容器。旧双端口版本升级需重建镜像和主体，更新后端接收 URL / 代理上游到前端唯一端口。
+命令提示粘贴 Base64，导入后检查配置再保存。检测只访问后端内部地址。旧双端口版本升级需重建镜像和主体，更新后端接收 URL / 代理上游到前端唯一端口。
+
+自定义配置路径：先 `export CONFIG_FILE=/宿主绝对目录/config.yaml`，再运行上述 setup 命令。默认只读取项目根 `config.yaml`，无 TOML 自动回退。直接创建容器时使用容器内路径，例如 `-e CONFIG_FILE=/data/config/config.yaml`；挂载其所在目录并确保前端运行用户可写。

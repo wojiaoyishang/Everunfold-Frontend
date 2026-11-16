@@ -91,7 +91,7 @@ deploy() {
     exit 1
   fi
   export NODE_ENV=production EVERUNFOLD_PROJECT_ROOT="$PWD" PLUGINS_DIRECTORY=/data/plugins
-  exec node --import tsx tools/plugins/run.mts start --port "${FRONTEND_PORT:-3000}"
+  exec node --import tsx tools/plugins/run.mts start
 }
 
 case "${1:-deploy}" in

@@ -1,3 +1,4 @@
+import { configurationEnvironment } from "../../core/config/deployment";
 import path from "node:path";
 import {
   connectionIdentity,
@@ -15,7 +16,10 @@ export function configuredSettingsHandler(root: string) {
     throw new Error(
       "Configure settings.source_epoch before starting the receiver",
     );
-  const token = process.env[config.backend.fastapiToNextjsTokenEnv ?? ""] ?? "";
+  const token =
+    configurationEnvironment(config)[
+      config.backend.fastapiToNextjsTokenEnv ?? ""
+    ] ?? "";
   const store = new FileSettingsStore(
     path.resolve(root, config.settings.directory),
     config.frontendNodeId,
@@ -42,7 +46,10 @@ export function configuredSettingsHandler(root: string) {
         const current = readConfigurationFiles(root);
         return (
           !!current.connections === !!connections &&
-          connectionIdentity(current.settings) === identity
+          connectionIdentity(current.settings) === identity &&
+          (configurationEnvironment(current.settings)[
+            current.settings.backend.fastapiToNextjsTokenEnv ?? ""
+          ] ?? "") === token
         );
       } catch {
         return false;

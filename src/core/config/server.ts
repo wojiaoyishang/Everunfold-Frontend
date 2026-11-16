@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { headers } from "next/headers";
 import { cache } from "react";
 
+import { bindEnvironment, configurationEnvironment } from "./deployment";
 import { ConfigurationError } from "./schema";
 import { contentDirectory, readConfigurationFiles } from "./files";
 import { browserBackendBaseUrl, browserProtocolHeader } from "./browser-api";
@@ -39,20 +40,27 @@ export function projectRoot(): string {
 
 export function readConfiguration() {
   const root = projectRoot();
-  const { settings, connections } = readConfigurationFiles(root);
-  return {
-    ...settings,
-    connections,
-    plugins: { directory: path.resolve(root, settings.plugins.directory) },
-    settings: {
-      ...settings.settings,
-      directory: path.resolve(root, settings.settings.directory),
+  const { settings, connections, file } = readConfigurationFiles(root);
+  return bindEnvironment(
+    {
+      ...settings,
+      file,
+      connections,
+      plugins: { directory: path.resolve(root, settings.plugins.directory) },
+      settings: {
+        ...settings.settings,
+        directory: path.resolve(root, settings.settings.directory),
+      },
+      cache: {
+        ...settings.cache,
+        directory: path.resolve(
+          root,
+          contentDirectory(settings, !!connections),
+        ),
+      },
     },
-    cache: {
-      ...settings.cache,
-      directory: path.resolve(root, contentDirectory(settings, !!connections)),
-    },
-  };
+    configurationEnvironment(settings),
+  );
 }
 
 export const readPageConfiguration = cache(readConfiguration);

@@ -31,7 +31,14 @@ class Context:
     def __init__(self, docker: Path, role: str, native: bool = False) -> None:
         self.docker, self.role, self.native = docker, role, native
         self.files = Files()
-        self.root_path = docker.parent / "config.yaml"
+        selected = os.environ.get("CONFIG_FILE", "config.yaml")
+        if not selected.strip():
+            raise ValueError("CONFIG_FILE 不能为空。")
+        self.root_path = (docker.parent / Path(selected).expanduser()).resolve()
+        if self.root_path.suffix.lower() not in {".yaml", ".yml"}:
+            raise ValueError(
+                "setup 的 CONFIG_FILE 必须指向部署 YAML；旧 TOML 请使用运行入口显式读取。"
+            )
         source = self.files.read(self.root_path)
         self.document = {}
         if source:
@@ -135,10 +142,23 @@ class Context:
         if not self.document:
             return
         config = copy.deepcopy(self.config)
+        if (
+            self.role == "frontend"
+            and "connection_profiles" in self.document
+            and not config.get("backend_node_file")
+        ):
+            profiles = self.document["connection_profiles"]
+            selected = copy.deepcopy(profiles["profiles"][profiles["active"]])
+            epoch = selected.pop("source_epoch", None)
+            config.update(selected)
+            if epoch:
+                config.setdefault("settings", {})["source_epoch"] = epoch
         for section, key, directory in self.directories():
             config.setdefault(section, {}).setdefault(key, self.runtime_path(directory))
         # Process ports have one source: root environment. Compose names are derived.
         mapping = dict(self.compose)
+        mapping["EVERUNFOLD_CONFIG_DIR"] = str(self.root_path.parent)
+        mapping["EVERUNFOLD_CONFIG_NAME"] = self.root_path.name
         port_names = (
             {"API_PORT": "BACKEND_API_PORT"}
             if self.role == "backend"
@@ -165,14 +185,6 @@ class Context:
         if any("\n" in v or "\r" in v for v in self.env.values()):
             raise ValueError("环境变量必须是单行值。")
         outputs[raw_env] = "".join(f"{key}={value}\n" for key, value in self.env.items())
-        if not self.native:
-            source = (
-                self.docker / self.compose.get(self.role.upper() + "_SOURCE_DIR", "..")
-            ).resolve()
-            if source != self.docker.parent:
-                source_config = source / "config.yaml"
-                self.files.read(source_config)
-                outputs[source_config] = self.files.read(self.root_path)
         self.files.write(outputs)
         for _, _, directory in self.directories():
             (self.data / directory).mkdir(parents=True, exist_ok=True)
@@ -181,7 +193,7 @@ class Context:
             if not self.native:
                 (self.data / "npm-cache").mkdir(parents=True, exist_ok=True)
 
-    def write(self, outputs: dict[Path, str]) -> None:
+    def write(self, outputs: dict[Path, str], *, connection_profiles: dict | None = None) -> None:
         document = copy.deepcopy(self.document)
         config = tomllib.loads(outputs.get(self.config_path, toml_text(self.config)))
         if self.role == "backend" and self.imported_from_data and config.get("frontend_nodes_file"):
@@ -219,7 +231,9 @@ class Context:
             }[derived]
             if variable in document["environment"]:
                 document["docker"].pop(derived, None)
-        if config.get("backend_node_file"):
+        if connection_profiles is not None:
+            document["connection_profiles"] = copy.deepcopy(connection_profiles)
+        elif config.get("backend_node_file"):
             profile = self.connection_profile()
             document["connection_profiles"] = (
                 tomllib.loads(outputs[profile])
@@ -234,7 +248,17 @@ class Context:
         outputs[self.root_path] = header + yaml.safe_dump(
             document, allow_unicode=True, sort_keys=False, default_flow_style=False
         )
-        self.files.write({self.root_path: outputs[self.root_path]})
+        self.root_path.parent.mkdir(parents=True, exist_ok=True)
+        lock_path = self.root_path.with_name(self.root_path.name + ".switch.lock")
+        try:
+            descriptor = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+        except FileExistsError:
+            raise ValueError("配置正在由其他页面或 setup 保存，请稍后重试。") from None
+        try:
+            self.files.write({self.root_path: outputs[self.root_path]})
+        finally:
+            os.close(descriptor)
+            lock_path.unlink()
         self.document = document
         self.env.clear()
         self.env.update(document["environment"])

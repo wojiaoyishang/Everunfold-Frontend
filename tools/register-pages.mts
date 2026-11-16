@@ -9,7 +9,10 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const { values } = parseArgs({
   options: {
     backend: { type: "string", default: "../Everunfold-Backend" },
-    config: { type: "string", default: "config.toml" },
+    config: {
+      type: "string",
+      default: process.env.CONFIG_FILE ?? "config.yaml",
+    },
     "node-id": { type: "string" },
     python: { type: "string" },
   },

@@ -2,6 +2,7 @@
 """Everunfold frontend deployment configuration."""
 
 import argparse
+import copy
 import json
 import os
 import re
@@ -23,6 +24,7 @@ from config_validation import (
     uuid_value,
     valid_port,
 )
+from connection_bundle import decode_bundle, validate_bundle
 from container_fields import add_container_fields
 from node_console_fields import add_node_console_fields
 
@@ -36,14 +38,17 @@ def configure(native: bool = False) -> Configuration:
     profile_path = None
     profiles = None
     connection = config
-    if config.get("backend_node_file"):
-        profile_path = ctx.connection_profile()
-        if not native:
-            config["backend_node_file"] = str(profile_path.relative_to(ctx.data))
-        profiles = ctx.read_profiles(profile_path)
+    if "connection_profiles" in ctx.document or config.get("backend_node_file"):
+        if config.get("backend_node_file"):
+            profile_path = ctx.connection_profile()
+            if not native:
+                config["backend_node_file"] = str(profile_path.relative_to(ctx.data))
+        profiles = ctx.read_profiles(profile_path or ctx.data / "backend-nodes.toml")
         connection = profiles.get("profiles", {}).get(profiles.get("active"))
         if not isinstance(connection, dict):
             raise ValueError("独立后端连接文件缺少有效的 active 配置。")
+        connection = copy.deepcopy(connection)
+        profiles["profiles"][profiles["active"]] = connection
         if "BACKEND_BASE_URL" in env:
             raise ValueError("独立连接文件启用时，请先移除 runtime.env 的 BACKEND_BASE_URL 覆盖。")
     backend = connection.get("backend", {})
@@ -64,6 +69,24 @@ def configure(native: bool = False) -> Configuration:
     def value(key: str) -> str:
         return by_key[key].value
 
+    def apply_bundle(bundle: dict) -> None:
+        incoming, outgoing = bundle["tokens"]["inbound"], bundle["tokens"]["outbound"]
+        proposed = {
+            "api": bundle["backend_public_url"],
+            "epoch": bundle["source_epoch"],
+            "node": bundle["node_id"],
+            "inbound": incoming["value"],
+            "outbound": outgoing["value"],
+        }
+        for key, text in proposed.items():
+            by_key[key].value = text
+        names[:] = [incoming["name"], outgoing["name"]]
+
+    def import_base64(source: str) -> str:
+        if source.strip():
+            apply_bundle(decode_bundle(source))
+        return ""  # Keep credentials in their fields, not a second encoded copy.
+
     def import_connection(source: str) -> str:
         if not source:
             return ""
@@ -73,7 +96,7 @@ def configure(native: bool = False) -> Configuration:
                 raise ValueError
             text = path.read_text()
             if text.lstrip().startswith("{"):
-                bundle = json.loads(text)
+                bundle = validate_bundle(json.loads(text))
                 incoming, outgoing = bundle["tokens"]["inbound"], bundle["tokens"]["outbound"]
                 proposed = {
                     "api": bundle["backend_public_url"],
@@ -121,8 +144,17 @@ def configure(native: bool = False) -> Configuration:
     container_mapping, container_errors, pending_network = add_container_fields(ctx, add, value)
 
     add(
+        "connection_base64",
+        "粘贴后端连接 Base64",
+        valid=lambda _: True,
+        resolve=import_base64,
+        secret=True,
+        empty="选中后粘贴导入；也可逐项填写",
+        hint="直接粘贴后端导出的完整编码，无需共享文件。导入后检查内部 URL 和来源 IP，再保存。",
+    )
+    add(
         "connection_file",
-        "导入后端连接文件",
+        "导入旧连接文件（可选）",
         valid=lambda _: True,
         resolve=import_connection,
         empty="选中后导入；也可逐项填写",
@@ -135,7 +167,7 @@ def configure(native: bool = False) -> Configuration:
         env.get("BACKEND_BASE_URL", connection.get("BACKEND_BASE_URL", "")),
         valid=public_url,
         resolve=lambda v: v.rstrip("/"),
-        hint="浏览器访问 API 的公开入口。导入连接文件可自动填写。",
+        hint="浏览器访问 API 的公开入口。粘贴 Base64 可自动填写。",
     )
     add(
         "site",
@@ -157,17 +189,22 @@ def configure(native: bool = False) -> Configuration:
     add(
         "node",
         "前端节点 ID",
-        env.get("FRONTEND_NODE_ID", config.get("FRONTEND_NODE_ID", "web-main")),
+        env.get(
+            "FRONTEND_NODE_ID",
+            connection.get("FRONTEND_NODE_ID", config.get("FRONTEND_NODE_ID", "web-main")),
+        ),
         valid=identifier,
         group="节点",
     )
     add(
         "epoch",
         "后端来源 UUID",
-        connection.get("source_epoch", "") if profile_path else settings.get("source_epoch", ""),
+        connection.get("source_epoch", "")
+        if profiles is not None
+        else settings.get("source_epoch", ""),
         valid=uuid_value,
         group="节点",
-        hint="由后端初始化数据库后导出，导入连接文件自动填写。",
+        hint="由后端初始化数据库后导出，粘贴 Base64 自动填写。",
     )
     add(
         "peers",
@@ -190,7 +227,7 @@ def configure(native: bool = False) -> Configuration:
             valid=token,
             secret=True,
             group="节点",
-            hint="从该节点的后端连接文件导入，可查看或修改。",
+            hint="粘贴该节点的后端连接 Base64 自动填写，可查看或修改。",
         )
     save_console = add_node_console_fields(ctx, add, value)
     add(
@@ -259,7 +296,10 @@ def configure(native: bool = False) -> Configuration:
 
     def save() -> None:
         config["PUBLIC_SITE_URL"] = value("site")
-        config["FRONTEND_NODE_ID"] = value("node")
+        if profiles is not None:
+            connection["FRONTEND_NODE_ID"] = value("node")
+        else:
+            config["FRONTEND_NODE_ID"] = value("node")
         connection["BACKEND_BASE_URL"] = value("api")
         backend_config = connection.setdefault("backend", {})
         if value("internal"):
@@ -273,7 +313,7 @@ def configure(native: bool = False) -> Configuration:
         ) = names
         local_settings = config.setdefault("settings", {})
         local_settings.setdefault("directory", ctx.runtime_path("settings"))
-        if profile_path:
+        if profiles is not None:
             connection["source_epoch"] = str(UUID(value("epoch")))
         else:
             local_settings["source_epoch"] = str(UUID(value("epoch")))
@@ -320,11 +360,20 @@ def configure(native: bool = False) -> Configuration:
         if profile_path and profiles is not None:
             outputs[profile_path] = toml_text(profiles)
         outputs[ctx.compose_path] = update_env(outputs[ctx.compose_path], container_mapping())
-        ctx.write(outputs)
+        ctx.write(outputs, connection_profiles=profiles)
 
     notice = ""
+    encoded = os.environ.pop("EVERUNFOLD_CONNECTION_BASE64", "")
     selected_file = os.environ.get("EVERUNFOLD_CONNECTION_FILE", "")
-    if selected_file:
+    if encoded and selected_file:
+        notice = "请仅选择 Base64 或旧连接文件中的一种导入方式。"
+    elif encoded:
+        try:
+            import_base64(encoded)
+            notice = "Base64 已导入，请检查内部 URL 和来源 IP，确认后保存。"
+        except ValueError as error:
+            notice = str(error)
+    elif selected_file:
         by_key["connection_file"].value = selected_file
         try:
             import_connection(selected_file)

@@ -1,6 +1,6 @@
+import { configurationEnvironment } from "@/core/config/deployment";
 import "server-only";
-import { createHash, randomBytes } from "node:crypto";
-import { open, readFile, rename, unlink } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { parse, stringify } from "smol-toml";
 import { connectionIdentity } from "@/core/config/files";
 import { readConfiguration } from "@/core/config/server";
@@ -11,14 +11,17 @@ import { FileContentStore } from "@/server/content/store";
 import { FileSettingsStore } from "@/server/settings/store";
 import { readReplicas } from "@/server/settings/receiver";
 import { proofChallenge } from "./access";
+import { activateYamlProfile } from "./connections";
+import { NodeConfigConflict, replaceConfiguration } from "./config-file";
+export { NodeConfigConflict } from "./config-file";
 
 type Config = ReturnType<typeof readConfiguration>;
 
 export function localRevision(config: Config): string {
-  return (
-    config.connections?.revision ??
-    createHash("sha256").update(connectionIdentity(config)).digest("hex")
-  );
+  return config.file.format === "yaml"
+    ? config.file.revision
+    : (config.connections?.revision ??
+        createHash("sha256").update(connectionIdentity(config)).digest("hex"));
 }
 
 export async function inspectNode(config: Config): Promise<LocalNode> {
@@ -57,7 +60,10 @@ export async function inspectNode(config: Config): Promise<LocalNode> {
 async function probeLocalReceiver(
   config: Config,
 ): Promise<LocalNode["receiver"]> {
-  const token = process.env[config.backend.fastapiToNextjsTokenEnv ?? ""] ?? "";
+  const token =
+    configurationEnvironment(config)[
+      config.backend.fastapiToNextjsTokenEnv ?? ""
+    ] ?? "";
   if (token.length < 32) return "not_configured";
   const configuredHost = config.listener.host;
   const host = configuredHost.startsWith("127.")
@@ -93,8 +99,6 @@ async function probeLocalReceiver(
   }
 }
 
-export class NodeConfigConflict extends Error {}
-
 export async function activateProfile(
   config: Config,
   profile: string,
@@ -103,43 +107,24 @@ export async function activateProfile(
   const connections = config.connections;
   if (!connections || !connections.profiles.has(profile))
     throw new NodeConfigConflict();
-  const { filename } = connections;
-  const lockName = filename + ".switch.lock";
-  const lock = await open(lockName, "wx", 0o600).catch(
-    (error: NodeJS.ErrnoException) => {
-      if (error.code === "EEXIST") throw new NodeConfigConflict();
-      throw error;
-    },
-  );
-  const staging = filename + ".staging-" + randomBytes(8).toString("hex");
-  try {
+  if (
+    config.file.format === "yaml" &&
+    connections.filename === config.file.filename
+  )
+    return activateYamlProfile(config, profile, authorize);
+  const { filename, revision } = connections;
+  await replaceConfiguration(filename, revision, async (before) => {
     const current = readConfiguration();
     if (
       current.connections?.filename !== filename ||
-      current.connections.revision !== connections.revision ||
+      current.connections.revision !== revision ||
       current.nodesMonitor.origin !== config.nodesMonitor.origin ||
       connectionIdentity(current) !== connectionIdentity(config)
     )
       throw new NodeConfigConflict();
     await authorize(current);
-    const before = await readFile(filename, "utf8");
-    if (
-      createHash("sha256").update(before).digest("hex") !== connections.revision
-    )
-      throw new NodeConfigConflict();
-    if (profile === current.connections.active) return;
+    if (profile === current.connections.active) return before;
     const parsed = configObject(parse(before), "后端连接");
-    const contents = stringify({ ...parsed, active: profile });
-    const output = await open(staging, "wx", 0o600);
-    try {
-      await output.writeFile(contents, "utf8");
-      await output.sync();
-    } finally {
-      await output.close();
-    }
-    await rename(staging, filename);
-  } finally {
-    await lock.close();
-    await Promise.all([unlink(staging).catch(() => {}), unlink(lockName)]);
-  }
+    return stringify({ ...parsed, active: profile });
+  });
 }

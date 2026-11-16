@@ -2,7 +2,7 @@
   "name": "everunfold-frontend",
   "version": "0.1.0",
   "private": true,
-  "description": "Everunfold \u7684\u72ec\u7acb Next.js \u524d\u7aef\u9879\u76ee",
+  "description": "Everunfold 的独立 Next.js 前端项目",
   "engines": {
     "node": ">=22.15.1 <23",
     "npm": ">=10.9.2 <11"
@@ -84,6 +84,7 @@
     "tsx": "4.23.15",
     "y-codemirror.next": "0.3.6",
     "y-protocols": "1.0.7",
+    "yaml": "2.9.1",
     "yjs": "13.6.33"
   },
   "devDependencies": {

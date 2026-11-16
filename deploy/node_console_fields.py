@@ -31,14 +31,14 @@ def add_node_console_fields(ctx: Context, add, value):
         valid=lambda v: v in {"0", "1"},
         group="节点控制台",
         hint=(
-            "/admin/_nodes，使用前端发布 URL；在线时验证后端管理员，离线时使用本机密码。"
+            "/admin/_nodes，使用前端发布 URL；本机密码管理本机连接，全站状态需后端管理员验证。"
             if frontend
             else "/_nodes，使用后端发布 URL；独立密码登录，不使用管理员账户密码。"
         ),
     )
     add(
         "monitor_password",
-        "节点控制台密码" if not frontend else "节点控制台离线密码",
+        "节点控制台密码" if not frontend else "节点控制台本机密码",
         password,
         secret=True,
         valid=lambda v: 12 <= len(v) <= 1024 or (not v and bool(password_hash)),

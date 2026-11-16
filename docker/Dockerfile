@@ -17,17 +17,16 @@ RUN apt-get update \
     && chmod 1777 /build
 COPY --chmod=755 docker/entrypoint.sh /usr/local/bin/everunfold-frontend
 COPY deploy/check.mjs /usr/local/lib/everunfold-check.mjs
+COPY deploy/healthcheck.mjs /usr/local/lib/everunfold-healthcheck.mjs
 
 ENV NEXT_TELEMETRY_DISABLED=1 \
-    CONFIG_FILE=/workspace/config.runtime.toml \
-    FRONTEND_BUILD_WORKERS=2 \
-    FRONTEND_HOST=0.0.0.0 \
-    FRONTEND_PORT=3000
+    CONFIG_FILE=/workspace/config.yaml \
+    FRONTEND_BUILD_WORKERS=2
 
 USER node
 WORKDIR /workspace
 EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=5s --start-period=30s \
-    CMD ["node", "-e", "let host = process.env.FRONTEND_HOST || '0.0.0.0'; host = ({'0.0.0.0': '127.0.0.1', '::': '::1'})[host] || host; if (host.includes(':')) host = '[' + host + ']'; fetch('http://' + host + ':' + process.env.FRONTEND_PORT + '/health/ready', {signal: AbortSignal.timeout(4000)}).then(r => { if (!r.ok) process.exitCode = 1 }, () => { process.exitCode = 1 })"]
+    CMD ["node", "--import", "tsx", "/usr/local/lib/everunfold-healthcheck.mjs"]
 ENTRYPOINT ["/usr/local/bin/everunfold-frontend"]
 CMD ["deploy"]

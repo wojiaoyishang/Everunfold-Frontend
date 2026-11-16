@@ -5,8 +5,9 @@ import contextlib
 import io
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
-from config_copy import CopyText, ResultsLog, frontend_import_command
+from config_copy import CopyText, ResultsLog, frontend_base64_import_command
 from config_model import Check, Configuration, Field
+from connection_bundle import decode_bundle
 from rich.text import Text
 from textual import work
 from textual.app import App, ComposeResult
@@ -259,6 +260,7 @@ class SetupApp(App[int]):
         self.saved = False
         self.exporting = False
         self.import_command = ""
+        self.connection_base64 = ""
         self.theme = "textual-dark"
 
     def compose(self) -> ComposeResult:
@@ -290,7 +292,7 @@ class SetupApp(App[int]):
                     yield Button("初始化新库", id="init-db")
                 with Horizontal(classes="buttons"):
                     yield Button("升级迁移", id="migrate")
-                    yield Button("登记并导出节点", id="export-node")
+                    yield Button("登记并导出 Base64", id="export-node")
         yield Footer()
 
     def on_mount(self) -> None:
@@ -402,7 +404,8 @@ class SetupApp(App[int]):
         log = self.query_one(ResultsLog)
         text = "\n".join(log.transcript)
         command = self.import_command if self.import_command in text else ""
-        self.push_screen(CopyText("执行结果", text, command))
+        encoded = self.connection_base64 if self.connection_base64 in text else ""
+        self.push_screen(CopyText("执行结果", text, command, encoded))
 
     def action_test(self) -> None:
         if not self.exporting:
@@ -412,6 +415,7 @@ class SetupApp(App[int]):
     async def test_connections(self) -> None:
         self.testing = True
         self.import_command = ""
+        self.connection_base64 = ""
         log = self.query_one("#checks", RichLog)
         log.clear()
         log.write("正在从当前运行环境检测连接…")
@@ -458,7 +462,7 @@ class SetupApp(App[int]):
                     "已有库不重置，旧版本仍需升级迁移。继续？"
                 ),
                 "migrate": "保存配置，并执行数据库迁移？请先完成数据库备份。",
-                "export-node": "保存配置，登记所选节点的内部连接并导出配对文件？",
+                "export-node": "保存配置，登记所选节点的内部连接并输出连接 Base64？",
             }[action]
             if not await self.push_screen_wait(Confirm(description)):
                 return
@@ -481,6 +485,7 @@ class SetupApp(App[int]):
         if action == "export-node":
             self.exporting = True
             self.import_command = ""
+            self.connection_base64 = ""
             log = self.query_one("#checks", RichLog)
             log.write("配置已保存，正在登记并导出节点…")
             buttons = list(self.query(Button))
@@ -489,7 +494,8 @@ class SetupApp(App[int]):
             try:
                 if self.config.export_node is None:
                     raise ValueError("请通过项目根目录的 ./setup.sh 启动助手。")
-                path = await self.config.export_node()
+                encoded = await self.config.export_node()
+                decode_bundle(encoded)
             except (OSError, ValueError) as error:
                 message = error.strerror if isinstance(error, OSError) else str(error)
                 log.clear()
@@ -497,11 +503,13 @@ class SetupApp(App[int]):
                 self.notify("导出失败，请查看执行结果。", severity="error")
             else:
                 log.clear()
-                log.write(Text(f"导出成功，文件绝对路径：\n{path}", style="green"))
-                self.import_command = frontend_import_command(path, self.config.native)
+                self.connection_base64 = encoded
+                log.write(Text("导出成功，节点连接 Base64：\n" + encoded, style="green"))
+                self.import_command = frontend_base64_import_command(self.config.native)
                 log.write("在前端项目根目录执行：\n" + self.import_command)
-                log.write("按 F4 查看并复制；跨主机部署需先传输连接文件，并替换命令中的路径。")
-                self.notify("节点连接文件已导出，按 F4 复制前端导入命令。", title="导出成功")
+                log.write("按提示粘贴编码；也可在前端节点页导入。编码包含节点令牌，请按密钥保管。")
+                log.write("登记连接后，还需在后端 /_nodes 添加或启用该节点的公开地址。")
+                self.notify("节点连接 Base64 已生成，可直接复制。", title="导出成功")
             finally:
                 self.exporting = False
                 for button in buttons:

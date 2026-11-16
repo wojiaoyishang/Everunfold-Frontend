@@ -1,32 +1,21 @@
-# 前端本机节点诊断
+# 前端本机节点配置
 
-`/admin/_nodes` 默认关闭。页面和本机诊断接口在关闭时返回 404。公开页面、节点上报和同步接收器仍按本机服务端配置运行。
+`/admin/_nodes` 默认关闭。在项目根运行 `./setup.sh`，启用“节点控制台”并设置本机配置密码和会话密钥。入口跟随 `PUBLIC_SITE_URL`；生产使用 HTTPS。全站状态仍须后端管理员，本机配置密码可在后端在线、离线、403/500 或网络失败时使用。
 
-## 手工配置连接
+## 配置位置
 
-从 [backend-node.example.toml](../../backend-node.example.toml) 复制一份 `backend-node.toml`，在前端 `config.toml` 的根级设置 `backend_node_file = "./backend-node.toml"`。相对路径以主配置所在目录为准。将原有 `BACKEND_BASE_URL`、`[backend]` 和 `settings.source_epoch` 移入选定的连接条目。如果由环境变量提供 `BACKEND_BASE_URL`，切换为独立文件前移除该环境变量。主配置继续维护 `FRONTEND_NODE_ID`、磁盘目录和接收器监听参数。原有内联配置仍可使用。
+外部环境变量 `CONFIG_FILE` 指定唯一部署文件，默认项目根 `config.yaml`。相对路径基于项目根，缺失即报错，不回退查找。setup、浏览器编辑、Node 接收器和上报服务共用此 YAML。Docker 助手显式挂载其所在目录到 `/config`，前端可写；原生可通过 `export CONFIG_FILE=/绝对目录/config.yaml` 选择位置。页面只在本机密码验证后显示文件的绝对路径。
 
-每个后端填写其实际来源 UUID。可从已鉴权的后端设置响应读取 `source_epoch`。在该后端登记相同的前端节点 ID、接收地址和双向 Token 引用。实际 Token 分别注入服务环境。跨设备内部 API 地址使用 HTTPS，接收器监听与白名单按实际来源部署。公开 API 地址和浏览器会话仍由后端的 HTTPS、Origin、CORS 与 Cookie 配置控制。
+## 新增与修改
 
-独立连接文件的 `active` 决定当前使用哪个后端。切换后重启独立接收器，然后在对应后端为该节点重新同步。公开内容按来源保存在缓存目录的 `sources/<source_epoch>` 下。首次采用独立文件时也要重发公开内容。该来源尚无有效副本时，公开页面会返回 503。
+解锁后选择已有连接或“新增连接…”，填写节点 ID、后端发布 URL、内部 URL、来源 UUID、允许后端调用前端的 IP/CIDR 和双向令牌。公开地址与内部地址分开；内网可用容器别名及 HTTP。令牌须与后端导出一致，原文不从接口回显，编辑时留空保留。
 
-## 开启诊断
+“保存并使用”写回 YAML 的 `connection_profiles` 和 `environment`；最多 16 个连接，保留其他条目。成功后页面保留并显示路径，重启前端进程或容器加载接收身份，无需重新编译。切换来源时内容缓存按 `sources/<source_epoch>` 隔离；首次从内联转换后从后端重新同步。接收器发现身份或凭据变化后拒绝处理，直到重启。
 
-在前端主配置添加以下内容，并为 Next.js 进程注入独立签名密钥。
+保存使用 0600 临时文件、独占锁、修订检查和原子替换。只读挂载、UID/GID 无权限、单文件 bind mount、磁盘空间不足或并发修改会显示具体原因。配置目录必须可写，不要求源码目录可写。setup 也使用相同锁和文件；异常遗留 `.switch.lock` 时，确认没有写入进程后再移除。
 
-```toml
-[nodes_monitor]
-enabled = true
-origin = "https://blog.example.com"
-session_secret_env = "EVERUNFOLD_FRONTEND_NODES_SESSION_SECRET"
-```
+## 旧 TOML
 
-运行 `npm run nodes:password`，在终端输入自己设置的密码，将输出的 `password_hash` 加到 `[nodes_monitor]`。使用 `node -e 'console.log(require("node:crypto").randomBytes(32).toString("base64url"))'` 生成会话签名密钥。前端各副本若服务同一个本机运维入口，须使用相同的本地配置及签名密钥。多个设备各自设置密码和密钥。只需在线诊断时可省略离线密码和密钥。
+显式 `CONFIG_FILE=/绝对路径/config.toml` 可继续读取旧配置及 `backend_node_file`，已有切换入口保留。浏览器新增/编辑要求部署 YAML：先由 setup 导入并保存，再切换 `CONFIG_FILE`，重建新版前端产物并启动。不要修改派生的 `config.runtime.toml`。
 
-生产入口使用 HTTPS，并由受信代理保持正确的 Host 和协议。HTTP 调试入口只对本机回环开放。配置 Origin 必须与浏览器实际访问一致。前端直接访问公开 FastAPI 时，仍需配置该后端的允许来源及跨源 Cookie，建议使用同站 HTTPS 域名。
-
-容器开发可在活动的 `[profiles.<id>]` 配置 `browser_loopback_origin = "http://127.0.0.1:3000"`，并使用同一地址配置 `nodes_monitor.origin`。后端 `cors.allowed_origins` 加入同一个精确 Origin。经此地址打开页面时，登录、账号中心、后台和节点诊断的浏览器请求都走本机 Nginx 的 `/v1/*`。其他访问地址继续使用活动连接的 `BACKEND_BASE_URL`。服务端探测和上报仍使用该连接的 `[backend].base_url`。
-
-后端可达时，只有站点管理员可以读全站状态和修改本机活动连接。本机授权还要求此节点已经在后端启用，双向凭据有效，并且来源 UUID 匹配。后端无法连接时，本机密码只授权查看本机副本和切换预先登记的连接。页面每 15 秒重新检查，后端恢复后回到管理员鉴权。关闭入口后可以继续在文件中手动选择活动连接。
-
-页面只修改 `active`。新增或修改连接、地址、IP 白名单和凭据引用仍在前端服务器手工操作。页面保存需要该文件所在目录可写，建议使用独立的部署配置目录，避免同时手工编辑。服务异常退出若留下 `.switch.lock`，在确认该节点已无写入进程后移除锁文件即可继续。
+后端节点连接通过 Base64 交接。`connection-bundle.ts` 在本机编辑器中有界解码并校验协议版本、地址、UUID 与双向令牌，只填入表单；保存复用原有鉴权、修订锁和原子写入。编码不放进 URL 或日志，不影响容器内部地址/来源列表。setup 支持相同格式和旧 JSON 兼容导入。

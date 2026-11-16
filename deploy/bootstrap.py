@@ -79,7 +79,7 @@ def paths() -> None:
         uid + ":" + gid,
         artifact,
         host,
-        context.config_path,
+        context.root_path,
         alias,
         gateway,
         peers,
@@ -140,29 +140,12 @@ def activate(release: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "action", choices=("paths", "activate", "render", "connection-path", "import-command")
-    )
+    parser.add_argument("action", choices=("paths", "activate", "render"))
     parser.add_argument("release", nargs="?")
     args = parser.parse_args()
     try:
         if args.action == "paths":
             paths()
-        elif args.action in {"connection-path", "import-command"}:
-            from config_validation import identifier
-
-            context = Context(DOCKER, ROLE)
-            node = context.meta.get("node", "")
-            if ROLE != "backend" or not identifier(node):
-                raise ValueError("节点 ID 无效。")
-            path = str((context.data / "connections" / (node + ".json")).resolve())
-            if args.action == "import-command":
-                from config_copy import frontend_import_command
-
-                print("在前端项目根目录执行（跨主机请先传输文件并替换路径）：")
-                print(frontend_import_command(path, False))
-            else:
-                print(path)
         elif args.action == "render":
             context = Context(DOCKER, ROLE)
             if not context.document:

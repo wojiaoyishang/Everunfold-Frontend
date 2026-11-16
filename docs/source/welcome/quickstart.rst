@@ -7,7 +7,7 @@
 
 助手先显示配置总览，支持顺序配置、按项修改、彩色状态和连接检测。
 新站点密钥自动生成且可编辑；已有实例保留原值。
-后端导出节点连接 JSON，前端导入即可取得节点 ID、来源 UUID 和双向令牌。
+后端导出节点连接 Base64，前端导入即可取得节点 ID、来源 UUID 和双向令牌。
 
 一、Docker 从零构建
 -------------------
@@ -54,10 +54,10 @@ API 默认绑定容器 ``0.0.0.0:8001``，宿主仅映射 ``127.0.0.1:8001``。
 ~~~~~~~~~~~~~~
 
 1. 在后端助手填写节点 ID 和接收器 URL，例如 ``web-main``、
-   ``https://blog.example.com``，选择“登记并导出节点”。
-   导出成功后保留界面，直接显示文件绝对路径。该文件含节点令牌。
-2. 在前端根目录运行 ``./setup.sh --docker --connection-file 后端导出文件绝对路径``，
-   只读挂载并导入该文件，填写本站发布 URL 和后端内部地址。
+   ``https://blog.example.com``，选择“登记并导出 Base64”。
+   导出成功后保留界面，显示完整 Base64，可单独复制编码及导入命令。
+2. 在前端根目录运行 ``./setup.sh --docker --connection-base64``，
+   按提示粘贴编码，填写本站发布 URL 和后端内部地址，再保存。
    容器内的 ``127.0.0.1`` 指当前容器；内部地址支持容器网络 HTTP/HTTPS。
 3. 点击“检测连接”，选择“构建并启动”。宿主自动构建镜像，再用一次性编译容器
    编译主体和插件，实时输出日志。成功后选择新的主体产物并启动 Web、接收器。
@@ -79,9 +79,9 @@ API 默认绑定容器 ``0.0.0.0:8001``，宿主仅映射 ``127.0.0.1:8001``。
 
 ``build`` 显式构建；``start`` 和容器重启不会重新编译。
 后端挂载源码到只读 ``/workspace``、数据到 ``/data``；
-后端从 ``/workspace/config.yaml`` 读配置，不需要 ``/data/config.toml``。
+两端助手将所选配置所在目录挂到 ``/config``，通过 ``CONFIG_FILE`` 明确指定容器路径。
 前端部署时把已完成的产物挂到 ``/workspace``、持久数据挂到 ``/data``；
-助手将根 YAML 派生的 ``config.runtime.toml`` 只读挂到 ``/workspace/config.runtime.toml``。
+前端配置目录可写，后端只读；未显式选择宿主路径时使用各项目根 ``config.yaml``。
 完整的 HTTPS、备份、升级及插件步骤见
 `后端部署教程 <https://github.com/wojiaoyishang/Everunfold-Backend/blob/main/deploy/README.md>`__ 和
 `前端部署教程 <https://github.com/wojiaoyishang/Everunfold-Frontend/blob/main/deploy/README.md>`__。
@@ -111,18 +111,18 @@ API 默认绑定容器 ``0.0.0.0:8001``，宿主仅映射 ``127.0.0.1:8001``。
 启动 API、Worker、Scheduler。若关闭开关，先手动 ``init-db``；初始化按钮保存过配置仍可使用。
 Ctrl+C 统一停止。已有实例应走备份及迁移流程，不执行空库初始化。
 
-在后端助手填写节点 ID 和本机接收器 ``http://127.0.0.1:3000``，导出连接文件：
+在后端助手填写节点 ID 和本机接收器 ``http://127.0.0.1:3000``，输出节点连接 Base64：
 
 .. code-block:: bash
 
    ./setup.sh --native export-node
 
-文件位于 ``var/instance/connections/节点ID.json``，无需手工查询来源 UUID。
+终端直接显示 Base64，无需连接文件或手工查询来源 UUID。
 
 前端
 ~~~~
 
-在前端仓库根目录运行 ``./setup.sh --native``，导入上述文件的绝对路径，
+在前端仓库根目录运行 ``./setup.sh --native --connection-base64``，按提示粘贴编码，
 本站 URL 使用 ``http://127.0.0.1:3000``。选择“构建并启动”，或保存后执行：
 
 .. code-block:: bash

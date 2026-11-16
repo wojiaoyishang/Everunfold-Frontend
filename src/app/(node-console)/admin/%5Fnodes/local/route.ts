@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readConfiguration } from "@/core/config/server";
+import { ConfigurationError } from "@/core/config/schema";
+import { listConnections, saveConnection } from "@/server/nodes/connections";
 import { browserBackendBaseUrl } from "@/core/config/browser-api";
 import { nodesConsolePath } from "@/core/auth/routes";
 import type { NodeProof, NodeProofRequest } from "@/core/contracts/settings";
@@ -58,12 +60,10 @@ export async function GET(request: NextRequest) {
   const config = readConfiguration();
   if (!allowedHost(request, config)) return notFound();
   const mode = await backendMode(config);
-  const offline = mode === "offline";
   const gate: LocalGate = {
     mode,
-    passwordConfigured: offline && offlineConfigured(config),
-    unlocked:
-      offline && offlineSession(config, request.cookies.get(cookieName)?.value),
+    passwordConfigured: offlineConfigured(config),
+    unlocked: offlineSession(config, request.cookies.get(cookieName)?.value),
   };
   if (mode === "online") {
     gate.backendBaseUrl = browserBackendBaseUrl(
@@ -79,10 +79,7 @@ export async function GET(request: NextRequest) {
       revision: gate.revision,
     });
   }
-  const response = reply(gate);
-  return !offline && request.cookies.has(cookieName)
-    ? setSession(response, config, "")
-    : response;
+  return reply(gate);
 }
 
 async function readInput(
@@ -103,7 +100,7 @@ async function readInput(
       const chunk = await reader.read();
       if (chunk.done) break;
       length += chunk.value.length;
-      if (length > 4096) throw new Error("body too large");
+      if (length > 16384) throw new Error("body too large");
       input += decoder.decode(chunk.value, { stream: true });
     }
     if (expired) throw new Error("request timed out");
@@ -133,9 +130,8 @@ export async function POST(request: NextRequest) {
   if (!input) return reply({ error: "请求无效" }, 400);
   if (input.action === "logout")
     return setSession(reply({ ok: true }), config, "");
-  const mode = await backendMode(config);
   if (input.action === "login") {
-    if (mode !== "offline" || !offlineConfigured(config))
+    if (!offlineConfigured(config))
       return reply({ error: "本机密码入口不可用" }, 403);
     if (
       typeof input.password !== "string" ||
@@ -151,13 +147,17 @@ export async function POST(request: NextRequest) {
   }
 
   const action = input.action;
-  if (action !== "inspect" && action !== "switch")
+  if (
+    !["inspect", "switch", "connections", "save-connection"].includes(
+      String(action),
+    )
+  )
     return reply({ error: "操作无效" }, 422);
   const revision = localRevision(config);
   const profile =
-    action === "inspect"
-      ? (config.connections?.active ?? "inline")
-      : input.profile;
+    action === "switch"
+      ? input.profile
+      : (config.connections?.active ?? "inline");
   if (
     typeof profile !== "string" ||
     !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(profile) ||
@@ -166,18 +166,19 @@ export async function POST(request: NextRequest) {
     return reply({ error: "本机配置已变化，请刷新后重试" }, 409);
   const proofRequest: NodeProofRequest = {
     node_id: config.frontendNodeId,
-    intent: action,
+    intent: action === "switch" ? "switch" : "inspect",
     profile,
     revision,
     challenge: typeof input.challenge === "string" ? input.challenge : "",
   };
   const proof = input.proof as NodeProof | undefined;
   const rawCookie = request.cookies.get(cookieName)?.value;
-  function authorize(current: Config, currentMode: typeof mode) {
+  function authorize(current: Config) {
+    const editor = action === "connections" || action === "save-connection";
     if (
       allowedHost(request, current) &&
-      ((currentMode === "offline" && offlineSession(current, rawCookie)) ||
-        (currentMode === "online" &&
+      (offlineSession(current, rawCookie) ||
+        (!editor &&
           proof &&
           typeof proof.signature === "string" &&
           acceptsProof(current, proofRequest, proof)))
@@ -186,17 +187,65 @@ export async function POST(request: NextRequest) {
     throw new LocalAccessError();
   }
   try {
-    authorize(config, mode);
+    authorize(config);
     if (action === "inspect") return reply(await inspectNode(config));
+    if (action === "connections") return reply(listConnections(config));
+    if (action === "save-connection") {
+      const result = await saveConnection(
+        config,
+        input.connection,
+        input.revision,
+        input.create === true,
+        async (fresh) => authorize(fresh),
+      );
+      const fresh = readConfiguration();
+      return setSession(reply(result), fresh, issueOfflineSession(fresh));
+    }
     await activateProfile(config, profile, async (current) =>
-      authorize(current, await backendMode(current)),
+      authorize(current),
     );
     return setSession(reply({ ok: true }), config, "");
   } catch (error) {
+    if (error instanceof ConfigurationError)
+      return reply({ error: error.message }, 422);
     if (error instanceof LocalAccessError)
       return reply({ error: "请先通过当前连接的身份验证" }, 403);
     if (error instanceof NodeConfigConflict)
       return reply({ error: "本机配置已变化，请刷新后重试" }, 409);
+    const storageCode = (error as NodeJS.ErrnoException)?.code;
+    if (storageCode === "EROFS")
+      return reply(
+        {
+          error:
+            "CONFIG_FILE 所在目录是只读挂载，无法保存。请将配置移至可写目录（如 /data/config），同时修改 CONFIG_FILE 和 setup 的路径。",
+        },
+        503,
+      );
+    if (storageCode === "EACCES" || storageCode === "EPERM")
+      return reply(
+        {
+          error:
+            "配置目录没有写入权限。请检查容器运行用户的 UID/GID 与目录权限；保存需要创建临时文件并重命名。",
+        },
+        503,
+      );
+    if (storageCode === "ENOENT")
+      return reply(
+        {
+          error: "配置文件或目录不存在，请检查 CONFIG_FILE 和目录挂载。",
+        },
+        503,
+      );
+    if (storageCode === "EBUSY")
+      return reply(
+        {
+          error:
+            "配置文件被单独 bind mount，无法原子替换。请挂载配置所在目录，并让 CONFIG_FILE 指向该目录中的文件。",
+        },
+        503,
+      );
+    if (storageCode === "ENOSPC" || storageCode === "EDQUOT")
+      return reply({ error: "配置目录的磁盘空间或配额不足，未保存。" }, 503);
     return reply({ error: "无法读取或保存本机配置" }, 503);
   }
 }

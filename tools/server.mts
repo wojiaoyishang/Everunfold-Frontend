@@ -1,7 +1,7 @@
 import { createServer } from "node:http";
 import { parseArgs } from "node:util";
 import next from "next";
-import { listenerConfiguration } from "../src/core/config/schema";
+import { readConfigurationFiles } from "../src/core/config/files";
 import { frontendHandler } from "../src/server/http";
 import { configuredSettingsHandler } from "../src/server/settings/runtime";
 
@@ -14,8 +14,10 @@ const { values } = parseArgs({
 });
 if (values.port !== undefined) process.env.FRONTEND_PORT = values.port;
 if (values.hostname !== undefined) process.env.FRONTEND_HOST = values.hostname;
-const { host, port } = listenerConfiguration(process.env);
 const root = process.env.EVERUNFOLD_PROJECT_ROOT ?? process.cwd();
+const { settings: config, file } = readConfigurationFiles(root);
+const { host, port } = config.listener;
+console.info("Everunfold Frontend · CONFIG_FILE=" + file.filename);
 const server = createServer({
   maxHeaderSize: 8192,
   requestTimeout: 10000,

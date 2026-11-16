@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[显式配置路径与浏览器连接编辑](decisions/0162-explicit-config-and-local-connections.md)说明 CONFIG_FILE、可写配置目录、本机密码入口、保存与重启，以及后端拒绝日志和各进程等级。
+
 [同步诊断日志与节点控制台配置](decisions/0161-sync-diagnostics-and-console-setup.md)说明 Node.js 失败原因、发布 URL 的优先级及两端 setup 的控制台开关和密码。
 
 [独立插件契约准备与 npm 下载缓存](decisions/0160-plugin-build-preparation-and-npm-cache.md)说明插件编译缺失契约的修复、临时构建容器之间的缓存挂载及升级方式。
@@ -56,7 +58,7 @@
 
 [节点状态与维护](development/cache-management.md)和[ADR0131](decisions/0131-node-cache-management-and-backend-events.md)说明发布回执、前端磁盘状态、单节点维护及后端插件通知。
 
-[前端本机节点诊断](development/nodes-monitor.md)说明 `/admin/_nodes`、独立连接文件、离线密码与切换步骤。
+[前端本机节点诊断](development/nodes-monitor.md)说明 `/admin/_nodes`、YAML 本机连接、独立配置密码与 Base64 导入。
 
 [顶栏标识](decisions/0128-header-branding.md)说明展示模式、默认值和兼容行为。
 

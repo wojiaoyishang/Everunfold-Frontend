@@ -22,3 +22,25 @@ export interface LocalNode {
     "public_settings" | "cache_policy" | "public_content"
   >;
 }
+
+export interface ConnectionDraft {
+  id: string;
+  nodeId: string;
+  publicUrl: string;
+  internalUrl: string;
+  sourceEpoch: string;
+  allowedPeerIps: string[];
+  inboundToken: string;
+  outboundToken: string;
+}
+
+export interface ConnectionList {
+  filename: string;
+  revision: string;
+  active: string;
+  editable: boolean;
+  profiles: (Omit<ConnectionDraft, "inboundToken" | "outboundToken"> & {
+    hasInboundToken: boolean;
+    hasOutboundToken: boolean;
+  })[];
+}

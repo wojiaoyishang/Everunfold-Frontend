@@ -13,6 +13,7 @@ import { FormField } from "@/themes/argon/components/ui/form-field";
 import { Select } from "@/themes/argon/components/ui/select";
 import { ConfirmDialog } from "@/themes/argon/components/ui/confirm-dialog";
 import { RouteLink } from "@/themes/argon/components/ui/route-link";
+import { ConnectionEditor } from "./connections";
 import { FleetStatus, LocalNodeStatus } from "./status";
 import styles from "./console.module.css";
 
@@ -40,7 +41,10 @@ export function NodeConsole() {
     }
   }
 
-  const full = view.mode === "online" || view.mode === "offline";
+  const full = view.mode === "online" || view.mode === "local";
+  const localLogin =
+    (view.mode === "locked" || view.mode === "online") &&
+    view.passwordConfigured;
   return (
     <main
       className={`admin-root ${full ? styles.page : styles.center}`}
@@ -66,7 +70,7 @@ export function NodeConsole() {
                 返回后台
               </RouteLink>
             )}
-            {view.mode === "offline" && (
+            {view.mode === "local" && (
               <Button
                 className="admin-button"
                 onClick={() => {
@@ -88,7 +92,7 @@ export function NodeConsole() {
         {view.mode === "unavailable" && (
           <p role="status">暂时无法确认后端状态。请检查连接后刷新。</p>
         )}
-        {view.mode === "sign-in" && (
+        {view.mode === "locked" && view.backendMode === "sign-in" && (
           <div className={styles.panel}>
             <p>后端已连接。请使用站点管理员账号登录。</p>
             <RouteLink
@@ -99,15 +103,21 @@ export function NodeConsole() {
             </RouteLink>
           </div>
         )}
-        {view.mode === "forbidden" && (
-          <p role="status">此页面需要站点管理员权限。</p>
+        {view.mode === "locked" && view.backendMode === "forbidden" && (
+          <p role="status">全站状态需要管理员权限；本机配置可使用下方密码。</p>
         )}
-        {view.mode === "locked" && (
+        {(view.mode === "locked" || localLogin) && (
           <div className={styles.panel}>
-            <p role="status">后端离线</p>
-            {view.passwordConfigured ? (
+            <p role="status">本机连接配置</p>
+            {view.mode === "locked" &&
+              ["offline", "unavailable"].includes(view.backendMode) && (
+                <p>
+                  后端连接未就绪，仍可使用本机密码查看状态、新增或编辑连接。
+                </p>
+              )}
+            {localLogin ? (
               <Form className={styles.stack} onSubmit={onLogin}>
-                <FormField id="node-password" label="本机诊断密码">
+                <FormField id="node-password" label="本机配置密码">
                   <TextField
                     id="node-password"
                     name="password"
@@ -126,20 +136,25 @@ export function NodeConsole() {
                 </Button>
               </Form>
             ) : (
-              <p>本机未设置诊断密码。请在前端服务器检查连接配置。</p>
+              <p>
+                请在前端 setup
+                的“节点控制台”中设置本机配置密码，保存并启动后重试。
+              </p>
             )}
           </div>
         )}
         {full && (
           <>
-            {view.mode === "offline" && (
-              <p role="status">后端离线，无法读取全站同步记录。</p>
+            {view.mode === "local" && (
+              <p role="status">
+                本机配置已解锁。全站同步记录需另行通过后端管理员验证。
+              </p>
             )}
             <noscript>请启用 JavaScript 后使用节点诊断。</noscript>
             {view.local ? (
               <LocalNodeStatus
                 node={view.local}
-                offline={view.mode === "offline"}
+                offline={view.mode === "local"}
               >
                 <ConnectionPicker
                   key={view.local.revision}
@@ -153,6 +168,7 @@ export function NodeConsole() {
                 本机诊断未授权。请确认此节点已在后端登记并启用。
               </p>
             )}
+            {view.mode === "local" && <ConnectionEditor onSaved={refresh} />}
             {view.mode === "online" && <FleetStatus fleet={view.fleet} />}
           </>
         )}

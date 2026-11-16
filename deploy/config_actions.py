@@ -5,6 +5,8 @@ import os
 import tempfile
 from pathlib import Path
 
+from connection_bundle import decode_bundle
+
 
 async def export_node(root: Path, native: bool) -> str:
     if native:
@@ -23,7 +25,9 @@ async def export_node(root: Path, native: bool) -> str:
                 raise ValueError(
                     "请检查数据库迁移和节点配置，或运行 ./setup.sh --native export-node 查看详情。"
                 )
-            return result.read_text().strip()
+            encoded = result.read_text().strip()
+            decode_bundle(encoded)
+            return encoded
     # The host performs Docker operations. The tool container never receives
     # docker.sock or general-purpose command execution through this mailbox.
     directory = os.environ.get("EVERUNFOLD_SETUP_ACTION_DIR")
@@ -43,7 +47,6 @@ async def export_node(root: Path, native: bool) -> str:
         raise ValueError(
             "请检查数据库迁移和节点配置，或运行 ./setup.sh --docker export-node 查看详情。"
         )
-    path = result.read_text().strip()
-    if not Path(path).is_absolute():
-        raise ValueError("导出结果缺少文件绝对路径。")
-    return path
+    encoded = result.read_text().strip()
+    decode_bundle(encoded)
+    return encoded

@@ -1,3 +1,4 @@
+import { configurationEnvironment } from "../../src/core/config/deployment";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { readConfigurationFiles } from "../../src/core/config/files";
@@ -94,7 +95,10 @@ export function watchInventory(root: string, pluginDirectory?: string) {
       context.target = syncTarget(url);
       context.node_id = config.frontendNodeId;
       context.operation = "POST /internal/extensions/{node_id}";
-      const token = process.env[config.backend.nextjsToFastapiTokenEnv ?? ""];
+      const token =
+        configurationEnvironment(config)[
+          config.backend.nextjsToFastapiTokenEnv ?? ""
+        ];
       failure = "inventory_token_missing";
       if (!token) throw new SyncValidationError(failure);
       failure = "inventory_read_failed";

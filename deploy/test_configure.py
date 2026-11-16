@@ -21,10 +21,24 @@ import configure
 from config_files import Files, env_values, update_env
 from config_model import Check
 from config_ui import Confirm, DatabaseForm, Editor, HistoryInput, SetupApp
+from connection_bundle import decode_bundle, encode_bundle
 from textual.widgets import Button, DataTable, Input, RichLog
 
 BACKEND = hasattr(configure, "node_token_names")
 DOCKER = Path(__file__).resolve().parent
+
+
+def connection_bundle():
+    return {
+        "format": "everunfold-node-connection/v1",
+        "node_id": "second-node",
+        "source_epoch": "00000000-0000-0000-0000-000000000002",
+        "backend_public_url": "https://api.example.test",
+        "tokens": {
+            "inbound": {"name": "NODE_IN", "value": "i" * 43},
+            "outbound": {"name": "NODE_OUT", "value": "o" * 43},
+        },
+    }
 
 
 class Fixtures:
@@ -77,6 +91,138 @@ class Fixtures:
 
 
 class ModelTests(Fixtures, unittest.TestCase):
+    def test_base64_is_bounded_and_checks_all_credentials_without_echoing_input(self):
+        import base64
+        import copy
+
+        bundle = connection_bundle()
+        encoded = encode_bundle(bundle)
+        self.assertEqual(decode_bundle(encoded), bundle)
+        self.assertEqual(decode_bundle("\n" + encoded[:40] + "\n" + encoded[40:]), bundle)
+        rejected = ["", "i-am-not-base64", encoded[:-1], encoded + "=", "A" * 90000]
+        for field, bad in (("format", "invalid"), ("source_epoch", "secret-do-not-echo")):
+            document = copy.deepcopy(bundle)
+            document[field] = bad
+            rejected.append(base64.b64encode(json.dumps(document).encode()).decode())
+        document = copy.deepcopy(bundle)
+        document["tokens"]["outbound"]["value"] = document["tokens"]["inbound"]["value"]
+        rejected.append(base64.b64encode(json.dumps(document).encode()).decode())
+        for source in rejected:
+            with self.assertRaises(ValueError) as raised:
+                decode_bundle(source)
+            self.assertNotIn("secret-do-not-echo", str(raised.exception))
+            self.assertNotIn(encoded, str(raised.exception))
+
+    @unittest.skipIf(BACKEND, "frontend Base64 import")
+    def test_base64_import_is_atomic_preserves_internal_url_and_requires_save(self):
+        bundle = connection_bundle()
+        encoded = encode_bundle(bundle)
+        model = self.complete()
+        self.edit(model, "internal", "http://backend:8001")
+        self.edit(model, "connection_base64", encoded)
+        self.assertEqual(model.get("api"), bundle["backend_public_url"])
+        self.assertEqual(model.get("node"), bundle["node_id"])
+        self.assertEqual(model.get("internal"), "http://backend:8001")
+        self.assertEqual(model.get("connection_base64"), "")
+        self.assertFalse((self.root / "config.yaml").exists())
+        before = model.snapshot()
+        with self.assertRaises(ValueError):
+            self.edit(model, "connection_base64", "not-valid")
+        self.assertEqual(model.snapshot(), before)
+        model.save()
+        saved = (self.root / "config.yaml").read_text()
+        self.assertNotIn(encoded, saved)
+        self.assertEqual(self.model().get("inbound"), bundle["tokens"]["inbound"]["value"])
+        with patch.dict(os.environ, {"EVERUNFOLD_CONNECTION_BASE64": encoded}):
+            auto = self.model(native=True)
+            self.assertIn("Base64 已导入", auto.notice)
+            self.assertEqual(auto.get("node"), "second-node")
+            self.assertNotIn("EVERUNFOLD_CONNECTION_BASE64", os.environ)
+
+    def test_explicit_configuration_path_and_writer_lock(self):
+        selected = self.root / "external config" / "site.yaml"
+        with patch.dict(os.environ, {"CONFIG_FILE": str(selected)}):
+            model = self.complete()
+            self.assertEqual(model.location, str(selected))
+            model.save()
+            self.assertTrue(selected.exists())
+            self.assertFalse((self.root / "config.yaml").exists())
+            self.materialize()
+            reopened = self.model()
+            self.assertEqual(reopened.get("inbound"), model.get("inbound"))
+            lock = selected.with_name(selected.name + ".switch.lock")
+            before = selected.read_bytes()
+            lock.touch()
+            with self.assertRaisesRegex(ValueError, "其他页面"):
+                reopened.save()
+            self.assertEqual(selected.read_bytes(), before)
+            lock.unlink()
+        for path in ("", " ", "legacy.toml"):
+            with patch.dict(os.environ, {"CONFIG_FILE": path}), self.assertRaises(ValueError):
+                self.model()
+
+    @unittest.skipIf(BACKEND, "frontend browser-edited profiles")
+    def test_browser_profiles_are_read_and_updated_without_losing_other_connections(self):
+        import yaml
+
+        self.complete().save()
+        filename = self.root / "config.yaml"
+        doc = yaml.safe_load(filename.read_text())
+        app = doc["application"]
+        profile = {
+            "FRONTEND_NODE_ID": "browser-node",
+            "BACKEND_BASE_URL": app.pop("BACKEND_BASE_URL"),
+            "source_epoch": app["settings"].pop("source_epoch"),
+            "backend": app.pop("backend"),
+        }
+        doc["connection_profiles"] = {
+            "active": "browser",
+            "profiles": {"browser": profile, "other": dict(profile)},
+        }
+        filename.write_text(yaml.safe_dump(doc))
+        model = self.model()
+        self.assertEqual(model.get("node"), "browser-node")
+        self.edit(model, "internal", "http://everunfold-backend:8001")
+        self.edit(model, "outbound", "new-browser-outbound-" + "x" * 32)
+        model.save()
+        saved = yaml.safe_load(filename.read_text())
+        self.assertEqual(saved["connection_profiles"]["profiles"]["other"], profile)
+        self.assertEqual(
+            saved["connection_profiles"]["profiles"]["browser"]["backend"]["base_url"],
+            "http://everunfold-backend:8001",
+        )
+        self.assertEqual(self.model().get("outbound"), "new-browser-outbound-" + "x" * 32)
+        self.materialize()
+        self.assertEqual(yaml.safe_load(filename.read_text()), saved)
+
+    @unittest.skipUnless(BACKEND, "Backend process log levels")
+    def test_process_log_levels_round_trip_and_validate(self):
+        import yaml
+
+        model = self.complete()
+        self.assertEqual(model.get("API_LOG_LEVEL"), "INFO")
+        self.assertEqual(model.get("WORKER_LOG_LEVEL"), "WARNING")
+        self.assertEqual(model.get("SCHEDULER_LOG_LEVEL"), "INFO")
+        for key, level in (
+            ("API_LOG_LEVEL", "warning"),
+            ("WORKER_LOG_LEVEL", "error"),
+            ("SCHEDULER_LOG_LEVEL", "debug"),
+        ):
+            self.edit(model, key, level)
+        with self.assertRaises(ValueError):
+            self.edit(model, "WORKER_LOG_LEVEL", "quiet")
+        model.save()
+        document = yaml.safe_load((self.root / "config.yaml").read_text())
+        self.materialize()
+        restored = self.model()
+        for key, level in (
+            ("API_LOG_LEVEL", "WARNING"),
+            ("WORKER_LOG_LEVEL", "ERROR"),
+            ("SCHEDULER_LOG_LEVEL", "DEBUG"),
+        ):
+            self.assertEqual(document["environment"][key], level)
+            self.assertEqual(restored.get(key), level)
+
     def test_node_console_switch_password_and_url_are_saved_in_root_configuration(self):
         import hashlib
 
@@ -368,9 +514,10 @@ class ModelTests(Fixtures, unittest.TestCase):
             self.materialize()
             self.assertEqual((cache / "retained-download").read_text(), "cached package")
         self.assertFalse((data / "config.toml").exists())
-        self.assertEqual(
-            (source / "config.yaml").read_bytes(), (self.root / "config.yaml").read_bytes()
-        )
+        self.assertFalse((source / "config.yaml").exists())
+        rendered = env_values(context.compose_path.read_text())
+        self.assertEqual(rendered["EVERUNFOLD_CONFIG_DIR"], str(self.root))
+        self.assertEqual(rendered["EVERUNFOLD_CONFIG_NAME"], "config.yaml")
         self.assertEqual(context.compose["EVERUNFOLD_EXTRA_NETWORKS"], "1panel-network")
         self.assertEqual(self.model().get("data_dir"), str(data))
         raw = context.env_path.with_name(context.env_path.name + ".docker").read_text()
@@ -548,9 +695,9 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
         self.assertEqual((self.root / "config.yaml").read_bytes(), saved)
 
     @unittest.skipUnless(BACKEND, "backend node export action")
-    async def test_export_stays_open_displays_absolute_path_and_handles_retry(self):
+    async def test_export_stays_open_copies_base64_and_handles_retry(self):
         model = self.complete()
-        target = self.root / "external data/connections/web-main.json"
+        encoded = encode_bundle(connection_bundle())
         exports = 0
 
         async def export():
@@ -558,7 +705,7 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
             exports += 1
             if exports == 1:
                 raise ValueError("数据库尚未初始化")
-            return str(target)
+            return encoded
 
         model.export_node = export
         app = SetupApp(model)
@@ -571,12 +718,15 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
                 await pilot.pause()
                 self.assertTrue(app.is_running)
                 if attempt > 1:
-                    from config_copy import CopyText, frontend_import_command
+                    from config_copy import CopyText, frontend_base64_import_command
                     from textual.widgets import TextArea
 
                     self.assertIsInstance(app.screen, CopyText)
-                    command = frontend_import_command(str(target), False)
+                    command = frontend_base64_import_command(False)
                     self.assertIn(command, app.screen.query_one(TextArea).text)
+                    self.assertNotIn(encoded, command)
+                    await pilot.click("#copy-base64")
+                    self.assertEqual(app.clipboard, encoded)
                     await pilot.click("#copy-command")
                     self.assertEqual(app.clipboard, command)
                     await pilot.press("escape")
@@ -584,7 +734,7 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
                 lines = "".join(line.text for line in app.query_one(RichLog).lines)
                 self.assertIn("导出失败" if attempt == 1 else "导出成功", lines)
                 if attempt > 1:
-                    self.assertIn(str(target), lines)
+                    self.assertIn(encoded, lines)
                 self.assertFalse(app.query_one("#export-node", Button).disabled)
             await pilot.press("3")
         self.assertEqual(app.return_value, 0)

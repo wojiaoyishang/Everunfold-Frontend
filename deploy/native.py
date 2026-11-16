@@ -49,13 +49,18 @@ def main() -> None:
     if not ctx.config_path.exists() or not ctx.env_path.exists():
         raise SystemExit("请先运行 ./setup.sh --native 完成配置。")
     environment = {
-        **os.environ,
         **ctx.env,
-        "CONFIG_FILE": str(ctx.root_path if BACKEND and ctx.document else ctx.config_path),
+        **os.environ,
+        "CONFIG_FILE": str(ctx.root_path),
         "EVERUNFOLD_DATA_DIR": str(ctx.data),
         "PYTHONUNBUFFERED": "1",
         "NEXT_TELEMETRY_DISABLED": "1",
     }
+    if not BACKEND:
+        for name in ctx.env:
+            if name not in os.environ:
+                environment.pop(name, None)
+    environment.pop("EVERUNFOLD_CONNECTION_BASE64", None)
     python = str(ROOT / ".venv/bin/python")
 
     def execute(command: list[str]) -> None:
@@ -90,7 +95,15 @@ def main() -> None:
         if BACKEND:
             execute([python, "deploy/runtime_check.py"])
         else:
-            execute(["node", "--import", "tsx", "deploy/check.mjs"])
+            execute(
+                [
+                    "node",
+                    "--import",
+                    "tsx",
+                    "deploy/check.mjs",
+                    *(["--require-backend"] if action == "check" else []),
+                ]
+            )
 
     if action in ("build", "deploy", "init-deploy"):
         build()
@@ -110,19 +123,27 @@ def main() -> None:
         elif action == "migrate":
             execute([python, "-m", "alembic", "-c", "migrations/alembic.ini", "upgrade", "head"])
         else:
-            execute([python, "deploy/node_bundle.py"])
-            from config_copy import frontend_import_command
-            from config_validation import identifier
+            from config_copy import frontend_base64_import_command
+            from connection_bundle import exported_connection
 
-            node = ctx.meta.get("node", "")
-            path = (ctx.data / "connections" / (node + ".json")).resolve()
-            if not identifier(node) or not path.is_file():
-                raise ValueError("导出的节点连接文件不存在。")
-            print("在前端项目根目录执行（跨主机请先传输文件并替换路径）：")
-            print(frontend_import_command(str(path), True))
+            result = subprocess.run(
+                [python, "deploy/node_bundle.py"],
+                cwd=ROOT,
+                env=environment,
+                check=True,
+                stdout=subprocess.PIPE,
+                text=True,
+            )
+            encoded = exported_connection(result.stdout)
+            print("节点连接 Base64（包含令牌，请按密钥保管）：\n" + encoded)
+            print("在前端项目根目录执行，按提示粘贴编码：")
+            print(frontend_base64_import_command(True))
+            print("还需在后端 /_nodes 添加或启用该节点的公开地址。")
             result_file = os.environ.get("EVERUNFOLD_SETUP_RESULT_FILE")
             if result_file:
-                Path(result_file).write_text(str(path))
+                descriptor = os.open(result_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+                with os.fdopen(descriptor, "w") as output:
+                    output.write(encoded)
             return
         execute(
             [
@@ -163,6 +184,8 @@ def main() -> None:
                 environment.get("API_PORT", "8001"),
                 "--workers",
                 environment.get("API_WORKERS", "1"),
+                "--log-level",
+                environment.get("API_LOG_LEVEL", "INFO").lower(),
                 "--no-proxy-headers",
             ],
             "worker": [
@@ -176,7 +199,8 @@ def main() -> None:
                 environment.get("WORKER_POOL", "solo"),
                 "--concurrency",
                 environment.get("WORKER_CONCURRENCY", "1"),
-                "--loglevel=INFO",
+                "--loglevel",
+                environment.get("WORKER_LOG_LEVEL", "WARNING").upper(),
             ],
             "scheduler": [python, "-m", "app.entrypoints.scheduler"],
         }
@@ -189,8 +213,6 @@ def main() -> None:
                 "tsx",
                 "tools/plugins/run.mts",
                 "start",
-                "--port",
-                environment.get("FRONTEND_PORT", "3000"),
             ],
         }
     if action in commands:
