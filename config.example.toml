@@ -21,9 +21,10 @@ FRONTEND_NODE_ID = "web-main"
 
 [nodes_monitor]
 enabled = false
-# 生产使用 HTTPS。本机开发仅允许回环地址。
+# 优先使用 PUBLIC_SITE_URL；setup 可配置启用开关、密码和会话密钥。
+# 生产使用 HTTPS。本机开发仅允许回环地址；没有 PUBLIC_SITE_URL 的旧配置可用 origin。
 # origin = "https://blog.example.com"
-# 运行 npm run nodes:password 生成哈希。
+# 密码仅用于后端离线时的本机诊断；在线仍验证后端管理员。也可运行 npm run nodes:password 生成哈希。
 # password_hash = "scrypt$..."
 session_secret_env = "EVERUNFOLD_FRONTEND_NODES_SESSION_SECRET"
 

@@ -3,6 +3,7 @@ import { createHmac, randomBytes, scrypt, timingSafeEqual } from "node:crypto";
 import type { readConfiguration } from "@/core/config/server";
 import { connectionIdentity } from "@/core/config/files";
 import type { NodeProof, NodeProofRequest } from "@/core/contracts/settings";
+import { syncFailure, syncTarget } from "../sync-diagnostics";
 
 type Config = ReturnType<typeof readConfiguration>;
 export type BackendMode = "online" | "offline" | "unavailable";
@@ -17,8 +18,19 @@ const offlineErrors = new Set([
 ]);
 
 export async function backendMode(config: Config): Promise<BackendMode> {
+  const url = config.backend.baseUrl + "/health/live";
+  const context = {
+    direction: "frontend_to_backend" as const,
+    operation: "GET /health/live",
+    target: syncTarget(url),
+    node_id: config.frontendNodeId,
+  };
+  const invalid = () => {
+    syncFailure(context, "backend_invalid");
+    return "unavailable" as const;
+  };
   try {
-    const response = await fetch(config.backend.baseUrl + "/health/live", {
+    const response = await fetch(url, {
       cache: "no-store",
       redirect: "manual",
       signal: AbortSignal.timeout(
@@ -27,11 +39,12 @@ export async function backendMode(config: Config): Promise<BackendMode> {
     });
     // Even a failed HTTP response is not a reason to fall back to a local password.
     if (!response.ok) {
+      syncFailure({ ...context, status: response.status }, "backend_http");
       await response.body?.cancel();
       return "unavailable";
     }
     const reader = response.body?.getReader();
-    if (!reader) return "unavailable";
+    if (!reader) return invalid();
     try {
       let body = "";
       const decoder = new TextDecoder();
@@ -39,18 +52,23 @@ export async function backendMode(config: Config): Promise<BackendMode> {
         const chunk = await reader.read();
         if (chunk.done) break;
         body += decoder.decode(chunk.value, { stream: true });
-        if (body.length > 4096) return "unavailable";
+        if (body.length > 4096) return invalid();
       }
       const value = JSON.parse(body);
       return value?.success === true &&
         value?.data?.status === "alive" &&
         value?.data?.stage === "browser-auth"
         ? "online"
-        : "unavailable";
+        : invalid();
     } finally {
       await reader.cancel();
     }
   } catch (error) {
+    syncFailure(
+      context,
+      error instanceof SyntaxError ? "backend_invalid" : "backend_network",
+      error,
+    );
     const cause = (error as Error).cause as
       { code?: string; errors?: { code?: string }[] } | undefined;
     const codes = cause?.errors?.map((item) => item.code) ?? [cause?.code];

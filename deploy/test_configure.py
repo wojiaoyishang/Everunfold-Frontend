@@ -77,6 +77,73 @@ class Fixtures:
 
 
 class ModelTests(Fixtures, unittest.TestCase):
+    def test_node_console_switch_password_and_url_are_saved_in_root_configuration(self):
+        import hashlib
+
+        import yaml
+
+        model = self.complete()
+        self.assertEqual(model.get("monitor_enabled"), "1")
+        self.assertGreaterEqual(len(model.get("monitor_password")), 12)
+        self.edit(model, "monitor_password", "")
+        self.assertGreaterEqual(len(model.get("monitor_password")), 12)
+        self.edit(model, "monitor_password", "operator password 123")
+        self.edit(model, "monitor_enabled", "0")
+        model.save()
+        root = self.root / "config.yaml"
+        document = yaml.safe_load(root.read_text())
+        monitor = document["application"]["nodes_monitor"]
+        self.assertFalse(monitor["enabled"])
+        self.assertNotIn("origin", monitor)
+        password_hash = monitor["password_hash"]
+        if BACKEND:
+            from argon2 import PasswordHasher
+
+            self.assertTrue(PasswordHasher().verify(password_hash, "operator password 123"))
+        else:
+            algorithm, salt, digest = password_hash.split("$")
+            self.assertEqual(algorithm, "scrypt")
+            self.assertEqual(
+                hashlib.scrypt(
+                    b"operator password 123", salt=bytes.fromhex(salt), n=16384, r=8, p=1, dklen=32
+                ).hex(),
+                digest,
+            )
+        secret = document["environment"][monitor["session_secret_env"]]
+        self.assertRegex(secret, r"^[A-Za-z0-9_-]{43,128}$")
+        self.edit(model, "monitor_enabled", "1")
+        model.save()
+        self.assertEqual(
+            yaml.safe_load(root.read_text())["application"]["nodes_monitor"]["password_hash"],
+            password_hash,
+        )
+        # A legacy pinned local address is removed when saving the new published URL.
+        document = yaml.safe_load(root.read_text())
+        document["application"]["nodes_monitor"]["origin"] = "http://127.0.0.1:8001"
+        password_key = (
+            "EVERUNFOLD_SETUP_NODES_PASSWORD"
+            if BACKEND
+            else "EVERUNFOLD_SETUP_FRONTEND_NODES_PASSWORD"
+        )
+        document["environment"].pop(password_key)
+        root.write_text(yaml.safe_dump(document))
+        second = self.model()
+        self.assertEqual(second.get("monitor_password"), "")
+        self.edit(second, "monitor_password", "")
+        self.edit(second, "api" if BACKEND else "site", "https://published.example.test")
+        second.save()
+        monitor = yaml.safe_load(root.read_text())["application"]["nodes_monitor"]
+        self.assertTrue(monitor["enabled"])
+        self.assertNotIn("origin", monitor)
+        self.assertEqual(monitor["password_hash"], password_hash)
+        third = self.model()
+        self.edit(third, "monitor_password", "new operator password")
+        third.save()
+        self.assertNotEqual(
+            yaml.safe_load(root.read_text())["application"]["nodes_monitor"]["password_hash"],
+            password_hash,
+        )
+
     def test_save_preserves_existing_values_and_backups(self):
         model = self.complete()
         before = model.get("inbound")
@@ -399,6 +466,37 @@ class ModelTests(Fixtures, unittest.TestCase):
 
 
 class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
+    async def test_node_console_switch_and_password_can_be_edited_and_generated(self):
+        model = self.complete()
+        app = SetupApp(model)
+        async with app.run_test(size=(80, 24)) as pilot:
+            table = app.query_one(DataTable)
+            table.move_cursor(
+                row=next(
+                    i for i, field in enumerate(model.fields) if field.key == "monitor_enabled"
+                )
+            )
+            await pilot.press("enter")
+            app.screen.query_one("#value", Input).value = "0"
+            await pilot.press("enter")
+            self.assertEqual(model.get("monitor_enabled"), "0")
+            table.move_cursor(
+                row=next(
+                    i for i, field in enumerate(model.fields) if field.key == "monitor_password"
+                )
+            )
+            await pilot.press("enter")
+            app.screen.query_one("#value", Input).value = "a custom console password"
+            await pilot.click("#apply")
+            self.assertEqual(model.get("monitor_password"), "a custom console password")
+            await pilot.press("enter")
+            await pilot.click("#generate")
+            generated = app.screen.query_one("#value", Input).value
+            self.assertGreaterEqual(len(generated), 12)
+            self.assertNotEqual(generated, "a custom console password")
+            await pilot.click("#apply")
+            self.assertEqual(model.get("monitor_password"), generated)
+
     async def test_edit_history_and_compact_layout(self):
         model = self.complete()
         app = SetupApp(model)

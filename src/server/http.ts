@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { syncFailure } from "./sync-diagnostics";
 
 type Handler = (request: IncomingMessage, response: ServerResponse) => unknown;
 
@@ -10,7 +11,18 @@ export function frontendHandler(web: Handler, internal: Handler) {
       await (
         path === "/internal" || path.startsWith("/internal/") ? internal : web
       )(request, response);
-    } catch {
+    } catch (error) {
+      if (request.url?.startsWith("/internal"))
+        syncFailure(
+          {
+            direction: "backend_to_frontend",
+            operation: "internal request",
+            peer: request.socket.remoteAddress,
+            status: 503,
+          },
+          "frontend_unavailable",
+          error,
+        );
       if (response.headersSent) response.destroy();
       else {
         response.writeHead(503, {

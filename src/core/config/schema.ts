@@ -110,7 +110,10 @@ export function loopback(hostname: string): boolean {
   );
 }
 
-function monitorConfig(value: unknown): FrontendConfiguration["nodesMonitor"] {
+function monitorConfig(
+  value: unknown,
+  publicSiteUrl?: string,
+): FrontendConfiguration["nodesMonitor"] {
   const monitor = configObject(value ?? {}, "nodes_monitor");
   configKeys(
     monitor,
@@ -120,18 +123,20 @@ function monitorConfig(value: unknown): FrontendConfiguration["nodesMonitor"] {
   const enabled = monitor.enabled ?? false;
   if (typeof enabled !== "boolean")
     throw new ConfigurationError("nodes_monitor.enabled 必须为布尔值");
+  const published = publicSiteUrl ?? monitor.origin;
   const origin =
-    monitor.origin === undefined
+    published === undefined
       ? undefined
-      : new URL(baseUrl(monitor.origin, "nodes_monitor.origin"));
+      : new URL(baseUrl(published, "nodes_monitor.origin"));
   if (
+    enabled &&
     origin &&
     (origin.pathname !== "/" ||
       (origin.protocol !== "https:" && !loopback(origin.hostname)))
   )
     throw new ConfigurationError("节点诊断需要 HTTPS 或回环 HTTP 来源");
   if (enabled && !origin)
-    throw new ConfigurationError("启用节点诊断需要配置 nodes_monitor.origin");
+    throw new ConfigurationError("启用节点诊断需要配置 PUBLIC_SITE_URL");
   const hash = monitor.password_hash;
   if (
     hash !== undefined &&
@@ -332,7 +337,7 @@ export function parseConfiguration(
     backendBaseUrl: publicUrl,
     browserLoopbackOrigin: loopbackOrigin?.origin,
     frontendNodeId: nodeId,
-    nodesMonitor: monitorConfig(root.nodes_monitor),
+    nodesMonitor: monitorConfig(root.nodes_monitor, publicSiteUrl),
     backend: {
       baseUrl:
         backend.base_url === undefined

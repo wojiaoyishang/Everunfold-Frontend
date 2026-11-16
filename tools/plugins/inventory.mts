@@ -2,6 +2,40 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { readConfigurationFiles } from "../../src/core/config/files";
 import { readInstalledPlugins } from "../../src/server/plugins/packages";
+import {
+  syncErrorDetails,
+  syncFailure,
+  syncTarget,
+  SyncValidationError,
+} from "../../src/server/sync-diagnostics";
+
+async function registration(
+  response: Response,
+  node: string,
+): Promise<boolean> {
+  const reader = response.body?.getReader();
+  if (!reader) return false;
+  try {
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    for (;;) {
+      const part = await reader.read();
+      if (part.done) break;
+      size += part.value.length;
+      if (size > 8192) return false;
+      chunks.push(part.value);
+    }
+    const value = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+    return (
+      value?.success === true &&
+      value?.code === response.status &&
+      value?.data?.node_id === node &&
+      value?.data?.registered === true
+    );
+  } finally {
+    await reader.cancel();
+  }
+}
 
 export async function readInventory(root: string, pluginDirectory?: string) {
   const themes = JSON.parse(
@@ -45,12 +79,25 @@ export function watchInventory(root: string, pluginDirectory?: string) {
   let stopped = false,
     timer: ReturnType<typeof setTimeout>,
     accepted = "",
-    lastReport = 0;
+    lastReport = 0,
+    lastFailure = "",
+    lastErrorLog = 0;
   const cycle = async () => {
+    const context: Parameters<typeof syncFailure>[0] = {
+      direction: "frontend_to_backend",
+      operation: "register extensions",
+    };
+    let failure = "inventory_config_invalid";
     try {
       const { settings: config } = readConfigurationFiles(root);
+      const url = `${config.backend.baseUrl}/internal/extensions/${encodeURIComponent(config.frontendNodeId)}`;
+      context.target = syncTarget(url);
+      context.node_id = config.frontendNodeId;
+      context.operation = "POST /internal/extensions/{node_id}";
       const token = process.env[config.backend.nextjsToFastapiTokenEnv ?? ""];
-      if (!token) throw new Error("missing deployment token");
+      failure = "inventory_token_missing";
+      if (!token) throw new SyncValidationError(failure);
+      failure = "inventory_read_failed";
       const inventory = await readInventory(
         root,
         pluginDirectory ?? path.resolve(root, config.plugins.directory),
@@ -63,25 +110,59 @@ export function watchInventory(root: string, pluginDirectory?: string) {
       ];
       const report = JSON.stringify([destination, body]);
       if (report !== accepted || Date.now() - lastReport > 60000) {
-        const response = await fetch(
-          `${config.backend.baseUrl}/internal/extensions/${encodeURIComponent(config.frontendNodeId)}`,
-          {
-            method: "POST",
-            redirect: "error",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-            body,
-            signal: AbortSignal.timeout(5000),
+        failure = "backend_network";
+        const response = await fetch(url, {
+          method: "POST",
+          redirect: "manual",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
-        );
-        if (!response.ok) throw new Error("inventory registration unavailable");
+          body,
+          signal: AbortSignal.timeout(5000),
+        });
+        context.status = response.status;
+        if (!response.ok) {
+          failure =
+            response.status === 403
+              ? "inventory_forbidden"
+              : response.status === 422
+                ? "inventory_schema_invalid"
+                : response.status === 413
+                  ? "inventory_too_large"
+                  : "backend_http";
+          await response.body?.cancel();
+          throw new SyncValidationError(failure);
+        }
+        failure = "inventory_invalid_response";
+        if (!(await registration(response, config.frontendNodeId)))
+          throw new SyncValidationError(failure);
+        if (lastFailure || report !== accepted)
+          console.info(
+            "[Everunfold sync] " +
+              JSON.stringify({
+                time: new Date().toISOString(),
+                ...context,
+                code: "inventory_registered",
+                reason: lastFailure ? "扩展清单上报已恢复" : "扩展清单上报成功",
+              }),
+          );
+        lastFailure = "";
         accepted = report;
         lastReport = Date.now();
       }
-    } catch {
-      /* Backend outages must not stop the frontend; retry without logging credentials. */
+    } catch (error) {
+      const signature = JSON.stringify([
+        context,
+        failure,
+        syncErrorDetails(error),
+      ]);
+      // Keep retrying; show changed failures immediately and repeat unchanged failures every 30s.
+      if (signature !== lastFailure || Date.now() - lastErrorLog >= 30000) {
+        syncFailure(context, failure, error);
+        lastErrorLog = Date.now();
+      }
+      lastFailure = signature;
     }
     if (!stopped) timer = setTimeout(() => void cycle(), 3000);
   };

@@ -2,6 +2,8 @@
 
 前后端统一使用项目根目录的 `setup.sh` 与 `config.yaml`。配置助手在 `deploy/`，不需要进入 `docker/` 运行。完整的逐步教程见[部署教程](../deploy/README.md)。
 
+setup 的“节点控制台”分组可设置启用开关、离线密码和会话密钥。入口为前端发布 URL 下的 `/admin/_nodes`；在线仍验证后端管理员。同步失败查看 `docker logs --follow --tail=100 everunfold-frontend` 中的 `[Everunfold sync]`，含内部目标、HTTP 状态、网络或落盘错误，详见[同步排查](../deploy/README.md#同步失败时看-nodejs-日志)。
+
 选中配置项可查看/复制，F4 查看完整执行结果；终端不支持剪贴板时使用“终端复制”。后端导出后自动显示前端导入命令，带空格的路径也可直接复制。
 
 ## 一、Docker 从零构建

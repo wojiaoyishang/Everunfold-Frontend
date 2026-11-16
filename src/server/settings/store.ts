@@ -5,6 +5,7 @@ import path from "node:path";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "@/core/contracts/settings-v1-schema";
+import { SyncValidationError } from "../sync-diagnostics";
 import type { SettingsDelivery } from "@/core/contracts/settings";
 import {
   pruneRevisions,
@@ -46,11 +47,13 @@ export class FileSettingsStore implements SettingsStore {
       !validate(value) ||
       value.protocol !== "settings-1" ||
       !Number.isSafeInteger(value.revision) ||
-      value.node_id !== this.nodeId ||
-      value.source_epoch !== this.sourceEpoch ||
       (value.resource === "public-settings") !== "site" in value.value
     )
-      throw new Error("Invalid settings delivery");
+      throw new SyncValidationError("settings_schema_invalid");
+    if (value.node_id !== this.nodeId)
+      throw new SyncValidationError("node_mismatch");
+    if (value.source_epoch !== this.sourceEpoch)
+      throw new SyncValidationError("source_epoch_mismatch");
     return value;
   }
   private folder() {

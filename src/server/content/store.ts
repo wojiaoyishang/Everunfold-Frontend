@@ -4,6 +4,7 @@ import path from "node:path";
 import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import schema from "@/core/contracts/content-admin-v1-schema";
+import { SyncValidationError } from "../sync-diagnostics";
 import type { ContentDelivery } from "@/core/contracts/content-admin";
 import type { PublicSnapshot } from "@/core/content/types";
 import { parsePublicSnapshot } from "../../core/content/validation";
@@ -79,15 +80,17 @@ export class FileContentStore implements ContentStore {
     );
   }
   private checked(input: unknown): ContentDelivery {
+    if (!validate(input) || !Number.isSafeInteger(input.revision))
+      throw new SyncValidationError("content_schema_invalid");
+    if (input.node_id !== this.nodeId)
+      throw new SyncValidationError("node_mismatch");
     if (
-      !validate(input) ||
-      input.node_id !== this.nodeId ||
       input.source_epoch !== this.sourceEpoch ||
-      input.value.source_epoch !== this.sourceEpoch ||
-      input.value.generation !== input.revision ||
-      !Number.isSafeInteger(input.revision)
+      input.value.source_epoch !== this.sourceEpoch
     )
-      throw new Error("Invalid content delivery");
+      throw new SyncValidationError("source_epoch_mismatch");
+    if (input.value.generation !== input.revision)
+      throw new SyncValidationError("revision_mismatch");
     return input;
   }
   private async readIntent(filename: string) {

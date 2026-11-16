@@ -24,6 +24,7 @@ from config_validation import (
     valid_port,
 )
 from container_fields import add_container_fields
+from node_console_fields import add_node_console_fields
 
 DOCKER = Path(__file__).resolve().parents[1] / "docker"
 TOKEN_NAMES = ("NEXTJS_TO_FASTAPI_WEB_MAIN_TOKEN", "FASTAPI_TO_NEXTJS_WEB_MAIN_TOKEN")
@@ -191,6 +192,7 @@ def configure(native: bool = False) -> Configuration:
             group="节点",
             hint="从该节点的后端连接文件导入，可查看或修改。",
         )
+    save_console = add_node_console_fields(ctx, add, value)
     add(
         "host",
         "前端绑定 IP",
@@ -284,6 +286,7 @@ def configure(native: bool = False) -> Configuration:
             "FRONTEND_HOST": value("host"),
             "FRONTEND_PORT": value("port"),
         }
+        save_console(environment)
         for name, key in (
             ("PUBLIC_SITE_URL", "site"),
             ("BACKEND_BASE_URL", "api"),

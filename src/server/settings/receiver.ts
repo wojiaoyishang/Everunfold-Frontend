@@ -10,16 +10,23 @@ import type { ReceiverStatus } from "@/core/contracts/settings";
 import type { cacheMaintenance } from "./cache-maintenance";
 import type { SettingsStore } from "./store";
 import type { ContentStore } from "../content/store";
+import { syncFailure } from "../sync-diagnostics";
 
 async function replica(
   read: () => Promise<number | undefined>,
+  operation: string,
 ): Promise<ReceiverStatus["public_settings"]> {
   try {
     const revision = await read();
     return revision === undefined
       ? { status: "missing", revision: null }
       : { status: "ready", revision };
-  } catch {
+  } catch (error) {
+    syncFailure(
+      { direction: "local", operation },
+      "replica_unavailable",
+      error,
+    );
     return { status: "unavailable", revision: null };
   }
 }
@@ -29,9 +36,18 @@ export async function readReplicas(
   content?: ContentStore,
 ) {
   const [public_settings, cache_policy, public_content] = await Promise.all([
-    replica(async () => (await store.read("public-settings"))?.revision),
-    replica(async () => (await store.read("cache-policy"))?.revision),
-    replica(async () => (await content?.read())?.generation),
+    replica(
+      async () => (await store.read("public-settings"))?.revision,
+      "read public-settings",
+    ),
+    replica(
+      async () => (await store.read("cache-policy"))?.revision,
+      "read cache-policy",
+    ),
+    replica(
+      async () => (await content?.read())?.generation,
+      "read public-content",
+    ),
   ]);
   return { public_settings, cache_policy, public_content };
 }
@@ -56,22 +72,62 @@ export function settingsHandler(
   }
   const secret = createHash("sha256").update(`Bearer ${token}`).digest();
   return async (request: IncomingMessage, response: ServerResponse) => {
+    const peer = request.socket.remoteAddress?.replace(/^::ffff:/, "") ?? "";
+    const knownPaths = [
+      "/internal/settings/status",
+      "/internal/settings/apply",
+      "/internal/cache/v1/status",
+      "/internal/cache/v1/apply",
+      "/internal/cache/v1/prune",
+    ];
+    const operation =
+      (request.method === "GET"
+        ? "GET "
+        : request.method === "POST"
+          ? "POST "
+          : "OTHER ") +
+      (knownPaths.includes(request.url ?? "")
+        ? request.url
+        : "/internal/(unknown)");
     response.setHeader("Cache-Control", "no-store");
     response.setHeader("Content-Type", "application/json");
-    const reply = (status: number, body: object) => {
+    const reply = (
+      status: number,
+      body: object,
+      code?: string,
+      error?: unknown,
+    ) => {
+      if (status >= 400)
+        syncFailure(
+          {
+            direction: "backend_to_frontend",
+            operation,
+            peer,
+            node_id: identity?.node_id,
+            status,
+          },
+          code ??
+            ("error" in body ? String(body.error) : "resource_not_applied"),
+          error,
+        );
       response.writeHead(status);
       response.end(JSON.stringify(body));
     };
-    const peer = request.socket.remoteAddress?.replace(/^::ffff:/, "") ?? "";
     const presented = createHash("sha256")
       .update(request.headers.authorization ?? "")
       .digest();
-    if (
-      !isIP(peer) ||
-      !allowed.check(peer, isIP(peer) === 6 ? "ipv6" : "ipv4") ||
-      !timingSafeEqual(secret, presented)
-    ) {
-      reply(403, { error: "forbidden" });
+    const peerAllowed =
+      !!isIP(peer) && allowed.check(peer, isIP(peer) === 6 ? "ipv6" : "ipv4");
+    if (!peerAllowed || !timingSafeEqual(secret, presented)) {
+      reply(
+        403,
+        { error: "forbidden" },
+        !peerAllowed
+          ? "peer_not_allowed"
+          : request.headers.authorization
+            ? "token_mismatch"
+            : "token_missing",
+      );
       request.resume();
       return;
     }
@@ -88,8 +144,8 @@ export function settingsHandler(
       request.resume();
       try {
         reply(200, await maintenance.status());
-      } catch {
-        reply(503, { error: "cache_state_unavailable" });
+      } catch (error) {
+        reply(503, { error: "cache_state_unavailable" }, undefined, error);
       }
       return;
     }
@@ -159,8 +215,8 @@ export function settingsHandler(
         }
         try {
           reply(200, await maintenance.prune());
-        } catch {
-          reply(503, { error: "cache_prune_unconfirmed" });
+        } catch (error) {
+          reply(503, { error: "cache_prune_unconfirmed" }, undefined, error);
         }
         return;
       }
@@ -174,8 +230,20 @@ export function settingsHandler(
         digest: createHash("sha256").update(bytes).digest("hex"),
         durable: true,
       });
-    } catch {
-      if (!response.headersSent) reply(409, { error: "resource_not_applied" });
+    } catch (error) {
+      if (!response.headersSent)
+        reply(409, { error: "resource_not_applied" }, undefined, error);
+      else
+        syncFailure(
+          {
+            direction: "backend_to_frontend",
+            operation,
+            peer,
+            node_id: identity?.node_id,
+          },
+          "resource_not_applied",
+          error,
+        );
     }
   };
 }

@@ -9,6 +9,51 @@ const base = {
   backend: { allowed_peer_ips: ["127.0.0.1", "::1", "10.0.0.0/24"] },
   cache: { directory: "./var/public-snapshots" },
 };
+test("node console follows the published frontend URL instead of a stale local origin", () => {
+  const legacy = { enabled: true, origin: "http://127.0.0.1:3000" };
+  assert.equal(
+    parseConfiguration({
+      ...base,
+      PUBLIC_SITE_URL: "https://blog.example.test",
+      nodes_monitor: legacy,
+    }).nodesMonitor.origin,
+    "https://blog.example.test",
+  );
+  assert.equal(
+    parseConfiguration(
+      {
+        ...base,
+        PUBLIC_SITE_URL: "https://blog.example.test",
+        nodes_monitor: legacy,
+      },
+      { PUBLIC_SITE_URL: "https://new.example.test" },
+    ).nodesMonitor.origin,
+    "https://new.example.test",
+  );
+  assert.equal(
+    parseConfiguration({ ...base, nodes_monitor: legacy }).nodesMonitor.origin,
+    legacy.origin,
+  );
+  assert.equal(
+    parseConfiguration({
+      ...base,
+      PUBLIC_SITE_URL: "https://blog.example.test",
+      nodes_monitor: { enabled: false },
+    }).nodesMonitor.enabled,
+    false,
+  );
+  assert.throws(
+    () => parseConfiguration({ ...base, nodes_monitor: { enabled: true } }),
+    /PUBLIC_SITE_URL/,
+  );
+  const internalSite = { ...base, PUBLIC_SITE_URL: "http://192.0.2.10:3000" };
+  assert.equal(parseConfiguration(internalSite).nodesMonitor.enabled, false);
+  assert.throws(
+    () =>
+      parseConfiguration({ ...internalSite, nodes_monitor: { enabled: true } }),
+    /HTTPS/,
+  );
+});
 test("container subnets supplement manual peer grants only for the current runtime", () => {
   const environment = {
     EVERUNFOLD_INTERNAL_PEER_CIDRS: "172.25.0.0/16,fd00::/64,172.25.0.0/16,",
