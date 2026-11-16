@@ -80,6 +80,7 @@ export function watchInventory(root: string, pluginDirectory?: string) {
   let stopped = false,
     timer: ReturnType<typeof setTimeout>,
     accepted = "",
+    acceptedToken = "",
     lastReport = 0,
     lastFailure = "",
     lastErrorLog = 0;
@@ -90,7 +91,9 @@ export function watchInventory(root: string, pluginDirectory?: string) {
     };
     let failure = "inventory_config_invalid";
     try {
-      const { settings: config } = readConfigurationFiles(root);
+      const { settings: config, file } = readConfigurationFiles(root);
+      context.config_file = file.filename;
+      context.token_env = config.backend.nextjsToFastapiTokenEnv;
       const url = `${config.backend.baseUrl}/internal/extensions/${encodeURIComponent(config.frontendNodeId)}`;
       context.target = syncTarget(url);
       context.node_id = config.frontendNodeId;
@@ -111,9 +114,15 @@ export function watchInventory(root: string, pluginDirectory?: string) {
         config.frontendNodeId,
         config.backend.baseUrl,
         config.settings.sourceEpoch,
+        config.publicSiteUrl,
       ];
       const report = JSON.stringify([destination, body]);
-      if (report !== accepted || Date.now() - lastReport > 60000) {
+      if (
+        lastFailure ||
+        report !== accepted ||
+        token !== acceptedToken ||
+        Date.now() - lastReport > 60000
+      ) {
         failure = "backend_network";
         const response = await fetch(url, {
           method: "POST",
@@ -121,6 +130,7 @@ export function watchInventory(root: string, pluginDirectory?: string) {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
+            "X-Everunfold-Public-Url": config.publicSiteUrl ?? "",
           },
           body,
           signal: AbortSignal.timeout(5000),
@@ -153,6 +163,7 @@ export function watchInventory(root: string, pluginDirectory?: string) {
           );
         lastFailure = "";
         accepted = report;
+        acceptedToken = token;
         lastReport = Date.now();
       }
     } catch (error) {

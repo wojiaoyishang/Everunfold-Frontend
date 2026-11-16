@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[配对凭据读取与前端发布地址归属](decisions/0165-pairing-runtime-and-frontend-origins.md)说明导入后令牌缺失的修复、内部配对表单及前端发布地址上报。
+
 [沿用已保存配对登记前端](decisions/0164-register-from-saved-frontend-pairing.md)说明节点控制台如何沿用部署助手中的节点 ID、接收器和令牌。
 
 [按 Docker 网络配置内部调用和宿主机反代](decisions/0163-named-docker-access-networks.md)说明两端如何按网络名解析子网和网桥网关。

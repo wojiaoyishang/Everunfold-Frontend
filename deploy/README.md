@@ -140,11 +140,14 @@ docker logs --follow --tail=100 everunfold-frontend
 
 原生部署查看前端启动终端或 systemd / Supervisor 日志。搜索 `[Everunfold sync]`：
 
+- `inventory_token_missing` 表示上报进程没有读到令牌，请检查日志的 `config_file` 和 `token_env`。导入 Base64 后须保存到该 CONFIG_FILE 指向的文件，并检查是否有空的进程环境变量覆盖。2026-11-16 已修复 ESM/CommonJS 模块重复载入使 YAML 令牌不可见的问题，升级须重新构建主体产物一次；无需重新生成正确的已有令牌。
 - `frontend_to_backend` 是插件/主题清单上报，记录实际内部目标 URL、节点 ID 和 HTTP 状态。`ENOTFOUND` 表示 DNS/容器别名解析失败，`ECONNREFUSED` 表示端口拒绝连接；403 提示核对后端 `/_nodes` 中节点已启用、来源 IP/CIDR 和前端到后端令牌。相同上报失败每 30 秒重复一次，仍每 3 秒重试；恢复后显示上报成功。
 - `backend_to_frontend` 是后端向前端投递设置或内容。日志区分真实来源 IP 未允许、缺少令牌、令牌不匹配、节点 ID/来源 UUID 不一致、无效 JSON、契约格式、大小限制，以及数据目录权限、只读挂载或磁盘空间不足。客户端错误响应保持原有格式。
 - 日志不输出令牌、密码、请求正文、响应正文或 URL 查询参数。浏览器直接访问后端的请求不经过 Node.js；这类失败要查看浏览器网络面板和后端日志。若后端根本连不到前端，前端不会收到投递日志，应同时检查 Worker 日志。
 
 更新此功能后须显式 `./setup.sh --docker build`，成功后 `./setup.sh --docker start`；日常重启不重新编译。
+
+也可一次运行 `./setup.sh --docker deploy` 完成构建并启动。先升级后端，再升级前端。后端 `/_nodes` 的“配置并登记”沿用 setup 内部配对，不再要求前端公开地址；前端只在自己的 `PUBLIC_SITE_URL` 设置发布 URL，通过已鉴权的扩展上报更新后端的该节点来源规则。修改接收器身份、来源或双向令牌后重启前端；上报器会在下一轮读取保存后的配置。
 
 ### npm 下载缓存
 

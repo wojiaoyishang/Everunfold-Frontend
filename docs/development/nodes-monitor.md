@@ -19,3 +19,5 @@
 显式 `CONFIG_FILE=/绝对路径/config.toml` 可继续读取旧配置及 `backend_node_file`，已有切换入口保留。浏览器新增/编辑要求部署 YAML：先由 setup 导入并保存，再切换 `CONFIG_FILE`，重建新版前端产物并启动。不要修改派生的 `config.runtime.toml`。
 
 后端节点连接通过 Base64 交接。`connection-bundle.ts` 在本机编辑器中有界解码并校验协议版本、地址、UUID 与双向令牌，只填入表单；保存复用原有鉴权、修订锁和原子写入。编码不放进 URL 或日志，不影响容器内部地址/来源列表。setup 支持相同格式和旧 JSON 兼容导入。
+
+2026-11-16 修复 ESM/CommonJS 配置模块重复载入导致 YAML 令牌在上报进程中丢失的问题，升级后重新构建前端产物一次。`inventory_token_missing` 日志包含 `config_file` 和 `token_env`，可核对实际挂载、导入保存和外部环境覆盖。前端的 `PUBLIC_SITE_URL` 通过已鉴权的上报同步到后端，无须在后端节点页重复填写；后端保留来源 IP、令牌、节点登记及启停校验。见 [ADR 0165](../decisions/0165-pairing-runtime-and-frontend-origins.md)。

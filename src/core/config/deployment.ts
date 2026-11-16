@@ -2,17 +2,27 @@
 import { parseDocument, visit } from "yaml";
 import { ConfigurationError, configObject } from "./schema";
 
-const environments = new WeakMap<object, Record<string, string | undefined>>();
+// tsx loads this module through both ESM (CLI entry points) and CommonJS.
+// A module-local WeakMap loses bindings across that boundary. Keep the private
+// value on the config itself, under a shared, non-enumerable symbol instead.
+const environmentKey = Symbol.for("everunfold.configuration.environment");
+type BoundConfiguration = {
+  [environmentKey]?: Record<string, string | undefined>;
+};
 export function configurationEnvironment(
   config: object,
 ): Record<string, string | undefined> {
-  return environments.get(config) ?? process.env;
+  return (config as BoundConfiguration)[environmentKey] ?? process.env;
 }
 export function bindEnvironment<T extends object>(
   config: T,
   environment: Record<string, string | undefined>,
 ): T {
-  environments.set(config, environment);
+  Object.defineProperty(config, environmentKey, {
+    value: environment,
+    enumerable: false,
+    configurable: true,
+  });
   return config;
 }
 

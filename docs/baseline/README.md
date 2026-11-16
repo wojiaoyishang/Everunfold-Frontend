@@ -1866,4 +1866,10 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
-| `docs/decisions/0164-register-from-saved-frontend-pairing.md` | `ADR0164-1` | `9e449f63a7eab0feda352b816dd64e164d4a842d594cef6d4a4d9d7397b41a14` |
+| `docs/decisions/0164-register-from-saved-frontend-pairing.md` | `ADR0164-2` | `8a7c30350acc4112e6f6ae9b87af645879bbc8d04993dd6289c32a2cf360acc8` |
+
+## 配对凭据读取与前端发布地址归属
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0165-pairing-runtime-and-frontend-origins.md` | `ADR0165-1` | `34b2b7832b0e2c501244b8229a568850b746fbccdc41c956ac37c8b614bea118` |

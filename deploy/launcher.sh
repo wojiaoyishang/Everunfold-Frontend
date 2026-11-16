@@ -337,7 +337,7 @@ case "$action" in
     [[ "$encoded" =~ ^[A-Za-z0-9+/]+=*$ && ${#encoded} -le 87384 ]] || { echo "未获得有效的节点连接 Base64。" >&2; exit 1; }
     printf '\n节点连接 Base64（包含令牌，请按密钥保管）：\n%s\n\n' "$encoded"
     printf '在前端项目根目录执行，按提示粘贴编码：\n./setup.sh --docker --connection-base64\n'
-    printf '还需在后端 /_nodes 添加或启用该节点的公开地址。\n'
+    printf '还需在后端 /_nodes 登记并启用已保存的前端配对；前端发布 URL 由前端自行上报。\n'
     if [[ -n "${EVERUNFOLD_SETUP_RESULT_FILE:-}" ]]; then
       (umask 077; printf '%s\n' "$encoded" >"$EVERUNFOLD_SETUP_RESULT_FILE")
     fi ;;

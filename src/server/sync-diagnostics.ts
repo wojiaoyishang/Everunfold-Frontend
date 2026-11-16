@@ -33,7 +33,7 @@ const reasons: Record<string, string> = {
   inventory_config_invalid:
     "无法读取前端运行配置，请检查 CONFIG_FILE 和 /workspace 配置挂载",
   inventory_token_missing:
-    "前端到后端的节点令牌未设置；请导入连接文件并重新创建前端进程",
+    "当前运行配置未读到前端到后端令牌；请核对 config_file、token_env 和 CONFIG_FILE 挂载，导入 Base64 后保存，并检查是否有空的外部环境变量覆盖",
   inventory_read_failed:
     "无法读取主题或插件清单；检查主体构建产物和 /data/plugins 挂载",
   inventory_forbidden:
@@ -148,6 +148,8 @@ type SyncContext = {
   peer?: string;
   target?: string;
   status?: number;
+  config_file?: string;
+  token_env?: string;
 };
 
 export function syncFailure(

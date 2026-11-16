@@ -508,7 +508,7 @@ class SetupApp(App[int]):
                 self.import_command = frontend_base64_import_command(self.config.native)
                 log.write("在前端项目根目录执行：\n" + self.import_command)
                 log.write("按提示粘贴编码；也可在前端节点页导入。编码包含节点令牌，请按密钥保管。")
-                log.write("登记连接后，还需在后端 /_nodes 添加或启用该节点的公开地址。")
+                log.write("配对已保存，还需在后端 /_nodes 登记并启用。前端发布 URL 由前端自行上报。")
                 self.notify("节点连接 Base64 已生成，可直接复制。", title="导出成功")
             finally:
                 self.exporting = False
