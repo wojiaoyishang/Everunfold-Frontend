@@ -80,6 +80,13 @@ export function ProtectedArticle({
         {authored.style}
         <ArticleHeader
           content={readable}
+          passwordState={
+            (content.password_required ?? content.access !== "captcha")
+              ? access.content
+                ? "unlocked"
+                : "locked"
+              : undefined
+          }
           liveMetrics={false}
           display={display}
           minutes={readingMinutes(rendered.html, display)}

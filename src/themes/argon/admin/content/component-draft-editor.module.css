@@ -18,16 +18,12 @@
   width: 100%;
 }
 
-.settings {
-  display: grid;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding: clamp(14px, 3vw, 24px);
-  border: 1px solid var(--line);
-  border-radius: var(--radius, 12px);
-  background: var(--surface);
+.settingsToggle {
+  display: none;
 }
 
-.settings aside {
-  min-width: 0;
+@media (max-width: 800px) {
+  .settingsToggle {
+    display: inline-flex;
+  }
 }

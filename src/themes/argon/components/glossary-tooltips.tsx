@@ -18,10 +18,8 @@ import {
   loadGlossaryMatches,
   type GlossaryRuntimeOptions,
 } from "@/core/glossary/runtime";
-import {
-  matchGlossaryText,
-  type GlossaryMatchTerm,
-} from "@/core/glossary/match";
+import type { GlossaryMatchTerm } from "@/core/glossary/match";
+import { observeGlossaryMarkup } from "@/core/glossary/decorate";
 import {
   renderGlossaryContent,
   renderGlossaryPreview,
@@ -58,56 +56,6 @@ type PopoverTerm = Omit<
   GlossaryMatchTerm,
   "matched_patterns" | "matched_texts"
 >;
-
-const ignoredSelector = [
-  "a",
-  "button",
-  "code",
-  "pre",
-  "script",
-  "style",
-  "svg",
-  "math",
-  ".katex",
-  ".glossary-term",
-  ".sr-only",
-  "[hidden]",
-  "[aria-hidden='true']",
-  "[data-glossary-ignore]",
-].join(",");
-
-function decorateTextNode(
-  node: Text,
-  terms: readonly GlossaryMatchTerm[],
-  limit: number,
-  label: (title: string) => string,
-) {
-  if (limit <= 0 || node.parentElement?.closest(ignoredSelector)) return 0;
-  const matches = matchGlossaryText(node.data, terms, limit);
-  if (!matches.length) return 0;
-  const fragment = document.createDocumentFragment();
-  let offset = 0;
-  for (const match of matches) {
-    fragment.append(
-      document.createTextNode(node.data.slice(offset, match.start)),
-    );
-    const shell = document.createElement("span");
-    shell.className = "glossary-term";
-    shell.dataset.glossaryTerm = match.term.id;
-    shell.tabIndex = 0;
-    shell.setAttribute("role", "button");
-    shell.setAttribute("aria-haspopup", "dialog");
-    shell.setAttribute("aria-controls", "glossary-tooltip");
-    shell.setAttribute("aria-expanded", "false");
-    shell.setAttribute("aria-label", label(match.term.title));
-    shell.textContent = match.text;
-    fragment.append(shell);
-    offset = match.end;
-  }
-  fragment.append(document.createTextNode(node.data.slice(offset)));
-  node.replaceWith(fragment);
-  return matches.length;
-}
 
 export default function GlossaryTooltips({
   root,
@@ -261,30 +209,11 @@ export default function GlossaryTooltips({
   useEffect(() => {
     const target = root.current;
     if (!target || !index || providedTerms) return;
-    let remaining = options.max_matches_per_page;
-    const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT);
-    const nodes: Text[] = [];
-    while (walker.nextNode()) {
-      const node = walker.currentNode as Text;
-      if (
-        node.data.trim() &&
-        (!markupSelector || node.parentElement?.closest(markupSelector))
-      )
-        nodes.push(node);
-    }
-    for (const node of nodes) {
-      remaining -= decorateTextNode(node, index.terms, remaining, (title) =>
-        translate("术语：{title}", uiLocale, { title }),
-      );
-      if (remaining <= 0) break;
-    }
-    return () => {
-      for (const term of target.querySelectorAll<HTMLElement>(
-        ".glossary-term[data-glossary-term]",
-      )) {
-        term.replaceWith(document.createTextNode(term.textContent ?? ""));
-      }
-    };
+    return observeGlossaryMarkup(target, index.terms, {
+      maxMatches: options.max_matches_per_page,
+      markupSelector,
+      label: (title) => translate("术语：{title}", uiLocale, { title }),
+    });
   }, [
     index,
     markupSelector,

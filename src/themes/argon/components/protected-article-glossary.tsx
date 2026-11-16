@@ -5,6 +5,7 @@ import {
   readProtectedGlossaryMatches,
   type GlossaryContract,
 } from "@/core/contracts/glossary";
+import { RequestError } from "@/core/http/request";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 import GlossaryFootnotes from "./glossary-footnotes";
 import GlossaryTooltips from "./glossary-tooltips";
@@ -34,8 +35,17 @@ export default function ProtectedArticleGlossary({
       .then(({ data }) => {
         if (!abort.signal.aborted) setIndex(data);
       })
-      .catch(() => {
-        // Glossary availability is independent from reading access.
+      .catch((error: unknown) => {
+        if (abort.signal.aborted) return;
+        // Never log the read receipt or the protected body.
+        console.warn("[Everunfold glossary]", {
+          operation: "protected_content_matches",
+          content_id: contentId,
+          status: error instanceof RequestError ? error.status : undefined,
+          code: error instanceof RequestError ? error.code : undefined,
+          reason:
+            "解密后的术语加载失败；请检查后端术语插件版本、启用状态与网络请求。",
+        });
       });
     return () => abort.abort();
   }, [baseUrl, contentId, readReceipt]);

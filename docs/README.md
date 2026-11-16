@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[固定编辑面板与解锁后的术语](decisions/0170-fixed-inspector-and-unlocked-glossary.md)说明统一设置面板、就地解锁与动态正文术语注入。
+
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
 [文章卡片摘要和编辑侧栏](decisions/0169-article-card-excerpts-and-editor-sidebar.md)说明空摘要、加密提示语和后台独立滚动行为。

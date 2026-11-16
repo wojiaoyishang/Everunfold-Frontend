@@ -1,47 +1,78 @@
 .layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  gap: 24px;
-  align-items: start;
-}
-
-.inspector {
-  --inspector-top: calc(82px + var(--admin-header-dock-height, 0px));
+  display: block;
   min-width: 0;
-  position: sticky;
-  top: var(--inspector-top);
 }
-
+.inspector {
+  min-width: 0;
+}
+.heading {
+  padding: 16px;
+  border-bottom: 1px solid var(--admin-border);
+}
+.heading h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.scroll {
+  padding: 16px;
+  min-height: 0;
+}
 @media (width > 800px) {
+  :global(.admin-shell:has([data-editor-inspector])) {
+    --editor-inspector-width: 320px;
+  }
+  :global(.admin-main:has([data-editor-inspector])) {
+    padding-inline-end: calc(var(--editor-inspector-width) + 24px);
+  }
+  :global(.admin-page:has([data-editor-inspector])) > * {
+    animation: none;
+  }
   .inspector {
-    max-block-size: max(
-      8rem,
-      calc(
-        100dvh - max(var(--inspector-top), var(--inspector-visible-top, 0px)) -
-          16px
+    position: fixed;
+    inset-inline-end: 0;
+    inset-block: calc(
+        var(--admin-header-height, 56px) + var(--admin-header-dock-height, 0px)
       )
-    );
-    margin-inline: -4px;
-    padding-inline: 4px;
-    padding-block-end: 4px;
+      0;
+    width: var(--editor-inspector-width, 320px);
+    display: flex;
+    flex-direction: column;
+    background: var(--admin-canvas);
+    border-inline-start: 1px solid var(--admin-border);
+    z-index: 10;
+  }
+  .heading {
+    flex: none;
+  }
+  .scroll {
+    flex: 1;
     overflow-y: auto;
     overscroll-behavior-y: contain;
     scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .scroll:hover,
+  .scroll:focus-within {
+    scrollbar-color: var(--admin-border) transparent;
   }
 }
-
-@media (max-width: 1050px) {
-  .layout {
-    grid-template-columns: minmax(0, 1fr) 270px;
-    gap: 16px;
+@media (max-width: 1050px) and (width > 800px) {
+  :global(.admin-shell:has([data-editor-inspector])) {
+    --editor-inspector-width: 280px;
   }
 }
-
 @media (max-width: 800px) {
-  .layout {
-    grid-template-columns: minmax(0, 1fr);
+  .inspector[data-mobile-open="false"] {
+    display: none;
   }
-  .inspector {
-    position: static;
+  .inspector[data-settings-only="true"] .heading {
+    display: none;
+  }
+  .heading {
+    padding-inline: 0;
+  }
+  .scroll {
+    padding: 16px 0;
   }
 }

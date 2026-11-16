@@ -57,6 +57,7 @@ import { useEditorResources } from "@/core/content-management/use-editor-resourc
 import { customPageTypeId } from "@/core/pages/registration";
 import styles from "./pages.module.css";
 import editorColumns from "../components/editor-columns.module.css";
+import { EditorInspector } from "../components/editor-inspector";
 import { NewPageLanguage, PageLanguages } from "./languages";
 import { authoringProse, pageScene } from "@/core/forms/authoring-source";
 import { SeoDisclosure, SeoFieldsEditor } from "../components/seo-fields";
@@ -736,9 +737,9 @@ export function ManagedPageEditor({
                 )
               )}
             </fieldset>
-            <aside
-              className={compact ? undefined : editorColumns.inspector}
-              aria-label={t("内容设置")}
+            <EditorInspector
+              embedded={compact}
+              label={t("内容设置")}
               data-live-part="settings"
             >
               <fieldset className="account-fieldset" disabled={disabled}>
@@ -827,7 +828,7 @@ export function ManagedPageEditor({
                   }
                 />
               </fieldset>
-            </aside>
+            </EditorInspector>
           </div>
         </Form>
       )}

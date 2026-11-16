@@ -1,13 +1,7 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import {
-  useId,
-  useLayoutEffect,
-  useRef,
-  useSyncExternalStore,
-  type ReactNode,
-} from "react";
+import { useId, useSyncExternalStore, type ReactNode } from "react";
 import { Button } from "../../components/ui/primitives";
 import { ActionPopover } from "../../components/ui/action-popover";
 import { useDragItem } from "../../components/ui/drag-and-drop";
@@ -15,7 +9,7 @@ import { Icon } from "../../components/icon";
 import { blockEditors } from "./plugins/registry";
 import { useBlockComposer } from "./block-composer";
 import styles from "./block-composer.module.css";
-import editorColumns from "../components/editor-columns.module.css";
+import { EditorInspector } from "../components/editor-inspector";
 
 export function BlockLibrary({
   compact = false,
@@ -145,98 +139,72 @@ export function ComposerSidebar({
 }) {
   const host = useBlockComposer(),
     id = useId();
-  const sidebar = useRef<HTMLElement>(null);
   const narrow = useSyncExternalStore(
     subscribeViewport,
     () => matchMedia("(max-width: 800px)").matches,
     () => false,
   );
-  useLayoutEffect(() => {
-    const rail = sidebar.current;
-    if (!rail || embedded || narrow) return;
-    // Before the rail reaches its sticky position, the heading takes up more of the viewport.
-    let frame = 0;
-    const measure = () => {
-      frame = 0;
-      const top = `${Math.ceil(rail.getBoundingClientRect().top)}px`;
-      if (rail.style.getPropertyValue("--inspector-visible-top") !== top)
-        rail.style.setProperty("--inspector-visible-top", top);
-    };
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(measure);
-    };
-    const observer = new ResizeObserver(schedule);
-    const workspace = rail.closest(".admin-content-editor-page");
-    if (workspace) observer.observe(workspace);
-    measure();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule);
-    return () => {
-      observer.disconnect();
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-      rail.style.removeProperty("--inspector-visible-top");
-    };
-  }, [embedded, narrow]);
   const tabValue = settingsOnly && narrow ? "settings" : host.tab;
   if (embedded) return <div data-live-part="settings">{children}</div>;
   return (
-    <aside
-      ref={sidebar}
-      className={`${editorColumns.inspector} ${styles.inspector}`}
+    <EditorInspector
+      className={styles.inspector}
+      label="区块与内容设置"
       data-composer-sidebar
       data-settings-only={settingsOnly}
-      aria-label="区块与内容设置"
-    >
-      <div
-        className={styles.inspectorTabs}
-        role="tablist"
-        aria-label="编辑侧栏"
-      >
-        {(["blocks", "settings"] as const).map((tab) => (
-          <Button
-            key={tab}
-            role="tab"
-            id={`${id}-${tab}-tab`}
-            aria-selected={tabValue === tab}
-            aria-controls={`${id}-${tab}`}
-            tabIndex={tabValue === tab ? 0 : -1}
-            onClick={() => host.setTab(tab)}
-            onKeyDown={(e) => {
-              if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) {
-                e.preventDefault();
-                const destination =
-                  e.key === "Home"
-                    ? "blocks"
-                    : e.key === "End"
-                      ? "settings"
-                      : tab === "blocks"
+      header={
+        <div
+          className={styles.inspectorTabs}
+          role="tablist"
+          aria-label="编辑侧栏"
+        >
+          {(["blocks", "settings"] as const).map((tab) => (
+            <Button
+              key={tab}
+              role="tab"
+              id={`${id}-${tab}-tab`}
+              aria-selected={tabValue === tab}
+              aria-controls={`${id}-${tab}`}
+              tabIndex={tabValue === tab ? 0 : -1}
+              onClick={() => host.setTab(tab)}
+              onKeyDown={(e) => {
+                if (
+                  ["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)
+                ) {
+                  e.preventDefault();
+                  const destination =
+                    e.key === "Home"
+                      ? "blocks"
+                      : e.key === "End"
                         ? "settings"
-                        : "blocks";
-                host.setTab(destination);
-                const next =
-                  e.currentTarget.parentElement?.querySelector<HTMLButtonElement>(
-                    `button[id="${id}-${destination}-tab"]`,
-                  );
-                next?.focus();
-              }
-            }}
-          >
-            {tab === "blocks" ? (
-              <>
-                <Icon name="grid" />
-                <UiText text="区块" />
-              </>
-            ) : (
-              <>
-                <Icon name="settings" />
-                <UiText text="内容设置" />
-              </>
-            )}
-          </Button>
-        ))}
-      </div>
+                        : tab === "blocks"
+                          ? "settings"
+                          : "blocks";
+                  host.setTab(destination);
+                  const next =
+                    e.currentTarget.parentElement?.querySelector<HTMLButtonElement>(
+                      `button[id="${id}-${destination}-tab"]`,
+                    );
+                  next?.focus();
+                }
+              }}
+            >
+              {tab === "blocks" ? (
+                <>
+                  <Icon name="grid" />
+                  <UiText text="区块" />
+                </>
+              ) : (
+                <>
+                  <Icon name="settings" />
+                  <UiText text="内容设置" />
+                </>
+              )}
+            </Button>
+          ))}
+        </div>
+      }
+    >
       <div className={styles.inspectorViews}>
         <div
           className={styles.inspectorView}
@@ -259,7 +227,7 @@ export function ComposerSidebar({
           {children}
         </div>
       </div>
-    </aside>
+    </EditorInspector>
   );
 }
 function subscribeViewport(changed: () => void) {

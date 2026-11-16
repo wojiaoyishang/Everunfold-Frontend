@@ -80,6 +80,16 @@
   margin: 0 0 17px;
   overflow-wrap: anywhere;
 }
+.article-header h1.article-title-protected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4em;
+}
+.article-title-protected > span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
 .article-actions {
   display: flex;
   align-items: center;

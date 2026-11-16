@@ -5,6 +5,7 @@ import { AppLink as Link } from "./navigation-link";
 import { PostMeta } from "./post-meta";
 import { ContentLanguages } from "./content-languages";
 import type { ArticleDisplayPreferences } from "@/core/contracts/settings";
+import { ReadingLock } from "./reading-lock";
 
 export function ArticleHeader({
   content,
@@ -12,12 +13,14 @@ export function ArticleHeader({
   interactive = true,
   display,
   minutes,
+  passwordState,
 }: {
   content: ContentMetadata;
   liveMetrics?: boolean;
   interactive?: boolean;
   display?: ArticleDisplayPreferences;
   minutes?: number;
+  passwordState?: "locked" | "unlocked";
 }) {
   const cover =
     display?.cover_position === "hidden"
@@ -54,7 +57,12 @@ export function ArticleHeader({
             ),
           )}
         </div>
-        <h1>{content.title}</h1>
+        <h1 className={passwordState ? "article-title-protected" : undefined}>
+          {passwordState && (
+            <ReadingLock unlocked={passwordState === "unlocked"} />
+          )}
+          <span>{content.title}</span>
+        </h1>
         <PostMeta
           content={content}
           article

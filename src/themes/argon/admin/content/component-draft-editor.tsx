@@ -44,6 +44,7 @@ import { AdminPageHeading } from "../components/page-heading";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { usePageAction } from "../pages/feedback";
 import { EditorLanguages } from "./editor-languages";
+import { EditorInspector } from "../components/editor-inspector";
 import { DraftExcerptField } from "./draft-excerpt-field";
 import { EditorPanels } from "./editor-panels";
 import { EditorTitle } from "./editor-title";
@@ -406,7 +407,7 @@ export function ComponentDraftEditor({
             />
             {!isEmbeddedEditor() && (
               <Button
-                className="admin-button"
+                className={`admin-button ${styles.settingsToggle}`}
                 aria-expanded={showSettings}
                 aria-controls="builder-content-settings"
                 onClick={() => setShowSettings((open) => !open)}
@@ -416,45 +417,44 @@ export function ComponentDraftEditor({
               </Button>
             )}
           </section>
-          {settingsOpen && (
-            <section
-              id="builder-content-settings"
-              className={styles.settings}
-              aria-label="内容设置"
-            >
-              {type.supports_excerpt && (
-                <DraftExcerptField
-                  type={type.id}
-                  fields={fields}
-                  id={detail?.id}
-                  language={detail?.language ?? language}
-                  disabled={!writable || action.busy}
-                  onChange={setFields}
-                />
-              )}
-              <EditorPanels
-                type={type}
+          <EditorInspector
+            id="builder-content-settings"
+            label="内容设置"
+            embedded={isEmbeddedEditor()}
+            data-mobile-open={settingsOpen}
+          >
+            {type.supports_excerpt && (
+              <DraftExcerptField
+                type={type.id}
                 fields={fields}
-                onChange={setFields}
-                detail={detail}
-                authoringLanguage={detail?.language ?? language}
+                id={detail?.id}
+                language={detail?.language ?? language}
                 disabled={!writable || action.busy}
-                terms={resources.terms}
-                newArticleDefaults={
-                  !detail && type.id === "article" ? resources.defaults : null
-                }
-                createCategory={resources.createCategory}
-                media={media}
-                onMedia={resources.remember}
-                publication={{
-                  choice,
-                  onChange: setPublication,
-                  onCancel: () => void save("cancel"),
-                  disabled: !publishable || action.busy,
-                }}
+                onChange={setFields}
               />
-            </section>
-          )}
+            )}
+            <EditorPanels
+              type={type}
+              fields={fields}
+              onChange={setFields}
+              detail={detail}
+              authoringLanguage={detail?.language ?? language}
+              disabled={!writable || action.busy}
+              terms={resources.terms}
+              newArticleDefaults={
+                !detail && type.id === "article" ? resources.defaults : null
+              }
+              createCategory={resources.createCategory}
+              media={media}
+              onMedia={resources.remember}
+              publication={{
+                choice,
+                onChange: setPublication,
+                onCancel: () => void save("cancel"),
+                disabled: !publishable || action.busy,
+              }}
+            />
+          </EditorInspector>
           <section className="account-card" hidden={isEmbeddedEditor()}>
             <h2>
               <UiText text="组件内容" />

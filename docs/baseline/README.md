@@ -1897,3 +1897,10 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0169-article-card-excerpts-and-editor-sidebar.md` | `ADR0169-1` | `9a5b41ddc921fe5c31565b63abb463286725f9fedbcb92eef5aea1459f7b7d54` |
+
+
+## 固定编辑面板与解锁后的术语
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0170-fixed-inspector-and-unlocked-glossary.md` | `ADR0170-1` | `3cb2669a8d6646985d3c798731f21ba43330daa2f4a37bb26374f09ad11d2999` |

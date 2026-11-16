@@ -1,0 +1,26 @@
+.lock {
+  display: inline-flex;
+  flex: none;
+  inline-size: 0.85em;
+  block-size: 0.85em;
+}
+.lock svg {
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+.shackle {
+  transform-origin: 8px 10px;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lock[data-unlocked="true"] .shackle {
+  transform: translateY(-1px) rotate(-32deg);
+}
+:global(html[data-motion="reduced"]) .shackle {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(html:not([data-motion="full"])) .shackle {
+    transition: none;
+  }
+}
