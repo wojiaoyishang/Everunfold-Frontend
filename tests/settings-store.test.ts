@@ -1,11 +1,20 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, writeFile } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { randomUUID } from "node:crypto";
 import { FileSettingsStore } from "../src/server/settings/store";
-import { settingsHandler } from "../src/server/settings/receiver";
+import {
+  settingsHandler,
+  settingsReceiver,
+} from "../src/server/settings/receiver";
+import { cacheMaintenance } from "../src/server/settings/cache-maintenance";
+import {
+  ClearedPublicContent,
+  FileContentStore,
+} from "../src/server/content/store";
+import { snapshot } from "./fixtures";
 import { createServer } from "node:http";
 import { frontendHandler } from "../src/server/http";
 import { once } from "node:events";
@@ -172,4 +181,121 @@ test("settings receiver accepts database-backed translation overrides", async ()
     admin: { "zh-CN": { 工作台: "大香蕉" } },
     backend: {},
   });
+});
+
+test("clearing a bound node removes current replicas without replaying older releases", async (t) => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "everunfold-clear-"));
+  const settingsDirectory = path.join(directory, "settings");
+  const contentDirectory = path.join(directory, "content");
+  const epoch = randomUUID();
+  const token = randomUUID() + randomUUID();
+  const identity = { node_id: "test", source_epoch: epoch };
+  const settings = new FileSettingsStore(settingsDirectory, "test", epoch);
+  const content = new FileContentStore(contentDirectory, "test", epoch);
+  const old = {
+    protocol: "content-1",
+    ...identity,
+    resource: "public-content",
+    revision: 1,
+    value: { ...snapshot(), source_epoch: epoch, generation: 1 },
+  };
+  const current = {
+    ...old,
+    revision: 2,
+    value: { ...old.value, generation: 2, contents: [], comments: {} },
+  };
+  await content.apply(old);
+  await content.apply(current);
+  await writeFile(
+    path.join(contentDirectory, "current.json"),
+    JSON.stringify(old.value),
+  );
+  await writeFile(path.join(contentDirectory, "keep.json"), "unrelated");
+  const otherEpoch = randomUUID();
+  const unrelated = new FileSettingsStore(
+    settingsDirectory,
+    "test",
+    otherEpoch,
+  );
+  await unrelated.apply(policy(otherEpoch, 1));
+  for (const revision of [1, 2]) {
+    await settings.apply(policy(epoch, revision));
+    await settings.apply(publicSettings(epoch, revision));
+  }
+  const maintenance = cacheMaintenance(identity, settings, content);
+  const server = settingsReceiver(
+    settings,
+    token,
+    ["127.0.0.1"],
+    content,
+    identity,
+    undefined,
+    maintenance,
+  );
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
+  t.after(async () => {
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await rm(directory, { recursive: true, force: true });
+  });
+  const url = `http://127.0.0.1:${(server.address() as AddressInfo).port}/internal/cache/v1/clear`;
+  const post = (target: object, secret: string) =>
+    fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${secret}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(target),
+    });
+  assert.equal((await post(identity, "wrong")).status, 403);
+  assert.equal(
+    (await post({ ...identity, source_epoch: otherEpoch }, token)).status,
+    409,
+  );
+  assert.equal((await content.read())?.generation, 2);
+
+  const response = await post(identity, token);
+  assert.equal(response.status, 200);
+  const receipt = await response.json();
+  assert.equal(receipt.protocol, "cache-clear-1");
+  assert.equal(receipt.removed_files, 8);
+  assert.ok(receipt.removed_bytes > 0);
+  assert.deepEqual(
+    (await maintenance.status()).resources.map((item) => item.status),
+    ["missing", "missing", "missing"],
+  );
+  const files = await readdir(
+    path.join(contentDirectory, "releases", "test", epoch),
+  );
+  assert.deepEqual(files.sort(), [
+    "public-content.2.floor.json",
+    "public-content.2.intent.json",
+  ]);
+  assert.equal(
+    await readFile(path.join(contentDirectory, "keep.json"), "utf8"),
+    "unrelated",
+  );
+  assert.equal((await unrelated.read("cache-policy"))?.revision, 1);
+  await assert.rejects(readFile(path.join(contentDirectory, "current.json")), {
+    code: "ENOENT",
+  });
+
+  const restarted = new FileContentStore(contentDirectory, "test", epoch);
+  await restarted.apply(old);
+  await settings.apply(policy(epoch, 1));
+  await settings.apply(publicSettings(epoch, 1));
+  await assert.rejects(restarted.read(), ClearedPublicContent);
+  assert.equal(await settings.read("public-settings"), null);
+  assert.equal(await settings.read("cache-policy"), null);
+  assert.equal((await (await post(identity, token)).json()).removed_files, 0);
+  await restarted.apply(current);
+  await settings.apply(publicSettings(epoch, 2));
+  await settings.apply(policy(epoch, 2));
+  assert.deepEqual((await restarted.read())?.contents, []);
+  assert.deepEqual(
+    (await maintenance.status()).resources.map((item) => item.status),
+    ["ready", "ready", "ready"],
+  );
 });

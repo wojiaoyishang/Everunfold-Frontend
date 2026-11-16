@@ -67,7 +67,7 @@ function bytes(value: number | null | undefined) {
   return `${new Intl.NumberFormat(undefined, { maximumFractionDigits: unit ? 1 : 0 }).format(value)} ${units[unit]}`;
 }
 
-type CacheAction = CacheRebuild["scope"] | "prune";
+type CacheAction = CacheRebuild["scope"] | "prune" | "clear";
 
 function SiteDeliverySection({
   rows,
@@ -153,7 +153,8 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
     (item) => (item.reclaimable_bytes ?? 0) > 0,
   );
   const prune = action === "prune";
-  const label = prune ? "清理旧版本" : "重新同步";
+  const clear = action === "clear";
+  const label = clear ? "清空缓存" : prune ? "清理旧版本" : "重新同步";
   const open = (operation: CacheAction, button: HTMLButtonElement) => {
     focus.current = button;
     cache.clearActionError();
@@ -365,6 +366,14 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
                 >
                   <UiText text="清理旧版本" />
                 </Button>
+                <Button
+                  className="admin-button"
+                  disabled={state.receiver !== "ready" || cache.busy}
+                  onClick={(event) => open("clear", event.currentTarget)}
+                >
+                  <Icon name="trash" />
+                  <UiText text="清空缓存" />
+                </Button>
               </div>
             )}
           </>
@@ -373,6 +382,11 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
           <p className="admin-settings-message" role="status">
             {cache.result.type === "queued" ? (
               <UiText text="已提交重新同步。" />
+            ) : cache.result.type === "cleared" ? (
+              <UiText
+                text="已清空节点缓存，删除 {count} 个文件。请重新同步全部副本。"
+                values={{ count: cache.result.files }}
+              />
             ) : cache.result.files === 0 ? (
               <UiText text="没有需要清理的旧文件。" />
             ) : (
@@ -400,11 +414,18 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
         open={action !== undefined}
         title={label}
         description={
-          prune
-            ? `${cache.node} · ${t("每类最多清理 200 个旧文件，保留当前副本和版本记录。")}`
-            : `${cache.node} · ${action && action !== "all" ? t(resources[action]) : t("全部副本")} · ${t("从后端重新发送当前版本。")}`
+          clear ? (
+            <UiText
+              text="将删除节点 {node} 的公开内容、站点设置和节点策略的全部缓存副本，包括当前版本。该节点的读者页面可能暂时不可用，请在清空后点击“重新同步全部”。"
+              values={{ node: cache.node }}
+            />
+          ) : prune ? (
+            `${cache.node} · ${t("每类最多清理 200 个旧文件，保留当前副本和版本记录。")}`
+          ) : (
+            `${cache.node} · ${action && action !== "all" ? t(resources[action]) : t("全部副本")} · ${t("从后端重新发送当前版本。")}`
+          )
         }
-        intent={prune ? "warning" : "default"}
+        intent={clear ? "danger" : prune ? "warning" : "default"}
         confirmLabel={label}
         error={cache.actionError}
         returnFocus={focus}

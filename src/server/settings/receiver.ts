@@ -9,7 +9,7 @@ import { createHash, timingSafeEqual } from "node:crypto";
 import type { ReceiverStatus } from "@/core/contracts/settings";
 import type { cacheMaintenance } from "./cache-maintenance";
 import type { SettingsStore } from "./store";
-import type { ContentStore } from "../content/store";
+import { ClearedPublicContent, type ContentStore } from "../content/store";
 import { syncFailure } from "../sync-diagnostics";
 
 async function replica(
@@ -22,6 +22,8 @@ async function replica(
       ? { status: "missing", revision: null }
       : { status: "ready", revision };
   } catch (error) {
+    if (error instanceof ClearedPublicContent)
+      return { status: "missing", revision: null };
     syncFailure(
       { direction: "local", operation },
       "replica_unavailable",
@@ -71,6 +73,17 @@ export function settingsHandler(
     else allowed.addSubnet(address, Number(prefix), family);
   }
   const secret = createHash("sha256").update(`Bearer ${token}`).digest();
+  // The node's receiver is the replica writer. Serialize destructive maintenance
+  // and publication so a clear can leave a durable high-water revision on disk.
+  let writes = Promise.resolve();
+  function write<T>(action: () => Promise<T>): Promise<T> {
+    const work = writes.then(action);
+    writes = work.then(
+      () => {},
+      () => {},
+    );
+    return work;
+  }
   return async (request: IncomingMessage, response: ServerResponse) => {
     const peer = request.socket.remoteAddress?.replace(/^::ffff:/, "") ?? "";
     const knownPaths = [
@@ -79,6 +92,7 @@ export function settingsHandler(
       "/internal/cache/v1/status",
       "/internal/cache/v1/apply",
       "/internal/cache/v1/prune",
+      "/internal/cache/v1/clear",
     ];
     const operation =
       (request.method === "GET"
@@ -168,9 +182,14 @@ export function settingsHandler(
         : request.url === "/internal/cache/v1/apply"
           ? content
           : undefined;
-    const prune =
-      maintenance && identity && request.url === "/internal/cache/v1/prune";
-    if (request.method !== "POST" || (!selected && !prune)) {
+    const deletion =
+      request.url === "/internal/cache/v1/clear"
+        ? "clear"
+        : request.url === "/internal/cache/v1/prune"
+          ? "prune"
+          : undefined;
+    const maintenanceRequest = deletion && maintenance && identity;
+    if (request.method !== "POST" || (!selected && !maintenanceRequest)) {
       reply(404, { error: "unknown_operation" });
       request.resume();
       return;
@@ -189,7 +208,7 @@ export function settingsHandler(
         size += chunk.length;
         if (
           size >
-          (prune
+          (maintenanceRequest
             ? 4096
             : selected === content && content
               ? content.maxBytes
@@ -203,7 +222,7 @@ export function settingsHandler(
       }
       const bytes = Buffer.concat(chunks);
       const payload = JSON.parse(bytes.toString("utf8"));
-      if (prune) {
+      if (maintenanceRequest) {
         if (
           !payload ||
           Object.keys(payload).length !== 2 ||
@@ -214,14 +233,19 @@ export function settingsHandler(
           return;
         }
         try {
-          reply(200, await maintenance.prune());
+          reply(200, await write(async () => maintenance[deletion]()));
         } catch (error) {
-          reply(503, { error: "cache_prune_unconfirmed" }, undefined, error);
+          reply(
+            503,
+            { error: `cache_${deletion}_unconfirmed` },
+            undefined,
+            error,
+          );
         }
         return;
       }
       if (!selected) return;
-      const applied = await selected.apply(payload);
+      const applied = await write(async () => selected.apply(payload));
       reply(200, {
         node_id: applied.node_id,
         source_epoch: applied.source_epoch,

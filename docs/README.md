@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[受限文章预览、更多组件与清空节点缓存](decisions/0167-reader-previews-and-cache-clear.md)记录旧封面副本恢复、阅读页动效、组件插件及完整缓存清理。
+
 [博客迁移后的阅读与组件页修复](decisions/0166-post-migration-reader-and-page-fixes.md)记录受限文章封面、解锁术语与标签、页面目录、进度条及主题动效的更新。
 
 [配对凭据读取与前端发布地址归属](decisions/0165-pairing-runtime-and-frontend-origins.md)说明导入后令牌缺失的修复、内部配对表单及前端发布地址上报。

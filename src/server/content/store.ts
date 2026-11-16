@@ -10,7 +10,10 @@ import type { PublicSnapshot } from "@/core/content/types";
 import { parsePublicSnapshot } from "../../core/content/validation";
 import { jsonDigest, publishImmutableJson } from "../storage/immutable-json";
 import {
+  clearedRevision,
+  clearRevisions,
   pruneRevisions,
+  removeReplicaFiles,
   revisionFiles,
   revisionUsage,
 } from "../storage/revisions";
@@ -46,6 +49,8 @@ export interface ContentStore {
   apply(value: unknown): Promise<ContentDelivery>;
 }
 
+export class ClearedPublicContent extends Error {}
+
 export class FileContentStore implements ContentStore {
   constructor(
     readonly directory: string,
@@ -62,7 +67,7 @@ export class FileContentStore implements ContentStore {
   private files() {
     return revisionFiles(
       this.folder(),
-      /^public-content\.([1-9]\d*)\.(intent|snapshot)\.json$/,
+      /^public-content\.([1-9]\d*)\.(intent|snapshot|floor)\.json$/,
     );
   }
   usage(verifiedRevision: number | null) {
@@ -78,6 +83,24 @@ export class FileContentStore implements ContentStore {
       await this.files(),
       current.generation,
     );
+  }
+  async clear() {
+    // A managed node may still have a pre-sync current.json. Fence that fallback
+    // before removing any replica, including when no managed release has arrived.
+    await publishImmutableJson(this.marker(), {
+      node_id: this.nodeId,
+      source_epoch: this.sourceEpoch,
+    });
+    const legacy = await removeReplicaFiles(this.directory, ["current.json"]);
+    const managed = await clearRevisions(
+      this.folder(),
+      "public-content",
+      await this.files(),
+    );
+    return {
+      removed_files: legacy.removed_files + managed.removed_files,
+      removed_bytes: legacy.removed_bytes + managed.removed_bytes,
+    };
   }
   private checked(input: unknown): ContentDelivery {
     if (!validate(input) || !Number.isSafeInteger(input.revision))
@@ -117,15 +140,21 @@ export class FileContentStore implements ContentStore {
       jsonDigest({ node_id: this.nodeId, source_epoch: this.sourceEpoch })
     )
       throw new Error("Content source binding changed");
-    const [latest] = await this.files();
+    const files = await this.files();
+    const [latest] = files;
     if (!latest) throw new Error("Managed content is missing");
     try {
       return await this.readRevision(latest.revision);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
       const [newest] = await this.files();
-      if (!newest || newest.revision <= latest.revision) throw error;
-      return this.readRevision(newest.revision);
+      if (newest && newest.revision > latest.revision)
+        return this.readRevision(newest.revision);
+      if (clearedRevision(files) === latest.revision)
+        throw new ClearedPublicContent(
+          "The public content replica has been cleared",
+        );
+      throw error;
     }
   }
   private async readRevision(revision: number) {
@@ -154,6 +183,7 @@ export class FileContentStore implements ContentStore {
     parsePublicSnapshot(value.value);
     if (Buffer.byteLength(JSON.stringify(value)) > this.maxBytes)
       throw new Error("Content release is too large");
+    if (value.revision < clearedRevision(await this.files())) return value;
     await publishImmutableJson(this.marker(), {
       node_id: this.nodeId,
       source_epoch: this.sourceEpoch,

@@ -1,4 +1,5 @@
 import type {
+  CacheClearReceipt,
   CacheDiskResource,
   CachePruneReceipt,
   CacheReceiverStatus,
@@ -8,6 +9,21 @@ import { freeDiskBytes, type RevisionUsage } from "../storage/revisions";
 import type { FileContentStore } from "../content/store";
 import type { FileSettingsStore } from "./store";
 import { readReplicas } from "./receiver";
+
+function totalRemoved(
+  counts: { removed_files: number; removed_bytes: number }[],
+) {
+  return {
+    removed_files: counts.reduce(
+      (total, count) => total + count.removed_files,
+      0,
+    ),
+    removed_bytes: counts.reduce(
+      (total, count) => total + count.removed_bytes,
+      0,
+    ),
+  };
+}
 
 export function cacheMaintenance(
   target: CacheReceiverTarget,
@@ -59,14 +75,19 @@ export function cacheMaintenance(
       return {
         protocol: "cache-prune-1",
         ...target,
-        removed_files: counts.reduce(
-          (total, count) => total + count.removed_files,
-          0,
-        ),
-        removed_bytes: counts.reduce(
-          (total, count) => total + count.removed_bytes,
-          0,
-        ),
+        ...totalRemoved(counts),
+      };
+    },
+    async clear(): Promise<CacheClearReceipt> {
+      // Check and clear the bound content store first. Settings stay available if
+      // the content source cannot be verified.
+      const contentRemoved = await content.clear();
+      const settingsRemoved = await settings.clear("public-settings");
+      const policyRemoved = await settings.clear("cache-policy");
+      return {
+        protocol: "cache-clear-1",
+        ...target,
+        ...totalRemoved([contentRemoved, settingsRemoved, policyRemoved]),
       };
     },
   };

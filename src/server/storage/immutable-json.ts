@@ -15,6 +15,16 @@ export function canonical(value: unknown): string {
 export const jsonDigest = (value: unknown) =>
   createHash("sha256").update(canonical(value)).digest("hex");
 
+export async function syncDirectory(directory: string) {
+  if (process.platform === "win32") return;
+  const dir = await open(directory, "r");
+  try {
+    await dir.sync();
+  } finally {
+    await dir.close();
+  }
+}
+
 export async function publishImmutableJson(target: string, value: unknown) {
   const directory = path.dirname(target);
   await mkdir(directory, { recursive: true });
@@ -35,14 +45,7 @@ export async function publishImmutableJson(target: string, value: unknown) {
       if (canonical(JSON.parse(await readFile(target, "utf8"))) !== bytes)
         throw new Error("Conflicting immutable revision");
     }
-    if (process.platform !== "win32") {
-      const dir = await open(directory, "r");
-      try {
-        await dir.sync();
-      } finally {
-        await dir.close();
-      }
-    }
+    await syncDirectory(directory);
   } finally {
     await unlink(staging).catch(() => {});
   }

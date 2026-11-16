@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
 import {
+  clearNodeCache,
   pruneNodeCache,
   readFrontendNodes,
   readNodeCache,
@@ -18,7 +19,7 @@ import {
 import { RequestError } from "@/core/http/request";
 import { settingsFailure } from "./editor";
 
-type Action = CacheRebuild["scope"] | "prune";
+type Action = CacheRebuild["scope"] | "prune" | "clear";
 type PolicyDraft = { base: PolicyState; value: CachePolicy };
 type SiteDelivery = {
   rows?: DeliveryState[];
@@ -42,7 +43,8 @@ export function useCacheManagement(localNode: string) {
   const [readError, setReadError] = useState(false);
   const [actionError, setActionError] = useState("");
   const [result, setResult] = useState<
-    { type: "queued" } | { type: "pruned"; files: number; bytes: number }
+    | { type: "queued" }
+    | { type: "pruned" | "cleared"; files: number; bytes: number }
   >();
   const current = useRef<AbortController | null>(null);
   const listing = useRef<AbortController | null>(null);
@@ -237,14 +239,15 @@ export function useCacheManagement(localNode: string) {
         resetPolicy();
         setPolicyNotice({ type: "saved", text: "节点策略已保存。" });
         setWatch((value) => value + 1);
-      } else if (action === "prune") {
-        const { data } = await pruneNodeCache(baseUrl, node, csrfToken, {
+      } else if (action === "prune" || action === "clear") {
+        const remove = action === "clear" ? clearNodeCache : pruneNodeCache;
+        const { data } = await remove(baseUrl, node, csrfToken, {
           signal: request.signal,
-          timeoutMs: 12000,
+          timeoutMs: action === "clear" ? 35000 : 12000,
         });
         if (request.signal.aborted) return false;
         setResult({
-          type: "pruned",
+          type: action === "clear" ? "cleared" : "pruned",
           files: data.removed_files,
           bytes: data.removed_bytes,
         });

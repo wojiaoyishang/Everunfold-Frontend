@@ -1879,3 +1879,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0166-post-migration-reader-and-page-fixes.md` | `ADR0166-1` | `47b11d8f73f7a43118b922cb188c9c24e0232c03092c5a944b550c2b8bf2ab36` |
+
+## 受限文章预览、更多组件与清空节点缓存
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0167-reader-previews-and-cache-clear.md` | `ADR0167-1` | `4dfbae7ba61afcb43fac88cb94eee5f5326282d082f24260071b9751daf30276` |

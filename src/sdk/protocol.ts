@@ -41,6 +41,7 @@ export const SDK_CLIENT_EXPORTS = [
   "readPageCategories",
   "savePageMetadata",
   "resourceUrl",
+  "parseSiteMediaReference",
   "taxonomyHref",
   "useAdminRequest",
   "randomUUID",

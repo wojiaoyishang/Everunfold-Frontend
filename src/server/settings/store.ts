@@ -8,6 +8,8 @@ import schema from "@/core/contracts/settings-v1-schema";
 import { SyncValidationError } from "../sync-diagnostics";
 import type { SettingsDelivery } from "@/core/contracts/settings";
 import {
+  clearedRevision,
+  clearRevisions,
   pruneRevisions,
   revisionFiles,
   revisionUsage,
@@ -62,7 +64,7 @@ export class FileSettingsStore implements SettingsStore {
   private files(resource: SettingsResource) {
     return revisionFiles(
       this.folder(),
-      new RegExp(`^${resource}\\.([1-9]\\d*)\\.json$`),
+      new RegExp(`^${resource}\\.([1-9]\\d*)(?:\\.(floor))?\\.json$`),
     );
   }
   usage(resource: SettingsResource, verifiedRevision: number | null) {
@@ -79,15 +81,21 @@ export class FileSettingsStore implements SettingsStore {
       current.revision,
     );
   }
+  async clear(resource: SettingsResource) {
+    return clearRevisions(this.folder(), resource, await this.files(resource));
+  }
   async read(resource: SettingsResource) {
-    const [newest] = await this.files(resource);
-    if (!newest) return null;
+    const files = await this.files(resource);
+    const newest = files.find((file) => !file.barrier);
+    if (!newest || newest.revision < clearedRevision(files)) return null;
     try {
       return await this.readRevision(resource, newest.name, newest.revision);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
-      const [latest] = await this.files(resource);
-      if (!latest || latest.revision <= newest.revision) throw error;
+      const current = await this.files(resource);
+      const latest = current.find((file) => !file.barrier);
+      if (!latest || latest.revision < clearedRevision(current)) return null;
+      if (latest.revision <= newest.revision) throw error;
       // Cleanup can remove a revision we selected just as its successor arrived.
       return this.readRevision(resource, latest.name, latest.revision);
     }
@@ -111,6 +119,8 @@ export class FileSettingsStore implements SettingsStore {
   }
   async apply(input: unknown) {
     const value = this.checked(input);
+    if (value.revision < clearedRevision(await this.files(value.resource)))
+      return value;
     await publishImmutableJson(
       path.join(this.folder(), `${value.resource}.${value.revision}.json`),
       value,

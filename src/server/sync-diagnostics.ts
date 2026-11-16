@@ -26,6 +26,7 @@ const reasons: Record<string, string> = {
   resource_not_applied: "同步数据未落盘，请结合 error_code/error_reason 排查",
   cache_state_unavailable: "无法读取本机缓存状态",
   cache_prune_unconfirmed: "缓存清理未能确认完成",
+  cache_clear_unconfirmed: "清空缓存未能确认完成",
   replica_unavailable: "无法读取本机公开副本",
   backend_http: "后端内部请求返回失败状态；检查内部地址、代理与后端日志",
   backend_invalid: "后端健康响应格式不正确；检查内部地址是否指向 FastAPI",
