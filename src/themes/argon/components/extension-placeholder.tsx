@@ -1,6 +1,14 @@
 import { UiText } from "@/core/i18n/provider";
 import styles from "./extension-placeholder.module.css";
 
+export function ExtensionProgress() {
+  return (
+    <div className={styles.progress} aria-hidden="true">
+      <span />
+    </div>
+  );
+}
+
 export function ExtensionPlaceholder({
   name,
   loading = false,
@@ -16,13 +24,7 @@ export function ExtensionPlaceholder({
       data-anchor-pending={loading || undefined}
     >
       <UiText text={loading ? "正在加载组件…" : "组件暂不可用"} />
-      {loading ? (
-        <div className={styles.progress} aria-hidden="true">
-          <span />
-        </div>
-      ) : (
-        <code>{name}</code>
-      )}
+      {loading ? <ExtensionProgress /> : <code>{name}</code>}
     </div>
   );
 }

@@ -1,0 +1,227 @@
+.disclosure,
+.notice {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.toggle {
+  inline-size: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  text-align: start;
+  font-weight: 600;
+  background: transparent;
+  color: var(--text-strong);
+}
+.toggle:not(:disabled):hover {
+  background: var(--accent-soft);
+}
+.toggle > svg {
+  flex: none;
+  color: var(--accent);
+  transition: transform 220ms var(--motion-ease);
+}
+.toggle[aria-expanded="true"] > svg {
+  transform: rotate(180deg);
+}
+.reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 260ms var(--motion-ease),
+    opacity 180ms ease;
+}
+.reveal[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+.clip {
+  min-block-size: 0;
+  overflow: hidden;
+}
+.disclosureBody {
+  display: grid;
+  gap: var(--builder-visual-gap, 12px);
+  padding: 2px 16px 16px;
+}
+.notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--line));
+}
+.notice[data-warning] {
+  background: color-mix(
+    in srgb,
+    var(--admin-warning, #d79232) 14%,
+    var(--surface)
+  );
+  border-color: color-mix(
+    in srgb,
+    var(--admin-warning, #d79232) 45%,
+    var(--line)
+  );
+}
+.notice > svg {
+  inline-size: 20px;
+  block-size: 20px;
+  margin-block-start: 3px;
+  color: var(--accent);
+}
+.notice[data-warning] > svg {
+  color: inherit;
+}
+.noticeBody {
+  display: grid;
+  gap: var(--builder-visual-gap, 10px);
+}
+.people h2 {
+  margin: 0 0 12px;
+  font-size: clamp(18px, 3vw, 24px);
+}
+.peopleItems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--builder-visual-gap, 10px);
+  align-items: stretch;
+}
+.peopleItems > * {
+  max-inline-size: 100%;
+}
+.people[data-appearance="cards"] .peopleItems {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+}
+:is(.disclosureBody, .noticeBody, .peopleItems)[data-preview]:not(
+    :has([data-builder-id])
+  ) {
+  min-block-size: 40px;
+}
+.person {
+  display: inline-flex;
+  inline-size: 100%;
+  min-inline-size: 0;
+  align-items: center;
+  gap: 9px;
+  padding: 6px 12px 6px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--text-strong);
+  background: var(--surface);
+  text-align: start;
+}
+.person:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.person > span:not(:first-child) {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.person small,
+.subtitle {
+  display: block;
+  color: var(--muted);
+  font-size: 13px;
+}
+.person > svg {
+  flex: none;
+  color: var(--accent);
+}
+.people[data-appearance="cards"] .person {
+  border-radius: var(--radius);
+  padding: 12px;
+}
+.dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  inline-size: min(520px, calc(100% - 32px));
+  max-block-size: calc(100dvh - 40px);
+  padding: clamp(20px, 5vw, 32px);
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  color: var(--text);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  animation: appear 220ms var(--motion-ease) both;
+}
+.dialog::backdrop {
+  background: rgb(12 9 27 / 54%);
+  animation: shade 180ms ease both;
+}
+.dialog[data-state="closing"] {
+  animation: appear 160ms ease reverse both;
+}
+.dialog[data-state="closing"]::backdrop {
+  animation: shade 160ms ease reverse both;
+}
+.dialog h2,
+.subtitle {
+  margin: 0;
+}
+.dialog blockquote {
+  margin: 16px 0 22px;
+  padding: 10px 14px;
+  border-inline-start: 3px solid var(--accent);
+  background: var(--accent-soft);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.close {
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 7px 14px;
+}
+.close:hover {
+  color: white;
+  background: var(--brand-accent);
+}
+.video {
+  margin: 0;
+}
+.video video {
+  display: block;
+  inline-size: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  border-radius: var(--radius);
+  background: #111;
+}
+.video figcaption,
+.empty {
+  margin: 8px 0 0;
+  text-align: center;
+  color: var(--muted);
+}
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@keyframes shade {
+  from {
+    opacity: 0;
+  }
+}
+:global(html[data-motion="reduced"]) :is(.toggle > svg, .reveal, .dialog),
+:global(html[data-motion="reduced"]) .dialog::backdrop {
+  animation: none;
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(html:not([data-motion="full"])) :is(.toggle > svg, .reveal, .dialog),
+  :global(html:not([data-motion="full"])) .dialog::backdrop {
+    animation: none;
+    transition: none;
+  }
+}

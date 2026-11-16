@@ -159,7 +159,9 @@ export function ProtectedArticle({
           />
         )}
       </article>
-      {access.content && display.show_related !== false && recommendations}
+      {access.content && display.show_related !== false && recommendations && (
+        <div className="article-followup">{recommendations}</div>
+      )}
       {access.content && display.show_comments !== false && (
         <CommentSection
           contentId={content.id}

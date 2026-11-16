@@ -64,14 +64,15 @@
   border-radius: 8px;
   white-space: nowrap;
 }
-.gate .checkTime {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+.opening {
+  display: grid;
+  gap: 4px;
+}
+.gate .countdown {
   color: var(--accent);
-  padding: 4px;
-  background: transparent;
-  font-size: 13px;
+  font-size: clamp(15px, 3vw, 19px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .gate .error {
   color: var(--accent);

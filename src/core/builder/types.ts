@@ -47,6 +47,7 @@ export interface BuilderField {
   options?: readonly { value: string; label: string }[];
   min?: number;
   max?: number;
+  mediaKind?: "image" | "video";
   multiple?: boolean;
   expose?: boolean;
 }

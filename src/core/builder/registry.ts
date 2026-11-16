@@ -188,6 +188,9 @@ export function defineBuilderComponent(definition: BuilderComponentDefinition) {
       ["layout", "tablet", "mobile"].includes(field.key) ||
       !field.label.trim() ||
       !fieldTypes.has(field.type) ||
+      (field.mediaKind !== undefined &&
+        (field.type !== "media" ||
+          !["image", "video"].includes(field.mediaKind))) ||
       (field.type === "select" && !field.options?.length)
     )
       throw new Error("Invalid builder field: " + field.key);

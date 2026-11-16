@@ -163,13 +163,17 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
       } catch (error) {
         for (const [id, item] of next)
           if (loaded.get(id) !== item) item.dispose();
-        for (const link of styleNodes()) {
-          if (
-            ![...loaded.values()].some(
-              (item) => item.css === link.getAttribute("href"),
+        // An obsolete effect may reject after a new one has started loading.
+        // Its pending styles were removed by abort; leave the new links alone.
+        if (!controller.signal.aborted) {
+          for (const link of styleNodes()) {
+            if (
+              ![...loaded.values()].some(
+                (item) => item.css === link.getAttribute("href"),
+              )
             )
-          )
-            link.remove();
+              link.remove();
+          }
         }
         throw error;
       }

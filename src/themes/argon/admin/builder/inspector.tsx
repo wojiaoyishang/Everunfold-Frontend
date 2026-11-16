@@ -611,6 +611,7 @@ function BuilderControl({
   const [sourceEditor, setSourceEditor] = useState(false);
   const [shortcodes, setShortcodes] = useState(false);
   const text = typeof value === "string" ? value : "";
+  const video = field.mediaKind === "video";
   if (field.type === "boolean")
     return (
       <label className={styles.checkbox}>
@@ -665,7 +666,11 @@ function BuilderControl({
           id={id}
           value={text}
           placeholder={t(
-            field.multiple ? "使用逗号分隔媒体引用" : "输入图片地址或选择媒体",
+            field.multiple
+              ? "使用逗号分隔媒体引用"
+              : video
+                ? "输入视频地址或选择媒体"
+                : "输入图片地址或选择媒体",
           )}
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
@@ -675,14 +680,18 @@ function BuilderControl({
           disabled={disabled}
           onClick={() => setMedia(true)}
         >
-          <Icon name="image" />
-          <UiText text={field.multiple ? "添加图片" : "选择媒体"} />
+          <Icon name={video ? "video" : "image"} />
+          <UiText
+            text={
+              field.multiple ? (video ? "添加视频" : "添加图片") : "选择媒体"
+            }
+          />
         </Button>
         {media &&
           (field.multiple ? (
             <MediaPickerDialog
               multiple
-              kind="image"
+              kind={field.mediaKind ?? "image"}
               maxSelection={Math.max(
                 0,
                 20 - text.split(",").filter(Boolean).length,
@@ -702,7 +711,7 @@ function BuilderControl({
             />
           ) : (
             <MediaPickerDialog
-              kind="image"
+              kind={field.mediaKind ?? "image"}
               value={text}
               onPick={(item) => {
                 onMedia(item);

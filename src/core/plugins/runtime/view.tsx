@@ -53,6 +53,7 @@ export function RuntimeComponent({
       plugin.components.includes(name) && !catalog.disabled.includes(plugin.id),
   );
   const implementation = owner ? components.get(owner.id)?.[name] : undefined;
+  const waiting = Boolean(owner && loading && !implementation);
   const callback = props.notifyReady === false ? undefined : props.onReady;
   return (
     <RuntimeBoundary
@@ -69,11 +70,8 @@ export function RuntimeComponent({
         </>
       ) : (
         <>
-          <ExtensionPlaceholder
-            name={name}
-            loading={Boolean(owner && loading)}
-          />
-          {props.children as ReactNode}
+          <ExtensionPlaceholder name={name} loading={waiting} />
+          {!waiting && (props.children as ReactNode)}
           {!loading && <Ready callback={props.onReady} />}
         </>
       )}

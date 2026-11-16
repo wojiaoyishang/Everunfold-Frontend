@@ -6,6 +6,7 @@ import { CaptchaField } from "./captcha-field";
 import { Button, Form } from "./ui/primitives";
 import { PasswordField } from "./ui/password-field";
 import { Icon } from "./icon";
+import { ReadingOpeningTime } from "./reading-opening-time";
 import styles from "./protected-article.module.css";
 
 export function ReadingAccessForm({
@@ -42,17 +43,7 @@ export function ReadingAccessForm({
           <UiText text="请完成下面的安全验证，正文将在当前页面中显示。" />
         )}
       </p>
-      {passwordRequired && opensAt && (
-        <p>
-          <UiText text="开放时间：" />
-          <time dateTime={opensAt}>
-            {new Date(opensAt).toLocaleString("zh-CN", {
-              timeZone: "Asia/Shanghai",
-              hour12: false,
-            })}
-          </time>
-        </p>
-      )}
+      {opensAt && <ReadingOpeningTime key={opensAt} opensAt={opensAt} />}
       <Form
         onSubmit={(event) => {
           event.preventDefault();

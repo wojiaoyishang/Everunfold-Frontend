@@ -1,0 +1,49 @@
+.view {
+  --loading-height: clamp(13rem, 34vh, 19rem);
+  position: relative;
+}
+.view[data-anchor-pending] {
+  min-block-size: var(--loading-height);
+}
+.loading {
+  position: absolute;
+  inset: 0 0 auto;
+  block-size: var(--loading-height);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding-inline: 24px;
+  pointer-events: none;
+  text-align: center;
+  color: var(--muted);
+  font-size: clamp(15px, 3vw, 18px);
+  --extension-progress-width: 26rem;
+  --extension-progress-height: 8px;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 220ms ease,
+    visibility 0s linear 220ms;
+}
+.view[data-anchor-pending] .loading {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+}
+.body {
+  min-inline-size: 0;
+  opacity: 1;
+  transition: opacity 270ms ease 80ms;
+}
+.view[data-anchor-pending] .body {
+  opacity: 0;
+}
+:global(html[data-motion="reduced"]) :is(.loading, .body) {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(html:not([data-motion="full"])) :is(.loading, .body) {
+    transition: none;
+  }
+}

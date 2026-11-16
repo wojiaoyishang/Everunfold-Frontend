@@ -156,6 +156,9 @@
   gap: var(--content-gap);
   margin-top: var(--content-gap);
 }
+.article-followup:empty {
+  display: none;
+}
 .article-neighbors {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

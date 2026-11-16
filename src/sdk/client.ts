@@ -43,6 +43,7 @@ export {
   savePageMetadata,
 } from "@/core/contracts/pages";
 export { resourceUrl, taxonomyHref } from "@/core/content/urls";
+export { parseSiteMediaReference } from "@/core/media/references";
 export { useAdminRequest } from "@/core/admin/account-context";
 export { randomUUID } from "@/core/browser/crypto";
 

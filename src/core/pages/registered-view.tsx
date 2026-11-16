@@ -1,11 +1,15 @@
 "use client";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
-import { ExtensionPlaceholder } from "@/themes/argon/components/extension-placeholder";
+import {
+  ExtensionPlaceholder,
+  ExtensionProgress,
+} from "@/themes/argon/components/extension-placeholder";
 import type { PublicManagedPage } from "@/core/contracts/pages";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { ExtensionComponent } from "@/core/extensions/components";
 import {
   RegisteredPageLocale,
+  UiText,
   useRegisteredPageLocale,
 } from "@/core/i18n/provider";
 import { useRouteState } from "@/themes/argon/components/route-state";
@@ -17,6 +21,7 @@ import {
   type PageArticleData,
 } from "./articles";
 import { pageImplementation } from "./registry";
+import styles from "@/themes/argon/pages/registered-view.module.css";
 
 export interface CustomPageProps {
   page: PublicManagedPage;
@@ -49,15 +54,8 @@ export function RegisteredPageView({
   const { entry, loading } = useRegisteredPageImplementation(page);
   const { route } = useRouteState();
   const { locale } = useRegisteredPageLocale();
-  if (!entry)
-    return (
-      <ExtensionPlaceholder
-        name={page.implementation_id ?? "page"}
-        loading={loading}
-      />
-    );
   const [pathname, query] = route.split("?");
-  const collection = entry.articleCollection;
+  const collection = entry?.articleCollection;
   const articles =
     articleData?.collection ??
     (collection && articleData?.sources
@@ -73,15 +71,31 @@ export function RegisteredPageView({
       : undefined);
   return (
     <RegisteredPageLocale>
-      <div lang={locale}>
-        <ExtensionComponent
-          name={entry.component}
-          page={page}
-          articleCollection={articles}
-          pathname={preview ? page.path : pathname}
-          preview={preview}
-          onReady={onReady}
-        />
+      <div
+        lang={locale}
+        className={styles.view}
+        data-anchor-pending={loading || undefined}
+      >
+        <div className={styles.loading} role="status" aria-hidden={!loading}>
+          <span>
+            <UiText text="正在加载页面…" />
+          </span>
+          <ExtensionProgress />
+        </div>
+        <div className={styles.body} aria-busy={loading}>
+          {loading ? null : entry ? (
+            <ExtensionComponent
+              name={entry.component}
+              page={page}
+              articleCollection={articles}
+              pathname={preview ? page.path : pathname}
+              preview={preview}
+              onReady={onReady}
+            />
+          ) : (
+            <ExtensionPlaceholder name={page.implementation_id ?? "page"} />
+          )}
+        </div>
       </div>
     </RegisteredPageLocale>
   );
