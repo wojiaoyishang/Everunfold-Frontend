@@ -28,7 +28,7 @@ import { Button, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import styles from "./hooks.module.css";
 
-const ScriptEditor = dynamic(() => import("../pages/source-editor"), {
+const ScriptEditor = dynamic(() => import("../components/source-editor"), {
   ssr: false,
 });
 

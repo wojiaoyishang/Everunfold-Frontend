@@ -37,15 +37,17 @@ test("keeps builder progress values and labels in static output", () => {
   );
   assert.ok(definition);
   const progress = createBuilderNode(definition);
-  assert.deepEqual(progress.props, { label: "进度", value: 50 });
-  const nodes = [
+  assert.equal(progress.props.label, "进度");
+  assert.equal(progress.props.value, 50);
+  const nodes: BuilderNode[] = [
     { ...progress, props: { label: "Python", value: 65 } },
     { ...progress, props: { label: "C# & C++", value: 105 } },
     { ...progress, props: { label: "Other", value: -5 } },
+    { ...progress, props: { label: "Hidden", value: 80, show_value: false } },
   ];
   assert.equal(
     builderSyndicationHtml({ version: 1, nodes }, {}),
-    "<p>Python 65%</p><p>C# &amp; C++ 100%</p><p>Other 0%</p>",
+    "<p>Python 65%</p><p>C# &amp; C++ 100%</p><p>Other 0%</p><p>Hidden</p>",
   );
 });
 

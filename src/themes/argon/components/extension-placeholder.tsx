@@ -3,9 +3,9 @@ import styles from "./extension-placeholder.module.css";
 
 export function ExtensionProgress() {
   return (
-    <div className={styles.progress} aria-hidden="true">
+    <span className={styles.progress} aria-hidden="true">
       <span />
-    </div>
+    </span>
   );
 }
 
@@ -23,8 +23,19 @@ export function ExtensionPlaceholder({
       data-loading={loading || undefined}
       data-anchor-pending={loading || undefined}
     >
-      <UiText text={loading ? "正在加载组件…" : "组件暂不可用"} />
-      {loading ? <ExtensionProgress /> : <code>{name}</code>}
+      {loading ? (
+        <>
+          <span className="sr-only">
+            <UiText text="正在加载组件…" />
+          </span>
+          <ExtensionProgress />
+        </>
+      ) : (
+        <>
+          <UiText text="组件暂不可用" />
+          <code>{name}</code>
+        </>
+      )}
     </div>
   );
 }

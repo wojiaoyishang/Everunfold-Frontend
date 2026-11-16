@@ -62,7 +62,7 @@ export function builderSyndicationHtml(
           case "core.banner":
             return `<h2>${text("title")}</h2>${image("image")}<p>${text("text")}</p>`;
           case "core.progress":
-            return `<p>${text("label")} ${builderProgressValue(node.props.value)}%</p>`;
+            return `<p>${text("label")}${node.props.show_value === false ? "" : ` ${builderProgressValue(node.props.value)}%`}</p>`;
           case "core.button": {
             const href = publicHref(field(node, "href"));
             return href

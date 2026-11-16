@@ -23,25 +23,29 @@ export function parsePublicSnapshot(input: unknown): PublicSnapshot {
   if (
     input.contents.some(
       (item) =>
-        item.access &&
-        item.access !== "public" &&
-        (item.content.length ||
-          item.component_document != null ||
-          Object.keys(item.media_urls).length ||
-          item.excerpt ||
-          (item.kind !== "article" && item.cover_url) ||
-          item.seo_description ||
-          item.seo_title ||
-          item.seo_canonical_path ||
-          item.seo_share_title ||
-          item.seo_share_description ||
-          item.seo_image_alt ||
-          item.share_image_url ||
-          item.seo_max_snippet != null ||
-          item.seo_image_preview ||
-          item.seo_structured_data != null ||
-          item.word_count ||
-          item.comment_count),
+        (item.show_encrypted_excerpt &&
+          (item.kind !== "article" ||
+            (item.access !== "password" && item.access !== "scheduled"))) ||
+        (item.access &&
+          item.access !== "public" &&
+          (item.content.length ||
+            item.component_document != null ||
+            Object.keys(item.media_urls).length ||
+            (item.excerpt && !item.show_encrypted_excerpt) ||
+            item.extra_css ||
+            (item.kind !== "article" && item.cover_url) ||
+            item.seo_description ||
+            item.seo_title ||
+            item.seo_canonical_path ||
+            item.seo_share_title ||
+            item.seo_share_description ||
+            item.seo_image_alt ||
+            item.share_image_url ||
+            item.seo_max_snippet != null ||
+            item.seo_image_preview ||
+            item.seo_structured_data != null ||
+            item.word_count ||
+            item.comment_count)),
     )
   )
     throw new Error("Restricted content leaked into public snapshot");
@@ -72,6 +76,8 @@ export function parsePublicSnapshot(input: unknown): PublicSnapshot {
       page.access === "captcha" &&
       (page.html ||
         page.css ||
+        page.component_css ||
+        page.component_css_override ||
         page.javascript ||
         page.component_document != null ||
         Object.keys(page.component_parameters ?? {}).length ||

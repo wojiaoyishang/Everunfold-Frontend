@@ -31,6 +31,13 @@
   max-width: 520px;
   margin: 0;
 }
+.gate .summary {
+  color: var(--text);
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--accent-soft);
+  overflow-wrap: anywhere;
+}
 .gate form {
   display: grid;
   gap: 14px;

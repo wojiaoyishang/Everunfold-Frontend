@@ -9,7 +9,9 @@ import { Switch } from "../../components/ui/switch";
 import { AdminWarning } from "../components/warning";
 import styles from "./pages.module.css";
 
-const SourceEditor = dynamic(() => import("./source-editor"), { ssr: false });
+const SourceEditor = dynamic(() => import("../components/source-editor"), {
+  ssr: false,
+});
 
 export function PageCodeFields({
   value,

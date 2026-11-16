@@ -22,6 +22,7 @@ import { ArticleTags } from "./article-tags";
 import { PagePresentation } from "./route-state";
 import { useCaptcha } from "@/core/captcha/use-captcha";
 import { ReadingAccessForm } from "./reading-access-form";
+import { authoredStyle } from "./authored-style";
 import { CommentSection } from "./comments/comment-section";
 import styles from "./protected-article.module.css";
 
@@ -51,6 +52,10 @@ export function ProtectedArticle({
   );
   const captcha = useCaptcha(baseUrl, "read", content.id, !access.content);
   const readable = access.content ?? content;
+  const authored = authoredStyle(
+    `article-${content.id}`,
+    access.content?.extra_css,
+  );
   const display = articleDisplay(
     readable,
     themeProfile(site.settings)?.article,
@@ -70,7 +75,9 @@ export function ProtectedArticle({
         className="surface article-card"
         data-theme-content={content.id}
         data-article-layout={readable.article_layout}
+        {...authored.scope}
       >
+        {authored.style}
         <ArticleHeader
           content={readable}
           liveMetrics={false}
@@ -155,6 +162,9 @@ export function ProtectedArticle({
               content.password_required ?? content.access !== "captcha"
             }
             opensAt={content.opens_at}
+            summary={
+              content.show_encrypted_excerpt ? content.excerpt : undefined
+            }
             onUnlock={(password) => access.load(password, captcha.response)}
           />
         )}

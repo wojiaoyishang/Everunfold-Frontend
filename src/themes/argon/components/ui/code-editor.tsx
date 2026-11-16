@@ -100,6 +100,7 @@ export interface CodeEditorProps {
   onChange: (value: string, previous: string) => void;
   label: string;
   language: Extension;
+  plainText?: boolean;
   disabled?: boolean;
   shared?: SharedSource;
   wrapLines?: boolean;
@@ -116,6 +117,7 @@ export function CodeEditor({
   onChange,
   label,
   language,
+  plainText = false,
   disabled,
   shared,
   wrapLines = true,
@@ -200,22 +202,26 @@ export function CodeEditor({
             Completions: "补全建议",
             "replaced $ matches.": "已替换 $ 处内容。",
           }),
-          lineNumbers(),
-          highlightActiveLine(),
-          highlightActiveLineGutter(),
           drawSelection(),
-          bracketMatching(),
-          closeBrackets(),
-          autocompletion({
-            defaultKeymap: false,
-            icons: false,
-            maxRenderedOptions: 8,
-          }),
-          indentOnInput(),
-          indentUnit.of("  "),
+          plainText
+            ? []
+            : [
+                lineNumbers(),
+                highlightActiveLine(),
+                highlightActiveLineGutter(),
+                bracketMatching(),
+                closeBrackets(),
+                autocompletion({
+                  defaultKeymap: false,
+                  icons: false,
+                  maxRenderedOptions: 8,
+                }),
+                indentOnInput(),
+                indentUnit.of("  "),
+                syntaxHighlighting(sourceHighlight),
+              ],
           searchExtension(),
           sourceSearchHighlights,
-          syntaxHighlighting(sourceHighlight),
           syntax.current.of(latest.current.language),
           wrapping.current.of(EditorView.lineWrapping),
           editable.current.of([
@@ -250,8 +256,7 @@ export function CodeEditor({
                 return true;
               },
             })),
-            ...completionKeymap,
-            ...closeBracketsKeymap,
+            ...(plainText ? [] : [...completionKeymap, ...closeBracketsKeymap]),
             ...(text && undo
               ? [
                   {
@@ -284,7 +289,7 @@ export function CodeEditor({
                 ]
               : historyKeymap),
             ...defaultKeymap,
-            indentWithTab,
+            ...(plainText ? [] : [indentWithTab]),
           ]),
           EditorView.domEventHandlers({
             focus: () => {
@@ -322,7 +327,7 @@ export function CodeEditor({
       view.current = null;
       editor.destroy();
     };
-  }, [text, awareness, undo, blockId, shortcuts, shared]);
+  }, [text, awareness, undo, blockId, shortcuts, shared, plainText]);
   useEffect(() => {
     view.current?.dispatch({ effects: syntax.current.reconfigure(language) });
   }, [language, text, awareness, undo, blockId, shortcuts]);
@@ -391,6 +396,7 @@ export function CodeEditor({
       className={`${styles.editor} ${presenceStyles.presence}`}
       ref={host}
       data-disabled={disabled || undefined}
+      data-plain-text={plainText || undefined}
     />
   );
 }

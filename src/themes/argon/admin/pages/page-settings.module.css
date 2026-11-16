@@ -120,8 +120,12 @@
 }
 
 .settings :global(.ui-textarea) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
   min-block-size: 66px;
-  field-sizing: content;
+  field-sizing: fixed;
+  resize: vertical;
   padding-block: 7px;
 }
 
@@ -178,7 +182,7 @@
 }
 
 .settings[data-compact] :global(.ui-textarea) {
-  min-block-size: 44px;
+  min-block-size: 66px;
 }
 
 .group[data-compact] :global(.account-card) {

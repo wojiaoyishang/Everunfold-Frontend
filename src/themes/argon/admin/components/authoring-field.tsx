@@ -1,10 +1,17 @@
 "use client";
 
 import { useId, type ReactNode } from "react";
+import dynamic from "next/dynamic";
 import { AdminFormFieldExtensions } from "@/core/forms/admin-field-extensions";
 import type { AdminFormFieldContext } from "@/core/forms/admin-field-types";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 import { TextArea, TextField } from "../../components/ui/primitives";
+import { ExtensionPlaceholder } from "../../components/extension-placeholder";
+
+const TextEditor = dynamic(() => import("./source-editor"), {
+  ssr: false,
+  loading: () => <ExtensionPlaceholder name="text-editor" loading />,
+});
 
 type Binding = Pick<
   AdminFormFieldContext,
@@ -22,6 +29,7 @@ export function AuthoringField({
   hint,
   labelAside,
   rows,
+  plainEditor = false,
   className = "admin-field",
 }: {
   binding?: Binding;
@@ -34,9 +42,11 @@ export function AuthoringField({
   hint?: string;
   labelAside?: ReactNode;
   rows?: number;
+  plainEditor?: boolean;
   className?: string;
 }) {
   const id = useId();
+  const t = useT();
   const render = (
     view: { placeholder?: string; description?: string },
     actions?: ReactNode,
@@ -61,7 +71,23 @@ export function AuthoringField({
           </label>
           {actions}
         </div>
-        {rows ? <TextArea {...props} rows={rows} /> : <TextField {...props} />}
+        {plainEditor ? (
+          <TextEditor
+            kind="text"
+            inputId={id}
+            label={t(label)}
+            value={value}
+            onChange={onChange}
+            limit={maxLength}
+            disabled={disabled}
+            descriptionId={props["aria-describedby"]}
+            placeholder={view.placeholder}
+          />
+        ) : rows ? (
+          <TextArea {...props} rows={rows} />
+        ) : (
+          <TextField {...props} />
+        )}
         {view.description && (
           <small id={id + "-hint"}>
             <UiText text={view.description} />

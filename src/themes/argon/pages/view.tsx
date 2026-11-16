@@ -21,6 +21,7 @@ import {
   usePageComments,
 } from "@/core/pages/comments";
 import { PageImageViewerBoundary } from "./image-viewer-boundary";
+import { authoredStyle } from "../components/authored-style";
 
 export function ManagedPageView({
   page,
@@ -80,6 +81,12 @@ export function ManagedPageSurface({
   const { entry: implementation } = useRegisteredPageImplementation(page);
   const { site } = useRouteState();
   const { readReceipt } = usePageComments();
+  const authored = authoredStyle(
+    `page-${page.id}`,
+    page.source === "custom" && page.edit_mode === "components"
+      ? [page.component_css, page.component_css_override]
+      : undefined,
+  );
   const layout =
     page.source === "custom" ? (page.layout ?? "wide") : implementation?.layout;
 
@@ -88,7 +95,9 @@ export function ManagedPageSurface({
       className={styles.page}
       data-reading-content="true"
       data-page-layout={layout}
+      {...authored.scope}
     >
+      {authored.style}
       <ThemeSlot
         name="page.header.before"
         context={{ page, preview: Boolean(onReady) }}

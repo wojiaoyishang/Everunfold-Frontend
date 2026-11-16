@@ -27,15 +27,17 @@ import { argonAssets, argonAssetUrl } from "../assets";
 export function BlogShell({
   site,
   backendBaseUrl,
+  embeddedPreview,
   children,
 }: {
   site: Site;
   backendBaseUrl: string;
+  embeddedPreview?: boolean;
   children: ReactNode;
 }) {
   return (
     <NavigationProvider>
-      <RouteStateProvider site={site}>
+      <RouteStateProvider site={site} embeddedPreview={embeddedPreview}>
         <ReadingStateProvider>
           <ReaderDataProvider baseUrl={backendBaseUrl}>
             <FeedbackProvider>

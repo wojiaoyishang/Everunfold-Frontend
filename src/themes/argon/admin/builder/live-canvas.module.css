@@ -239,6 +239,13 @@
   font-size: 12px;
   white-space: nowrap;
 }
+.loading {
+  --extension-progress-width: 9rem;
+  --extension-progress-height: 5px;
+  inline-size: min(10rem, calc(100% - 24px));
+  justify-content: center;
+  pointer-events: none;
+}
 .status svg {
   width: 16px;
   height: 16px;

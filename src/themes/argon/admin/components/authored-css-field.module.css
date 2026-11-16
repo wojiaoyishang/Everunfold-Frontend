@@ -1,0 +1,32 @@
+.field {
+  min-inline-size: 0;
+}
+
+.input {
+  min-inline-size: 0;
+  border: 1px solid var(--admin-border);
+  border-radius: 7px;
+}
+
+.input > :first-child {
+  --source-editor-min-height: 7rem;
+  border-radius: inherit;
+}
+
+.input :global(.cm-scroller) {
+  max-block-size: 16rem;
+  font-size: 12px;
+}
+
+.input[data-invalid] + small {
+  color: var(--admin-danger, var(--danger));
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  min-block-size: 7rem;
+  padding: 12px;
+  --extension-progress-width: 10rem;
+}

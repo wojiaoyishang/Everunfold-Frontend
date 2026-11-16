@@ -32,6 +32,10 @@ import { ConfirmPopover } from "../../components/ui/confirm-popover";
 import { BuilderBlockSourceEditor } from "./block-source-editor";
 import { ShortcodePicker } from "../shortcodes/picker";
 import { MediaPickerDialog } from "../media/media-picker-dialog";
+import { AuthoredCssField } from "../components/authored-css-field";
+import { hexColor } from "@/core/colors";
+import { ColorPicker } from "../../components/ui/color-picker";
+import { componentCssLimit } from "@/core/rendering/authored-css";
 import { builderIcon, type BuilderRenderContext } from "../../builder/content";
 import styles from "./editor.module.css";
 import inspectorStyles from "./inspector.module.css";
@@ -268,7 +272,9 @@ function NodeProperties({
   const styleFields = fields.filter(
     (field) =>
       (node.type === "core.banner" && field.key === "image") ||
-      (node.type === "core.spacer" && field.key === "height"),
+      (node.type === "core.spacer" && field.key === "height") ||
+      (node.type === "core.progress" &&
+        !["label", "value"].includes(field.key)),
   );
   const contentFields = fields.filter((field) => !styleFields.includes(field));
   const labels = {
@@ -452,7 +458,13 @@ function NodeProperties({
             <>
               {styleFields.length > 0 && (
                 <PropertySection
-                  title={node.type === "core.banner" ? "背景" : "尺寸"}
+                  title={
+                    node.type === "core.banner"
+                      ? "背景"
+                      : node.type === "core.progress"
+                        ? "进度条外观"
+                        : "尺寸"
+                  }
                   defaultOpen
                 >
                   <div className={styles.fields}>
@@ -462,6 +474,17 @@ function NodeProperties({
               )}
               <PropertySection title="对齐" defaultOpen>
                 {layout("style")}
+              </PropertySection>
+              <PropertySection title="自定义样式">
+                <AuthoredCssField
+                  label="组件 CSS"
+                  value={node.css}
+                  disabled={disabled}
+                  limit={componentCssLimit}
+                  onChange={(css) =>
+                    changeNode((entry) => ({ ...entry, css: css || undefined }))
+                  }
+                />
               </PropertySection>
             </>
           )}
@@ -616,7 +639,7 @@ function BuilderControl({
     return (
       <label className={styles.checkbox}>
         <Checkbox
-          checked={value === true}
+          checked={(value ?? field.default) === true}
           disabled={disabled}
           onChange={(event) => onChange(event.target.checked)}
         />
@@ -659,7 +682,37 @@ function BuilderControl({
         onChange={(event) => onChange(event.target.value)}
       />
     );
-  else if (field.type === "media")
+  else if (field.type === "color") {
+    const color = hexColor(text);
+    const pickerLabel = t("选择颜色：{name}", { name: t(field.label) });
+    input = (
+      <div className={inspectorStyles.colorField}>
+        <TextField
+          id={id}
+          value={text}
+          placeholder={t("跟随配色")}
+          spellCheck={false}
+          maxLength={7}
+          disabled={disabled}
+          aria-invalid={Boolean(text && !color)}
+          aria-describedby={text && !color ? `${id}-color-error` : undefined}
+          onChange={(event) => onChange(event.target.value)}
+        />
+        <ColorPicker
+          label={pickerLabel}
+          compact
+          value={color ?? (field.key === "track_color" ? "#e4dfed" : "#673bb7")}
+          disabled={disabled}
+          onChange={onChange}
+        />
+        {text && !color && (
+          <small id={`${id}-color-error`} className="form-error">
+            <UiText text="请输入 # 加三位或六位十六进制颜色。" />
+          </small>
+        )}
+      </div>
+    );
+  } else if (field.type === "media")
     input = (
       <div className={styles.controlStack}>
         <TextField

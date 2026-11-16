@@ -79,6 +79,33 @@ test("accepts the listing cover of a locked article without exposing its body me
   }
 });
 
+test("the public snapshot admits only opted-in encrypted article excerpts", () => {
+  const data = snapshot();
+  data.comments = {};
+  const locked = content({
+    access: "password",
+    password_required: true,
+    excerpt: "手写公开摘要",
+    show_encrypted_excerpt: true,
+    content: [],
+    media_urls: {},
+    cover_url: null,
+    word_count: 0,
+    comment_count: 0,
+  });
+  data.contents = [locked];
+  assert.equal(parsePublicSnapshot(data).contents[0].excerpt, locked.excerpt);
+  for (const patch of [
+    { show_encrypted_excerpt: false },
+    { access: "captcha" as const },
+    { kind: "shuoshuo" as const },
+    { extra_css: ":scope {color: red}" },
+  ]) {
+    data.contents = [{ ...locked, ...patch }];
+    assert.throws(() => parsePublicSnapshot(data), /Restricted content leaked/);
+  }
+});
+
 test("URLs reject active schemes and preserve unrelated external origins", () => {
   assert.equal(publicHref("javascript:alert(1)"), null);
   assert.equal(publicHref("//example.com/"), null);

@@ -19,7 +19,7 @@ function implementation(theme: string, name: string) {
   const path = Object.entries(themeModules)
     .find(([, value]) => value.id === owner)?.[0]
     .replace(/theme\.ts$/, "components.tsx");
-  const candidate = path ? modules[path]?.default[name] : undefined;
+  const candidate = path ? modules[path]?.default?.[name] : undefined;
   return {
     owner,
     component:

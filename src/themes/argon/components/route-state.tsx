@@ -29,6 +29,7 @@ interface RouteState {
   toc: TableOfContentsItem[];
   presentationId: string;
   presentationReady: boolean;
+  embeddedPreview: boolean;
   pending: boolean;
   feedback: NavigationFeedback;
   navigate: (href: string, options?: NavigateOptions) => void;
@@ -38,9 +39,11 @@ const RouteContext = createContext<RouteState | null>(null);
 
 export function RouteStateProvider({
   site,
+  embeddedPreview = false,
   children,
 }: {
   site: Site;
+  embeddedPreview?: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -71,6 +74,7 @@ export function RouteStateProvider({
         toc: current?.toc ?? noHeadings,
         presentationId: current?.id ?? route,
         presentationReady: Boolean(current),
+        embeddedPreview,
         pending,
         feedback,
         navigate,

@@ -16,6 +16,7 @@ import {
 import { ArticleActions } from "./article-actions";
 import { ArticleMedia } from "./article-media";
 import { ArticleTags } from "./article-tags";
+import { authoredStyle } from "./authored-style";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 import type {
   ArticleDisplayPreferences,
@@ -45,12 +46,15 @@ export function ArticleCard({
   builderContext,
 }: ArticleCardProps) {
   const display = resolveDisplay(content, articleDisplay);
+  const authored = authoredStyle(`article-${content.id}`, content.extra_css);
   return (
     <article
       className="surface article-card"
       lang={content.language}
       data-article-layout={content.article_layout}
+      {...authored.scope}
     >
+      {authored.style}
       <ServerThemeSlot
         theme={theme}
         name="article.header.before"

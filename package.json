@@ -75,6 +75,8 @@
     "markdown-it": "15.0.3",
     "mathlive": "0.111.4",
     "next": "16.4.3",
+    "postcss": "8.5.23",
+    "postcss-selector-parser": "7.1.4",
     "react": "19.3.1",
     "react-dom": "19.3.1",
     "react-qr-code": "2.2.0",

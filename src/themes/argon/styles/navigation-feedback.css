@@ -232,6 +232,10 @@ html[data-motion="reduced"] .navigation-countdown-trail {
   line-height: 1.5;
   white-space: nowrap;
 }
+.navigation-message-loader {
+  inline-size: min(12rem, 100%);
+  --extension-progress-height: 5px;
+}
 .navigation-face {
   color: var(--accent);
   font-size: 20px;

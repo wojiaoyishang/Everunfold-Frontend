@@ -747,6 +747,7 @@ export function ManagedPageEditor({
                   change={update}
                   disabled={disabled}
                   compact={compact}
+                  inheritedComponentCss={Boolean(templateId)}
                   authoring={{
                     ...pageAuthoring,
                     source: () => ({
@@ -851,6 +852,7 @@ export function ManagedPageEditor({
                 description: value.description,
                 edit_mode: "components" as const,
                 component_document: value.component_document ?? emptyDocument,
+                component_css: value.component_css,
                 layout: value.layout,
               },
             };

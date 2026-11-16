@@ -9,6 +9,7 @@ import { shortcodeExcerpt } from "@/core/rendering/native-shortcodes";
 
 export function PostCard({ content }: { content: ReadableContentMetadata }) {
   const cover = resourceUrl(content.cover_url);
+  const excerpt = shortcodeExcerpt(content.excerpt);
   const heading = (
     <>
       <div className="post-title-row">
@@ -43,7 +44,7 @@ export function PostCard({ content }: { content: ReadableContentMetadata }) {
       )}
       <div className="post-card-body">
         {!cover && <header>{heading}</header>}
-        <p className="post-excerpt">{shortcodeExcerpt(content.excerpt)}</p>
+        {excerpt && <p className="post-excerpt">{excerpt}</p>}
         <div className="post-card-footer">
           <div className="post-tags">
             <Icon name="tag" />

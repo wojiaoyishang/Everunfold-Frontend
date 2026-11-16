@@ -5,6 +5,7 @@ import { useEffect, useRef, type CSSProperties } from "react";
 import type { NavigationFailure } from "@/core/navigation/document";
 import { NAVIGATION_FAILURE_HOLD_MS } from "@/core/navigation/transaction";
 import { useRouteState } from "./route-state";
+import { ExtensionProgress } from "./extension-placeholder";
 
 const failureText: Record<NavigationFailure, string> = {
   timeout: "加载超时，原页面已保留",
@@ -16,7 +17,7 @@ const failureText: Record<NavigationFailure, string> = {
 };
 
 export function NavigationProgress() {
-  const { feedback, pending } = useRouteState();
+  const { feedback, pending, embeddedPreview } = useRouteState();
   const bar = useRef<HTMLSpanElement>(null);
   const progress = useRef({ id: 0, value: 0 });
   const expanded = feedback.phase === "slow" || feedback.phase === "failed";
@@ -70,18 +71,24 @@ export function NavigationProgress() {
         inert={!expanded}
         aria-hidden={!expanded}
       >
-        <div className="navigation-message-copy">
-          <span className="navigation-face" aria-hidden="true">
-            {failed ? "(╥﹏╥)" : "(ง •̀_•́)ง"}
-          </span>
-          <span>
-            {failed ? (
-              failureText[feedback.failure ?? "network"]
-            ) : (
-              <UiText text="正在努力加载，再等一下…" />
-            )}
-          </span>
-        </div>
+        {embeddedPreview && !failed ? (
+          <div className="navigation-message-loader">
+            <ExtensionProgress />
+          </div>
+        ) : (
+          <div className="navigation-message-copy">
+            <span className="navigation-face" aria-hidden="true">
+              {failed ? "(╥﹏╥)" : "(ง •̀_•́)ง"}
+            </span>
+            <span>
+              {failed ? (
+                failureText[feedback.failure ?? "network"]
+              ) : (
+                <UiText text="正在努力加载，再等一下…" />
+              )}
+            </span>
+          </div>
+        )}
       </div>
       <span
         className="sr-only"

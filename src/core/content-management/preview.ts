@@ -43,6 +43,7 @@ export function previewContent(draft: DraftDetail, terms: Taxonomy[]): Content {
     title: draft.title,
     path: settings?.path || draft.public_path || "",
     excerpt: draft.excerpt,
+    extra_css: settings?.extra_css,
     language: draft.language ?? "zh-CN",
     translation_group_id: draft.translation_group_id,
     published_at:

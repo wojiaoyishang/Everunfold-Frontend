@@ -26,6 +26,7 @@ import {
 import { ConfirmPopover } from "../../components/ui/confirm-popover";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
+import { ExtensionProgress } from "../../components/extension-placeholder";
 import type { MediaURL } from "@/core/contracts/content-admin";
 import type { PublicShortcode } from "@/core/contracts/settings";
 import dynamic from "next/dynamic";
@@ -577,9 +578,11 @@ export function LiveBuilderCanvas({
         </div>
       )}
       {status === "loading" && (
-        <div className={styles.status} role="status">
-          <Icon name="refresh" />
-          <UiText text="正在载入预览…" />
+        <div className={`${styles.status} ${styles.loading}`} role="status">
+          <span className="sr-only">
+            <UiText text="正在载入预览…" />
+          </span>
+          <ExtensionProgress />
         </div>
       )}
       {!interactive && (

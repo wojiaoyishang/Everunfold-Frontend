@@ -15,6 +15,7 @@ import { Icon } from "./icon";
 import { ViewMetric } from "./reader-data";
 import { ContentEditLink } from "./content-edit-link";
 import { ContentLanguages } from "./content-languages";
+import { authoredStyle } from "./authored-style";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 
 export function ShuoshuoCardView({
@@ -33,6 +34,7 @@ export function ShuoshuoCardView({
   builderContext?: BuilderRenderContext;
 }) {
   const { content, example } = entry;
+  const authored = authoredStyle(`shuoshuo-${content.id}`, content.extra_css);
   const body = (
     <ArticleMedia enabled={content.show_image_viewer !== false}>
       {content.edit_mode === "components" && content.component_document ? (
@@ -65,7 +67,9 @@ export function ShuoshuoCardView({
     <article
       lang={content.language}
       className={`surface shuoshuo-card ${detail ? "shuoshuo-detail" : ""}`}
+      {...authored.scope}
     >
+      {authored.style}
       <header className="shuoshuo-meta">
         <span className="shuoshuo-avatar">
           <Icon name="leaf" />

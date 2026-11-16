@@ -22,6 +22,7 @@ import { Button, Form } from "../../components/ui/primitives";
 import { RouteLink } from "../../components/ui/route-link";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { AdminPageHeading } from "../components/page-heading";
+import { AuthoredCssField } from "../components/authored-css-field";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { PageCodeFields } from "./code-fields";
 import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publisher";
@@ -359,6 +360,18 @@ export function PageTemplateEditor({ id }: { id?: string }) {
                 }
               />
             </section>
+            {value.edit_mode === "components" && (
+              <section className="account-card" data-live-part="settings">
+                <AuthoredCssField
+                  label="全局 CSS"
+                  value={value.component_css}
+                  disabled={!write || action.busy}
+                  onChange={(component_css) =>
+                    setValue({ ...value, component_css })
+                  }
+                />
+              </section>
+            )}
             {value.edit_mode !== "components" && (
               <PageCodeFields
                 value={value}

@@ -1,5 +1,5 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 
 import { useId, useState, type ComponentType, type ReactNode } from "react";
 import type {
@@ -23,6 +23,7 @@ import {
   shuoshuoScene,
 } from "@/core/forms/authoring-source";
 import { SeoFieldsEditor } from "../components/seo-fields";
+import { AuthoredCssField } from "../components/authored-css-field";
 import { CaptchaOverrides } from "../components/captcha-overrides";
 import { CategorySelector, type CreateCategory } from "./category-selector";
 import { TagSelector } from "./tag-selector";
@@ -146,13 +147,17 @@ function PublicationPanel({
   );
 }
 function AccessPanel({
+  type,
   settings,
+  update,
   detail,
   disabled,
   fields,
   updateFields,
 }: PanelProps) {
+  const t = useT();
   const protectedContent = settings.visibility === "password";
+  const showExcerpt = settings.show_encrypted_excerpt === true;
   return (
     <Panel title="访问权限">
       <Select
@@ -206,6 +211,38 @@ function AccessPanel({
             <small>
               <UiText text="读者输入密码后才能阅读正文。文中的媒体文件仍使用公开链接。" />
             </small>
+            {type.id === "article" && (
+              <>
+                <div className={styles.switchRow}>
+                  <UiText text="在加密情况下仍然显示摘要" />
+                  <Switch
+                    aria-label={t("在加密情况下仍然显示摘要")}
+                    checked={showExcerpt}
+                    disabled={disabled || !protectedContent}
+                    onCheckedChange={(show_encrypted_excerpt) =>
+                      update({ show_encrypted_excerpt })
+                    }
+                  />
+                </div>
+                <small>
+                  <UiText text="开启后，手动填写的摘要会在解锁前公开。" />
+                </small>
+                {showExcerpt && (
+                  <Button
+                    className={styles.textButton}
+                    disabled={disabled || !protectedContent}
+                    onClick={() =>
+                      updateFields({
+                        excerpt: "这是一篇加密的文章，需要输入密码才能阅读。",
+                      })
+                    }
+                  >
+                    <Icon name="edit" />
+                    <UiText text="填入加密摘要提示语" />
+                  </Button>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -620,6 +657,16 @@ export function EditorPanels({
             />
           ) : null;
         })}
+      {(props.type.id === "article" || props.type.id === "shuoshuo") && (
+        <Panel title="额外 CSS" initialOpen={false}>
+          <AuthoredCssField
+            label="额外 CSS"
+            value={settings.extra_css}
+            disabled={props.disabled}
+            onChange={(extra_css) => update({ extra_css })}
+          />
+        </Panel>
+      )}
     </aside>
   );
 }

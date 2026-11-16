@@ -8,7 +8,9 @@ import { SettingsForm } from "@/core/forms/renderer";
 import type { SettingsModel } from "@/core/forms/schema";
 import styles from "./pages.module.css";
 
-const SourceEditor = dynamic(() => import("./source-editor"), { ssr: false });
+const SourceEditor = dynamic(() => import("../components/source-editor"), {
+  ssr: false,
+});
 
 export function PageConfigurationEditor({
   model,

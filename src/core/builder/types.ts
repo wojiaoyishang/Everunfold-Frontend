@@ -18,6 +18,7 @@ export interface BuilderNode {
   id: string;
   type: string;
   props: BuilderValues;
+  css?: string;
   children?: BuilderNode[];
   parameters?: Record<string, BuilderParameter>;
 }
@@ -31,6 +32,7 @@ export type BuilderFieldType =
   | "text"
   | "textarea"
   | "number"
+  | "color"
   | "select"
   | "boolean"
   | "media"

@@ -13,6 +13,7 @@ export function ReadingAccessForm({
   captcha,
   passwordRequired = false,
   opensAt,
+  summary,
   pending,
   error,
   onUnlock,
@@ -20,6 +21,7 @@ export function ReadingAccessForm({
   captcha: CaptchaController;
   passwordRequired?: boolean;
   opensAt?: string | null;
+  summary?: string;
   pending: boolean;
   error: string;
   onUnlock: (password: string) => Promise<boolean>;
@@ -43,6 +45,7 @@ export function ReadingAccessForm({
           <UiText text="请完成下面的安全验证，正文将在当前页面中显示。" />
         )}
       </p>
+      {summary && <p className={styles.summary}>{summary}</p>}
       {opensAt && <ReadingOpeningTime key={opensAt} opensAt={opensAt} />}
       <Form
         onSubmit={(event) => {

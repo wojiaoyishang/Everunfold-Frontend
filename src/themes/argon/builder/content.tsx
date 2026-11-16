@@ -1,17 +1,19 @@
 "use client";
 
-import { createElement, useEffect, useMemo, type ReactNode } from "react";
+import {
+  createElement,
+  useEffect,
+  useId,
+  useMemo,
+  type ReactNode,
+} from "react";
 import type {
   BuilderComponentDefinition,
   BuilderDocument,
   BuilderNode,
   BuilderValues,
 } from "@/core/builder/types";
-import {
-  builderEntries,
-  builderProgressValue,
-  resolvedBuilderProps,
-} from "@/core/builder/document";
+import { builderEntries, resolvedBuilderProps } from "@/core/builder/document";
 import { builderStyle } from "@/core/builder/layout";
 import { coreBuilderComponents } from "@/core/builder/registry";
 import type { PublicShortcode } from "@/core/contracts/settings";
@@ -29,6 +31,9 @@ import { ContentMarkup } from "../components/content-markup";
 import { ContentMarkupView } from "../components/content-markup-view";
 import { TextLink } from "../components/ui/primitives";
 import { ShortcodeRegionBoundary } from "../components/shortcode-regions";
+import { authoredStyle } from "../components/authored-style";
+import { componentCssLimit } from "@/core/rendering/authored-css";
+import { BuilderProgress } from "./progress";
 import { Icon, isBuiltinIcon, type IconName } from "../components/icon";
 import styles from "./content.module.css";
 
@@ -208,6 +213,12 @@ export function BuilderElement({
   const { locale } = useLocale();
   const t = useT();
   const props = resolvedBuilderProps(node, parameters);
+  const id = useId();
+  const authored = authoredStyle(
+    `component-${id}`,
+    node.css,
+    componentCssLimit,
+  );
   const text = (key: string) => stringProp(props, key);
   const empty = (label: string, icon: IconName) =>
     preview ? <EmptyElement label={label} icon={icon} /> : null;
@@ -270,20 +281,14 @@ export function BuilderElement({
         <Action label={text("label")} href={text("href")} preview={preview} />
       );
       break;
-    case "core.progress": {
-      const label = text("label").trim() || t("进度");
-      const value = builderProgressValue(props.value);
+    case "core.progress":
       body = (
-        <div className={styles.progress}>
-          <div className={styles.progressLabel} aria-hidden="true">
-            <span>{label}</span>
-            <span>{value}%</span>
-          </div>
-          <progress aria-label={label} max={100} value={value} />
-        </div>
+        <BuilderProgress
+          label={text("label").trim() || t("进度")}
+          values={props}
+        />
       );
       break;
-    }
     case "core.icon": {
       const name = text("name");
       body = (
@@ -407,7 +412,9 @@ export function BuilderElement({
       data-builder-node={node.type}
       data-builder-id={preview ? node.id : undefined}
       style={builderStyle(props, node.type === "core.grid")}
+      {...authored.scope}
     >
+      {authored.style}
       {preview &&
       ["core.html", "core.markdown", "core.heading"].includes(node.type) ? (
         <>

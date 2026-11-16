@@ -105,6 +105,28 @@
   gap: 4px;
 }
 
+.colorField {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.colorField > :global(.ui-input) {
+  min-inline-size: 0;
+}
+.colorField > small {
+  grid-column: 1 / -1;
+}
+
+.colorField :global(.ui-color-trigger[data-compact]) {
+  inline-size: 38px;
+  min-block-size: 36px;
+  justify-content: center;
+  border: 1px solid var(--admin-border);
+  background: var(--admin-canvas);
+}
+
 .actions :global(.admin-icon-button) {
   inline-size: 32px;
   block-size: 32px;

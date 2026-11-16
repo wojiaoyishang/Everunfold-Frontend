@@ -1,0 +1,99 @@
+.progress {
+  --progress-tone: var(--accent);
+  --progress-fill: var(--progress-custom-fill, var(--progress-tone));
+  --progress-track: var(
+    --progress-custom-track,
+    color-mix(in srgb, var(--progress-fill) 14%, var(--line))
+  );
+  --progress-radius: 999px;
+  display: grid;
+  gap: 7px;
+  color: var(--text);
+  text-align: start;
+}
+
+.progress[data-tone="violet"] {
+  --progress-tone: #8b5cf6;
+}
+.progress[data-tone="blue"] {
+  --progress-tone: #3b82f6;
+}
+.progress[data-tone="green"] {
+  --progress-tone: #198764;
+}
+.progress[data-tone="amber"] {
+  --progress-tone: #ce7923;
+}
+.progress[data-tone="rose"] {
+  --progress-tone: #d65580;
+}
+.progress[data-shape="square"] {
+  --progress-radius: 0;
+}
+
+.label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  line-height: 1.45;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.label > :nth-child(2) {
+  flex: none;
+  color: var(--muted);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.track {
+  inline-size: 100%;
+  block-size: var(--progress-height, 8px);
+  overflow: hidden;
+  border-radius: var(--progress-radius);
+  background: var(--progress-track);
+}
+
+.fill {
+  display: block;
+  inline-size: var(--progress-value);
+  block-size: 100%;
+  border-radius: inherit;
+  background: var(--progress-fill);
+  transition: inline-size 280ms ease-out;
+}
+
+.progress[data-appearance="gradient"] .fill {
+  background: linear-gradient(
+    90deg,
+    var(--progress-fill),
+    color-mix(in srgb, var(--progress-fill) 55%, white)
+  );
+}
+
+.progress[data-appearance="striped"] .fill {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--progress-fill) 0 7px,
+    color-mix(in srgb, var(--progress-fill) 75%, white) 7px 14px
+  );
+}
+
+.progress[data-appearance="segments"] .track {
+  mask-image: repeating-linear-gradient(
+    to right,
+    black 0 max(0px, calc(10% - 2px)),
+    transparent max(0px, calc(10% - 2px)) 10%
+  );
+}
+
+:global(html[data-motion="reduced"]) .fill {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(html:not([data-motion="full"])) .fill {
+    transition: none;
+  }
+}

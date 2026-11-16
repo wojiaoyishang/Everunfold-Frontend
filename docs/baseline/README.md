@@ -1090,7 +1090,7 @@ ADR0079已实现，前端d28bd75/aceee88/fd5d52d、后端650a0f0/4dc394b。当�
 | `docs/development/font-registration.md`                           | `font-registration-1`         | `c83fce15b8be12fb3980f615d6762d128c1aa60930fb448f8be83d1684c60389` |
 | `docs/development/frontend-plugins.md`                            | `frontend-plugins-7`          | `08fced8dc6f6b1b6af0faf598b97b670f27205d54132234b5b7daae8d7022465` |
 | `docs/development/settings.md`                                    | `settings-runtime-11`         | `131ab1bb5903f01f988bd0d2b050a529f4d1b354e84afee7c46782a60134b61a` |
-| `docs/development/protocol.md` | `development-21` | `574e0cb5b05212153f8f38cb2d7a889148ecf58f94529367ca7235d34ee3b640` |
+| `docs/development/protocol.md` | `development-22` | `9a90b44f7406d1f7682c08bb252f38624a3474d9c32333077f7df06a4ebd8e80` |
 | `docs/decisions/0080-minimal-paper-starter-theme.md`              | `ADR0080-2`                   | `0f7a9b020c64afdd569241fae67dbc272b3ec2028474d72e44f0c1c5bcc5f9f7` |
 | `docs/decisions/0084-theme-cards-metadata-and-settings-scroll.md` | `ADR0084-2`                   | `e39535b125f6d5103544a6e4f05eb490f52da2447a2fa884a244c241da708551` |
 | `docs/decisions/0085-shared-font-registration.md`                 | `ADR0085`                     | `60c7c469e00620f86f1ea1bc4bf0491bd3b0d45dbe445b8175d4b1e6fe63062d` |
@@ -1885,3 +1885,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0167-reader-previews-and-cache-clear.md` | `ADR0167-1` | `4dfbae7ba61afcb43fac88cb94eee5f5326282d082f24260071b9751daf30276` |
+
+## 内容样式和加密摘要
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0168-authoring-styles-and-encrypted-excerpts.md` | `ADR0168-1` | `cdfa0a7fec1e751e2bbe56a293d5f110258a1aa68a0d48c0352872366fb49090` |

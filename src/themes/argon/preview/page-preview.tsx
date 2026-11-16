@@ -15,6 +15,7 @@ import { UiText } from "@/core/i18n/provider";
 import { BlogShell } from "../components/shell";
 import { ManagedPageView } from "../pages/view";
 import { Button } from "../components/ui/primitives";
+import { ExtensionProgress } from "../components/extension-placeholder";
 import styles from "./content-preview.module.css";
 import { previewStamp } from "@/core/preview/bridge";
 import { usePreviewReceipt } from "@/core/preview/use-preview-receipt";
@@ -131,7 +132,11 @@ export function ManagedPagePreview({
       </main>
     );
   return (
-    <BlogShell site={site} backendBaseUrl={baseUrl}>
+    <BlogShell
+      site={site}
+      backendBaseUrl={baseUrl}
+      embeddedPreview={liveWorkspace}
+    >
       {!liveWorkspace && (
         <>
           <section className={`surface ${styles.bar}`}>
@@ -194,8 +199,14 @@ export function ManagedPagePreview({
           </section>
         )
       ) : (
-        <section className={`surface ${styles.state}`} role="status">
-          <UiText text="正在等待编辑器的预览内容…" />
+        <section
+          className={`surface ${styles.state} ${styles.loading}`}
+          role="status"
+        >
+          <span className="sr-only">
+            <UiText text="正在等待编辑器的预览内容…" />
+          </span>
+          <ExtensionProgress />
         </section>
       )}
     </BlogShell>

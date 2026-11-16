@@ -91,12 +91,16 @@
   margin: 18px auto 0;
 }
 .loading {
-  animation: spin 1s linear infinite;
+  --extension-progress-width: 20rem;
+  --extension-progress-height: 6px;
+  display: grid;
+  justify-items: center;
 }
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.headerProgress {
+  --extension-progress-width: 5rem;
+  display: inline-block;
+  inline-size: 5rem;
+  margin-block: 3px;
 }
 @media (max-width: 640px) {
   .bar {
@@ -110,10 +114,5 @@
   }
   .notice {
     line-height: 1.7;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .loading {
-    animation: none;
   }
 }

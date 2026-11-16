@@ -21,6 +21,7 @@
   border-style: solid;
 }
 .progress {
+  display: block;
   inline-size: min(100%, var(--extension-progress-width, 16rem));
   block-size: var(--extension-progress-height, 4px);
   overflow: hidden;

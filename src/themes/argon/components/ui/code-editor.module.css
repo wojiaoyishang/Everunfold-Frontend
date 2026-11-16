@@ -93,6 +93,32 @@
   padding: 2px 5px;
   font-family: inherit;
 }
+.editor[data-plain-text] {
+  --source-editor-min-height: 6rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-canvas);
+}
+.editor[data-plain-text]:focus-within {
+  border-color: var(--admin-accent);
+  box-shadow: 0 0 0 2px var(--admin-accent-soft);
+}
+.editor[data-plain-text] :global(.cm-editor) {
+  box-shadow: none;
+}
+.editor[data-plain-text] :global(.cm-scroller) {
+  font-family: inherit;
+  max-height: 14rem;
+}
+.editor[data-plain-text] :global(.cm-content) {
+  padding-block: 9px;
+}
+.editor[data-plain-text] :global(.cm-line) {
+  padding-inline: 10px;
+}
+.editor[data-plain-text] :global(.cm-placeholder) {
+  color: var(--admin-muted);
+}
 @media (max-width: 640px) {
   .editor :global(.cm-line) {
     padding-inline: 12px;

@@ -17,6 +17,7 @@ import { PagePresentation } from "../components/route-state";
 import { Button } from "../components/ui/primitives";
 import { RouteLink } from "../components/ui/route-link";
 import { Icon } from "../components/icon";
+import { ExtensionProgress } from "../components/extension-placeholder";
 import styles from "./content-preview.module.css";
 import { previewStamp } from "@/core/preview/bridge";
 import { usePreviewReceipt } from "@/core/preview/use-preview-receipt";
@@ -102,7 +103,11 @@ export function ContentPreview({
       </main>
     );
   return (
-    <BlogShell site={site} backendBaseUrl={baseUrl}>
+    <BlogShell
+      site={site}
+      backendBaseUrl={baseUrl}
+      embeddedPreview={liveWorkspace}
+    >
       {!liveWorkspace && (
         <>
           <section
@@ -123,7 +128,12 @@ export function ContentPreview({
                   ) : error ? (
                     <UiText text="读取失败" />
                   ) : (
-                    <UiText text="正在读取草稿" />
+                    <span className={styles.headerProgress} role="status">
+                      <span className="sr-only">
+                        <UiText text="正在读取草稿" />
+                      </span>
+                      <ExtensionProgress />
+                    </span>
                   )}
                 </span>
               </div>
@@ -215,14 +225,14 @@ export function ContentPreview({
         </>
       ) : (
         <section
-          className={`surface ${styles.state}`}
+          className={`surface ${styles.state} ${styles.loading}`}
           role="status"
           aria-busy="true"
         >
-          <Icon name="refresh" className={styles.loading} />
-          <p>
+          <span className="sr-only">
             <UiText text="正在读取已保存的草稿…" />
-          </p>
+          </span>
+          <ExtensionProgress />
         </section>
       )}
     </BlogShell>

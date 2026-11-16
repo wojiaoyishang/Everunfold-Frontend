@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import type { PageValue } from "@/core/contracts/pages";
 import { UiText, useT } from "@/core/i18n/provider";
 import { AuthoringField } from "../components/authoring-field";
+import { AuthoredCssField } from "../components/authored-css-field";
 import type { AdminFormFieldContext } from "@/core/forms/admin-field-types";
 import { Icon } from "../../components/icon";
 import { Switch } from "../../components/ui/switch";
@@ -72,6 +73,7 @@ export function PageSettings({
   disabled,
   compact,
   compactIdentity,
+  inheritedComponentCss,
   authoring,
   seo,
   extra,
@@ -81,6 +83,7 @@ export function PageSettings({
   disabled: boolean;
   compact: boolean;
   compactIdentity?: ReactNode;
+  inheritedComponentCss?: boolean;
   authoring?: Pick<AdminFormFieldContext, "scene" | "source" | "resourceKey">;
   seo?: ReactNode;
   extra?: ReactNode;
@@ -99,7 +102,7 @@ export function PageSettings({
           label="页面说明"
           value={value.description ?? ""}
           onChange={(description) => change({ description })}
-          rows={4}
+          plainEditor
           maxLength={500}
           disabled={disabled}
         />
@@ -154,6 +157,35 @@ export function PageSettings({
           ))}
         </div>
       </PageSettingsGroup>
+      {value.edit_mode === "components" && (
+        <PageSettingsGroup
+          title="页面 CSS"
+          initiallyOpen={false}
+          compact={compact}
+        >
+          <AuthoredCssField
+            label="全局 CSS"
+            value={
+              inheritedComponentCss
+                ? value.component_css_override
+                : value.component_css
+            }
+            disabled={disabled}
+            onChange={(css) =>
+              change(
+                inheritedComponentCss
+                  ? { component_css_override: css }
+                  : { component_css: css },
+              )
+            }
+          />
+          {inheritedComponentCss && (
+            <p className={styles.help}>
+              <UiText text="此处的 CSS 在模板样式之后应用，只影响当前页面。" />
+            </p>
+          )}
+        </PageSettingsGroup>
+      )}
       {seo && <div className={styles.seo}>{seo}</div>}
       {extra}
     </div>

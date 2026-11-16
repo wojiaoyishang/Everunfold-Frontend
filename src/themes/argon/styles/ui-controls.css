@@ -424,6 +424,64 @@ html[data-motion="reduced"]
   margin-bottom: 14px;
   font-weight: 500;
 }
+.ui-color-swatches {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.ui-color-swatch {
+  min-inline-size: 0;
+  aspect-ratio: 1;
+  border: 1px solid color-mix(in srgb, var(--text) 20%, transparent);
+  border-radius: 5px;
+}
+.ui-color-swatch[aria-pressed="true"] {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.ui-color-plane {
+  position: relative;
+  display: block;
+  inline-size: 100%;
+  block-size: 112px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background-image:
+    linear-gradient(0deg, black, transparent),
+    linear-gradient(90deg, white, transparent);
+  cursor: crosshair;
+  touch-action: none;
+}
+.ui-color-plane > span {
+  position: absolute;
+  inline-size: 13px;
+  block-size: 13px;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 60%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.ui-color-hue {
+  --hue-track: linear-gradient(90deg, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+.ui-color-hue .ui-range::-webkit-slider-runnable-track {
+  background: var(--hue-track);
+}
+.ui-color-hue .ui-range::-moz-range-track {
+  background: var(--hue-track);
+}
+.ui-color-hue .ui-range::-moz-range-progress {
+  background: transparent;
+}
+.ui-color-rgb {
+  margin-top: 10px;
+  color: var(--muted);
+}
+.ui-color-rgb > summary {
+  cursor: pointer;
+}
 .ui-color-hex {
   display: flex;
   gap: 9px;
