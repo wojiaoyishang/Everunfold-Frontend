@@ -33,6 +33,7 @@ ACTIONS = {
     "init-db": 30,
     "migrate": 31,
     "export-node": 32,
+    "sync": 33,
 }
 
 
@@ -286,6 +287,8 @@ class SetupApp(App[int]):
             with Horizontal(classes="buttons"):
                 yield Button("查看 / 复制选中项", id="copy_value")
                 yield Button("查看 / 复制结果", id="copy_results")
+                if not self.config.backend:
+                    yield Button("触发同步", id="sync", variant="primary")
             if self.config.backend:
                 with Horizontal(classes="buttons"):
                     yield Button("初始化数据库并构建启动", id="init-deploy", variant="success")
@@ -452,7 +455,7 @@ class SetupApp(App[int]):
             for error in errors:
                 log.write(Text(error, style="red"))
             return
-        if action in ("init-db", "init-deploy", "migrate", "export-node"):
+        if action in ("init-db", "init-deploy", "migrate", "export-node", "sync"):
             description = {
                 "init-db": (
                     "保存配置并检查数据库；仅空库会初始化和创建管理员，已初始化则跳过。继续？"
@@ -463,6 +466,7 @@ class SetupApp(App[int]):
                 ),
                 "migrate": "保存配置，并执行数据库迁移？请先完成数据库备份。",
                 "export-node": "保存配置，登记所选节点的内部连接并输出连接 Base64？",
+                "sync": "保存配置，并向活动后端请求重新同步此节点？",
             }[action]
             if not await self.push_screen_wait(Confirm(description)):
                 return

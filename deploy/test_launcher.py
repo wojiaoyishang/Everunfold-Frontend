@@ -73,7 +73,13 @@ if args[0] == "inspect":
     if args[-1] in containers:
         container = containers[args[-1]]
         expression = args[args.index("--format")+1]
-        if "Labels" in expression:
+        if ".State.Running" in expression:
+            print(args[-1])
+            print(next(value.split("=", 1)[1] for value in container["args"]
+                       if value.startswith("org.everunfold.project=")))
+            print(next(value.split(",target=/config", 1)[0].split(",source=", 1)[1]
+                       for value in container["args"] if ",target=/config" in value))
+        elif "Labels" in expression:
             print(next(value.split("=", 1)[1] for value in container["args"]
                        if value.startswith("org.everunfold.project=")))
         elif ".Mounts" in expression:
@@ -95,6 +101,8 @@ if args[0] == "inspect":
     else: raise SystemExit(1)
 if args[:2] == ["container", "inspect"]:
     raise SystemExit(0 if args[-1] in containers or os.environ.get("DOCKER_TEST_OLD") else 1)
+if args[0] == "exec":
+    assert "/internal/frontend-nodes/" in sys.stdin.read()
 if args[0] == "rm":
     containers.pop(args[-1], None); save()
 if args[0] == "compose":
@@ -133,6 +141,9 @@ class LauncherTests(unittest.TestCase):
         shutil.copy2(DEPLOY.parent / "setup.sh", self.repo / "setup.sh")
         if BACKEND:
             (self.repo / "app").mkdir()
+        else:
+            (self.repo / "tools").mkdir()
+            shutil.copy2(DEPLOY.parent / "tools/trigger-sync.mjs", self.repo / "tools")
         self.bin = self.root / "bin"
         self.bin.mkdir()
         stub = self.bin / "docker"
@@ -212,6 +223,35 @@ class LauncherTests(unittest.TestCase):
         self.assertIn("0.0.0.0:3434:3210", create)
         self.assertNotIn("3210", (self.repo / "config.yaml").read_text())
         self.assertIn(str(selected), result.stdout)
+
+    @unittest.skipIf(BACKEND, "frontend sync action")
+    def test_sync_uses_current_config_and_network_without_a_live_frontend(self):
+        result, calls = self.run_action("sync")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        helper_path = "/usr/local/lib/everunfold-trigger-sync.mjs"
+        command = ["node", "--import", "tsx", helper_path]
+        helper = next(call for call in calls if call[-4:] == command)
+        self.assertIn("CONFIG_FILE=/config/config.yaml", helper)
+        source = self.repo / "tools/trigger-sync.mjs"
+        self.assertIn(f"type=bind,source={source},target={helper_path},readonly", helper)
+        self.assertTrue(any(call[:3] == ["network", "connect", "1panel-network"] for call in calls))
+        self.assertFalse(any(call[0] == "stop" or "--name" in call or "build" in call for call in calls))
+
+    @unittest.skipIf(BACKEND, "frontend sync action")
+    def test_sync_reuses_running_frontend_container_network_identity(self):
+        result, _ = self.run_action("start")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.log.write_text("")
+        result, calls = self.run_action("sync")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            [
+                "exec", "-i", "--workdir", "/workspace", "-e", "CONFIG_FILE=/config/config.yaml",
+                "custom-everunfold", "node", "--import", "tsx", "--input-type=module",
+            ],
+            calls,
+        )
+        self.assertFalse(any(call[0] == "stop" or "--name" in call or "build" in call for call in calls))
 
     def test_build_then_start_without_rebuilding(self):
         result, calls = self.run_action("build")

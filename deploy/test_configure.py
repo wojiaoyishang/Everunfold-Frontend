@@ -710,6 +710,21 @@ class TerminalTests(Fixtures, unittest.IsolatedAsyncioTestCase):
         self.assertEqual(app.return_value, 0)
         self.assertEqual((self.root / "config.yaml").read_bytes(), saved)
 
+    @unittest.skipIf(BACKEND, "frontend sync action")
+    async def test_sync_confirms_before_saving_and_requesting_dispatch(self):
+        model = self.complete()
+        app = SetupApp(model)
+        async with app.run_test(size=(80, 24)) as pilot:
+            await pilot.click("#sync")
+            self.assertIsInstance(app.screen, Confirm)
+            await pilot.click("#no")
+            self.assertFalse(app.saved)
+            await pilot.click("#sync")
+            self.assertIsInstance(app.screen, Confirm)
+            await pilot.click("#yes")
+        self.assertTrue(app.saved)
+        self.assertEqual(app.return_value, 33)
+
     @unittest.skipUnless(BACKEND, "backend node export action")
     async def test_export_stays_open_copies_base64_and_handles_retry(self):
         model = self.complete()

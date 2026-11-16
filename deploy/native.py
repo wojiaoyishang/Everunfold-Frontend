@@ -32,6 +32,7 @@ def main() -> None:
             30: "init-db",
             31: "migrate",
             32: "export-node",
+            33: "sync",
         }.get(result, "failed")
         if action in ("saved", "cancelled"):
             print("配置已保存。" if action == "saved" else "已退出，未保存本次修改。")
@@ -159,6 +160,12 @@ def main() -> None:
         return
     if action == "check":
         check()
+        return
+    if action == "sync" and not BACKEND:
+        try:
+            execute(["node", "--import", "tsx", "tools/trigger-sync.mjs"])
+        except subprocess.CalledProcessError as error:
+            raise SystemExit(error.returncode) from None
         return
     if action == "start":
         if BACKEND:

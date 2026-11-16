@@ -18,8 +18,8 @@ if [[ "${1:-}" == --native ]]; then native=true; shift; fi
 action=configure
 if [[ $# -gt 0 && "$1" != --connection-file && "$1" != --connection-base64 ]]; then action=$1; shift; fi
 case "$action" in
-  configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|api|worker|scheduler|web|render) ;;
-  *) echo "用法：./setup.sh [--docker|--native] [configure|build|deploy|init-deploy|start|check|init-db|migrate|export-node|render] [--connection-base64 | --connection-file 文件路径]"; exit 2 ;;
+  configure|build|deploy|init-deploy|start|check|sync|init-db|migrate|export-node|api|worker|scheduler|web|render) ;;
+  *) echo "用法：./setup.sh [--docker|--native] [configure|build|deploy|init-deploy|start|check|sync|init-db|migrate|export-node|render] [--connection-base64 | --connection-file 文件路径]"; exit 2 ;;
 esac
 connection_file=
 if (( $# )); then
@@ -230,7 +230,7 @@ if [[ "$action" == configure ]]; then
     0) action=render ;;
     10) echo "已退出，未保存本次修改。"; exit 0 ;;
     20) action=build ;; 21) action=deploy ;; 22) action=init-deploy ;; 30) action=init-db ;;
-    31) action=migrate ;; 32) action=export-node ;; *) exit "$result" ;;
+    31) action=migrate ;; 32) action=export-node ;; 33) action=sync ;; *) exit "$result" ;;
   esac
   refresh_layout
   ensure_networks
@@ -294,6 +294,21 @@ else
                  -e "FRONTEND_HOST=$listen_host" -e "FRONTEND_PORT=$listen_port")
 fi
 run_runtime() { run_temporary no "${runtime_args[@]}" "$image_name" "$@"; }
+sync_runtime() {
+  local helper="$project_root/tools/trigger-sync.mjs" config_dir config_name
+  local -a running
+  config_dir=$(dirname -- "$runtime_config")
+  config_name=$(basename -- "$runtime_config")
+  # 与运行中的前端共用源 IP，兼容后端按单个容器 IP 设置的白名单。
+  mapfile -t running < <(docker inspect --format '{{if .State.Running}}{{.Id}}{{println}}{{index .Config.Labels "org.everunfold.project"}}{{range .Mounts}}{{if eq .Destination "/config"}}{{println}}{{.Source}}{{end}}{{end}}{{end}}' "$container_name" 2>/dev/null)
+  if [[ "${running[1]:-}" == "$project_root" && "${running[2]:-}" == "$config_dir" ]]; then
+    docker exec -i --workdir /workspace -e "CONFIG_FILE=/config/$config_name" "${running[0]}" \
+      node --import tsx --input-type=module <"$helper"
+  else
+    runtime_args+=(--mount "type=bind,source=$helper,target=/usr/local/lib/everunfold-trigger-sync.mjs,readonly")
+    run_runtime node --import tsx /usr/local/lib/everunfold-trigger-sync.mjs
+  fi
+}
 check_runtime() {
   if [[ "$role" == backend ]]; then run_runtime python deploy/runtime_check.py
   else
@@ -342,6 +357,9 @@ case "$action" in
       (umask 077; printf '%s\n' "$encoded" >"$EVERUNFOLD_SETUP_RESULT_FILE")
     fi ;;
   check) check_runtime ;;
+  sync)
+    [[ "$role" == frontend ]] || exit 2
+    sync_runtime ;;
   start)
     if [[ "$role" == backend ]]; then
       echo "启动准备：检查依赖，并按配置初始化空数据库。"
