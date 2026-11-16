@@ -569,16 +569,24 @@
 
 .admin-authoring-field-heading {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   flex-wrap: wrap;
   gap: 4px 8px;
   min-width: 0;
 }
 
-.admin-authoring-field-heading > :not(label) {
+.admin-authoring-field-label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  min-width: 0;
+}
+
+.admin-authoring-field-heading > :not(.admin-authoring-field-label) {
   margin-inline-start: auto;
 }
 
-.admin-settings-field > .admin-authoring-field-heading > label {
+.admin-settings-field .admin-authoring-field-label > label {
   font-weight: 500;
 }

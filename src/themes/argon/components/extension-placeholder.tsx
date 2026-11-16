@@ -9,6 +9,23 @@ export function ExtensionProgress() {
   );
 }
 
+export function LoadingProgress({
+  label,
+  className,
+}: {
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div className={className} role="status">
+      <span className="sr-only">
+        <UiText text={label} />
+      </span>
+      <ExtensionProgress />
+    </div>
+  );
+}
+
 export function ExtensionPlaceholder({
   name,
   loading = false,

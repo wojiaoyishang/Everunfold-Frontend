@@ -24,11 +24,7 @@ import type {
 import type { MediaURL } from "@/core/contracts/content-admin";
 import styles from "./editor-workspace.module.css";
 import type { DraftSession } from "@/core/collaboration/session";
-import { AuthoringField } from "../components/authoring-field";
-import {
-  articleScene,
-  draftAuthoringSource,
-} from "@/core/forms/authoring-source";
+import { DraftExcerptField } from "./draft-excerpt-field";
 
 export interface EditorProps {
   authoringLanguage?: string;
@@ -231,37 +227,13 @@ export function EditorBody({
         <BlockPosition end />
       </div>
       {type.supports_excerpt && (
-        <AuthoringField
-          className={`admin-field ${styles.excerpt}`}
-          binding={
-            type.id === "article" && authoringLanguage
-              ? {
-                  scene: articleScene,
-                  field: "excerpt",
-                  resourceKey: `${authoringId ?? "new"}:${authoringLanguage}`,
-                  source: () => ({
-                    ...draftAuthoringSource(
-                      value,
-                      authoringLanguage,
-                      authoringId,
-                    ),
-                    summary: undefined,
-                  }),
-                }
-              : undefined
-          }
-          label="摘要"
-          labelAside={
-            <small>
-              <UiText text="（可选）" />
-            </small>
-          }
-          value={value.excerpt ?? ""}
-          rows={3}
-          maxLength={1000}
+        <DraftExcerptField
+          type={type.id}
+          fields={value}
+          id={authoringId}
+          language={authoringLanguage}
           disabled={disabled}
-          placeholder="留空时从正文生成摘要"
-          onChange={(excerpt) => onChange({ ...value, excerpt })}
+          onChange={onChange}
         />
       )}
       <span role="status" className="sr-only">

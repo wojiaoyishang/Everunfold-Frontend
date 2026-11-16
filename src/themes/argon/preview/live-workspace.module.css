@@ -228,9 +228,12 @@
   overflow: auto;
   scrollbar-width: thin;
 }
-.panelBody[role="status"] {
-  padding: 18px;
-  color: var(--admin-muted);
+.panelLoading {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  padding: 24px 18px;
+  --extension-progress-width: 11rem;
 }
 .editorHost {
   position: relative;

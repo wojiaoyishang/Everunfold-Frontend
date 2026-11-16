@@ -1891,3 +1891,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0168-authoring-styles-and-encrypted-excerpts.md` | `ADR0168-1` | `cdfa0a7fec1e751e2bbe56a293d5f110258a1aa68a0d48c0352872366fb49090` |
+
+## 文章卡片摘要和编辑侧栏
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0169-article-card-excerpts-and-editor-sidebar.md` | `ADR0169-1` | `9a5b41ddc921fe5c31565b63abb463286725f9fedbcb92eef5aea1459f7b7d54` |

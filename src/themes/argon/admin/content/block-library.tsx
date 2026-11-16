@@ -1,7 +1,13 @@
 "use client";
 import { UiText } from "@/core/i18n/provider";
 
-import { useId, useSyncExternalStore, type ReactNode } from "react";
+import {
+  useId,
+  useLayoutEffect,
+  useRef,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 import { Button } from "../../components/ui/primitives";
 import { ActionPopover } from "../../components/ui/action-popover";
 import { useDragItem } from "../../components/ui/drag-and-drop";
@@ -139,15 +145,45 @@ export function ComposerSidebar({
 }) {
   const host = useBlockComposer(),
     id = useId();
+  const sidebar = useRef<HTMLElement>(null);
   const narrow = useSyncExternalStore(
     subscribeViewport,
     () => matchMedia("(max-width: 800px)").matches,
     () => false,
   );
+  useLayoutEffect(() => {
+    const rail = sidebar.current;
+    if (!rail || embedded || narrow) return;
+    // Before the rail reaches its sticky position, the heading takes up more of the viewport.
+    let frame = 0;
+    const measure = () => {
+      frame = 0;
+      const top = `${Math.ceil(rail.getBoundingClientRect().top)}px`;
+      if (rail.style.getPropertyValue("--inspector-visible-top") !== top)
+        rail.style.setProperty("--inspector-visible-top", top);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(measure);
+    };
+    const observer = new ResizeObserver(schedule);
+    const workspace = rail.closest(".admin-content-editor-page");
+    if (workspace) observer.observe(workspace);
+    measure();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      rail.style.removeProperty("--inspector-visible-top");
+    };
+  }, [embedded, narrow]);
   const tabValue = settingsOnly && narrow ? "settings" : host.tab;
   if (embedded) return <div data-live-part="settings">{children}</div>;
   return (
     <aside
+      ref={sidebar}
       className={`${editorColumns.inspector} ${styles.inspector}`}
       data-composer-sidebar
       data-settings-only={settingsOnly}

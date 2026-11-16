@@ -311,6 +311,13 @@
   width: 100%;
   padding: 12px;
 }
+.excerptToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--admin-muted);
+}
 .excerpt textarea:focus-visible {
   outline: none;
   border-color: var(--admin-accent);

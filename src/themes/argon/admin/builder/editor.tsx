@@ -29,6 +29,7 @@ import type {
 } from "@/core/preview/builder";
 import type { MediaURL } from "@/core/contracts/content-admin";
 import { UiText, useT } from "@/core/i18n/provider";
+import { LoadingProgress } from "../../components/extension-placeholder";
 import { Icon } from "../../components/icon";
 import { Button, Popover, TextField } from "../../components/ui/primitives";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
@@ -439,9 +440,10 @@ export function LiveEditorSurface({
               {editor}
             </div>
             {awaitingEditor ? (
-              <div className={layout.panelBody} role="status">
-                <UiText text="正在读取…" />
-              </div>
+              <LoadingProgress
+                label="正在读取…"
+                className={layout.panelLoading}
+              />
             ) : builder && !embedded ? (
               activePanel === "parameters" ||
               (activePanel === "properties" && current) ? (

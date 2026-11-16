@@ -227,20 +227,6 @@ function AccessPanel({
                 <small>
                   <UiText text="开启后，手动填写的摘要会在解锁前公开。" />
                 </small>
-                {showExcerpt && (
-                  <Button
-                    className={styles.textButton}
-                    disabled={disabled || !protectedContent}
-                    onClick={() =>
-                      updateFields({
-                        excerpt: "这是一篇加密的文章，需要输入密码才能阅读。",
-                      })
-                    }
-                  >
-                    <Icon name="edit" />
-                    <UiText text="填入加密摘要提示语" />
-                  </Button>
-                )}
               </>
             )}
           </div>

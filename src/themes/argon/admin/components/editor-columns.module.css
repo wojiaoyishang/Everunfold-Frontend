@@ -6,9 +6,28 @@
 }
 
 .inspector {
+  --inspector-top: calc(82px + var(--admin-header-dock-height, 0px));
   min-width: 0;
   position: sticky;
-  top: calc(82px + var(--admin-header-dock-height, 0px));
+  top: var(--inspector-top);
+}
+
+@media (width > 800px) {
+  .inspector {
+    max-block-size: max(
+      8rem,
+      calc(
+        100dvh - max(var(--inspector-top), var(--inspector-visible-top, 0px)) -
+          16px
+      )
+    );
+    margin-inline: -4px;
+    padding-inline: 4px;
+    padding-block-end: 4px;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
 }
 
 @media (max-width: 1050px) {

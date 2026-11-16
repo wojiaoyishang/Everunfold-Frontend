@@ -74,6 +74,10 @@
   gap: 10px;
 }
 .post-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  min-width: 0;
   margin: 0 0 13px;
   color: var(--text-strong);
   font-size: 25px;
@@ -81,6 +85,11 @@
   line-height: 1.55;
   overflow-wrap: anywhere;
   transition: color 200ms ease;
+}
+.post-title > .post-title-lock {
+  flex: none;
+  inline-size: 0.8em;
+  block-size: 0.8em;
 }
 .post-title a {
   transition: color 0.2s;

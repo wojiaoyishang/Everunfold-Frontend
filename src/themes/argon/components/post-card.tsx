@@ -9,7 +9,12 @@ import { shortcodeExcerpt } from "@/core/rendering/native-shortcodes";
 
 export function PostCard({ content }: { content: ReadableContentMetadata }) {
   const cover = resourceUrl(content.cover_url);
-  const excerpt = shortcodeExcerpt(content.excerpt);
+  const locked =
+    content.access === "password" || content.access === "scheduled";
+  const excerpt =
+    locked && !content.show_encrypted_excerpt
+      ? ""
+      : shortcodeExcerpt(content.excerpt);
   const heading = (
     <>
       <div className="post-title-row">
@@ -21,7 +26,10 @@ export function PostCard({ content }: { content: ReadableContentMetadata }) {
             </span>
           </span>
         )}
-        <h2 className="post-title">{content.title}</h2>
+        <h2 className="post-title">
+          {locked && <Icon name="lock" className="post-title-lock" />}
+          <span>{content.title}</span>
+        </h2>
       </div>
       <PostMeta content={content} />
     </>
@@ -44,7 +52,13 @@ export function PostCard({ content }: { content: ReadableContentMetadata }) {
       )}
       <div className="post-card-body">
         {!cover && <header>{heading}</header>}
-        {excerpt && <p className="post-excerpt">{excerpt}</p>}
+        {!content.hide_card_excerpt && (excerpt || locked) && (
+          <p className="post-excerpt">
+            {excerpt || (
+              <UiText text="这是一篇加密的文章，需要输入密码才能阅读。" />
+            )}
+          </p>
+        )}
         <div className="post-card-footer">
           <div className="post-tags">
             <Icon name="tag" />

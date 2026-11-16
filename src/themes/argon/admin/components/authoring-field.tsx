@@ -28,6 +28,7 @@ export function AuthoringField({
   placeholder,
   hint,
   labelAside,
+  labelControl,
   rows,
   plainEditor = false,
   className = "admin-field",
@@ -41,6 +42,7 @@ export function AuthoringField({
   placeholder?: string;
   hint?: string;
   labelAside?: ReactNode;
+  labelControl?: ReactNode;
   rows?: number;
   plainEditor?: boolean;
   className?: string;
@@ -65,10 +67,13 @@ export function AuthoringField({
     return (
       <div className={className}>
         <div className="admin-authoring-field-heading">
-          <label htmlFor={id}>
-            <UiText text={label} />
-            {labelAside}
-          </label>
+          <div className="admin-authoring-field-label">
+            <label htmlFor={id}>
+              <UiText text={label} />
+              {labelAside}
+            </label>
+            {labelControl}
+          </div>
           {actions}
         </div>
         {plainEditor ? (

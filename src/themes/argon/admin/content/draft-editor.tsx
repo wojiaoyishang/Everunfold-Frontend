@@ -40,6 +40,7 @@ import { FrontendPreviewButton } from "./frontend-preview-button";
 import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 import { CodePreferencesProvider } from "../../components/code-preferences";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
+import { LoadingProgress } from "../../components/extension-placeholder";
 import { useAppliedShortcodes } from "@/core/shortcodes/use-library";
 import { EditorLanguages } from "./editor-languages";
 import type { Locale } from "@/core/i18n/locale";
@@ -570,9 +571,10 @@ export function DraftEditor({
                   </div>
                 )}
                 {editor.loading ? (
-                  <div className="admin-draft-empty" role="status">
-                    <UiText text="正在读取内容…" />
-                  </div>
+                  <LoadingProgress
+                    label="正在读取内容…"
+                    className="admin-draft-empty"
+                  />
                 ) : (
                   (!id || editor.detail) && (
                     <div key={mode} className="admin-draft-editor-view">

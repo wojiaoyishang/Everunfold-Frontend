@@ -40,11 +40,17 @@
   background: var(--admin-accent, var(--accent));
   animation: loading-progress 1.1s ease-in-out infinite alternate;
 }
-:global(html[data-motion="reduced"]) .progress > span {
+:global([data-admin-motion="reduced"]) .progress > span,
+:global(html[data-motion="reduced"]:not(:has([data-surface="admin"])))
+  .progress
+  > span {
   animation: none;
 }
 @media (prefers-reduced-motion: reduce) {
-  :global(html:not([data-motion="full"])) .progress > span {
+  :global([data-admin-motion="system"]) .progress > span,
+  :global(html:not([data-motion="full"]):not(:has([data-surface="admin"])))
+    .progress
+    > span {
     animation: none;
   }
 }

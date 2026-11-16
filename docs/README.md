@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[文章卡片摘要和编辑侧栏](decisions/0169-article-card-excerpts-and-editor-sidebar.md)说明空摘要、加密提示语和后台独立滚动行为。
+
 [内容样式和加密摘要](decisions/0168-authoring-styles-and-encrypted-excerpts.md)说明公开摘要的条件，以及页面、组件和文章样式的编辑边界。
 
 [受限文章预览、更多组件与清空节点缓存](decisions/0167-reader-previews-and-cache-clear.md)记录旧封面副本恢复、阅读页动效、组件插件及完整缓存清理。
