@@ -58,6 +58,8 @@ max_concurrent_fetches = 4
 max_total_bytes = 2147483648
 min_free_bytes = 536870912
 rebuild_concurrency = 2
+# 后台定期检查本节点公开副本，缺失时请求后端重新投递。修改后重启前端。
+recovery_interval_seconds = 60
 
 # 设置副本与接收器；部署时填写从后端已鉴权响应获取的真实 source_epoch。
 # 未绑定 epoch 时不启用接收；不能通过首个请求自动认领来源。

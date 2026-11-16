@@ -1,4 +1,4 @@
-import type { ReceiverStatus } from "@/core/contracts/settings";
+import type { ReceiverStatus, SyncCheck } from "@/core/contracts/settings";
 
 export interface LocalGate {
   mode: "online" | "offline" | "unavailable";
@@ -17,6 +17,7 @@ export interface LocalNode {
   revision: string;
   profiles: { id: string; challenge: string }[];
   receiver: "reachable" | "unavailable" | "rejected" | "not_configured";
+  syncCheck?: SyncCheck;
   replicas?: Pick<
     ReceiverStatus,
     "public_settings" | "cache_policy" | "public_content"

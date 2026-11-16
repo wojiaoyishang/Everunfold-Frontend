@@ -223,6 +223,13 @@ test("clearing a bound node removes current replicas without replaying older rel
     await settings.apply(publicSettings(epoch, revision));
   }
   const maintenance = cacheMaintenance(identity, settings, content);
+  let clearChecks = 0;
+  const check = {
+    interval_seconds: 60,
+    last_checked_at: null,
+    next_check_at: null,
+    state: "idle",
+  } as const;
   const server = settingsReceiver(
     settings,
     token,
@@ -231,6 +238,7 @@ test("clearing a bound node removes current replicas without replaying older rel
     identity,
     undefined,
     maintenance,
+    { status: () => check, cleared: () => clearChecks++ },
   );
   server.listen(0, "127.0.0.1");
   await once(server, "listening");
@@ -255,6 +263,7 @@ test("clearing a bound node removes current replicas without replaying older rel
     409,
   );
   assert.equal((await content.read())?.generation, 2);
+  assert.equal(clearChecks, 0);
 
   const response = await post(identity, token);
   assert.equal(response.status, 200);
@@ -262,6 +271,11 @@ test("clearing a bound node removes current replicas without replaying older rel
   assert.equal(receipt.protocol, "cache-clear-1");
   assert.equal(receipt.removed_files, 8);
   assert.ok(receipt.removed_bytes > 0);
+  assert.equal(clearChecks, 1);
+  const status = await fetch(url.replace("/clear", "/status"), {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  assert.deepEqual((await status.json()).sync_check, check);
   assert.deepEqual(
     (await maintenance.status()).resources.map((item) => item.status),
     ["missing", "missing", "missing"],

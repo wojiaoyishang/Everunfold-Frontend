@@ -41,6 +41,7 @@ export interface FrontendConfiguration {
     maxTotalBytes: number;
     minFreeBytes: number;
     rebuildConcurrency: number;
+    recoveryIntervalSeconds: number;
   };
 }
 
@@ -319,6 +320,7 @@ export function parseConfiguration(
       "max_total_bytes",
       "min_free_bytes",
       "rebuild_concurrency",
+      "recovery_interval_seconds",
     ],
     "cache",
   );
@@ -349,6 +351,15 @@ export function parseConfiguration(
     siteValue === undefined ? undefined : baseUrl(siteValue, "PUBLIC_SITE_URL");
   if (publicSiteUrl && new URL(publicSiteUrl).pathname !== "/")
     throw new ConfigurationError("PUBLIC_SITE_URL 必须为前台公开站点根地址");
+  const recoveryIntervalSeconds = number(
+    cache.recovery_interval_seconds,
+    60,
+    "cache.recovery_interval_seconds",
+  );
+  if (recoveryIntervalSeconds > 86400)
+    throw new ConfigurationError(
+      "cache.recovery_interval_seconds 不能超过 86400",
+    );
   return {
     listener: listenerConfiguration(environment),
     theme: { active: activeTheme },
@@ -429,6 +440,7 @@ export function parseConfiguration(
         2,
         "cache.rebuild_concurrency",
       ),
+      recoveryIntervalSeconds,
     },
   };
 }

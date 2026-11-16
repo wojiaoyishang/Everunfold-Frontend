@@ -30,6 +30,11 @@ const reasons: Record<string, string> = {
   public_data_not_synced:
     "当前节点没有已同步的可读公开内容；检查后端 Worker 的投递与前端同步接收日志",
   replica_unavailable: "无法读取本机公开副本",
+  recovery_config_invalid: "无法读取前端恢复同步的运行配置",
+  recovery_token_missing: "恢复同步缺少前端到后端的有效节点令牌",
+  recovery_forbidden:
+    "后端拒绝恢复同步；检查节点是否启用、实际来源 IP 和前端到后端令牌",
+  recovery_invalid_response: "后端未确认恢复同步请求；检查两端版本与代理路径",
   backend_http: "后端内部请求返回失败状态；检查内部地址、代理与后端日志",
   backend_invalid: "后端健康响应格式不正确；检查内部地址是否指向 FastAPI",
   backend_network: "无法连接后端内部地址",

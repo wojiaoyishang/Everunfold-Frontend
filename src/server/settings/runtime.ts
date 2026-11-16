@@ -8,8 +8,10 @@ import {
 import { FileSettingsStore } from "./store";
 import { cacheMaintenance } from "./cache-maintenance";
 import { settingsHandler } from "./receiver";
+import { replicaRecovery } from "./recovery";
 import { FileContentStore } from "../content/store";
-export function configuredSettingsHandler(root: string) {
+
+export function configuredSettingsRuntime(root: string) {
   const { settings: config, connections } = readConfigurationFiles(root);
   const identity = connectionIdentity(config);
   if (!config.settings.sourceEpoch)
@@ -35,7 +37,37 @@ export function configuredSettingsHandler(root: string) {
     node_id: config.frontendNodeId,
     source_epoch: config.settings.sourceEpoch,
   };
-  return settingsHandler(
+  function currentConfiguration() {
+    const current = readConfigurationFiles(root);
+    if (
+      !!current.connections !== !!connections ||
+      connectionIdentity(current.settings) !== identity ||
+      (configurationEnvironment(current.settings)[
+        current.settings.backend.fastapiToNextjsTokenEnv ?? ""
+      ] ?? "") !== token
+    )
+      return;
+    return current.settings;
+  }
+  const recovery = replicaRecovery({
+    intervalSeconds: config.cache.recoveryIntervalSeconds,
+    settings: store,
+    content,
+    backend: () => {
+      const current = currentConfiguration();
+      if (!current) return;
+      return {
+        nodeId: current.frontendNodeId,
+        baseUrl: current.backend.baseUrl,
+        token:
+          configurationEnvironment(current)[
+            current.backend.nextjsToFastapiTokenEnv ?? ""
+          ] ?? "",
+        timeoutMs: Math.min(current.backend.requestTimeoutSeconds, 30) * 1000,
+      };
+    },
+  });
+  const handler = settingsHandler(
     store,
     token,
     config.backend.allowedPeerIps,
@@ -43,18 +75,13 @@ export function configuredSettingsHandler(root: string) {
     target,
     () => {
       try {
-        const current = readConfigurationFiles(root);
-        return (
-          !!current.connections === !!connections &&
-          connectionIdentity(current.settings) === identity &&
-          (configurationEnvironment(current.settings)[
-            current.settings.backend.fastapiToNextjsTokenEnv ?? ""
-          ] ?? "") === token
-        );
+        return !!currentConfiguration();
       } catch {
         return false;
       }
     },
     cacheMaintenance(target, store, content),
+    recovery,
   );
+  return { handler, recovery };
 }

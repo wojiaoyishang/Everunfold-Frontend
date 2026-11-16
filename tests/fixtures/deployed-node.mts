@@ -1,12 +1,12 @@
 import { createServer } from "node:http";
 import { readConfigurationFiles } from "../../src/core/config/files";
-import { configuredSettingsHandler } from "../../src/server/settings/runtime";
+import { configuredSettingsRuntime } from "../../src/server/settings/runtime";
 import { frontendHandler } from "../../src/server/http";
 import { watchInventory } from "../../tools/plugins/inventory.mts";
 
 const root = process.argv[2];
 const { settings } = readConfigurationFiles(root);
-const handler = configuredSettingsHandler(root);
+const { handler } = configuredSettingsRuntime(root);
 const server = createServer(
   frontendHandler((_request, response) => {
     response.writeHead(404);

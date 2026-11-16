@@ -50,21 +50,21 @@ export async function inspectNode(config: Config): Promise<LocalNode> {
     epoch,
     cache.maxSnapshotBytes,
   );
-  const [replicas, receiver] = await Promise.all([
+  const [replicas, status] = await Promise.all([
     readReplicas(store, content),
     probeLocalReceiver(config),
   ]);
-  return { ...node, replicas, receiver };
+  return { ...node, replicas, ...status };
 }
 
 async function probeLocalReceiver(
   config: Config,
-): Promise<LocalNode["receiver"]> {
+): Promise<Pick<LocalNode, "receiver" | "syncCheck">> {
   const token =
     configurationEnvironment(config)[
       config.backend.fastapiToNextjsTokenEnv ?? ""
     ] ?? "";
-  if (token.length < 32) return "not_configured";
+  if (token.length < 32) return { receiver: "not_configured" };
   const configuredHost = config.listener.host;
   const host = configuredHost.startsWith("127.")
     ? configuredHost
@@ -73,7 +73,7 @@ async function probeLocalReceiver(
       : configuredHost === "::" || configuredHost === "::1"
         ? "[::1]"
         : null;
-  if (!host) return "not_configured";
+  if (!host) return { receiver: "not_configured" };
   try {
     const response = await fetch(
       `http://${host}:${config.listener.port}/internal/settings/status`,
@@ -86,16 +86,16 @@ async function probeLocalReceiver(
     );
     if (!response.ok) {
       await response.body?.cancel();
-      return response.status === 403 ? "rejected" : "unavailable";
+      return { receiver: response.status === 403 ? "rejected" : "unavailable" };
     }
     const report = (await response.json()) as ReceiverStatus;
     return report.protocol === "node-status-1" &&
       report.node_id === config.frontendNodeId &&
       report.source_epoch === config.settings.sourceEpoch
-      ? "reachable"
-      : "unavailable";
+      ? { receiver: "reachable", syncCheck: report.sync_check ?? undefined }
+      : { receiver: "unavailable" };
   } catch {
-    return "unavailable";
+    return { receiver: "unavailable" };
   }
 }
 

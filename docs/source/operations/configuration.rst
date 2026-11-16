@@ -164,6 +164,8 @@ Docker 端口映射通常要求进程绑定 ``0.0.0.0``，各端健康检查访�
      - 网页、节点控制台与内部接收器共用监听 IP 和端口，Docker 缺省为 ``0.0.0.0:3000``。
    * - ``[cache].directory``、``max_snapshot_bytes``
      - 公开内容快照目录及单份快照大小限制。
+   * - ``[cache].recovery_interval_seconds``
+     - 公开副本后台检查及恢复请求间隔，默认 60 秒，修改后重启前端。
    * - ``[theme].active``、``[plugins].directory``
      - 实例默认主题和独立插件包目录。已应用的站点扩展设置参与主题选择。
 

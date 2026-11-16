@@ -6,7 +6,7 @@ import {
 } from "node:http";
 import { BlockList, isIP } from "node:net";
 import { createHash, timingSafeEqual } from "node:crypto";
-import type { ReceiverStatus } from "@/core/contracts/settings";
+import type { ReceiverStatus, SyncCheck } from "@/core/contracts/settings";
 import type { cacheMaintenance } from "./cache-maintenance";
 import type { SettingsStore } from "./store";
 import { ClearedPublicContent, type ContentStore } from "../content/store";
@@ -62,6 +62,7 @@ export function settingsHandler(
   identity?: Pick<ReceiverStatus, "node_id" | "source_epoch">,
   isCurrent: () => boolean = () => true,
   maintenance?: ReturnType<typeof cacheMaintenance>,
+  recovery?: { status: () => SyncCheck; cleared: () => void },
 ) {
   if (token.length < 32 || !peers.length)
     throw new Error("Settings receiver credentials are not configured");
@@ -157,7 +158,10 @@ export function settingsHandler(
     ) {
       request.resume();
       try {
-        reply(200, await maintenance.status());
+        reply(200, {
+          ...(await maintenance.status()),
+          ...(recovery ? { sync_check: recovery.status() } : {}),
+        });
       } catch (error) {
         reply(503, { error: "cache_state_unavailable" }, undefined, error);
       }
@@ -173,6 +177,7 @@ export function settingsHandler(
         protocol: "node-status-1",
         ...identity,
         ...(await readReplicas(store, content)),
+        ...(recovery ? { sync_check: recovery.status() } : {}),
       } satisfies ReceiverStatus);
       return;
     }
@@ -234,6 +239,7 @@ export function settingsHandler(
         }
         try {
           reply(200, await write(async () => maintenance[deletion]()));
+          if (deletion === "clear") recovery?.cleared();
         } catch (error) {
           reply(
             503,

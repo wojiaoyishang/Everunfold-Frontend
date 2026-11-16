@@ -3,7 +3,7 @@ import { parseArgs } from "node:util";
 import next from "next";
 import { readConfigurationFiles } from "../src/core/config/files";
 import { frontendHandler } from "../src/server/http";
-import { configuredSettingsHandler } from "../src/server/settings/runtime";
+import { configuredSettingsRuntime } from "../src/server/settings/runtime";
 
 const { values } = parseArgs({
   options: {
@@ -31,9 +31,10 @@ const app = next({
   httpServer: server,
 });
 await app.prepare();
+const { handler, recovery } = configuredSettingsRuntime(root);
 server.on(
   "request",
-  frontendHandler(app.getRequestHandler(), configuredSettingsHandler(root)),
+  frontendHandler(app.getRequestHandler(), handler, recovery.visit),
 );
 // Next installs its HMR upgrade handler on this server when handling a web request.
 server.on("error", () => {
@@ -43,6 +44,7 @@ server.on("error", () => {
   process.exit(1);
 });
 server.listen(port, host, () => {
+  recovery.start();
   console.log(
     `Everunfold Frontend ready: ${host}:${port} (web + internal sync)`,
   );
@@ -52,6 +54,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
     if (closing) return;
     closing = true;
+    recovery.stop();
     const deadline = setTimeout(() => process.exit(1), 30000);
     deadline.unref();
     void Promise.all([

@@ -4,14 +4,37 @@ import { syncFailure } from "./sync-diagnostics";
 
 type Handler = (request: IncomingMessage, response: ServerResponse) => unknown;
 
+function publicRead(request: IncomingMessage, pathname: string): boolean {
+  if (request.method !== "GET" && request.method !== "HEAD") return false;
+  if (
+    /^\/(?:_|admin(?:\/|$)|account(?:\/|$)|login(?:\/|$)|health(?:\/|$))/.test(
+      pathname,
+    )
+  )
+    return false;
+  return (
+    pathname === "/" ||
+    request.headers.rsc === "1" ||
+    request.headers.accept?.includes("text/html") === true ||
+    ["/feed.xml", "/atom.xml", "/sitemap.xml"].includes(pathname)
+  );
+}
+
 /** Reserve every internal path before Next.js sees or rewrites the request. */
-export function frontendHandler(web: Handler, internal: Handler) {
+export function frontendHandler(
+  web: Handler,
+  internal: Handler,
+  onVisit?: () => void,
+) {
   return async (request: IncomingMessage, response: ServerResponse) => {
     try {
       const path = new URL(request.url ?? "/", "http://localhost").pathname;
       if (path === "/internal" || path.startsWith("/internal/"))
         await internal(request, response);
-      else await withNodeRequestPeer(request, () => web(request, response));
+      else {
+        if (onVisit && publicRead(request, path)) onVisit();
+        await withNodeRequestPeer(request, () => web(request, response));
+      }
     } catch (error) {
       if (request.url?.startsWith("/internal"))
         syncFailure(

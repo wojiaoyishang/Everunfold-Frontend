@@ -100,7 +100,7 @@ async function receiver() {
       `
     import {createServer} from 'node:http';
     import runtime from './src/server/settings/runtime.ts';
-    const server=createServer(runtime.configuredSettingsHandler(process.cwd()));
+    const server=createServer(runtime.configuredSettingsRuntime(process.cwd()).handler);
     server.listen(0,'127.0.0.1',()=>console.log('PORT='+server.address().port));
   `,
     ],
