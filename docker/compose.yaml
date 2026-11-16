@@ -68,3 +68,8 @@ services:
         target: /plugins
         bind:
           create_host_path: false
+      - type: bind
+        source: ${FRONTEND_DATA_DIR:-./data}/npm-cache
+        target: /build/npm-cache
+        bind:
+          create_host_path: false

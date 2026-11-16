@@ -32,8 +32,8 @@ prepare_source() {
     next.config.ts tsconfig.json tsconfig.plugins.json "$build_root/"
   cd "$build_root"
 
-  build_log 'Installing locked npm dependencies.'
-  npm ci --ignore-scripts --include=dev --no-audit --loglevel=verbose --timing
+  build_log "Installing locked npm dependencies; download cache: $npm_config_cache."
+  npm ci --ignore-scripts --include=dev --no-audit --prefer-offline --loglevel=verbose --timing
 }
 
 build() {
@@ -72,7 +72,7 @@ build_plugins() {
   for name in "$@"; do
     arguments+=(--plugin "$name")
   done
-  build_log 'Compiling and publishing plugin packages.'
+  build_log 'Preparing pinned contracts, then compiling and publishing plugin packages.'
   npm run plugins:build -- --output /plugins "${arguments[@]}"
   build_log 'Plugin build complete.'
 }

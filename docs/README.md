@@ -2,6 +2,8 @@
 
 面向读者的新版文档从 [RST 手册首页](source/index.rst) 开始。以下记录保留供追溯。
 
+[独立插件契约准备与 npm 下载缓存](decisions/0160-plugin-build-preparation-and-npm-cache.md)说明插件编译缺失契约的修复、临时构建容器之间的缓存挂载及升级方式。
+
 [配置复制与容器互通](decisions/0159-copy-and-container-networking.md)说明完整结果复制、导出后的前端导入命令、Docker 网络别名、宿主网关与自动来源允许。
 
 [单端口前端与保留配置界面的操作反馈](decisions/0158-single-port-and-persistent-setup.md)说明监听合并、内部地址检测、连接文件导入，以及保存和节点导出后的成功提示。

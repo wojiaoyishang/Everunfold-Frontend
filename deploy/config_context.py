@@ -178,6 +178,8 @@ class Context:
             (self.data / directory).mkdir(parents=True, exist_ok=True)
         if self.role == "frontend":
             (self.data / "plugins").mkdir(parents=True, exist_ok=True)
+            if not self.native:
+                (self.data / "npm-cache").mkdir(parents=True, exist_ok=True)
 
     def write(self, outputs: dict[Path, str]) -> None:
         document = copy.deepcopy(self.document)

@@ -110,6 +110,20 @@ docker logs --tail=100 everunfold-frontend
 
 仅想生成配置时选择“仅保存”，不会触发构建。
 
+### npm 下载缓存
+
+助手自动创建并挂载缓存，无需手动增加配置：
+
+| 宿主位置 | 编译容器位置 | 用途 |
+| --- | --- | --- |
+| 所选前端数据目录下的 `npm-cache/` | `/build/npm-cache` | npm 下载缓存及安装调试日志 |
+
+默认宿主位置为 `docker/data/npm-cache/`；若数据目录设为 `/opt/everunfold/Everunfold-Data/frontend`，则为 `/opt/everunfold/Everunfold-Data/frontend/npm-cache/`。目录由助手按当前部署账号创建，主体和插件的临时编译容器共用它，退出、失败重试和镜像重建均保留下载缓存。
+
+每次构建仍执行锁文件安装 `npm ci --prefer-offline`，重新准备本次 `node_modules`；已有包从缓存读取，缺失的包才联网下载。缓存不保存编译工作区、生成契约或 Next.js 产物，也不会跳过锁文件校验。独立插件构建会先生成当前锁定版本的契约，首次获取契约仍需要网络或可用的本地后端检出。
+
+已有部署更新代码后，运行根目录 `./setup.sh --docker build` 即可重建镜像并启用缓存。直接运行 Compose 编译命令前，先在项目根目录执行 `./setup.sh --docker render`，确保缓存等挂载目录已创建。若自行使用 `docker run`，先以构建容器的 UID/GID 创建宿主缓存目录，再添加 `--mount type=bind,source=/宿主缓存目录,target=/build/npm-cache`。
+
 ### 4. HTTPS、节点启用和第一次同步
 
 前端只监听一个端口，默认 `3000`。网页和 `/internal/*` 同步接口共用它；接收器是前端服务内的请求处理部分，不再有独立绑定 IP、端口或 Docker 映射。
@@ -146,6 +160,7 @@ docker/
     public-snapshots/        公开内容副本
     plugins/                当前独立插件包
     plugin-builds/           构建暂存批次
+    npm-cache/               跨编译容器复用的 npm 下载缓存和日志
 ```
 
 部署模式把选中的产物挂到 `/workspace`，把所选数据目录挂到 `/data`。助手另外将根目录生成的 `config.runtime.toml` 只读挂到 `/workspace/config.runtime.toml`，与产物分开，无需重编译即可修改配置。`/workspace` 可写以容纳 Next.js 派生缓存；公开副本和独立插件使用 `/data`。新配置的容器 UID/GID 与宿主执行助手的账号一致。
@@ -154,7 +169,7 @@ docker/
 - 更换公开域名或连接参数：重新运行助手保存，再执行 `./setup.sh --docker start`，无需重新编译；同步修改反向代理和后端节点公开地址。
 - 修改主体或主题：执行 `./setup.sh --docker build`，成功后 `./setup.sh --docker start`。
 - 回滚主体：在根目录 `config.yaml` 的 `docker` 小节将 `FRONTEND_ARTIFACT_DIR` 指向保留的旧产物，再启动；核对插件、契约和快照版本兼容性。
-- 单独更新插件：在 `docker/` 目录执行 `docker compose run --rm builder build-plugins 插件目录名`。它沿用原有独立插件发布机制，不要求重新编译主体。
+- 单独更新插件：先在项目根目录执行 `./setup.sh --docker render`，再到 `docker/` 目录执行 `docker compose run --rm builder build-plugins 插件目录名`。该入口会准备锁定契约，沿用原有独立插件发布机制，不要求重新编译主体。
 - 备份：保存根目录 `config.yaml`、`data` 和选中的产物。删除应用容器不会删除这些宿主目录。
 
 挂载和容器设置直接在向导中修改，保存到根 `config.yaml` 的 `docker` 小节；相对路径以 `docker/` 为基准。日志和重启命令使用你选定的容器名称。启动请使用 `./setup.sh --docker start`，Compose 负责镜像及编译任务，直接 `compose up` 不会接入额外网络。向导保留根配置的其他字段和环境变量，保存前创建 `*.bak`。独立后端连接只修改当前 active 项；完整连接清单保存在根 YAML 的 `connection_profiles`。Docker 中派生连接文件须放在数据目录内。
@@ -187,6 +202,8 @@ npm --version
 ```
 
 `build` 执行锁文件安装、主体生产构建和独立插件构建。`start` 自动加载生成的环境文件，运行同一端口上的 Web 和内部同步接口，**不会重新编译**。进程在前台运行，Ctrl+C 统一停止。
+
+原生安装使用当前账号的 npm 缓存目录（可用 `npm config get cache` 查看），同样通过 `--prefer-offline` 优先复用下载缓存，并输出详细日志及耗时。
 
 若后端契约无法从远端取得，可设置 `EVERUNFOLD_BACKEND_PATH` 指向包含锁定提交的本地后端 Git 检出；前端按 `contracts.lock.json` 校验契约版本。
 

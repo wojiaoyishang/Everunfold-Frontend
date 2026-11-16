@@ -35,7 +35,7 @@
     "nodes:password": "node tools/nodes-password.mjs",
     "contracts:prepare": "node tools/prepare-contracts.mjs",
     "prepare:local": "npm run prepare:host && npm run extensions:check",
-    "plugins:build": "node --import tsx tools/plugins/build.mjs",
+    "plugins:build": "npm run contracts:prepare && node --import tsx tools/plugins/build.mjs",
     "plugins:typecheck": "tsc --noEmit -p tsconfig.plugins.json",
     "themes:catalog": "tsx tools/plugins/theme-catalog.mts",
     "themes:assets": "node tools/theme-assets.mjs",

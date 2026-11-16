@@ -1,5 +1,14 @@
 # 前端交接状态
 
+## 独立插件构建修复与 npm 持久缓存（2026-11-16）
+
+- 已复现用户的 `@contracts/content-types.json` 缺失：主体和插件使用不同的临时容器，插件入口未生成契约。`plugins:build` 现显式先执行 `contracts:prepare`，按后端锁定提交和 SHA 生成后再加载注册表；插件目录与输出参数保持可用。
+- builder 将所选前端数据目录的 `npm-cache/` 挂到 `/build/npm-cache`。根助手提前创建目录，主体、插件及重试复用下载缓存；Docker/原生安装增加 `--prefer-offline`，继续锁文件安装、禁用安装脚本并显示 verbose/timing 日志。不缓存整个工作区或跳过依赖安装。
+- 干净只读源码副本、空缓存下运行实际编译入口，六个插件全部成功；第二个独立工作区将 npm 设为严格离线后仍成功，六个插件产物哈希一致。契约下载独立进行，此结果仅证明 npm 下载缓存复用。新增无生成契约的实际插件构建回归，设置忽略生命周期脚本仍通过。
+- 前端 414 项测试全部通过；两端助手各 44 项（前端 34 通过/10 按组件跳过，后端 40 通过/4 跳过）。TypeScript、ESLint、改动文件 Prettier、Ruff（显式使用后端共享 Python 配置）/格式、Bash 语法、Compose 默认/带空格自定义缓存路径渲染、双端 Sphinx 严格构建及差异检查通过。
+- Docker README、部署教程、共享操作手册和 [ADR 0160](../decisions/0160-plugin-build-preparation-and-npm-cache.md) 已更新，共用 Python 助手同步后端。升级：在前端根目录更新代码后运行 `./setup.sh --docker build`，成功后 `./setup.sh --docker start`；无需新增配置项。直接 Compose 编译前先用根助手 `render` 创建挂载目录。
+- 当前无 Docker daemon，实际入口验收使用宿主 Node.js 22/npm 10/rsync，未构建镜像或验收真实容器挂载；本轮未重复 Next.js 主体生产构建，未测试用户服务器连接或修改其实际配置、数据。
+
 ## npm 安装调试输出（2026-11-15）
 
 - Docker 主体/插件构建和原生构建的 `npm ci` 统一增加 `--loglevel=verbose --timing`，实时显示详细日志、阶段耗时及调试日志位置；继续使用锁文件并禁用安装脚本。

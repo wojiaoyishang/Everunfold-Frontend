@@ -22,6 +22,10 @@
 
 npm 安装默认启用 `--loglevel=verbose --timing`，实时显示详细日志、各阶段耗时及调试日志文件位置；Docker 主体/插件构建和原生构建均生效。更新此安装入口后需重新构建前端镜像。
 
+**npm 下载缓存自动持久化**：助手在所选前端数据目录创建 `npm-cache/`，编译容器将其挂到 `/build/npm-cache`。主体、插件和重试共用缓存，一次性容器退出不会清除；安装优先复用已下载的包，缺失时才下载。每次仍按锁文件执行 `npm ci` 安装依赖。插件构建会自行准备锁定的后端契约，不依赖上一次主体构建留下的文件。
+
+已有部署更新后，在项目根目录执行 `git pull`、`./setup.sh --docker build`，成功后执行 `./setup.sh --docker start`。助手会重建镜像并准备缓存挂载，无需新增配置项；完整挂载说明见[部署教程](../deploy/README.md#npm-下载缓存)。
+
 根 `config.yaml` 生成根目录 `config.runtime.toml`，由助手只读挂入运行产物；不要求数据目录保存配置。代码供编译，成功产物挂 `/workspace`，数据挂 `/data`。选择主网络 `bridge` 和额外网络 `1panel-network` 时，脚本先接入全部网络再启动。更新 Dockerfile 后先构建一次镜像。
 
 此目录保留 Dockerfile、Compose、入口脚本和一次性工具镜像的构建文件。数据默认位于 `docker/data`，配置来自根目录 YAML。不要手动维护自动生成的 `.env` 和运行配置。

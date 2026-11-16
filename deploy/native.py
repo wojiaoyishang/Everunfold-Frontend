@@ -73,7 +73,16 @@ def main() -> None:
                 "FRONTEND_BUILD_NODE_OPTIONS", "--max-old-space-size=3072"
             )
             environment["FRONTEND_BUILD_WORKERS"] = ctx.compose.get("FRONTEND_BUILD_WORKERS", "2")
-            execute(["npm", "ci", "--ignore-scripts", "--loglevel=verbose", "--timing"])
+            execute(
+                [
+                    "npm",
+                    "ci",
+                    "--ignore-scripts",
+                    "--prefer-offline",
+                    "--loglevel=verbose",
+                    "--timing",
+                ]
+            )
             execute(["npm", "run", "build:host"])
             execute(["npm", "run", "plugins:build", "--", "--output", str(ctx.data / "plugins")])
 

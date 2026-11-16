@@ -294,6 +294,12 @@ class ModelTests(Fixtures, unittest.TestCase):
         context = self.materialize()
         self.assertEqual(context.data, data)
         self.assertTrue(data.is_dir())
+        if not BACKEND:
+            cache = data / "npm-cache"
+            self.assertTrue(cache.is_dir())
+            (cache / "retained-download").write_text("cached package")
+            self.materialize()
+            self.assertEqual((cache / "retained-download").read_text(), "cached package")
         self.assertFalse((data / "config.toml").exists())
         self.assertEqual(
             (source / "config.yaml").read_bytes(), (self.root / "config.yaml").read_bytes()
