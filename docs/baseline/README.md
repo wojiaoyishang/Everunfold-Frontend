@@ -1911,3 +1911,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | --- | --- | --- |
 | `docs/decisions/0171-glossary-deployment-catalog.md` | `ADR0171-1` | `da58c635e317b614d75f475cc9a2ea0afc06aea8ede4e22aa78dc3fc15edf0f4` |
 | `docs/development/glossary.md` | `glossary-runtime-16` | `001bec986d82ee9c45f89737c10e8e590aae39a65f5361f143eac358dd319b72` |
+
+## 同步错误提示与直接翻牌
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0172-sync-failure-pages-and-first-card.md` | `ADR0172-1` | `31d65813206ad68bea809bff0de0a6fa5d108e73e13a65661365b526c730e8d1` |

@@ -1,9 +1,6 @@
 import { UiText } from "@/core/i18n/provider";
 import type { CSSProperties } from "react";
-import {
-  failurePage,
-  type FailureStatus,
-} from "@/core/navigation/failure-page";
+import { failurePage, type FailureKind } from "@/core/navigation/failure-page";
 import { Icon, type IconName } from "../components/icon";
 import { Button, TextLink } from "../components/ui/primitives";
 import { CelebrationFireworks } from "../components/ui/celebration-fireworks";
@@ -12,13 +9,14 @@ const faces: IconName[] = ["star", "moon", "leaf", "heart"];
 
 /** Presentational markup shared by React boundaries and the standalone HTTP document. */
 export function FailureSurface({
-  status,
+  kind,
   embedded = false,
 }: {
-  status: FailureStatus;
+  kind: FailureKind;
   embedded?: boolean;
 }) {
-  const page = failurePage(status);
+  const page = failurePage(kind);
+  const { status } = page;
   return (
     <section
       className="failure-surface"
@@ -31,7 +29,7 @@ export function FailureSurface({
             <div className="failure-art" aria-hidden="true">
               <span className="failure-orbit" />
               <Icon name={status === 404 ? "search" : "cloud-off"} />
-              <span className="failure-code">{page.code}</span>
+              <span className="failure-code">{status}</span>
               <span className="failure-spark">
                 <Icon name="star" />
               </span>
@@ -45,6 +43,9 @@ export function FailureSurface({
             </p>
             <h1>{page.title}</h1>
             <p className="failure-description">{page.description}</p>
+            {page.adminHint && (
+              <p className="failure-description">{page.adminHint}</p>
+            )}
             <div className="failure-actions">
               <TextLink href="/" className="failure-primary">
                 <Icon name="home" />
@@ -119,14 +120,14 @@ export function FailureSurface({
               role="status"
               aria-live="polite"
             >
-              <UiText text="找出 4 组相同图案，不计时。" />
+              <UiText text="翻开任意一张牌开始配对。" />
             </p>
-            <Button className="failure-start" data-restart disabled>
-              <Icon name="play" />
-              <span>
-                <UiText text="开始配对" />
-              </span>
-            </Button>
+            <div className="failure-game-actions">
+              <Button className="failure-restart" data-restart hidden disabled>
+                <Icon name="refresh" />
+                <UiText text="重新开始" />
+              </Button>
+            </div>
             <noscript>
               <p className="failure-game-note">
                 <UiText text="启用 JavaScript 后可玩配对；返回首页不受影响。" />

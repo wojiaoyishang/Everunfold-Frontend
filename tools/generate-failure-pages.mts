@@ -9,6 +9,7 @@ import { FailureSurface } from "../src/themes/argon/failure/failure-surface";
 import { failureStyles } from "../src/themes/argon/failure/styles";
 import { initializeAppearance } from "../src/core/browser/appearance-policy";
 import { initializeMotion } from "../src/core/browser/motion-policy";
+import { httpFailureKinds } from "../src/core/navigation/failure-page";
 
 const root = new URL("../", import.meta.url);
 const file = new URL("var/cache/build/failure-pages.json", root);
@@ -38,9 +39,9 @@ const data = {
   appearance: initializeAppearance + initializeMotion,
   game,
   pages: Object.fromEntries(
-    ([404, 503] as const).map((status) => [
-      status,
-      renderToStaticMarkup(createElement(FailureSurface, { status })),
+    httpFailureKinds.map((kind) => [
+      kind,
+      renderToStaticMarkup(createElement(FailureSurface, { kind })),
     ]),
   ),
 };

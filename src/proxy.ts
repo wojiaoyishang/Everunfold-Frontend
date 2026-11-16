@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { readPublicSnapshot } from "@/core/content/snapshot";
+import {
+  readPublicSnapshot,
+  SnapshotUnavailable,
+} from "@/core/content/snapshot";
 import { hasPublicRoute } from "@/core/content/routes";
 import { resolveManagedPage } from "@/core/pages/resolve";
 import { resolveContent } from "@/core/content/query";
 import { failureDocument } from "@/themes/argon/failure/document";
+import {
+  failurePage,
+  type HttpFailureKind,
+} from "@/core/navigation/failure-page";
 import { isManagementRoute } from "@/core/auth/routes";
 import { readConfiguration } from "@/core/config/server";
 import { browserProtocolHeader } from "@/core/config/browser-api";
@@ -25,8 +32,9 @@ import { readPublicGlossaryTerm } from "@/core/glossary/server";
 import { indexable } from "@/core/seo/policy";
 import { readingPage } from "@/core/pages/reading-pages";
 
-function publicFailure(status: 404 | 503) {
-  return new NextResponse(failureDocument(status), {
+function publicFailure(kind: HttpFailureKind) {
+  const { status } = failurePage(kind);
+  return new NextResponse(failureDocument(kind), {
     status,
     headers: {
       "Content-Type": "text/html; charset=utf-8",
@@ -117,8 +125,9 @@ export async function proxy(request: NextRequest) {
       const published = publishedGlossaryTerm(snapshot, termSlug, locale);
       if (snapshot.glossary != null && !published) return publicFailure(404);
       const result = await readPublicGlossaryTerm(termSlug, locale);
-      if (result.status !== "ready")
-        return publicFailure(result.status === "missing" ? 404 : 503);
+      if (result.status === "missing") return publicFailure(404);
+      if (result.status === "plugin-sync") return publicFailure("plugin-sync");
+      if (result.status !== "ready") return publicFailure(503);
       const target = glossaryTermPath(result.term, catalog);
       if (!target) return publicFailure(404);
       if (target !== new URL(path, request.url).pathname) {
@@ -170,8 +179,12 @@ export async function proxy(request: NextRequest) {
     )
       response.headers.set("X-Robots-Tag", "noindex, follow");
     return response;
-  } catch {
-    return publicFailure(503);
+  } catch (error) {
+    return publicFailure(
+      error instanceof SnapshotUnavailable && error.reason === "unsynced"
+        ? "content-sync"
+        : 503,
+    );
   }
 }
 export const config = {

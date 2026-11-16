@@ -49,7 +49,8 @@ export interface ContentStore {
   apply(value: unknown): Promise<ContentDelivery>;
 }
 
-export class ClearedPublicContent extends Error {}
+export class MissingPublicContent extends Error {}
+export class ClearedPublicContent extends MissingPublicContent {}
 
 export class FileContentStore implements ContentStore {
   constructor(
@@ -142,7 +143,7 @@ export class FileContentStore implements ContentStore {
       throw new Error("Content source binding changed");
     const files = await this.files();
     const [latest] = files;
-    if (!latest) throw new Error("Managed content is missing");
+    if (!latest) throw new MissingPublicContent("Managed content is missing");
     try {
       return await this.readRevision(latest.revision);
     } catch (error) {

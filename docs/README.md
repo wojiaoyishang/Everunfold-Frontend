@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[同步错误提示与直接翻牌](decisions/0172-sync-failure-pages-and-first-card.md)说明 503 诊断、管理员日志指引及小游戏开局方式。
+
 [术语插件清单同步与标题开锁图标](decisions/0171-glossary-deployment-catalog.md)记录内网 50389 根因、启动时同步和现有容器的恢复方法。
 
 [固定编辑面板与解锁后的术语](decisions/0170-fixed-inspector-and-unlocked-glossary.md)说明统一设置面板、就地解锁与动态正文术语注入。

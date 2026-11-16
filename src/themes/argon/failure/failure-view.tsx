@@ -24,7 +24,7 @@ export function FailureView({
     <div ref={root}>
       <meta name="robots" content="noindex,nofollow" />
       <style>{failureStyles}</style>
-      <FailureSurface status={status} embedded={embedded} />
+      <FailureSurface kind={status} embedded={embedded} />
     </div>
   );
 }

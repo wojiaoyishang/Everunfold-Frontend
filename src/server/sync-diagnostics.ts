@@ -27,6 +27,8 @@ const reasons: Record<string, string> = {
   cache_state_unavailable: "无法读取本机缓存状态",
   cache_prune_unconfirmed: "缓存清理未能确认完成",
   cache_clear_unconfirmed: "清空缓存未能确认完成",
+  public_data_not_synced:
+    "当前节点没有已同步的可读公开内容；检查后端 Worker 的投递与前端同步接收日志",
   replica_unavailable: "无法读取本机公开副本",
   backend_http: "后端内部请求返回失败状态；检查内部地址、代理与后端日志",
   backend_invalid: "后端健康响应格式不正确；检查内部地址是否指向 FastAPI",

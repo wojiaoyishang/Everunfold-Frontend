@@ -158,7 +158,6 @@ test("known article failures surface sync feedback while a real missing URL stay
     transaction.cancel();
   }
   assert.match(failureDocument(404), /404 页面未找到/);
-  assert.match(failureDocument(503), /后端同步失败/);
   assert.doesNotMatch(failureDocument(404), /故事|展开|data-page-ready/);
 });
 

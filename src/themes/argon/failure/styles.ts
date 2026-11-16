@@ -43,7 +43,7 @@ html[data-failure-document] body { margin: 0; }
 .failure-surface button, .failure-actions a { display: inline-flex; align-items: center; justify-content: center; gap: 8px; font: inherit; font-size: 14px; border: 1px solid var(--failure-line); border-radius: 9px; background: var(--failure-soft); color: var(--failure-accent); text-decoration: none; cursor: pointer; padding: 10px 17px; min-height: 44px; transition: background-color 180ms, transform 220ms, box-shadow 220ms; }
 .failure-surface [hidden] { display: none !important; }
 .failure-surface button:disabled { cursor: default; }
-.failure-surface .failure-primary, .failure-surface .failure-start { background: var(--failure-brand); border-color: transparent; color: #fff; box-shadow: 0 5px 14px color-mix(in srgb, var(--failure-brand) 17%, transparent); }
+.failure-surface .failure-primary, .failure-surface .failure-restart { background: var(--failure-brand); border-color: transparent; color: #fff; box-shadow: 0 5px 14px color-mix(in srgb, var(--failure-brand) 17%, transparent); }
 .failure-surface button:not(:disabled):not([aria-disabled="true"]):hover, .failure-actions a:hover { transform: translateY(-2px); box-shadow: 0 6px 16px color-mix(in srgb, var(--failure-brand) 20%, transparent); }
 .failure-surface button:focus-visible, .failure-surface a:focus-visible { outline: 2px solid var(--failure-accent); outline-offset: 4px; }
 .failure-game { align-self: center; min-width: 0; padding-left: clamp(22px, 3vw, 38px); border-left: 1px solid var(--failure-line); }
@@ -69,8 +69,8 @@ html[data-failure-document] body { margin: 0; }
 .failure-card[data-matched="true"] .failure-card-check { opacity: .75; }
 .failure-game-message { min-height: 40px; margin: 17px 0 10px; font-size: 12px; color: var(--failure-muted); }
 .failure-game[data-complete="true"] .failure-game-message { color: var(--failure-accent); }
-.failure-surface .failure-start { width: 100%; }
-.failure-game:not([data-game-ready]) .failure-start { display: none; }
+.failure-game[data-game-ready="true"] .failure-game-actions { min-height: 44px; }
+.failure-surface .failure-restart { width: 100%; }
 .failure-game-note { font-size: 12px; color: var(--failure-muted); }
 .failure-surface[data-embedded="true"] { min-height: auto; padding: 0; background: transparent; }
 .failure-surface[data-embedded="true"]::before { display: none; }

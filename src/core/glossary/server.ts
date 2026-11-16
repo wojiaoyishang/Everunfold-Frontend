@@ -11,7 +11,7 @@ type GlossaryDetail = GlossaryContract["public_detail"]["data"];
 
 export type GlossaryRead =
   | { status: "ready"; term: GlossaryDetail }
-  | { status: "missing" | "unavailable" };
+  | { status: "missing" | "unavailable" | "plugin-sync" };
 
 export const readPublicGlossaryTerm = cache(
   async (slug: string, language: string): Promise<GlossaryRead> => {
@@ -27,12 +27,12 @@ export const readPublicGlossaryTerm = cache(
       );
       return { status: "ready", term: response.data };
     } catch (error) {
-      return {
-        status:
-          error instanceof RequestError && error.status === 404
-            ? "missing"
-            : "unavailable",
-      };
+      if (error instanceof RequestError) {
+        if (error.status === 404) return { status: "missing" };
+        if (error.status === 503 && error.code === 50389)
+          return { status: "plugin-sync" };
+      }
+      return { status: "unavailable" };
     }
   },
 );

@@ -216,7 +216,7 @@ export async function verifyReaderRuntime({
     );
     await waitFor(`${api}/health/live`);
   }
-  async function htmlAt(origin, route, expected) {
+  async function htmlAt(origin, route, expected, pendingSync = false) {
     const response = await fetch(new URL(route, origin));
     assert.equal(response.status, expected, `${origin}${route}`);
     const html = await response.text();
@@ -266,8 +266,13 @@ export async function verifyReaderRuntime({
       );
     } else {
       assert.match(html, /noindex/);
-      assert.match(html, /页面加载失败/);
-      assert.match(html, /后端同步失败/);
+      if (pendingSync) {
+        assert.match(html, /站点数据尚未同步/);
+        assert.match(html, /\[Everunfold sync\].*后端 Worker 的投递日志/);
+      } else {
+        assert.match(html, /页面加载失败/);
+        assert.doesNotMatch(html, /站点数据尚未同步/);
+      }
       assert.equal(response.headers.get("cache-control"), "no-store");
       assert.equal(response.headers.get("retry-after"), "60");
       assert.doesNotMatch(html, /data-page-ready="true"/);
@@ -348,8 +353,8 @@ export async function verifyReaderRuntime({
       /<title>(.*?)<\/title>/.exec(cached)?.[1],
     );
     await htmlAt(warm, "/?type=article", 200);
-    await htmlAt(cold, content.path, 503);
-    await htmlAt(cold, "/", 503);
+    await htmlAt(cold, content.path, 503, true);
+    await htmlAt(cold, "/", 503, true);
     if (!interactive) {
       const withdrawn = await prepareRelease({
         ...snapshot,
@@ -360,7 +365,7 @@ export async function verifyReaderRuntime({
         ),
       });
       await withdrawn.intent();
-      await htmlAt(warm, content.path, 503);
+      await htmlAt(warm, content.path, 503, true);
       await writeFile(withdrawn.target, withdrawn.bytes);
       const gone = await fetch(new URL(content.path, warm));
       assert.equal(gone.status, 404);
@@ -368,7 +373,7 @@ export async function verifyReaderRuntime({
       await writeFile(withdrawn.target, "broken");
       await htmlAt(warm, content.path, 503);
       console.log(
-        "PASS: warmed SSR returns 503 for an incomplete newer release, 404 for the completed withdrawal, and 503 for a corrupted payload.",
+        "PASS: warmed SSR shows a sync-specific 503 for an incomplete newer release, 404 for the completed withdrawal, and a generic 503 for a corrupted payload.",
       );
     }
     for (const route of ["/login", "/admin"]) {

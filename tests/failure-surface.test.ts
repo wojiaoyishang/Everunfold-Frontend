@@ -8,12 +8,14 @@ import { failureDocument } from "../src/themes/argon/failure/document";
 import { FailureSurface } from "../src/themes/argon/failure/failure-surface";
 import { ColorPicker } from "../src/themes/argon/components/ui/color-picker";
 
-test("pair game ignores double clicks, invalid cards and input while an unmatched pair is visible", () => {
+test("the first valid flip starts play; duplicates and invalid flips do not count", () => {
   const game = createPairGame(() => 0.999);
-  assert.deepEqual(game.flip(0).deck, []);
-  const first = game.restart();
+  assert.deepEqual(game.flip(-1).deck, []);
+  assert.deepEqual(game.flip(8).deck, []);
+  const first = game.flip(0);
   assert.deepEqual([...first.deck].sort(), [0, 0, 1, 1, 2, 2, 3, 3]);
-  game.flip(0);
+  assert.deepEqual(first.revealed, [0]);
+  assert.equal(first.moves, 0);
   game.flip(0);
   game.flip(-1);
   game.flip(1.5);
@@ -29,7 +31,6 @@ test("pair game ignores double clicks, invalid cards and input while an unmatche
 
 test("pair game completes only with four distinct pairs and restart clears all progress", () => {
   const game = createPairGame(() => 0.999);
-  game.restart();
   for (let index = 0; index < 4; index++) {
     game.flip(index);
     game.flip(index + 4);
@@ -46,15 +47,26 @@ test("pair game completes only with four distinct pairs and restart clears all p
   assert.deepEqual(restarted.matched, []);
 });
 
-test("fallback HTML contains readable recovery and no external asset dependency or private error", () => {
-  for (const status of [404, 503] as const) {
-    const html = failureDocument(status);
+test("fallback HTML distinguishes sync problems and contains no external asset dependencies or private errors", () => {
+  for (const [kind, heading] of [
+    [404, "页面未找到"],
+    [503, "页面加载失败"],
+    ["content-sync", "站点数据尚未同步"],
+    ["plugin-sync", "后端插件清单尚未同步"],
+  ] as const) {
+    const html = failureDocument(kind);
     const document = parseDocument(html);
     const title = DomUtils.findOne(
       (node) => node.name === "h1",
       document.children,
     );
-    assert.match(DomUtils.textContent(title!), /页面未找到|页面加载失败/);
+    assert.equal(DomUtils.textContent(title!), heading);
+    if (kind === "content-sync")
+      assert.match(html, /\[Everunfold sync\].*后端 Worker 的投递日志/);
+    else if (kind === "plugin-sync") {
+      assert.match(html, /管理员请查看后端部署日志/);
+      assert.doesNotMatch(html, /50389/);
+    } else assert.doesNotMatch(html, /尚未同步|管理员请查看/);
     assert.match(html, /name="robots" content="noindex,nofollow"/);
     assert.ok(
       DomUtils.findOne(
@@ -62,6 +74,12 @@ test("fallback HTML contains readable recovery and no external asset dependency 
         document.children,
       ),
     );
+    const restart = DomUtils.findOne(
+      (node) => node.name === "button" && "data-restart" in node.attribs,
+      document.children,
+    );
+    assert.ok(restart && "hidden" in restart.attribs);
+    assert.match(html, /翻开任意一张牌开始配对/);
     assert.equal(
       DomUtils.findAll(
         (node) =>
@@ -87,7 +105,7 @@ test("fallback HTML contains readable recovery and no external asset dependency 
     assert.doesNotMatch(html, /data-page-ready|BACKEND_BASE_URL|stack trace/);
   }
   assert.match(
-    renderToStaticMarkup(createElement(FailureSurface, { status: 500 })),
+    renderToStaticMarkup(createElement(FailureSurface, { kind: 500 })),
     /页面显示出错了/,
   );
 });

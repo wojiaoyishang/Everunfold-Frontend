@@ -11,7 +11,7 @@ export function enhanceFailure(
   const cards = Array.from(
     panel.querySelectorAll<HTMLButtonElement>("[data-card]"),
   );
-  const start = panel.querySelector<HTMLButtonElement>("[data-restart]")!;
+  const restart = panel.querySelector<HTMLButtonElement>("[data-restart]")!;
   const message = panel.querySelector<HTMLElement>("[data-game-message]")!;
   const score = panel.querySelector<HTMLElement>("[data-game-score]")!;
   const fireworks = panel.querySelector<HTMLElement>(".ui-fireworks")!;
@@ -59,6 +59,8 @@ export function enhanceFailure(
         `第 ${index + 1} 张，${visible ? labels[state.deck[index]] + (matched ? "，已配对" : "") : "未翻开"}`,
       );
     });
+    restart.hidden = false;
+    restart.disabled = false;
     score.textContent = `${state.matched.length / 2} / 4 组 · ${state.moves} 次尝试`;
     panel.dataset.complete = String(state.complete);
     fireworks.dataset.active = String(state.complete);
@@ -71,7 +73,9 @@ export function enhanceFailure(
           : "找出 4 组相同图案，不计时。";
   }
   panel.dataset.gameReady = "true";
-  start.disabled = false;
+  cards.forEach((card) => {
+    card.disabled = false;
+  });
   root
     .querySelector<HTMLButtonElement>("[data-retry]")
     ?.removeAttribute("hidden");
@@ -87,11 +91,10 @@ export function enhanceFailure(
         retry();
         return;
       }
-      if (target === start) {
+      if (target === restart) {
         clearTimeout(timer);
         game.restart();
         render();
-        start.querySelector("span")!.textContent = "重新开始";
         cards[0].focus({ preventScroll: true });
       } else if (
         target.hasAttribute("data-card") &&
