@@ -11,6 +11,7 @@ import {
   readLegacySnapshot,
 } from "@/server/content/store";
 import { syncFailure } from "@/server/sync-diagnostics";
+import { pluginEnabled } from "@/core/settings/plugin-activation";
 
 export class SnapshotUnavailable extends Error {
   constructor(
@@ -79,11 +80,10 @@ export const readPublicSnapshot = cache(async (): Promise<PublicSnapshot> => {
         (page) =>
           !page.implementation_id || !disabledPages.has(page.implementation_id),
       ),
-      glossary: value?.extensions?.disabled_plugins?.includes(
-        "everunfold.glossary",
-      )
-        ? []
-        : snapshot.glossary,
+      glossary:
+        value && pluginEnabled(value.extensions, "everunfold.glossary")
+          ? snapshot.glossary
+          : [],
       site: {
         ...snapshot.site,
         ...(value

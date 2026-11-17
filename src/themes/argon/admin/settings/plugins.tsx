@@ -15,6 +15,10 @@ import styles from "./plugins.module.css";
 import { UiText } from "@/core/i18n/provider";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import { useSettingsEditor } from "@/core/settings/editor";
+import {
+  pluginChoices,
+  pluginEnabled,
+} from "@/core/settings/plugin-activation";
 import { useExtensionCatalog } from "@/core/plugins/use-catalog";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import {
@@ -96,17 +100,17 @@ export function PluginsSettingsPage() {
   const { saved, draft, changePlugins } = useSettingsEditor();
   const { catalog } = usePluginRuntime();
   const deployed = useExtensionCatalog();
-  const disabled = draft?.extensions?.disabled_plugins ?? [];
-  const savedDisabled = saved?.value.extensions?.disabled_plugins ?? [];
+  const choices = draft?.extensions;
+  const savedChoices = saved?.value.extensions;
   const activeTheme = saved?.value.extensions?.theme || catalog?.theme || "";
   const recommended = themePluginRecommendations(deployed.themes, activeTheme);
   const { required, unavailable } = planRecommendedActivation(
     deployed,
     recommended,
   );
-  const toEnable = disabled.some((id) => required.has(id));
+  const toEnable = [...required].some((id) => !pluginEnabled(choices, id));
   const pendingActivation =
-    !toEnable && savedDisabled.some((id) => required.has(id));
+    !toEnable && [...required].some((id) => !pluginEnabled(savedChoices, id));
   const recommendationStatus = unavailable.length
     ? "推荐插件尚未全部完成部署。"
     : pendingActivation
@@ -118,7 +122,7 @@ export function PluginsSettingsPage() {
     ...new Set([
       ...deployed.plugins.map((p) => p.id),
       ...deployed.backendPlugins.map((p) => p.id),
-      ...disabled,
+      ...pluginChoices(choices),
     ]),
   ];
   const visibleIds = ids.filter((id) => {
@@ -245,7 +249,7 @@ export function PluginsSettingsPage() {
                     plugin?.description ||
                     "插件未安装，保留停用设置与现有内容。"
                   }
-                  value={!disabled.includes(id)}
+                  value={pluginEnabled(choices, id)}
                   onChange={(enabled) => changePlugins([id], enabled)}
                 />
               </div>
@@ -273,7 +277,7 @@ export function PluginsSettingsPage() {
                   <div
                     className={`admin-density-controls ${styles.rowActions}`}
                   >
-                    {ready && !savedDisabled.includes(id) && (
+                    {ready && pluginEnabled(savedChoices, id) && (
                       <PluginConfiguration id={id} title={plugin.title} />
                     )}
                     <Button

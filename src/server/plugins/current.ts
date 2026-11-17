@@ -17,6 +17,7 @@ import {
 import { themeRegistry } from "@/core/extensions/themes";
 import type { RuntimeCatalog } from "@/core/plugins/runtime/types";
 import { scopePluginCatalog } from "@/core/plugins/runtime/catalog-scope";
+import { pluginEnabled } from "@/core/settings/plugin-activation";
 
 export const readRuntimeCatalog = cache(
   async (surface?: "admin"): Promise<RuntimeCatalog> => {
@@ -43,7 +44,11 @@ export const readRuntimeCatalog = cache(
       }
     }
     const preferences = applied.publicSettings?.extensions;
-    const disabled = preferences?.disabled_plugins ?? [];
+    const disabled = installed.packages
+      .map(({ manifest }) => manifest.id)
+      .filter(
+        (id) => !applied.publicSettings || !pluginEnabled(preferences, id),
+      );
     const theme = preferences?.theme || config.theme.active;
     themeRegistry.chain(theme);
     const {

@@ -2,7 +2,8 @@ import type { ReaderPreviewContract } from "@/core/contracts/reader-preview";
 import { RequestError } from "@/core/http/request";
 
 export type Identity = ReaderPreviewContract["identity"]["data"];
-export type Metric = ReaderPreviewContract["metrics"]["data"]["items"][number];
+export type Metric =
+  ReaderPreviewContract["article_metrics"]["data"]["items"][number];
 export type Persona = Identity["persona"];
 export type LoadState<T> =
   | { status: "idle" | "loading" }

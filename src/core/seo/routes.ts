@@ -5,6 +5,7 @@ import { glossaryTermPath } from "@/core/glossary/routes";
 import { normalizeCatalog } from "@/core/i18n/catalog";
 import { hasPageImplementation } from "@/core/pages/registry";
 import { readingPage } from "@/core/pages/reading-pages";
+import { pluginEnabled } from "@/core/settings/plugin-activation";
 import { indexable } from "./policy";
 
 export type SeoRoute = {
@@ -72,11 +73,7 @@ export function seoRoutes(snapshot: PublicSnapshot): SeoRoutes {
       ),
     );
   }
-  if (
-    !site.settings?.extensions?.disabled_plugins?.includes(
-      "everunfold.glossary",
-    )
-  ) {
+  if (pluginEnabled(site.settings?.extensions, "everunfold.glossary")) {
     for (const term of snapshot.glossary ?? []) {
       const path = glossaryTermPath(term, catalog);
       if (path)

@@ -1,11 +1,23 @@
 import type { PluginUsage, PublicSettings } from "@/core/contracts/settings";
+import {
+  pluginChoices,
+  pluginEnabled,
+  withPluginChoices,
+} from "./plugin-activation";
 
 /** Compare saved activation with the whole draft, including edits made on another settings tab. */
 export function changedPluginIds(saved: PublicSettings, draft: PublicSettings) {
-  const before = new Set(saved.extensions?.disabled_plugins ?? []);
-  const after = new Set(draft.extensions?.disabled_plugins ?? []);
-  return [...new Set([...before, ...after])]
-    .filter((id) => before.has(id) !== after.has(id))
+  return [
+    ...new Set([
+      ...pluginChoices(saved.extensions),
+      ...pluginChoices(draft.extensions),
+    ]),
+  ]
+    .filter(
+      (id) =>
+        pluginEnabled(saved.extensions, id) !==
+        pluginEnabled(draft.extensions, id),
+    )
     .sort();
 }
 
@@ -15,16 +27,19 @@ export function restorePluginChoices(
   previous: PublicSettings,
   ids: readonly string[],
 ): PublicSettings {
-  const before = new Set(previous.extensions?.disabled_plugins ?? []);
-  const disabled = new Set(current.extensions?.disabled_plugins ?? []);
+  let extensions = { ...current.extensions };
   for (const id of ids) {
-    if (before.has(id)) disabled.add(id);
-    else disabled.delete(id);
+    extensions = withPluginChoices(
+      extensions,
+      [id],
+      pluginEnabled(previous.extensions, id),
+    );
   }
-  const extensions = { ...current.extensions };
-  if (disabled.size || previous.extensions?.disabled_plugins !== undefined)
-    extensions.disabled_plugins = [...disabled].sort();
-  else delete extensions.disabled_plugins;
+  if (
+    !extensions.disabled_plugins?.length &&
+    previous.extensions?.disabled_plugins === undefined
+  )
+    delete extensions.disabled_plugins;
   return {
     ...current,
     extensions: Object.keys(extensions).length

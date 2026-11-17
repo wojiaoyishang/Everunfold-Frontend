@@ -1,6 +1,7 @@
 "use client";
 import { UiText, useT } from "@/core/i18n/provider";
 import { useSettingsEditor } from "@/core/settings/editor";
+import { pluginEnabled } from "@/core/settings/plugin-activation";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 
 export function PluginImpactDialog() {
@@ -32,11 +33,12 @@ export function PluginImpactDialog() {
               <span>
                 <UiText
                   text={
-                    impact.input.value.extensions?.disabled_plugins?.includes(
+                    pluginEnabled(
+                      impact.input.value.extensions,
                       plugin.plugin_id,
                     )
-                      ? "将停用"
-                      : "将启用"
+                      ? "将启用"
+                      : "将停用"
                   }
                 />
               </span>

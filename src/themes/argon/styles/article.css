@@ -246,12 +246,18 @@
 }
 .article-content img {
   display: block;
+  max-width: 100%;
   margin: 22px auto;
   height: auto;
   border-radius: 5px;
   transition:
     transform 420ms var(--motion-ease),
     box-shadow 300ms ease;
+}
+.article-body
+  .article-content
+  img:where(:not([width], [style*="width"], [data-sticker])) {
+  width: 100%;
 }
 .article-content figure {
   margin: 24px 0;

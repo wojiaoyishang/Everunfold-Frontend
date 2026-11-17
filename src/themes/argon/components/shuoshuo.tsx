@@ -1,4 +1,5 @@
 import { siteShortcodes } from "@/core/shortcodes/configuration";
+import { builderEntries } from "@/core/builder/document";
 import { UiText } from "@/core/i18n/provider";
 import type { FeedEntry } from "@/core/content/presentation";
 import type { PublicSnapshot } from "@/core/content/types";
@@ -10,7 +11,6 @@ import {
 } from "@/core/extensions/server-components";
 import { PagePresentation } from "./route-state";
 import { CommentSection } from "./comments/comment-section";
-import { ArticleActions } from "./article-actions";
 import type { BuilderRenderContext } from "../builder/content";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 
@@ -54,6 +54,22 @@ export function ShuoshuoDetail({
   snapshot: PublicSnapshot;
 }) {
   const glossary = snapshot.site.settings?.site.glossary;
+  const content = entry.content;
+  const inlineComments =
+    content.edit_mode === "components" &&
+    content.component_document &&
+    builderEntries(content.component_document.nodes).some(
+      (node) => node.type === "core.comments",
+    );
+  const comments = (
+    <CommentSection
+      key={content.id}
+      contentId={entry.example ? undefined : content.id}
+      open={content.comments_open}
+      comments={snapshot.comments[content.id] ?? []}
+      path={content.path}
+    />
+  );
   return (
     <>
       <PagePresentation site={snapshot.site} id={entry.content.id} />
@@ -77,6 +93,7 @@ export function ShuoshuoDetail({
           detail
           builderContext={{
             shortcodes: siteShortcodes(snapshot.site.settings),
+            comments: inlineComments ? comments : undefined,
           }}
           glossary={{
             auto_match: glossary?.auto_match ?? true,
@@ -86,20 +103,7 @@ export function ShuoshuoDetail({
             show_footnotes: entry.content.show_glossary_footnotes ?? true,
           }}
         />
-        <div className="surface shuoshuo-share">
-          <ArticleActions
-            path={entry.content.path}
-            title={entry.content.title}
-            commentsOpen={entry.content.comments_open}
-          />
-        </div>
-        <CommentSection
-          key={entry.content.id}
-          contentId={entry.example ? undefined : entry.content.id}
-          open={entry.content.comments_open}
-          comments={snapshot.comments[entry.content.id] ?? []}
-          path={entry.content.path}
-        />
+        {!inlineComments && comments}
       </ServerThemeTemplate>
     </>
   );

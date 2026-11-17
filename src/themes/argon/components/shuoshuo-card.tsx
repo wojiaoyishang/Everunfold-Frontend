@@ -15,6 +15,7 @@ import { Icon } from "./icon";
 import { ViewMetric } from "./reader-data";
 import { ContentEditLink } from "./content-edit-link";
 import { ContentLanguages } from "./content-languages";
+import { ArticleActions } from "./article-actions";
 import { authoredStyle } from "./authored-style";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 
@@ -70,23 +71,14 @@ export function ShuoshuoCardView({
       {...authored.scope}
     >
       {authored.style}
-      <header className="shuoshuo-meta">
-        <span className="shuoshuo-avatar">
-          <Icon name="leaf" />
+      <span className="shuoshuo-avatar" aria-hidden="true">
+        <Icon name="quote" />
+      </span>
+      {example && (
+        <span className="preview-badge">
+          <UiText text="示例" />
         </span>
-        <div>
-          <strong>{content.author}</strong>
-          <RelativeTime value={content.published_at} />
-        </div>
-        <span className="content-kind">
-          <UiText text="说说" />
-        </span>
-        {example && (
-          <span className="preview-badge">
-            <UiText text="示例" />
-          </span>
-        )}
-      </header>
+      )}
       <ContentLanguages
         content={{
           id: content.id,
@@ -107,25 +99,25 @@ export function ShuoshuoCardView({
       {detail ? (
         body
       ) : (
-        <CollapsibleContent limit={240}>{body}</CollapsibleContent>
+        <CollapsibleContent limit={520} previewRatio={0.64}>
+          {body}
+        </CollapsibleContent>
       )}
       {interactive && (
         <footer className="shuoshuo-actions">
+          <span className="shuoshuo-date">
+            <Icon name="calendar" />
+            <RelativeTime value={content.published_at} />
+            {detail && <strong>{content.author}</strong>}
+          </span>
           {detail && <ContentEditLink contentId={content.id} />}
           <ReactionButton id={content.id} count={content.reaction_count} />
-          {!example && <ViewMetric contentId={content.id} />}
-          {content.comments_open ? (
-            <Link
-              href={detail ? "#comments" : `${content.path}#comments`}
-              expectedContent={!detail}
-            >
+          {!example && <ViewMetric contentId={content.id} record={detail} />}
+          {!detail && content.comments_open && (
+            <Link href={`${content.path}#comments`} expectedContent>
               <Icon name="comment" />
               {content.comment_count || <UiText text="聊两句" />}
             </Link>
-          ) : (
-            <span>
-              <UiText text="评论已关闭" />
-            </span>
           )}
           {!detail && (
             <Link
@@ -138,6 +130,13 @@ export function ShuoshuoCardView({
             </Link>
           )}
         </footer>
+      )}
+      {detail && interactive && (
+        <ArticleActions
+          path={content.path}
+          title={content.title}
+          commentsOpen={content.comments_open}
+        />
       )}
     </article>
   );

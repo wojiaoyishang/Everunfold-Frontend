@@ -10,33 +10,54 @@ import { Icon } from "./icon";
 export function CollapsibleContent({
   children,
   limit = 380,
+  previewRatio,
 }: {
   children: ReactNode;
   limit?: number;
+  previewRatio?: number;
 }) {
   const id = useId();
   const inner = useRef<HTMLDivElement>(null);
-  const [height, setHeight] = useState<number | null>(null);
+  const [measurement, setMeasurement] = useState<{
+    height: number;
+    limit: number;
+  } | null>(null);
   const [expanded, setExpanded] = useState(false);
   useEffect(() => {
     const element = inner.current;
     if (!element) return;
-    const observer = new ResizeObserver(() => setHeight(element.scrollHeight));
+    const measure = () =>
+      setMeasurement({
+        height: element.scrollHeight,
+        limit: previewRatio
+          ? Math.min(limit, Math.round(element.clientWidth * previewRatio))
+          : limit,
+      });
+    const observer = new ResizeObserver(measure);
+    measure();
     observer.observe(element);
     return () => observer.disconnect();
-  }, []);
-  const long = height !== null && height > limit + 40;
+  }, [limit, previewRatio]);
+  const long =
+    measurement !== null && measurement.height > measurement.limit + 2;
+  const folded = long && !expanded;
   return (
-    <div className="foldable-content" data-folded={long && !expanded}>
+    <div className="foldable-content" data-folded={folded}>
       <div
         id={id}
         className="foldable-window"
         onFocusCapture={() => {
-          if (long && !expanded) setExpanded(true);
+          if (folded) setExpanded(true);
         }}
         style={{
           maxHeight:
-            height === null ? limit : long && !expanded ? limit : height + 2,
+            measurement === null
+              ? previewRatio
+                ? `min(${limit}px, ${previewRatio * 100}cqi)`
+                : limit
+              : folded
+                ? measurement.limit
+                : measurement.height + 2,
         }}
       >
         <div ref={inner}>{children}</div>
@@ -46,13 +67,14 @@ export function CollapsibleContent({
       </noscript>
       {long && (
         <Button
+          type="button"
           className="fold-toggle"
           aria-controls={id}
           aria-expanded={expanded}
-          onClick={() => setExpanded(!expanded)}
+          onClick={() => setExpanded((current) => !current)}
         >
-          {expanded ? <UiText text="收起长内容" /> : <UiText text="展开全文" />}
           <Icon name={expanded ? "up" : "down"} />
+          {expanded ? <UiText text="收起长内容" /> : <UiText text="展开全文" />}
         </Button>
       )}
     </div>

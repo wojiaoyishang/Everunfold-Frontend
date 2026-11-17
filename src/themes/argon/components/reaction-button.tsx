@@ -5,6 +5,7 @@ import { Button } from "@/themes/argon/components/ui/primitives";
 
 import { useEffect, useState } from "react";
 import { Icon } from "./icon";
+import { useReaderData } from "./reader-data";
 
 const previews = new Set<string>();
 /** Preview-only reaction, shared between card and detail in this browser tab. */
@@ -16,6 +17,10 @@ export function ReactionButton({
   count?: number;
 }) {
   const [liked, setLiked] = useState(false);
+  const { snapshot } = useReaderData();
+  const metric = snapshot.metrics[id];
+  const historical =
+    metric?.status === "ready" ? metric.value.historical_likes : undefined;
   useEffect(() => {
     const frame = requestAnimationFrame(() => setLiked(previews.has(id)));
     return () => cancelAnimationFrame(frame);
@@ -33,7 +38,7 @@ export function ReactionButton({
       }}
     >
       <Icon name="heart" />
-      {count + Number(liked) || <UiText text="喜欢" />}
+      {(historical ?? count) + Number(liked) || <UiText text="喜欢" />}
       <span className="sr-only">
         <UiText text="（互动预览）" />
       </span>

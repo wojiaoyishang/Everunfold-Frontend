@@ -27,6 +27,7 @@ import {
   pluginNeedsConfirmation,
   restorePluginChoices,
 } from "./plugin-impact";
+import { withPluginChoices } from "./plugin-activation";
 import { mergeActivatedTheme, themeActivationInput } from "./theme-activation";
 
 export function settingsFailure(error: unknown) {
@@ -195,15 +196,9 @@ function useEditor() {
         : null;
     setDraft((value) => {
       if (!value) return value;
-      const current = value.extensions?.disabled_plugins ?? [];
       return {
         ...value,
-        extensions: {
-          ...value.extensions,
-          disabled_plugins: enabled
-            ? current.filter((id) => !pluginIds.includes(id))
-            : [...new Set([...current, ...pluginIds])].sort(),
-        },
+        extensions: withPluginChoices(value.extensions, pluginIds, enabled),
       };
     });
   }

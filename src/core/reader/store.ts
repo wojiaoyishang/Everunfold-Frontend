@@ -1,7 +1,6 @@
 import {
   readArticleMetrics,
   readPreviewIdentity,
-  readPreviewMetrics,
 } from "@/core/contracts/reader-preview";
 import { RequestError, type RequestOptions } from "@/core/http/request";
 import { RequestTasks } from "./tasks";
@@ -11,11 +10,14 @@ import {
   type Persona,
   type ReaderSnapshot,
   type LoadState,
+  type Metric,
 } from "./state";
 
 interface ReaderClient {
   identity: typeof readPreviewIdentity;
-  metrics: typeof readPreviewMetrics | typeof readArticleMetrics;
+  metrics: (...request: Parameters<typeof readArticleMetrics>) => Promise<{
+    data: { items: Metric[] };
+  }>;
 }
 export interface ReaderStoreOptions {
   client?: ReaderClient;
