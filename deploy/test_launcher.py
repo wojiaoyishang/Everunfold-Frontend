@@ -233,6 +233,17 @@ class LauncherTests(unittest.TestCase):
         self.assertNotIn("3210", (self.repo / "config.yaml").read_text())
         self.assertIn(str(selected), result.stdout)
 
+    @unittest.skipIf(BACKEND, "frontend worker setting")
+    def test_multi_worker_requires_a_compatible_release_before_replacing_container(self):
+        root_config = self.repo / "config.yaml"
+        document = yaml.safe_load(root_config.read_text())
+        document["environment"]["FRONTEND_WORKERS"] = "2"
+        root_config.write_text(yaml.safe_dump(document))
+        result, calls = self.run_action("start", old="matching")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("当前前端产物不支持多个运行 worker", result.stderr)
+        self.assertFalse(any("custom-everunfold" in call for call in calls))
+
     @unittest.skipIf(BACKEND, "frontend sync action")
     def test_sync_uses_current_config_and_network_without_a_live_frontend(self):
         result, calls = self.run_action("sync")

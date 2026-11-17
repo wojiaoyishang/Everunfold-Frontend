@@ -84,7 +84,7 @@ read_paths() {
   local result
   result="$(docker run --rm --network none "${base[@]}" "${mount_args[@]}" "$setup_image" python "$deploy_dir/bootstrap.py" paths)"
   mapfile -t locations <<< "$result"
-  if (( ${#locations[@]} != 22 )); then echo "无法确定容器设置。" >&2; exit 1; fi
+  if (( ${#locations[@]} != 23 )); then echo "无法确定容器设置。" >&2; exit 1; fi
   network=${locations[0]}; data_dir=${locations[1]}; env_parent=${locations[2]}
   output_dir=${locations[3]}; source_dir=${locations[4]}; profile_parent=${locations[5]}
   container_name=${locations[6]}; image_name=${locations[8]}; bind_host=${locations[9]}
@@ -94,6 +94,7 @@ read_paths() {
   network_alias=${locations[17]}; host_gateway=${locations[18]}; allow_network_peers=${locations[19]}
   internal_peer_networks=${locations[20]#EVERUNFOLD_INTERNAL_PEER_NETWORKS=}
   tls_proxy_network=${locations[21]#EVERUNFOLD_TLS_PROXY_NETWORK=}
+  frontend_workers=${FRONTEND_WORKERS-${locations[22]#FRONTEND_WORKERS=}}
   host_args=()
   if [[ "$host_gateway" == 1 ]]; then host_args+=(--add-host host.docker.internal:host-gateway); fi
   IFS=',' read -ra extra_networks <<< "${locations[7]}"
@@ -323,10 +324,17 @@ if [[ "$role" == backend ]]; then
 else
   workspace_dir="$artifact_dir"
   [[ -s "$artifact_dir/.next/BUILD_ID" ]] || { echo "前端产物未构建，请先执行 build。" >&2; exit 1; }
+  if [[ "$action" == start ]]; then
+    [[ "$frontend_workers" =~ ^([1-9]|[12][0-9]|3[0-2])$ ]] || { echo "FRONTEND_WORKERS 必须是 1–32 之间的整数。" >&2; exit 2; }
+    if [[ "$frontend_workers" != 1 && ! -f "$artifact_dir/tools/frontend-cluster.ts" ]]; then
+      echo "当前前端产物不支持多个运行 worker；请用新版前端源码重新编译。" >&2; exit 1
+    fi
+  fi
   runtime_args+=(--mount "type=bind,source=$artifact_dir,target=/workspace"
                  --mount "type=bind,source=$(dirname -- "$runtime_config"),target=/config"
                  -e "CONFIG_FILE=/config/$(basename -- "$runtime_config")" -e EVERUNFOLD_DATA_DIR=/data
                  -e "FRONTEND_HOST=$listen_host" -e "FRONTEND_PORT=$listen_port")
+  [[ ! -v FRONTEND_WORKERS ]] || runtime_args+=(-e "FRONTEND_WORKERS=$FRONTEND_WORKERS")
 fi
 run_runtime() { run_temporary no "${runtime_args[@]}" "$image_name" "$@"; }
 sync_runtime() {

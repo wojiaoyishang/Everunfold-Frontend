@@ -4,6 +4,7 @@ import next from "next";
 import { readConfigurationFiles } from "../src/core/config/files";
 import { frontendHandler } from "../src/server/http";
 import { configuredSettingsRuntime } from "../src/server/settings/runtime";
+import { frontendClusterClient } from "./frontend-cluster";
 
 const { values } = parseArgs({
   options: {
@@ -17,6 +18,7 @@ if (values.hostname !== undefined) process.env.FRONTEND_HOST = values.hostname;
 const root = process.env.EVERUNFOLD_PROJECT_ROOT ?? process.cwd();
 const { settings: config, file } = readConfigurationFiles(root);
 const { host, port } = config.listener;
+const runtime = configuredSettingsRuntime(root, frontendClusterClient());
 console.info("Everunfold Frontend · CONFIG_FILE=" + file.filename);
 const server = createServer({
   maxHeaderSize: 8192,
@@ -31,10 +33,9 @@ const app = next({
   httpServer: server,
 });
 await app.prepare();
-const { handler, recovery } = configuredSettingsRuntime(root);
 server.on(
   "request",
-  frontendHandler(app.getRequestHandler(), handler, recovery.visit),
+  frontendHandler(app.getRequestHandler(), runtime.handler, runtime.visit),
 );
 // Next installs its HMR upgrade handler on this server when handling a web request.
 server.on("error", () => {
@@ -44,9 +45,9 @@ server.on("error", () => {
   process.exit(1);
 });
 server.listen(port, host, () => {
-  recovery.start();
+  runtime.start();
   console.log(
-    `Everunfold Frontend ready: ${host}:${port} (web + internal sync)`,
+    `Everunfold Frontend ready: ${host}:${port} (web + internal sync, pid ${process.pid})`,
   );
 });
 let closing = false;
@@ -54,7 +55,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.on(signal, () => {
     if (closing) return;
     closing = true;
-    recovery.stop();
+    runtime.stop();
     const deadline = setTimeout(() => process.exit(1), 30000);
     deadline.unref();
     void Promise.all([

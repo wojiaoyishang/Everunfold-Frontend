@@ -22,6 +22,7 @@ services:
       CONFIG_FILE: /config/${EVERUNFOLD_CONFIG_NAME:-config.yaml}
       EVERUNFOLD_DATA_DIR: /data
       FRONTEND_PORT: "${FRONTEND_WEB_PORT:-3000}"
+      FRONTEND_WORKERS:
     ports:
       - "${FRONTEND_BIND_ADDRESS:-127.0.0.1}:${FRONTEND_PUBLISH_PORT:-3000}:${FRONTEND_WEB_PORT:-3000}"
     volumes:

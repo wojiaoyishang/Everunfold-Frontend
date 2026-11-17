@@ -7,11 +7,15 @@ import {
 } from "../../core/config/files";
 import { FileSettingsStore } from "./store";
 import { cacheMaintenance } from "./cache-maintenance";
-import { settingsHandler } from "./receiver";
+import {
+  settingsHandler,
+  type RecoveryControl,
+  type ReplicaWrite,
+} from "./receiver";
 import { replicaRecovery } from "./recovery";
 import { FileContentStore } from "../content/store";
 
-export function configuredSettingsRuntime(root: string) {
+function configuredReplicas(root: string) {
   const { settings: config, connections } = readConfigurationFiles(root);
   const identity = connectionIdentity(config);
   if (!config.settings.sourceEpoch)
@@ -67,6 +71,38 @@ export function configuredSettingsRuntime(root: string) {
       };
     },
   });
+  return {
+    config,
+    store,
+    content,
+    target,
+    token,
+    currentConfiguration,
+    recovery,
+  };
+}
+
+export function configuredReplicaRecovery(root: string) {
+  return configuredReplicas(root).recovery;
+}
+
+export function configuredSettingsRuntime(
+  root: string,
+  cluster?: {
+    recovery: RecoveryControl & { visit: () => void };
+    write: ReplicaWrite;
+  },
+) {
+  const {
+    config,
+    store,
+    content,
+    target,
+    token,
+    currentConfiguration,
+    recovery,
+  } = configuredReplicas(root);
+  const control = cluster?.recovery ?? recovery;
   const handler = settingsHandler(
     store,
     token,
@@ -81,7 +117,17 @@ export function configuredSettingsRuntime(root: string) {
       }
     },
     cacheMaintenance(target, store, content),
-    recovery,
+    control,
+    cluster?.write,
   );
-  return { handler, recovery };
+  return {
+    handler,
+    visit: () => control.visit(),
+    start: () => {
+      if (!cluster) recovery.start();
+    },
+    stop: () => {
+      if (!cluster) recovery.stop();
+    },
+  };
 }

@@ -245,6 +245,14 @@ def configure(native: bool = False) -> Configuration:
         group="进程",
     )
     add(
+        "workers",
+        "前端 Node.js 运行 worker 数",
+        env.get("FRONTEND_WORKERS", "1"),
+        valid=lambda s: bool(re.fullmatch(r"[1-9]|[12][0-9]|3[0-2]", s)),
+        hint="默认 1，范围 1–32。多个进程共用一个端口，每个进程会增加内存占用；与编译无关。",
+        group="进程",
+    )
+    add(
         "publish_host",
         "宿主映射绑定 IP",
         compose.get("FRONTEND_BIND_ADDRESS", "127.0.0.1").strip("[]"),
@@ -326,6 +334,7 @@ def configure(native: bool = False) -> Configuration:
             names[1]: value("outbound"),
             "FRONTEND_HOST": value("host"),
             "FRONTEND_PORT": value("port"),
+            "FRONTEND_WORKERS": value("workers"),
         }
         save_console(environment)
         for name, key in (

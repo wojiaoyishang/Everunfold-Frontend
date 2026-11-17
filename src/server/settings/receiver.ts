@@ -54,6 +54,12 @@ export async function readReplicas(
   return { public_settings, cache_policy, public_content };
 }
 
+export type ReplicaWrite = <T>(action: () => Promise<T>) => Promise<T>;
+export type RecoveryControl = {
+  status: () => SyncCheck | Promise<SyncCheck>;
+  cleared: () => void;
+};
+
 export function settingsHandler(
   store: SettingsStore,
   token: string,
@@ -62,7 +68,8 @@ export function settingsHandler(
   identity?: Pick<ReceiverStatus, "node_id" | "source_epoch">,
   isCurrent: () => boolean = () => true,
   maintenance?: ReturnType<typeof cacheMaintenance>,
-  recovery?: { status: () => SyncCheck; cleared: () => void },
+  recovery?: RecoveryControl,
+  sharedWrite?: ReplicaWrite,
 ) {
   if (token.length < 32 || !peers.length)
     throw new Error("Settings receiver credentials are not configured");
@@ -78,7 +85,9 @@ export function settingsHandler(
   // and publication so a clear can leave a durable high-water revision on disk.
   let writes = Promise.resolve();
   function write<T>(action: () => Promise<T>): Promise<T> {
-    const work = writes.then(action);
+    const work = writes.then(() =>
+      sharedWrite ? sharedWrite(action) : action(),
+    );
     writes = work.then(
       () => {},
       () => {},
@@ -160,7 +169,7 @@ export function settingsHandler(
       try {
         reply(200, {
           ...(await maintenance.status()),
-          ...(recovery ? { sync_check: recovery.status() } : {}),
+          ...(recovery ? { sync_check: await recovery.status() } : {}),
         });
       } catch (error) {
         reply(503, { error: "cache_state_unavailable" }, undefined, error);
@@ -177,7 +186,7 @@ export function settingsHandler(
         protocol: "node-status-1",
         ...identity,
         ...(await readReplicas(store, content)),
-        ...(recovery ? { sync_check: recovery.status() } : {}),
+        ...(recovery ? { sync_check: await recovery.status() } : {}),
       } satisfies ReceiverStatus);
       return;
     }
@@ -238,8 +247,12 @@ export function settingsHandler(
           return;
         }
         try {
-          reply(200, await write(async () => maintenance[deletion]()));
-          if (deletion === "clear") recovery?.cleared();
+          const receipt = await write(async () => {
+            const result = await maintenance[deletion]();
+            if (deletion === "clear") recovery?.cleared();
+            return result;
+          });
+          reply(200, receipt);
         } catch (error) {
           reply(
             503,

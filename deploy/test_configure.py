@@ -91,6 +91,22 @@ class Fixtures:
 
 
 class ModelTests(Fixtures, unittest.TestCase):
+    @unittest.skipIf(BACKEND, "frontend worker setting")
+    def test_runtime_workers_save_independently_of_build_workers(self):
+        for native in (False, True):
+            with self.subTest(native=native):
+                model = self.complete(native)
+                workers = next(item for item in model.fields if item.key == "workers")
+                self.assertEqual(workers.value, "1" if not native else "4")
+                with self.assertRaises(ValueError):
+                    self.edit(model, "workers", "33")
+                self.edit(model, "workers", "4")
+                self.edit(model, "build_workers", "2")
+                model.save()
+                ctx = self.materialize(native)
+                self.assertEqual(ctx.document["environment"]["FRONTEND_WORKERS"], "4")
+                self.assertEqual(ctx.document["docker"]["FRONTEND_BUILD_WORKERS"], "2")
+
     def test_base64_is_bounded_and_checks_all_credentials_without_echoing_input(self):
         import base64
         import copy
