@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { can } from "@/core/accounts/permissions";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { UiText } from "@/core/i18n/provider";
@@ -28,11 +29,7 @@ export function ManagedPageTypes({ choose = false }: { choose?: boolean }) {
           </div>
         }
       />
-      {loading && (
-        <p role="status" className="account-card">
-          <UiText text="正在读取页面类型…" />
-        </p>
-      )}
+      {loading && <AdminLoadingState label="正在读取页面类型…" />}
       {!loading && error && (
         <div className={styles.typeError}>
           <Button className="admin-button" onClick={reload}>

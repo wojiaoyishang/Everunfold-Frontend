@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   readRuntime,
@@ -144,9 +145,7 @@ export function RuntimePage() {
         </p>
       )}
       {!data ? (
-        <p role="status">
-          <UiText text="正在读取运行状态…" />
-        </p>
+        <AdminLoadingState label="正在读取运行状态…" />
       ) : (
         <>
           <p className={styles.sample}>

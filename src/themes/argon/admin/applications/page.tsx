@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useEffect, useState } from "react";
 import type {
   ApplicationState,
@@ -138,11 +139,7 @@ export function ApplicationsPage() {
               onReveal={setSecrets}
             />
           ) : (
-            !error && (
-              <p role="status">
-                <UiText text="正在读取接入应用…" />
-              </p>
-            )
+            !error && <AdminLoadingState label="正在读取接入应用…" />
           )}
         </div>
       </div>

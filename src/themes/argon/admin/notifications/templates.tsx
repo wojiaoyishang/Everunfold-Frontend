@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useMemo, useRef, useState } from "react";
 import { html as htmlLanguage } from "@codemirror/lang-html";
@@ -350,9 +351,7 @@ export function NotificationTemplatesPage() {
         />
       )}
       {editor.loading && !editor.state ? (
-        <div className="admin-settings-loading" role="status">
-          <UiText text="正在读取通知模板…" />
-        </div>
+        <AdminLoadingState label="正在读取通知模板…" />
       ) : !editor.state ? (
         <div className={styles.message} data-error="true" role="alert">
           <Icon name="cloud-off" />

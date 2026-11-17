@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { AdminPagination } from "../components/admin-pagination";
 import { useEffect, useState } from "react";
 import { readAccountUsers } from "@/core/contracts/accounts";
@@ -131,11 +132,7 @@ export function UsersPage() {
             <UiText text="刷新" />
           </Button>
         </div>
-        {loading && (
-          <p className="account-empty" role="status">
-            <UiText text="正在读取用户…" />
-          </p>
-        )}
+        {loading && <AdminLoadingState label="正在读取用户…" />}
         {error && (
           <p role="alert">
             <UiText text={error} />

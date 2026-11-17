@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useEffect, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
 import {
@@ -63,9 +64,7 @@ export function NewManagedPage({
         }
       />
       {loading || (templateId && !templateError) ? (
-        <p role="status" className="account-card">
-          <UiText text="正在读取页面类型…" />
-        </p>
+        <AdminLoadingState label="正在读取页面类型…" />
       ) : (
         <div className={styles.typeError}>
           {error || templateError ? (

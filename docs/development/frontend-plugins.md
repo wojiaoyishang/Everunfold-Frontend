@@ -1,6 +1,6 @@
 # 独立插件、页面与短代码开发
 
-版本：frontend-plugins-13，2026-11-11。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
+版本：frontend-plugins-14，2026-11-17。运行机制见[规范](../architecture/frontend-plugin-runtime.md)，主题另见[子主题指南](child-themes.md)。第一方示例为src/plugins/people、src/plugins/gallery及[荣誉页](honors-page.md)的src/plugins/honors；后者演示包内多语言表单、媒体选择及证书弹窗。
 
 ## 源码和命令
 
@@ -212,3 +212,7 @@ definePlugin允许author、homepage、license、preview、readme；版本继续�
 ## 页面评论 SDK
 
 页面支持`registration.comments_open`初值与前端`comments`放置声明。默认页末；`PageComments`提供正文内锚点，selector限定当前页面正文；manual无锚点适合自行绘制。`usePageComments`提供上下文，`usePageCommentClient`、`CaptchaField`复用阅读回执/验证码/幂等提交，另开放原始读写客户端；预览禁止评论互动。主题可覆盖`public.page.comments`。参数、最小例子与安全边界见[页面评论指南](page-comments.md)。
+
+## 工作台卡片
+
+后台插件可通过 `workspaceCards.register` 贡献工作台卡片，参见[注册、组件和权限规范](workspace-cards.md)。SDK/client 提供 `AdminLoadingState` 与后台 `RouteLink`，避免插件重复实现加载动画或误用前台链接。

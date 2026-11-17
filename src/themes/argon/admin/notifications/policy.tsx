@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useMemo, useState } from "react";
 import type {
@@ -448,9 +449,7 @@ export function NotificationPolicyPage() {
         }
       />
       {editor.loading && !editor.state ? (
-        <div className="admin-settings-loading" role="status">
-          <UiText text="正在读取通知策略…" />
-        </div>
+        <AdminLoadingState label="正在读取通知策略…" />
       ) : !editor.state ? (
         <div className={styles.message} data-error="true" role="alert">
           <Icon name="cloud-off" />

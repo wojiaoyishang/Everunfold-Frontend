@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { AdminPagination } from "../components/admin-pagination";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -743,9 +744,7 @@ export function TranslationSettingsPage() {
               }
             >
               {editor.loading ? (
-                <p className={styles.empty} role="status">
-                  <UiText text="正在读取翻译设置…" />
-                </p>
+                <AdminLoadingState label="正在读取翻译设置…" />
               ) : !detailItem ? (
                 <div className={styles.missingDetail}>
                   <p>
@@ -999,9 +998,7 @@ export function TranslationSettingsPage() {
                   </span>
                 </p>
                 {editor.loading ? (
-                  <p className={styles.empty} role="status">
-                    <UiText text="正在读取翻译设置…" />
-                  </p>
+                  <AdminLoadingState label="正在读取翻译设置…" />
                 ) : rows.length === 0 ? (
                   <p className={styles.empty}>
                     <UiText text="没有匹配的翻译字符串。" />

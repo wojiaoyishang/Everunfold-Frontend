@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { embeddedEditorSurface, isEmbeddedEditor } from "@/core/preview/bridge";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import {
@@ -585,9 +586,7 @@ export function ManagedPageEditor({
                 <UiText text="重新读取页面" />
               </Button>
             ) : (
-              <p role="status">
-                <UiText text="正在读取页面…" />
-              </p>
+              <AdminLoadingState label="正在读取页面…" />
             )}
           </section>
         </>

@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { UiText } from "@/core/i18n/provider";
 
 import { useEffect, useState } from "react";
@@ -56,11 +57,7 @@ function LinkPicker({
           value={search}
           onChange={(event) => setSearch(event.target.value)}
         />
-        {results.loading && (
-          <p role="status">
-            <UiText text="正在读取内容…" />
-          </p>
-        )}
+        {results.loading && <AdminLoadingState label="正在读取内容…" />}
         {(error || results.error) && (
           <p role="alert">{error || results.error}</p>
         )}
@@ -233,9 +230,7 @@ export function EditorLanguages({
                 </p>
               )}
               {!group ? (
-                <p role="status">
-                  <UiText text="正在读取语言版本…" />
-                </p>
+                <AdminLoadingState label="正在读取语言版本…" />
               ) : (
                 <>
                   <div className={styles.rows}>

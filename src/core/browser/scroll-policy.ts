@@ -21,3 +21,16 @@ export function dampedPosition(
 export function easeOutExpo(progress: number): number {
   return progress >= 1 ? 1 : 1 - Math.pow(2, -10 * Math.max(0, progress));
 }
+
+/** Pixel streams already carry OS momentum; interpolate only discrete wheel notches. */
+export function discreteWheel(delta: number, mode: number): boolean {
+  return (
+    mode !== 0 ||
+    (Number.isInteger(delta) &&
+      Math.abs(delta) >= 100 &&
+      (Math.abs(delta) % 100 === 0 || Math.abs(delta) % 120 === 0))
+  );
+}
+export function wheelAcceleration(gap: number, sameDirection: boolean): number {
+  return sameDirection && gap >= 0 && gap < 160 ? 1 + (1 - gap / 160) * 0.8 : 1;
+}

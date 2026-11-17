@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useRef, useState } from "react";
 import type { InstalledTheme } from "@/core/contracts/settings";
 import { useSettingsEditor } from "@/core/settings/editor";
@@ -95,11 +96,7 @@ export function InstalledThemeSection() {
             </div>
           )}
         </div>
-        {deployed.loading && (
-          <p role="status">
-            <UiText text="正在读取部署清单…" />
-          </p>
-        )}
+        {deployed.loading && <AdminLoadingState label="正在读取部署清单…" />}
         {deployed.error && (
           <div role="alert">
             <p>

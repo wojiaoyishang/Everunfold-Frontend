@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useAccessSettings } from "@/core/accounts/use-access-settings";
 import { UiText } from "@/core/i18n/provider";
@@ -114,9 +115,7 @@ export function AccountCaptchaPage() {
           </Button>
         </div>
       ) : (
-        <p role="status">
-          <UiText text="正在读取设置…" />
-        </p>
+        <AdminLoadingState label="正在读取设置…" />
       )}
     </SettingsLayout>
   );

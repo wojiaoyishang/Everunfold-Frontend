@@ -1,6 +1,9 @@
 import type { CSSProperties } from "react";
 
 const paths = {
+  flame:
+    "M12 3c1 5-4 5-4 9 0 2 1 3 2 4-1-4 3-4 3-7 4 3 7 6 6 9-1 4-5 5-8 3-5-3-7-8 1-18Z",
+  shield: "m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6l8-3Zm-4 9 3 3 5-6",
   sliders: "M4 6h5m4 0h7M4 18h9m4 0h3M9 3v6h4V3H9Zm4 12v6h4v-6h-4",
   puzzle:
     "M4 4h5a3 3 0 1 1 6 0h5v5a3 3 0 1 0 0 6v5h-5a3 3 0 1 0-6 0H4v-5a3 3 0 1 1 0-6V4Z",

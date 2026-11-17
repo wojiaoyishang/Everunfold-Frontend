@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { AdminPagination } from "../components/admin-pagination";
 import { useEffect, useState } from "react";
 import type {
@@ -101,9 +102,7 @@ export function NavigationPicker({
         </p>
         <div className={styles.results} aria-busy={loading}>
           {loading ? (
-            <p role="status">
-              <UiText text="正在读取内容…" />
-            </p>
+            <AdminLoadingState label="正在读取内容…" />
           ) : error ? (
             <p role="alert">{error}</p>
           ) : (

@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type FormEvent } from "react";
 import {
+  AdminLoadingState,
   Button,
   ConfirmDialog,
   Form,
@@ -100,7 +101,7 @@ export function WritingSettings({ pageId }: { pageId?: string }) {
   }, [baseUrl, csrfToken, revision]);
 
   if (!configuration) {
-    if (!unavailable) return <p role="status">{t("正在读取配置…")}</p>;
+    if (!unavailable) return <AdminLoadingState label="正在读取配置…" />;
     return (
       <div className={styles.loadError}>
         <p role="alert">{t("配置暂时无法读取。")}</p>

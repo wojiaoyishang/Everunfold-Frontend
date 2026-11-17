@@ -3,13 +3,23 @@ import { writingScenes } from "./fields";
 
 export default definePlugin({
   id: "core.ai-writing",
-  version: "1.1.0",
+  version: "1.2.0",
   title: "AI 写作助手",
   description: "为摘要、搜索与分享文案提供生成建议。",
   surface: "admin",
   preview: "asset:assets/preview.webp",
-  setup({ adminPages, components, formFields }) {
+  setup({ adminPages, components, formFields, workspaceCards }) {
     components.register("core.ai-writing.settings");
+    components.register("core.ai-writing.workspace");
+    workspaceCards.register({
+      id: "core.ai-writing.workspace",
+      label: "AI 写作助手",
+      component: "core.ai-writing.workspace",
+      permission: "settings:write",
+      icon: "writing",
+      width: 2,
+      defaultVisible: false,
+    });
     components.register("core.ai-writing.generate");
     adminPages.register({
       id: "settings",

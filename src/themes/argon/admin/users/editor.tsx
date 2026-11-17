@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type {
@@ -423,11 +424,7 @@ export function UserEditor({ id }: { id?: string }) {
           </fieldset>
         </Form>
       ) : (
-        !error && (
-          <p role="status">
-            <UiText text="正在读取用户资料…" />
-          </p>
-        )
+        !error && <AdminLoadingState label="正在读取用户资料…" />
       )}
       {saved && !forbidden && (
         <ManagedUserSecurity

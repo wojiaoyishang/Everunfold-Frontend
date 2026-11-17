@@ -74,3 +74,8 @@ export interface PluginActivationContext {
   };
   onDispose(callback: () => void): void;
 }
+
+export type {
+  WorkspaceCardDefinition,
+  WorkspaceCardProps,
+} from "@/core/workspace/types";

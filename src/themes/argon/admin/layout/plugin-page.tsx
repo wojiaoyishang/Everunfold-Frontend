@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { createElement } from "react";
 import { useAdminAccount } from "@/core/admin/account-context";
@@ -18,12 +19,7 @@ export function AdminPluginPage({ pluginId, pageId }: PluginAdminPageProps) {
   );
   const Page =
     registration && components.get(pluginId)?.[registration.component];
-  if (loading)
-    return (
-      <p className="admin-panel" role="status">
-        <UiText text="正在加载工作区内容" />
-      </p>
-    );
+  if (loading) return <AdminLoadingState label="正在加载工作区内容" />;
   if (!registration || !Page)
     return (
       <section className="admin-panel">

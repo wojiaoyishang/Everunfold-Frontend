@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useEffect, useState } from "react";
 import type { ManagedPageSummary } from "@/core/contracts/pages";
 import { readManagedPages, removeManagedPage } from "@/core/contracts/pages";
@@ -253,11 +254,7 @@ export function ManagedPagesDirectory({
             </div>
           </div>
         ))}
-        {loading && (
-          <p role="status" className={styles.empty}>
-            <UiText text="正在读取页面…" />
-          </p>
-        )}
+        {loading && <AdminLoadingState label="正在读取页面…" />}
         {!loading && !error && !rows.length && (
           <p className={styles.empty}>
             <UiText text={query ? "没有找到匹配的页面。" : "暂无页面。"} />

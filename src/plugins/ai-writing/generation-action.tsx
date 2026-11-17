@@ -4,6 +4,7 @@ import type {
   AdminFormFieldSource,
 } from "@everunfold/plugin-sdk";
 import {
+  AdminLoadingState,
   Button,
   Icon,
   Modal,
@@ -309,7 +310,7 @@ function GenerationDialog({
           </p>
         )}
         {!material && !sourceError ? (
-          <p role="status">{t("正在读取素材…")}</p>
+          <AdminLoadingState compact label="正在读取素材…" />
         ) : material ? (
           <section
             className={styles.material}
@@ -392,7 +393,9 @@ function GenerationDialog({
             <div className={styles.generationProgress} aria-hidden="true" />
           )}
           <div className={styles.notice} role="status">
-            {checkingMaterial && t("正在读取素材…")}
+            {checkingMaterial && (
+              <AdminLoadingState compact label="正在读取素材…" />
+            )}
             {job.busy &&
               t(job.status?.status === "queued" ? "正在排队…" : "正在生成…")}
           </div>

@@ -1,0 +1,131 @@
+import type { WorkspaceCardDefinition } from "./types";
+import type { WorkspaceCardPlacement } from "@/core/contracts/operations";
+export const workspaceCards: readonly WorkspaceCardDefinition[] = [
+  {
+    id: "core.pending-comments",
+    label: "待审核评论",
+    component: "pending_comments",
+    permission: "comments:read",
+    icon: "comment",
+    width: 1,
+  },
+  {
+    id: "core.drafts",
+    label: "未发布草稿",
+    component: "drafts",
+    permission: "content:read",
+    icon: "edit",
+    width: 1,
+  },
+  {
+    id: "core.scheduled",
+    label: "定时发布",
+    component: "scheduled",
+    permission: "content:read",
+    icon: "clock",
+    width: 1,
+  },
+  {
+    id: "core.failed-schedules",
+    label: "发布失败",
+    component: "failed_schedules",
+    permission: "content:read",
+    icon: "warning",
+    width: 1,
+  },
+  {
+    id: "core.translations",
+    label: "译文待核对",
+    component: "translations_to_review",
+    permission: "content:read",
+    icon: "languages",
+    width: 1,
+  },
+  {
+    id: "core.failed-deliveries",
+    label: "同步待重试",
+    component: "failed_deliveries",
+    permission: "settings:read",
+    icon: "cloud",
+    width: 1,
+  },
+  {
+    id: "core.write",
+    label: "撰写文章",
+    component: "write",
+    permission: "content:write",
+    icon: "edit",
+    width: 3,
+  },
+  {
+    id: "core.media",
+    label: "媒体库",
+    component: "media",
+    permission: "media:read",
+    icon: "image",
+    width: 3,
+  },
+  {
+    id: "core.views",
+    label: "访问趋势",
+    component: "views",
+    permission: "content:read",
+    icon: "activity",
+    width: 6,
+  },
+  {
+    id: "core.popular",
+    label: "时段热门文章",
+    component: "popular",
+    permission: "content:read",
+    icon: "flame",
+    width: 3,
+  },
+  {
+    id: "core.all-time",
+    label: "累计浏览排行",
+    component: "all_time",
+    permission: "content:read",
+    icon: "eye",
+    width: 3,
+  },
+  {
+    id: "core.recent",
+    label: "最近编辑",
+    component: "recent",
+    permission: "content:read",
+    icon: "edit",
+    width: 3,
+  },
+  {
+    id: "core.upcoming",
+    label: "发布排期",
+    component: "upcoming",
+    permission: "content:read",
+    icon: "calendar",
+    width: 3,
+  },
+  {
+    id: "core.security",
+    label: "安全审计",
+    component: "security",
+    permission: "users:manage",
+    icon: "shield",
+    width: 3,
+  },
+  {
+    id: "core.settings",
+    label: "配置变更",
+    component: "settings",
+    permission: "settings:read",
+    icon: "sliders",
+    width: 3,
+  },
+];
+export function defaultWorkspaceLayout(
+  cards: readonly WorkspaceCardDefinition[],
+): WorkspaceCardPlacement[] {
+  return cards
+    .filter((card) => card.defaultVisible !== false)
+    .map((card) => ({ id: card.id, width: card.width ?? 3 }));
+}

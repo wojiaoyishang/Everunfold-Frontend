@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { UiText, useLocale } from "@/core/i18n/provider";
 
 import { useId, useState } from "react";
@@ -134,9 +135,7 @@ export function ShortcodePicker({
           </p>
         )}
         {library.loading && !items.length && (
-          <p role="status">
-            <UiText text="正在读取短代码…" />
-          </p>
+          <AdminLoadingState label="正在读取短代码…" />
         )}
         {!library.loading && !library.error && !selected && (
           <p className={styles.hint}>

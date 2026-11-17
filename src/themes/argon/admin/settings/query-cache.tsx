@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useId, useState } from "react";
 import { UiText, useLocale, useT } from "@/core/i18n/provider";
@@ -247,11 +248,7 @@ export function QueryCacheSection() {
             />
           </p>
         )}
-        {!report && loading && (
-          <p role="status">
-            <UiText text="正在读取查询指标…" />
-          </p>
-        )}
+        {!report && loading && <AdminLoadingState label="正在读取查询指标…" />}
         {report?.metrics_status === "unavailable" && (
           <p role="status" className="admin-settings-message is-error">
             <UiText text="指标存储暂不可用。" />

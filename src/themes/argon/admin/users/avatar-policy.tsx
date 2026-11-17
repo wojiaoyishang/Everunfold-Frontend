@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useEffect, useState } from "react";
 import { readAvatarPolicy, saveAvatarPolicy } from "@/core/contracts/accounts";
 import type {
@@ -156,11 +157,7 @@ export function AvatarPolicyEditor({ onClose }: { onClose: () => void }) {
           </p>
         </Form>
       ) : (
-        !error && (
-          <p role="status">
-            <UiText text="正在读取设置…" />
-          </p>
-        )
+        !error && <AdminLoadingState label="正在读取设置…" />
       )}
       <ConfirmDialog
         open={discard}

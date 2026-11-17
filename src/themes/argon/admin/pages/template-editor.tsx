@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useEffect, useEffectEvent, useId, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -395,9 +396,7 @@ export function PageTemplateEditor({ id }: { id?: string }) {
               <UiText text="重新读取模板" />
             </Button>
           ) : (
-            <p role="status">
-              <UiText text="正在读取模板…" />
-            </p>
+            <AdminLoadingState label="正在读取模板…" />
           )}
         </section>
       )}

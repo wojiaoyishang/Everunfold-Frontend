@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useRef, useState } from "react";
 import { UiText, useT } from "@/core/i18n/provider";
@@ -102,9 +103,13 @@ function SiteDeliverySection({
           ))}
         </ul>
       ) : !error ? (
-        <p role="status">
-          <UiText text={rows ? "尚未配置前端节点。" : "正在读取发布状态…"} />
-        </p>
+        rows ? (
+          <p>
+            <UiText text="尚未配置前端节点。" />
+          </p>
+        ) : (
+          <AdminLoadingState label="正在读取发布状态…" compact />
+        )
       ) : null}
       {error && (
         <div className="admin-settings-message is-error" role="alert">
@@ -219,17 +224,15 @@ export function NodeStatusPage({ runtime }: { runtime: DeploymentSummary }) {
               <UiText text="重试" />
             </Button>
           </div>
-        ) : (
-          <p role="status">
-            <UiText
-              text={cache.nodes ? "尚未配置前端节点。" : "正在读取节点…"}
-            />
+        ) : cache.nodes ? (
+          <p>
+            <UiText text="尚未配置前端节点。" />
           </p>
+        ) : (
+          <AdminLoadingState label="正在读取节点…" compact />
         )}
         {cache.node && !state && !cache.readError && (
-          <p role="status">
-            <UiText text="正在读取缓存状态…" />
-          </p>
+          <AdminLoadingState label="正在读取缓存状态…" />
         )}
         {cache.readError && (
           <p role="alert" className="admin-settings-message is-error">

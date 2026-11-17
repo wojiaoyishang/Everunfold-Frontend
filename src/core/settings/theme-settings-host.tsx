@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import {
   createElement,
@@ -102,22 +103,14 @@ export function ThemeSettingsHost(props: ThemeSettingsProps) {
       )}
       {draft ? (
         Panel ? (
-          <Suspense
-            fallback={
-              <div className="admin-settings-loading" role="status">
-                <UiText text="正在读取主题设置…" />
-              </div>
-            }
-          >
+          <Suspense fallback={<AdminLoadingState label="正在读取主题设置…" />}>
             {createElement(Panel, props)}
           </Suspense>
         ) : (
           <ThemeUnavailable id={theme} />
         )
       ) : (
-        <div className="admin-settings-loading" role="status">
-          <UiText text="正在读取主题设置…" />
-        </div>
+        <AdminLoadingState label="正在读取主题设置…" />
       )}
     </SettingsFrame>
   );

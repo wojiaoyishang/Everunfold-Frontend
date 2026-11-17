@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { UiText } from "@/core/i18n/provider";
 
 import type {
@@ -146,11 +147,7 @@ export function VersionCatalog({
               </Button>
             </div>
           ))}
-          {!catalog && (
-            <p role="status">
-              <UiText text="正在读取历史版本…" />
-            </p>
-          )}
+          {!catalog && <AdminLoadingState label="正在读取历史版本…" />}
           {pager(pages.page, catalog?.total ?? 0, (page) =>
             setPages({ ...pages, page }),
           )}

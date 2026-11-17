@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useState } from "react";
 import type { InstalledPlugin } from "@/core/contracts/settings";
 import { PluginDetails } from "./plugin-details";
@@ -200,11 +201,7 @@ export function PluginsSettingsPage() {
             <UiText text={deployed.error} />
           </p>
         )}
-        {deployed.loading && (
-          <p role="status">
-            <UiText text="正在读取部署清单…" />
-          </p>
-        )}
+        {deployed.loading && <AdminLoadingState label="正在读取部署清单…" />}
         {!deployed.loading && !ids.length && (
           <p>
             <UiText text="还没有已登记的插件。" />

@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useId } from "react";
 import { UiText, useT } from "@/core/i18n/provider";
 import { useCaptchaSettings } from "@/core/captcha/use-settings";
@@ -52,9 +53,7 @@ export function CaptchaSettingsPanel() {
     <>
       <UnsavedAccountChanges dirty={editor.dirty} busy={editor.busy} />
       {editor.loading ? (
-        <p role="status">
-          <UiText text="正在读取设置…" />
-        </p>
+        <AdminLoadingState label="正在读取设置…" />
       ) : (
         draft &&
         saved && (

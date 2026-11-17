@@ -26,11 +26,13 @@ import { RegisteredFontsProvider } from "@/core/fonts/provider";
 
 const assetURL = (plugin: PublicPluginPackage, file: string) =>
   `/__plugins/${plugin.surface === "admin" ? "admin/" : ""}assets/${encodeURIComponent(plugin.directory)}/${encodeURIComponent(file)}`;
+import type { RegisteredWorkspaceCard } from "@/core/workspace/types";
 interface Loaded {
   build: string;
   components: Record<string, React.ComponentType<Record<string, unknown>>>;
   plugin: FrontendPlugin;
   fieldHooks: ReturnType<typeof createPluginRegistry>["adminFormFieldHooks"];
+  workspaceCards: readonly RegisteredWorkspaceCard[];
   adminPages: readonly RegisteredPluginAdminPage[];
   adminMenuGroups: readonly RegisteredPluginAdminMenuGroup[];
   dispose: () => void;
@@ -95,6 +97,7 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
     components: RuntimeComponents;
     loading: boolean;
     fieldHooks: ReturnType<typeof createPluginRegistry>["adminFormFieldHooks"];
+    workspaceCards: readonly RegisteredWorkspaceCard[];
     adminPages: readonly RegisteredPluginAdminPage[];
     adminMenuGroups: readonly RegisteredPluginAdminMenuGroup[];
   }>({
@@ -102,6 +105,7 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
     components: new Map(),
     loading: true,
     fieldHooks: [],
+    workspaceCards: [],
     adminPages: [],
     adminMenuGroups: [],
   });
@@ -241,6 +245,7 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
           components,
           plugin: declaration,
           fieldHooks: registry?.adminFormFieldHooks ?? [],
+          workspaceCards: registry?.workspaceCards ?? [],
           adminPages: registry?.adminPages ?? [],
           adminMenuGroups: registry?.adminMenuGroups ?? [],
           dispose,
@@ -270,6 +275,9 @@ function usePackageRuntime(initial: RuntimeCatalog | null, surface?: "admin") {
         components,
         loading: false,
         fieldHooks,
+        workspaceCards: [...next.values()].flatMap((item) =>
+          item.workspaceCards.filter((card) => item.components[card.component]),
+        ),
         adminPages: [...next.values()].flatMap((item) =>
           item.adminPages.filter((page) => item.components[page.component]),
         ),

@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[工作台卡片与统计](decisions/0178-workspace-cards-and-shared-loading.md)及[插件和共享加载指南](development/workspace-cards.md)说明自由布局、鉴权统计、统一动画和排序。
+
 [阅读字体、页脚与媒体选择器](decisions/0177-public-typography-footer-and-media-picker.md)记录浏览器和主题字号偏好、页脚 HTML 与媒体分页置顶。
 
 [术语短代码与插入表单](decisions/0176-glossary-shortcodes-and-insert-editors.md)和[完整调用规范](development/shortcode-authoring.md)记录三种术语弹窗内容及前端控件注册方式。

@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useId, useMemo, useState, type FormEvent } from "react";
 import type {
@@ -247,9 +248,7 @@ export function MailProfilesPanel({ editor }: { editor: Editor }) {
       </header>
 
       {editor.loading && !editor.draft ? (
-        <div className="admin-settings-loading" role="status">
-          <UiText text="正在读取邮件配置…" />
-        </div>
+        <AdminLoadingState label="正在读取邮件配置…" />
       ) : (
         <>
           {editor.error && (

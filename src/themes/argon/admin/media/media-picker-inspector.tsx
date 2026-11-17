@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { UiText } from "@/core/i18n/provider";
 
 import { useMediaAttachment } from "@/core/media/media-attachment";
@@ -89,11 +90,7 @@ export function MediaPickerInspector({ item }: { item: MediaItem }) {
           </>
         )}
       </dl>
-      {attachment.loading && (
-        <p role="status">
-          <UiText text="正在读取附件资料…" />
-        </p>
-      )}
+      {attachment.loading && <AdminLoadingState label="正在读取附件资料…" />}
       {attachment.error && (
         <div role="status">
           <p>{attachment.error}</p>

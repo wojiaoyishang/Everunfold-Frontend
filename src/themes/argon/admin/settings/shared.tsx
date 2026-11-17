@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { UiText } from "@/core/i18n/provider";
 
 import { useId, type ReactNode } from "react";
@@ -229,9 +230,7 @@ export function SettingsFrame({
     <SettingsLayout fullWidth={fullWidth}>
       <AdminPageHeading title={title} description={description} />
       {editor.loading ? (
-        <div className="admin-settings-loading" role="status">
-          <UiText text="正在读取设置…" />
-        </div>
+        <AdminLoadingState label="正在读取设置…" />
       ) : !editor.draft ? (
         <div className="admin-settings-message" role="alert">
           <UiText text={editor.error} />

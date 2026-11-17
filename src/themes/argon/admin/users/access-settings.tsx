@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useId } from "react";
 
@@ -175,9 +176,7 @@ export function AccessSettingsPage() {
           </Button>
         </div>
       ) : (
-        <p role="status">
-          <UiText text="正在读取设置…" />
-        </p>
+        <AdminLoadingState label="正在读取设置…" />
       )}
       {message && (
         <p role="status" className="admin-settings-message">

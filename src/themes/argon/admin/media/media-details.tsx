@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { UiText } from "@/core/i18n/provider";
 
 import { useRef, useState } from "react";
@@ -242,9 +243,7 @@ export function MediaDetailsDialog({
                 )}
               </dl>
               {loading ? (
-                <p role="status">
-                  <UiText text="正在读取附件资料…" />
-                </p>
+                <AdminLoadingState label="正在读取附件资料…" />
               ) : (
                 draft && (
                   <div className="admin-media-metadata-fields">

@@ -2,7 +2,8 @@
 
 import type { ArticleDisplayPreferences } from "@/core/contracts/settings";
 import { UiText, useT } from "@/core/i18n/provider";
-import { Button, TextField } from "../../components/ui/primitives";
+import { TextField } from "../../components/ui/primitives";
+import { ReorderList } from "../../components/ui/reorder-list";
 import { Select } from "../../components/ui/select";
 import { SettingsText, SettingsToggle } from "./shared";
 
@@ -43,12 +44,6 @@ export function ArticlePresentationSettings({
       .filter((key) => !value.meta_order.includes(key)),
   ];
   const labels = Object.fromEntries(articleMeta);
-  const move = (index: number, offset: number) => {
-    const target = index + offset;
-    const next = [...order];
-    [next[index], next[target]] = [next[target]!, next[index]!];
-    onChange({ meta_order: next });
-  };
   return (
     <>
       <SettingsToggle
@@ -65,31 +60,11 @@ export function ArticlePresentationSettings({
         <p>
           <UiText text="文章信息顺序" />
         </p>
-        <ol className="admin-settings-list-editor">
-          {order.map((key, index) => (
-            <li className="admin-settings-list-row" key={key}>
-              <span>
-                <UiText text={labels[key] ?? key} />
-              </span>
-              <Button
-                className="admin-button"
-                disabled={index === 0}
-                aria-label={t("上移") + " " + t(labels[key] ?? key)}
-                onClick={() => move(index, -1)}
-              >
-                <UiText text="上移" />
-              </Button>
-              <Button
-                className="admin-button"
-                disabled={index === order.length - 1}
-                aria-label={t("下移") + " " + t(labels[key] ?? key)}
-                onClick={() => move(index, 1)}
-              >
-                <UiText text="下移" />
-              </Button>
-            </li>
-          ))}
-        </ol>
+        <ReorderList
+          label={t("文章信息顺序")}
+          items={order.map((id) => ({ id, label: t(labels[id] ?? id) }))}
+          onChange={(meta_order) => onChange({ meta_order })}
+        />
       </div>
       <div className="admin-settings-two-col">
         <div className="admin-settings-field">

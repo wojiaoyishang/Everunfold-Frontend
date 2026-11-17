@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "../components/loading-state";
 
 import { UiText, useT } from "@/core/i18n/provider";
 import { useNotificationInbox } from "@/core/notifications/use-notifications";
@@ -97,12 +98,16 @@ export function NotificationCenter({
               </Button>
             </div>
           ) : !inbox?.items.length ? (
-            <div className={styles.centerState} data-kind="empty">
-              <Icon name={loading ? "refresh" : "bell"} />
-              <span>
-                <UiText text={loading ? "正在读取通知…" : "暂时没有通知"} />
-              </span>
-            </div>
+            loading ? (
+              <AdminLoadingState label="正在读取通知…" compact />
+            ) : (
+              <div className={styles.centerState} data-kind="empty">
+                <Icon name="bell" />
+                <span>
+                  <UiText text="暂时没有通知" />
+                </span>
+              </div>
+            )
           ) : (
             <div className={styles.centerList}>
               {inbox.items.map((item) => {

@@ -27,6 +27,11 @@ import type {
   RegisteredPluginShortcode,
 } from "./types";
 
+import type {
+  RegisteredWorkspaceCard,
+  WorkspaceCardDefinition,
+} from "@/core/workspace/types";
+
 const identity = /^[a-z][a-z0-9-]*(?:\.[a-z][a-z0-9-]*)+$/;
 const uuid = /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/;
 const version = /^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/;
@@ -47,6 +52,7 @@ export function createPluginRegistry(
   const builderComponents = new Map<string, BuilderComponentDefinition>();
   const adminFormFieldHooks: RegisteredAdminFormFieldHook[] = [];
   const adminPages: RegisteredPluginAdminPage[] = [];
+  const workspaceCards: RegisteredWorkspaceCard[] = [];
   const adminMenuGroups: RegisteredPluginAdminMenuGroup[] = [];
   for (const plugin of plugins) {
     if (
@@ -68,6 +74,7 @@ export function createPluginRegistry(
     const ownBuilderComponents: BuilderComponentDefinition[] = [];
     const ownShortcodes: RegisteredPluginShortcode[] = [];
     const ownFieldHooks = new Map<string, RegisteredAdminFormFieldHook>();
+    const ownWorkspaceCards = new Map<string, RegisteredWorkspaceCard>();
     const ownAdminPages = new Map<string, RegisteredPluginAdminPage>();
     const ownAdminGroups = new Map<string, RegisteredPluginAdminMenuGroup>();
     const assertAdminRegistration = (
@@ -205,6 +212,28 @@ export function createPluginRegistry(
               );
             },
           }),
+          workspaceCards: Object.freeze({
+            register(card: WorkspaceCardDefinition) {
+              if (
+                !collecting ||
+                plugin.surface !== "admin" ||
+                !card.id?.startsWith(plugin.id + ".") ||
+                !/^[a-z][a-z0-9_.:-]{1,159}$/.test(card.id) ||
+                !card.label?.trim() ||
+                card.label.length > 120 ||
+                !card.permission?.trim() ||
+                !card.component?.trim() ||
+                (card.width !== undefined &&
+                  ![1, 2, 3, 6].includes(card.width)) ||
+                ownWorkspaceCards.has(card.id)
+              )
+                throw new Error(`Invalid workspace card: ${plugin.id}`);
+              ownWorkspaceCards.set(
+                card.id,
+                Object.freeze({ ...card, pluginId: plugin.id }),
+              );
+            },
+          }),
           builder: Object.freeze({
             register(definition: BuilderComponentDefinition) {
               if (!collecting)
@@ -300,6 +329,13 @@ export function createPluginRegistry(
       adminPages.push(page);
     }
     adminMenuGroups.push(...ownAdminGroups.values());
+    for (const card of ownWorkspaceCards.values()) {
+      if (components.get(card.component) !== plugin.id)
+        throw new Error(
+          `Workspace renderer must be registered by its plugin: ${card.id}`,
+        );
+      workspaceCards.push(card);
+    }
     for (const definition of ownBuilderComponents) {
       if (
         definition.component &&
@@ -333,6 +369,7 @@ export function createPluginRegistry(
       adminFormFieldHooks.sort(compareAdminFormFieldHooks),
     ),
     adminPages: Object.freeze(adminPages),
+    workspaceCards: Object.freeze(workspaceCards),
     adminMenuGroups: Object.freeze(adminMenuGroups),
     shortcodes,
     pages: Object.freeze(pages),

@@ -1947,3 +1947,11 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0177-public-typography-footer-and-media-picker.md` | `ADR0177-1` | `ec44c67da22d77fad1a763ae8d152b3bc354c619c20cc544c60a4ff57bf55dcb` |
+
+## 工作台卡片与共享加载
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0178-workspace-cards-and-shared-loading.md` | `ADR0178-1` | `412102c0ac7d57fc19779d6afda4018f4bcafd83cd4499624dd20bb165e290e6` |
+| `docs/development/workspace-cards.md` | `workspace-cards-1` | `716c6acf3b998b1455e1b61cc9a9453249d37442822f06546aab29149df12160` |
+| `docs/development/frontend-plugins.md` | `frontend-plugins-14` | `a3ec0b0384a05318ff512bd5ea36712bdc72b82493b5cff8816ccf8c7a72ba8d` |

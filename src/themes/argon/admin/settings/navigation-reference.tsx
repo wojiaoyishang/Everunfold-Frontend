@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useEffect, useState } from "react";
 import type {
   NavigationReference,
@@ -57,11 +58,7 @@ export function NavigationReferenceField({
           <small>{current.resource.path}</small>
         </div>
       )}
-      {!current && (
-        <p role="status" className="admin-settings-hint">
-          <UiText text="正在读取内容…" />
-        </p>
-      )}
+      {!current && <AdminLoadingState label="正在读取内容…" />}
       {current?.error && <p role="alert">{current.error}</p>}
       {current && !current.error && !current.resource && (
         <p className="admin-settings-hint">

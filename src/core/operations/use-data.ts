@@ -4,6 +4,8 @@ import { useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure } from "@/core/accounts/use-action";
 import {
   queryComments,
+  queryWorkspaceAnalytics,
+  type WorkspaceAnalytics,
   readWorkspace,
   type CommentQuery,
   type ModerationCatalog,
@@ -42,7 +44,7 @@ function useOperationalQuery<T>(
       active.current?.abort();
     };
   }, [refresh]);
-  return { data, loading, error, refresh };
+  return { data, loading, error, refresh, setData };
 }
 export function useWorkspace() {
   const { baseUrl } = useAdminRequest();
@@ -60,4 +62,14 @@ export function useModeration(query: CommentQuery) {
     [baseUrl, csrfToken, query],
   );
   return useOperationalQuery<ModerationCatalog>(load);
+}
+
+export function useWorkspaceAnalytics(days: 7 | 30 | 90) {
+  const { baseUrl, csrfToken } = useAdminRequest();
+  const load = useCallback(
+    (signal: AbortSignal) =>
+      queryWorkspaceAnalytics(baseUrl, { days }, csrfToken, { signal }),
+    [baseUrl, csrfToken, days],
+  );
+  return useOperationalQuery<WorkspaceAnalytics>(load);
 }

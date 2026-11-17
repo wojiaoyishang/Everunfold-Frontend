@@ -1,5 +1,6 @@
 /** Public SDK exports used by the independent compiler's runtime bridge. */
 export const SDK_CLIENT_EXPORTS = [
+  "AdminLoadingState",
   "Button",
   "TextField",
   "TextArea",
@@ -10,6 +11,7 @@ export const SDK_CLIENT_EXPORTS = [
   "Avatar",
   "Icon",
   "AppLink",
+  "RouteLink",
   "Pagination",
   "PublicDate",
   "Select",

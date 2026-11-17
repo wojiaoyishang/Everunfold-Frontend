@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useContext, type ComponentType } from "react";
+import type { RegisteredWorkspaceCard } from "@/core/workspace/types";
 import type { RuntimeCatalog } from "./types";
 import type { RegisteredAdminFormFieldHook } from "@/core/forms/admin-field-types";
 import type {
@@ -23,6 +24,7 @@ export const AdminPluginRuntimeContext = createContext<{
   components: RuntimeComponents;
   loading: boolean;
   fieldHooks: readonly RegisteredAdminFormFieldHook[];
+  workspaceCards: readonly RegisteredWorkspaceCard[];
   adminPages: readonly RegisteredPluginAdminPage[];
   adminMenuGroups: readonly RegisteredPluginAdminMenuGroup[];
 }>({
@@ -30,6 +32,7 @@ export const AdminPluginRuntimeContext = createContext<{
   components: new Map(),
   loading: false,
   fieldHooks: [],
+  workspaceCards: [],
   adminPages: [],
   adminMenuGroups: [],
 });

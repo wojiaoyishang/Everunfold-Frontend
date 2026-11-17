@@ -1,3 +1,4 @@
+import type { WorkspaceCardDefinition } from "@/core/workspace/types";
 import type { Content } from "@/core/content/types";
 import type { MediaItem, PublicShortcode } from "@/core/contracts/settings";
 import type { CustomPageDefinition } from "@/core/pages/registration";
@@ -60,6 +61,7 @@ export interface FrontendPlugin {
     fonts: { register: (font: FontDefinition) => void };
     builder: { register: (definition: BuilderComponentDefinition) => void };
     formFields: { register: (hook: AdminFormFieldHook) => void };
+    workspaceCards: { register: (card: WorkspaceCardDefinition) => void };
     adminPages: {
       register: (page: PluginAdminPage) => void;
       registerGroup: (group: PluginAdminMenuGroup) => void;

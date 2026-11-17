@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { useEffect, useState } from "react";
 import type {
   PermissionCatalog,
@@ -161,11 +162,7 @@ export function UserPresetsPage() {
               </p>
             )
           ) : (
-            !error && (
-              <p role="status">
-                <UiText text="正在读取身份预设…" />
-              </p>
-            )
+            !error && <AdminLoadingState label="正在读取身份预设…" />
           )}
         </div>
       </div>

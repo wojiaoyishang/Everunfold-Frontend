@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useMemo, useState } from "react";
 import type {
@@ -200,9 +201,7 @@ export function NotificationDeliveriesPage() {
         </Button>
       </div>
       {editor.loading && !editor.state ? (
-        <div className="admin-settings-loading" role="status">
-          <UiText text="正在读取投递记录…" />
-        </div>
+        <AdminLoadingState label="正在读取投递记录…" />
       ) : deliveries.length ? (
         <div className={styles.deliveryList}>
           {deliveries.map((delivery) => (

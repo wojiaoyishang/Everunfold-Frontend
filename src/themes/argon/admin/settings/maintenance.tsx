@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useEffect, useEffectEvent, useId, useState } from "react";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
@@ -118,9 +119,7 @@ function MaintenanceHealthSection() {
         </p>
       )}
       {!health && !action.message && (
-        <p className={styles.muted} role="status">
-          <UiText text="正在读取站点健康状态…" />
-        </p>
+        <AdminLoadingState label="正在读取站点健康状态…" />
       )}
       {health && (
         <>
@@ -242,9 +241,7 @@ function MaintenanceData() {
           </p>
         )}
         {!receipts && !action.message && (
-          <p className={styles.muted} role="status">
-            <UiText text="正在读取导入记录…" />
-          </p>
+          <AdminLoadingState label="正在读取导入记录…" />
         )}
         {receipts?.length === 0 && (
           <p className={styles.muted}>

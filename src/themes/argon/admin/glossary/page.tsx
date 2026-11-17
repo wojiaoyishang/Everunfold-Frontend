@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
@@ -531,9 +532,7 @@ export function GlossaryAdminPage() {
             {loading && !catalog ? (
               <div className="admin-draft-empty" role="status">
                 <Icon name="refresh" className="admin-draft-spin" />
-                <p>
-                  <UiText text="正在读取术语…" />
-                </p>
+                <AdminLoadingState label="正在读取术语…" />
               </div>
             ) : null}
             {!loading && items.length === 0 ? (

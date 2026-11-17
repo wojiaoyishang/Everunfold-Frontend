@@ -1,4 +1,5 @@
 "use client";
+import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 
 import { useEffect, useId, useState } from "react";
 import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
@@ -150,9 +151,7 @@ export function DiscussionPage() {
           </Button>
         </div>
       ) : !draft ? (
-        <div className="admin-settings-loading" role="status">
-          <UiText text="正在读取设置…" />
-        </div>
+        <AdminLoadingState label="正在读取设置…" />
       ) : (
         <Form
           onSubmit={(event) => {
