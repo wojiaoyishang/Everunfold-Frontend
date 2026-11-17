@@ -1,7 +1,7 @@
 "use client";
 import { UiText, useT } from "@/core/i18n/provider";
 
-import { useId, useState, type ComponentType, type ReactNode } from "react";
+import { useState, type ComponentType } from "react";
 import type {
   ContentTypeDefinition,
   DraftFields,
@@ -25,6 +25,8 @@ import {
 import { SeoFieldsEditor } from "../components/seo-fields";
 import { AuthoredCssField } from "../components/authored-css-field";
 import { CaptchaOverrides } from "../components/captcha-overrides";
+import { ContentCacheCard } from "../components/content-cache-card";
+import { EditorPanel as Panel } from "../components/editor-panel";
 import { CategorySelector, type CreateCategory } from "./category-selector";
 import { TagSelector } from "./tag-selector";
 import { Icon } from "../../components/icon";
@@ -36,41 +38,6 @@ import {
   type PublicationScheduleProps,
 } from "./publication-schedule";
 
-function Panel({
-  title,
-  children,
-  initialOpen = true,
-}: {
-  title: string;
-  children: ReactNode;
-  initialOpen?: boolean;
-}) {
-  const id = useId();
-  const [open, setOpen] = useState(initialOpen);
-  return (
-    <section className={styles.panel}>
-      <Button
-        className={styles.panelHeading}
-        aria-expanded={open}
-        aria-controls={id}
-        onClick={() => setOpen(!open)}
-      >
-        <UiText text={title} />
-        <Icon name="chevron" />
-      </Button>
-      <div
-        id={id}
-        className={styles.panelReveal}
-        data-open={open}
-        inert={!open}
-      >
-        <div>
-          <div className={styles.panelBody}>{children}</div>
-        </div>
-      </div>
-    </section>
-  );
-}
 interface PanelProps {
   type: ContentTypeDefinition;
   authoringLanguage?: string;
@@ -645,14 +612,21 @@ export function EditorPanels({
           ) : null;
         })}
       {(props.type.id === "article" || props.type.id === "shuoshuo") && (
-        <Panel title="额外 CSS" initialOpen={false}>
-          <AuthoredCssField
-            label="额外 CSS"
-            value={settings.extra_css}
-            disabled={props.disabled}
-            onChange={(extra_css) => update({ extra_css })}
+        <>
+          <Panel title="额外 CSS" initialOpen={false}>
+            <AuthoredCssField
+              label="额外 CSS"
+              value={settings.extra_css}
+              disabled={props.disabled}
+              onChange={(extra_css) => update({ extra_css })}
+            />
+          </Panel>
+          <ContentCacheCard
+            id={props.detail?.id}
+            kind={props.type.id}
+            revision={props.detail?.published_revision}
           />
-        </Panel>
+        </>
       )}
     </aside>
   );

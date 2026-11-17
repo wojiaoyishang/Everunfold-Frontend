@@ -72,6 +72,7 @@ import { usePageAction } from "./feedback";
 
 import { PageEditOptions } from "./edit-mode";
 import { PageSettings, PageSettingsGroup } from "./page-settings";
+import { ContentCacheCard } from "../components/content-cache-card";
 
 const emptyDocument = { version: 1 as const, nodes: [] };
 
@@ -813,21 +814,31 @@ export function ManagedPageEditor({
                     )
                   }
                   extra={
-                    compact &&
-                    templateId && (
-                      <PageSettingsGroup
-                        title="自定义页面模板"
-                        initiallyOpen={false}
-                      >
-                        <RouteLink
-                          className="admin-button"
-                          href={`/admin/pages/templates/${templateId}`}
+                    <>
+                      {compact && templateId && (
+                        <PageSettingsGroup
+                          title="自定义页面模板"
+                          initiallyOpen={false}
                         >
-                          <Icon name="code" />
-                          <UiText text={write ? "编辑模板" : "查看模板"} />
-                        </RouteLink>
-                      </PageSettingsGroup>
-                    )
+                          <RouteLink
+                            className="admin-button"
+                            href={`/admin/pages/templates/${templateId}`}
+                          >
+                            <Icon name="code" />
+                            <UiText text={write ? "编辑模板" : "查看模板"} />
+                          </RouteLink>
+                        </PageSettingsGroup>
+                      )}
+                      <ContentCacheCard
+                        id={saved?.id}
+                        kind="page"
+                        revision={
+                          saved
+                            ? `${saved.applied_revision}:${saved.enabled}`
+                            : null
+                        }
+                      />
+                    </>
                   }
                 />
               </fieldset>

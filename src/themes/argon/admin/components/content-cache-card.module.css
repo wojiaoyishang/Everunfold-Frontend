@@ -1,0 +1,72 @@
+.card,
+.actions {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.header,
+.node {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.header {
+  font-weight: 600;
+}
+
+.header button {
+  padding: 5px;
+  min-height: 28px;
+}
+
+.nodes {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nodes li {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--admin-radius, 8px);
+  background: var(--admin-subtle);
+}
+
+.nodeId {
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.state,
+.nodes time,
+.card p {
+  color: var(--admin-muted);
+}
+
+.state {
+  flex-shrink: 0;
+}
+
+.state[data-state="applied"] {
+  color: var(--admin-accent);
+}
+
+.nodes time {
+  font-size: 0.85em;
+}
+
+.card p {
+  margin: 0;
+}
+
+.actions button {
+  justify-content: flex-start;
+  white-space: normal;
+  text-align: start;
+}
