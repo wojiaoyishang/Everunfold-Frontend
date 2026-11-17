@@ -6,6 +6,7 @@ import type {
   VersionSelection,
 } from "@/core/content-management/use-draft-versions";
 import { Button } from "../../components/ui/primitives";
+import { AdminPagination } from "../components/admin-pagination";
 import styles from "./versions.module.css";
 
 export type VersionTab = "version" | "branch" | "merge";
@@ -62,25 +63,13 @@ export function VersionCatalog({
     onChange: (value: number) => void,
   ) =>
     total > 20 && (
-      <div className={styles.pager}>
-        <Button
-          className="admin-button"
-          disabled={working || page <= 1}
-          onClick={() => onChange(page - 1)}
-        >
-          <UiText text="上一页" />
-        </Button>
-        <span>
-          {page} / {Math.ceil(total / 20)}
-        </span>
-        <Button
-          className="admin-button"
-          disabled={working || page * 20 >= total}
-          onClick={() => onChange(page + 1)}
-        >
-          <UiText text="下一页" />
-        </Button>
-      </div>
+      <AdminPagination
+        className={styles.pager}
+        page={page}
+        pages={Math.ceil(total / 20)}
+        disabled={working}
+        onChange={onChange}
+      />
     );
   return (
     <aside className={styles.catalog} aria-label="版本目录">

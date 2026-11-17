@@ -1,0 +1,54 @@
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+}
+
+.numbers {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.number {
+  min-inline-size: max(29px, var(--admin-touch-target, 0px));
+  min-block-size: max(30px, var(--admin-touch-target, 0px));
+  padding: 2px 5px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--admin-text);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    color var(--admin-motion-fast),
+    background var(--admin-motion-fast);
+}
+
+.number:hover:not([aria-disabled="true"]) {
+  background: var(--admin-subtle);
+  color: var(--admin-accent);
+}
+
+.number[aria-disabled="true"] {
+  cursor: default;
+  color: var(--admin-muted);
+}
+
+.number[aria-current="page"] {
+  background: var(--admin-accent-soft);
+  color: var(--admin-accent);
+  font-weight: 600;
+}
+
+.ellipsis {
+  padding-inline: 3px;
+  color: var(--admin-muted);
+}

@@ -11,6 +11,7 @@ import { useDraftCatalog } from "@/core/content-management/use-draft-catalog";
 import { Button, Form, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
+import { AdminPagination } from "../components/admin-pagination";
 import { RouteLink } from "../../components/ui/route-link";
 import { BatchEditor } from "./batch-editor";
 import { Checkbox } from "../../components/ui/checkbox";
@@ -347,29 +348,12 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
               </>
             )}
           </span>
-          <div>
-            <Button
-              className="admin-icon-button"
-              aria-label="上一页"
-              disabled={catalog.page <= 1 || catalog.loading}
-              onClick={() => catalog.setPage(catalog.page - 1)}
-            >
-              <Icon name="arrow-left" />
-            </Button>
-            <span>
-              {catalog.page} / {Math.max(1, Math.ceil((data?.total ?? 0) / 12))}
-            </span>
-            <Button
-              className="admin-icon-button"
-              aria-label="下一页"
-              disabled={
-                !data || catalog.page * 12 >= data.total || catalog.loading
-              }
-              onClick={() => catalog.setPage(catalog.page + 1)}
-            >
-              <Icon name="arrow" />
-            </Button>
-          </div>
+          <AdminPagination
+            page={catalog.page}
+            pages={Math.max(1, Math.ceil((data?.total ?? 0) / 12))}
+            disabled={catalog.loading}
+            onChange={catalog.setPage}
+          />
         </footer>
       </section>
       {(user.role === "admin" ||

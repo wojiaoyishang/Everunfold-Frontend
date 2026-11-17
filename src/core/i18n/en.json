@@ -747,6 +747,7 @@
   "书籍目录": "Contents",
   "{count} 篇文章": "{count} articles",
   "第 {page} 页": "Page {page}",
+  "分页": "Pagination",
   "选择文章分类后预览目录。": "Choose a category to preview its contents.",
   "书中暂时没有文章。": "There are no articles in this book yet.",
   "书籍分页": "Book pagination",

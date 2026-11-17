@@ -1923,3 +1923,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0173-node-recovery-and-article-views.md` | `ADR0173-1` | `37fac45634a7dd284aa960ed2aa2aeb1d8f825ed4fbf9aff2994f8733bd9d716` |
+
+## 记住文章解锁与列表导航
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0174-remembered-reading-and-pagination.md` | `ADR0174-1` | `0b189cc3da9919eb05fc8e0b37aaa591752f65672257358e5d7ef620bf061853` |

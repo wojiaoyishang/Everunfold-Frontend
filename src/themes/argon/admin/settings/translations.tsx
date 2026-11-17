@@ -1,4 +1,5 @@
 "use client";
+import { AdminPagination } from "../components/admin-pagination";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -1011,29 +1012,12 @@ export function TranslationSettingsPage() {
                     onOpen={openDetail}
                   />
                 )}
-                <div className={styles.pagination}>
-                  <Button
-                    className="admin-button"
-                    disabled={currentPage === 0}
-                    onClick={() => setPage((value) => Math.max(0, value - 1))}
-                  >
-                    <Icon name="chevron-left" />
-                    <UiText text="上一页" />
-                  </Button>
-                  <span>
-                    {currentPage + 1} / {pageCount}
-                  </span>
-                  <Button
-                    className="admin-button"
-                    disabled={currentPage + 1 >= pageCount}
-                    onClick={() =>
-                      setPage((value) => Math.min(pageCount - 1, value + 1))
-                    }
-                  >
-                    <UiText text="下一页" />
-                    <Icon name="chevron" />
-                  </Button>
-                </div>
+                <AdminPagination
+                  className={styles.pagination}
+                  page={currentPage + 1}
+                  pages={pageCount}
+                  onChange={(page) => setPage(page - 1)}
+                />
               </div>
             </SettingsSection>
           )}

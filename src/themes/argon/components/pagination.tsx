@@ -1,5 +1,6 @@
 import { AppLink as Link } from "./navigation-link";
 import { Icon } from "./icon";
+import { pageNumbers } from "@/core/navigation/page-numbers";
 
 function href(
   pathname: string,
@@ -37,9 +38,7 @@ export function Pagination({
   localize?: boolean;
 }) {
   if (pages <= 1 && page === 1) return null;
-  const visible = [...new Set([1, page - 1, page, page + 1, pages])]
-    .filter((number) => number >= 1 && number <= pages)
-    .sort((a, b) => a - b);
+  const visible = pageNumbers(page, pages);
   return (
     <nav className="pagination" aria-label={label}>
       {page > 1 && (

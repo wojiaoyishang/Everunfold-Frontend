@@ -11,8 +11,18 @@
 
 .value {
   min-inline-size: 0;
-  color: var(--admin-accent);
   overflow-wrap: anywhere;
+}
+
+.link {
+  color: var(--admin-accent);
+  cursor: pointer;
+  text-decoration: none;
+  text-underline-offset: 0.18em;
+}
+
+.link:is(:hover, :focus-visible) {
+  text-decoration: underline;
 }
 
 .action {

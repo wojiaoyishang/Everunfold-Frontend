@@ -9,6 +9,7 @@ import { Button, Form, TextField } from "../../components/ui/primitives";
 import { AdminPageHeading } from "../components/page-heading";
 import { Icon } from "../../components/icon";
 import { AdminActionButton } from "../components/action-button";
+import { AdminPagination } from "../components/admin-pagination";
 import { TaxonomyDialog } from "./term-dialog";
 import { AdminTagCloud } from "./tag-cloud";
 import styles from "./taxonomy.module.css";
@@ -229,28 +230,12 @@ export function TaxonomiesPage() {
             {catalog.data?.total ?? 0} <UiText text="项" />
           </span>
           {!cloudView && (
-            <div className={styles.actions}>
-              <AdminActionButton
-                icon="arrow-left"
-                disabled={page <= 1 || catalog.loading}
-                onClick={() => setPage(page - 1)}
-              >
-                <UiText text="上一页" />
-              </AdminActionButton>
-              <span>
-                {page} /{" "}
-                {Math.max(1, Math.ceil((catalog.data?.total ?? 0) / 20))}
-              </span>
-              <AdminActionButton
-                icon="arrow"
-                disabled={
-                  page * 20 >= (catalog.data?.total ?? 0) || catalog.loading
-                }
-                onClick={() => setPage(page + 1)}
-              >
-                <UiText text="下一页" />
-              </AdminActionButton>
-            </div>
+            <AdminPagination
+              page={page}
+              pages={Math.max(1, Math.ceil((catalog.data?.total ?? 0) / 20))}
+              disabled={catalog.loading}
+              onChange={setPage}
+            />
           )}
         </footer>
       </section>

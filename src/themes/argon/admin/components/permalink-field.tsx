@@ -2,8 +2,9 @@
 
 import { useId, useRef, useState, type ReactNode } from "react";
 import { UiText, useT } from "@/core/i18n/provider";
+import { publicHref } from "@/core/content/urls";
 import { Icon } from "../../components/icon";
-import { Button, TextField } from "../../components/ui/primitives";
+import { Button, TextField, TextLink } from "../../components/ui/primitives";
 import styles from "./permalink-field.module.css";
 
 export function PermalinkField({
@@ -38,6 +39,7 @@ export function PermalinkField({
     inputError ||
     (input === null || input.trim() === value ? error : undefined);
   const label = t("编辑固定链接");
+  const href = publicHref(displayValue);
 
   const close = () => {
     setInput(null);
@@ -63,9 +65,20 @@ export function PermalinkField({
       </span>
       {input === null ? (
         <>
-          <span className={styles.value}>
-            {displayValue || <UiText text={emptyLabel} />}
-          </span>
+          {href?.startsWith("/") ? (
+            <TextLink
+              className={`${styles.value} ${styles.link}`}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {displayValue}
+            </TextLink>
+          ) : (
+            <span className={styles.value}>
+              {displayValue || <UiText text={emptyLabel} />}
+            </span>
+          )}
           <Button
             ref={editButton}
             className={styles.action}

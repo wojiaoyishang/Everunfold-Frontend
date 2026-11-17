@@ -177,28 +177,17 @@
   padding: 48px 20px;
   color: var(--admin-muted);
 }
-.pagination,
-.pagination div {
+.pagination {
   display: flex;
   align-items: center;
   gap: 14px;
-}
-.pagination {
   justify-content: space-between;
   flex-wrap: wrap;
   padding: 18px 24px;
   color: var(--admin-muted);
   font-size: 13px;
 }
-.pageCount {
-  flex-shrink: 0;
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
 @media (max-width: 600px) {
-  .paginationLabel {
-    display: none;
-  }
   .filters,
   .bulk,
   .row,

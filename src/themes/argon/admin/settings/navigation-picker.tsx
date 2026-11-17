@@ -1,4 +1,5 @@
 "use client";
+import { AdminPagination } from "../components/admin-pagination";
 import { useEffect, useState } from "react";
 import type {
   NavigationReference,
@@ -145,31 +146,15 @@ export function NavigationPicker({
           <span>
             <UiText text="{count} 项" values={{ count: total }} />
           </span>
-          <Button
-            className="admin-icon-button"
-            aria-label={t("上一页")}
-            disabled={loading || page <= 1}
-            onClick={() => {
-              setPage(page - 1);
+          <AdminPagination
+            page={page}
+            pages={Math.max(1, Math.ceil(total / 20))}
+            disabled={loading}
+            onChange={(next) => {
+              setPage(next);
               setLoading(true);
             }}
-          >
-            <Icon name="arrow-left" />
-          </Button>
-          <span>
-            {page} / {Math.max(1, Math.ceil(total / 20))}
-          </span>
-          <Button
-            className="admin-icon-button"
-            aria-label={t("下一页")}
-            disabled={loading || page * 20 >= total}
-            onClick={() => {
-              setPage(page + 1);
-              setLoading(true);
-            }}
-          >
-            <Icon name="arrow" />
-          </Button>
+          />
         </div>
       </div>
     </Modal>

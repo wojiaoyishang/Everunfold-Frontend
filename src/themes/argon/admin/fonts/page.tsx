@@ -1,4 +1,5 @@
 "use client";
+import { AdminPagination } from "../components/admin-pagination";
 import { FileDropZone } from "../../components/ui/file-drop-zone";
 import { UiText } from "@/core/i18n/provider";
 
@@ -155,25 +156,13 @@ export function FontLibraryPage({
         </div>
       )}
       {library.total > 60 && (
-        <div className="admin-library-pagination">
-          <Button
-            className="admin-button"
-            disabled={library.page === 1}
-            onClick={() => library.setPage(library.page - 1)}
-          >
-            <UiText text="上一页" />
-          </Button>
-          <span>
-            {library.page} / {Math.ceil(library.total / 60)}
-          </span>
-          <Button
-            className="admin-button"
-            disabled={library.page * 60 >= library.total}
-            onClick={() => library.setPage(library.page + 1)}
-          >
-            <UiText text="下一页" />
-          </Button>
-        </div>
+        <AdminPagination
+          className="admin-library-pagination"
+          page={library.page}
+          pages={Math.ceil(library.total / 60)}
+          disabled={library.loading}
+          onChange={library.setPage}
+        />
       )}
       {selected && (
         <MediaDetailsDialog

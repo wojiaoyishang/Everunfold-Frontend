@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[记住文章解锁与列表导航](decisions/0174-remembered-reading-and-pagination.md)说明短时恢复阅读、固定链接与数字分页。
+
 [节点同步恢复与文章浏览量](decisions/0173-node-recovery-and-article-views.md)说明同步触发、缓存恢复、节点时区和浏览统计。
 
 [同步错误提示与直接翻牌](decisions/0172-sync-failure-pages-and-first-card.md)说明 503 诊断、管理员日志指引及小游戏开局方式。

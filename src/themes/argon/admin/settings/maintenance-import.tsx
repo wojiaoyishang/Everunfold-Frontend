@@ -1,4 +1,5 @@
 "use client";
+import { AdminPagination } from "../components/admin-pagination";
 
 import {
   useEffect,
@@ -132,25 +133,12 @@ function ImportPreview({ preview }: { preview: MaintenancePreview }) {
         </p>
       )}
       {pageCount > 1 && (
-        <div className={styles.actions}>
-          <Button
-            className="admin-button"
-            disabled={page === 0}
-            onClick={() => setPage(page - 1)}
-          >
-            <UiText text="上一页" />
-          </Button>
-          <span className={styles.muted} aria-live="polite">
-            {page + 1} / {pageCount}
-          </span>
-          <Button
-            className="admin-button"
-            disabled={page + 1 === pageCount}
-            onClick={() => setPage(page + 1)}
-          >
-            <UiText text="下一页" />
-          </Button>
-        </div>
+        <AdminPagination
+          className={styles.actions}
+          page={page + 1}
+          pages={pageCount}
+          onChange={(next) => setPage(next - 1)}
+        />
       )}
     </>
   );

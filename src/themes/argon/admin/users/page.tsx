@@ -1,4 +1,5 @@
 "use client";
+import { AdminPagination } from "../components/admin-pagination";
 import { useEffect, useState } from "react";
 import { readAccountUsers } from "@/core/contracts/accounts";
 import type { AccountUserList } from "@/core/contracts/accounts";
@@ -207,25 +208,13 @@ export function UsersPage() {
         {list && (
           <div className="account-actions">
             <span className="account-muted">
-              {list?.total ?? 0} <UiText text="位用户" />
+              {list.total} <UiText text="位用户" />
             </span>
-            <Button
-              className="admin-button"
-              disabled={page === 1}
-              onClick={() => setPage((value) => value - 1)}
-            >
-              <UiText text="上一页" />
-            </Button>
-            <span>
-              {page} / {Math.max(1, Math.ceil((list?.total ?? 0) / 20))}
-            </span>
-            <Button
-              className="admin-button"
-              disabled={page * 20 >= (list?.total ?? 0)}
-              onClick={() => setPage((value) => value + 1)}
-            >
-              <UiText text="下一页" />
-            </Button>
+            <AdminPagination
+              page={page}
+              pages={Math.max(1, Math.ceil(list.total / 20))}
+              onChange={setPage}
+            />
           </div>
         )}
       </section>

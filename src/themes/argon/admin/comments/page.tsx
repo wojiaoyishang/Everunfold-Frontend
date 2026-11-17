@@ -1,6 +1,7 @@
 "use client";
 import { useId, useMemo, useState } from "react";
 import { UiText, useT } from "@/core/i18n/provider";
+import { AdminPagination } from "../components/admin-pagination";
 import { can } from "@/core/accounts/permissions";
 import { useAccountAction } from "@/core/accounts/use-action";
 import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
@@ -301,41 +302,15 @@ export function CommentsPage() {
           <span>
             {state.data?.total ?? "—"} <UiText text="条评论" />
           </span>
-          <div>
-            <Button
-              className="admin-button"
-              aria-label={t("上一页")}
-              title={t("上一页")}
-              disabled={locked || page === 1}
-              onClick={() => {
-                setPage(page - 1);
-                setSelected([]);
-              }}
-            >
-              <Icon name="arrow-left" />
-              <span className={styles.paginationLabel}>
-                <UiText text="上一页" />
-              </span>
-            </Button>
-            <span className={styles.pageCount}>
-              {page} / {Math.max(1, Math.ceil((state.data?.total ?? 0) / 20))}
-            </span>
-            <Button
-              className="admin-button"
-              aria-label={t("下一页")}
-              title={t("下一页")}
-              disabled={locked || page * 20 >= (state.data?.total ?? 0)}
-              onClick={() => {
-                setPage(page + 1);
-                setSelected([]);
-              }}
-            >
-              <span className={styles.paginationLabel}>
-                <UiText text="下一页" />
-              </span>
-              <Icon name="arrow" />
-            </Button>
-          </div>
+          <AdminPagination
+            page={page}
+            pages={Math.max(1, Math.ceil((state.data?.total ?? 0) / 20))}
+            disabled={locked}
+            onChange={(next) => {
+              setPage(next);
+              setSelected([]);
+            }}
+          />
         </footer>
       </section>
       <ConfirmDialog

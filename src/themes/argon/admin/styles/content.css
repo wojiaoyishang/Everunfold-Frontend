@@ -126,16 +126,12 @@
   font-size: 11px;
 }
 .admin-draft-row-actions,
-.admin-draft-list-footer > div {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 .admin-draft-list-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  flex-wrap: wrap;
+  gap: 8px 16px;
   padding: 10px 20px;
   border-top: 1px solid var(--admin-border);
   color: var(--admin-muted);

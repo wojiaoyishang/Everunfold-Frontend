@@ -1,4 +1,5 @@
 "use client";
+import { AdminPagination } from "../components/admin-pagination";
 import { useEffect, useState } from "react";
 import type {
   AccountProfile,
@@ -184,25 +185,12 @@ export function ManagedUserSecurity({
           </p>
         )}
         {keys && keys.total > 20 && (
-          <div className="account-actions">
-            <Button
-              className="admin-button"
-              disabled={page === 1}
-              onClick={() => setPage((value) => value - 1)}
-            >
-              <UiText text="上一页" />
-            </Button>
-            <span>
-              {page} / {Math.ceil(keys.total / 20)}
-            </span>
-            <Button
-              className="admin-button"
-              disabled={page * 20 >= keys.total}
-              onClick={() => setPage((value) => value + 1)}
-            >
-              <UiText text="下一页" />
-            </Button>
-          </div>
+          <AdminPagination
+            className="account-actions"
+            page={page}
+            pages={Math.ceil(keys.total / 20)}
+            onChange={setPage}
+          />
         )}
       </section>
       <ConfirmDialog

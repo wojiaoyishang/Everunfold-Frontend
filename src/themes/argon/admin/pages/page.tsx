@@ -12,11 +12,15 @@ import { RouteLink } from "../../components/ui/route-link";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
+import { AdminPagination } from "../components/admin-pagination";
 import styles from "./pages.module.css";
 import { PageEnabledControl } from "./enabled-control";
 import { PageLanguageMenu } from "./language-menu";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { usePageAction, usePageErrorToast } from "./feedback";
+
+const pageSize = 12;
+
 export function ManagedPagesDirectory({
   initialType = "",
 }: {
@@ -29,6 +33,7 @@ export function ManagedPagesDirectory({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"active" | "trash">("active");
   const [type, setType] = useState(initialType);
+  const [page, setPage] = useState(1);
   const [refresh, setRefresh] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -66,6 +71,9 @@ export function ManagedPagesDirectory({
         .toLocaleLowerCase()
         .includes(query.toLocaleLowerCase()),
   );
+  const pages = Math.max(1, Math.ceil(rows.length / pageSize));
+  const currentPage = Math.min(page, pages);
+  const start = (currentPage - 1) * pageSize;
   return (
     <>
       <AdminPageHeading
@@ -105,7 +113,10 @@ export function ManagedPagesDirectory({
               <Button
                 key={key}
                 aria-pressed={filter === key}
-                onClick={() => setFilter(key)}
+                onClick={() => {
+                  setFilter(key);
+                  setPage(1);
+                }}
               >
                 <UiText text={label} />
               </Button>
@@ -123,7 +134,10 @@ export function ManagedPagesDirectory({
                 label: t(label),
               })),
             ]}
-            onValueChange={setType}
+            onValueChange={(value) => {
+              setType(value);
+              setPage(1);
+            }}
           />
           <RouteLink href="/admin/pages/types" className="admin-button">
             <UiText text="页面类型" />
@@ -134,7 +148,10 @@ export function ManagedPagesDirectory({
               aria-label={t("搜索页面")}
               placeholder={t("搜索标题或路径…")}
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => {
+                setQuery(event.target.value);
+                setPage(1);
+              }}
             />
             <Button
               className="admin-button"
@@ -148,7 +165,7 @@ export function ManagedPagesDirectory({
             </Button>
           </div>
         </div>
-        {rows.map((row) => (
+        {rows.slice(start, start + pageSize).map((row) => (
           <div className={styles.row} key={row.id}>
             <span className={styles.pageIcon}>
               <Icon name={row.source === "registered" ? "grid" : "code"} />
@@ -245,9 +262,19 @@ export function ManagedPagesDirectory({
             <UiText text={query ? "没有找到匹配的页面。" : "暂无页面。"} />
           </p>
         )}
-        <p className={styles.help}>
-          <UiText text="{count} 个页面" values={{ count: rows.length }} />
-        </p>
+        <footer className={styles.directoryFooter}>
+          <span className={styles.help}>
+            <UiText text="{count} 个页面" values={{ count: rows.length }} />
+          </span>
+          {pages > 1 && (
+            <AdminPagination
+              page={currentPage}
+              pages={pages}
+              disabled={loading}
+              onChange={setPage}
+            />
+          )}
+        </footer>
       </section>
       <ConfirmDialog
         open={Boolean(target)}
