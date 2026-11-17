@@ -464,11 +464,14 @@ class LauncherTests(unittest.TestCase):
         document = yaml.safe_load(path.read_text())
         document["environment"]["API_PORT" if BACKEND else "FRONTEND_PORT"] = "9201"
         document["docker"]["BACKEND_API_PORT" if BACKEND else "FRONTEND_WEB_PORT"] = "8001"
+        document["docker"]["BACKEND_BIND_ADDRESS" if BACKEND else "FRONTEND_BIND_ADDRESS"] = (
+            "2001:0db8::2"
+        )
         path.write_text(yaml.safe_dump(document))
         result, calls = self.run_action("start")
         self.assertEqual(result.returncode, 0, result.stderr)
         create = next(c for c in calls if c[0] == "create" and "--name" in c)
-        self.assertIn("0.0.0.0:3434:9201", create)
+        self.assertIn("[2001:db8::2]:3434:9201", create)
         self.assertIn("9201", (self.docker / ".env").read_text())
 
     def test_failure_stops_before_activation_or_initialization(self):

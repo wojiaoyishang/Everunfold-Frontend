@@ -246,9 +246,10 @@ def configure(native: bool = False) -> Configuration:
     )
     add(
         "publish_host",
-        "宿主映射 IP",
+        "宿主映射绑定 IP",
         compose.get("FRONTEND_BIND_ADDRESS", "127.0.0.1").strip("[]"),
-        valid=ip_address,
+        valid=lambda s: "%" not in s and ip_address(s),
+        hint="127.0.0.1 供宿主反代；0.0.0.0 绑定全部 IPv4 接口；也可填宿主具体 IPv4 或 IPv6。",
         active=lambda: not native,
         group="Docker",
     )

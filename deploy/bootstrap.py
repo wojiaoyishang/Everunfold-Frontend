@@ -1,6 +1,7 @@
 """Noninteractive setup helpers; output never contains credentials."""
 
 import argparse
+import ipaddress
 import os
 import re
 import shutil
@@ -9,6 +10,7 @@ from pathlib import Path
 
 from config_context import Context
 from config_files import update_env
+from config_validation import valid_port
 
 DOCKER = Path(__file__).resolve().parents[1] / "docker"
 ROLE = "backend" if (DOCKER.parent / "app").is_dir() else "frontend"
@@ -64,6 +66,17 @@ def paths() -> None:
     port = context.env.get("API_PORT" if ROLE == "backend" else "FRONTEND_PORT", port)
     published = values.get(prefix + "_PUBLISH_PORT", port)
     binding = values.get(prefix + "_BIND_ADDRESS", "127.0.0.1")
+    if binding.startswith("[") and binding.endswith("]"):
+        binding = binding[1:-1]
+    try:
+        address = ipaddress.ip_address(binding)
+    except ValueError:
+        raise ValueError(f"{prefix}_BIND_ADDRESS 必须是宿主机 IPv4 或 IPv6 地址。") from None
+    if "%" in binding:
+        raise ValueError(f"{prefix}_BIND_ADDRESS 不接受带网卡作用域的 IPv6 地址。")
+    if not valid_port(published) or not valid_port(port):
+        raise ValueError("宿主映射和容器监听端口须在 1 到 65535 之间。")
+    binding = f"[{address}]" if address.version == 6 else str(address)
     uid = values.get("EVERUNFOLD_UID", str(os.getuid()))
     gid = values.get("EVERUNFOLD_GID", str(os.getgid()))
     artifact = (DOCKER / values.get("FRONTEND_ARTIFACT_DIR", "output/pre-1")).resolve()
