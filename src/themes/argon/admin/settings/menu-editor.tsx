@@ -23,6 +23,8 @@ import { SettingsText } from "./shared";
 import { NavigationPicker } from "./navigation-picker";
 import { NavigationReferenceField } from "./navigation-reference";
 import { LanguageLabel } from "../../components/language-label";
+import { AuthoredCssField } from "../components/authored-css-field";
+import { componentCssLimit } from "@/core/rendering/authored-css";
 export function MenuEditor({
   value,
   iconUrls = {},
@@ -278,6 +280,19 @@ export function MenuEditor({
                 <Icon name="chevron" />
               </Button>
             </div>
+            <SettingsText
+              label="额外 CSS 类名"
+              hint="用空格分隔，例如 nav-diary featured。可用于 CSS 或 JavaScript 选择。"
+              value={item.extra_class ?? ""}
+              maxLength={240}
+              onChange={(extra_class) => patch({ extra_class })}
+            />
+            <AuthoredCssField
+              label="菜单项 CSS"
+              value={item.extra_css}
+              limit={componentCssLimit}
+              onChange={(extra_css) => patch({ extra_css })}
+            />
             <div className="admin-menu-detail-actions">
               <Button
                 className="admin-button"

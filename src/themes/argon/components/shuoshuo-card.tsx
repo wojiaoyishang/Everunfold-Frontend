@@ -16,6 +16,7 @@ import { ViewMetric } from "./reader-data";
 import { ContentEditLink } from "./content-edit-link";
 import { ContentLanguages } from "./content-languages";
 import { ArticleActions } from "./article-actions";
+import { CommentAvailability } from "./comments/availability";
 import { authoredStyle } from "./authored-style";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 
@@ -114,10 +115,12 @@ export function ShuoshuoCardView({
           <ReactionButton id={content.id} count={content.reaction_count} />
           {!example && <ViewMetric contentId={content.id} record={detail} />}
           {!detail && content.comments_open && (
-            <Link href={`${content.path}#comments`} expectedContent>
-              <Icon name="comment" />
-              {content.comment_count || <UiText text="聊两句" />}
-            </Link>
+            <CommentAvailability>
+              <Link href={`${content.path}#comments`} expectedContent>
+                <Icon name="comment" />
+                {content.comment_count || <UiText text="聊两句" />}
+              </Link>
+            </CommentAvailability>
           )}
           {!detail && (
             <Link

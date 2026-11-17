@@ -12,6 +12,8 @@ import { PublicTheme } from "@/core/themes/presentation";
 import { readActiveTheme } from "@/core/themes/server";
 import { themeProfile } from "@/core/settings/theme-options";
 import { BlogShell } from "@/themes/argon/components/shell";
+import { PageInjectionRuntime } from "@/core/page-injections/runtime";
+import { pageInjectionPluginAvailable } from "@/server/plugins/page-injection";
 
 export async function generateMetadata(): Promise<Metadata> {
   try {
@@ -67,6 +69,7 @@ export default async function BlogLayout({
 }) {
   const { site } = await readPublicSnapshot();
   const backendBaseUrl = await readBrowserBackendBaseUrl();
+  const rules = site.settings?.page_injections;
   return (
     <PublicTheme
       theme={await readActiveTheme()}
@@ -74,6 +77,9 @@ export default async function BlogLayout({
     >
       <BlogShell site={site} backendBaseUrl={backendBaseUrl}>
         {children}
+        {!!rules?.length && (await pageInjectionPluginAvailable()) && (
+          <PageInjectionRuntime surface="public" rules={rules} />
+        )}
       </BlogShell>
     </PublicTheme>
   );

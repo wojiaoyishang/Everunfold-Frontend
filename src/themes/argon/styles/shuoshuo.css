@@ -63,9 +63,13 @@
 .shuoshuo-card > .foldable-content[data-folded="true"] .fold-toggle {
   margin-top: -44px;
   margin-bottom: 12px;
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
 }
 .shuoshuo-card > .foldable-content .fold-toggle:hover {
   background: var(--accent-soft);
+}
+.shuoshuo-card > .foldable-content[data-folded="true"] .fold-toggle:hover {
+  background: color-mix(in srgb, var(--accent-soft) 94%, transparent);
 }
 .shuoshuo-actions {
   display: flex;

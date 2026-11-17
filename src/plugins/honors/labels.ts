@@ -48,7 +48,6 @@ const en: Record<string, string> = {
   上一张证书: "Previous certificate",
   下一张证书: "Next certificate",
   证书暂不可用: "Certificate unavailable",
-  查看原图: "Open original image",
   查看相关链接: "View related link",
   聘书类: "Appointments",
   荣誉类: "Honors",

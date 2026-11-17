@@ -3,6 +3,7 @@ import "./sidebar-flyout.css";
 import { useId } from "react";
 import { usePathname } from "next/navigation";
 import {
+  menuItemAttributes,
   navigationIsActive,
   navigationTarget,
   type NavigationItem,
@@ -50,7 +51,7 @@ export function SidebarFlyout({
       }}
     >
       <div
-        className="sidebar-flyout-row"
+        {...menuItemAttributes(item, "sidebar", "sidebar-flyout-row")}
         ref={row}
         data-open={open}
         onKeyDown={(e) => {

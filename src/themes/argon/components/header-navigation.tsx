@@ -12,6 +12,8 @@ import {
 import { usePathname } from "next/navigation";
 import type { Site } from "@/core/content/types";
 import {
+  menuItemAttributes,
+  menuItemStyles,
   navigationIsActive,
   navigationTarget,
   siteNavigation,
@@ -78,9 +80,17 @@ export function HeaderNavigation({ site }: { site: Site }) {
               : (current + links.length - 1) % links.length;
     requestAnimationFrame(() => links[next]?.focus());
   }
+  const items = siteNavigation(site);
+  const css = menuItemStyles(items, "header");
   return (
-    <nav ref={root} className="header-navigation" aria-label="顶部导航">
-      {siteNavigation(site).map((item, index) => {
+    <nav
+      ref={root}
+      className="header-navigation"
+      aria-label="顶部导航"
+      data-site-top-menu={items.length ? "" : undefined}
+    >
+      {css && <style>{css}</style>}
+      {items.map((item, index) => {
         const key = item.id ?? `${item.href}-${index}`;
         const expanded = opened === key;
         const panelId = `${id}-${index}`;
@@ -105,7 +115,7 @@ export function HeaderNavigation({ site }: { site: Site }) {
             }}
             onKeyDown={item.children ? (event) => onKey(event, key) : undefined}
           >
-            <div className="header-menu-trigger">
+            <div {...menuItemAttributes(item, "header", "header-menu-trigger")}>
               <Link
                 href={item.href}
                 className="header-menu-link"

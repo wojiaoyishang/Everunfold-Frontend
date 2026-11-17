@@ -9,6 +9,7 @@ import { ContentEditLink } from "./content-edit-link";
 import { PublicDate } from "./public-date";
 import type { ArticleDisplayPreferences } from "@/core/contracts/settings";
 import { LockedCardStatus } from "./protected-card-access";
+import { CommentAvailability } from "./comments/availability";
 
 const defaultOrder = [
   "author",
@@ -84,13 +85,15 @@ export function PostMeta({
       !locked &&
       display?.show_comments !== false &&
       (content.comments_open !== false || content.comment_count > 0) && (
-        <Link
-          href={article ? "#comments" : `${content.path}#comments`}
-          expectedContent={!article}
-        >
-          <Icon name="comment" />
-          {content.comment_count}
-        </Link>
+        <CommentAvailability>
+          <Link
+            href={article ? "#comments" : `${content.path}#comments`}
+            expectedContent={!article}
+          >
+            <Icon name="comment" />
+            {content.comment_count}
+          </Link>
+        </CommentAvailability>
       ),
     views: liveMetrics &&
       content.kind === "article" &&

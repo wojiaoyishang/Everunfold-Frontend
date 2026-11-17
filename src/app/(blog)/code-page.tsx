@@ -6,6 +6,7 @@ import { feedAlternates } from "@/core/seo/discovery";
 import { readingPage } from "@/core/pages/reading-pages";
 import { ManagedPageView } from "@/themes/argon/pages/view";
 import { PagePresentation } from "@/themes/argon/components/route-state";
+import { PageInjectionMarker } from "@/core/page-injections/marker";
 import { pageLanguages } from "@/core/pages/languages";
 import { localizeHref } from "@/core/i18n/locale";
 import { ServerThemeTemplate } from "@/core/extensions/server-components";
@@ -146,6 +147,17 @@ export async function CodePage(props: CodePageProps) {
     >
       <StructuredData data={identity} />
       <StructuredData data={pageData} />
+      <PageInjectionMarker
+        type={
+          isHome
+            ? "home"
+            : path === "/search" || path === "/"
+              ? "search"
+              : path === "/about"
+                ? "page"
+                : "archive"
+        }
+      />
       {output}
     </ServerThemeTemplate>
   );

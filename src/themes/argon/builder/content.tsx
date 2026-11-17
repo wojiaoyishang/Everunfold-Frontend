@@ -1,5 +1,7 @@
 "use client";
 
+import { useSiteCommentsDisabled } from "../components/comments/availability";
+
 import {
   createElement,
   useEffect,
@@ -464,6 +466,7 @@ export function BuilderContent({
 }) {
   const definitions = useBuilderComponents();
   const { loading } = usePluginRuntime();
+  const commentsDisabled = useSiteCommentsDisabled();
   useEffect(() => {
     if (!loading) onReady?.();
   }, [loading, onReady]);
@@ -473,7 +476,10 @@ export function BuilderContent({
   function render(nodes: BuilderNode[]): ReactNode {
     return nodes.map((node) => {
       if (node.type === "core.comments") {
-        if (node.id !== commentsId || (!context?.comments && !preview))
+        if (
+          node.id !== commentsId ||
+          (!preview && (commentsDisabled || !context?.comments))
+        )
           return null;
       }
       return (

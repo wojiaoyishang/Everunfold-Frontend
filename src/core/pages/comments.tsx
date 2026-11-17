@@ -16,6 +16,7 @@ import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { ShortcodeRegionBoundary } from "@/themes/argon/components/shortcode-regions";
 import { useReaderData } from "@/themes/argon/components/reader-data";
+import { useSiteCommentsDisabled } from "@/themes/argon/components/comments/availability";
 import {
   placePageCommentsHost,
   showPageCommentsFallback,
@@ -48,6 +49,7 @@ export function usePageComments() {
 /** One anchor selects the host's shared section, preserving one set of IDs. */
 export function PageComments({ className }: { className?: string }) {
   usePageComments();
+  if (useSiteCommentsDisabled()) return null;
   return <div className={className} data-page-comments-slot="true" />;
 }
 
@@ -65,6 +67,7 @@ export function PageCommentsBoundary({
   children: ReactNode;
 }) {
   const { store } = useReaderData();
+  const disabled = useSiteCommentsDisabled();
   const runtime = usePluginRuntime();
   const definitions =
     runtime.catalog?.plugins
@@ -84,21 +87,22 @@ export function PageCommentsBoundary({
   const fallback = useRef<HTMLDivElement>(null);
   const [host, setHost] = useState<HTMLDivElement | null>(null);
   const [activated, setActivated] = useState(showPageCommentsFallback(options));
-  const open = page.comments_open ?? true;
+  const open = !disabled && (page.comments_open ?? true);
   const context = useMemo(
     () => ({
       page,
       pageId: page.id,
       path: page.path,
-      comments,
+      comments: disabled ? [] : comments,
       open,
       preview,
       readReceipt,
       baseUrl: store.baseUrl,
     }),
-    [page, comments, open, preview, readReceipt, store.baseUrl],
+    [page, comments, disabled, open, preview, readReceipt, store.baseUrl],
   );
   useEffect(() => {
+    if (disabled) return;
     const container = document.createElement("div");
     container.dataset.pageCommentsHost = "true";
     let disposed = false;
@@ -109,12 +113,12 @@ export function PageCommentsBoundary({
       disposed = true;
       container.remove();
     };
-  }, []);
+  }, [disabled]);
   useEffect(() => {
     const root = scope.current;
     const home = fallback.current;
     const section = host;
-    if (!root || !home || !section) return;
+    if (disabled || !root || !home || !section) return;
     const placementOptions = placement ? { placement, selector } : undefined;
     let disposed = false;
     const place = () => {
@@ -134,7 +138,7 @@ export function PageCommentsBoundary({
       disposed = true;
       observer.disconnect();
     };
-  }, [host, placement, selector]);
+  }, [disabled, host, placement, selector]);
   return (
     <PageCommentsContext.Provider value={context}>
       <div ref={scope} style={{ display: "contents" }}>
@@ -142,7 +146,8 @@ export function PageCommentsBoundary({
           {children}
         </ShortcodeRegionBoundary>
         <div ref={fallback} style={{ display: "contents" }} />
-        {host &&
+        {!disabled &&
+          host &&
           activated &&
           (open || comments.length > 0) &&
           createPortal(

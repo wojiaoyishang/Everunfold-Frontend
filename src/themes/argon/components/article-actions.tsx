@@ -10,6 +10,7 @@ import {
 import { useEffect, useId, useState } from "react";
 import { AppLink as Link } from "./navigation-link";
 import { Icon } from "./icon";
+import { useSiteCommentsDisabled } from "./comments/availability";
 
 export function ArticleActions({
   path,
@@ -21,6 +22,8 @@ export function ArticleActions({
   commentsOpen?: boolean;
 }) {
   const panel = useId();
+  const commentsDisabled = useSiteCommentsDisabled();
+  const showComments = commentsOpen && !commentsDisabled;
   const [state, setState] = useState<"idle" | "copied" | "manual">("idle");
   const [link, setLink] = useState("");
   useEffect(() => {
@@ -41,14 +44,14 @@ export function ArticleActions({
   return (
     <div className="article-actions">
       <span>
-        {commentsOpen ? (
+        {showComments ? (
           <UiText text="读到这里，想听听你的声音。" />
         ) : (
           <UiText text="把这一刻，分享给在意的人。" />
         )}
       </span>
       <div className="article-action-buttons">
-        {commentsOpen && (
+        {showComments && (
           <Link href="#comment-composer">
             <Icon name="comment" />
             <UiText text="写下感想" />

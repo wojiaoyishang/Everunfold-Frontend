@@ -32,6 +32,7 @@ function keywords(value: string): string[] {
 
 function discussionDraft(settings: DiscussionSettings) {
   return {
+    disabled: settings.comments_disabled ?? false,
     guests: settings.allow_guest_comments,
     trusted: settings.auto_approve_previously_approved,
     links: String(settings.moderation_link_threshold),
@@ -102,6 +103,7 @@ export function DiscussionPage() {
         baseUrl,
         {
           revision: loaded.revision,
+          comments_disabled: draft.disabled,
           allow_guest_comments: draft.guests,
           auto_approve_previously_approved: draft.trusted,
           moderation_link_threshold: Number(draft.links),
@@ -168,6 +170,12 @@ export function DiscussionPage() {
               title="发表评论"
               description="各篇内容仍可单独关闭评论。"
             >
+              <SettingsToggle
+                label="全站关闭评论入口"
+                hint="隐藏前台评论与发评入口，并停止接收新评论。已发表的评论和单篇设置会保留。"
+                value={draft.disabled}
+                onChange={(disabled) => setDraft({ ...draft, disabled })}
+              />
               <SettingsToggle
                 label="允许访客发表评论"
                 value={draft.guests}

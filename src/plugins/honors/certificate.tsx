@@ -5,7 +5,6 @@ import {
   Button,
   Dialog,
   Icon,
-  TextLink,
   surfacePortalTarget,
   useDialogDismiss,
   useDialogSurface,
@@ -130,17 +129,6 @@ export function Certificate({
           >
             <Icon name="chevron" />
           </Button>
-          {item.image && (
-            <TextLink
-              href={item.image}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.sourceLink}
-            >
-              {t("查看原图")}
-              <Icon name="external" />
-            </TextLink>
-          )}
         </div>
       </footer>
     </Dialog>,

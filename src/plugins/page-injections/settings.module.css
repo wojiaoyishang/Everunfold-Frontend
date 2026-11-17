@@ -1,0 +1,58 @@
+.panel {
+  padding: clamp(16px, 3vw, 28px);
+  display: grid;
+  gap: 18px;
+}
+.actions,
+.ruleState,
+.codeTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.heading p {
+  margin: 0;
+  flex: 1 1 18em;
+}
+.codeTabs button[aria-pressed="true"] {
+  color: var(--admin-accent);
+  background: var(--admin-subtle);
+  border-color: var(--admin-accent);
+}
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+.fields label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.editor {
+  overflow: hidden;
+  min-height: 13rem;
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius, 8px);
+  background: var(--admin-canvas);
+}
+.editor :global(.cm-editor) {
+  min-height: 13rem;
+  max-height: 26rem;
+}
+.error {
+  color: var(--admin-danger, var(--danger));
+}
+@media (max-width: 620px) {
+  .fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

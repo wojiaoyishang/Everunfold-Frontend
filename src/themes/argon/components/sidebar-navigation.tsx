@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from "react";
 import type { Site } from "@/core/content/types";
-import { siteNavigation } from "../navigation";
+import { menuItemStyles, siteNavigation } from "../navigation";
 import { useNavigation } from "./navigation-state";
 import { SidebarFlyout } from "./sidebar-flyout";
 import { SidebarMobileBranch } from "./sidebar-mobile-navigation";
@@ -9,6 +9,7 @@ export function SidebarNavigation({ site }: { site: Site }) {
   const root = useRef<HTMLElement>(null);
   const { setOpen } = useNavigation();
   const items = siteNavigation(site, "sidebar");
+  const css = menuItemStyles(items, "sidebar");
   const onNavigate = () => {
     root.current
       ?.querySelectorAll<HTMLElement>("[popover]:popover-open")
@@ -17,6 +18,7 @@ export function SidebarNavigation({ site }: { site: Site }) {
   };
   return (
     <nav ref={root} className="sidebar-navigation" aria-label="侧栏导航">
+      {css && <style>{css}</style>}
       <div className="sidebar-navigation-desktop">
         {items.map((item, index) => (
           <SidebarFlyout

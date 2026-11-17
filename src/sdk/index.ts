@@ -79,3 +79,8 @@ export type {
   WorkspaceCardDefinition,
   WorkspaceCardProps,
 } from "@/core/workspace/types";
+
+export type {
+  PageInjection,
+  PageInjectionState,
+} from "@/core/contracts/settings";

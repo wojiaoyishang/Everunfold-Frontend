@@ -215,14 +215,17 @@
 .profile-friends li a {
   padding-block: 2px;
   color: var(--text-strong);
-  text-decoration: underline;
-  text-decoration-color: var(--line);
-  text-underline-offset: 4px;
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) left bottom / 0 1px
+    no-repeat;
+  transition:
+    color var(--motion-fast) ease,
+    background-size var(--motion-normal, 240ms) ease;
   overflow-wrap: anywhere;
 }
 .profile-friends li a:is(:hover, :focus-visible) {
   color: var(--accent);
-  text-decoration-color: currentColor;
+  background-size: 100% 1px;
 }
 .sidebar-note {
   color: rgb(255 255 255 / 62%);

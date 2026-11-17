@@ -3,6 +3,7 @@ import "./sidebar-mobile-navigation.css";
 import { useId, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import {
+  menuItemAttributes,
   navigationIsActive,
   navigationTarget,
   type NavigationItem,
@@ -37,7 +38,10 @@ export function SidebarMobileBranch({
       className="mobile-menu-branch"
       style={{ "--menu-depth": Math.min(depth, 3) } as CSSProperties}
     >
-      <div className="mobile-menu-row" data-active={active}>
+      <div
+        {...menuItemAttributes(item, "sidebar", "mobile-menu-row")}
+        data-active={active}
+      >
         {children ? (
           <>
             <Button

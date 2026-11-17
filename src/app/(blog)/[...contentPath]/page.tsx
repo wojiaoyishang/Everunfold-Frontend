@@ -31,6 +31,7 @@ import { CodePage, codePageMetadata } from "../code-page";
 import { readActiveTheme } from "@/core/themes/server";
 import { GlossaryDirectory } from "@/themes/argon/glossary/directory";
 import { GlossaryTerm, glossaryTermMetadata } from "../glossary/term";
+import { PageInjectionMarker } from "@/core/page-injections/marker";
 type Parameters = {
   params: Promise<{ contentPath: string[] }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -95,6 +96,7 @@ export default async function ContentPage({
         : { sources: category ? pageArticleSources(snapshot, category) : [] });
     return (
       <>
+        <PageInjectionMarker type="page" />
         <StructuredData
           data={
             managedPageSeo(snapshot, managed, readConfiguration().publicSiteUrl)
@@ -115,12 +117,24 @@ export default async function ContentPage({
     );
   }
   const codePath = localizedCodePath(snapshot, `/${contentPath.join("/")}`);
-  if (codePath === "/glossary") return <GlossaryDirectory />;
+  if (codePath === "/glossary")
+    return (
+      <>
+        <PageInjectionMarker type="glossary" />
+        <GlossaryDirectory />
+      </>
+    );
   const term = glossarySlug(
     `/${contentPath.join("/")}`,
     normalizeCatalog(snapshot.site.settings?.site.language_catalog),
   );
-  if (term) return <GlossaryTerm snapshot={snapshot} slug={term} />;
+  if (term)
+    return (
+      <>
+        <PageInjectionMarker type="glossary" />
+        <GlossaryTerm snapshot={snapshot} slug={term} />
+      </>
+    );
   if (codePath)
     return (
       <CodePage snapshot={snapshot} path={codePath} parameters={parameters} />
@@ -136,30 +150,36 @@ export default async function ContentPage({
     protectedContent.access !== "public"
   )
     return (
-      <ProtectedArticle
-        recommendations={
-          protectedContent.kind === "article" && (
-            <RelatedArticles
-              snapshot={snapshot}
-              content={protectedContent}
-              limit={
-                themeProfile(snapshot.site.settings)?.article.related_count
-              }
-              basis={
-                themeProfile(snapshot.site.settings)?.article.related_basis
-              }
-            />
-          )
-        }
-        key={`${protectedContent.id}:${protectedContent.updated_at}`}
-        content={protectedContent}
-        site={snapshot.site}
-        baseUrl={await readBrowserBackendBaseUrl()}
-      />
+      <>
+        <PageInjectionMarker
+          type={protectedContent.kind === "article" ? "article" : "moment"}
+        />
+        <ProtectedArticle
+          recommendations={
+            protectedContent.kind === "article" && (
+              <RelatedArticles
+                snapshot={snapshot}
+                content={protectedContent}
+                limit={
+                  themeProfile(snapshot.site.settings)?.article.related_count
+                }
+                basis={
+                  themeProfile(snapshot.site.settings)?.article.related_basis
+                }
+              />
+            )
+          }
+          key={`${protectedContent.id}:${protectedContent.updated_at}`}
+          content={protectedContent}
+          site={snapshot.site}
+          baseUrl={await readBrowserBackendBaseUrl()}
+        />
+      </>
     );
   if (presented?.content.type === "shuoshuo")
     return (
       <>
+        <PageInjectionMarker type="moment" />
         <StructuredData
           data={articleSchema(
             presented.content,
@@ -179,6 +199,7 @@ export default async function ContentPage({
   if (!content) notFound();
   return (
     <>
+      <PageInjectionMarker type="article" />
       {presented && (
         <StructuredData
           data={articleSchema(

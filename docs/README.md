@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[页面代码注入与菜单样式](development/page-injections.md)说明规则配置、清理钩子和稳定的菜单定位方式。
+
 [共用视频播放器](decisions/0180-shared-video-insertion.md)用于短代码、正文区块和组件编排。
 
 [可配置的滚轮惯性](decisions/0179-configurable-wheel-momentum.md)涵盖主题默认值、前台浏览器偏好与减少动态。

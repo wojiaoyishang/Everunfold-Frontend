@@ -23,6 +23,7 @@ import { commentSubmissionFailure } from "./submission";
 import { useReaderData } from "../reader-data";
 import { usePublicAccount } from "@/core/auth/use-public-account";
 import { useCommentLikes } from "./use-comment-likes";
+import { useSiteCommentsDisabled } from "./availability";
 import {
   COMMENT_PAGE_SIZE,
   commentPage,
@@ -34,15 +35,7 @@ import {
   type CommentEntry,
 } from "./model";
 
-export function CommentSection({
-  comments,
-  path,
-  initialPage = 1,
-  open = true,
-  contentId,
-  readReceipt,
-  interactive = true,
-}: {
+interface Props {
   comments: PublicComment[];
   path: string;
   initialPage?: number;
@@ -51,7 +44,23 @@ export function CommentSection({
   readReceipt?: string;
   /** Previews can show history without challenge, like or submission requests. */
   interactive?: boolean;
-}) {
+}
+
+export function CommentSection(props: Props) {
+  return useSiteCommentsDisabled() ? null : (
+    <VisibleCommentSection {...props} />
+  );
+}
+
+function VisibleCommentSection({
+  comments,
+  path,
+  initialPage = 1,
+  open = true,
+  contentId,
+  readReceipt,
+  interactive = true,
+}: Props) {
   const { store } = useReaderData();
   const account = usePublicAccount(store.baseUrl);
   const session =
@@ -59,8 +68,9 @@ export function CommentSection({
   const user = session?.user;
   const signedInName = user ? user.display_name || user.username : null;
   const [allowGuests, setAllowGuests] = useState<boolean | null>(null);
+  const [disabled, setDisabled] = useState(false);
   useEffect(() => {
-    if (!contentId || !open || !interactive) return;
+    if (!contentId || !interactive) return;
     const controller = new AbortController();
     let reading = false;
     const readPolicy = () => {
@@ -68,8 +78,10 @@ export function CommentSection({
       reading = true;
       void readDiscussionPolicy(store.baseUrl, { signal: controller.signal })
         .then(({ data }) => {
-          if (!controller.signal.aborted)
+          if (!controller.signal.aborted) {
             setAllowGuests(data.allow_guest_comments);
+            setDisabled(data.comments_disabled === true);
+          }
         })
         .catch(() => {
           // Submission still enforces the server policy if the read is unavailable.
@@ -86,9 +98,12 @@ export function CommentSection({
       controller.abort();
       window.removeEventListener("focus", readPolicy);
     };
-  }, [contentId, interactive, open, store.baseUrl]);
+  }, [contentId, interactive, store.baseUrl]);
   const canWrite =
-    open && interactive && (!contentId || !!user || allowGuests === true);
+    !disabled &&
+    open &&
+    interactive &&
+    (!contentId || !!user || allowGuests === true);
   const checking = account.state.phase === "checking" || allowGuests === null;
   const loginHref = `/login?next=${encodeURIComponent(`${path.split("#")[0]}#comments`)}`;
   const captcha = useCaptcha(
@@ -132,7 +147,7 @@ export function CommentSection({
       .map((entry) => entry.id),
     contentId,
     readReceipt,
-    interactive,
+    interactive && !disabled,
   );
   useCommentLocation(target, page);
   useEffect(() => {
@@ -168,6 +183,7 @@ export function CommentSection({
     signal?: AbortSignal,
   ) {
     if (!interactive || !open) throw new RequestError("http", 403, 40388);
+    if (disabled) throw new RequestError("http", 403, 40391);
     if (contentId) {
       const parentId =
         reply.active && reply.entry?.origin === "history"
@@ -228,6 +244,8 @@ export function CommentSection({
           message: "评论已提交，等待审核。通过审核后会公开显示。",
         };
       } catch (reason) {
+        if (reason instanceof RequestError && reason.code === 40391)
+          setDisabled(true);
         if (reason instanceof RequestError && reason.code === 40389)
           setAllowGuests(false);
         return { accepted: false, message: commentSubmissionFailure(reason) };
@@ -255,6 +273,7 @@ export function CommentSection({
       message: "已加入本页预览。这条留言没有发布到网站。",
     };
   }
+  if (disabled) return null;
   return (
     <>
       <section

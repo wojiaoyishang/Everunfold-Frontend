@@ -10,5 +10,11 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function GlossaryTermPage({ params }: Props) {
   const [snapshot, { slug }] = await Promise.all([readPageSnapshot(), params]);
-  return <GlossaryTerm snapshot={snapshot} slug={slug} />;
+  return (
+    <>
+      <PageInjectionMarker type="glossary" />
+      <GlossaryTerm snapshot={snapshot} slug={slug} />
+    </>
+  );
 }
+import { PageInjectionMarker } from "@/core/page-injections/marker";

@@ -16,6 +16,7 @@ export function commentSubmissionFailure(reason: unknown) {
     if (reason.code === 40388)
       return "此内容已关闭评论或阅读验证已过期，请刷新页面。";
     if (reason.code === 40389) return "请先登录再发表评论。";
+    if (reason.code === 40391) return "全站评论已关闭。";
     if (reason.code === 42288) return "评论包含本站禁止的内容，请修改后重试。";
     if (reason.code === 42289) return "请检查个人网站地址。";
     if (reason.code === 42287) return "请检查评论内容或回复对象。";

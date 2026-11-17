@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, type ReactNode } from "react";
+import { useContext, useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/core/auth/use-session";
 import { authFailureMessage } from "@/core/auth/session";
@@ -28,8 +28,17 @@ import { AccountKeys } from "./keys";
 import { AccountSessionState } from "./session-state";
 import { AccountNavigationProvider, useAccountNavigation } from "./unsaved";
 import { NotificationPreferences } from "./notification-preferences";
+import { defaultSiteName, SiteBrandContext } from "@/core/site/brand";
+import { SiteIcon } from "../components/site-icon";
+import { PrivatePageInjections } from "@/core/page-injections/private";
 
-export function AccountPage({ baseUrl }: { baseUrl: string }) {
+export function AccountPage({
+  baseUrl,
+  pageInjections = false,
+}: {
+  baseUrl: string;
+  pageInjections?: boolean;
+}) {
   const { state, check, accept } = useSession(baseUrl);
   useEffect(() => {
     const focus = () => void check(true);
@@ -58,6 +67,7 @@ export function AccountPage({ baseUrl }: { baseUrl: string }) {
     <ConfirmedAccount
       key={state.session.user.id}
       baseUrl={baseUrl}
+      pageInjections={pageInjections}
       session={state.session}
       onSession={accept}
       onRefresh={() => void check(true)}
@@ -67,16 +77,19 @@ export function AccountPage({ baseUrl }: { baseUrl: string }) {
 
 function ConfirmedAccount({
   baseUrl,
+  pageInjections,
   session,
   onSession,
   onRefresh,
 }: {
   baseUrl: string;
+  pageInjections: boolean;
   session: AuthSessionState;
   onSession: (session: AuthSessionState) => void;
   onRefresh: () => void;
 }) {
   const user = session.user!;
+  const brand = useContext(SiteBrandContext);
   const t = useT();
   const [profile, setProfile] = useState<AccountProfile | null>(null);
   const [error, setError] = useState("");
@@ -117,7 +130,15 @@ function ConfirmedAccount({
             >
               <header className="account-header">
                 <RouteLink href="/" className="account-brand">
-                  <Icon name="leaf" /> Everunfold
+                  <SiteIcon
+                    url={brand?.icon_url}
+                    fallback="leaf"
+                    size={22}
+                    className="account-brand-image"
+                  />
+                  <span dir="auto">
+                    {brand?.name.trim() || defaultSiteName}
+                  </span>
                 </RouteLink>
                 <nav
                   className="account-site-actions"
@@ -154,6 +175,10 @@ function ConfirmedAccount({
                   />
                 </nav>
               </header>
+              <PrivatePageInjections
+                surface="account"
+                enabled={pageInjections && !user.must_change_password}
+              />
               <main className="account-container">
                 <div className="account-page-heading">
                   <h1>

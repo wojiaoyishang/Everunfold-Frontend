@@ -54,6 +54,7 @@ Thumbs.db
 !/src/plugins/gallery/
 !/src/plugins/honors/
 !/src/plugins/more-components/
+!/src/plugins/page-injections/
 !/src/plugins/people/
 /src/themes/*
 !/src/themes/argon/

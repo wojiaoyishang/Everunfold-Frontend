@@ -18,6 +18,9 @@ import { LocalDraftRecovery } from "@/themes/argon/admin/content/local-recovery"
 import { AdminSeoContext, type AdminSeo } from "@/core/admin/seo-context";
 import { SiteBrandContext } from "@/core/site/brand";
 import { AdminPluginRuntimeProvider } from "@/core/plugins/runtime/provider";
+import { useAdminPluginRuntime } from "@/core/plugins/runtime/context";
+import { PrivatePageInjections } from "@/core/page-injections/private";
+import { pageInjectionPluginId } from "@/core/page-injections/matching";
 
 export function AdminWorkspace({
   baseUrl,
@@ -106,9 +109,20 @@ function ConfirmedWorkspace({
             onSignOut={onSignOut}
           >
             {children}
+            <WorkspacePageInjections />
           </AdminShell>
         </AdminPluginRuntimeProvider>
       </AdminAccountContext>
     </AdminRequestContext>
+  );
+}
+
+function WorkspacePageInjections() {
+  const { components } = useAdminPluginRuntime();
+  return (
+    <PrivatePageInjections
+      surface="admin"
+      enabled={components.has(pageInjectionPluginId)}
+    />
   );
 }

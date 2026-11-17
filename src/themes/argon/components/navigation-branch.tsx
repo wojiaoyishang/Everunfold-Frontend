@@ -3,6 +3,7 @@ import "./navigation-branch.css";
 import { useId, useState, type CSSProperties } from "react";
 import { usePathname } from "next/navigation";
 import {
+  menuItemAttributes,
   navigationIsActive,
   navigationTarget,
   type NavigationItem,
@@ -41,7 +42,7 @@ export function NavigationBranch({
       className="navigation-branch"
       style={{ "--navigation-depth": Math.min(depth, 4) } as CSSProperties}
     >
-      <div className="navigation-branch-row">
+      <div {...menuItemAttributes(item, "header", "navigation-branch-row")}>
         <AppLink
           href={item.href}
           {...navigationTarget(item.href)}

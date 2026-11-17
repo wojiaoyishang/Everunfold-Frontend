@@ -5,6 +5,11 @@ import type {
   SidebarNavigationPreferences,
 } from "@/core/contracts/settings";
 import { localizedMenuLabel } from "@/core/navigation/labels";
+import {
+  authoredCssScope,
+  compileAuthoredCss,
+  componentCssLimit,
+} from "@/core/rendering/authored-css";
 
 export interface NavigationItem {
   id?: string;
@@ -13,7 +18,49 @@ export interface NavigationItem {
   icon: string;
   iconUrl?: string;
   description?: string;
+  extraClass?: string;
+  extraCss?: string;
   children?: NavigationItem[];
+}
+
+type MenuPosition = "header" | "sidebar";
+
+function menuStyleId(item: NavigationItem, position: MenuPosition) {
+  return `menu-${position}-${Array.from(item.id ?? "", (character) => character.charCodeAt(0).toString(16)).join("")}`;
+}
+
+export function menuItemAttributes(
+  item: NavigationItem,
+  position: MenuPosition,
+  base: string,
+) {
+  return {
+    className: item.extraClass ? `${base} ${item.extraClass}` : base,
+    "data-menu-item-id": item.id,
+    "data-menu-position": position,
+    ...(item.id && item.extraCss
+      ? authoredCssScope(menuStyleId(item, position))
+      : {}),
+  };
+}
+
+export function menuItemStyles(
+  items: NavigationItem[],
+  position: MenuPosition,
+): string {
+  return items
+    .flatMap((item) => [
+      item.id && item.extraCss
+        ? compileAuthoredCss(
+            item.extraCss,
+            menuStyleId(item, position),
+            componentCssLimit,
+          ).css
+        : "",
+      item.children ? menuItemStyles(item.children, position) : "",
+    ])
+    .filter(Boolean)
+    .join("\n");
 }
 
 const known: Partial<Record<string, Omit<NavigationItem, "href">>> = {
@@ -103,6 +150,8 @@ export function siteNavigation(
           href,
           icon: item.icon ?? "link",
           iconUrl: site.settings?.icon_urls?.[item.icon ?? ""],
+          extraClass: item.extra_class,
+          extraCss: item.extra_css,
           children: item.children?.length
             ? item.children.flatMap(map)
             : undefined,

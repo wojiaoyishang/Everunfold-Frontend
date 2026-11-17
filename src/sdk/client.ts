@@ -63,3 +63,9 @@ export {
 } from "@/core/contracts/captcha";
 
 export { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
+
+export { AdminSourceEditor } from "./admin-source-editor";
+export {
+  readPageInjectionSettings,
+  savePageInjectionSettings,
+} from "@/core/contracts/settings";
