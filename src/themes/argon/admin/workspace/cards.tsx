@@ -192,22 +192,33 @@ function AuditList({
 function ViewChart({ points }: { points: WorkspaceViewPoint[] }) {
   const t = useT();
   const [active, setActive] = useState<number | null>(null);
-  const selected = active ?? (points.length === 1 ? 0 : null);
+  if (!points.length) return <Empty label="暂无按日浏览记录" />;
+  if (points.length === 1) {
+    const [point] = points;
+    return (
+      <div className={styles.dailySample}>
+        <span className={styles.point} aria-hidden="true" />
+        <time dateTime={point.day}>{point.day}</time>
+        <strong>
+          {point.views.toLocaleString()} <UiText text="浏览" />
+        </strong>
+      </div>
+    );
+  }
+  const selected = active === null ? null : points[active];
   const max = Math.max(1, ...points.map((point) => point.views));
   const width = 720,
-    height = 150,
-    step = width / Math.max(1, points.length - 1);
-  const x = (i: number) => (points.length === 1 ? width / 2 : i * step);
+    height = 150;
+  const x = (index: number) => index / (points.length - 1);
+  const y = (views: number) => 1 - (views / max) * 0.92;
   const line = points
-    .map(
-      (point, i) => `${x(i)},${height - (point.views / max) * (height - 12)}`,
-    )
+    .map((point, i) => `${x(i) * width},${y(point.views) * height}`)
     .join(" ");
   return (
     <div
       className={styles.chart}
       tabIndex={0}
-      role="img"
+      role="group"
       aria-label={t("访问趋势，方向键查看每天浏览量")}
       onKeyDown={(event) => {
         if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
@@ -227,58 +238,53 @@ function ViewChart({ points }: { points: WorkspaceViewPoint[] }) {
           );
         }
       }}
-      onPointerMove={(event) => {
-        const rect = event.currentTarget.getBoundingClientRect();
-        setActive(
-          Math.max(
-            0,
-            Math.min(
-              points.length - 1,
-              Math.round(
-                ((event.clientX - rect.left) / rect.width) *
-                  (points.length - 1),
-              ),
-            ),
-          ),
-        );
-      }}
-      onPointerLeave={() => setActive(null)}
     >
       <output aria-live="polite">
-        {active !== null && points[active]
-          ? `${points[active].day} · ${points[active].views.toLocaleString()} ${t("浏览")}`
+        {selected
+          ? `${selected.day} · ${selected.views.toLocaleString()} ${t("浏览")}`
           : t("每日浏览量")}
       </output>
-      <svg
-        viewBox={`-8 -8 ${width + 16} ${height + 22}`}
-        preserveAspectRatio="none"
-        aria-hidden="true"
+      <div
+        className={styles.plot}
+        onPointerMove={(event) => {
+          const rect = event.currentTarget.getBoundingClientRect();
+          const offset = Math.min(
+            1,
+            Math.max(0, (event.clientX - rect.left) / rect.width),
+          );
+          setActive(Math.round(offset * (points.length - 1)));
+        }}
+        onPointerLeave={() => setActive(null)}
       >
-        <path
-          className={styles.gridline}
-          d={`M0 0H${width}M0 ${height / 2}H${width}M0 ${height}H${width}`}
-        />
-        {points.length > 1 && (
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <path
+            className={styles.gridline}
+            d={`M0 0H${width}M0 ${height / 2}H${width}M0 ${height}H${width}`}
+          />
           <polygon
             className={styles.area}
             points={`0,${height} ${line} ${width},${height}`}
           />
-        )}
-        <polyline className={styles.line} points={line} />
-        {selected !== null && points[selected] && (
-          <circle
-            cx={x(selected)}
-            cy={height - (points[selected].views / max) * (height - 12)}
-            r="4"
+          <polyline className={styles.line} points={line} />
+        </svg>
+        {active !== null && selected && (
+          <span
+            className={styles.point}
+            aria-hidden="true"
+            style={{
+              left: `${x(active) * 100}%`,
+              top: `${y(selected.views) * 100}%`,
+            }}
           />
         )}
-      </svg>
+      </div>
       <div className={styles.axis}>
-        <span>{points[0]?.day}</span>
-        <span>
-          {max.toLocaleString()} {t("浏览")}
-        </span>
-        <span>{points.at(-1)?.day}</span>
+        <time dateTime={points[0].day}>{points[0].day}</time>
+        <time dateTime={points.at(-1)?.day}>{points.at(-1)?.day}</time>
       </div>
     </div>
   );
