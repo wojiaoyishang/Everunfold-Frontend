@@ -194,9 +194,24 @@
   background: var(--accent-soft);
 }
 .profile-friends {
+  position: relative;
   margin-top: 14px;
-  padding-top: 13px;
-  border-block-start: 1px solid color-mix(in srgb, var(--text) 25%, var(--line));
+  padding-top: 14px;
+}
+.profile-friends::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 8%;
+  block-size: 2px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--text) 18%, transparent),
+    transparent
+  );
+  clip-path: polygon(0 50%, 50% 0, 100% 50%, 50% 100%);
+  pointer-events: none;
 }
 .profile-friends h3 {
   display: flex;
