@@ -123,11 +123,11 @@ export function ShellFrame({ children }: { children: ReactNode }) {
               <ThemeSlot name="shell.content.before" context={{ site }} />
               <RouteContent>{children}</RouteContent>
               <ThemeSlot name="shell.content.after" context={{ site }} />
+              <ThemeSlot name="shell.footer.before" context={{ site }} />
+              <ExtensionComponent name="public.footer" site={site} />
+              <ThemeSlot name="shell.footer.after" context={{ site }} />
             </main>
           </div>
-          <ThemeSlot name="shell.footer.before" context={{ site }} />
-          <ExtensionComponent name="public.footer" site={site} />
-          <ThemeSlot name="shell.footer.after" context={{ site }} />
           <ExtensionComponent name="public.tools" />
           <GlossaryHooks />
         </BackgroundVideoProvider>

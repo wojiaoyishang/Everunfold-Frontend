@@ -42,12 +42,12 @@
 }
 .search-dialog h2 {
   margin: 4px 0 20px;
-  font-size: 23px;
+  font-size: calc(23px * var(--public-font-scale, 1));
   font-weight: 500;
   color: var(--text-strong);
 }
 .search-eyebrow {
-  font: 10px/1.5 sans-serif;
+  font: calc(10px * var(--public-font-scale, 1))/1.5 sans-serif;
   letter-spacing: 2px;
   color: var(--accent);
 }
@@ -68,7 +68,7 @@
   outline: none;
   color: var(--text);
   font: inherit;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
 }
 .search-dialog-form label:focus-within {
   border-color: var(--accent);
@@ -94,7 +94,7 @@
   margin-inline-start: auto;
 }
 .search-dialog > p {
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   color: var(--muted);
   margin: 18px 0 0;
 }
@@ -127,7 +127,7 @@
 }
 .share-panel label {
   display: block;
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .share-panel input {
@@ -147,7 +147,7 @@
 .share-panel small {
   display: block;
   margin-top: 15px;
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .article-followup {
@@ -180,7 +180,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   margin-bottom: 8px;
   opacity: 0.8;
 }
@@ -195,7 +195,7 @@
 }
 .neighbor-card > span:not(.story-cover) {
   position: relative;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
@@ -252,7 +252,7 @@
   padding: 22px 24px 12px;
 }
 .related-articles h2 {
-  font-size: 18px;
+  font-size: calc(18px * var(--public-font-scale, 1));
   font-weight: 500;
   margin: 0 0 16px;
   display: flex;
@@ -298,7 +298,7 @@ a.related-card:hover {
 }
 .related-card h3 {
   position: relative;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   font-weight: 500;
   line-height: 1.65;
   margin: 0;

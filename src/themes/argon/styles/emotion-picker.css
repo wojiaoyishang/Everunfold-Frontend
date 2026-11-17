@@ -14,7 +14,7 @@
   border-radius: 7px;
   background: transparent;
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   white-space: nowrap;
 }
 .emotion-tabs button:hover {
@@ -44,7 +44,7 @@
   border-radius: 7px;
   background: var(--surface);
   color: var(--text);
-  font-size: 20px;
+  font-size: calc(20px * var(--public-font-scale, 1));
   line-height: 1.5;
   white-space: nowrap;
 }
@@ -61,7 +61,7 @@
 .emotion-grid[data-kind="faces"] button {
   flex: 0 0 auto;
   padding-inline: 12px;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   word-break: normal;
   overflow-wrap: normal;
 }
@@ -84,5 +84,5 @@
   display: block;
   margin: 8px 2px 0;
   color: var(--muted);
-  font-size: 10px;
+  font-size: calc(10px * var(--public-font-scale, 1));
 }

@@ -15,7 +15,7 @@ export function codePreferenceStyle(code: CodePreferences): CSSProperties {
     "--code-default-break": code.wrap ? "anywhere" : "normal",
     "--code-fold-lines": fold,
     "--code-fold-size": fold
-      ? `calc(${fold} * ${height} * ${size}px + 28px)`
+      ? `calc(${fold} * ${height} * ${size}px * var(--public-font-scale, 1) + 28px)`
       : "none",
     ...(code.font_media_id && code.font_url && code.font_info
       ? {

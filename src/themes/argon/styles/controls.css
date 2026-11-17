@@ -1,16 +1,30 @@
 .site-footer {
   text-align: center;
-  color: rgb(255 255 255 / 70%);
-  padding: 55px 25px 30px;
-  font-size: 12px;
+  color: #fff;
+  background: linear-gradient(
+    150deg,
+    var(--brand-accent) 15%,
+    color-mix(in srgb, var(--brand-accent), black 10%) 70%,
+    color-mix(in srgb, var(--brand-accent), black 18%) 94%
+  );
+  border-radius: var(--radius);
+  margin: clamp(28px, 4vw, 48px) 0 26px;
+  padding: 25px 20px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   line-height: 1.8;
+  overflow-wrap: anywhere;
 }
 .site-footer p {
   margin: 3px 0;
 }
-.site-footer p:last-child {
-  color: rgb(255 255 255 / 48%);
-  font-size: 11px;
+.site-footer a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor, transparent 58%);
+  text-underline-offset: 0.18em;
+}
+.site-footer a:hover {
+  text-decoration-color: currentColor;
 }
 .footer-separator {
   padding: 0 5px;
@@ -93,7 +107,7 @@ html[data-motion="reduced"] .reading-progress-slot {
   place-items: center;
   border-radius: 4px;
   overflow: hidden;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
@@ -161,7 +175,7 @@ html[data-motion="reduced"] .reading-progress-slot {
   }
 }
 .setting-hint {
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   color: var(--muted);
   margin: 9px 0 0;
 }
@@ -175,7 +189,7 @@ html[data-motion="reduced"] .reading-progress-slot {
 }
 .settings-content h2 {
   margin: 0;
-  font-size: 19px;
+  font-size: calc(19px * var(--public-font-scale, 1));
   font-weight: 500;
 }
 .settings-content fieldset {
@@ -184,7 +198,7 @@ html[data-motion="reduced"] .reading-progress-slot {
   margin: 20px 0;
 }
 .settings-content legend {
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   margin-bottom: 8px;
 }
 .setting-options {
@@ -197,7 +211,7 @@ html[data-motion="reduced"] .reading-progress-slot {
   border-radius: 4px;
   color: var(--text);
   background: var(--accent-soft);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   transition:
     background 180ms,
     color 180ms;
@@ -208,13 +222,13 @@ html[data-motion="reduced"] .reading-progress-slot {
 }
 .setting-range {
   display: block;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   margin: 20px 0;
 }
 .setting-range output {
   float: right;
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .setting-range .ui-range {
   width: 100%;
@@ -231,12 +245,12 @@ html[data-motion="reduced"] .reading-progress-slot {
   justify-content: space-between;
   padding-block: 16px;
   border-block: 1px solid var(--line);
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
 }
 .settings-persistence {
   text-align: center;
   color: var(--muted);
-  font-size: 10px;
+  font-size: calc(10px * var(--public-font-scale, 1));
   margin: 12px 0 0;
 }
 .standalone-state {
@@ -250,13 +264,13 @@ html[data-motion="reduced"] .reading-progress-slot {
 }
 .state-code {
   color: var(--text-strong);
-  font-size: 64px;
+  font-size: calc(64px * var(--public-font-scale, 1));
   margin: 0;
   letter-spacing: 0.05em;
 }
 .standalone-state h1 {
   color: var(--text-strong);
-  font-size: 28px;
+  font-size: calc(28px * var(--public-font-scale, 1));
   font-weight: 500;
 }
 .standalone-state > p:not(.state-code) {

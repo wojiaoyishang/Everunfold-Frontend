@@ -55,9 +55,7 @@ const css = `
 }
 .public-theme[data-theme-chain~="paper"] .list-heading,
 .public-theme[data-theme-chain~="paper"] .list-heading > span:last-child,
-.public-theme[data-theme-chain~="paper"] .pagination-ellipsis,
-.public-theme[data-theme-chain~="paper"] .site-footer,
-.public-theme[data-theme-chain~="paper"] .site-footer p:last-child {
+.public-theme[data-theme-chain~="paper"] .pagination-ellipsis {
   color: var(--muted);
 }
 .public-theme[data-theme-chain~="paper"] .sidebar-menu-card,

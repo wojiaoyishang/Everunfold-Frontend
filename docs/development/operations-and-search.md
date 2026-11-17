@@ -64,7 +64,7 @@ canonical、站点地图和分享地址使用前端服务端部署配置 publicS
 
 ### 浏览器阅读视图与机器响应
 
-`/sitemap.xml` 固定返回标准 XML，`robots.txt` 公布同一地址。启用地图且配置公开站点地址后，读者可从页脚「站点地图」或后台「站点地图与订阅」打开 `/sitemap.xml/preview`。阅读页保留响应式列表、时间、语言和原始 XML 链接，并标记 `noindex, follow`。两份输出使用相同的公开内容过滤规则。详见 [ADR0121](../decisions/0121-separate-sitemap-preview-and-xml.md)。
+`/sitemap.xml` 固定返回标准 XML，`robots.txt` 公布同一地址。启用地图且配置公开站点地址后，后台「站点地图与订阅」提供 `/sitemap.xml/preview`，管理员也可在页脚设置添加该地址。阅读页保留响应式列表、时间、语言和原始 XML 链接，并标记 `noindex, follow`。两份输出使用相同的公开内容过滤规则。详见 [ADR0121](../decisions/0121-separate-sitemap-preview-and-xml.md)。
 
 `/feed.xml` 和 `/atom.xml` 继续按请求头区分浏览器阅读页和机器 XML；`?format=xml` 可显式读取 XML。订阅响应声明 `Vary: Accept, Sec-Fetch-Dest, User-Agent`。旧站点地图的 `?format=xml` 仍可用，`?format=html` 跳转到阅读页。
 

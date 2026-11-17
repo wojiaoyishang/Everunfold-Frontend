@@ -14,7 +14,7 @@
   gap: 12px;
   padding: 12px 16px;
   color: var(--text);
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   transition:
     background 180ms,
     color 180ms;
@@ -61,7 +61,7 @@
   padding: 10px;
 }
 .header-submenu .navigation-branch-children .navigation-branch-row > a {
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 @keyframes navigation-disclose {
   from {

@@ -125,7 +125,7 @@ test("font declarations contain only fonts actually used by the current content"
   assert.match(html, /font-display:swap/);
   assert.match(html, /used\.woff2/);
   assert.doesNotMatch(html, /unused\.woff2/);
-  assert.match(html, /font-size:18px/);
+  assert.match(html, /font-size:calc\(18px \* var\(--public-font-scale, 1\)\)/);
   assert.equal(referencedFontFaces("<p>没有引用字体</p>", media), "");
   assert.doesNotMatch(
     renderContent({

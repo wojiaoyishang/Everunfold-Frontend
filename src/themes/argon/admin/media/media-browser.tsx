@@ -24,12 +24,14 @@ import styles from "./media-picker.module.css";
 export function MediaBrowser({
   kind = "all",
   value,
+  pinnedIds,
   onSelect,
   pickerTab,
   selection,
 }: {
   kind?: NonNullable<MediaQuery["kind"]>;
   value?: string;
+  pinnedIds?: readonly string[];
   onSelect?: (item: MediaItem) => void;
   pickerTab?: "upload" | "library";
   selection?: {
@@ -43,7 +45,7 @@ export function MediaBrowser({
   const [trash, setTrash] = useState(false);
   const canUpload = can(useAdminAccount(), "media:upload");
   const requestKind = pickerTab === "upload" ? kind : filter;
-  const library = useMediaLibrary(requestKind, trash);
+  const library = useMediaLibrary(requestKind, trash, pinnedIds);
   const [selected, setSelected] = useState<MediaItem | null>(null);
   const pick = (item: MediaItem) => {
     if (onSelect) onSelect(item);
@@ -217,7 +219,8 @@ export function MediaBrowser({
               const state = selectionState(item);
               const pressed = selection
                 ? state === "selected"
-                : (value ?? selected?.id) === item.id;
+                : mediaReferenceId(value ?? selected?.id ?? "") ===
+                  mediaReferenceId(item.id);
               return (
                 <Button
                   key={item.id}

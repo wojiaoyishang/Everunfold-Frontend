@@ -10,6 +10,7 @@ import {
 } from "@/core/config/server";
 import { PublicTheme } from "@/core/themes/presentation";
 import { readActiveTheme } from "@/core/themes/server";
+import { themeProfile } from "@/core/settings/theme-options";
 import { BlogShell } from "@/themes/argon/components/shell";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -67,7 +68,10 @@ export default async function BlogLayout({
   const { site } = await readPublicSnapshot();
   const backendBaseUrl = await readBrowserBackendBaseUrl();
   return (
-    <PublicTheme theme={await readActiveTheme()}>
+    <PublicTheme
+      theme={await readActiveTheme()}
+      defaultFontScale={themeProfile(site.settings)?.font_scale_percent}
+    >
       <BlogShell site={site} backendBaseUrl={backendBaseUrl}>
         {children}
       </BlogShell>

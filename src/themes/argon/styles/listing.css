@@ -5,7 +5,7 @@
   padding: 15px 24px;
   align-items: center;
   margin-bottom: 20px;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
 }
 .notice > .icon {
   color: var(--accent);
@@ -18,7 +18,7 @@
   justify-content: space-between;
   margin: 0 3px 16px;
   color: rgb(255 255 255 / 85%);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .list-heading > span:first-child {
   display: inline-flex;
@@ -80,7 +80,7 @@
   min-width: 0;
   margin: 0 0 13px;
   color: var(--text-strong);
-  font-size: 25px;
+  font-size: calc(25px * var(--public-font-scale, 1));
   font-weight: 500;
   line-height: 1.55;
   overflow-wrap: anywhere;
@@ -103,7 +103,7 @@
   gap: 3px;
   align-items: center;
   color: var(--accent);
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -116,7 +116,7 @@
   flex-wrap: wrap;
   gap: 7px var(--post-meta-gap);
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   line-height: 1.7;
 }
 .post-meta > * {
@@ -134,7 +134,7 @@
 }
 .post-excerpt {
   color: var(--text);
-  font-size: 15px;
+  font-size: calc(15px * var(--public-font-scale, 1));
   line-height: 1.95;
   margin: 20px 0 24px;
   overflow-wrap: anywhere;
@@ -155,7 +155,7 @@
   flex-wrap: wrap;
   gap: 6px;
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .post-tags a:hover {
   color: var(--accent);
@@ -174,7 +174,7 @@
 }
 .read-more {
   color: var(--accent);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   display: inline-flex;
   gap: 8px;
   align-items: center;
@@ -260,13 +260,13 @@
 .page-heading h1 {
   margin: 0;
   color: var(--text-strong);
-  font-size: 23px;
+  font-size: calc(23px * var(--public-font-scale, 1));
   font-weight: 500;
   line-height: 1.5;
 }
 .page-heading p {
   color: var(--muted);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   margin: 5px 0 0;
 }
 .pagination,
@@ -288,7 +288,7 @@
   height: 38px;
   display: inline-grid;
   place-items: center;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   box-shadow: var(--shadow);
   transition:
     transform 240ms var(--motion-ease),
@@ -308,17 +308,17 @@
   text-align: center;
 }
 .empty-state > .icon {
-  font-size: 42px;
+  font-size: calc(42px * var(--public-font-scale, 1));
   color: var(--accent-light);
 }
 .empty-state h2 {
   font-weight: 500;
-  font-size: 22px;
+  font-size: calc(22px * var(--public-font-scale, 1));
   color: var(--text-strong);
 }
 .empty-state p {
   color: var(--muted);
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
 }
 .primary-button {
   display: inline-block;
@@ -327,7 +327,7 @@
   padding: 10px 22px;
   background: var(--brand-accent);
   color: #fff;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   box-shadow: 0 3px 7px color-mix(in srgb, var(--brand-accent) 18%, transparent);
   transition:
     transform 240ms var(--motion-ease),
@@ -348,7 +348,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  font-size: 23px;
+  font-size: calc(23px * var(--public-font-scale, 1));
   margin: 0 0 22px;
   font-weight: 500;
 }
@@ -372,7 +372,7 @@
 }
 .search-card > p {
   color: var(--muted);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   margin: 16px 0 0;
 }
 .search-form > .search-filter-group {
@@ -398,13 +398,13 @@
   align-items: center;
   gap: 7px;
   color: var(--accent);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   font-weight: 700;
 }
 .glossary-search-results h2 {
   margin: 4px 0 0;
   color: var(--text-strong);
-  font-size: 18px;
+  font-size: calc(18px * var(--public-font-scale, 1));
 }
 .glossary-search-results > header small {
   color: var(--muted);
@@ -465,7 +465,7 @@
 .glossary-search-grid small,
 .glossary-search-grid em {
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   font-style: normal;
 }
 .taxonomy-index {
@@ -495,7 +495,7 @@
 .taxonomy-index small {
   color: var(--muted);
   margin-left: auto;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .tag-cloud {
   display: flex;
@@ -505,7 +505,7 @@
 }
 .tag-cloud a {
   padding: 8px 14px;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
 }
 .tag-cloud small {
   margin-left: 6px;
@@ -520,7 +520,7 @@
 }
 .archive-year h2 {
   color: var(--text-strong);
-  font-size: 26px;
+  font-size: calc(26px * var(--public-font-scale, 1));
   font-weight: 600;
   margin: 0 0 18px;
 }
@@ -529,12 +529,12 @@
 }
 .archive-month h3 {
   color: var(--text-strong);
-  font-size: 17px;
+  font-size: calc(17px * var(--public-font-scale, 1));
   font-weight: 500;
   margin: 0 0 8px;
 }
 .archive-month h3 small {
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
   margin-left: 10px;
 }
@@ -567,7 +567,7 @@
 }
 .archive-month time {
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   white-space: nowrap;
   padding-top: 2px;
 }

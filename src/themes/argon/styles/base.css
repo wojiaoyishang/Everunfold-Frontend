@@ -76,6 +76,9 @@ button {
     color var(--motion-fast) ease,
     border-color var(--motion-normal) ease;
 }
+:where(.public-theme) {
+  font-size: calc(1rem * var(--public-font-scale, 1));
+}
 :where(.public-theme) :where(h1, h2, h3, h4, h5, h6, .hero-title) {
   font-family: var(--theme-heading-font, inherit);
 }

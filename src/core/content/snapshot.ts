@@ -11,7 +11,6 @@ import {
   readLegacySnapshot,
 } from "@/server/content/store";
 import { syncFailure } from "@/server/sync-diagnostics";
-import { SITEMAP_PREVIEW_PATH, sitemapEnabled } from "@/core/seo/sitemap-paths";
 
 export class SnapshotUnavailable extends Error {
   constructor(
@@ -107,10 +106,6 @@ export const readPublicSnapshot = cache(async (): Promise<PublicSnapshot> => {
             }
           : {}),
         ...(applied.policy ? { cachePolicy: applied.policy } : {}),
-        ...(configuration.publicSiteUrl &&
-        sitemapEnabled({ settings: value ?? snapshot.site.settings })
-          ? { sitemapPreviewPath: SITEMAP_PREVIEW_PATH }
-          : {}),
       },
     };
   } catch (error) {

@@ -25,3 +25,16 @@ test("authored CSS cannot introduce external styles, resource requests or HTML",
     });
   }
 });
+
+test("an authored CSS font scales once while nested font percentages inherit", () => {
+  const { css, error } = compileAuthoredCss(
+    "p { font: italic 20px/1.4 serif } p span { font-size: 80% }",
+    "section-1",
+  );
+  assert.equal(error, undefined);
+  assert.match(
+    css,
+    /font: italic calc\(20px \* var\(--public-font-scale, 1\)\)\/1\.4 serif/,
+  );
+  assert.match(css, /font-size: 80%/);
+});

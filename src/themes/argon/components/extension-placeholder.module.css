@@ -8,12 +8,12 @@
   border-radius: 8px;
   color: var(--admin-muted, var(--muted));
   background: var(--admin-subtle, var(--surface));
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   line-height: 1.7;
   overflow-wrap: anywhere;
 }
 .placeholder code {
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 
 .placeholder[data-loading] {

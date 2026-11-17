@@ -1,6 +1,7 @@
 // Use the synchronous parser entry for the eagerly discovered theme modules.
 import parse from "postcss/lib/parse";
 import selectors from "postcss-selector-parser";
+import { scaleFontDeclaration } from "@/core/themes/font-sizing";
 
 export const authoredCssLimit = 16000;
 export const componentCssLimit = 4096;
@@ -63,6 +64,8 @@ export function compileAuthoredCss(
         unsupported =
           node.parent?.type !== "rule" ||
           resourceFunction.test(node.value.replace(/\/\*[\s\S]*?\*\//g, ""));
+        if (!unsupported)
+          node.value = scaleFontDeclaration(node.prop, node.value);
       } else if (node.type === "rule") {
         unsupported =
           node.parent?.type === "rule" || node.selector.includes("&");

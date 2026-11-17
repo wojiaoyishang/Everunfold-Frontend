@@ -1941,3 +1941,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0176-glossary-shortcodes-and-insert-editors.md` | `ADR0176-1` | `d6c22c2ad524eb82b9aff0c63cad8367b4e29d7d1e989d935c62504d708be4aa` |
+
+## 阅读字体、页脚与媒体选择器
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0177-public-typography-footer-and-media-picker.md` | `ADR0177-1` | `ec44c67da22d77fad1a763ae8d152b3bc354c619c20cc544c60a4ff57bf55dcb` |

@@ -14,6 +14,11 @@ import { setAppearance } from "@/core/browser/appearance";
 import { defaultAppearance } from "@/core/browser/appearance-policy";
 import { HomeFeedSettings } from "./home-feed-settings";
 import { useHomeFeed } from "../hooks/use-home-feed";
+import { fontScaleLimits } from "@/core/settings/theme-options";
+import {
+  setFontScalePreference,
+  usePublicFontScale,
+} from "@/core/themes/font-scale";
 
 const defaults = {
   size: 16.5,
@@ -61,6 +66,7 @@ export function ReadingSettings() {
   const motion = useMotion();
   const playback = useBackgroundPlayback();
   const homeFeed = useHomeFeed();
+  const fontScale = usePublicFontScale();
   const [settings, setSettings] = useState(defaults);
   useEffect(() => {
     const frame = requestAnimationFrame(() => {
@@ -115,6 +121,22 @@ export function ReadingSettings() {
             </Button>
           </header>
           <AppearanceSettings />
+          <label className="setting-range">
+            <span id={`${panelId}-font-scale`}>
+              <UiText text="全站字体缩放" />
+            </span>
+            <output>{fontScale}%</output>
+            <RangeField
+              aria-labelledby={`${panelId}-font-scale`}
+              aria-valuetext={`${fontScale}%`}
+              min={fontScaleLimits.min}
+              max={fontScaleLimits.max}
+              value={fontScale}
+              onChange={(event) =>
+                setFontScalePreference(event.currentTarget.valueAsNumber)
+              }
+            />
+          </label>
           <HomeFeedSettings
             value={homeFeed.value}
             onChange={homeFeed.setValue}
@@ -189,7 +211,7 @@ export function ReadingSettings() {
             </div>
           </fieldset>
           <label className="setting-range">
-            <UiText text="字号" />
+            <UiText text="正文字号" />
             <output>{settings.size} px</output>
             <RangeField
               aria-label="正文字号"
@@ -261,6 +283,7 @@ export function ReadingSettings() {
             className="settings-reset"
             onClick={() => {
               update(defaults);
+              setFontScalePreference(null);
               motion.setPreference("full");
               playback.reset();
               setAppearance(defaultAppearance);

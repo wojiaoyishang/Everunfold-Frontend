@@ -26,7 +26,7 @@
   gap: 7px;
   align-items: center;
   color: var(--accent);
-  font-size: 0.82rem;
+  font-size: calc(0.82rem * var(--public-font-scale, 1));
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -72,7 +72,7 @@
 .card h2 {
   margin: 0 0 6px;
   color: var(--text-strong);
-  font-size: 1.05rem;
+  font-size: calc(1.05rem * var(--public-font-scale, 1));
 }
 
 .card p {

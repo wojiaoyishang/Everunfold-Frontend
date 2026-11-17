@@ -24,6 +24,7 @@ import { codeHtml, parseCodeInfo } from "./features/code-options";
 import { frameCodeHtml } from "./features/code-frame";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { literalUnicodeEntities } from "./literal-unicode";
+import { scaleFontSize } from "@/core/themes/font-sizing";
 
 export interface TableOfContentsItem {
   id: string;
@@ -179,7 +180,10 @@ const options: sanitizeHtml.IOptions = {
     "*": { "text-align": [/^(left|center|right|justify)$/] },
     span: {
       "font-family": [/^ef-font-[0-9a-f-]{36}$/],
-      "font-size": [/^(?:[8-9]|[1-6][0-9]|7[0-2])px$/],
+      "font-size": [
+        /^(?:[8-9]|[1-6][0-9]|7[0-2])px$/,
+        /^calc\((?:[8-9]|[1-6][0-9]|7[0-2])px \* var\(--public-font-scale, 1\)\)$/,
+      ],
       color: [/^#[a-fA-F0-9]{6}$/],
     },
   },
@@ -304,6 +308,13 @@ export function renderContent(
                   if (style) node.attribs.style = style;
                   else delete node.attribs.style;
                 }
+              }
+              if (node.name === "span" && node.attribs.style) {
+                node.attribs.style = node.attribs.style.replace(
+                  /(^|;)font-size:(\d+px)(?=;|$)/gi,
+                  (_, start: string, size: string) =>
+                    `${start}font-size:${scaleFontSize(size)}`,
+                );
               }
               // Authored links must not impersonate heading or page-control IDs.
               if (node.name === "a") delete node.attribs.id;

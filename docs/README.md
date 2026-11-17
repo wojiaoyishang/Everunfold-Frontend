@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[阅读字体、页脚与媒体选择器](decisions/0177-public-typography-footer-and-media-picker.md)记录浏览器和主题字号偏好、页脚 HTML 与媒体分页置顶。
+
 [术语短代码与插入表单](decisions/0176-glossary-shortcodes-and-insert-editors.md)和[完整调用规范](development/shortcode-authoring.md)记录三种术语弹窗内容及前端控件注册方式。
 
 [后台每页数量与文章摘要默认值](decisions/0175-page-size-and-excerpt-defaults.md)说明浏览器分页偏好、固定链接编辑和发布摘要设置。

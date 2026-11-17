@@ -52,7 +52,7 @@
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 6px 12px;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   line-height: 1.5;
   font-weight: 500;
   background: var(--surface-soft);
@@ -135,7 +135,7 @@
   border-radius: 6px;
   background: var(--surface-soft);
   color: var(--text);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .versionResults {
   height: min(45dvh, 300px);
@@ -144,7 +144,7 @@
   padding: 3px;
 }
 .versionResults a {
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   line-height: 1.6;
   overflow-wrap: anywhere;
 }
@@ -154,7 +154,7 @@
 .noMatches {
   padding: 16px 10px;
   margin: 0;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .versions > noscript {

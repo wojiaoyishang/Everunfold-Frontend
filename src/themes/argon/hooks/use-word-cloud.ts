@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { usePublicFontScale } from "@/core/themes/font-scale";
 import {
   layoutWords,
   type CloudWord,
@@ -15,6 +16,7 @@ export function useWordCloud(
   options?: CloudLayoutOptions,
 ) {
   const ref = useRef<HTMLDivElement>(null);
+  const scale = usePublicFontScale() / 100;
   const [placed, setPlaced] = useState<PlacedWord[]>([]);
   useEffect(() => {
     const root = ref.current;
@@ -25,6 +27,14 @@ export function useWordCloud(
       const ctx = document.createElement("canvas").getContext("2d");
       if (!ctx) return;
       const width = root.clientWidth;
+      const sizing =
+        scale === 1
+          ? options
+          : {
+              ...options,
+              minSize: (options?.minSize ?? 16) * scale,
+              maxSize: (options?.maxSize ?? (width < 500 ? 34 : 52)) * scale,
+            };
       setPlaced(
         layoutWords(
           words,
@@ -34,7 +44,7 @@ export function useWordCloud(
             ctx.font = `600 ${size}px ${getComputedStyle(root).fontFamily}`;
             return ctx.measureText(text).width;
           },
-          options,
+          sizing,
         ),
       );
     };
@@ -47,6 +57,6 @@ export function useWordCloud(
       observer.disconnect();
       document.fonts.removeEventListener("loadingdone", update);
     };
-  }, [words, desktopHeight, mobileHeight, options]);
+  }, [words, desktopHeight, mobileHeight, options, scale]);
   return { ref, placed };
 }

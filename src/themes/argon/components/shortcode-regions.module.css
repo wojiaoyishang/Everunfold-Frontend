@@ -79,7 +79,7 @@
 
 .dialog > :global(.admin-library-modal-heading) h2 {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: calc(1.2rem * var(--public-font-scale, 1));
 }
 
 .dialog > :global(.admin-library-modal-heading) button {

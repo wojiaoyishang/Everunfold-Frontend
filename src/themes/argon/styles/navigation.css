@@ -98,13 +98,13 @@
   display: block;
 }
 .header-submenu strong {
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   font-weight: 500;
 }
 .header-submenu small {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
 }
 .header-submenu .external-mark {
   margin-left: auto;

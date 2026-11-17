@@ -228,7 +228,7 @@ html[data-motion="reduced"] .navigation-countdown-trail {
   justify-content: center;
   gap: 12px;
   text-align: center;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   line-height: 1.5;
   white-space: nowrap;
 }
@@ -238,7 +238,7 @@ html[data-motion="reduced"] .navigation-countdown-trail {
 }
 .navigation-face {
   color: var(--accent);
-  font-size: 20px;
+  font-size: calc(20px * var(--public-font-scale, 1));
   line-height: 1.2;
   white-space: nowrap;
   transition: color 220ms;
@@ -281,10 +281,10 @@ html[data-motion="reduced"] .navigation-countdown-trail {
     padding-inline: 10px;
   }
   .navigation-message-copy {
-    font-size: 12px;
+    font-size: calc(12px * var(--public-font-scale, 1));
     gap: 8px;
   }
   .navigation-face {
-    font-size: 16px;
+    font-size: calc(16px * var(--public-font-scale, 1));
   }
 }

@@ -2,6 +2,7 @@
 import { SitePublishingSettings } from "./site-publishing";
 import { DiscoverySettings } from "./discovery";
 import { UiText, useT } from "@/core/i18n/provider";
+import { useId } from "react";
 
 import { useSettingsEditor } from "@/core/settings/editor";
 import {
@@ -21,10 +22,13 @@ import { randomUUID } from "@/core/browser/crypto";
 import { Button, TextField } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import { Icon } from "../../components/icon";
+import { defaultFooterHtml } from "../../footer-credits";
+import AdminSourceEditor from "../components/source-editor";
 export function SiteSettingsPage() {
   const { draft, setDraft } = useSettingsEditor();
   const writable = can(useAdminAccount(), "settings:write");
   const t = useT();
+  const footerId = useId();
   const site = draft?.site;
   const siteAuthoring = {
     scene: siteScene,
@@ -118,11 +122,40 @@ export function SiteSettingsPage() {
           <SettingsSection
             id="settings-footer"
             title="页脚"
-            description="版权说明和备案、友链等结构化链接；不执行自定义 HTML。"
+            description="HTML 可替换页脚内容。留空时显示主题署名和已配置的版权说明、链接。"
           >
+            <div className="admin-settings-field">
+              <label htmlFor={footerId}>
+                <UiText text="页脚 HTML" />
+              </label>
+              <AdminSourceEditor
+                kind="html"
+                label={t("页脚 HTML")}
+                inputId={footerId}
+                value={site.footer?.html ?? ""}
+                disabled={!writable}
+                limit={8000}
+                onChange={(html) =>
+                  update({ footer: { ...site.footer, html } })
+                }
+              />
+              <div className="admin-settings-inline-actions">
+                <Button
+                  type="button"
+                  className="admin-button"
+                  disabled={!writable}
+                  onClick={() =>
+                    update({
+                      footer: { ...site.footer, html: defaultFooterHtml(t) },
+                    })
+                  }
+                >
+                  <UiText text="填入默认 HTML" />
+                </Button>
+              </div>
+            </div>
             <SettingsText
               label="版权说明"
-              hint="留空时显示“© 年份 作者 · 站点名称”。"
               value={site.footer?.copyright ?? ""}
               maxLength={300}
               onChange={(copyright) =>

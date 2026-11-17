@@ -4,7 +4,7 @@
   gap: 12px;
   margin-bottom: var(--section-gap, 24px);
   padding: 18px 22px;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   line-height: 24px;
 }
 .site-notice > .icon {
@@ -52,7 +52,7 @@
   border: 0;
   background: transparent;
   color: var(--accent);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   line-height: 24px;
   white-space: nowrap;
 }
@@ -74,7 +74,7 @@
     padding: 14px 16px;
   }
   .site-notice-toggle {
-    font-size: 11px;
+    font-size: calc(11px * var(--public-font-scale, 1));
   }
 }
 @media (prefers-reduced-motion: reduce) {

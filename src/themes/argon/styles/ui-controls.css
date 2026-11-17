@@ -40,7 +40,7 @@
 .ui-form-field > label,
 .ui-field-heading > label {
   color: var(--text);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   font-weight: 550;
 }
 .ui-field-heading {
@@ -251,7 +251,7 @@
   background: var(--surface-soft);
   color: var(--text);
   border-radius: 6px;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   white-space: nowrap;
 }
 .ui-select-trigger:hover,
@@ -363,7 +363,7 @@ html[data-motion="reduced"]
   color: var(--text);
   text-align: left;
   font: inherit;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .ui-select-options > button > span {
   display: flex;
@@ -406,7 +406,7 @@ html[data-motion="reduced"]
   align-items: center;
   gap: 5px;
   padding: 5px;
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .ui-color-trigger > span {
@@ -417,7 +417,7 @@ html[data-motion="reduced"]
 }
 .ui-color-panel {
   padding: 16px;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .ui-color-panel strong {
   display: block;
@@ -498,7 +498,7 @@ html[data-motion="reduced"]
   width: 100%;
   min-width: 0;
   padding: 7px 9px;
-  font: 13px monospace;
+  font: calc(13px * var(--public-font-scale, 1)) monospace;
 }
 .ui-color-channel {
   display: block;
@@ -508,7 +508,7 @@ html[data-motion="reduced"]
   display: flex;
   justify-content: space-between;
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .ui-color-done {
   display: block;

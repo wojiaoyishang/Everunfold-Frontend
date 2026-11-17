@@ -15,5 +15,5 @@
 .error pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }

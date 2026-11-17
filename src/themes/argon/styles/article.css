@@ -68,12 +68,12 @@
   gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--accent);
   margin-bottom: 14px;
 }
 .article-header h1 {
-  font-size: clamp(26px, 2.5vw, 34px);
+  font-size: calc(clamp(26px, 2.5vw, 34px) * var(--public-font-scale, 1));
   color: var(--text-strong);
   line-height: 1.55;
   font-weight: 500;
@@ -99,7 +99,7 @@
   padding-top: 24px;
   margin-top: 23px;
   border-top: 1px dashed var(--line);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .article-action-buttons {
@@ -143,7 +143,7 @@
   }
 }
 .article-content {
-  font-size: var(--reading-font-size, 1rem);
+  font-size: calc(var(--reading-font-size, 1rem) * var(--public-font-scale, 1));
   line-height: 1.95;
   overflow-wrap: anywhere;
 }
@@ -181,16 +181,16 @@
   background: var(--accent);
 }
 .article-content h1 {
-  font-size: 26px;
+  font-size: calc(26px * var(--public-font-scale, 1));
 }
 .article-content h2 {
-  font-size: 23px;
+  font-size: calc(23px * var(--public-font-scale, 1));
 }
 .article-content h3 {
-  font-size: 20px;
+  font-size: calc(20px * var(--public-font-scale, 1));
 }
 .article-content h4 {
-  font-size: 18px;
+  font-size: calc(18px * var(--public-font-scale, 1));
 }
 .article-content a,
 .comment-copy a {
@@ -242,7 +242,7 @@
   padding: 0;
   background: transparent;
   color: var(--text);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .article-content img {
   display: block;
@@ -259,7 +259,7 @@
 .article-content figcaption {
   color: var(--muted);
   text-align: center;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .article-content table {
   border-collapse: collapse;
@@ -360,7 +360,7 @@
   gap: 5px;
   align-items: center;
   padding: 4px 10px;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   border-radius: 4px;
   transition:
     transform 240ms var(--motion-ease),
@@ -368,7 +368,7 @@
 }
 .article-footer > p {
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   margin: 17px 0 0;
 }
 

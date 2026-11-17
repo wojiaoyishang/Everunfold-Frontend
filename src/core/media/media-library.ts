@@ -1,4 +1,5 @@
 "use client";
+import { useMemo } from "react";
 import { randomUUID } from "@/core/browser/crypto";
 import { queryMedia, uploadMedia } from "@/core/contracts/settings";
 import type {
@@ -12,26 +13,37 @@ import {
   type LibraryAdapter,
 } from "./asset-library";
 export type MediaUploadPayload = { metadata: MediaUpload; file: File };
+async function readMediaCatalog(
+  base: string,
+  query: string,
+  page: number,
+  context: string,
+  csrf: string,
+  signal: AbortSignal,
+  pinnedIds?: readonly string[],
+) {
+  const [kind, state] = context.split(":");
+  return (
+    await queryMedia(
+      base,
+      {
+        query,
+        page,
+        kind: kind as MediaQuery["kind"],
+        trash: state === "trash",
+        ...(pinnedIds?.length ? { pinned_ids: [...pinnedIds] } : {}),
+      },
+      csrf,
+      { signal },
+    )
+  ).data;
+}
+
 export const mediaLibraryAdapter: LibraryAdapter<
   MediaItem,
   MediaUploadPayload
 > = {
-  read: async (base, query, page, context, csrf, signal) => {
-    const [kind, state] = context.split(":");
-    return (
-      await queryMedia(
-        base,
-        {
-          query,
-          page,
-          kind: kind as MediaQuery["kind"],
-          trash: state === "trash",
-        },
-        csrf,
-        { signal },
-      )
-    ).data;
-  },
+  read: readMediaCatalog,
   prepare: async (file, context) => {
     const kind = context.split(":")[0];
     const video = /\.(mp4|webm)$/i.test(file.name);
@@ -69,9 +81,17 @@ export const mediaLibraryAdapter: LibraryAdapter<
 export function useMediaLibrary(
   kind: NonNullable<MediaQuery["kind"]>,
   trash = false,
+  pinnedIds?: readonly string[],
 ) {
-  return useAssetLibrary(
-    mediaLibraryAdapter,
-    `${kind}:${trash ? "trash" : "active"}`,
+  const adapter = useMemo<LibraryAdapter<MediaItem, MediaUploadPayload>>(
+    () =>
+      pinnedIds?.length
+        ? {
+            ...mediaLibraryAdapter,
+            read: (...args) => readMediaCatalog(...args, pinnedIds),
+          }
+        : mediaLibraryAdapter,
+    [pinnedIds],
   );
+  return useAssetLibrary(adapter, `${kind}:${trash ? "trash" : "active"}`);
 }

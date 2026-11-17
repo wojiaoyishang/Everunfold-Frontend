@@ -416,6 +416,7 @@ export function SeoFieldsEditor({
       {picker && (
         <MediaPickerDialog
           kind="image"
+          value={value.share_image_media_id ?? undefined}
           title="选择分享图片"
           confirmLabel="使用此图片"
           onClose={() => setPicker(false)}

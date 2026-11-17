@@ -17,7 +17,7 @@
   pointer-events: none;
   text-align: center;
   color: var(--muted);
-  font-size: clamp(15px, 3vw, 18px);
+  font-size: calc(clamp(15px, 3vw, 18px) * var(--public-font-scale, 1));
   --extension-progress-width: 26rem;
   --extension-progress-height: 8px;
   opacity: 0;

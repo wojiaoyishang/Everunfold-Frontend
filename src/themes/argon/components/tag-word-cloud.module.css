@@ -12,7 +12,7 @@
 .heading button {
   width: auto;
   padding: 8px 12px;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .stage {
   position: relative;
@@ -69,7 +69,7 @@
 }
 .list small,
 .hint {
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 @media (max-width: 500px) {

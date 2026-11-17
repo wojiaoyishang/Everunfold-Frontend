@@ -14,12 +14,12 @@
   border-radius: 14px;
 }
 .dialog :global(.ui-confirm-heading h2) {
-  font-size: 19px;
+  font-size: calc(19px * var(--public-font-scale, 1));
   letter-spacing: 0.01em;
 }
 .dialog :global(.ui-confirm-description) {
   margin-top: 4px;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   line-height: 1.65;
 }
 .dialog :global(.ui-confirm-content) {
@@ -38,7 +38,7 @@
   width: 100%;
   min-height: 44px;
   border-radius: 10px;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .dialog :global(.ui-confirm-submit.ui-button):disabled {
   opacity: 1;

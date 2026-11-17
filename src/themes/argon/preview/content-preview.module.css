@@ -15,7 +15,7 @@
 }
 .label {
   min-width: 0;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   line-height: 20px;
 }
 .label > svg {
@@ -35,7 +35,7 @@
 }
 .details > span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .actions {
   flex-shrink: 0;
@@ -47,7 +47,7 @@
   color: var(--accent);
   border-radius: 6px;
   padding: 7px 10px;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   text-decoration: none;
   white-space: nowrap;
 }
@@ -70,7 +70,7 @@
 .notice {
   margin: 0 3px 17px;
   color: #fff;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   text-shadow: 0 1px 4px rgb(0 0 0 / 45%);
 }
 .state {
@@ -80,7 +80,7 @@
 }
 .state h1 {
   color: var(--text);
-  font-size: 20px;
+  font-size: calc(20px * var(--public-font-scale, 1));
 }
 .state > svg {
   width: 28px;

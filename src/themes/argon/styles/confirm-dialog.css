@@ -21,7 +21,7 @@
   color: var(--text);
   background: var(--surface);
   font: inherit;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   line-height: 1.65;
   animation: ui-confirm-enter 280ms var(--motion-ease) both;
 }
@@ -68,7 +68,7 @@
 }
 .ui-confirm-heading h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: calc(18px * var(--public-font-scale, 1));
   font-weight: 600;
   line-height: 1.5;
 }
@@ -88,7 +88,7 @@
 .ui-confirm-description {
   margin-top: 5px;
   color: var(--muted);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   overflow-wrap: anywhere;
 }
 .ui-confirm-content {
@@ -105,7 +105,7 @@
   background: color-mix(in srgb, var(--confirm-danger) 8%, var(--surface));
   color: var(--confirm-danger);
   border-radius: 7px;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   overflow-wrap: anywhere;
 }
 .ui-confirm-actions {

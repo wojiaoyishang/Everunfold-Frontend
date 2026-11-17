@@ -13,7 +13,7 @@
 }
 .heading h1 {
   margin: 0 0 10px;
-  font-size: clamp(26px, 4vw, 38px);
+  font-size: calc(clamp(26px, 4vw, 38px) * var(--public-font-scale, 1));
 }
 .heading p {
   margin: 0;

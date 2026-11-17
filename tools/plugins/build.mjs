@@ -17,6 +17,7 @@ import { parseArgs } from "node:util";
 import { writeArtifact } from "../write-artifact.mjs";
 import { bundleFonts } from "./fonts.mjs";
 import { createPluginRegistry } from "../../src/core/plugins/create-registry.ts";
+import { scaleStylesheetFonts } from "../../src/core/themes/font-sizing.ts";
 import {
   SDK_CLIENT_EXPORTS,
   REACT_EXPORTS,
@@ -275,6 +276,8 @@ export async function buildPlugin(
       if (isJs || isCss) {
         let text = bytes.toString();
         for (const [from, to] of renames) text = text.replaceAll(from, to);
+        if (isCss && plugin.surface !== "admin")
+          text = scaleStylesheetFonts(text);
         bytes = Buffer.from(text);
       }
       const hash = digest(bytes);

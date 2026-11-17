@@ -320,6 +320,7 @@ function CoverPanel({
       {picker && (
         <EditorMediaDialog
           kind="image"
+          value={settings.cover_media_id ?? undefined}
           onClose={() => setPicker(false)}
           onPick={(item) => {
             if (disabled) return;

@@ -44,13 +44,11 @@ export function Sidebar({
   useEffect(() => {
     if (!open) return;
     const trigger = triggerRef.current;
-    const previousOverflow = document.body.style.overflow;
     const desktop = window.matchMedia("(min-width: 901px)");
     const onViewportChange = () => {
       if (desktop.matches) setOpen(false);
     };
-    document.body.style.overflow = "hidden";
-    closeRef.current?.focus();
+    closeRef.current?.focus({ preventScroll: true });
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") setOpen(false);
       if (event.key !== "Tab") return;
@@ -76,10 +74,9 @@ export function Sidebar({
     document.addEventListener("keydown", onKeyDown);
     desktop.addEventListener("change", onViewportChange);
     return () => {
-      document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
       desktop.removeEventListener("change", onViewportChange);
-      trigger?.focus();
+      trigger?.focus({ preventScroll: true });
     };
   }, [open, setOpen, triggerRef]);
   const profile = themeProfile(site.settings);

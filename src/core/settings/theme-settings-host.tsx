@@ -9,9 +9,20 @@ import {
 } from "react";
 
 import { useSettingsEditor } from "./editor";
-import { activeThemeId } from "./theme-options";
-import { SettingsFrame } from "@/themes/argon/admin/settings/shared";
+import {
+  activeThemeId,
+  fontScaleLimits,
+  themeProfile,
+  updateThemeProfile,
+} from "./theme-options";
+import {
+  SettingsFrame,
+  SettingsSection,
+} from "@/themes/argon/admin/settings/shared";
 import { InstalledThemeSection } from "@/themes/argon/admin/settings/installed-theme";
+import { RangeField } from "@/themes/argon/components/ui/range-field";
+import { useAdminAccount } from "@/core/admin/account-context";
+import { can } from "@/core/accounts/permissions";
 import { UiText } from "@/core/i18n/provider";
 import { Icon } from "@/themes/argon/components/icon";
 import type { Taxonomy } from "@/core/content/types";
@@ -46,8 +57,10 @@ function ThemeUnavailable({ id }: { id: string }) {
 }
 
 export function ThemeSettingsHost(props: ThemeSettingsProps) {
-  const { draft } = useSettingsEditor();
+  const { draft, setDraft } = useSettingsEditor();
+  const writable = can(useAdminAccount(), "settings:write");
   const theme = activeThemeId(draft);
+  const profile = themeProfile(draft, theme);
   const Panel = panels.get(theme);
   return (
     <SettingsFrame
@@ -55,6 +68,38 @@ export function ThemeSettingsHost(props: ThemeSettingsProps) {
       description="主题切换保持在公共设置；当前主题的外观与阅读选项由主题自行提供。"
     >
       <InstalledThemeSection />
+      {profile && (
+        <SettingsSection
+          id="settings-font-scale"
+          title="字体缩放"
+          description="默认缩放适用于所有前台文字，访客可以在阅读设置中调整。"
+        >
+          <label className="admin-settings-field">
+            <span>
+              <span id="default-font-scale-label">
+                <UiText text="默认字体缩放" />
+              </span>{" "}
+              <output>{profile.font_scale_percent}%</output>
+            </span>
+            <RangeField
+              aria-labelledby="default-font-scale-label"
+              aria-valuetext={`${profile.font_scale_percent}%`}
+              disabled={!writable}
+              min={fontScaleLimits.min}
+              max={fontScaleLimits.max}
+              value={profile.font_scale_percent}
+              onChange={(event) => {
+                const font_scale_percent = event.currentTarget.valueAsNumber;
+                setDraft((current) =>
+                  current
+                    ? updateThemeProfile(current, theme, { font_scale_percent })
+                    : current,
+                );
+              }}
+            />
+          </label>
+        </SettingsSection>
+      )}
       {draft ? (
         Panel ? (
           <Suspense

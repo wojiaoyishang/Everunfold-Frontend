@@ -41,7 +41,7 @@ html:not(:has([data-surface="admin"]))[data-theme="dark"][data-amoled="true"] {
 .appearance-check {
   display: flex;
   gap: 8px;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   align-items: center;
   padding-bottom: 8px;
 }

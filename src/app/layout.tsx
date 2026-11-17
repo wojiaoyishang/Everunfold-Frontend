@@ -13,6 +13,7 @@ import "./globals.css";
 import "@/themes/argon/shared.css";
 import { initializeMotion } from "@/core/browser/motion-policy";
 import { initializeAppearance } from "@/core/browser/appearance-policy";
+import { initializeFontScale } from "@/core/browser/font-scale-policy";
 import { ToastProvider } from "@/themes/argon/components/ui/toast/toast-provider";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +58,7 @@ export default async function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: initializeAppearance }} />
         <script dangerouslySetInnerHTML={{ __html: initializeMotion }} />
+        <script dangerouslySetInnerHTML={{ __html: initializeFontScale }} />
       </head>
       <body>
         <LocaleProvider

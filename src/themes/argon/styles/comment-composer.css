@@ -20,13 +20,13 @@
 }
 .composer-heading h2 {
   color: var(--text-strong);
-  font-size: 21px;
+  font-size: calc(21px * var(--public-font-scale, 1));
   font-weight: 500;
   margin: 0;
 }
 .composer-heading p {
   margin: 7px 0 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .composer-reply {
@@ -40,7 +40,7 @@
   background: var(--accent-soft);
   border-left: 3px solid var(--accent);
   border-radius: 5px;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .composer-reply strong {
   font-weight: 500;
@@ -48,7 +48,7 @@
 .composer-reply p {
   margin: 4px 0 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   overflow-wrap: anywhere;
 }
 .composer-reply > button {
@@ -106,7 +106,7 @@
   gap: 6px;
   border-radius: 4px;
   padding: 6px 10px;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
   background: transparent;
 }
@@ -137,7 +137,7 @@
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   line-height: 1.85;
 }
 .composer-editor textarea::placeholder {
@@ -154,7 +154,7 @@
 }
 .preview-empty {
   color: var(--muted);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .composer-editor-footer {
   display: flex;
@@ -163,7 +163,7 @@
   gap: 8px 12px;
   padding: 8px 14px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: calc(10px * var(--public-font-scale, 1));
   border-top: 1px solid var(--line);
 }
 .composer-editor-footer label {
@@ -184,7 +184,7 @@
 }
 .composer-identity label,
 .composer-extra-fields label {
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .composer-identity label > span:first-child {
@@ -200,7 +200,7 @@
   border-radius: 5px;
   color: var(--text);
   background: var(--surface-soft);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .composer-extra-toggle {
   display: flex;
@@ -209,7 +209,7 @@
   align-self: end;
   gap: 8px;
   height: 39px;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
   background: transparent;
 }
@@ -229,7 +229,7 @@
   border-radius: 6px;
   background: color-mix(in srgb, var(--accent-soft) 72%, transparent);
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   line-height: 1.7;
 }
 .composer-signed-identity .icon {
@@ -255,7 +255,7 @@
 .composer-submit-row p {
   margin: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   line-height: 1.8;
 }
 .composer-submit-row button {
@@ -273,7 +273,7 @@
 .form-error {
   display: block;
   margin: 7px 0 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: #c24e69;
 }
 .comment-composer [aria-invalid="true"] {

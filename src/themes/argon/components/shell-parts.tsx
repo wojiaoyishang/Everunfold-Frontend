@@ -1,10 +1,60 @@
-import type { CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { themeProfile } from "@/core/settings/theme-options";
 import type { Site } from "@/core/content/types";
 import { publicHref } from "@/core/content/urls";
+import { renderContent } from "@/core/rendering/content";
 import { AppLink } from "./navigation-link";
 import { TextLink } from "./ui/primitives";
 import { UiText } from "@/core/i18n/provider";
+import { footerCredits } from "../footer-credits";
+
+const segmenter = new Intl.Segmenter(undefined, { granularity: "grapheme" });
+const typingLead = 180;
+const caretHold = 320;
+const typingLineGap = 240;
+
+function TypedLine({
+  glyphs,
+  start,
+  pace,
+}: {
+  glyphs: Intl.SegmentData[];
+  start: number;
+  pace: number;
+}) {
+  return (
+    <>
+      <span className="sr-only">
+        {glyphs.map(({ segment }) => segment).join("")}
+      </span>
+      <span className="hero-typing-line" aria-hidden="true">
+        <span
+          className="hero-typing-start"
+          style={
+            {
+              "--hero-typing-delay": `${start}ms`,
+              "--hero-caret-duration": `${typingLead}ms`,
+            } as CSSProperties
+          }
+        />
+        {glyphs.map(({ index, segment }, order) => (
+          <span
+            key={index}
+            className="hero-glyph"
+            style={
+              {
+                "--hero-typing-delay": `${start + typingLead + order * pace}ms`,
+                "--hero-caret-duration": `${order === glyphs.length - 1 ? caretHold : pace}ms`,
+              } as CSSProperties
+            }
+          >
+            {segment}
+          </span>
+        ))}
+      </span>
+    </>
+  );
+}
 
 export function SiteHero({ site }: { site: Site }) {
   const theme = themeProfile(site.settings);
@@ -15,13 +65,13 @@ export function SiteHero({ site }: { site: Site }) {
       : "";
   const motion = theme?.hero_animation ?? "rise";
   const typing = motion === "typewriter";
-  const glyphs = typing
-    ? Array.from(
-        new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(
-          title,
-        ),
-      )
-    : [];
+  const pace = theme?.hero_typing_ms ?? 30;
+  const titleGlyphs = typing ? Array.from(segmenter.segment(title)) : [];
+  const subtitleStart =
+    typingLead +
+    Math.max(0, titleGlyphs.length - 1) * pace +
+    caretHold +
+    typingLineGap;
   return (
     <section
       className="hero"
@@ -31,29 +81,24 @@ export function SiteHero({ site }: { site: Site }) {
       <div className="hero-copy">
         <p className="hero-title">
           {typing ? (
-            <>
-              <span className="sr-only">{title}</span>
-              <span aria-hidden="true">
-                {glyphs.map(({ index, segment }, order) => (
-                  <span
-                    key={index}
-                    className="hero-glyph"
-                    style={
-                      {
-                        "--hero-typing-delay": `${order * (theme?.hero_typing_ms ?? 30)}ms`,
-                      } as CSSProperties
-                    }
-                  >
-                    {segment}
-                  </span>
-                ))}
-              </span>
-            </>
+            <TypedLine glyphs={titleGlyphs} start={0} pace={pace} />
           ) : (
             title
           )}
         </p>
-        {subtitle && <p className="hero-subtitle">{subtitle}</p>}
+        {subtitle && (
+          <p className="hero-subtitle">
+            {typing ? (
+              <TypedLine
+                glyphs={Array.from(segmenter.segment(subtitle))}
+                start={subtitleStart}
+                pace={pace}
+              />
+            ) : (
+              subtitle
+            )}
+          </p>
+        )}
       </div>
     </section>
   );
@@ -61,39 +106,53 @@ export function SiteHero({ site }: { site: Site }) {
 
 export function SiteFooter({ site }: { site: Site }) {
   const footer = site.settings?.site.footer;
+  const source = footer?.html?.trim();
+  const html = useMemo(
+    () =>
+      source
+        ? renderContent(
+            {
+              id: "site-footer",
+              content: [{ id: "footer", type: "html", content: source }],
+              media_urls: {},
+            },
+            [],
+            { disableShortcodeScripts: true, omitGlossaryPopups: true },
+          ).html.trim()
+        : "",
+    [source],
+  );
+  if (source && !html) return null;
   const links = (footer?.links ?? []).filter(
     (link) => link.label.trim() && publicHref(link.href),
   );
-  const sitemap = site.sitemapPreviewPath;
-  const showSitemap = sitemap && !links.some((link) => link.href === sitemap);
   return (
-    <footer className="site-footer">
-      <p>
-        {footer?.copyright ||
-          `© ${new Date().getFullYear()} ${site.author} · ${site.hero_title || site.name}`}
-      </p>
-      {(links.length > 0 || showSitemap) && (
-        <p className="footer-links">
-          {links.map((link, index) => (
-            <span key={link.id}>
-              {index > 0 && <span className="footer-separator">·</span>}
-              <AppLink href={link.href}>{link.label}</AppLink>
-            </span>
-          ))}
-          {showSitemap && (
-            <span>
-              {links.length > 0 && <span className="footer-separator">·</span>}
-              <TextLink href={sitemap}>
-                <UiText text="站点地图" />
-              </TextLink>
-            </span>
+    <footer className="site-footer" role="contentinfo">
+      {html ? (
+        <div dangerouslySetInnerHTML={{ __html: html }} />
+      ) : (
+        <>
+          {footer?.copyright && <p>{footer.copyright}</p>}
+          {links.length > 0 && (
+            <p>
+              {links.map((link, index) => (
+                <span key={link.id}>
+                  {index > 0 && <span className="footer-separator">·</span>}
+                  <AppLink href={link.href}>{link.label}</AppLink>
+                </span>
+              ))}
+            </p>
           )}
-        </p>
+          <p>
+            {footerCredits.map(({ label, name, href }, index) => (
+              <span key={name}>
+                {index > 0 && <span className="footer-separator">·</span>}
+                <UiText text={label} /> <TextLink href={href}>{name}</TextLink>
+              </span>
+            ))}
+          </p>
+        </>
       )}
-      <p>
-        Every story is still unfolding.{" "}
-        <span className="footer-separator">·</span> Powered by Everunfold
-      </p>
     </footer>
   );
 }

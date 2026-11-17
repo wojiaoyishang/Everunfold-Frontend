@@ -89,7 +89,7 @@
   display: flex;
   gap: 30px;
   align-items: center;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
 }
 .header-menu-link {
   display: inline-flex;
@@ -203,7 +203,7 @@ html[data-theme="dark"] .theme-moon {
   padding-top: 10px;
 }
 .hero-title {
-  font-size: 30px;
+  font-size: calc(30px * var(--public-font-scale, 1));
   font-weight: 400;
   margin: 0;
   text-shadow: 0 2px 14px rgb(0 0 0 / 15%);
@@ -211,7 +211,7 @@ html[data-theme="dark"] .theme-moon {
   overflow-wrap: anywhere;
 }
 .hero-subtitle {
-  font-size: 16px;
+  font-size: calc(16px * var(--public-font-scale, 1));
   font-weight: 400;
   margin: 11px 0 0;
   opacity: 0.9;
@@ -222,23 +222,41 @@ html:not([data-motion="reduced"]) {
   .hero[data-hero-animation="rise"] :is(.hero-title, .hero-subtitle) {
     animation: hero-arrive 800ms var(--motion-ease) both;
   }
-  .hero[data-hero-animation="fade"] :is(.hero-title, .hero-subtitle),
-  .hero[data-hero-animation="typewriter"] .hero-subtitle {
+  .hero[data-hero-animation="fade"] :is(.hero-title, .hero-subtitle) {
     animation: hero-fade 650ms ease-out both;
   }
   .hero:not([data-hero-animation="none"]) .hero-subtitle {
     animation-delay: 120ms;
   }
-  .hero[data-hero-animation="typewriter"] .hero-glyph {
-    /* Finished glyphs fall back to their normal visible state. */
-    animation: hero-glyph-reveal 1ms linear var(--hero-typing-delay) backwards;
+  .hero-glyph {
+    animation: hero-glyph-reveal 1ms step-end var(--hero-typing-delay) backwards;
+  }
+  :is(.hero-glyph, .hero-typing-start)::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 100%;
+    top: 0.08em;
+    width: 2px;
+    height: 0.9em;
+    background: currentColor;
+    visibility: hidden;
+    animation: hero-caret var(--hero-caret-duration) step-end
+      var(--hero-typing-delay);
   }
 }
+.hero-typing-line {
+  white-space: pre-wrap;
+}
+.hero-glyph,
+.hero-typing-start {
+  position: relative;
+}
 @media (prefers-reduced-motion: reduce) {
-  html:not([data-motion="full"])
-    .hero
-    :is(.hero-title, .hero-subtitle, .hero-glyph) {
-    animation: none !important;
+  html:not([data-motion="full"]) .hero {
+    :is(.hero-title, .hero-subtitle, .hero-glyph),
+    :is(.hero-glyph, .hero-typing-start)::after {
+      animation: none !important;
+    }
   }
 }
 @keyframes hero-fade {
@@ -252,6 +270,14 @@ html:not([data-motion="reduced"]) {
   }
   to {
     opacity: 1;
+  }
+}
+@keyframes hero-caret {
+  from {
+    visibility: visible;
+  }
+  to {
+    visibility: hidden;
   }
 }
 

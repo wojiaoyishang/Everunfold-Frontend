@@ -22,7 +22,7 @@
   margin-inline-end: 0.4em;
   overflow: hidden;
   vertical-align: middle;
-  font-size: var(--language-flag-size);
+  font-size: calc(var(--language-flag-size) * var(--public-font-scale, 1));
   mask-image: linear-gradient(
     to right,
     transparent,

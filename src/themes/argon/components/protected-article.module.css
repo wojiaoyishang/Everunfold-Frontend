@@ -21,12 +21,12 @@
 }
 .gate h2 {
   margin: 0;
-  font-size: 22px;
+  font-size: calc(22px * var(--public-font-scale, 1));
   font-weight: 600;
 }
 .gate p {
   color: var(--muted);
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   line-height: 1.8;
   max-width: 520px;
   margin: 0;
@@ -77,7 +77,7 @@
 }
 .gate .countdown {
   color: var(--accent);
-  font-size: clamp(15px, 3vw, 19px);
+  font-size: calc(clamp(15px, 3vw, 19px) * var(--public-font-scale, 1));
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

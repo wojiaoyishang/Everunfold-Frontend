@@ -16,7 +16,7 @@
   border-inline-start: 3px solid var(--accent);
   border-radius: 8px;
   box-shadow: var(--shadow);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   line-height: 1.6;
   pointer-events: auto;
   opacity: 0;

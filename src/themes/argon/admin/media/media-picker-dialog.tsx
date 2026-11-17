@@ -9,6 +9,7 @@ import { Icon } from "../../components/icon";
 import { MediaBrowser } from "./media-browser";
 import { MediaPickerInspector } from "./media-picker-inspector";
 import { mediaReferenceId } from "@/core/media/references";
+import { useAdminAccount, useAdminRequest } from "@/core/admin/account-context";
 import styles from "./media-picker.module.css";
 
 type MediaPickerProps = {
@@ -26,6 +27,18 @@ type MediaPickerProps = {
     }
 );
 
+function pinReferences(values: readonly unknown[]) {
+  const ids = new Set<string>();
+  for (const value of values) {
+    if (typeof value !== "string") continue;
+    const id = mediaReferenceId(value).toLowerCase();
+    if (/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(id))
+      ids.add(`media:${id}`);
+    if (ids.size === 60) break;
+  }
+  return [...ids];
+}
+
 /** All media callers stage a choice in the same full-window picker before confirming. */
 export function MediaPickerDialog(props: MediaPickerProps) {
   const {
@@ -36,13 +49,30 @@ export function MediaPickerDialog(props: MediaPickerProps) {
   } = props;
   const id = useId();
   const t = useT();
+  const account = useAdminAccount();
+  const { baseUrl } = useAdminRequest();
+  const recentKey = `everunfold.media-picker:${baseUrl}:${account.id}:${kind}:${Boolean(props.multiple)}`;
+  const [pinnedIds] = useState(() => {
+    const current = pinReferences(
+      props.multiple ? (props.excludedIds ?? []) : [props.value],
+    );
+    if (current.length) return current;
+    try {
+      const previous = JSON.parse(localStorage.getItem(recentKey) ?? "null");
+      return Array.isArray(previous) ? pinReferences(previous) : [];
+    } catch {
+      return [];
+    }
+  });
   const [tab, setTab] = useState<"upload" | "library">("library");
   const [selected, setSelected] = useState<MediaItem[]>([]);
   const [confirmed, setConfirmed] = useState(false);
   const [closing, setClosing] = useState(false);
   const current = selected.at(-1);
   const maxSelection = props.multiple ? props.maxSelection : undefined;
-  const excludedIds = new Set(props.multiple ? props.excludedIds : undefined);
+  const excludedIds = new Set(
+    props.multiple ? props.excludedIds?.map(mediaReferenceId) : undefined,
+  );
   const full = maxSelection !== undefined && selected.length >= maxSelection;
   const pick = (item: MediaItem) => {
     if (!props.multiple) {
@@ -67,6 +97,14 @@ export function MediaPickerDialog(props: MediaPickerProps) {
       onClose={() => setClosing(true)}
       onExited={() => {
         if (confirmed && current) {
+          try {
+            localStorage.setItem(
+              recentKey,
+              JSON.stringify(pinReferences(selected.map((item) => item.id))),
+            );
+          } catch {
+            /* Optional browser preference. */
+          }
           if (props.multiple) props.onPick(selected);
           else props.onPick(current);
         }
@@ -123,6 +161,7 @@ export function MediaPickerDialog(props: MediaPickerProps) {
             <MediaBrowser
               kind={kind}
               value={props.multiple ? undefined : (current?.id ?? props.value)}
+              pinnedIds={pinnedIds}
               selection={
                 props.multiple
                   ? {

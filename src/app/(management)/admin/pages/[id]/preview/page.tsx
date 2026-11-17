@@ -1,4 +1,5 @@
 import { PublicTheme } from "@/core/themes/presentation";
+import { themeProfile } from "@/core/settings/theme-options";
 import { readActiveTheme } from "@/core/themes/server";
 import { notFound } from "next/navigation";
 import { readPublicSnapshot } from "@/core/content/snapshot";
@@ -23,7 +24,12 @@ export default async function PagePreview({
   if (!isManagedPagePreviewPath(`/admin/pages/${id}/preview`)) notFound();
   const snapshot = await readPublicSnapshot().catch(() => null);
   return (
-    <PublicTheme theme={await readActiveTheme()}>
+    <PublicTheme
+      theme={await readActiveTheme()}
+      defaultFontScale={
+        themeProfile(snapshot?.site.settings)?.font_scale_percent
+      }
+    >
       <ManagedPagePreview
         key={id}
         id={id}

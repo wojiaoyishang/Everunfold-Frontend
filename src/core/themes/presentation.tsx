@@ -1,5 +1,5 @@
 "use client";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
   renderThemeComponent,
   ThemeComponentsProvider,
@@ -11,6 +11,10 @@ import { templateTargets } from "./targets";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { inheritedTypography } from "@/core/fonts/registry";
 import { FontStyles, useTypographyStyle } from "@/core/fonts/provider";
+import { fontScaleLimits } from "@/core/settings/theme-options";
+import { fontScaleOverride } from "@/core/browser/font-scale-policy";
+import { PublicFontScale, useFontScalePreference } from "./font-scale";
+import { scaleStylesheetFonts } from "./font-sizing";
 import type {
   ThemeTemplateProps,
   ThemeViewContext,
@@ -21,34 +25,42 @@ const styles = import.meta.glob<{ default: string }>(
   { eager: true },
 );
 const styleById = new Map(
-  Object.entries(themeModules).map(([path, theme]) => [
-    theme.id,
-    styles[path.replace(/theme\.ts$/, "styles.ts")]?.default,
-  ]),
+  Object.entries(themeModules).map(([path, theme]) => {
+    const css = styles[path.replace(/theme\.ts$/, "styles.ts")]?.default;
+    return [theme.id, css ? scaleStylesheetFonts(css) : ""];
+  }),
 );
 
 /** CSS is emitted only for this public tree, in the same order as the inheritance chain. */
 export function PublicTheme({
   theme,
   children,
+  defaultFontScale = fontScaleLimits.default,
   followActive = true,
 }: {
   followActive?: boolean;
   theme: string;
   children: ReactNode;
+  defaultFontScale?: number;
 }) {
   const runtime = usePluginRuntime();
   theme = (followActive && runtime.catalog?.theme) || theme;
   const chain = themeRegistry.chain(theme);
   const typography = inheritedTypography(chain);
   const typographyStyle = useTypographyStyle(typography);
+  const fontScale = useFontScalePreference(defaultFontScale);
   return (
     <ThemeComponentsProvider theme={theme}>
       <div
         className="public-theme"
         data-public-theme={theme}
         data-theme-chain={chain.map((item) => item.id).join(" ")}
-        style={typographyStyle}
+        style={
+          {
+            ...typographyStyle,
+            "--public-font-scale": `var(${fontScaleOverride}, ${defaultFontScale / 100})`,
+          } as CSSProperties
+        }
       >
         {[...chain]
           .reverse()
@@ -60,7 +72,9 @@ export function PublicTheme({
               dangerouslySetInnerHTML={{ __html: styleById.get(item.id) ?? "" }}
             />
           ))}
-        {children}
+        <PublicFontScale.Provider value={fontScale}>
+          {children}
+        </PublicFontScale.Provider>
         <FontStyles
           ids={[typography.body, typography.heading].filter(
             (id): id is string => Boolean(id),

@@ -11,7 +11,7 @@
   gap: 12px;
 }
 .heading label {
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--public-font-scale, 1));
   font-weight: 500;
 }
 .refresh {
@@ -20,7 +20,7 @@
   gap: 5px;
   padding: 4px;
   color: var(--muted);
-  font-size: 0.8rem;
+  font-size: calc(0.8rem * var(--public-font-scale, 1));
   background: transparent;
   border: 0;
 }
@@ -55,7 +55,7 @@
 }
 .login .heading label {
   color: var(--text-strong);
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   font-weight: 500;
   white-space: nowrap;
 }
@@ -65,7 +65,7 @@
   border: 1px solid transparent;
   border-radius: 7px;
   color: var(--accent);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   font-weight: 500;
   white-space: nowrap;
   transition:
@@ -140,7 +140,7 @@
   text-align: center;
   text-transform: uppercase;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 18px;
+  font-size: calc(18px * var(--public-font-scale, 1));
   font-weight: 600;
   letter-spacing: 0.16em;
   background: var(--surface);
@@ -148,7 +148,7 @@
 .login [data-captcha-answer] input::placeholder {
   color: var(--muted);
   font-family: inherit;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   font-weight: 400;
   letter-spacing: 0.02em;
   text-transform: none;
@@ -160,7 +160,7 @@
 }
 .login .hint {
   padding-inline: 2px;
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   line-height: 1.65;
 }
 .login[aria-busy="true"] .image img {
@@ -182,7 +182,7 @@
     color-mix(in srgb, var(--danger-color, #b44545) 24%, transparent);
   border-radius: 7px;
   background: color-mix(in srgb, var(--danger-color, #b44545) 6%, transparent);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   line-height: 1.6;
 }
 @media (max-width: 600px) {
@@ -204,7 +204,7 @@
 .field small,
 .field p {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: calc(0.8rem * var(--public-font-scale, 1));
   line-height: 1.6;
   color: var(--muted);
 }
@@ -246,14 +246,14 @@
   background: var(--surface-soft);
 }
 .dialog .heading > span {
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .dialog .refresh {
   gap: 5px;
   padding: 4px 0 4px 8px;
   color: var(--accent);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .dialog .refresh svg {
   width: 14px;
@@ -288,11 +288,11 @@
 }
 .answerHeading label {
   color: var(--text-strong);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   font-weight: 500;
 }
 .dialog .answerHeading small {
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
 }
 .dialog input {
   height: 54px;
@@ -300,7 +300,7 @@
   text-align: center;
   text-transform: uppercase;
   font-family: var(--font-mono, ui-monospace, monospace);
-  font-size: 23px;
+  font-size: calc(23px * var(--public-font-scale, 1));
   font-weight: 500;
   line-height: 1.5;
   letter-spacing: 0.35em;
@@ -323,7 +323,7 @@
 }
 .dialog .hint {
   margin-top: 9px;
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   line-height: 1.7;
 }
 .dialog > p {
@@ -363,7 +363,7 @@
   display: grid;
   place-items: center;
   color: var(--text);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 @keyframes captcha-spin {
   to {

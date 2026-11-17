@@ -23,7 +23,7 @@
   padding: 12px 16px;
   background: var(--accent-soft);
   border-radius: 6px;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .media-failures button {
   background: none;
@@ -51,7 +51,7 @@
 .viewer-toolbar > span {
   margin-right: auto;
   opacity: 0.7;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .enhanced-viewer button {
   color: #fff;
@@ -104,7 +104,7 @@
 .viewer-bottom p {
   flex: 1;
   text-align: center;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   margin: 0;
 }
 .viewer-loading {
@@ -112,7 +112,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   color: #ddd;
 }
 .viewer-error {
@@ -147,7 +147,7 @@
 }
 .viewer-notice {
   margin: 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   text-align: center;
 }
 .reader-code {
@@ -162,7 +162,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
-  font: 11px/1.5 system-ui;
+  font: calc(11px * var(--public-font-scale, 1))/1.5 system-ui;
   color: var(--muted);
   border-bottom: 1px solid var(--line);
 }
@@ -172,7 +172,7 @@
   align-items: center;
   gap: 5px;
   flex-wrap: wrap;
-  font: 11px/1.5 system-ui;
+  font: calc(11px * var(--public-font-scale, 1))/1.5 system-ui;
 }
 .code-tools button {
   color: var(--muted);
@@ -191,7 +191,7 @@
 }
 .code-tools span {
   color: var(--muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
 }
 .attached-code-tools {
   margin-top: 20px;
@@ -256,7 +256,7 @@
   background: var(--surface-soft);
   color: var(--muted);
   font: inherit;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   border-radius: 6px;
   padding: 6px 12px;
   cursor: pointer;
@@ -285,6 +285,6 @@
   .enhanced-viewer button {
     padding: 4px 7px;
     min-width: 32px;
-    font-size: 12px;
+    font-size: calc(12px * var(--public-font-scale, 1));
   }
 }

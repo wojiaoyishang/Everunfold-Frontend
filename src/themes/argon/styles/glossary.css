@@ -76,13 +76,13 @@ div[data-glossary-interactive]:is(
 .glossary-footnotes h2 {
   margin: 0;
   color: var(--text-strong);
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   line-height: 1.45;
 }
 .glossary-footnotes header p {
   margin: 3px 0 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   line-height: 1.55;
 }
 .glossary-footnotes ul {
@@ -127,12 +127,12 @@ div[data-glossary-interactive]:is(
 }
 .glossary-footnotes li strong {
   color: var(--text-strong);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   font-weight: 650;
 }
 .glossary-footnotes li span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .glossary-footnotes li a > .icon {
   width: 15px;
@@ -213,7 +213,7 @@ div[data-glossary-interactive]:is(
   flex: 1 1 auto;
   overflow: hidden;
   color: inherit;
-  font-size: 1rem;
+  font-size: calc(1rem * var(--public-font-scale, 1));
   font-weight: 700;
   line-height: 1.2;
   text-overflow: ellipsis;
@@ -234,7 +234,7 @@ div[data-glossary-interactive]:is(
   border-radius: 4px;
   color: rgb(255 255 255 / 84%);
   background: rgb(255 255 255 / 12%);
-  font-size: 0.68rem;
+  font-size: calc(0.68rem * var(--public-font-scale, 1));
   font-weight: 600;
   line-height: 1.25;
 }
@@ -283,7 +283,7 @@ div[data-glossary-interactive]:is(
   flex-wrap: wrap;
   gap: 6px;
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: calc(0.72rem * var(--public-font-scale, 1));
 }
 .glossary-tooltip-aliases > span:not(:first-child) {
   max-width: min(100%, 180px);
@@ -301,7 +301,7 @@ div[data-glossary-interactive]:is(
   margin: 0;
   color: var(--text);
   line-height: 1.65;
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--public-font-scale, 1));
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
@@ -310,7 +310,7 @@ div[data-glossary-interactive]:is(
   min-width: 0;
   max-width: 100%;
   overflow-wrap: anywhere;
-  font-size: 0.9rem;
+  font-size: calc(0.9rem * var(--public-font-scale, 1));
   line-height: 1.65;
 }
 .glossary-tooltip-content > :first-child {
@@ -324,7 +324,7 @@ div[data-glossary-interactive]:is(
 }
 .glossary-tooltip-content :is(h1, h2, h3, h4, h5, h6) {
   margin: 0.8em 0 0.35em;
-  font-size: 1rem;
+  font-size: calc(1rem * var(--public-font-scale, 1));
 }
 .glossary-tooltip-actions {
   flex: 0 0 auto;
@@ -343,7 +343,7 @@ div[data-glossary-interactive]:is(
   align-items: center;
   gap: 5px;
   color: var(--accent);
-  font-size: 0.85rem;
+  font-size: calc(0.85rem * var(--public-font-scale, 1));
   font-weight: 600;
   text-decoration: none;
 }
@@ -411,12 +411,12 @@ div[data-glossary-interactive]:is(
 }
 .glossary-expanded-panel > header small {
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: calc(0.78rem * var(--public-font-scale, 1));
 }
 .glossary-expanded-panel > header h2 {
   margin: 5px 0 0;
   color: var(--text-strong);
-  font-size: 1.35rem;
+  font-size: calc(1.35rem * var(--public-font-scale, 1));
 }
 .glossary-expanded-scroll {
   min-height: 0;
@@ -426,7 +426,7 @@ div[data-glossary-interactive]:is(
 }
 .glossary-expanded-body {
   min-width: 0;
-  font-size: 0.94rem;
+  font-size: calc(0.94rem * var(--public-font-scale, 1));
   line-height: 1.75;
 }
 .glossary-expanded-body > :first-child {
@@ -449,7 +449,7 @@ div[data-glossary-interactive]:is(
   align-items: center;
   gap: 7px;
   color: var(--accent);
-  font-size: 0.86rem;
+  font-size: calc(0.86rem * var(--public-font-scale, 1));
   font-weight: 600;
 }
 .glossary-expanded-panel > footer svg {

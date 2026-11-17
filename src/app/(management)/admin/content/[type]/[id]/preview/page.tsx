@@ -1,4 +1,5 @@
 import { PublicTheme } from "@/core/themes/presentation";
+import { themeProfile } from "@/core/settings/theme-options";
 import { readActiveTheme } from "@/core/themes/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -30,7 +31,12 @@ export default async function PreviewPage({
   // Only public theme data crosses SSR. Draft content is fetched after the workspace confirms identity.
   const publicData = await readPublicSnapshot().catch(() => null);
   return (
-    <PublicTheme theme={await readActiveTheme()}>
+    <PublicTheme
+      theme={await readActiveTheme()}
+      defaultFontScale={
+        themeProfile(publicData?.site.settings)?.font_scale_percent
+      }
+    >
       <ContentPreview
         type={type}
         id={id}

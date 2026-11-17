@@ -83,7 +83,7 @@ export function frameCodeHtml(html: string) {
       Number(/(?:\r\n|\r|\n)$/.test(source));
     const large = source.length > 100_000 || rows > 5000;
     const foldSize = options.fold
-      ? `calc(${options.fold} * var(--code-line-height,1.7) * var(--code-font-size,13px) + 28px)`
+      ? `calc(${options.fold} * var(--code-line-height,1.7) * var(--code-font-size,13px) * var(--public-font-scale,1) + 28px)`
       : "none";
     const localStyle =
       options.fold === undefined

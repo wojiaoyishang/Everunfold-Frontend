@@ -73,14 +73,14 @@
 }
 .image-viewer figcaption {
   text-align: center;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   padding-top: 14px;
   color: #ddd6eb;
 }
 .image-viewer figcaption span {
   display: block;
   opacity: 0.65;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .viewer-close {
   position: fixed;

@@ -117,7 +117,7 @@ html[data-theme="dark"] [data-code-dark="github"],
   padding: 7px 12px;
   border-bottom: 1px solid var(--code-border);
   font:
-    12px/1.5 system-ui,
+    calc(12px * var(--public-font-scale, 1))/1.5 system-ui,
     sans-serif;
   text-align: start;
   color: var(--code-ink);
@@ -135,7 +135,7 @@ html[data-theme="dark"] [data-code-dark="github"],
   font-weight: 550;
 }
 .code-language {
-  font-size: 10px;
+  font-size: calc(10px * var(--public-font-scale, 1));
   color: var(--code-comment);
   flex-shrink: 0;
 }
@@ -150,11 +150,15 @@ html[data-theme="dark"] [data-code-dark="github"],
   overflow: auto;
   max-height: var(
     --code-measured-fold-size,
-    var(--code-fold-size, calc(18 * 1.7 * 13px + 28px))
+    var(
+      --code-fold-size,
+      calc(18 * 1.7 * 13px * var(--public-font-scale, 1) + 28px)
+    )
   );
   tab-size: var(--code-tab-size, 4);
   transition: max-height 280ms cubic-bezier(0.2, 0.7, 0.2, 1);
-  font: var(--code-font-size, 13px) / var(--code-line-height, 1.7)
+  font: calc(var(--code-font-size, 13px) * var(--public-font-scale, 1)) /
+    var(--code-line-height, 1.7)
     var(
       --code-font-family,
       ui-monospace,
@@ -199,7 +203,7 @@ html[data-theme="dark"] [data-code-dark="github"],
   background: transparent;
   color: var(--code-ink);
   font:
-    12px/1.5 system-ui,
+    calc(12px * var(--public-font-scale, 1))/1.5 system-ui,
     sans-serif;
   cursor: pointer;
   transition:

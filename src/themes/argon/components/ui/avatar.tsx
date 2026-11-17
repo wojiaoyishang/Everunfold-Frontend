@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { scaleFontSize } from "@/core/themes/font-sizing";
 
 /** Raster/avatar URLs remain isolated image resources; never inject uploaded markup. */
 export function Avatar({
@@ -17,7 +18,11 @@ export function Avatar({
   return (
     <span
       className={`ui-avatar ${className}`}
-      style={{ width: size, height: size, fontSize: Math.max(14, size * 0.35) }}
+      style={{
+        width: size,
+        height: size,
+        fontSize: scaleFontSize(`${Math.max(14, size * 0.35)}px`),
+      }}
     >
       {src && failed !== src ? (
         // eslint-disable-next-line @next/next/no-img-element

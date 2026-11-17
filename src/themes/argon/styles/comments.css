@@ -7,7 +7,7 @@
   gap: 9px;
   align-items: center;
   margin: 0;
-  font-size: 21px;
+  font-size: calc(21px * var(--public-font-scale, 1));
   font-weight: 500;
   color: var(--text-strong);
 }
@@ -15,12 +15,12 @@
   color: var(--accent);
 }
 .comments-header h2 span {
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .comments-notice {
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   margin: 10px 0 20px;
 }
 .comment-list {
@@ -47,7 +47,7 @@
   display: grid;
   place-items: center;
   color: var(--accent);
-  font-size: 18px;
+  font-size: calc(18px * var(--public-font-scale, 1));
 }
 .comment-main {
   min-width: 0;
@@ -94,16 +94,16 @@
 }
 .comment-heading strong {
   font-weight: 500;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   color: var(--text-strong);
 }
 .comment-heading time {
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .comment-copy {
   white-space: pre-wrap;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
   line-height: 1.85;
   overflow-wrap: anywhere;
   margin-top: 5px;
@@ -116,7 +116,7 @@
 }
 .comment-reply-to {
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   margin: 4px 0;
 }
 .comment-reply-to a {
@@ -126,10 +126,10 @@
   color: var(--muted);
   padding: 30px 0;
   text-align: center;
-  font-size: 14px;
+  font-size: calc(14px * var(--public-font-scale, 1));
 }
 .comment-pagination {
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .comment-pagination a {
@@ -144,7 +144,7 @@
 }
 .comments-header p {
   margin: 7px 0 0;
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
   color: var(--muted);
 }
 .comments-write {
@@ -152,7 +152,7 @@
   align-items: center;
   flex: 0 0 auto;
   gap: 7px;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   color: var(--accent);
   padding: 8px 12px;
   border-radius: 5px;
@@ -168,7 +168,7 @@
   border: 1px dashed var(--line);
   border-radius: 6px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   line-height: 1.8;
 }
 .preview-badge {
@@ -179,7 +179,7 @@
   margin-right: 6px;
   background: var(--accent-soft);
   white-space: nowrap;
-  font-size: 10px;
+  font-size: calc(10px * var(--public-font-scale, 1));
 }
 .comments-demo-note button {
   flex: 0 0 auto;
@@ -245,7 +245,7 @@
 }
 .comment-badge {
   padding: 1px 5px;
-  font-size: 10px;
+  font-size: calc(10px * var(--public-font-scale, 1));
   line-height: 1.6;
   color: var(--muted);
   background: var(--surface-soft);
@@ -258,7 +258,7 @@
 }
 .comment-floor {
   margin-left: auto;
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   color: var(--muted);
   opacity: 0.7;
 }
@@ -266,7 +266,7 @@
   display: block;
   margin-top: 4px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
 }
 .comment-reply-to {
   display: flex;
@@ -291,7 +291,7 @@
 .comment-formatted blockquote {
   margin: 10px 0;
   padding: 6px 13px;
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
 }
 .comment-actions {
   display: flex;
@@ -302,7 +302,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: calc(11px * var(--public-font-scale, 1));
   color: var(--muted);
   background: transparent;
   padding: 3px 0;

@@ -2,7 +2,7 @@
   --local-danger: var(--admin-danger, var(--color-danger, #b54343));
   border-color: var(--line);
   box-shadow: var(--shadow);
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   line-height: 1.6;
 }
 .panel:global(.ui-anchored-panel) {
@@ -20,13 +20,13 @@
   flex-shrink: 0;
 }
 .heading strong {
-  font-size: 13px;
+  font-size: calc(13px * var(--public-font-scale, 1));
   font-weight: 600;
 }
 .panel p {
   margin: 8px 0 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .actions {
   display: flex;
@@ -50,7 +50,7 @@
   border-radius: 6px;
   background: var(--surface);
   color: var(--text);
-  font-size: 12px;
+  font-size: calc(12px * var(--public-font-scale, 1));
 }
 .actions .remove {
   border-color: transparent;

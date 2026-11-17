@@ -34,7 +34,7 @@
     background: transparent;
     color: var(--text);
     text-align: left;
-    font-size: 14px;
+    font-size: calc(14px * var(--public-font-scale, 1));
     line-height: 1.5;
     font-weight: 400;
   }

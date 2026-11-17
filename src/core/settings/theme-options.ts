@@ -7,6 +7,7 @@ import type {
 } from "@/core/contracts/settings";
 
 export const fallbackThemeId = "argon";
+export const fontScaleLimits = { min: 75, max: 150, default: 100 } as const;
 const articleDefaults: Required<ArticleDisplayPreferences> = {
   show_updated: false,
   show_toc: true,
@@ -76,6 +77,7 @@ const defaults: RuntimeThemePreferences = {
   article: articleDefaults,
   code: codeDefaults,
   feed: feedDefaults,
+  font_scale_percent: fontScaleLimits.default,
   font_media_id: "",
   font_url: "",
   font_info: null,
