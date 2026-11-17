@@ -12,6 +12,7 @@ import { Button, Form, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { AdminPagination } from "../components/admin-pagination";
+import { AdminPageSize } from "../components/admin-page-size";
 import { RouteLink } from "../../components/ui/route-link";
 import { BatchEditor } from "./batch-editor";
 import { Checkbox } from "../../components/ui/checkbox";
@@ -327,30 +328,35 @@ export function DraftList({ type }: { type: ContentTypeDefinition }) {
           )}
         </div>
         <footer className="admin-draft-list-footer">
-          <span className={styles.footerLabel} role="status">
-            {catalog.loading ? (
-              <UiText text="正在读取…" />
-            ) : data ? (
-              `${data.total} 份${trash ? "已回收内容" : "内容"}`
-            ) : (
-              ""
-            )}
-            {catalog.appliedSearch && (
-              <>
-                {" "}
-                · “{catalog.appliedSearch}”
-                <Button
-                  className={styles.clearSearch}
-                  onClick={catalog.clearSearch}
-                >
-                  <UiText text="清除搜索" />
-                </Button>
-              </>
-            )}
-          </span>
+          <AdminPageSize size={catalog.pageSize} onChange={catalog.setPageSize}>
+            <span className={styles.footerLabel} role="status">
+              {catalog.loading ? (
+                <UiText text="正在读取…" />
+              ) : data ? (
+                `${data.total} 份${trash ? "已回收内容" : "内容"}`
+              ) : (
+                ""
+              )}
+              {catalog.appliedSearch && (
+                <>
+                  {" "}
+                  · “{catalog.appliedSearch}”
+                  <Button
+                    className={styles.clearSearch}
+                    onClick={catalog.clearSearch}
+                  >
+                    <UiText text="清除搜索" />
+                  </Button>
+                </>
+              )}
+            </span>
+          </AdminPageSize>
           <AdminPagination
             page={catalog.page}
-            pages={Math.max(1, Math.ceil((data?.total ?? 0) / 12))}
+            pages={Math.max(
+              1,
+              Math.ceil((data?.total ?? 0) / catalog.pageSize),
+            )}
             disabled={catalog.loading}
             onChange={catalog.setPage}
           />

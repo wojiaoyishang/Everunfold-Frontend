@@ -60,24 +60,47 @@
 }
 
 .edit {
+  --permalink-control-size: max(36px, var(--admin-touch-target, 0px));
   display: flex;
-  flex: 1 1 180px;
+  flex: 1 1 260px;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 4px;
+  gap: 6px 8px;
   min-inline-size: 0;
+  max-inline-size: 44rem;
 }
 
 .line .input {
-  flex: 1;
-  min-inline-size: 0;
-  max-inline-size: 36rem;
-  min-block-size: max(32px, var(--admin-touch-target, 0px));
+  flex: 1 1 12ch;
+  min-inline-size: min(12ch, 100%);
+  min-block-size: var(--permalink-control-size);
   padding: 4px 8px;
   border: 1px solid var(--admin-border);
   border-radius: 5px;
   background: var(--admin-canvas);
   color: var(--admin-text);
   font: inherit;
+}
+
+.editActions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  margin-inline-start: auto;
+}
+
+.line .editActions .editButton {
+  min-block-size: var(--permalink-control-size);
+  min-inline-size: max(58px, var(--admin-touch-target, 0px));
+  gap: 5px;
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.editButton svg {
+  inline-size: 14px;
+  block-size: 14px;
 }
 
 .line .input[aria-invalid="true"] {

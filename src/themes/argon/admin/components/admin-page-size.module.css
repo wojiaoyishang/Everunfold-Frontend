@@ -1,0 +1,20 @@
+.details,
+.control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.details {
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  min-inline-size: 0;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.control :global(.ui-select-trigger) {
+  min-block-size: max(32px, var(--admin-touch-target, 0px));
+  padding: 4px 8px;
+  font-size: inherit;
+}

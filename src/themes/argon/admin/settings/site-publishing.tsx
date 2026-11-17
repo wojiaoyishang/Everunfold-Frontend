@@ -7,6 +7,7 @@ import { readManagedPages } from "@/core/contracts/pages";
 import type { SitePreferences } from "@/core/contracts/settings";
 import { UiText } from "@/core/i18n/provider";
 import { Select } from "../../components/ui/select";
+import { TextField } from "../../components/ui/primitives";
 import { SettingsSection, SettingsText, SettingsToggle } from "./shared";
 
 const dateFormats = [
@@ -71,6 +72,11 @@ export function SitePublishingSettings({
   }, [baseUrl]);
   const reading = site.reading ?? {};
   const writing = site.writing ?? {};
+  const excerptLength = writing.excerpt_length ?? 180;
+  const validLength =
+    Number.isInteger(excerptLength) &&
+    excerptLength >= 1 &&
+    excerptLength <= 1000;
   const home = reading.home_page_id ?? "";
   const posts = reading.posts_page_id ?? "";
   const category = writing.default_category_id ?? "";
@@ -214,6 +220,49 @@ export function SitePublishingSettings({
           maxLength={160}
           onChange={(permalink) =>
             update({ writing: { ...writing, permalink } })
+          }
+        />
+      </SettingsSection>
+      <SettingsSection
+        id="settings-excerpts"
+        title="摘要设置"
+        description="发布未填写摘要的文章时应用。"
+      >
+        <div className="admin-settings-field">
+          <label htmlFor="site-excerpt-length">
+            <UiText text="自动摘要字数" />
+          </label>
+          <TextField
+            id="site-excerpt-length"
+            type="number"
+            min={1}
+            max={1000}
+            step={1}
+            required
+            aria-describedby="site-excerpt-length-hint"
+            aria-invalid={!validLength || undefined}
+            value={Number.isNaN(excerptLength) ? "" : excerptLength}
+            onChange={({ currentTarget }) =>
+              update({
+                writing: {
+                  ...writing,
+                  excerpt_length: currentTarget.valueAsNumber,
+                },
+              })
+            }
+          />
+          <small id="site-excerpt-length-hint">
+            <UiText text="从正文截取的最多字符数，范围为 1 至 1000。" />
+          </small>
+        </div>
+        <SettingsText
+          label="固定摘要"
+          hint="填写后优先使用此文案，留空则从正文自动截取。"
+          multiline
+          maxLength={1000}
+          value={writing.default_excerpt ?? ""}
+          onChange={(default_excerpt) =>
+            update({ writing: { ...writing, default_excerpt } })
           }
         />
       </SettingsSection>

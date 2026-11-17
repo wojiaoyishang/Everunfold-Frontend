@@ -13,13 +13,13 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { Icon } from "../../components/icon";
 import { AdminPageHeading } from "../components/page-heading";
 import { AdminPagination } from "../components/admin-pagination";
+import { AdminPageSize } from "../components/admin-page-size";
+import { useAdminPageSize } from "@/core/browser/admin-page-size";
 import styles from "./pages.module.css";
 import { PageEnabledControl } from "./enabled-control";
 import { PageLanguageMenu } from "./language-menu";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { usePageAction, usePageErrorToast } from "./feedback";
-
-const pageSize = 12;
 
 export function ManagedPagesDirectory({
   initialType = "",
@@ -34,6 +34,7 @@ export function ManagedPagesDirectory({
   const [filter, setFilter] = useState<"active" | "trash">("active");
   const [type, setType] = useState(initialType);
   const [page, setPage] = useState(1);
+  const { pageSize, setPageSize } = useAdminPageSize("pages");
   const [refresh, setRefresh] = useState(0);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
@@ -263,9 +264,18 @@ export function ManagedPagesDirectory({
           </p>
         )}
         <footer className={styles.directoryFooter}>
-          <span className={styles.help}>
-            <UiText text="{count} 个页面" values={{ count: rows.length }} />
-          </span>
+          <AdminPageSize
+            size={pageSize}
+            onChange={(size) => {
+              if (size === pageSize) return;
+              setPageSize(size);
+              setPage(1);
+            }}
+          >
+            <span role="status">
+              <UiText text="{count} 个页面" values={{ count: rows.length }} />
+            </span>
+          </AdminPageSize>
           {pages > 1 && (
             <AdminPagination
               page={currentPage}

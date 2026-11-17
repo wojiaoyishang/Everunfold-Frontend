@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[后台每页数量与文章摘要默认值](decisions/0175-page-size-and-excerpt-defaults.md)说明浏览器分页偏好、固定链接编辑和发布摘要设置。
+
 [记住文章解锁与列表导航](decisions/0174-remembered-reading-and-pagination.md)说明短时恢复阅读、固定链接与数字分页。
 
 [节点同步恢复与文章浏览量](decisions/0173-node-recovery-and-article-views.md)说明同步触发、缓存恢复、节点时区和浏览统计。

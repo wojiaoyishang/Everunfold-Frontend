@@ -11,6 +11,7 @@ import type {
   EditorCatalog,
 } from "@/core/contracts/content-admin";
 import { useAdminRequest } from "@/core/admin/account-context";
+import { useAdminPageSize } from "@/core/browser/admin-page-size";
 import { draftError } from "./draft-state";
 import {
   catalogQuery,
@@ -21,6 +22,7 @@ import {
 
 export function useDraftCatalog(type: ContentTypeDefinition) {
   const { baseUrl, csrfToken } = useAdminRequest();
+  const { pageSize, setPageSize } = useAdminPageSize(`content.${type.id}`);
   const [search, setSearch] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [filters, setFilters] = useState<CatalogFilters>(defaultFilters);
@@ -98,7 +100,7 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
               search: appliedSearch,
               ...filters,
               page,
-              page_size: 12,
+              page_size: pageSize,
             },
             csrfToken,
             { signal: abort.signal },
@@ -134,7 +136,17 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
       clearTimeout(timer);
       abort.abort();
     };
-  }, [baseUrl, csrfToken, type, appliedSearch, filters, page, revision, ready]);
+  }, [
+    baseUrl,
+    csrfToken,
+    type,
+    appliedSearch,
+    filters,
+    page,
+    pageSize,
+    revision,
+    ready,
+  ]);
   const update = (patch: Partial<CatalogFilters>) => {
     setFilters((value) => ({ ...value, ...patch }));
     setPage(1);
@@ -155,6 +167,13 @@ export function useDraftCatalog(type: ContentTypeDefinition) {
     status: filters.status ?? "all",
     setStatus: (status: CatalogFilters["status"]) => update({ status }),
     page,
+    pageSize,
+    setPageSize: (size: number) => {
+      if (size === pageSize) return;
+      setLoading(true);
+      setPage(1);
+      setPageSize(size);
+    },
     setSearch,
     update,
     submitSearch: () => {

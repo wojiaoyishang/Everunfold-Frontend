@@ -118,12 +118,22 @@ export function PermalinkField({
               }
             }}
           />
-          <Button className={styles.action} disabled={disabled} onClick={apply}>
-            <UiText text="确定" />
-          </Button>
-          <Button className={styles.action} onClick={close}>
-            <UiText text="取消" />
-          </Button>
+          <div className={styles.editActions}>
+            <Button
+              className={`admin-button ${styles.editButton}`}
+              onClick={close}
+            >
+              <UiText text="取消" />
+            </Button>
+            <Button
+              className={`admin-button admin-button-primary ${styles.editButton}`}
+              disabled={disabled}
+              onClick={apply}
+            >
+              <Icon name="check" />
+              <UiText text="确定" />
+            </Button>
+          </div>
         </div>
       )}
       {message && (
