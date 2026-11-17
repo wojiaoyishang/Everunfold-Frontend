@@ -196,7 +196,7 @@
 .profile-friends {
   margin-top: 14px;
   padding-top: 13px;
-  border-top: 1px solid var(--line);
+  border-block-start: 1px solid color-mix(in srgb, var(--text) 25%, var(--line));
 }
 .profile-friends h3 {
   display: flex;
