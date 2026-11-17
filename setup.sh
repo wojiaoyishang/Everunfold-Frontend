@@ -14,5 +14,5 @@ case "${1:-}" in
       *) echo "请选择 1 或 2。" >&2; exit 2 ;;
     esac
     ;;
-  *) echo "用法：./setup.sh [--docker|--native] [configure|build|deploy|init-deploy|start|check|sync|init-db|migrate|export-node]" >&2; exit 2 ;;
+  *) echo "用法：./setup.sh [--docker|--native] [configure|build|build-plugins|hot-update-frontend|deploy|init-deploy|start|check|sync|init-db|migrate|export-node]" >&2; exit 2 ;;
 esac

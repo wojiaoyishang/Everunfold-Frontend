@@ -18,8 +18,8 @@ if [[ "${1:-}" == --native ]]; then native=true; shift; fi
 action=configure
 if [[ $# -gt 0 && "$1" != --connection-file && "$1" != --connection-base64 ]]; then action=$1; shift; fi
 case "$action" in
-  configure|build|deploy|init-deploy|start|check|sync|init-db|migrate|export-node|api|worker|scheduler|web|render) ;;
-  *) echo "用法：./setup.sh [--docker|--native] [configure|build|deploy|init-deploy|start|check|sync|init-db|migrate|export-node|render] [--connection-base64 | --connection-file 文件路径]"; exit 2 ;;
+  configure|build|build-plugins|hot-update-frontend|deploy|init-deploy|start|check|sync|init-db|migrate|export-node|api|worker|scheduler|web|render) ;;
+  *) echo "用法：./setup.sh [--docker|--native] [configure|build|build-plugins|hot-update-frontend|deploy|init-deploy|start|check|sync|init-db|migrate|export-node|render] [--connection-base64 | --connection-file 文件路径]"; exit 2 ;;
 esac
 connection_file=
 if (( $# )); then
@@ -52,7 +52,7 @@ fi
 case "$action" in api|worker|scheduler|web) echo "单进程入口请使用 --native。" >&2; exit 2 ;; esac
 command -v docker >/dev/null || { echo "需要 Docker Engine 和 Compose v2。" >&2; exit 1; }
 docker info >/dev/null || { echo "无法连接 Docker daemon。" >&2; exit 1; }
-docker compose version >/dev/null
+if [[ "$action" != hot-update-frontend ]]; then docker compose version >/dev/null; fi
 printf '\n\033[1;36mEverunfold · %s · Docker 部署助手\033[0m\n' "$role"
 read -r checksum _ < <(cat "$docker_dir/setup/Dockerfile" "$deploy_dir/assistant/uv.lock" | cksum)
 setup_image="everunfold-setup:1-$checksum"
@@ -195,8 +195,8 @@ run_tool() {
   run_temporary no "${base[@]}" "${mount_args[@]}" "$setup_image" python "$deploy_dir/bootstrap.py" "$@"
 }
 refresh_layout
-ensure_networks
 if [[ "$action" == configure ]]; then
+  ensure_networks
   [[ -t 0 && -t 1 ]] || { echo "配置界面需要交互终端。" >&2; exit 1; }
   ui_args=()
   if [[ -n "${EVERUNFOLD_CONNECTION_BASE64:-}" ]]; then
@@ -230,15 +230,49 @@ if [[ "$action" == configure ]]; then
     0) action=render ;;
     10) echo "已退出，未保存本次修改。"; exit 0 ;;
     20) action=build ;; 21) action=deploy ;; 22) action=init-deploy ;; 30) action=init-db ;;
-    31) action=migrate ;; 32) action=export-node ;; 33) action=sync ;; *) exit "$result" ;;
+    31) action=migrate ;; 32) action=export-node ;; 33) action=sync ;;
+    34) action=build-plugins ;; 35) action=hot-update-frontend ;; *) exit "$result" ;;
   esac
   refresh_layout
-  ensure_networks
 fi
+compose=(docker compose --project-directory "$docker_dir" -f "$docker_dir/compose.yaml")
+lock_plugins() {
+  exec {plugin_lock}>"$data_dir/.plugin-release.lock"
+  flock -xn "$plugin_lock" || { echo "另一个 setup 正在更新前端插件，请稍后重试。" >&2; return 1; }
+}
+if [[ "$action" == build-plugins || "$action" == hot-update-frontend ]]; then
+  [[ "$role" == frontend && -f "$CONFIG_FILE" ]] || { echo "请先在前端仓库完成配置并保存。" >&2; exit 2; }
+  lock_plugins
+  if [[ "$action" == hot-update-frontend ]]; then
+    mkdir -p -- "$data_dir/plugin-inbox"
+    printf '待发布目录：%s/plugin-inbox\n' "$data_dir"
+    if ! running="$(docker container inspect --format '{{if .State.Running}}{{.Id}}{{println}}{{index .Config.Labels "org.everunfold.project"}}{{range .Mounts}}{{if eq .Destination "/data"}}{{println}}{{.Source}}{{end}}{{end}}{{end}}' "$container_name")"; then
+      echo "无法查询前端容器，请先启动此部署。" >&2; exit 1
+    fi
+    mapfile -t container_details <<< "$running"
+    if [[ -z "${container_details[0]:-}" || "${container_details[1]:-}" != "$project_root" || "${container_details[2]:-}" != "$data_dir" ]]; then
+      echo "请先启动与当前部署和数据目录匹配的前端容器。" >&2; exit 1
+    fi
+    docker exec -i --workdir /workspace "${container_details[0]}" \
+      node --import tsx --input-type=module - /data <"$project_root/tools/plugins/publish.mjs"
+    exit
+  fi
+  [[ -d "$source_dir" ]] || { echo "代码目录不存在：$source_dir" >&2; exit 1; }
+  docker image inspect "$image_name" >/dev/null 2>&1 || {
+    echo "请先执行一次 ./setup.sh --docker build，准备前端构建镜像。" >&2; exit 1;
+  }
+  ensure_networks
+  run_tool render
+  staging="$(mktemp -d "$data_dir/.plugin-build.XXXXXXXX")"
+  trap 'rm -rf -- "$staging"' EXIT
+  FRONTEND_PLUGIN_OUTPUT_DIR="$staging" "${compose[@]}" run --rm --no-build builder build-plugins
+  run_tool stage-plugins "$staging" "$data_dir"
+  exit
+fi
+ensure_networks
 [[ -d "$source_dir" ]] || { echo "代码目录不存在：$source_dir" >&2; exit 1; }
 run_tool render
 if [[ "$action" == render ]]; then echo "根目录配置已保存，挂载目录已准备。"; exit 0; fi
-compose=(docker compose --project-directory "$docker_dir" -f "$docker_dir/compose.yaml")
 export EVERUNFOLD_BUILD_REVISION EVERUNFOLD_BUILD_CREATED
 EVERUNFOLD_BUILD_REVISION="$(git -C "$source_dir" rev-parse --short HEAD 2>/dev/null || echo unknown)"
 EVERUNFOLD_BUILD_CREATED="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -253,6 +287,7 @@ build_frontend() {
   mkdir -p "$staging"
   "${compose[@]}" run --rm builder build "$release"
   FRONTEND_PLUGIN_OUTPUT_DIR="$staging" "${compose[@]}" run --rm builder build-plugins
+  lock_plugins
   run_tool activate "$release"
   run_tool render
   read_paths

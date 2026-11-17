@@ -100,9 +100,16 @@ if args[0] == "inspect":
             print(os.environ["DOCKER_TEST_DATA"] if matching else "/other/data")
     else: raise SystemExit(1)
 if args[:2] == ["container", "inspect"]:
+    if "--format" in args and args[-1] in containers:
+        container_args = containers[args[-1]]["args"]
+        print(args[-1])
+        print(next(value.split("=", 1)[1] for value in container_args
+                   if value.startswith("org.everunfold.project=")))
+        print(next(value.split(",target=/data", 1)[0].split(",source=", 1)[1]
+                   for value in container_args if value.endswith(",target=/data")))
     raise SystemExit(0 if args[-1] in containers or os.environ.get("DOCKER_TEST_OLD") else 1)
 if args[0] == "exec":
-    assert "/internal/frontend-nodes/" in sys.stdin.read()
+    assert ("plugin-inbox" if args[-1] == "/data" else "/internal/frontend-nodes/") in sys.stdin.read()
 if args[0] == "rm":
     containers.pop(args[-1], None); save()
 if args[0] == "compose":
@@ -144,6 +151,8 @@ class LauncherTests(unittest.TestCase):
         else:
             (self.repo / "tools").mkdir()
             shutil.copy2(DEPLOY.parent / "tools/trigger-sync.mjs", self.repo / "tools")
+            (self.repo / "tools/plugins").mkdir()
+            shutil.copy2(DEPLOY.parent / "tools/plugins/publish.mjs", self.repo / "tools/plugins")
         self.bin = self.root / "bin"
         self.bin.mkdir()
         stub = self.bin / "docker"
@@ -252,6 +261,33 @@ class LauncherTests(unittest.TestCase):
             calls,
         )
         self.assertFalse(any(call[0] == "stop" or "--name" in call or "build" in call for call in calls))
+
+    @unittest.skipIf(BACKEND, "frontend only")
+    def test_independent_plugin_build_and_hot_update(self):
+        result, _ = self.run_action("start")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.log.write_text("")
+        result, calls = self.run_action("build-plugins")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((self.data / "plugin-inbox/test-plugin/manifest.json").is_file())
+        self.assertFalse((self.data / "plugins/test-plugin").exists())
+        self.assertTrue(any(call[-2:] == ["builder", "build-plugins"] for call in calls))
+        self.assertFalse(any("build" in call or "stop" in call for call in calls))
+        self.log.write_text("")
+        result, calls = self.run_action("hot-update-frontend")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            ["exec", "-i", "--workdir", "/workspace", "custom-everunfold",
+             "node", "--import", "tsx", "--input-type=module", "-", "/data"],
+            calls,
+        )
+        self.assertFalse(
+            any(
+                call[0] in {"compose", "stop", "restart"}
+                or call == ["start", "custom-everunfold"]
+                for call in calls
+            )
+        )
 
     def test_build_then_start_without_rebuilding(self):
         result, calls = self.run_action("build")

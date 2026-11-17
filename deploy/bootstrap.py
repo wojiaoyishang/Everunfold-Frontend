@@ -161,8 +161,9 @@ def activate(release: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("paths", "activate", "render"))
+    parser.add_argument("action", choices=("paths", "activate", "render", "stage-plugins"))
     parser.add_argument("release", nargs="?")
+    parser.add_argument("data", nargs="?")
     args = parser.parse_args()
     try:
         if args.action == "paths":
@@ -172,6 +173,10 @@ def main() -> None:
             if not context.document:
                 raise ValueError("请先在项目根目录运行 ./setup.sh --docker 并保存 config.yaml。")
             context.materialize()
+        elif args.action == "stage-plugins":
+            from plugin_stage import stage_plugins
+
+            stage_plugins(Path(args.release), Path(args.data))
         else:
             activate(args.release or "")
     except (OSError, ValueError) as error:

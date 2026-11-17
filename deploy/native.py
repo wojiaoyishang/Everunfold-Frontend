@@ -3,8 +3,10 @@
 import argparse
 import asyncio
 import os
+import shutil
 import signal
 import subprocess
+import tempfile
 from pathlib import Path
 
 from config_context import Context
@@ -33,6 +35,8 @@ def main() -> None:
             31: "migrate",
             32: "export-node",
             33: "sync",
+            34: "build-plugins",
+            35: "hot-update-frontend",
         }.get(result, "failed")
         if action in ("saved", "cancelled"):
             print("配置已保存。" if action == "saved" else "已退出，未保存本次修改。")
@@ -43,11 +47,16 @@ def main() -> None:
     if initialize_then_start and not BACKEND:
         raise SystemExit("此操作请在后端仓库执行。")
     ctx = Context(DOCKER, "backend" if BACKEND else "frontend", native=True)
-    ctx.materialize()
+    plugin_action = action in {"build-plugins", "hot-update-frontend"}
+    if plugin_action:
+        if BACKEND or not ctx.document:
+            raise ValueError("请先在前端仓库完成配置并保存。")
+    else:
+        ctx.materialize()
     if action == "render" and ctx.document:
         print("根目录配置已应用。")
         return
-    if not ctx.config_path.exists() or not ctx.env_path.exists():
+    if not plugin_action and (not ctx.config_path.exists() or not ctx.env_path.exists()):
         raise SystemExit("请先运行 ./setup.sh --native 完成配置。")
     environment = {
         **ctx.env,
@@ -64,33 +73,84 @@ def main() -> None:
     environment.pop("EVERUNFOLD_CONNECTION_BASE64", None)
     python = str(ROOT / ".venv/bin/python")
 
-    def execute(command: list[str]) -> None:
+    def execute(command: list[str], cwd: Path = ROOT) -> None:
         print(
             "Everunfold · " + ("Backend" if BACKEND else "Frontend") + " · " + command[0],
             flush=True,
         )
-        subprocess.run(command, cwd=ROOT, env=environment, check=True)
+        subprocess.run(command, cwd=cwd, env=environment, check=True)
+
+    def install_frontend_dependencies(cwd: Path = ROOT) -> None:
+        environment["NODE_OPTIONS"] = ctx.compose.get(
+            "FRONTEND_BUILD_NODE_OPTIONS", "--max-old-space-size=3072"
+        )
+        environment["FRONTEND_BUILD_WORKERS"] = ctx.compose.get("FRONTEND_BUILD_WORKERS", "2")
+        environment["npm_config_cache"] = str(ctx.data / "npm-cache")
+        execute(
+            [
+                "npm",
+                "ci",
+                "--ignore-scripts",
+                "--include=dev",
+                "--prefer-offline",
+                "--loglevel=verbose",
+                "--timing",
+            ],
+            cwd,
+        )
+
+    def compile_plugins(output: Path, cwd: Path = ROOT) -> None:
+        execute(["npm", "run", "plugins:build", "--", "--output", str(output)], cwd)
 
     def build() -> None:
         if BACKEND:
             execute(["uv", "sync", "--locked", "--no-dev"])
-        else:
-            environment["NODE_OPTIONS"] = ctx.compose.get(
-                "FRONTEND_BUILD_NODE_OPTIONS", "--max-old-space-size=3072"
-            )
-            environment["FRONTEND_BUILD_WORKERS"] = ctx.compose.get("FRONTEND_BUILD_WORKERS", "2")
-            execute(
-                [
-                    "npm",
-                    "ci",
-                    "--ignore-scripts",
-                    "--prefer-offline",
-                    "--loglevel=verbose",
-                    "--timing",
-                ]
-            )
+            return
+        from plugin_stage import lock_plugins
+
+        with lock_plugins(ctx.data):
+            install_frontend_dependencies()
             execute(["npm", "run", "build:host"])
-            execute(["npm", "run", "plugins:build", "--", "--output", str(ctx.data / "plugins")])
+            compile_plugins(ctx.data / "plugins")
+
+    if plugin_action:
+        from plugin_stage import lock_plugins, stage_plugins
+
+        with lock_plugins(ctx.data):
+            if action == "build-plugins":
+                with tempfile.TemporaryDirectory(prefix=".plugin-build.", dir=ctx.data) as stage:
+                    work, output = Path(stage) / "work", Path(stage) / "packages"
+                    work.mkdir()
+                    for directory in ("src", "tools", "public"):
+                        shutil.copytree(
+                            ROOT / directory,
+                            work / directory,
+                            ignore=shutil.ignore_patterns("themes") if directory == "public" else None,
+                        )
+                    for name in (
+                        "package.json",
+                        "package-lock.json",
+                        "contracts.lock.json",
+                        "tsconfig.json",
+                        "tsconfig.plugins.json",
+                        ".npmrc",
+                        ".prettierrc.json",
+                    ):
+                        shutil.copy2(ROOT / name, work)
+                    environment.setdefault(
+                        "EVERUNFOLD_BACKEND_PATH", str(ROOT.parent / "Everunfold-Backend")
+                    )
+                    install_frontend_dependencies(work)
+                    compile_plugins(output, work)
+                    stage_plugins(output, ctx.data)
+            else:
+                inbox = ctx.data / "plugin-inbox"
+                inbox.mkdir(exist_ok=True)
+                print(f"待发布目录：{inbox}", flush=True)
+                if not (ROOT / ".next/BUILD_ID").is_file():
+                    raise ValueError("请先完成一次前端宿主构建。")
+                execute(["node", "--import", "tsx", "tools/plugins/publish.mjs", str(ctx.data)])
+        return
 
     def check() -> None:
         if BACKEND:

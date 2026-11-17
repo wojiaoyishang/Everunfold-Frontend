@@ -32,6 +32,50 @@ const declaration = (title = "Runtime test") =>
   `export default { id:"test.runtime",title:${JSON.stringify(title)},version:"1.0.0",setup({pages,components}){ components.register("test.runtime.control");pages.register({registration:{id:"test.runtime",version:"1.0.0",title:"Runtime test",path:"/runtime-test"},component:"test.runtime.control",comments:{placement:"manual"},imageViewer:{enabled:false,selector:".gallery"}});}};`;
 const control = `import {useState} from "react";import {Button,PageComments,usePageComments,usePageCommentClient,CaptchaField,readPageComments,submitReaderComment,useCaptcha,captchaFailure} from "@everunfold/plugin-sdk/client";import styles from "./control.module.css";import mark from "./mark.svg";export default {"test.runtime.control":function Control(){const [value,setValue]=useState(0);const page=usePageComments();const client=usePageCommentClient();return <><Button className={styles.control} onClick={()=>setValue(value+1)}><img alt="" src={mark}/>{value}</Button><PageComments/>{!page.preview&&<CaptchaField control={client.captcha}/>}</>;},"test.runtime.api":function Api(){return String([readPageComments,submitReaderComment,useCaptcha,captchaFailure].length)}};`;
 
+test("hot publication validates the whole inbox before replacing any live manifest", async () => {
+  const { buildPlugin } = await import("../tools/plugins/build.mjs");
+  const data = await mkdtemp(path.join(tmpdir(), "everunfold-plugin-publish-"));
+  const source = path.join(data, "src/plugins/runtime");
+  const installed = path.join(data, "plugins");
+  const inbox = path.join(data, "plugin-inbox");
+  const current = path.join(installed, "runtime/manifest.json");
+  const publish = () =>
+    promisify(execFile)(process.execPath, [
+      "--import",
+      "tsx",
+      "tools/plugins/publish.mjs",
+      data,
+    ]);
+  try {
+    await mkdir(source, { recursive: true });
+    await writeFile(
+      path.join(data, "tsconfig.json"),
+      JSON.stringify({ extends: path.resolve("tsconfig.json") }),
+    );
+    const entry = path.join(source, "plugin.ts");
+    await writeFile(entry, declaration("Version one"));
+    const first = await buildPlugin(data, "runtime", { output: installed });
+    await writeFile(entry, declaration("Version two"));
+    const next = await buildPlugin(data, "runtime", { output: inbox });
+    await rm(source, { force: true, recursive: true });
+    const broken = path.join(inbox, "broken");
+    await mkdir(broken);
+    await writeFile(path.join(broken, "manifest.json"), "{}");
+    await assert.rejects(publish(), /待发布插件校验失败/);
+    assert.equal(
+      JSON.parse(await readFile(current, "utf8")).build,
+      first.build,
+    );
+    await rm(broken, { force: true, recursive: true });
+    await publish();
+    assert.equal(JSON.parse(await readFile(current, "utf8")).build, next.build);
+    await stat(path.join(installed, "runtime", first.entries.shared));
+    assert.match((await publish()).stdout, /均已安装/);
+  } finally {
+    await rm(data, { force: true, recursive: true });
+  }
+});
+
 test("independent packages load without source, preserve last good build, and disable without deleting declarations", async () => {
   const { buildPlugin } = await import("../tools/plugins/build.mjs");
   const root = await mkdtemp(path.join(tmpdir(), "everunfold-plugin-test-"));

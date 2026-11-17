@@ -34,6 +34,8 @@ ACTIONS = {
     "migrate": 31,
     "export-node": 32,
     "sync": 33,
+    "build-plugins": 34,
+    "hot-update-frontend": 35,
 }
 
 
@@ -289,6 +291,10 @@ class SetupApp(App[int]):
                 yield Button("查看 / 复制结果", id="copy_results")
                 if not self.config.backend:
                     yield Button("触发同步", id="sync", variant="primary")
+            if not self.config.backend:
+                with Horizontal(classes="buttons"):
+                    yield Button("编译前端插件", id="build-plugins")
+                    yield Button("热更新前端", id="hot-update-frontend", variant="success")
             if self.config.backend:
                 with Horizontal(classes="buttons"):
                     yield Button("初始化数据库并构建启动", id="init-deploy", variant="success")
@@ -445,6 +451,13 @@ class SetupApp(App[int]):
     @work(group="finish")
     async def finish(self, action: str) -> None:
         if self.exporting or len(self.screen_stack) > 1:
+            return
+        if action in {"build-plugins", "hot-update-frontend"}:
+            if self.config.snapshot() != self.config.initial and not await self.push_screen_wait(
+                Confirm("此操作使用已保存的部署配置。放弃尚未保存的修改并继续？")
+            ):
+                return
+            self.exit(ACTIONS[action])
             return
         errors = self.config.errors()
         if action == "export-node" and not self.config.get("receiver"):

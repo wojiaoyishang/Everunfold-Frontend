@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[前端插件编译与热发布](decisions/0183-frontend-plugin-deployment-actions.md)说明从源码准备插件包、发布预编译包和沿用运行中前端的流程。
+
 [页面代码注入与菜单样式](development/page-injections.md)说明规则配置、清理钩子和稳定的菜单定位方式。
 
 [共用视频播放器](decisions/0180-shared-video-insertion.md)用于短代码、正文区块和组件编排。
