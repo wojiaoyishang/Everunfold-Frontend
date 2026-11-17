@@ -25,7 +25,7 @@ export async function generateSettingsClient(
               op.path,
             )
           : stem === "content-access"
-            ? op.path === "/v1/reader/access"
+            ? /^\/v1\/reader\/access(?:\/(?:resume|excerpt))?$/.test(op.path)
             : stem === "accounts"
               ? /^\/v1\/(?:account|admin\/users|admin\/user-presets|admin\/api-key-applications|admin\/access)(?:\/[a-z/{}_-]+)?$/.test(
                   op.path,

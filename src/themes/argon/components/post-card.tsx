@@ -6,6 +6,11 @@ import { resourceUrl, taxonomyHref } from "@/core/content/urls";
 import { Icon } from "./icon";
 import { PostMeta } from "./post-meta";
 import { shortcodeExcerpt } from "@/core/rendering/native-shortcodes";
+import {
+  ProtectedCardAccess,
+  ProtectedCardExcerpt,
+  ProtectedCardLock,
+} from "./protected-card-access";
 
 export function PostCard({ content }: { content: ContentMetadata }) {
   const cover = resourceUrl(content.cover_url);
@@ -27,14 +32,14 @@ export function PostCard({ content }: { content: ContentMetadata }) {
           </span>
         )}
         <h2 className="post-title">
-          {locked && <Icon name="lock" className="post-title-lock" />}
+          {locked && <ProtectedCardLock />}
           <span>{content.title}</span>
         </h2>
       </div>
-      <PostMeta content={content} />
+      <PostMeta content={content} protectedCard={locked} />
     </>
   );
-  return (
+  const card = (
     <article className={`surface post-card ${cover ? "has-cover" : ""}`}>
       <Link
         href={content.path}
@@ -52,12 +57,14 @@ export function PostCard({ content }: { content: ContentMetadata }) {
       )}
       <div className="post-card-body">
         {!cover && <header>{heading}</header>}
-        {!content.hide_card_excerpt && (excerpt || locked) && (
-          <p className="post-excerpt">
-            {excerpt || (
-              <UiText text="这是一篇加密的文章，需要输入密码才能阅读。" />
-            )}
-          </p>
+        {locked ? (
+          <ProtectedCardExcerpt
+            fallback={excerpt}
+            hideFallback={content.hide_card_excerpt}
+          />
+        ) : (
+          !content.hide_card_excerpt &&
+          excerpt && <p className="post-excerpt">{excerpt}</p>
         )}
         <div className="post-card-footer">
           <div className="post-tags">
@@ -75,5 +82,12 @@ export function PostCard({ content }: { content: ContentMetadata }) {
         </div>
       </div>
     </article>
+  );
+  return locked ? (
+    <ProtectedCardAccess id={content.id} revision={content.updated_at}>
+      {card}
+    </ProtectedCardAccess>
+  ) : (
+    card
   );
 }

@@ -44,13 +44,19 @@ export function ProtectedArticle({
   const runtime = usePluginRuntime();
   const glossaryRoot = useRef<HTMLDivElement>(null);
   const glossary = site.settings?.site.glossary;
-  const access = useProtectedContent(
+  const passwordRequired =
+    content.password_required ?? content.access !== "captcha";
+  const access = useProtectedContent(baseUrl, content.id, {
+    opensAt: content.opens_at,
+    captchaRequired: content.captcha_required,
+    remember: content.kind === "article" && passwordRequired,
+  });
+  const captcha = useCaptcha(
     baseUrl,
+    "read",
     content.id,
-    content.opens_at,
-    content.captcha_required,
+    !access.content && !access.restoring,
   );
-  const captcha = useCaptcha(baseUrl, "read", content.id, !access.content);
   const readable = access.content ?? content;
   const authored = authoredStyle(
     `article-${content.id}`,
@@ -81,7 +87,7 @@ export function ProtectedArticle({
         <ArticleHeader
           content={readable}
           passwordState={
-            (content.password_required ?? content.access !== "captcha")
+            passwordRequired
               ? access.content
                 ? "unlocked"
                 : "locked"
@@ -164,9 +170,7 @@ export function ProtectedArticle({
             captcha={captcha}
             pending={access.pending}
             error={access.error}
-            passwordRequired={
-              content.password_required ?? content.access !== "captcha"
-            }
+            passwordRequired={passwordRequired}
             opensAt={content.opens_at}
             summary={
               content.show_encrypted_excerpt ? content.excerpt : undefined

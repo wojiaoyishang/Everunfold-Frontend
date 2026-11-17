@@ -2,9 +2,18 @@ import { UiText } from "@/core/i18n/provider";
 import { Icon } from "./icon";
 import styles from "./reading-lock.module.css";
 
-export function ReadingLock({ unlocked }: { unlocked: boolean }) {
+export function ReadingLock({
+  unlocked,
+  className,
+}: {
+  unlocked: boolean;
+  className?: string;
+}) {
   return (
-    <span className={styles.lock} data-unlocked={unlocked}>
+    <span
+      className={className ? `${styles.lock} ${className}` : styles.lock}
+      data-unlocked={unlocked}
+    >
       <Icon name="lock" className={styles.closed} />
       <Icon name="lock-open" className={styles.open} />
       <span className="sr-only" role="status">

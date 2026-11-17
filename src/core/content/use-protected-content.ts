@@ -1,19 +1,45 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { readProtectedContent } from "@/core/contracts/content-access";
-import type { ContentDetail } from "@/core/contracts/content-access";
+import {
+  readProtectedContent,
+  resumeProtectedArticle,
+  type ContentDetail,
+} from "@/core/contracts/content-access";
 import { RequestError } from "@/core/http/request";
 import type { CaptchaAnswer } from "@/core/contracts/captcha";
 import { captchaFailure } from "@/core/captcha/use-captcha";
+import {
+  articleReadHeaders,
+  forgetArticleRead,
+  rememberArticleRead,
+  unavailableArticleRead,
+  useRememberedArticleRead,
+} from "./remembered-article";
 
-/** Restricted data lives only in this mounted page; never register it in shared reader caches. */
+/** Protected bodies remain in the mounted page, including reads restored from a receipt. */
 export function useProtectedContent(
   baseUrl: string,
   id: string,
-  opensAt?: string | null,
-  captchaRequired = false,
+  {
+    opensAt,
+    captchaRequired = false,
+    remember = false,
+  }: { opensAt?: string | null; captchaRequired?: boolean; remember?: boolean },
 ) {
-  const [content, setContent] = useState<ContentDetail | null>(null);
+  const [reading, setReading] = useState<{
+    data: ContentDetail;
+    baseUrl: string;
+    remembered: boolean;
+  } | null>(null);
+  const [failedReceipt, setFailedReceipt] = useState<string | null>(null);
+  const receipt = useRememberedArticleRead(baseUrl, remember ? id : undefined);
+  const content =
+    reading?.baseUrl === baseUrl &&
+    reading.data.id === id &&
+    (!reading.remembered || reading.data.read_receipt === receipt)
+      ? reading.data
+      : null;
+  const restoring = Boolean(receipt && receipt !== failedReceipt && !content);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const inFlight = useRef<AbortController | null>(null);
@@ -22,6 +48,7 @@ export function useProtectedContent(
       if (inFlight.current) return false;
       const abort = new AbortController();
       inFlight.current = abort;
+      const requestedAt = Date.now();
       setPending(true);
       setError("");
       try {
@@ -31,7 +58,17 @@ export function useProtectedContent(
           { signal: abort.signal },
         );
         if (abort.signal.aborted) return false;
-        setContent(response.data);
+        if (response.data.id !== id) throw new RequestError("invalid");
+        const remembered =
+          Boolean(password) &&
+          remember &&
+          rememberArticleRead(
+            baseUrl,
+            id,
+            response.data.read_receipt,
+            requestedAt,
+          );
+        setReading({ data: response.data, baseUrl, remembered });
         return true;
       } catch (reason) {
         if (!abort.signal.aborted)
@@ -48,13 +85,37 @@ export function useProtectedContent(
         return false;
       } finally {
         if (!abort.signal.aborted) setPending(false);
-        inFlight.current = null;
+        if (inFlight.current === abort) inFlight.current = null;
       }
     },
-    [baseUrl, id],
+    [baseUrl, id, remember],
   );
+
   useEffect(() => {
-    if (!opensAt || captchaRequired) return;
+    if (!receipt || !restoring) return;
+    const abort = new AbortController();
+    void resumeProtectedArticle(
+      baseUrl,
+      { id },
+      { signal: abort.signal, headers: articleReadHeaders(receipt) },
+    )
+      .then(({ data }) => {
+        if (abort.signal.aborted) return;
+        if (data.id !== id || data.read_receipt !== receipt)
+          throw new RequestError("invalid");
+        setReading({ data, baseUrl, remembered: true });
+      })
+      .catch((reason: unknown) => {
+        if (abort.signal.aborted) return;
+        setFailedReceipt(receipt);
+        if (unavailableArticleRead(reason))
+          forgetArticleRead(baseUrl, id, receipt);
+      });
+    return () => abort.abort();
+  }, [baseUrl, id, receipt, restoring]);
+
+  useEffect(() => {
+    if (!opensAt || captchaRequired || content || restoring) return;
     let timer: ReturnType<typeof setTimeout>;
     const check = () => {
       const remaining = Date.parse(opensAt) - Date.now();
@@ -64,12 +125,13 @@ export function useProtectedContent(
     };
     check();
     return () => clearTimeout(timer);
-  }, [opensAt, load, captchaRequired]);
+  }, [opensAt, load, captchaRequired, content, restoring]);
   useEffect(
     () => () => {
       inFlight.current?.abort();
+      inFlight.current = null;
     },
-    [],
+    [baseUrl, id],
   );
-  return { content, pending, error, load };
+  return { content, pending: pending || restoring, restoring, error, load };
 }

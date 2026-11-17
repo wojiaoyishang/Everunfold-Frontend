@@ -8,6 +8,7 @@ import { ViewMetric } from "./reader-data";
 import { ContentEditLink } from "./content-edit-link";
 import { PublicDate } from "./public-date";
 import type { ArticleDisplayPreferences } from "@/core/contracts/settings";
+import { LockedCardStatus } from "./protected-card-access";
 
 const defaultOrder = [
   "author",
@@ -26,6 +27,7 @@ export function PostMeta({
   interactive = true,
   display,
   minutes,
+  protectedCard = false,
 }: {
   content: ContentMetadata;
   article?: boolean;
@@ -33,6 +35,7 @@ export function PostMeta({
   interactive?: boolean;
   display?: ArticleDisplayPreferences;
   minutes?: number;
+  protectedCard?: boolean;
 }) {
   const locked = Boolean(content.access && content.access !== "public");
   const fields: Record<(typeof defaultOrder)[number], ReactNode> = {
@@ -100,24 +103,29 @@ export function PostMeta({
       ),
   };
   const order = new Set([...(display?.meta_order ?? []), ...defaultOrder]);
+  const restriction = locked && (
+    <span>
+      <Icon name={content.opens_at ? "clock" : "lock"} />
+      <UiText
+        text={
+          content.access === "captcha"
+            ? "验证后阅读"
+            : content.opens_at
+              ? "定时开放"
+              : "密码保护"
+        }
+      />
+    </span>
+  );
   return (
     <div className="post-meta">
       {[...order].map((key) => (
         <Fragment key={key}>{fields[key]}</Fragment>
       ))}
-      {locked && (
-        <span>
-          <Icon name={content.opens_at ? "clock" : "lock"} />
-          <UiText
-            text={
-              content.access === "captcha"
-                ? "验证后阅读"
-                : content.opens_at
-                  ? "定时开放"
-                  : "密码保护"
-            }
-          />
-        </span>
+      {protectedCard ? (
+        <LockedCardStatus>{restriction}</LockedCardStatus>
+      ) : (
+        restriction
       )}
       {article && interactive && <ContentEditLink contentId={content.id} />}
     </div>

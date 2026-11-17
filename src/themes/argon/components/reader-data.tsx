@@ -148,15 +148,20 @@ export function DynamicStatusExtensions() {
   );
 }
 
-export function useReaderData() {
+export function useReaderScope() {
   const store = useContext(ReaderContext);
   if (!store) throw new Error("Reader data requires the shared public shell");
+  const { route } = useRouteState();
+  return { store, route };
+}
+
+export function useReaderData() {
+  const { store, route } = useReaderScope();
   const snapshot = useSyncExternalStore(
     store.subscribe,
     store.getSnapshot,
     store.getServerSnapshot,
   );
-  const { route } = useRouteState();
   return {
     store,
     route,
