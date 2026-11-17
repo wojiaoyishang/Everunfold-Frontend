@@ -19,6 +19,9 @@ import { ThemeCodeFont } from "@/core/fonts/provider";
 
 const GlossaryTooltips = lazy(() => import("./glossary-tooltips"));
 const GlossaryFootnotes = lazy(() => import("./glossary-footnotes"));
+const GlossaryShortcodePopups = lazy(
+  () => import("./glossary-shortcode-popups"),
+);
 
 export function ContentMarkupEnhancer({
   targetId,
@@ -27,6 +30,7 @@ export function ContentMarkupEnhancer({
   revision,
   glossary,
   codeTools = true,
+  hasGlossaryShortcodes = false,
 }: {
   targetId: string;
   features: ContentFeatures;
@@ -34,6 +38,7 @@ export function ContentMarkupEnhancer({
   revision?: string;
   glossary?: GlossaryRuntimeOptions;
   codeTools?: boolean;
+  hasGlossaryShortcodes?: boolean;
 }) {
   const [target, setTarget] = useState<HTMLDivElement | null>(null);
   const root = useMemo<RefObject<HTMLDivElement | null>>(
@@ -188,6 +193,11 @@ export function ContentMarkupEnhancer({
         <style data-code-font dangerouslySetInnerHTML={{ __html: font }} />
       )}
       {codeTools ? tools : null}
+      {target && hasGlossaryShortcodes && (
+        <Suspense fallback={null}>
+          <GlossaryShortcodePopups root={root} revision={revision} />
+        </Suspense>
+      )}
       {loadGlossary && glossary && contentId && revision && (
         <Suspense fallback={null}>
           {glossary.show_tooltips && (

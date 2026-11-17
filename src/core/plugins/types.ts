@@ -1,5 +1,5 @@
 import type { Content } from "@/core/content/types";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import type { MediaItem, PublicShortcode } from "@/core/contracts/settings";
 import type { CustomPageDefinition } from "@/core/pages/registration";
 import type { FontDefinition } from "@/core/fonts/types";
 import type { BuilderComponentDefinition } from "@/core/builder/types";
@@ -13,11 +13,24 @@ export interface ShortcodeRenderContext {
   escape: (value: string) => string;
 }
 
+/** A custom authoring component reports one complete shortcode invocation. */
+export interface ShortcodeEditorProps {
+  definition: PublicShortcode;
+  format: "markdown" | "html";
+  language: string;
+  initialBody: string;
+  source: string;
+  onChange: (source: string) => void;
+  media: Readonly<NonNullable<Content["media_urls"]>>;
+  onMedia: (item: MediaItem) => void;
+}
+
 /** Contributions belong to a trusted plugin, never to a downloaded database module. */
 export interface PluginShortcode {
   definition: PublicShortcode;
   render: (context: ShortcodeRenderContext) => string;
   preview?: (context: ShortcodeRenderContext) => string | null;
+  editor?: string;
   classNames?: readonly string[];
   mediaPicker?: {
     parameter: string;

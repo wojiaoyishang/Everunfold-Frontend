@@ -1,9 +1,10 @@
 "use client";
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import { glossaryTermPath } from "@/core/glossary/routes";
 
 import { useEffect, useMemo, useState } from "react";
 import type { GlossaryContract } from "@/core/contracts/glossary";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import { loadGlossaryMatches } from "@/core/glossary/runtime";
 import { renderGlossaryPreview } from "@/core/glossary/content";
 import { translate } from "@/core/i18n/messages";
@@ -23,10 +24,7 @@ function normalizeText(value: string) {
   return value.replaceAll("\u200b", "").replace(/\s+/g, " ").trim();
 }
 
-function richTextExcerpt(
-  term: MatchTerm,
-  shortcodes: readonly PublicShortcode[] = [],
-) {
+function richTextExcerpt(term: MatchTerm, shortcodes: RenderShortcodes = []) {
   const preview = renderGlossaryPreview(term, shortcodes);
   if (!preview || typeof DOMParser === "undefined") return "";
   const document = new DOMParser().parseFromString(preview.html, "text/html");
@@ -82,10 +80,10 @@ export default function GlossaryFootnotes({
         term,
         hint:
           normalizeText(term.summary) ||
-          richTextExcerpt(term, site.settings?.shortcodes ?? []) ||
+          richTextExcerpt(term, siteShortcodes(site.settings)) ||
           translate("查看词条了解详情", uiLocale),
       })),
-    [index?.terms, site.settings?.shortcodes, uiLocale],
+    [index?.terms, site.settings, uiLocale],
   );
 
   if (!index?.terms.length) return null;

@@ -141,7 +141,9 @@ activate可通过components.register补充清单中已声明的实现，通过on
 
 ## 短代码
 
-PluginShortcode包含definition、render及可选preview/classNames/mediaPicker。definition使用权威短代码参数协议，scope须匹配稳定UUID。render得到parameters、已格式化body、当前正文media及escape；参数插入文字时escape，最终HTML仍过公共allowlist/媒体校验。CSS限定本定义scope，仅使用时输出。preview用于目录样例，不替代真实参数校验。
+快捷插入支持参数声明生成的表单和插件自己的 React 控件。注册、SDK 示例及完整调用语法见[短代码插入表单和调用规范](shortcode-authoring.md)。
+
+PluginShortcode包含definition、render及可选preview、classNames、mediaPicker或editor。definition使用权威短代码参数协议，scope须匹配稳定UUID。render得到parameters、已格式化body、当前正文media及escape；参数插入文字时escape，最终HTML仍过公共allowlist/媒体校验。CSS限定本定义scope，仅使用时输出。preview用于目录样例，不替代真实参数校验。
 
 mediaPicker声明参数名、图片类型、数量上限及文案，宿主据此提供媒体选择和当前区块插入。画廊是完整示例，核心没有按gallery名称写解析分支。插件目录项只读；数据库纯HTML/CSS模板仍由原后台短代码库管理。
 

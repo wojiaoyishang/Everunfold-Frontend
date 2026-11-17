@@ -3,6 +3,7 @@
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import {
   readContentGlossaryMatches,
+  readGlossaryDetail,
   readGlossaryHooksForTarget,
   readGlossaryIndex,
 } from "@/core/contracts/glossary";
@@ -22,6 +23,13 @@ type CacheEntry = {
 };
 
 const cache = new Map<string, CacheEntry>();
+const detailCache = new Map<
+  string,
+  {
+    expires: number;
+    pending: Promise<GlossaryContract["public_detail"]["data"]>;
+  }
+>();
 const indexCache = new Map<
   string,
   {
@@ -45,6 +53,25 @@ function pruneExpired<T>(entries: Map<string, { expires: number } & T>) {
   for (const [key, entry] of entries) {
     if (entry.expires <= now) entries.delete(key);
   }
+}
+
+export function loadGlossaryTerm(
+  baseUrl: string,
+  slug: string,
+  language: string,
+) {
+  const key = `${baseUrl}\0${language}\0${slug}`;
+  pruneExpired(detailCache);
+  const entry = detailCache.get(key);
+  if (entry) return entry.pending;
+  const pending = readGlossaryDetail(baseUrl, slug, language).then(
+    ({ data }) => data,
+  );
+  detailCache.set(key, { expires: Date.now() + HOOK_CACHE_MS, pending });
+  pending.catch(() => {
+    if (detailCache.get(key)?.pending === pending) detailCache.delete(key);
+  });
+  return pending;
 }
 
 export function loadGlossaryMatches(
@@ -107,6 +134,7 @@ export function loadGlossaryHooks(
 
 export function clearGlossaryCache() {
   cache.clear();
+  detailCache.clear();
   indexCache.clear();
   hookCache.clear();
 }

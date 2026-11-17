@@ -5,7 +5,15 @@ import { DomUtils, parseDocument } from "htmlparser2";
 import type { Content } from "@/core/content/types";
 import { publicHref, resourceUrl } from "@/core/content/urls";
 import { renderNativeShortcodes } from "./native-shortcodes";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import {
+  shortcodeConfiguration,
+  type RenderShortcodes,
+} from "@/core/shortcodes/configuration";
+import {
+  glossaryPopupAttribute,
+  glossaryPopupData,
+  type GlossaryPopup,
+} from "@/core/shortcodes/glossary";
 import type { ShortcodeDiagnostic } from "@/core/shortcodes/parser";
 import { fontFamily, referencedFontFaces } from "@/core/fonts/media";
 import { markdownMath } from "./features/markdown-math";
@@ -22,6 +30,7 @@ export interface TableOfContentsItem {
   text: string;
   level: number;
 }
+type ContentShortcodeDiagnostic = ShortcodeDiagnostic & { block: number };
 
 const markdown = new MarkdownIt({ html: true, linkify: true, breaks: true });
 markdown.use(markdownMath);
@@ -133,6 +142,7 @@ const options: sanitizeHtml.IOptions = {
     details: ["open", "class"],
     div: [
       "class",
+      glossaryPopupAttribute,
       "data-math",
       "data-latex",
       "data-shortcode-instance",
@@ -142,6 +152,7 @@ const options: sanitizeHtml.IOptions = {
     strong: ["class"],
     span: [
       "class",
+      glossaryPopupAttribute,
       "title",
       "tabindex",
       "data-font",
@@ -189,16 +200,17 @@ function mappedUrl(value: string, media: Content["media_urls"]): string | null {
 
 export function renderContent(
   content: Pick<Content, "id" | "content" | "media_urls">,
-  shortcodes: readonly PublicShortcode[] = [],
+  shortcodes: RenderShortcodes = [],
   rendering: {
     shortcodePreview?: boolean;
     disableShortcodeScripts?: boolean;
+    omitGlossaryPopups?: boolean;
   } = {},
 ): {
   html: string;
   toc: TableOfContentsItem[];
   features: ContentFeatures;
-  diagnostics: ShortcodeDiagnostic[];
+  diagnostics: ContentShortcodeDiagnostic[];
 } {
   // Packages can arrive after this module was imported, or be replaced/disabled.
   // Derive the allowlist from the same active registry as this render.
@@ -220,28 +232,35 @@ export function renderContent(
     string,
     { javascript: string; title: string; css: string }
   > = {};
+  const popups = new Map<string, GlossaryPopup>();
   let instancePrefix = "ef-shortcode-hole";
   while (
     content.content.some((block) => block.content.includes(instancePrefix))
   )
     instancePrefix += "x";
-  const diagnostics: ShortcodeDiagnostic[] = [];
+  const diagnostics: ContentShortcodeDiagnostic[] = [];
+  const configuration = shortcodeConfiguration(shortcodes);
   const html = content.content
     .map((block, index) => {
       const expanded = renderNativeShortcodes(
         block.content,
         block.type === "markdown",
-        shortcodes,
+        configuration.definitions,
         block.type === "markdown" ? renderMarkdownSource : (source) => source,
         content.media_urls,
         rendering.shortcodePreview,
         `${instancePrefix}-${index}`,
+        {
+          maxDepth: configuration.maxDepth,
+          formatMarkdown: renderMarkdownSource,
+        },
       );
       const raw = expanded.html;
       if (!rendering.disableShortcodeScripts)
         Object.assign(scripts, Object.fromEntries(expanded.scripts));
       if (expanded.css) shortcodeStyles.add(expanded.css);
-      diagnostics.push(...expanded.diagnostics);
+      for (const issue of expanded.diagnostics)
+        diagnostics.push({ ...issue, block: index });
       const media = {
         ...Object.fromEntries(
           Object.entries(expanded.mediaURLs).map(([id, original]) => [
@@ -251,95 +270,117 @@ export function renderContent(
         ),
         ...content.media_urls,
       };
-      // Permit the storage-only scheme in this intermediate tree, then resolve actual nodes.
-      // Code text never participates in URL replacement.
-      const clean = sanitizeHtml(raw, {
-        ...sanitizeOptions,
-        allowedSchemes: ["http", "https", "mailto", "site"],
-      });
-      const document = parseDocument(clean);
-      function visit(nodes: ParsedNode[]): void {
-        for (const node of nodes) {
-          if ("attribs" in node) {
-            if (node.name === "span" && node.attribs["data-font"]) {
-              const reference = node.attribs["data-font"];
-              const id = reference.startsWith("site://media/")
-                ? reference.slice(13)
-                : "";
-              const family = fontFamily(id);
-              const style = (node.attribs.style ?? "")
-                .replace(/(?:^|;)\s*font-family\s*:[^;]*/gi, "")
-                .replace(/^;|;$/g, "");
-              if (family && content.media_urls?.[id]?.font)
-                node.attribs.style = [style, `font-family:${family}`]
-                  .filter(Boolean)
-                  .join(";");
-              else {
-                delete node.attribs["data-font"];
-                if (style) node.attribs.style = style;
-                else delete node.attribs.style;
-              }
-            }
-            // Authored links must not impersonate heading or page-control IDs.
-            if (node.name === "a") delete node.attribs.id;
-            if (["img", "audio", "video", "source"].includes(node.name)) {
-              const source = mappedUrl(node.attribs.src ?? "", media);
-              if (source) node.attribs.src = source;
-              else delete node.attribs.src;
-              if (node.name === "img") {
-                node.attribs.loading = "lazy";
-                node.attribs.decoding = "async";
-              } else if (["audio", "video"].includes(node.name)) {
-                node.attribs.controls = "";
-                node.attribs.preload = "none";
-                if (node.attribs.poster) {
-                  const poster = mappedUrl(node.attribs.poster, media);
-                  if (poster) node.attribs.poster = poster;
-                  else delete node.attribs.poster;
+      const blockOptions = expanded.hasShortcodes
+        ? { ...sanitizeOptions, nestingLimit: 384 }
+        : sanitizeOptions;
+      function cleanMarkup(raw: string, main: boolean) {
+        // Permit the storage-only scheme in this intermediate tree, then resolve actual nodes.
+        // Code text never participates in URL replacement.
+        const clean = sanitizeHtml(raw, {
+          ...blockOptions,
+          allowedSchemes: ["http", "https", "mailto", "site"],
+        });
+        const document = parseDocument(clean);
+        function visit(nodes: ParsedNode[]): void {
+          for (const node of nodes) {
+            if ("attribs" in node) {
+              if (rendering.omitGlossaryPopups)
+                delete node.attribs[glossaryPopupAttribute];
+              if (node.name === "span" && node.attribs["data-font"]) {
+                const reference = node.attribs["data-font"];
+                const id = reference.startsWith("site://media/")
+                  ? reference.slice(13)
+                  : "";
+                const family = fontFamily(id);
+                const style = (node.attribs.style ?? "")
+                  .replace(/(?:^|;)\s*font-family\s*:[^;]*/gi, "")
+                  .replace(/^;|;$/g, "");
+                if (family && content.media_urls?.[id]?.font)
+                  node.attribs.style = [style, `font-family:${family}`]
+                    .filter(Boolean)
+                    .join(";");
+                else {
+                  delete node.attribs["data-font"];
+                  if (style) node.attribs.style = style;
+                  else delete node.attribs.style;
                 }
               }
-            }
-            if (node.name === "a") {
-              const href = node.attribs.href?.startsWith("site://media/")
-                ? mappedUrl(node.attribs.href, media)
-                : publicHref(node.attribs.href ?? "");
-              if (href) node.attribs.href = href;
-              else delete node.attribs.href;
-              if (href?.startsWith("http")) {
-                node.attribs.target = "_blank";
-                node.attribs.rel = "noopener noreferrer";
-              } else {
-                delete node.attribs.target;
-                delete node.attribs.rel;
+              // Authored links must not impersonate heading or page-control IDs.
+              if (node.name === "a") delete node.attribs.id;
+              if (["img", "audio", "video", "source"].includes(node.name)) {
+                const source = mappedUrl(node.attribs.src ?? "", media);
+                if (source) node.attribs.src = source;
+                else delete node.attribs.src;
+                if (node.name === "img") {
+                  node.attribs.loading = "lazy";
+                  node.attribs.decoding = "async";
+                } else if (["audio", "video"].includes(node.name)) {
+                  node.attribs.controls = "";
+                  node.attribs.preload = "none";
+                  if (node.attribs.poster) {
+                    const poster = mappedUrl(node.attribs.poster, media);
+                    if (poster) node.attribs.poster = poster;
+                    else delete node.attribs.poster;
+                  }
+                }
+              }
+              if (node.name === "a") {
+                const href = node.attribs.href?.startsWith("site://media/")
+                  ? mappedUrl(node.attribs.href, media)
+                  : publicHref(node.attribs.href ?? "");
+                if (href) node.attribs.href = href;
+                else delete node.attribs.href;
+                if (href?.startsWith("http")) {
+                  node.attribs.target = "_blank";
+                  node.attribs.rel = "noopener noreferrer";
+                } else {
+                  delete node.attribs.target;
+                  delete node.attribs.rel;
+                }
+              }
+              if (main && /^h[1-6]$/.test(node.name)) {
+                const text = DomUtils.textContent(node).trim();
+                const base = `heading-${
+                  text
+                    .normalize("NFKC")
+                    .toLocaleLowerCase()
+                    .replace(/[^\p{L}\p{N}]+/gu, "-")
+                    .replace(/^-|-$/g, "")
+                    .slice(0, 80) || toc.length + 1
+                }`;
+                const count = (seenHeadings.get(base) ?? 0) + 1;
+                seenHeadings.set(base, count);
+                const id = count === 1 ? base : `${base}-${count}`;
+                node.attribs.id = id;
+                if (text) toc.push({ id, text, level: Number(node.name[1]) });
               }
             }
-            if (/^h[1-6]$/.test(node.name)) {
-              const text = DomUtils.textContent(node).trim();
-              const base = `heading-${
-                text
-                  .normalize("NFKC")
-                  .toLocaleLowerCase()
-                  .replace(/[^\p{L}\p{N}]+/gu, "-")
-                  .replace(/^-|-$/g, "")
-                  .slice(0, 80) || toc.length + 1
-              }`;
-              const count = (seenHeadings.get(base) ?? 0) + 1;
-              seenHeadings.set(base, count);
-              const id = count === 1 ? base : `${base}-${count}`;
-              node.attribs.id = id;
-              if (text) toc.push({ id, text, level: Number(node.name[1]) });
-            }
+            if ("children" in node) visit(node.children);
           }
-          if ("children" in node) visit(node.children);
+        }
+        visit(document.children);
+        return frameCodeHtml(
+          sanitizeHtml(
+            literalUnicodeEntities(DomUtils.getOuterHTML(document)),
+            blockOptions,
+          ),
+        );
+      }
+      if (!rendering.omitGlossaryPopups) {
+        for (const [id, popup] of expanded.popups) {
+          if (popup.kind === "markup") {
+            const html = cleanMarkup(popup.html, false);
+            const fonts = referencedFontFaces(html, media);
+            popups.set(id, {
+              ...popup,
+              html: fonts
+                ? `<style data-content-fonts>${fonts}</style>${html}`
+                : html,
+            });
+          } else popups.set(id, popup);
         }
       }
-      visit(document.children);
-      return frameCodeHtml(
-        sanitizeHtml(
-          literalUnicodeEntities(DomUtils.getOuterHTML(document)),
-          sanitizeOptions,
-        ),
-      );
+      return cleanMarkup(raw, true);
     })
     .join("\n");
   const faces = referencedFontFaces(html, content.media_urls);
@@ -352,6 +393,9 @@ export function renderContent(
       html +
       (Object.keys(scripts).length
         ? `<script type="application/json" data-shortcode-scripts>${JSON.stringify(scripts).replaceAll("<", "\\u003c")}</script>`
+        : "") +
+      (popups.size
+        ? `<script type="application/json" ${glossaryPopupData}>${JSON.stringify(Object.fromEntries(popups)).replaceAll("<", "\\u003c")}</script>`
         : ""),
     toc,
     features: inspectContentFeatures(html),

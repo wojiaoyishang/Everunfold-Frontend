@@ -3,7 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useId, useMemo, useRef, useState } from "react";
 import type { MediaURL } from "@/core/contracts/content-admin";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import type { ComparedBlock } from "@/core/editor/version-diff";
 import { highlightRenderedDiff } from "@/core/editor/version-diff";
 import { renderContent } from "@/core/rendering/content";
@@ -30,7 +30,7 @@ export function VersionDiffBlock({
   afterIndex: number;
   showAll: boolean;
   media: Record<string, MediaURL>;
-  shortcodes: readonly PublicShortcode[];
+  shortcodes: RenderShortcodes;
 }) {
   const [expanded, setExpanded] = useState(true);
   const id = useId();

@@ -3,6 +3,7 @@ import { glossaryTermPath } from "@/core/glossary/routes";
 
 import {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -16,24 +17,36 @@ import { createPortal } from "react-dom";
 import type { GlossaryContract } from "@/core/contracts/glossary";
 import {
   loadGlossaryMatches,
+  loadGlossaryTerm,
   type GlossaryRuntimeOptions,
 } from "@/core/glossary/runtime";
 import type { GlossaryMatchTerm } from "@/core/glossary/match";
 import { observeGlossaryMarkup } from "@/core/glossary/decorate";
+import { useOptionalAdminRequest } from "@/core/admin/account-context";
+import type { GlossaryPopup } from "@/core/shortcodes/glossary";
+import {
+  siteShortcodes,
+  type RenderShortcodes,
+} from "@/core/shortcodes/configuration";
+import { inspectContentFeatures } from "@/core/rendering/features/content-features";
 import {
   renderGlossaryContent,
   renderGlossaryPreview,
 } from "@/core/glossary/content";
 import { surfacePortalTarget } from "@/core/themes/portal";
 import { afterDialogMotion } from "../hooks/dialog-motion";
-import { useReaderBaseUrl } from "./reader-data";
-import { AppLink } from "./navigation-link";
+import { useOptionalReaderBaseUrl } from "./reader-data";
 import { Icon } from "./icon";
-import { Button } from "./ui/primitives";
-import { useRouteState } from "./route-state";
+import { Button, Popover, TextLink } from "./ui/primitives";
+import { useOptionalRouteState } from "./route-state";
 import { ContentMarkupView } from "./content-markup-view";
 import { ArticleMedia } from "./article-media";
 import { GlossaryExpandedDialog } from "./glossary-expanded-dialog";
+import {
+  GlossaryPopupScope,
+  type GlossaryPopups,
+} from "./glossary-popup-scope";
+import { LoadingProgress } from "./extension-placeholder";
 import { useLanguageCatalog, useLocale, useT } from "@/core/i18n/provider";
 import { translate } from "@/core/i18n/messages";
 import Image from "next/image";
@@ -42,7 +55,10 @@ type MatchIndex = NonNullable<GlossaryContract["content_matches"]["data"]>;
 
 interface ActiveTooltip {
   rect: DOMRect;
-  term: PopoverTerm;
+  term?: PopoverTerm;
+  authored?: Exclude<GlossaryPopup, { kind: "term" }>;
+  status?: "loading" | "unavailable";
+  title: string;
   trigger: HTMLElement;
 }
 
@@ -56,6 +72,8 @@ type PopoverTerm = Omit<
   GlossaryMatchTerm,
   "matched_patterns" | "matched_texts"
 >;
+const interactiveContent =
+  "a[href],button,input,select,textarea,summary,video[controls],audio[controls],[contenteditable='true']";
 
 export default function GlossaryTooltips({
   root,
@@ -68,23 +86,31 @@ export default function GlossaryTooltips({
   triggerSelector = ".glossary-term[data-glossary-term]",
   preserveNativeClick = false,
   popupId = "glossary-tooltip",
+  authoredPopups,
+  shortcodes,
 }: {
   root: RefObject<HTMLElement | null>;
   contentId?: string;
   revision?: string;
-  options: GlossaryRuntimeOptions;
+  options?: GlossaryRuntimeOptions;
   matchIndex?: MatchIndex;
   markupSelector?: string;
   terms?: readonly PopoverTerm[];
   triggerSelector?: string;
   preserveNativeClick?: boolean;
   popupId?: string;
+  authoredPopups?: GlossaryPopups;
+  shortcodes?: RenderShortcodes;
 }) {
-  const baseUrl = useReaderBaseUrl();
-  const { site } = useRouteState();
-  const { uiLocale } = useLocale();
+  const readerBase = useOptionalReaderBaseUrl();
+  const adminBase = useOptionalAdminRequest()?.baseUrl;
+  const baseUrl = readerBase ?? adminBase;
+  const site = useOptionalRouteState()?.site;
+  const { locale, uiLocale } = useLocale();
+  const language = site?.locale ?? locale;
   const catalog = useLanguageCatalog();
   const t = useT();
+  const fallbackTitle = t("术语");
   const [publicIndex, setPublicIndex] = useState<MatchIndex | null>(null);
   const index = matchIndex ?? publicIndex;
   const [active, setActive] = useState<ActiveTooltip | null>(null);
@@ -100,27 +126,75 @@ export default function GlossaryTooltips({
   const lastPointerActivation = useRef(0);
   const lastOpened = useRef(0);
   const popup = useRef<HTMLDivElement>(null);
+  const request = useRef(0);
+  const skipFocus = useRef(false);
+  const parentLayer = useContext(GlossaryPopupScope);
+  const childPopups = useMemo(() => new Set<HTMLElement>(), []);
   const terms = useMemo(() => {
     const source: readonly PopoverTerm[] = providedTerms ?? index?.terms ?? [];
     return new Map(source.map((term) => [term.id, term]));
   }, [index?.terms, providedTerms]);
+  const term = active?.term;
+  const configuration = useMemo(
+    () => shortcodes ?? siteShortcodes(site?.settings),
+    [shortcodes, site?.settings],
+  );
   const fullContent = useMemo(
     () =>
-      active && active.term.body.some((block) => block.content.trim())
-        ? renderGlossaryContent(active.term, site.settings?.shortcodes ?? [])
+      term?.body.some((block) => block.content.trim())
+        ? renderGlossaryContent(term, configuration)
         : null,
-    [active, site.settings?.shortcodes],
+    [configuration, term],
   );
   const previewContent = useMemo(
     () =>
-      active && !active.term.summary.trim()
-        ? renderGlossaryPreview(active.term, site.settings?.shortcodes ?? [])
+      term && !term.summary.trim()
+        ? renderGlossaryPreview(term, configuration)
         : null,
-    [active, site.settings?.shortcodes],
+    [configuration, term],
   );
-  const visibleAliases = active?.term.aliases.slice(0, 4) ?? [];
-  const remainingAliases =
-    active?.term.aliases.slice(visibleAliases.length) ?? [];
+  const authoredMarkup =
+    active?.authored?.kind === "markup" ? active.authored.html : null;
+  const authoredFeatures = useMemo(
+    () => (authoredMarkup ? inspectContentFeatures(authoredMarkup) : null),
+    [authoredMarkup],
+  );
+  const visibleAliases = term?.aliases.slice(0, 4) ?? [];
+  const remainingAliases = term?.aliases.slice(visibleAliases.length) ?? [];
+  const termPath = term && (glossaryTermPath(term, catalog) ?? term.path);
+  const layer = useMemo(
+    () => ({
+      ancestors: [...parentLayer.ancestors, childPopups],
+      terms: term ? [...parentLayer.terms, term.id] : parentLayer.terms,
+      popups: authoredPopups,
+    }),
+    [authoredPopups, childPopups, parentLayer, term],
+  );
+
+  const activeTrigger = active?.trigger;
+  useLayoutEffect(() => {
+    const element = popup.current;
+    if (!element || !activeTrigger) return;
+    for (const layer of parentLayer.ancestors) layer.add(element);
+    return () => {
+      for (const layer of parentLayer.ancestors) layer.delete(element);
+    };
+  }, [activeTrigger, parentLayer.ancestors]);
+
+  const containsPopup = useCallback(
+    (node: EventTarget | null) =>
+      node instanceof Node &&
+      (popup.current?.contains(node) ||
+        [...childPopups].some((child) => child.contains(node))),
+    [childPopups],
+  );
+
+  const focusTrigger = useCallback((trigger: HTMLElement) => {
+    if (!trigger.isConnected) return;
+    skipFocus.current = true;
+    trigger.focus({ preventScroll: true });
+    skipFocus.current = false;
+  }, []);
 
   const clearTimers = useCallback(() => {
     if (openTimer.current) clearTimeout(openTimer.current);
@@ -130,8 +204,9 @@ export default function GlossaryTooltips({
   }, []);
 
   const close = useCallback(() => {
-    if (expandedRef.current || closingRef.current) return;
+    if (expandedRef.current || closingRef.current || !popup.current) return;
     clearTimers();
+    request.current++;
     closingRef.current = true;
     setClosing(true);
   }, [clearTimers]);
@@ -151,7 +226,13 @@ export default function GlossaryTooltips({
   const open = useCallback(
     (trigger: HTMLElement) => {
       const term = terms.get(trigger.dataset.glossaryTerm ?? "");
-      if (!term) return;
+      const id = trigger.dataset.glossaryPopup ?? "";
+      const authored =
+        authoredPopups && Object.hasOwn(authoredPopups, id)
+          ? authoredPopups[id]
+          : undefined;
+      if (!term && !authored) return;
+      const ticket = ++request.current;
       clearTimers();
       expandedRef.current = false;
       closingRef.current = false;
@@ -160,10 +241,77 @@ export default function GlossaryTooltips({
       setEntered(false);
       setPlacement(null);
       lastOpened.current = Date.now();
-      trigger.setAttribute("aria-expanded", "true");
-      setActive({ rect: trigger.getBoundingClientRect(), term, trigger });
+      const title =
+        term?.title ||
+        (authored?.kind !== "term" && authored?.title) ||
+        (trigger.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 120) ||
+        fallbackTitle;
+      const current: ActiveTooltip = {
+        rect: trigger.getBoundingClientRect(),
+        term,
+        trigger,
+        title,
+        authored: authored?.kind === "term" ? undefined : authored,
+        status:
+          authored?.kind === "term"
+            ? baseUrl
+              ? "loading"
+              : "unavailable"
+            : undefined,
+      };
+      setActive((previous) => {
+        if (previous?.trigger !== trigger)
+          previous?.trigger.setAttribute("aria-expanded", "false");
+        trigger.setAttribute("aria-expanded", "true");
+        return current;
+      });
+      if (authored?.kind !== "term" || !baseUrl) return;
+      void loadGlossaryTerm(baseUrl, authored.slug, language)
+        .then((term) => {
+          if (request.current !== ticket || !trigger.isConnected) return;
+          if (parentLayer.terms.includes(term.id)) {
+            trigger.removeAttribute("data-glossary-interactive");
+            trigger.removeAttribute("tabindex");
+            trigger.removeAttribute("role");
+            trigger.removeAttribute("aria-controls");
+            trigger.removeAttribute("aria-haspopup");
+            close();
+          } else {
+            setActive(
+              (previous) =>
+                previous && {
+                  ...previous,
+                  title: term.title,
+                  term,
+                  status: undefined,
+                },
+            );
+          }
+        })
+        .catch(() => {
+          if (request.current === ticket)
+            setActive(
+              (previous) => previous && { ...previous, status: "unavailable" },
+            );
+        });
     },
-    [clearTimers, terms],
+    [
+      authoredPopups,
+      baseUrl,
+      clearTimers,
+      close,
+      fallbackTitle,
+      language,
+      parentLayer.terms,
+      terms,
+    ],
+  );
+
+  useEffect(
+    () => () => {
+      request.current++;
+    },
+    [],
   );
 
   useEffect(() => {
@@ -192,7 +340,8 @@ export default function GlossaryTooltips({
   }, [active, closing, placement]);
 
   useEffect(() => {
-    if (matchIndex || providedTerms || !contentId || !revision) return;
+    if (matchIndex || providedTerms || !contentId || !revision || !baseUrl)
+      return;
     let active = true;
     void loadGlossaryMatches(baseUrl, contentId, revision)
       .then((value) => {
@@ -208,72 +357,73 @@ export default function GlossaryTooltips({
 
   useEffect(() => {
     const target = root.current;
-    if (!target || !index || providedTerms) return;
+    if (!target || !index || providedTerms || !options) return;
     return observeGlossaryMarkup(target, index.terms, {
       maxMatches: options.max_matches_per_page,
       markupSelector,
       label: (title) => translate("术语：{title}", uiLocale, { title }),
     });
-  }, [
-    index,
-    markupSelector,
-    options.max_matches_per_page,
-    providedTerms,
-    root,
-    uiLocale,
-  ]);
+  }, [index, markupSelector, options, providedTerms, root, uiLocale]);
 
   useEffect(() => {
     const target = root.current;
-    if (!target || (!index?.terms.length && !providedTerms?.length)) return;
-    const trigger = (event: Event) =>
-      event.target instanceof Element
-        ? event.target.closest<HTMLElement>(triggerSelector)
-        : null;
+    if (
+      !target ||
+      (!authoredPopups && !index?.terms.length && !providedTerms?.length)
+    )
+      return;
+    const trigger = (element: EventTarget | null) => {
+      const item =
+        element instanceof Element
+          ? element.closest<HTMLElement>(triggerSelector)
+          : null;
+      return item && target.contains(item) ? item : null;
+    };
+    const hoverEnded = (next: EventTarget | null) => {
+      if (!childPopups.size && !containsPopup(next)) close();
+    };
     const pointerOver = (event: PointerEvent) => {
-      const item = trigger(event);
+      const item = trigger(event.target);
       if (
         !item ||
         event.pointerType === "touch" ||
-        item === active?.trigger ||
-        item.contains(event.relatedTarget as Node | null)
+        trigger(event.relatedTarget) === item
       )
         return;
       if (closeTimer.current) clearTimeout(closeTimer.current);
+      if (openTimer.current) clearTimeout(openTimer.current);
+      if (item === activeTrigger) return;
       openTimer.current = setTimeout(() => open(item), 180);
     };
     const pointerOut = (event: PointerEvent) => {
-      const item = trigger(event);
-      if (!item || item.contains(event.relatedTarget as Node | null)) return;
+      const item = trigger(event.target);
+      if (!item || trigger(event.relatedTarget) === item) return;
       if (Date.now() - lastPointerActivation.current < 400) return;
       if (openTimer.current) clearTimeout(openTimer.current);
-      closeTimer.current = setTimeout(() => {
-        if (
-          !(event.relatedTarget instanceof Node) ||
-          !popup.current?.contains(event.relatedTarget)
-        )
-          close();
-      }, 180);
+      closeTimer.current = setTimeout(
+        () => hoverEnded(event.relatedTarget),
+        180,
+      );
     };
     const focusIn = (event: FocusEvent) => {
-      const item = trigger(event);
+      if (skipFocus.current || authoredPopups) return;
+      const item = trigger(event.target);
       if (item) open(item);
     };
     const focusOut = (event: FocusEvent) => {
-      const item = trigger(event);
-      if (!item) return;
+      const item = trigger(event.target);
+      if (!item || item !== activeTrigger) return;
       closeTimer.current = setTimeout(() => {
-        const next = event.relatedTarget;
-        if (
-          !(next instanceof Node) ||
-          (!popup.current?.contains(next) && next !== item)
-        )
-          close();
+        if (event.relatedTarget !== item) hoverEnded(event.relatedTarget);
       }, 0);
     };
+    const nativeControl = (event: Event) =>
+      authoredPopups &&
+      event.target instanceof Element &&
+      event.target.closest(interactiveContent);
     const click = (event: MouseEvent) => {
-      const item = trigger(event);
-      if (!item) return;
+      const item = trigger(event.target);
+      if (!item || nativeControl(event)) return;
       if (
         preserveNativeClick &&
         item.matches(
@@ -283,35 +433,67 @@ export default function GlossaryTooltips({
         return;
       lastPointerActivation.current = Date.now();
       event.preventDefault();
-      if (active?.trigger === item && Date.now() - lastOpened.current > 300)
+      if (activeTrigger === item && Date.now() - lastOpened.current > 300)
         close();
       else open(item);
     };
     const keydown = (event: KeyboardEvent) => {
-      const item = trigger(event);
-      if (!item) return;
+      const item = trigger(event.target);
+      if (!item || nativeControl(event)) return;
       if (event.key === "Enter" || event.key === " ") {
         event.preventDefault();
         open(item);
-      } else if (event.key === "Tab" && active?.trigger === item) {
-        const link = popup.current?.querySelector<HTMLElement>("a");
-        if (link) {
+      } else if (
+        event.key === "Tab" &&
+        !event.shiftKey &&
+        activeTrigger === item
+      ) {
+        const control =
+          popup.current?.querySelector<HTMLElement>(
+            ".glossary-tooltip-body a[href], .glossary-tooltip-body [data-glossary-interactive]",
+          ) ??
+          popup.current?.querySelector<HTMLElement>(".glossary-tooltip-close");
+        if (control) {
           event.preventDefault();
-          link.focus();
+          control.focus();
         }
-      } else if (event.key === "Escape") {
+      } else if (
+        !authoredPopups &&
+        event.key === "Escape" &&
+        !childPopups.size
+      ) {
         event.preventDefault();
         close();
-        item.focus();
+        focusTrigger(item);
       }
     };
     const outside = (event: PointerEvent) => {
-      if (!(event.target instanceof Node)) return;
       if (
-        !root.current?.contains(event.target) &&
-        !popup.current?.contains(event.target)
+        !activeTrigger ||
+        !(event.target instanceof Node) ||
+        containsPopup(event.target)
       )
+        return;
+      if (!(authoredPopups ? activeTrigger : target).contains(event.target))
         close();
+    };
+    const escape = (event: KeyboardEvent) => {
+      if (
+        !authoredPopups ||
+        !activeTrigger ||
+        event.key !== "Escape" ||
+        event.defaultPrevented ||
+        closingRef.current ||
+        expandedRef.current ||
+        imageViewerOpen.current ||
+        childPopups.size ||
+        !activeTrigger.isConnected
+      )
+        return;
+      event.preventDefault();
+      event.stopPropagation();
+      close();
+      focusTrigger(activeTrigger);
     };
     target.addEventListener("pointerover", pointerOver);
     target.addEventListener("pointerout", pointerOut);
@@ -320,6 +502,7 @@ export default function GlossaryTooltips({
     target.addEventListener("click", click);
     target.addEventListener("keydown", keydown);
     document.addEventListener("pointerdown", outside);
+    if (authoredPopups) document.addEventListener("keydown", escape, true);
     return () => {
       target.removeEventListener("pointerover", pointerOver);
       target.removeEventListener("pointerout", pointerOut);
@@ -328,12 +511,17 @@ export default function GlossaryTooltips({
       target.removeEventListener("click", click);
       target.removeEventListener("keydown", keydown);
       document.removeEventListener("pointerdown", outside);
+      if (authoredPopups) document.removeEventListener("keydown", escape, true);
       clearTimers();
     };
   }, [
-    active?.trigger,
+    activeTrigger,
+    authoredPopups,
+    childPopups,
     clearTimers,
     close,
+    containsPopup,
+    focusTrigger,
     index?.terms.length,
     open,
     preserveNativeClick,
@@ -366,6 +554,8 @@ export default function GlossaryTooltips({
   useLayoutEffect(() => {
     const element = popup.current;
     if (!active || !element) return;
+    if (element.hasAttribute("popover") && !element.matches(":popover-open"))
+      element.showPopover();
     const boundary = 12;
     const gap = 10;
     const maxViewportHeight = Math.max(80, window.innerHeight - boundary * 2);
@@ -399,6 +589,8 @@ export default function GlossaryTooltips({
   }, [active]);
 
   if (!active || typeof window === "undefined") return null;
+  const dialog = active.trigger.closest("dialog[open]");
+  const Panel = dialog ? Popover : "div";
   const viewport = document.documentElement.clientWidth;
   const width = Math.min(400, viewport - 24);
   const left = Math.max(
@@ -418,16 +610,18 @@ export default function GlossaryTooltips({
     top: placement?.top ?? Math.max(12, active.rect.bottom + 10),
     maxHeight: placement?.maxHeight ?? 360,
     visibility: placement ? "visible" : "hidden",
+    zIndex: 80 + parentLayer.ancestors.length,
     "--glossary-arrow-left": `${arrowLeft}px`,
   } as CSSProperties;
   return createPortal(
-    <>
-      <div
+    <GlossaryPopupScope.Provider value={layer}>
+      <Panel
         ref={popup}
         id={popupId}
         className="glossary-tooltip"
         role="dialog"
-        aria-label={t("术语：{title}", { title: active.term.title })}
+        popover={dialog ? "manual" : undefined}
+        aria-label={t("术语：{title}", { title: active.title })}
         data-above={placement?.above ?? false}
         data-entered={entered}
         data-state={closing ? "closing" : "open"}
@@ -435,45 +629,63 @@ export default function GlossaryTooltips({
         onPointerEnter={() => {
           if (closeTimer.current) clearTimeout(closeTimer.current);
         }}
-        onPointerLeave={() => {
-          if (imageViewerOpen.current) return;
-          closeTimer.current = setTimeout(close, 180);
+        onPointerLeave={(event) => {
+          if (
+            imageViewerOpen.current ||
+            childPopups.size ||
+            containsPopup(event.relatedTarget)
+          )
+            return;
+          closeTimer.current = setTimeout(() => {
+            if (!childPopups.size) close();
+          }, 180);
         }}
         onKeyDown={(event) => {
-          if (event.key === "Escape") {
-            const trigger = active.trigger;
+          if (
+            event.key === "Escape" &&
+            !childPopups.size &&
+            !expandedRef.current &&
+            !imageViewerOpen.current
+          ) {
+            event.preventDefault();
+            event.stopPropagation();
             close();
-            trigger.focus();
+            focusTrigger(active.trigger);
           }
         }}
       >
         <header>
           <div className="glossary-tooltip-heading">
-            <span className="glossary-tooltip-kicker">{t("术语")}</span>
-            <strong title={active.term.title}>{active.term.title}</strong>
+            {term && (
+              <span className="glossary-tooltip-kicker">{fallbackTitle}</span>
+            )}
+            <strong title={active.title}>{active.title}</strong>
           </div>
           <Button
             type="button"
             className="icon-button glossary-tooltip-close"
             aria-label={t("关闭术语提示")}
             disabled={closing}
-            onClick={close}
+            onClick={() => {
+              close();
+              focusTrigger(active.trigger);
+            }}
           >
             <Icon name="close" />
           </Button>
         </header>
-        <div className="glossary-tooltip-body">
+        <div className="glossary-tooltip-body" data-actions={Boolean(termPath)}>
           <div className="glossary-tooltip-scroll">
             <ArticleMedia
-              enabled={active.term.show_image_viewer !== false}
+              enabled={term?.show_image_viewer !== false}
               selector="[data-reader-image] img[src], .glossary-tooltip-content img[src]"
               className="glossary-tooltip-viewer"
               onOpenChange={onImageViewerChange}
             >
-              {active.term.feature_image && (
+              {term?.feature_image && (
                 <span className="glossary-tooltip-feature" data-reader-image>
                   <Image
-                    src={active.term.feature_image.original}
+                    src={term.feature_image.original}
                     alt=""
                     fill
                     sizes="400px"
@@ -481,7 +693,7 @@ export default function GlossaryTooltips({
                   />
                 </span>
               )}
-              {active.term.aliases.length > 0 && (
+              {visibleAliases.length > 0 && (
                 <div
                   className="glossary-tooltip-aliases"
                   role="list"
@@ -504,65 +716,87 @@ export default function GlossaryTooltips({
                   )}
                 </div>
               )}
-              {active.term.summary.trim() ? (
-                <p className="glossary-tooltip-summary">
-                  {active.term.summary}
-                </p>
+              {term?.summary.trim() ? (
+                <p className="glossary-tooltip-summary">{term.summary}</p>
               ) : previewContent ? (
                 <ContentMarkupView
                   className="article-content glossary-tooltip-content"
                   data-glossary-ignore
                   html={previewContent.html}
                   features={previewContent.features}
+                  shortcodes={configuration}
                   codeTools={false}
                 />
               ) : null}
+              {active.authored?.kind === "text" && (
+                <p className="glossary-tooltip-summary">
+                  {active.authored.text}
+                </p>
+              )}
+              {authoredMarkup !== null && authoredFeatures && (
+                <ContentMarkupView
+                  className="article-content glossary-tooltip-content"
+                  data-glossary-ignore
+                  html={authoredMarkup}
+                  features={authoredFeatures}
+                  shortcodes={configuration}
+                  codeTools={false}
+                />
+              )}
+              {active.status === "loading" && (
+                <LoadingProgress label="正在读取术语…" />
+              )}
+              {active.status === "unavailable" && (
+                <p className="glossary-tooltip-summary" role="status">
+                  {t("词条暂不可用。")}
+                </p>
+              )}
             </ArticleMedia>
           </div>
-          <div className="glossary-tooltip-actions">
-            <AppLink
-              href={glossaryTermPath(active.term, catalog) ?? active.term.path}
-              localize={false}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t("打开词条页面")} <Icon name="external" />
-            </AppLink>
-            {fullContent && (
-              <Button
-                className="glossary-tooltip-expand"
-                aria-haspopup="dialog"
-                onClick={() => {
-                  clearTimers();
-                  expandedRef.current = true;
-                  setExpanded(true);
-                }}
+          {termPath && (
+            <div className="glossary-tooltip-actions">
+              <TextLink
+                href={termPath}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                <Icon name="book" />
-                {t("查看详情")}
-              </Button>
-            )}
-          </div>
+                {t("打开词条页面")} <Icon name="external" />
+              </TextLink>
+              {fullContent && (
+                <Button
+                  className="glossary-tooltip-expand"
+                  aria-haspopup="dialog"
+                  onClick={() => {
+                    clearTimers();
+                    expandedRef.current = true;
+                    setExpanded(true);
+                  }}
+                >
+                  <Icon name="book" />
+                  {t("查看详情")}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
-      </div>
-      {expanded && fullContent && (
+      </Panel>
+      {expanded && fullContent && termPath && (
         <GlossaryExpandedDialog
-          title={active.term.title}
-          path={glossaryTermPath(active.term, catalog) ?? active.term.path}
+          title={active.title}
+          path={termPath}
           html={fullContent.html}
           features={fullContent.features}
+          shortcodes={configuration}
           onDismiss={() => {
             const trigger = active.trigger;
             expandedRef.current = false;
             setExpanded(false);
             close();
-            queueMicrotask(() => {
-              if (trigger.isConnected) trigger.focus({ preventScroll: true });
-            });
+            queueMicrotask(() => focusTrigger(trigger));
           }}
         />
       )}
-    </>,
-    surfacePortalTarget(),
+    </GlossaryPopupScope.Provider>,
+    dialog ?? surfacePortalTarget(),
   );
 }

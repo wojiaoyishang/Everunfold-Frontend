@@ -1,6 +1,6 @@
 import type { Content } from "@/core/content/types";
 import { renderContent } from "@/core/rendering/content";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 
 type GlossaryBlock = {
   id: string;
@@ -24,7 +24,7 @@ function renderableBlocks(term: GlossaryRenderable) {
 
 export function renderGlossaryContent(
   term: GlossaryRenderable,
-  shortcodes: readonly PublicShortcode[] = [],
+  shortcodes: RenderShortcodes = [],
 ) {
   return renderContent(
     {
@@ -46,7 +46,7 @@ export function renderGlossaryContent(
 
 export function renderGlossaryPreview(
   term: GlossaryRenderable,
-  shortcodes: readonly PublicShortcode[] = [],
+  shortcodes: RenderShortcodes = [],
 ) {
   const first = renderableBlocks(term).find((block) => block.content.trim());
   if (!first) return null;

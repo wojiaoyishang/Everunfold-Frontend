@@ -16,7 +16,10 @@ import type {
 import { builderEntries, resolvedBuilderProps } from "@/core/builder/document";
 import { builderStyle } from "@/core/builder/layout";
 import { coreBuilderComponents } from "@/core/builder/registry";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import {
+  shortcodeConfiguration,
+  type RenderShortcodes,
+} from "@/core/shortcodes/configuration";
 import type { MediaURL } from "@/core/contracts/content-admin";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
@@ -42,7 +45,7 @@ export type BuilderRenderContext = {
   contentRevision?: string;
   readReceipt?: string;
   media?: Record<string, MediaURL>;
-  shortcodes?: readonly PublicShortcode[];
+  shortcodes?: RenderShortcodes;
   glossary?: GlossaryRuntimeOptions;
   comments?: ReactNode;
 };
@@ -141,6 +144,7 @@ export function BuilderSource({
       <ContentMarkupView
         html={rendered.html}
         features={rendered.features}
+        shortcodes={shortcodes}
         className={`article-content ${styles.source}`}
         codeTools={false}
         preview
@@ -150,6 +154,7 @@ export function BuilderSource({
     <ContentMarkup
       html={rendered.html}
       features={rendered.features}
+      shortcodes={shortcodes}
       className={`article-content ${styles.source}`}
       contentId={contentId}
       contentRevision={context?.contentRevision}
@@ -364,7 +369,7 @@ export function BuilderElement({
         (pluginRegistry.shortcodes.find(
           (item) => item.definition.name === definition.shortcode,
         )?.definition ??
-          context?.shortcodes?.find(
+          shortcodeConfiguration(context?.shortcodes).definitions.find(
             (item) => item.name === definition.shortcode,
           ));
       if (registered) {

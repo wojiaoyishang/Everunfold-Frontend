@@ -1,4 +1,5 @@
 "use client";
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 import { UiText } from "@/core/i18n/provider";
 
@@ -73,15 +74,9 @@ export function ContentPreview({
     const content = liveContent ?? previewContent(detail, terms);
     return {
       content,
-      rendered: renderContent(content, site?.settings?.shortcodes),
+      rendered: renderContent(content, siteShortcodes(site?.settings)),
     };
-  }, [
-    detail,
-    liveContent,
-    terms,
-    site?.settings?.shortcodes,
-    runtime.catalog?.revision,
-  ]);
+  }, [detail, liveContent, terms, site?.settings, runtime.catalog?.revision]);
   useEffect(() => {
     if (presentation && liveContent) rendered();
   }, [presentation, liveContent, rendered]);
@@ -209,7 +204,7 @@ export function ContentPreview({
                 }}
                 detail
                 rendered={presentation.rendered}
-                builderContext={{ shortcodes: site.settings?.shortcodes }}
+                builderContext={{ shortcodes: siteShortcodes(site.settings) }}
                 interactive={false}
               />
             ) : (
@@ -217,7 +212,7 @@ export function ContentPreview({
                 theme={runtime.catalog?.theme ?? "argon"}
                 content={presentation.content}
                 rendered={presentation.rendered}
-                builderContext={{ shortcodes: site.settings?.shortcodes }}
+                builderContext={{ shortcodes: siteShortcodes(site.settings) }}
                 interactive={false}
               />
             )}

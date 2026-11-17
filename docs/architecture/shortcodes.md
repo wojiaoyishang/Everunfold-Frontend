@@ -1,6 +1,6 @@
 # 原生短代码与后台短代码库
 
-版本：shortcodes-5，2026-11-09（Asia/Shanghai）。用户已确认下面的原生语法、去掉旧兼容及自定义HTML可视化编辑。实现决定见[ADR0057](../decisions/0057-native-shortcode-implementation.md)、[HTML编辑决定](../decisions/0058-preserved-html-visual-editing.md)，实际检查与限制见[验收记录](../handoff/native-shortcodes-verification.md)。ADR0056与两张proposal图片仅保留上一轮设计历史。
+版本：shortcodes-6，2026-11-17（Asia/Shanghai）。用户已确认下面的原生语法、去掉旧兼容及自定义HTML可视化编辑。实现决定见[ADR0057](../decisions/0057-native-shortcode-implementation.md)、[HTML编辑决定](../decisions/0058-preserved-html-visual-editing.md)，实际检查与限制见[验收记录](../handoff/native-shortcodes-verification.md)。ADR0056与两张proposal图片仅保留上一轮设计历史。
 
 ## 调用协议
 
@@ -20,12 +20,14 @@
 {{< /custom:reading-tip >}}
 ```
 
-- 注册定义决定单体或容器。单体不需要斜杠或结束标记；容器使用`{{< /名称 >}}`，必须正确配对，最多32层。建议把调用独立放在区块或行上。
+- 注册定义决定单体或容器。单体不需要斜杠或结束标记；容器使用`{{< /名称 >}}`，必须正确配对，默认32层，可在站点设置中设为1至64层。建议把调用独立放在区块或行上。
 - 名称小写，内置/代码注册项可用notice等名称；自定义名称必须使用`custom:`命名空间。自定义的数据库UUID与调用名称创建后固定；已应用模板的单体/容器类型也不能修改。
 - 参数是`名称="值"`，只接受双引号，支持JSON字符串转义；同一个调用不能有重复、未知参数。支持文字、链接、枚举、有限数字与true/false字符串；缺省值来自定义，必填项必须非空。参数最多16个，值最长1000字符。
 - Markdown围栏、缩进代码、行内代码、HTML的pre/code、属性字符串与注释不会展开。Markdown可用`\{{< … >}}`展示字面调用；HTML可把首个左花括号写成`&#123;`。模板不做递归源文替换，参数中的短代码文字不会变成第二次调用。
 - 未知项、错误参数、未配对调用保留源文，并返回范围诊断；错误不会吞掉后续正文。正文按所在Markdown/HTML区块渲染，预览与公开阅读使用同一个解析器和渲染器。
 - 没有方括号兼容、旧名称映射或旧参数别名。旧标记现在是普通正文；转换器、legacy类名/CSS、旧摘要清理和参考资料汇总路径已删除。保留作者正文和WordPress原备份，不批量改写历史数据。
+
+HTML 或 Markdown 术语说明以及前端自定义插入控件的完整调用见[短代码插入表单和调用规范](../development/shortcode-authoring.md)。
 
 ## 后台入口与目录
 
@@ -33,7 +35,7 @@
 
 样式卡片展示名称、调用、真实效果、来源与草稿/应用状态。来源可筛选，归档项单独查看。详情可试填参数和正文、查看调用源码；代码注册项的实现是只读源码展示，不提供保存/应用/归档按钮。权限由后端复核，不能靠隐藏按钮保证。
 
-当前注册项：后端core.basic-shortcodes插件提供notice提示框、accordion折叠内容，example.cards提供example:card容器和example:badge单体；前端core.gallery插件提供gallery图片画廊；管理员可创建自定义HTML/CSS模板。画廊样式库无图片时显示明确的样式示例；文章插入时从现有媒体库选择真实图片，调用保留`site://media/UUID`引用。多个图片引用用英文逗号分隔，复用原上传队列、媒体解析和删除保护。
+前端主体直接注册术语弹窗 `glossary`。其他注册项包括后端core.basic-shortcodes插件提供notice提示框、accordion折叠内容，example.cards提供example:card容器和example:badge单体；前端core.gallery插件提供gallery图片画廊；管理员可创建自定义HTML/CSS模板。画廊样式库无图片时显示明确的样式示例；文章插入时从现有媒体库选择真实图片，调用保留`site://media/UUID`引用。多个图片引用用英文逗号分隔，复用原上传队列、媒体解析和删除保护。
 
 文章/说说的Markdown/HTML工具栏提供“插入短代码”，源码与可视化模式均可用；区块标题栏不再放置该按钮。选择项与参数来自同一目录，只提供未归档、已有应用版本的定义；自定义有未应用修改时插入器仍使用其已应用定义。确认后在当前区块的光标/选区中插入，保持区块ID和数量，源文保存原生调用，不保存展开DOM，也不创建短代码专用Y.Doc。本地可视化用调用原文原子保留分隔符，周围文字继续可编辑；参数和调用正文在源码中修改。见[ADR0059](../decisions/0059-editor-inline-insertion-and-sticky-blocks.md)。
 
@@ -82,7 +84,7 @@ SSR每次读本地已经持久应用的完整设置副本，正文/后台预览/
 
 ## 插件注册（2026-11-07）
 
-前端短代码不自行注册。宿主自动发现`src/plugins/*/plugin.ts`，插件同步setup获得`shortcodes.register`，贡献定义、渲染、预览、媒体选择与按需CSS。后台只读目录、正文解析、样式/插入均由同一贡献派生，核心/主题不再按gallery名称分支。已有UUID、调用语法与媒体引用保持；后端模板从已应用设置读取，契约只描述协议，不再内嵌安装目录。前后端登记检查名称冲突；部署间隙中前台优先采用已应用的后端模板，不能让新前端包覆盖其渲染。预览保留前端插件的专属示例渲染器，HTML清理白名单随当前插件目录更新。参见[插件指南](../development/frontend-plugins.md)。
+内建术语弹窗随主体加载。独立插件从同一目录注册短代码和可选的插入控件。宿主自动发现`src/plugins/*/plugin.ts`，插件同步setup获得`shortcodes.register`，贡献定义、渲染、预览、媒体选择与按需CSS。后台只读目录、正文解析、样式/插入均由同一贡献派生，核心/主题不再按gallery名称分支。已有UUID、调用语法与媒体引用保持；后端模板从已应用设置读取，契约只描述协议，不再内嵌安装目录。前后端登记检查名称冲突；部署间隙中前台优先采用已应用的后端模板，不能让新前端包覆盖其渲染。预览保留前端插件的专属示例渲染器，HTML清理白名单随当前插件目录更新。参见[插件指南](../development/frontend-plugins.md)。
 
 
 后端也仅由插件setup注册：`app/plugins/*/plugin.py` 通过 `app.plugin_sdk` 提供函数或类式入口，其余文件无需规定名称。显式 `tools.register_backend_plugins --apply` 保存私有部署快照并推送当前启用模板；禁用后目录/插入器隐藏对应项，源文保持，恢复启用后继续显示。原notice/accordion的UUID、语法和样式保持，不需重写文章。新增纯模板后无需重新构建前端，具体命令和限制见[后端指南](../development/backend-plugins.md)。

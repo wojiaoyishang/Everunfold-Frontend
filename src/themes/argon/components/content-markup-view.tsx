@@ -10,6 +10,8 @@ import {
 } from "react";
 
 import { mountShortcodeScripts } from "@/core/shortcodes/scripts";
+import { glossaryPopupAttribute } from "@/core/shortcodes/glossary";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import { ThemeCodeFont } from "@/core/fonts/provider";
 import { useCodeTools } from "../hooks/use-code-tools";
@@ -25,6 +27,9 @@ const ShortcodeRegions = lazy(() =>
     default: module.ShortcodeRegions,
   })),
 );
+const GlossaryShortcodePopups = lazy(
+  () => import("./glossary-shortcode-popups"),
+);
 
 type ContentMarkupViewProps = Omit<
   HTMLAttributes<HTMLDivElement>,
@@ -35,6 +40,7 @@ type ContentMarkupViewProps = Omit<
   containerRef?: RefObject<HTMLDivElement | null>;
   codeTools?: boolean;
   preview?: boolean;
+  shortcodes?: RenderShortcodes;
 };
 
 /** Shared safe body rendering and on-demand code/formula enhancement. */
@@ -44,6 +50,7 @@ export function ContentMarkupView({
   containerRef,
   codeTools = true,
   preview = false,
+  shortcodes,
   className = "",
   style,
   ...attributes
@@ -161,6 +168,15 @@ export function ContentMarkupView({
       {!preview && html.includes("data-shortcode-region=") && (
         <Suspense fallback={null}>
           <ShortcodeRegions root={root} html={html} />
+        </Suspense>
+      )}
+      {html.includes(glossaryPopupAttribute + "=") && (
+        <Suspense fallback={null}>
+          <GlossaryShortcodePopups
+            root={root}
+            revision={html}
+            shortcodes={shortcodes}
+          />
         </Suspense>
       )}
       {codeTools ? tools : null}

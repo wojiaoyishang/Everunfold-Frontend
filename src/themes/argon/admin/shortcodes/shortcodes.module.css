@@ -54,6 +54,19 @@
 .picker .invocation {
   min-height: 64px;
 }
+.glossaryEditor {
+  --source-editor-min-height: 5.5em;
+  min-inline-size: 0;
+  border: 1px solid var(--admin-border);
+  border-radius: 6px;
+  overflow: clip;
+}
+.glossaryEditor :global(.cm-content) {
+  min-height: 5.5em;
+}
+.glossaryEditor :global(.cm-scroller) {
+  max-height: 220px;
+}
 .toolbar,
 .actions,
 .tabs,

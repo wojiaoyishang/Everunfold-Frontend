@@ -1,3 +1,4 @@
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import { UiText } from "@/core/i18n/provider";
 import type { FeedEntry } from "@/core/content/presentation";
 import type { PublicSnapshot } from "@/core/content/types";
@@ -74,7 +75,9 @@ export function ShuoshuoDetail({
           theme={theme}
           entry={entry}
           detail
-          builderContext={{ shortcodes: snapshot.site.settings?.shortcodes }}
+          builderContext={{
+            shortcodes: siteShortcodes(snapshot.site.settings),
+          }}
           glossary={{
             auto_match: glossary?.auto_match ?? true,
             max_matches_per_page: glossary?.max_matches_per_page ?? 20,

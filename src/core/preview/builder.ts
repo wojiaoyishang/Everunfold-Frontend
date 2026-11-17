@@ -1,7 +1,8 @@
 import Ajv from "ajv";
 import schema from "@/core/contracts/pages-v1-schema";
 import type { BuilderDocument, BuilderValues } from "@/core/builder/types";
-import type { MediaItem, PublicShortcode } from "@/core/contracts/settings";
+import type { MediaItem } from "@/core/contracts/settings";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import type { MediaURL } from "@/core/contracts/content-admin";
 
 /** Private, same-window preview messages. Persistence still belongs to the editor. */
@@ -13,7 +14,7 @@ export interface LiveBuilderState {
   allowComments: boolean;
   canSaveTemplate: boolean;
   media: Record<string, MediaURL>;
-  shortcodes: readonly PublicShortcode[];
+  shortcodes: RenderShortcodes;
 }
 export interface LiveBuilderChange {
   document?: BuilderDocument;
@@ -46,7 +47,11 @@ export function checkedBuilderState(value: unknown): LiveBuilderState | null {
     typeof v.canSaveTemplate === "boolean" &&
     v.media &&
     typeof v.media === "object" &&
-    Array.isArray(v.shortcodes)
+    v.shortcodes &&
+    typeof v.shortcodes === "object" &&
+    (Array.isArray(v.shortcodes) ||
+      ("definitions" in v.shortcodes &&
+        Array.isArray(v.shortcodes.definitions)))
     ? v
     : null;
 }

@@ -1,3 +1,4 @@
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import "server-only";
 import { readRuntimeCatalog } from "@/server/plugins/current";
 import { renderContent } from "./content";
@@ -9,7 +10,10 @@ export async function renderContentForReader(
 ) {
   await readRuntimeCatalog();
   const settings = await readAppliedSettings();
-  const rendered = renderContent(content, settings.publicSettings?.shortcodes);
+  const rendered = renderContent(
+    content,
+    siteShortcodes(settings.publicSettings),
+  );
   return {
     ...rendered,
     html:

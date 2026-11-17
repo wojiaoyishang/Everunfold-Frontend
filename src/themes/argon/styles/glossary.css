@@ -1,4 +1,5 @@
-.glossary-term {
+.glossary-term,
+span[data-glossary-interactive] {
   display: inline;
   padding: 0;
   border: 0;
@@ -11,14 +12,34 @@
   text-underline-offset: 0.18em;
   cursor: help;
 }
-.glossary-term:is(:hover, :focus-visible, [aria-expanded="true"]) {
+.glossary-term:is(:hover, :focus-visible, [aria-expanded="true"]),
+span[data-glossary-interactive]:is(
+    :hover,
+    :focus-visible,
+    [aria-expanded="true"]
+  ) {
   color: var(--accent);
   text-decoration-color: currentColor;
   outline: none;
 }
-.glossary-term:focus-visible {
+.glossary-term:focus-visible,
+[data-glossary-interactive]:focus-visible {
   border-radius: 2px;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 32%, transparent);
+}
+div[data-glossary-interactive] {
+  padding-inline-start: 10px;
+  border-inline-start: 2px dotted
+    color-mix(in srgb, var(--accent) 55%, transparent);
+  cursor: help;
+  transition: border-color 160ms ease;
+}
+div[data-glossary-interactive]:is(
+    :hover,
+    :focus-visible,
+    [aria-expanded="true"]
+  ) {
+  border-inline-start-color: var(--accent);
 }
 .glossary-hook-target {
   cursor: help;
@@ -139,6 +160,14 @@
     opacity 320ms ease,
     transform 320ms var(--motion-ease);
 }
+.glossary-tooltip[popover] {
+  inset: auto;
+  margin: 0;
+  padding: 0;
+}
+.glossary-tooltip[popover]:not(:popover-open) {
+  display: none;
+}
 .glossary-tooltip[data-state="open"][data-entered="true"] {
   opacity: 1;
   transform: none;
@@ -225,6 +254,9 @@
   overflow: auto;
   overscroll-behavior: contain;
 }
+.glossary-tooltip-body[data-actions="false"] .glossary-tooltip-scroll {
+  padding-block-end: 16px;
+}
 .glossary-tooltip-feature {
   position: relative;
   display: block;
@@ -270,6 +302,8 @@
   color: var(--text);
   line-height: 1.65;
   font-size: 0.9rem;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
 }
 
 .glossary-tooltip-content {

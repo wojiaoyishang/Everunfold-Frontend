@@ -5,6 +5,10 @@ import { useAdminRequest } from "@/core/admin/account-context";
 import { readEditorOptions } from "@/core/contracts/content-admin";
 import { readManagedPages } from "@/core/contracts/pages";
 import type { SitePreferences } from "@/core/contracts/settings";
+import {
+  defaultShortcodeDepth,
+  maximumShortcodeDepth,
+} from "@/core/shortcodes/configuration";
 import { UiText } from "@/core/i18n/provider";
 import { Select } from "../../components/ui/select";
 import { TextField } from "../../components/ui/primitives";
@@ -73,6 +77,7 @@ export function SitePublishingSettings({
   const reading = site.reading ?? {};
   const writing = site.writing ?? {};
   const excerptLength = writing.excerpt_length ?? 180;
+  const shortcodeDepth = writing.shortcode_max_depth ?? defaultShortcodeDepth;
   const validLength =
     Number.isInteger(excerptLength) &&
     excerptLength >= 1 &&
@@ -265,6 +270,40 @@ export function SitePublishingSettings({
             update({ writing: { ...writing, default_excerpt } })
           }
         />
+      </SettingsSection>
+      <SettingsSection id="settings-shortcodes" title="短代码">
+        <div className="admin-settings-field">
+          <label htmlFor="site-shortcode-depth">
+            <UiText text="最大嵌套层数" />
+          </label>
+          <TextField
+            id="site-shortcode-depth"
+            type="number"
+            min={1}
+            max={maximumShortcodeDepth}
+            step={1}
+            required
+            aria-describedby="site-shortcode-depth-hint"
+            aria-invalid={
+              !Number.isInteger(shortcodeDepth) ||
+              shortcodeDepth < 1 ||
+              shortcodeDepth > maximumShortcodeDepth ||
+              undefined
+            }
+            value={Number.isNaN(shortcodeDepth) ? "" : shortcodeDepth}
+            onChange={({ currentTarget }) =>
+              update({
+                writing: {
+                  ...writing,
+                  shortcode_max_depth: currentTarget.valueAsNumber,
+                },
+              })
+            }
+          />
+          <small id="site-shortcode-depth-hint">
+            <UiText text="前台阅读和编辑预览共用此设置。调低后，超限的短代码只显示可读正文。" />
+          </small>
+        </div>
       </SettingsSection>
     </>
   );

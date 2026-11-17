@@ -3,7 +3,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { MediaURL } from "@/core/contracts/content-admin";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import { UiText, useT } from "@/core/i18n/provider";
 import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
@@ -26,7 +26,7 @@ export default function InlineSource({
   source: string;
   format: "html" | "markdown";
   media?: Record<string, MediaURL>;
-  shortcodes?: readonly PublicShortcode[];
+  shortcodes?: RenderShortcodes;
   onFinish: (value?: string, media?: Record<string, MediaURL>) => void;
 }) {
   const t = useT();

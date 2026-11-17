@@ -112,6 +112,7 @@ export function ShortcodeLibraryPage() {
           onClose={() => choose(null)}
           onDirtyChange={onDirtyChange}
           definitions={definitions}
+          maxDepth={library.maxDepth}
         />
       )}
       <div
@@ -134,6 +135,7 @@ export function ShortcodeLibraryPage() {
                 compact
                 definition={item.compiled}
                 definitions={definitions}
+                maxDepth={library.maxDepth}
                 body={item.source.example_body}
               />
               <p>

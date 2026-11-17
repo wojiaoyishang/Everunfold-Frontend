@@ -7,7 +7,8 @@ import type {
   ContentTypeDefinition,
   MediaURL,
 } from "@/core/contracts/content-admin";
-import type { MediaItem, PublicShortcode } from "@/core/contracts/settings";
+import type { MediaItem } from "@/core/contracts/settings";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import type { DraftSession } from "@/core/collaboration/session";
 import { useDraftEditor } from "@/core/content-management/use-draft-editor";
 import {
@@ -96,7 +97,7 @@ function VersionsWorkspace({
   session: DraftSession;
   type: ContentTypeDefinition;
   media: Record<string, MediaURL>;
-  shortcodes: readonly PublicShortcode[];
+  shortcodes: RenderShortcodes;
   onCheckpoint: (note: string) => Promise<boolean>;
   saveError: string;
   onMedia: (item: MediaItem) => void;

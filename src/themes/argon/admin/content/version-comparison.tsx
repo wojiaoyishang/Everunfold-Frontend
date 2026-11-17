@@ -3,7 +3,7 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useMemo, useState } from "react";
 import type { DraftFields, MediaURL } from "@/core/contracts/content-admin";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import { compareBlocks, textDiff } from "@/core/editor/version-diff";
 import { privateDraftFields } from "@/core/collaboration/branches";
 import { Button } from "../../components/ui/primitives";
@@ -55,7 +55,7 @@ export function VersionComparison({
   beforeLabel: string;
   afterLabel: string;
   media: Record<string, MediaURL>;
-  shortcodes: readonly PublicShortcode[];
+  shortcodes: RenderShortcodes;
 }) {
   const [showAll, setShowAll] = useState(false);
   const [showSettings, setShowSettings] = useState(false);

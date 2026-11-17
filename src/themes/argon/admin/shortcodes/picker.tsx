@@ -1,5 +1,5 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useLocale } from "@/core/i18n/provider";
 
 import { useId, useState } from "react";
 import type { MediaItem } from "@/core/contracts/settings";
@@ -10,30 +10,40 @@ import { RequestError } from "@/core/http/request";
 import { shortcodeCall } from "@/core/shortcodes/parser";
 import { pluginRegistry } from "@/core/plugins/registry";
 import { renderContent } from "@/core/rendering/content";
+import { isCompleteShortcodeCall } from "@/core/shortcodes/registry";
 import { Button, TextArea, TextField } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { Modal } from "../../components/ui/modal";
 import { Select } from "../../components/ui/select";
 import { ShortcodeValues } from "./parameters";
 import { ShortcodePreview } from "./preview";
+import {
+  RegisteredShortcodeEditor,
+  shortcodeEditor,
+} from "./registered-editor";
 import { MediaPickerDialog } from "../media/media-picker-dialog";
 import { mediaReferenceId, siteMediaReference } from "@/core/media/references";
 import styles from "./shortcodes.module.css";
 
 export function ShortcodePicker({
   format,
+  language,
+  initialBody,
   media = {},
   onMedia,
   onPick,
   onClose,
 }: {
   format: "markdown" | "html";
+  language?: string;
+  initialBody?: string;
   media?: Record<string, MediaURL>;
   onMedia: (item: MediaItem) => void;
   onPick: (source: string) => void;
   onClose: () => void;
 }) {
   const id = useId();
+  const { locale } = useLocale();
   const library = useShortcodeLibrary();
   const { regionPassword } = useShortcodeActions();
   const [password, setPassword] = useState("");
@@ -42,8 +52,10 @@ export function ShortcodePicker({
   const [chosen, setChosen] = useState(""),
     [values, setValues] = useState<Record<string, string>>({});
   const [body, setBody] = useState(
-    format === "html" ? "<p>这里是正文内容。</p>" : "这里是正文内容。",
+    initialBody?.trim() ||
+      (format === "html" ? "<p>这里是正文内容。</p>" : "这里是正文内容。"),
   );
+  const [customSource, setCustomSource] = useState("");
   const [closing, setClosing] = useState(false),
     [result, setResult] = useState<string>(),
     [images, setImages] = useState(false);
@@ -73,14 +85,29 @@ export function ShortcodePicker({
     ? Math.max(0, mediaPicker.limit - mediaReferences.length)
     : 0;
   const needsPassword = selected?.name === "password-area";
-  const call = selected ? shortcodeCall(selected, values, body) : "";
+  const editor = shortcodeEditor(selected);
+  const call = editor
+    ? customSource
+    : selected
+      ? shortcodeCall(selected, values, body)
+      : "";
+  const complete =
+    !editor ||
+    (selected &&
+      isCompleteShortcodeCall(
+        call,
+        selected,
+        library.applied,
+        format === "markdown",
+        library.maxDepth,
+      ));
   const rendered = renderContent(
     {
       id: "shortcode-picker",
-      content: [{ id: "sample", type: format, content: call }],
+      content: [{ id: "sample", type: format, content: complete ? call : "" }],
       media_urls: media,
     },
-    library.applied,
+    { definitions: library.applied, maxDepth: library.maxDepth },
   );
   return (
     <Modal
@@ -134,12 +161,26 @@ export function ShortcodePicker({
                 onValueChange={(value) => {
                   setChosen(value);
                   setValues({});
+                  setCustomSource("");
                   setPassword("");
                   setPasswordError("");
                 }}
               />
             </div>
-            {needsPassword ? (
+            {editor ? (
+              <RegisteredShortcodeEditor
+                key={selected.id}
+                editor={editor}
+                definition={selected}
+                source={customSource}
+                onChange={setCustomSource}
+                language={language ?? locale}
+                format={format}
+                initialBody={body}
+                media={media}
+                onMedia={onMedia}
+              />
+            ) : needsPassword ? (
               <label className={styles.field}>
                 <span>
                   <UiText text="区域口令" />
@@ -193,7 +234,7 @@ export function ShortcodePicker({
                 </span>
               </div>
             )}
-            {selected.kind === "container" && (
+            {selected.kind === "container" && !editor && (
               <label className={styles.field}>
                 <span>
                   <UiText text="正文（" />
@@ -216,9 +257,16 @@ export function ShortcodePicker({
                 definitions={library.applied}
                 values={values}
                 body={body}
+                source={editor ? (complete ? call : "") : undefined}
+                maxDepth={library.maxDepth}
                 format={format}
                 media={media}
               />
+              {editor && customSource && !complete && (
+                <p role="status" className={styles.hint}>
+                  <UiText text="请生成一个完整的当前短代码调用。" />
+                </p>
+              )}
             </section>
             <label className={styles.field}>
               <span>
@@ -250,14 +298,15 @@ export function ShortcodePicker({
           className="admin-button admin-button-primary"
           disabled={
             !selected ||
+            !complete ||
             Boolean(rendered.diagnostics.length) ||
-            library.loading ||
+            (library.loading && !editor) ||
             closing ||
             settingPassword ||
             (needsPassword && !password.length)
           }
           onClick={async () => {
-            if (!selected) return;
+            if (!selected || !complete) return;
             if (!needsPassword) {
               setResult(call);
               setClosing(true);

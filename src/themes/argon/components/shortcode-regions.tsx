@@ -1,5 +1,6 @@
 "use client";
 
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import {
   createContext,
   useContext,
@@ -100,7 +101,7 @@ export function ShortcodeRegion({
         content: [{ id, content: body.source, type: body.type }],
         media_urls: body.media_urls,
       },
-      site.settings?.shortcodes,
+      siteShortcodes(site.settings),
       { disableShortcodeScripts: true },
     );
     return (

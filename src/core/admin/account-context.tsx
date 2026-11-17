@@ -14,7 +14,10 @@ export const AdminRequestContext = createContext<{
   csrfToken: string;
 } | null>(null);
 export function useAdminRequest() {
-  const value = useContext(AdminRequestContext);
+  const value = useOptionalAdminRequest();
   if (!value) throw new Error("Admin operations require a confirmed session");
   return value;
+}
+export function useOptionalAdminRequest() {
+  return useContext(AdminRequestContext);
 }

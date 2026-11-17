@@ -7,6 +7,7 @@ import {
   type GlossaryRuntimeOptions,
 } from "@/core/glossary/runtime";
 import { useLocale } from "@/core/i18n/provider";
+import { glossaryTriggerSelector } from "@/core/shortcodes/glossary";
 import { useReaderBaseUrl } from "./reader-data";
 import { useRouteState } from "./route-state";
 const GlossaryTooltips = lazy(() => import("./glossary-tooltips"));
@@ -19,8 +20,7 @@ const MAX_TARGETS = 20;
 const popupId = "glossary-hook-tooltip";
 const nativeFocusable =
   "a[href],button,input,select,textarea,summary,[tabindex]";
-const ignored =
-  ".glossary-term,[data-glossary-hook],[data-glossary-ignore],.glossary-tooltip,.glossary-tooltip *,.glossary-footnotes";
+const ignored = `.glossary-term,${glossaryTriggerSelector},[data-glossary-hook],[data-glossary-ignore],.glossary-tooltip,.glossary-tooltip *,.glossary-footnotes`;
 
 function targetFor(
   pathname: string,

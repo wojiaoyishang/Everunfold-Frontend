@@ -1935,3 +1935,9 @@ settings-v1 1.42.0 随节点登记主题推荐清单。前后端插件各自打�
 | 文件 | 版本 | SHA256 |
 | --- | --- | --- |
 | `docs/decisions/0175-page-size-and-excerpt-defaults.md` | `ADR0175-1` | `530cf60f981c4334b2eb314c3f4a18621f2198caf297e0d4b1a9c567d29de538` |
+
+## 术语短代码与插入表单
+
+| 文件 | 版本 | SHA256 |
+| --- | --- | --- |
+| `docs/decisions/0176-glossary-shortcodes-and-insert-editors.md` | `ADR0176-1` | `d6c22c2ad524eb82b9aff0c63cad8367b4e29d7d1e989d935c62504d708be4aa` |

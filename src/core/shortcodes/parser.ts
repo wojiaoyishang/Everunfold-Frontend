@@ -1,5 +1,8 @@
 import MarkdownIt from "markdown-it";
 import type { PublicShortcode } from "@/core/contracts/settings";
+import { defaultShortcodeDepth, maximumShortcodeDepth } from "./configuration";
+import { glossaryPopupName } from "./glossary";
+export { shortcodeCall } from "./source";
 
 export type ShortcodeNode = {
   from: number;
@@ -10,6 +13,7 @@ export type ShortcodeNode = {
   bodyFrom: number;
   bodyTo: number;
   error?: string;
+  overLimit?: boolean;
 };
 export type ShortcodeDiagnostic = { from: number; to: number; message: string };
 const markdown = new MarkdownIt({ html: true });
@@ -92,19 +96,32 @@ export function parseShortcodes(
   source: string,
   definitions: readonly Pick<PublicShortcode, "name" | "kind">[],
   isMarkdown = false,
+  maxDepth = defaultShortcodeDepth,
 ) {
+  const limit = Number.isInteger(maxDepth)
+    ? Math.max(1, Math.min(maximumShortcodeDepth, maxDepth))
+    : defaultShortcodeDepth;
   const known = new Map(
     definitions.map((definition) => [definition.name, definition]),
   );
   const nodes: ShortcodeNode[] = [],
-    stack: ShortcodeNode[] = [],
+    stack: { node: ShortcodeNode; markdown: boolean }[] = [],
     diagnostics: ShortcodeDiagnostic[] = [];
-  const ranges = protectedRanges(source, isMarkdown);
-  let range = 0;
+  const scanners = new Map<
+    boolean,
+    { ranges: ReturnType<typeof protectedRanges>; index: number }
+  >();
   for (let at = 0; at < source.length;) {
-    while (range < ranges.length && ranges[range].to <= at) range++;
-    if (ranges[range]?.from <= at) {
-      at = Math.max(at + 1, ranges[range].to);
+    const markdown = stack.at(-1)?.markdown ?? isMarkdown;
+    let scanner = scanners.get(markdown);
+    if (!scanner) {
+      scanner = { ranges: protectedRanges(source, markdown), index: 0 };
+      scanners.set(markdown, scanner);
+    }
+    const { ranges } = scanner;
+    while (ranges[scanner.index]?.to <= at) scanner.index++;
+    if (ranges[scanner.index]?.from <= at) {
+      at = Math.max(at + 1, ranges[scanner.index].to);
       continue;
     }
     if (!source.startsWith("{{<", at)) {
@@ -133,12 +150,12 @@ export function parseShortcodes(
       continue;
     }
     if (head.close) {
-      const top = stack.at(-1);
+      const top = stack.at(-1)?.node;
       if (top?.name === head.name && !head.error) {
         top.to = head.to;
         top.bodyTo = at;
         stack.pop();
-        (stack.at(-1)?.children ?? nodes).push(top);
+        (stack.at(-1)?.node.children ?? nodes).push(top);
       } else
         diagnostics.push({
           from: at,
@@ -155,42 +172,33 @@ export function parseShortcodes(
         bodyFrom: head.to,
         bodyTo: head.to,
         error: head.error,
+        overLimit: stack.length >= limit,
       };
-      if (stack.length >= 32)
+      if (stack.length === limit)
         diagnostics.push({
           from: at,
           to: head.to,
-          message: "短代码嵌套超过 32 层",
+          message: `短代码嵌套超过 ${limit} 层`,
         });
-      else if (definition.kind === "container") stack.push(node);
-      else (stack.at(-1)?.children ?? nodes).push(node);
+      if (definition.kind === "container")
+        stack.push({
+          node,
+          markdown:
+            node.name === glossaryPopupName && node.attributes.format
+              ? node.attributes.format === "markdown"
+              : markdown,
+        });
+      else (stack.at(-1)?.node.children ?? nodes).push(node);
       if (head.error)
         diagnostics.push({ from: at, to: head.to, message: head.error });
     }
     at = head.to;
   }
-  for (const node of stack)
+  for (const { node } of stack)
     diagnostics.push({
       from: node.from,
       to: node.to,
       message: `缺少结束标记：${node.name}`,
     });
   return { nodes, diagnostics };
-}
-
-export function shortcodeCall(
-  definition: Pick<PublicShortcode, "name" | "kind" | "parameters">,
-  values: Record<string, string> = {},
-  body = "",
-) {
-  const attributes = definition.parameters
-    .map(
-      (parameter) =>
-        ` ${parameter.name}=${JSON.stringify(values[parameter.name] ?? parameter.default ?? "")}`,
-    )
-    .join("");
-  const head = `{{< ${definition.name}${attributes} >}}`;
-  return definition.kind === "container"
-    ? `${head}\n${body}\n{{< /${definition.name} >}}`
-    : head;
 }

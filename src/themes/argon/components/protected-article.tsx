@@ -1,4 +1,5 @@
 "use client";
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import { ArticleAgeNotice } from "./article-age-notice";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
 
@@ -68,8 +69,8 @@ export function ProtectedArticle({
   );
   const rendered = useMemo(() => {
     void runtime.catalog?.revision;
-    return renderContent(readable, site.settings?.shortcodes);
-  }, [readable, site.settings?.shortcodes, runtime.catalog?.revision]);
+    return renderContent(readable, siteShortcodes(site.settings));
+  }, [readable, site.settings, runtime.catalog?.revision]);
   return (
     <>
       <PagePresentation
@@ -110,7 +111,7 @@ export function ProtectedArticle({
                         contentId: content.id,
                         contentRevision: readable.updated_at,
                         media: readable.media_urls,
-                        shortcodes: site.settings?.shortcodes,
+                        shortcodes: siteShortcodes(site.settings),
                         readReceipt: access.content.read_receipt,
                       }}
                     />

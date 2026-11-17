@@ -1,4 +1,5 @@
 import { matchGlossaryText, type GlossaryMatchTerm } from "./match";
+import { glossaryTriggerSelector } from "@/core/shortcodes/glossary";
 
 const ignoredSelector = [
   "a",
@@ -11,6 +12,7 @@ const ignoredSelector = [
   "math",
   ".katex",
   ".glossary-term",
+  glossaryTriggerSelector,
   ".sr-only",
   "[hidden]",
   "[aria-hidden='true']",

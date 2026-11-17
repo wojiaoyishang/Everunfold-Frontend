@@ -87,10 +87,14 @@ export function RouteStateProvider({
 }
 
 export function useRouteState() {
-  const value = useContext(RouteContext);
+  const value = useOptionalRouteState();
   if (!value)
     throw new Error("Reading components must share the persistent blog layout");
   return value;
+}
+
+export function useOptionalRouteState() {
+  return useContext(RouteContext);
 }
 
 export function useSiteReadingPreferences() {

@@ -9,6 +9,7 @@ export type {
   FrontendPlugin,
   PluginShortcode,
   ShortcodeRenderContext,
+  ShortcodeEditorProps,
 } from "@/core/plugins/types";
 export type { SettingsModel, SettingField } from "@/core/forms/schema";
 export type {
@@ -52,6 +53,7 @@ export function definePlugin<T extends FrontendPlugin>(plugin: T): T {
 }
 
 export type { MediaItem, MediaQuery } from "@/core/contracts/settings";
+export { shortcodeCall } from "../core/shortcodes/source";
 export type { ThemeDefinition } from "@/core/extensions/types";
 export {
   defineFont,

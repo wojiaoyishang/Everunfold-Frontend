@@ -1,6 +1,7 @@
 import type { CodePreferences } from "@/core/contracts/settings";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
+import { glossaryPopupAttribute } from "@/core/shortcodes/glossary";
 import { ContentResources } from "./content-resources";
 import { codeFontFace, codePreferenceStyle } from "./code-preferences-model";
 import { ContentMarkupEnhancer } from "./content-markup-enhancer";
@@ -57,6 +58,7 @@ export function StaticContentMarkup({
         contentId={contentId}
         revision={contentRevision}
         glossary={glossary}
+        hasGlossaryShortcodes={html.includes(glossaryPopupAttribute + "=")}
       />
     </>
   );

@@ -1,3 +1,4 @@
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import type { ContentPresentation } from "@/core/contracts/presentation";
 import type { Content, PublicSnapshot } from "./types";
 import { builderSearchText } from "@/core/builder/discovery";
@@ -104,7 +105,7 @@ export function queryFeed(
             builderSearchText(
               content.component_document,
               content.media_urls,
-              snapshot.site.settings?.shortcodes,
+              siteShortcodes(snapshot.site.settings),
             ),
           ]
         : content.content.map((block) => block.content)),

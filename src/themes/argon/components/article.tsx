@@ -1,3 +1,4 @@
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import type { Content, PublicSnapshot } from "@/core/content/types";
 import { contentMetadata } from "@/core/content/client-data";
 import { renderContentForReader } from "@/core/rendering/render-content-server";
@@ -56,7 +57,9 @@ export async function Article({
           }}
           articleDisplay={display}
           code={profile?.code}
-          builderContext={{ shortcodes: snapshot.site.settings?.shortcodes }}
+          builderContext={{
+            shortcodes: siteShortcodes(snapshot.site.settings),
+          }}
         />
         {content.kind === "article" && (
           <div className="article-followup">

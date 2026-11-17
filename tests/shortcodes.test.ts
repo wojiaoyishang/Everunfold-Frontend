@@ -8,8 +8,11 @@ import {
 import { parseShortcodes, shortcodeCall } from "../src/core/shortcodes/parser";
 import {
   builtinShortcodes as frontendShortcodes,
+  frontendShortcodes as frontendCatalog,
+  isCompleteShortcodeCall,
   previewShortcodeDefinitions,
 } from "../src/core/shortcodes/registry";
+import { glossaryShortcode } from "../src/core/shortcodes/glossary";
 import { content } from "./fixtures";
 import { backendShortcodes } from "../tools/fixtures/backend-shortcodes";
 const builtinShortcodes = () => [...backendShortcodes, ...frontendShortcodes()];
@@ -19,6 +22,152 @@ const render = (source: string, type: "markdown" | "html" = "markdown") =>
     content({ content: [{ id: "native", type, content: source }] }),
     backendShortcodes,
   );
+
+function splitGlossaryMarkup(html: string) {
+  const table =
+    /<script type="application\/json" data-glossary-popups>([\s\S]+)<\/script>$/.exec(
+      html,
+    );
+  assert.ok(table, html);
+  return {
+    body: html.slice(0, table.index),
+    popups: Object.values(JSON.parse(table[1])) as Array<
+      Record<string, string>
+    >,
+  };
+}
+
+test("frontend glossary shortcode preserves inline formatting and escapes explanations", () => {
+  const call =
+    '{{< glossary text="价格 $& 和 <script>原样</script>" >}}**归档**{{< /glossary >}}';
+  const rendered = render(`请看 ${call}，也可以 **查找**。`);
+  assert.deepEqual(rendered.diagnostics, []);
+  assert.equal(
+    frontendCatalog().find((item) => item.id === glossaryShortcode.id)?.origin,
+    "frontend",
+  );
+  const { body, popups } = splitGlossaryMarkup(rendered.html);
+  assert.match(
+    body,
+    /<p>请看 <span data-glossary-popup="[^"]+"><strong>归档<\/strong><\/span>，也可以 <strong>查找<\/strong>。<\/p>/,
+  );
+  assert.equal(popups[0].text, "价格 $& 和 <script>原样</script>");
+  assert.doesNotMatch(rendered.html, /<script>原样/);
+});
+
+test("nested HTML explanations share one sanitized table while their triggers remain in their own content", () => {
+  const source = [
+    '{{< glossary title="外层" >}}',
+    "外层触发",
+    '{{< glossary-popup format="html" >}}',
+    '<p onclick="discard()">隐藏说明</p><script>discard()</script>',
+    '{{< notice type="info" title="嵌套提示" >}}',
+    '<p>{{< glossary term="术语甲" >}}<strong>内层触发</strong>{{< /glossary >}}</p>',
+    "{{< /notice >}}",
+    "{{< /glossary-popup >}}",
+    "{{< /glossary >}}",
+    "这里是后续正文。",
+  ].join("\n");
+  const rendered = render(source);
+  assert.deepEqual(rendered.diagnostics, []);
+  const { body, popups } = splitGlossaryMarkup(rendered.html);
+  assert.match(body, /外层触发/);
+  assert.match(body, /后续正文/);
+  assert.doesNotMatch(body, /隐藏说明|内层触发/);
+  assert.equal(popups.length, 2);
+  const rich = popups.find((item) => item.kind === "markup");
+  assert.match(rich?.html ?? "", /<p>隐藏说明<\/p>/);
+  assert.match(rich?.html ?? "", /<strong>内层触发<\/strong>/);
+  assert.doesNotMatch(rich?.html ?? "", /onclick|discard\(/);
+  assert.equal(popups.find((item) => item.kind === "term")?.slug, "术语甲");
+});
+
+test("a Markdown explanation inside an HTML block can contain formatted text and shortcodes", () => {
+  const result = render(
+    '<p>{{< glossary >}}说明{{< glossary-popup format="markdown" >}}\n**粗体**和{{< glossary text="说明" >}}其他{{< /glossary >}}\n{{< /glossary-popup >}}{{< /glossary >}}</p>',
+    "html",
+  );
+  assert.deepEqual(result.diagnostics, []);
+  const { body, popups } = splitGlossaryMarkup(result.html);
+  assert.match(body, /<p><span data-glossary-popup="[^"]+">说明<\/span><\/p>/);
+  assert.match(
+    popups.find((popup) => popup.kind === "markup")?.html ?? "",
+    /<strong>粗体<\/strong>.*其他/,
+  );
+});
+
+test("invalid glossary modes and lowered nesting limits keep visible text without flattening hidden explanations", () => {
+  const source =
+    '{{< glossary >}}外{{< glossary-popup format="html" >}}隐藏{{< /glossary-popup >}}{{< /glossary >}}\n\n后文';
+  for (const [maxDepth, input] of [
+    [1, source],
+    [
+      32,
+      source.replace("{{< glossary >}}", '{{< glossary term="已有词条" >}}'),
+    ],
+  ] as const) {
+    const rendered = renderContent(
+      content({ content: [{ id: "a", type: "markdown", content: input }] }),
+      { definitions: backendShortcodes, maxDepth },
+    );
+    assert.equal(rendered.diagnostics.length, 1);
+    assert.match(rendered.html, /外/);
+    assert.match(rendered.html, /后文/);
+    assert.doesNotMatch(rendered.html, /隐藏|data-glossary-popup/);
+  }
+});
+
+test("64 levels work for HTML and Markdown; overflow in same-name calls keeps later siblings aligned", () => {
+  const open = '{{< notice type="info" >}}\n';
+  const close = "\n{{< /notice >}}";
+  for (const type of ["markdown", "html"] as const) {
+    const source =
+      open.repeat(65) +
+      "最内层" +
+      close.repeat(65) +
+      "\n\n" +
+      open +
+      "同级" +
+      close;
+    const rendered = renderContent(
+      content({ content: [{ id: "a", type, content: source }] }),
+      { definitions: backendShortcodes, maxDepth: 64 },
+    );
+    assert.deepEqual(
+      rendered.diagnostics.map((issue) => issue.message),
+      ["短代码嵌套超过 64 层"],
+    );
+    assert.equal(
+      (rendered.html.match(/data-variant="info"/g) ?? []).length,
+      65,
+    );
+    assert.match(rendered.html, /最内层/);
+    assert.match(rendered.html, /同级/);
+  }
+});
+
+test("a custom form can supply only one complete call for its selected definition", () => {
+  const call = shortcodeCall(glossaryShortcode, { text: "说明" }, "正文");
+  assert.ok(
+    isCompleteShortcodeCall(call, glossaryShortcode, backendShortcodes, true),
+  );
+  for (const invalid of [
+    `前缀 ${call}`,
+    `${call}\n额外文字`,
+    `${call}\n${call}`,
+    "{{< notice >}}另一个{{< /notice >}}",
+  ]) {
+    assert.equal(
+      isCompleteShortcodeCall(
+        invalid,
+        glossaryShortcode,
+        backendShortcodes,
+        true,
+      ),
+      false,
+    );
+  }
+});
 test("preview overrides a name with a temporary identity and retains other custom containers", () => {
   const notice = builtinShortcodes().find((item) => item.name === "notice")!;
   const accordion = builtinShortcodes().find(

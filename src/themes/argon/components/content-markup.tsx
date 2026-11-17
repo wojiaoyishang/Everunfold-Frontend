@@ -2,6 +2,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import type { GlossaryRuntimeOptions } from "@/core/glossary/runtime";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import { ContentMarkupView } from "./content-markup-view";
 
 const GlossaryTooltips = lazy(() => import("./glossary-tooltips"));
@@ -13,6 +14,7 @@ export function ContentMarkup({
   contentId,
   contentRevision,
   glossary,
+  shortcodes,
 }: {
   html: string;
   features: ContentFeatures;
@@ -20,6 +22,7 @@ export function ContentMarkup({
   contentId?: string;
   contentRevision?: string;
   glossary?: GlossaryRuntimeOptions;
+  shortcodes?: RenderShortcodes;
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [loadGlossary, setLoadGlossary] = useState(false);
@@ -59,6 +62,7 @@ export function ContentMarkup({
         html={html}
         features={features}
         className={className}
+        shortcodes={shortcodes}
         data-glossary-enabled={Boolean(
           glossary?.auto_match && glossary.show_tooltips && contentId,
         )}

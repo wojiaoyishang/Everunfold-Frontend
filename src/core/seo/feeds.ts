@@ -1,3 +1,4 @@
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import { escapeMarkup } from "@/core/rendering/features/model";
 import type { PublicSnapshot } from "@/core/content/types";
 import { builderSyndicationHtml } from "@/core/builder/discovery";
@@ -28,10 +29,11 @@ export function buildFeed(
         ? builderSyndicationHtml(
             item.component_document,
             item.media_urls,
-            site.settings?.shortcodes,
+            siteShortcodes(site.settings),
           ) || `<p>${escapeMarkup(item.excerpt)}</p>`
-        : renderContent(item, site.settings?.shortcodes, {
+        : renderContent(item, siteShortcodes(site.settings), {
             disableShortcodeScripts: true,
+            omitGlossaryPopups: true,
           }).html,
     );
   const url = (path: string) => xml(new URL(path, origin).href);

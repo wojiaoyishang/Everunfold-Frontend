@@ -1,3 +1,4 @@
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import { ExtensionComponent } from "@/core/extensions/components";
 import { ThemeTemplate, ThemeSlot } from "@/core/themes/presentation";
 import type { PublicManagedPage } from "@/core/contracts/pages";
@@ -137,7 +138,7 @@ export function ManagedPageSurface({
                   readReceipt,
                   contentRevision: String(page.revision),
                   media: page.media_urls,
-                  shortcodes: site.settings?.shortcodes,
+                  shortcodes: siteShortcodes(site.settings),
                   comments: <PageComments />,
                 }}
                 onReady={onReady}

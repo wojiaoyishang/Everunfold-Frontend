@@ -66,6 +66,7 @@ export function createPluginRegistry(
         );
     };
     const ownBuilderComponents: BuilderComponentDefinition[] = [];
+    const ownShortcodes: RegisteredPluginShortcode[] = [];
     const ownFieldHooks = new Map<string, RegisteredAdminFormFieldHook>();
     const ownAdminPages = new Map<string, RegisteredPluginAdminPage>();
     const ownAdminGroups = new Map<string, RegisteredPluginAdminMenuGroup>();
@@ -116,6 +117,10 @@ export function createPluginRegistry(
         shortcode.classNames?.some(
           (name) => !/^[a-zA-Z_][a-zA-Z0-9_-]{0,95}$/.test(name),
         ) ||
+        (shortcode.editor !== undefined &&
+          (typeof shortcode.editor !== "string" ||
+            !shortcode.editor ||
+            Boolean(shortcode.mediaPicker))) ||
         (shortcode.mediaPicker &&
           (!parameters.has(shortcode.mediaPicker.parameter) ||
             shortcode.mediaPicker.kind !== "image" ||
@@ -126,18 +131,18 @@ export function createPluginRegistry(
         throw new Error(`Invalid plugin shortcode options: ${d.name}`);
       ids.add(d.id);
       names.add(d.name);
-      contributions.push(
-        Object.freeze({
-          ...shortcode,
-          definition: Object.freeze(structuredClone(d)),
-          classNames: Object.freeze([...(shortcode.classNames ?? [])]),
-          mediaPicker: shortcode.mediaPicker
-            ? Object.freeze({ ...shortcode.mediaPicker })
-            : undefined,
-          pluginId: plugin.id,
-          pluginVersion: plugin.version,
-        }),
-      );
+      const registered = Object.freeze({
+        ...shortcode,
+        definition: Object.freeze(structuredClone(d)),
+        classNames: Object.freeze([...(shortcode.classNames ?? [])]),
+        mediaPicker: shortcode.mediaPicker
+          ? Object.freeze({ ...shortcode.mediaPicker })
+          : undefined,
+        pluginId: plugin.id,
+        pluginVersion: plugin.version,
+      });
+      contributions.push(registered);
+      ownShortcodes.push(registered);
     };
     try {
       const result: unknown = plugin.setup(
@@ -265,6 +270,11 @@ export function createPluginRegistry(
     } finally {
       collecting = false;
     }
+    for (const shortcode of ownShortcodes)
+      if (shortcode.editor && components.get(shortcode.editor) !== plugin.id)
+        throw new Error(
+          `Shortcode editor must be registered by its plugin: ${shortcode.definition.name}`,
+        );
     for (const hook of ownFieldHooks.values()) {
       if (
         hook.stage === "render" &&

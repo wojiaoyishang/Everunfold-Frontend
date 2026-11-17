@@ -5,9 +5,9 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ContentFeatures } from "@/core/rendering/features/model";
 import { afterDialogMotion } from "../hooks/dialog-motion";
 import { useDialogSurface } from "../hooks/use-dialog-surface";
-import { AppLink } from "./navigation-link";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import { Icon } from "./icon";
-import { Button, Dialog } from "./ui/primitives";
+import { Button, Dialog, TextLink } from "./ui/primitives";
 import { ContentMarkupView } from "./content-markup-view";
 import { useT } from "@/core/i18n/provider";
 
@@ -17,12 +17,14 @@ export function GlossaryExpandedDialog({
   path,
   html,
   features,
+  shortcodes,
   onDismiss,
 }: {
   title: string;
   path: string;
   html: string;
   features: ContentFeatures;
+  shortcodes?: RenderShortcodes;
   onDismiss: () => void;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -77,13 +79,14 @@ export function GlossaryExpandedDialog({
             data-glossary-ignore
             html={html}
             features={features}
+            shortcodes={shortcodes}
             codeTools={false}
           />
         </div>
         <footer>
-          <AppLink href={path} target="_blank" rel="noopener noreferrer">
+          <TextLink href={path} target="_blank" rel="noopener noreferrer">
             {t("打开词条页面")} <Icon name="external" />
-          </AppLink>
+          </TextLink>
         </footer>
       </div>
     </Dialog>

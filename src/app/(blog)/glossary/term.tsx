@@ -1,3 +1,4 @@
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import { notFound } from "next/navigation";
 import { readPageConfiguration } from "@/core/config/server";
 import type { PublicSnapshot } from "@/core/content/types";
@@ -61,7 +62,7 @@ export async function GlossaryTerm({
   const { term, seo } = await readTerm(snapshot, slug);
   const rendered = renderGlossaryContent(
     term,
-    snapshot.site.settings?.shortcodes,
+    siteShortcodes(snapshot.site.settings),
   );
   return (
     <>

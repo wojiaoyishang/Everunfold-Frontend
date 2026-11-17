@@ -1,8 +1,9 @@
 "use client";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useLocale } from "@/core/i18n/provider";
 
 import { useEffect, useId, useRef, useState } from "react";
 import type {
+  MediaItem,
   ShortcodeItem,
   ShortcodeSource,
   PublicShortcode,
@@ -23,6 +24,12 @@ import { Select } from "../../components/ui/select";
 import { RichToolbar } from "../content/plugins/rich-toolbar";
 import { ShortcodeParameters, ShortcodeValues } from "./parameters";
 import { ShortcodePreview } from "./preview";
+import {
+  RegisteredShortcodeEditor,
+  shortcodeEditor,
+} from "./registered-editor";
+import { isCompleteShortcodeCall } from "@/core/shortcodes/registry";
+import type { MediaURL } from "@/core/contracts/content-admin";
 import styles from "./shortcodes.module.css";
 
 type EditableShortcodeSource = ShortcodeSource & { javascript?: string };
@@ -54,6 +61,7 @@ export function ShortcodeEditor({
   onClose,
   onDirtyChange,
   definitions = [],
+  maxDepth,
 }: {
   item: CatalogItem | null;
   onSaved: (item: ShortcodeItem) => void;
@@ -61,9 +69,11 @@ export function ShortcodeEditor({
   onClose: () => void;
   onDirtyChange: (dirty: boolean) => void;
   definitions?: readonly PublicShortcode[];
+  maxDepth?: number;
 }) {
   const kindId = useId();
   const actions = useShortcodeActions();
+  const { locale } = useLocale();
   const [source, setSource] = useState<EditableShortcodeSource>(
     item?.source ?? initial,
   );
@@ -82,6 +92,28 @@ export function ShortcodeEditor({
     JSON.stringify(source) !== JSON.stringify(item?.source ?? initial) || !item;
   const compilation = useShortcodeCompilation(source, item?.id, writable);
   const compiled = writable ? compilation.compiled : item?.compiled;
+  const customEditor = shortcodeEditor(compiled ?? undefined);
+  const [customSource, setCustomSource] = useState("");
+  const [previewMedia, setPreviewMedia] = useState<Record<string, MediaURL>>(
+    {},
+  );
+  const addPreviewMedia = (item: MediaItem) =>
+    setPreviewMedia((previous) => ({
+      ...previous,
+      [item.id]: { original: item.url },
+    }));
+  const complete =
+    !customEditor ||
+    Boolean(
+      compiled &&
+      isCompleteShortcodeCall(
+        customSource,
+        compiled,
+        definitions,
+        true,
+        maxDepth,
+      ),
+    );
   const htmlLanguage = useCodeLanguage("html"),
     cssLanguage = useCodeLanguage("css"),
     javascriptLanguage = useCodeLanguage("javascript");
@@ -353,12 +385,26 @@ export function ShortcodeEditor({
           <strong>
             <UiText text="样式预览" />
           </strong>
-          <ShortcodeValues
-            parameters={source.parameters ?? []}
-            values={values}
-            onChange={setValues}
-          />
-          {source.kind !== "leaf" && (
+          {customEditor && compiled ? (
+            <RegisteredShortcodeEditor
+              editor={customEditor}
+              definition={compiled}
+              source={customSource}
+              onChange={setCustomSource}
+              format="markdown"
+              language={locale}
+              initialBody={source.example_body ?? ""}
+              media={previewMedia}
+              onMedia={addPreviewMedia}
+            />
+          ) : (
+            <ShortcodeValues
+              parameters={source.parameters ?? []}
+              values={values}
+              onChange={setValues}
+            />
+          )}
+          {!customEditor && source.kind !== "leaf" && (
             <label className={styles.field}>
               <span>
                 <UiText text="示例正文" />
@@ -393,9 +439,19 @@ export function ShortcodeEditor({
               <ShortcodePreview
                 definition={compiled}
                 definitions={definitions}
+                maxDepth={maxDepth}
                 body={values.__body ?? source.example_body}
                 values={values}
+                source={
+                  customEditor ? (complete ? customSource : "") : undefined
+                }
+                media={previewMedia}
               />
+              {customEditor && customSource && !complete && (
+                <p role="status" className={styles.hint}>
+                  <UiText text="请生成一个完整的当前短代码调用。" />
+                </p>
+              )}
               <label className={styles.field}>
                 <span>
                   <UiText text="调用源码" />
@@ -403,11 +459,15 @@ export function ShortcodeEditor({
                 <TextArea
                   className={styles.invocation}
                   readOnly
-                  value={shortcodeCall(
-                    compiled,
-                    values,
-                    values.__body ?? source.example_body ?? "",
-                  )}
+                  value={
+                    customEditor
+                      ? customSource
+                      : shortcodeCall(
+                          compiled,
+                          values,
+                          values.__body ?? source.example_body ?? "",
+                        )
+                  }
                 />
               </label>
             </>

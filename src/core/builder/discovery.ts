@@ -49,7 +49,7 @@ export function builderSyndicationHtml(
                 media_urls: media,
               },
               shortcodes,
-              { disableShortcodeScripts: true },
+              { disableShortcodeScripts: true, omitGlossaryPopups: true },
             ).html;
           case "core.heading": {
             const level = /^[2-6]$/.test(field(node, "level"))

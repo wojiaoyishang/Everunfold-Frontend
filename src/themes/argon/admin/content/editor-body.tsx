@@ -65,6 +65,7 @@ export function EditorBody({
   const [shortcodeTarget, setShortcodeTarget] = useState<{
     id: string;
     insert: CapturedInsertion;
+    body?: string;
   } | null>(null);
   const composer = useBlockComposer();
   const [announcement, setAnnouncement] = useState("");
@@ -166,14 +167,16 @@ export function EditorBody({
                   label={`正文块 ${index + 1} 内容`}
                   value={block.content}
                   media={media}
-                  onShortcode={() =>
+                  onShortcode={() => {
+                    const input = inputs.current.get(block.id);
+                    const range = input?.selection();
                     setShortcodeTarget({
                       id: block.id,
-                      insert:
-                        inputs.current.get(block.id)?.captureInsertion() ??
-                        (() => {}),
-                    })
-                  }
+                      insert: input?.captureInsertion() ?? (() => {}),
+                      body:
+                        range && block.content.slice(range.start, range.end),
+                    });
+                  }}
                   onMedia={(kind) =>
                     setMediaTarget({
                       id: block.id,
@@ -269,6 +272,8 @@ export function EditorBody({
       )}
       {shortcodeTarget && (
         <ShortcodePicker
+          initialBody={shortcodeTarget.body}
+          language={authoringLanguage}
           format={
             value.body.find((block) => block.id === shortcodeTarget.id)?.type ??
             "markdown"

@@ -48,6 +48,7 @@ export { useAdminRequest } from "@/core/admin/account-context";
 export { randomUUID } from "@/core/browser/crypto";
 
 export { MediaPickerDialog } from "./media-picker";
+export { default as HtmlSourceEditor } from "@/themes/argon/admin/content/plugins/html-source";
 export { SettingsForm } from "@/core/forms/renderer";
 export { FontStyles, useFont, useRegisteredFonts } from "@/core/fonts/provider";
 export { PageComments, usePageComments } from "@/core/pages/comments";

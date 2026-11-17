@@ -1,3 +1,4 @@
+import { siteShortcodes } from "@/core/shortcodes/configuration";
 import { UiText } from "@/core/i18n/provider";
 import type { PublicSnapshot } from "@/core/content/types";
 import {
@@ -104,7 +105,7 @@ export function Feed({
                 key={entry.content.id}
                 entry={entry}
                 theme={theme}
-                shortcodes={snapshot.site.settings?.shortcodes}
+                shortcodes={siteShortcodes(snapshot.site.settings)}
               />
             ))}
           </div>

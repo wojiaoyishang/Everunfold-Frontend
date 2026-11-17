@@ -28,7 +28,7 @@ import { Button } from "../../components/ui/primitives";
 import { Icon } from "../../components/icon";
 import { ExtensionProgress } from "../../components/extension-placeholder";
 import type { MediaURL } from "@/core/contracts/content-admin";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 import dynamic from "next/dynamic";
 import { isBuilderPreviewControl } from "./preview-controls";
 import styles from "./live-canvas.module.css";
@@ -121,7 +121,7 @@ export function LiveBuilderCanvas({
   onInlineActiveChange?: (active: boolean) => void;
   inlineRequest?: InlineRequest | null;
   media?: Record<string, MediaURL>;
-  shortcodes?: readonly PublicShortcode[];
+  shortcodes?: RenderShortcodes;
 }) {
   const t = useT();
   const [load, setLoad] = useState(0);

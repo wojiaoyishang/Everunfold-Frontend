@@ -13,6 +13,8 @@ import type {
 } from "@/core/contracts/settings";
 import { RequestError } from "@/core/http/request";
 import { frontendShortcodes, type CatalogItem } from "./registry";
+import { type ShortcodeConfiguration } from "./configuration";
+import { glossaryShortcode } from "./glossary";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
@@ -37,6 +39,7 @@ export function useShortcodeLibrary() {
   const canReadSettings = can(useAdminAccount(), "settings:read");
   const [items, setItems] = useState<CatalogItem[]>([]);
   const [applied, setApplied] = useState<PublicShortcode[]>([]);
+  const [maxDepth, setMaxDepth] = useState<number>();
   const [settings, setSettings] = useState<SettingsState | null>(null);
   const [loading, setLoading] = useState(true),
     [error, setError] = useState("");
@@ -54,6 +57,7 @@ export function useShortcodeLibrary() {
       if (mounted.current && request.current === id) {
         setItems(catalog.data.items);
         setApplied(catalog.data.applied ?? []);
+        setMaxDepth(catalog.data.shortcode_max_depth);
         setSettings(state?.data ?? null);
       }
     } catch (error) {
@@ -99,20 +103,20 @@ export function useShortcodeLibrary() {
   }, [baseUrl, pending, settings?.revision]);
   return {
     items: [
-      ...items,
-      ...(runtime.loading
-        ? []
-        : frontendShortcodes().filter(
-            (entry) =>
-              !items.some(
-                (item) =>
-                  item.id === entry.id ||
-                  item.source.name === entry.source.name,
-              ),
-          )),
+      ...items.filter((item) => item.source.name !== glossaryShortcode.name),
+      ...frontendShortcodes().filter(
+        (entry) =>
+          entry.id === glossaryShortcode.id ||
+          (!runtime.loading &&
+            !items.some(
+              (item) =>
+                item.id === entry.id || item.source.name === entry.source.name,
+            )),
+      ),
     ],
     settings,
     applied,
+    maxDepth,
     loading,
     error,
     reload,
@@ -172,13 +176,20 @@ export function useShortcodeCompilation(
 
 export function useAppliedShortcodes() {
   const { baseUrl } = useAdminRequest();
-  const [definitions, setDefinitions] = useState<PublicShortcode[]>([]);
+  const [configuration, setConfiguration] = useState<ShortcodeConfiguration>({
+    definitions: [],
+  });
   useEffect(() => {
     const controller = new AbortController();
     void readShortcodes(baseUrl, { signal: controller.signal })
-      .then(({ data }) => setDefinitions(data.applied ?? []))
+      .then(({ data }) =>
+        setConfiguration({
+          definitions: data.applied ?? [],
+          maxDepth: data.shortcode_max_depth,
+        }),
+      )
       .catch(() => {});
     return () => controller.abort();
   }, [baseUrl]);
-  return definitions;
+  return configuration;
 }

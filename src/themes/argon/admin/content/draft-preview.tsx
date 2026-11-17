@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { renderContent } from "@/core/rendering/content";
 import type { DraftFields, MediaURL } from "@/core/contracts/content-admin";
 import { ContentMarkup } from "../../components/content-markup";
-import type { PublicShortcode } from "@/core/contracts/settings";
+import type { RenderShortcodes } from "@/core/shortcodes/configuration";
 
 export function DraftPreview({
   fields,
@@ -13,7 +13,7 @@ export function DraftPreview({
 }: {
   fields: DraftFields;
   media?: Record<string, MediaURL>;
-  shortcodes?: readonly PublicShortcode[];
+  shortcodes?: RenderShortcodes;
 }) {
   const runtime = usePluginRuntime();
   const rendered = useMemo(() => {
@@ -31,17 +31,33 @@ export function DraftPreview({
       shortcodes,
     );
   }, [fields.body, media, shortcodes, runtime.catalog?.revision]);
+  const issue = rendered.diagnostics[0];
   return (
     <article className="admin-draft-preview">
       {fields.title && <h1>{fields.title}</h1>}
       {fields.excerpt && (
         <p className="admin-draft-excerpt">{fields.excerpt}</p>
       )}
+      {issue && (
+        <p role="status" className="admin-draft-empty">
+          <UiText
+            text="正文块 {block} 第 {line} 行 · {message}"
+            values={{
+              block: issue.block + 1,
+              line: fields.body[issue.block].content
+                .slice(0, issue.from)
+                .split(/\r\n?|\n/).length,
+              message: issue.message,
+            }}
+          />
+        </p>
+      )}
       {fields.body.some((block) => block.content.trim()) ? (
         <ContentMarkup
           className="article-content"
           html={rendered.html}
           features={rendered.features}
+          shortcodes={shortcodes}
         />
       ) : (
         <p className="admin-draft-empty">
