@@ -11,6 +11,8 @@ import {
   shortcodeSyntax,
 } from "@/core/shortcodes/registry";
 import { pluginRegistry } from "@/core/plugins/registry";
+import { videoMarkup, videoOptions, videoSource } from "@/core/video/player";
+import { videoShortcode } from "@/core/video/shortcode";
 import {
   glossaryPopupAttribute,
   glossaryPopupName,
@@ -105,6 +107,7 @@ export function renderNativeShortcodes(
   options: {
     maxDepth?: number;
     formatMarkdown?: (source: string) => string;
+    videoPreview?: boolean;
   } = {},
 ) {
   const definitions = new Map(
@@ -125,6 +128,7 @@ export function renderNativeShortcodes(
     { javascript: string; title: string; css: string }
   >();
   const popups = new Map<string, GlossaryPopup>();
+  const videos = new Map<string, string>();
   let prefix = instancePrefix;
   while (source.includes(prefix)) prefix += "x";
   let counter = 0;
@@ -167,6 +171,25 @@ export function renderNativeShortcodes(
           throw new Error("弹窗内容区须直接放在术语弹窗中");
         const definition = definitions.get(node.name)!;
         if (node.error) throw new Error(node.error);
+        if (definition.id === videoShortcode.id) {
+          const params = values(definition, node.attributes);
+          const settings = videoOptions(params);
+          if (!videoSource(settings.source))
+            throw new Error("请输入有效的视频地址");
+          if (!settings.max_width && Number(params.max_width) !== 0)
+            throw new Error("视频最大宽度超出范围");
+          const instance = `${prefix}-${counter++}`;
+          const key = `<!--${instance}-->`;
+          videos.set(
+            instance,
+            videoMarkup(settings, media, preview || options.videoPreview),
+          );
+          holes.set(key, {
+            html: `<div data-ef-video="${instance}"></div>`,
+          });
+          text += key;
+          continue;
+        }
         if (definition.id === glossaryShortcode.id) {
           const params = values(definition, node.attributes);
           const slots = node.children.filter(
@@ -321,6 +344,7 @@ export function renderNativeShortcodes(
     diagnostics,
     scripts,
     popups,
+    videos,
     hasShortcodes: counter > 0,
   };
 }

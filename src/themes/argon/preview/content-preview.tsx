@@ -74,7 +74,9 @@ export function ContentPreview({
     const content = liveContent ?? previewContent(detail, terms);
     return {
       content,
-      rendered: renderContent(content, siteShortcodes(site?.settings)),
+      rendered: renderContent(content, siteShortcodes(site?.settings), {
+        videoPreview: true,
+      }),
     };
   }, [detail, liveContent, terms, site?.settings, runtime.catalog?.revision]);
   useEffect(() => {

@@ -149,6 +149,7 @@ const options: sanitizeHtml.IOptions = {
       "data-shortcode-instance",
       "data-shortcode-region",
       "data-shortcode-region-kind",
+      "data-ef-video",
     ],
     strong: ["class"],
     span: [
@@ -209,6 +210,7 @@ export function renderContent(
     shortcodePreview?: boolean;
     disableShortcodeScripts?: boolean;
     omitGlossaryPopups?: boolean;
+    videoPreview?: boolean;
   } = {},
 ): {
   html: string;
@@ -257,6 +259,7 @@ export function renderContent(
         {
           maxDepth: configuration.maxDepth,
           formatMarkdown: renderMarkdownSource,
+          videoPreview: rendering.videoPreview,
         },
       );
       const raw = expanded.html;
@@ -370,11 +373,16 @@ export function renderContent(
           }
         }
         visit(document.children);
-        return frameCodeHtml(
+        const sanitized = frameCodeHtml(
           sanitizeHtml(
             literalUnicodeEntities(DomUtils.getOuterHTML(document)),
             blockOptions,
           ),
+        );
+        // Embed markup is generated only by the registered video shortcodes.
+        return sanitized.replace(
+          /<div data-ef-video="([\w-]+)"><\/div>/g,
+          (_, id: string) => expanded.videos.get(id) ?? "",
         );
       }
       if (!rendering.omitGlossaryPopups) {

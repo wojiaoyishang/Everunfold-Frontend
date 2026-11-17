@@ -1,9 +1,15 @@
 "use client";
 
 import { useId, useState } from "react";
-import { Button, Icon, UiText, useT } from "@everunfold/plugin-sdk/client";
+import {
+  Button,
+  Icon,
+  UiText,
+  useT,
+  VideoPlayer,
+} from "@everunfold/plugin-sdk/client";
 import { Greeting } from "./greeting";
-import { mediaUrl, text, type WidgetProps } from "./values";
+import { text, type WidgetProps } from "./values";
 import styles from "./widgets.module.css";
 
 function Disclosure({ values, children, preview }: WidgetProps) {
@@ -67,38 +73,16 @@ function PeopleGroup({ values, children, preview }: WidgetProps) {
 }
 
 function Video({ values, media, preview }: WidgetProps) {
-  const t = useT();
-  const source = mediaUrl(text(values, "source"), media);
-  if (!source)
+  if (!text(values, "source"))
     return preview ? (
       <p className={styles.empty}>
         <UiText text="选择视频" />
       </p>
     ) : null;
-  const title = text(values, "title");
-  const captions = mediaUrl(text(values, "captions"), media);
-  const language = text(values, "language") || "zh-CN";
   return (
-    <figure className={styles.video}>
-      <video
-        aria-label={title || t("视频")}
-        controls
-        playsInline
-        preload="metadata"
-        src={source}
-        poster={mediaUrl(text(values, "poster"), media)}
-      >
-        {captions && (
-          <track
-            kind="captions"
-            src={captions}
-            srcLang={language}
-            label={language}
-          />
-        )}
-      </video>
-      {title && <figcaption>{title}</figcaption>}
-    </figure>
+    <div className={styles.legacyVideo}>
+      <VideoPlayer values={values} media={media} preview={preview} />
+    </div>
   );
 }
 

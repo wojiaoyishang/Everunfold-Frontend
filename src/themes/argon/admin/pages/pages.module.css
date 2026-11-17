@@ -189,16 +189,6 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 10px;
 }
-.codeCover {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  align-items: center;
-  justify-items: center;
-  border: 1px solid var(--admin-border);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--admin-subtle) 93%, transparent);
-}
 .sourcePane {
   min-inline-size: 0;
   min-block-size: calc(17.5 * 14px + 32px);

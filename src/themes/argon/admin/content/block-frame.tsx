@@ -3,6 +3,8 @@ import { UiText } from "@/core/i18n/provider";
 
 import { useRef, useState, type ReactNode } from "react";
 import type { DraftBlock } from "@/core/contracts/content-admin";
+import type { VideoOptions } from "@/core/video/player";
+import { standaloneVideo } from "@/core/video/shortcode";
 import {
   useDragItem,
   useDropPosition,
@@ -59,6 +61,7 @@ export function BlockFrame({
   onDelete,
   disabled = false,
   formatDisabled,
+  onVideoSettings,
 }: {
   block: DraftBlock;
   index: number;
@@ -66,16 +69,19 @@ export function BlockFrame({
   formatDisabled: boolean;
   onFormat: (format: "markdown" | "html") => void;
   onDelete: () => void;
+  onVideoSettings?: (options: VideoOptions) => void;
   disabled?: boolean;
 }) {
   const [controls, setControls] = useState<HTMLDivElement | null>(null);
   const host = useBlockComposer(),
     node = useRef<HTMLElement | null>(null);
+  const video =
+    onVideoSettings && standaloneVideo(block.content, block.type !== "html");
   const drag = useDragItem(
     {
       kind: "block",
       id: block.id,
-      label: block.type === "html" ? "HTML" : "Markdown",
+      label: video ? "视频" : block.type === "html" ? "HTML" : "Markdown",
     },
     host.disabled || disabled,
   );
@@ -104,6 +110,9 @@ export function BlockFrame({
           handle={drag.handle}
           onFormat={onFormat}
           onDelete={onDelete}
+          onVideoSettings={
+            video && onVideoSettings ? () => onVideoSettings(video) : undefined
+          }
           onMove={(position) => {
             const before =
               position === "first"

@@ -5,22 +5,56 @@ import { clientNavigationHref } from "@/core/navigation/targets";
 import { useRouteState } from "./route-state";
 import { useMotion } from "../hooks/use-motion";
 
+function homeFeedLead() {
+  return Math.max(800, Math.round(window.innerHeight * 1.5));
+}
+
 export function RouteContent({ children }: { children: ReactNode }) {
   const { route, pending, navigate } = useRouteState();
   const { enabled } = useMotion();
+  const home = route === "/" || route.startsWith("/?");
   const container = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const element = container.current;
+    if (!home || !element || !("IntersectionObserver" in window)) return;
+    const lead = homeFeedLead();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          (entry.target as HTMLImageElement).loading = "eager";
+          observer.unobserve(entry.target);
+        }
+      },
+      { rootMargin: `${lead}px 0px ${lead}px` },
+    );
+    element
+      .querySelectorAll<HTMLImageElement>(
+        '.post-cover img[loading="lazy"], .shuoshuo-card img[loading="lazy"]',
+      )
+      .forEach((image) => observer.observe(image));
+    return () => observer.disconnect();
+  }, [route, children, home]);
+  useEffect(() => {
+    const element = container.current;
     if (!element || !("IntersectionObserver" in window) || !enabled) return;
+    const lead = home ? homeFeedLead() : 24;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries)
           if (entry.isIntersecting) {
-            (entry.target as HTMLElement).dataset.revealState = "visible";
+            const alreadyInView =
+              entry.boundingClientRect.top < window.innerHeight &&
+              entry.boundingClientRect.bottom > 0;
+            (entry.target as HTMLElement).dataset.revealState =
+              home && alreadyInView ? "immediate" : "visible";
             observer.unobserve(entry.target);
           }
       },
-      { rootMargin: "0px 0px 24px 0px", threshold: 0.05 },
+      {
+        rootMargin: home ? `${lead}px 0px ${lead}px` : "0px 0px 24px",
+        threshold: home ? 0 : 0.05,
+      },
     );
     const waiting: HTMLElement[] = [];
     element
@@ -28,7 +62,10 @@ export function RouteContent({ children }: { children: ReactNode }) {
         ".post-card, .shuoshuo-card, .archive-month",
       )
       .forEach((item) => {
-        if (item.getBoundingClientRect().top > window.innerHeight + 24) {
+        if (
+          !item.dataset.revealState &&
+          item.getBoundingClientRect().top > window.innerHeight + lead
+        ) {
           item.dataset.revealState = "pending";
           waiting.push(item);
           observer.observe(item);
@@ -41,7 +78,7 @@ export function RouteContent({ children }: { children: ReactNode }) {
           delete item.dataset.revealState;
       });
     };
-  }, [route, children, enabled]);
+  }, [route, children, enabled, home]);
   function onClick(event: MouseEvent<HTMLDivElement>) {
     if (event.defaultPrevented || !(event.target instanceof Element)) return;
     const anchor = event.target.closest<HTMLAnchorElement>(
@@ -67,6 +104,7 @@ export function RouteContent({ children }: { children: ReactNode }) {
       ref={container}
       key={route}
       className="route-transition"
+      data-home-feed={home || undefined}
       data-state={pending ? "pending" : "entering"}
       aria-busy={pending}
       onClick={onClick}

@@ -16,6 +16,8 @@ import { Icon } from "../../components/icon";
 import { blockEditors } from "./plugins/registry";
 import styles from "./block-composer.module.css";
 
+export const videoBlockPreset = "video";
+
 type Composer = {
   body: DraftBlock[];
   disabled: boolean;
@@ -32,6 +34,9 @@ type Composer = {
   focus: React.RefObject<string | null>;
   moved: string | null;
   message: string;
+  videoInsertion: { before: string | null } | null;
+  configureVideo: (before: string | null) => void;
+  closeVideo: () => void;
 };
 const ComposerContext = createContext<Composer | null>(null);
 export const useBlockComposer = () => {
@@ -57,6 +62,11 @@ export function BlockComposer({
     [moved, setMoved] = useState<string | null>(null),
     [message, setMessage] = useState("");
   const focus = useRef<string | null>(null);
+  const [videoInsertion, setVideoInsertion] =
+    useState<Composer["videoInsertion"]>(null);
+  const configureVideo = (before: string | null) => {
+    if (!disabled && body.length < 128) setVideoInsertion({ before });
+  };
   const finish = (commandValue: BlockCommand) => {
     if (disabled) return false;
     const changed = command(commandValue);
@@ -87,6 +97,7 @@ export function BlockComposer({
   };
   const drop = (item: DragItem, before: string | null) => {
     if (item.kind === "block") finish({ kind: "move", id: item.id, before });
+    else if (item.id === videoBlockPreset) configureVideo(before);
     else {
       const plugin = blockEditors.entries.find((p) => p.id === item.id);
       if (plugin) insert(plugin.format, before);
@@ -109,6 +120,9 @@ export function BlockComposer({
         focus,
         moved,
         message,
+        videoInsertion,
+        configureVideo,
+        closeVideo: () => setVideoInsertion(null),
       }}
     >
       <DragAndDrop

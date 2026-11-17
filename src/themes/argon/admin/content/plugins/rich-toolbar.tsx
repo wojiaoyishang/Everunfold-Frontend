@@ -16,6 +16,7 @@ import { ContentFeatureButtons } from "../../../components/ui/content-feature-di
 import { prepareVisualFeature } from "@/core/editor/visual-feature-insertion";
 import { TextColorButton } from "./text-color-button";
 import { ShortcodeButton } from "./shortcode-button";
+import { VideoInsertButton } from "./video-insert-button";
 
 export function RichToolbar({
   editor,
@@ -25,6 +26,7 @@ export function RichToolbar({
   emailTemplate = false,
   onMedia,
   onShortcode,
+  onVideoShortcode,
   onUpload,
 }: {
   editor: Editor;
@@ -34,6 +36,7 @@ export function RichToolbar({
   emailTemplate?: boolean;
   onMedia?: (kind: "image" | "all" | "video") => void;
   onShortcode?: () => void;
+  onVideoShortcode?: () => void;
   onUpload?: (files: File[]) => void;
 }) {
   const state = useEditorState({
@@ -208,9 +211,18 @@ export function RichToolbar({
               onClick={onShortcode}
             />
           )}
+          {!markdown && onVideoShortcode ? (
+            <VideoInsertButton
+              className={styles.toolButton}
+              disabled={!editor.isEditable}
+              onOrdinary={onMedia && (() => onMedia("video"))}
+              onShortcode={onVideoShortcode}
+            />
+          ) : (
+            onMedia && button("插入视频", "video", () => onMedia("video"))
+          )}
           {onMedia && (
             <>
-              {button("插入视频", "video", () => onMedia("video"))}
               {button("插入图片", "image", () => onMedia("image"))}
               {button("插入媒体或附件", "folder", () => onMedia("all"))}
             </>

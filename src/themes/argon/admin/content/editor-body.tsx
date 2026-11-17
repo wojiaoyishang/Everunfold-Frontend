@@ -16,6 +16,8 @@ import { useBlockComposer } from "./block-composer";
 import { EditorMediaDialog } from "./editor-media-dialog";
 import { RegisteredBlockEditor } from "./plugins/registry";
 import { ShortcodePicker } from "../shortcodes/picker";
+import { VideoEditorDialog } from "../shortcodes/video-editor";
+import type { VideoOptions } from "@/core/video/player";
 import { useToast } from "../../components/ui/toast/toast-provider";
 import type {
   CodeEditorHandle,
@@ -66,6 +68,12 @@ export function EditorBody({
     id: string;
     insert: CapturedInsertion;
     body?: string;
+    video?: boolean;
+  } | null>(null);
+  const [videoEdit, setVideoEdit] = useState<{
+    id: string;
+    source: string;
+    initial: VideoOptions;
   } | null>(null);
   const composer = useBlockComposer();
   const [announcement, setAnnouncement] = useState("");
@@ -129,6 +137,9 @@ export function EditorBody({
             index={index}
             disabled={locked(block.id)}
             formatDisabled={stagedBlocks.includes(block.id)}
+            onVideoSettings={(initial) =>
+              setVideoEdit({ id: block.id, source: block.content, initial })
+            }
             onFormat={(format) =>
               onChange({
                 ...value,
@@ -176,6 +187,17 @@ export function EditorBody({
                       body:
                         range && block.content.slice(range.start, range.end),
                     });
+                  }}
+                  onVideoShortcode={() => {
+                    const insert = inputs.current
+                      .get(block.id)
+                      ?.captureInsertion();
+                    if (insert)
+                      setShortcodeTarget({
+                        id: block.id,
+                        insert,
+                        video: true,
+                      });
                   }}
                   onMedia={(kind) =>
                     setMediaTarget({
@@ -270,29 +292,80 @@ export function EditorBody({
           }}
         />
       )}
-      {shortcodeTarget && (
-        <ShortcodePicker
-          initialBody={shortcodeTarget.body}
-          language={authoringLanguage}
-          format={
-            value.body.find((block) => block.id === shortcodeTarget.id)?.type ??
-            "markdown"
-          }
+      {shortcodeTarget?.video ? (
+        <VideoEditorDialog
+          shortcode
           media={media}
           onMedia={onMedia}
           onClose={() => {
             shortcodeTarget.insert.dispose?.();
             setShortcodeTarget(null);
           }}
-          onPick={(source) => {
+          onConfirm={(source) => {
             if (
-              disabled ||
-              locked(shortcodeTarget.id) ||
-              !value.body.some((block) => block.id === shortcodeTarget.id)
+              !disabled &&
+              !locked(shortcodeTarget.id) &&
+              value.body.some(({ id }) => id === shortcodeTarget.id)
             )
-              return;
-            if (insertCaptured(shortcodeTarget.insert, source))
-              setAnnouncement("已在当前区块插入短代码");
+              if (insertCaptured(shortcodeTarget.insert, source))
+                setAnnouncement("已在当前区块插入短代码");
+          }}
+        />
+      ) : (
+        shortcodeTarget && (
+          <ShortcodePicker
+            initialBody={shortcodeTarget.body}
+            language={authoringLanguage}
+            format={
+              value.body.find((block) => block.id === shortcodeTarget.id)
+                ?.type ?? "markdown"
+            }
+            media={media}
+            onMedia={onMedia}
+            onClose={() => {
+              shortcodeTarget.insert.dispose?.();
+              setShortcodeTarget(null);
+            }}
+            onPick={(source) => {
+              if (
+                disabled ||
+                locked(shortcodeTarget.id) ||
+                !value.body.some((block) => block.id === shortcodeTarget.id)
+              )
+                return;
+              if (insertCaptured(shortcodeTarget.insert, source))
+                setAnnouncement("已在当前区块插入短代码");
+            }}
+          />
+        )
+      )}
+      {composer.videoInsertion && (
+        <VideoEditorDialog
+          media={media}
+          onMedia={onMedia}
+          onClose={composer.closeVideo}
+          onConfirm={(source) =>
+            composer.insert("html", composer.videoInsertion!.before, source)
+          }
+        />
+      )}
+      {videoEdit && (
+        <VideoEditorDialog
+          initial={videoEdit.initial}
+          media={media}
+          onMedia={onMedia}
+          onClose={() => setVideoEdit(null)}
+          onConfirm={(source) => {
+            if (disabled || locked(videoEdit.id)) return;
+            const current = value.body.find(({ id }) => id === videoEdit.id);
+            if (current?.content === videoEdit.source)
+              onBlockChange(videoEdit.id, source, videoEdit.source);
+            else
+              toast.show({
+                id: "content:video",
+                title: "区块内容已变化，请重新打开视频设置。",
+                tone: "info",
+              });
           }}
         />
       )}

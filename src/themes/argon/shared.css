@@ -6,6 +6,7 @@
 @import "./styles/ui-controls.css";
 @import "./styles/interaction-motion.css";
 @import "./styles/confirm-dialog.css";
+@import "./styles/video-player.css";
 
 /* Shared language mark: stable slot, with overflow panning instead of layout shift. */
 .language-flag {

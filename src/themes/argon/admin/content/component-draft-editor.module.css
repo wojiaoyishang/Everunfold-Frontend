@@ -9,7 +9,6 @@
 .metadata {
   display: grid;
   gap: 12px;
-  justify-items: start;
   min-width: 0;
   margin-bottom: 16px;
 }
@@ -20,6 +19,12 @@
 
 .settingsToggle {
   display: none;
+  justify-self: start;
+}
+
+.canvas > h2 {
+  margin: 0 0 10px;
+  font-size: 14px;
 }
 
 @media (max-width: 800px) {

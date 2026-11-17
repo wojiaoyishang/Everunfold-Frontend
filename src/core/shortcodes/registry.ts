@@ -4,20 +4,29 @@ import type { PublicShortcode, ShortcodeItem } from "@/core/contracts/settings";
 import { regionKind, regionNames } from "./region-definitions";
 import { glossaryPopupName, glossaryShortcode } from "./glossary";
 import { parseShortcodes } from "./parser";
+import { videoShortcode } from "@/core/video/shortcode";
 
 export { regionKind } from "./region-definitions";
 
 export type CatalogItem = Omit<ShortcodeItem, "origin"> & {
   origin: "backend" | "frontend" | "custom";
 };
+export const coreShortcodes = [glossaryShortcode, videoShortcode];
+const claimsBuiltinName = (definition: PublicShortcode) =>
+  coreShortcodes.some(
+    ({ id, name }) => id === definition.id || name === definition.name,
+  );
+
 /** Trusted frontend registrations share the catalog, but expose no write capability. */
 export const frontendShortcodes = (): readonly CatalogItem[] =>
   [
-    { definition: glossaryShortcode, pluginId: "Everunfold" },
+    ...coreShortcodes.map((definition) => ({
+      definition,
+      pluginId: "Everunfold",
+    })),
     ...pluginRegistry.shortcodes.filter(
       ({ definition }) =>
-        !regionKind(definition.name) &&
-        definition.name !== glossaryShortcode.name,
+        !regionKind(definition.name) && !claimsBuiltinName(definition),
     ),
   ].map(({ definition, pluginId }) => ({
     id: definition.id,
@@ -40,20 +49,15 @@ export const frontendShortcodes = (): readonly CatalogItem[] =>
     versions: [],
   }));
 export const builtinShortcodes = (): readonly PublicShortcode[] => [
-  glossaryShortcode,
+  ...coreShortcodes,
   ...pluginRegistry.shortcodes
     .map((item) => item.definition)
-    .filter(
-      (item) => !regionKind(item.name) && item.name !== glossaryShortcode.name,
-    ),
+    .filter((item) => !regionKind(item.name) && !claimsBuiltinName(item)),
 ];
 
 export function shortcodeDefinitions(applied: readonly PublicShortcode[] = []) {
   const names = new Set<string>();
-  const templates = applied.filter(
-    (item) =>
-      item.name !== glossaryShortcode.name && item.id !== glossaryShortcode.id,
-  );
+  const templates = applied.filter((item) => !claimsBuiltinName(item));
   const reservedNames = new Set(templates.map((item) => item.name));
   const reservedIds = new Set(templates.map((item) => item.id));
   return [
@@ -107,7 +111,7 @@ export function previewShortcodeDefinitions(
   definition: PublicShortcode,
   applied: readonly PublicShortcode[] = [],
 ) {
-  if (definition.id === glossaryShortcode.id) return applied;
+  if (claimsBuiltinName(definition)) return applied;
   // Frontend contributions must retain their renderer and optional sample view.
   // A persisted backend definition with the same identity remains authoritative.
   if (

@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[共用视频播放器](decisions/0180-shared-video-insertion.md)用于短代码、正文区块和组件编排。
+
 [可配置的滚轮惯性](decisions/0179-configurable-wheel-momentum.md)涵盖主题默认值、前台浏览器偏好与减少动态。
 
 [工作台卡片与统计](decisions/0178-workspace-cards-and-shared-loading.md)及[插件和共享加载指南](development/workspace-cards.md)说明自由布局、鉴权统计、统一动画和排序。

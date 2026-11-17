@@ -32,13 +32,12 @@
   width: 15px;
   height: 15px;
 }
-.previewActions > :global(.admin-editor-preview-action) {
+.previewActions > a:global(.admin-editor-preview-action) {
   background: transparent;
   border-color: transparent;
   color: var(--admin-muted);
 }
-.previewActions > :global(.admin-editor-preview-action):hover:not(:disabled),
-.previewActions > :global(.admin-editor-preview-action)[aria-pressed="true"] {
+.previewActions > a:global(.admin-editor-preview-action):hover {
   background: var(--admin-subtle);
   color: var(--admin-accent);
 }

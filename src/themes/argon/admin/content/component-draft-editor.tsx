@@ -40,7 +40,11 @@ import { ConfirmDialog } from "../../components/ui/confirm-dialog";
 import { RouteLink } from "../../components/ui/route-link";
 import { livePreviewPath } from "@/core/preview/routes";
 import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
-import { AdminPageHeading } from "../components/page-heading";
+import { EditorModeField } from "../components/editor-mode-field";
+import {
+  EditorCanvasCover,
+  OpenLiveEditorButton,
+} from "../components/editor-canvas-cover";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { usePageAction } from "../pages/feedback";
 import { EditorLanguages } from "./editor-languages";
@@ -103,6 +107,8 @@ export function ComponentDraftEditor({
     action.notify(draftError(error)),
   );
   const section = `/admin/content/${type.id}`;
+  const blocksHref = id ? `${section}/${id}/edit` : `${section}/new`;
+  const savedComponents = detail?.edit_mode === "components";
   const writable =
     (!id || Boolean(detail)) &&
     detail?.status !== "trash" &&
@@ -331,25 +337,6 @@ export function ComponentDraftEditor({
           <UiText text="返回内容列表" />
         </RouteLink>
         <ScrollHeaderActions className={styles.actions}>
-          {detail?.edit_mode === "components" ? (
-            <Button
-              className="admin-button"
-              disabled={!writable || action.busy}
-              onClick={() => {
-                action.clearDialogError();
-                setConfirmBlocks(true);
-              }}
-            >
-              <UiText text="切换到区块模式" />
-            </Button>
-          ) : (
-            <RouteLink
-              className="admin-button"
-              href={id ? `${section}/${id}/edit` : `${section}/new`}
-            >
-              <UiText text="返回区块模式" />
-            </RouteLink>
-          )}
           {detail?.public_path && detail.published_revision && (
             <RouteLink
               className="admin-button"
@@ -366,9 +353,9 @@ export function ComponentDraftEditor({
           </EmbeddedEditorActions>
         </ScrollHeaderActions>
       </div>
-      <AdminPageHeading
-        title={`${id ? "编辑" : "新建"}${type.label} · 组件模式`}
-      />
+      <h1 className="sr-only">
+        {`${id ? "编辑" : "新建"}${type.label} · 组件模式`}
+      </h1>
       {id && !detail ? (
         <section className="account-card">
           {loadError ? (
@@ -404,6 +391,20 @@ export function ComponentDraftEditor({
               onLanguage={setLanguage}
               disabled={action.busy || (Boolean(detail) && dirty)}
               onNavigate={(href) => router.push(href)}
+              controls={
+                !isEmbeddedEditor() && (
+                  <EditorModeField
+                    value="components"
+                    disabled={!writable || action.busy}
+                    onChange={() => {
+                      if (savedComponents || dirty) {
+                        action.clearDialogError();
+                        setConfirmBlocks(true);
+                      } else router.push(blocksHref);
+                    }}
+                  />
+                )
+              }
             />
             {!isEmbeddedEditor() && (
               <Button
@@ -455,61 +456,67 @@ export function ComponentDraftEditor({
               }}
             />
           </EditorInspector>
-          <section className="account-card" hidden={isEmbeddedEditor()}>
-            <h2>
-              <UiText text="组件内容" />
-            </h2>
-            <Button
-              className="admin-button admin-button-primary"
-              disabled={!writable || action.busy}
-              onClick={() => void openLive()}
-            >
-              <Icon name="eye" />
-              <UiText text="进入实时编辑" />
-            </Button>
-          </section>
+          {!isEmbeddedEditor() && (
+            <section className={`account-card ${styles.canvas}`}>
+              <h2>
+                <UiText text="组件内容" />
+              </h2>
+              <EditorCanvasCover>
+                <OpenLiveEditorButton
+                  disabled={!writable || action.busy}
+                  onClick={() => void openLive()}
+                />
+              </EditorCanvasCover>
+            </section>
+          )}
         </>
       )}
       <ConfirmDialog
         open={confirmBlocks}
         title="切换到区块模式？"
-        description="切换后会恢复原来的区块正文。组件画布将保留，可再次进入组件模式继续编辑。已发布版本不变。"
+        description={
+          savedComponents || switching
+            ? "切换后会恢复原来的区块正文。组件画布将保留，可再次进入组件模式继续编辑。已发布版本不变。"
+            : "当前输入尚未保存，离开页面会丢失这些修改。"
+        }
         confirmLabel="切换编辑模式"
         busy={action.busy}
         error={action.dialogError}
         onCancel={() => setConfirmBlocks(false)}
         onConfirm={() =>
-          action.runInDialog(async (signal) => {
-            if (!detail) return;
-            const input = {
-              id: detail.id,
-              expected_revision: detail.revision,
-              fields: {
-                ...fields,
-                edit_mode: "blocks" as const,
-                component_document: undefined,
-              },
-            };
-            const { data } = await saveComponentDraft(
-              baseUrl,
-              {
-                ...input,
-                operation_id: action.operation(input),
-              },
-              csrfToken,
-              { signal },
-            );
-            if (!signal.aborted) {
-              applied(data);
-              setSwitching(true);
-            }
-          })
+          savedComponents && detail
+            ? action.runInDialog(async (signal) => {
+                const input = {
+                  id: detail.id,
+                  expected_revision: detail.revision,
+                  fields: {
+                    ...fields,
+                    edit_mode: "blocks" as const,
+                    component_document: undefined,
+                  },
+                };
+                const { data } = await saveComponentDraft(
+                  baseUrl,
+                  {
+                    ...input,
+                    operation_id: action.operation(input),
+                  },
+                  csrfToken,
+                  { signal },
+                );
+                if (!signal.aborted) {
+                  applied(data);
+                  setSwitching(true);
+                }
+              })
+            : true
         }
         onConfirmed={() => {
           setConfirmBlocks(false);
           // Open a fresh editor so it reads the new collaboration epoch even
           // when this workspace was reached through the canonical edit URL.
-          window.location.replace(`${section}/${detail!.id}/edit`);
+          if (switching) window.location.replace(blocksHref);
+          else router.push(blocksHref);
         }}
       />
       <UnsavedAccountChanges dirty={dirty} busy={action.busy} />

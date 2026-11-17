@@ -38,6 +38,8 @@ import { authoredStyle } from "../components/authored-style";
 import { componentCssLimit } from "@/core/rendering/authored-css";
 import { BuilderProgress } from "./progress";
 import { Icon, isBuiltinIcon, type IconName } from "../components/icon";
+import { VideoPlayer } from "../components/video-player";
+import { videoSource } from "@/core/video/player";
 import styles from "./content.module.css";
 
 export type BuilderRenderContext = {
@@ -58,6 +60,7 @@ const coreIcons: Record<string, IconName> = {
   "core.html": "code",
   "core.shortcode": "shortcode",
   "core.image": "image",
+  "core.video": "video",
   "core.button": "link",
   "core.progress": "activity",
   "core.icon": "star",
@@ -137,7 +140,11 @@ export function BuilderSource({
       media_urls: media ?? {},
     },
     shortcodes,
-    { shortcodePreview: preview, disableShortcodeScripts: preview },
+    {
+      shortcodePreview: preview,
+      disableShortcodeScripts: preview,
+      videoPreview: preview,
+    },
   );
   if (preview)
     return (
@@ -264,6 +271,14 @@ export function BuilderElement({
         />
       ) : (
         empty(definition?.label ?? "正文", builderIcon(node))
+      );
+      break;
+    }
+    case "core.video": {
+      body = videoSource(text("source")) ? (
+        <VideoPlayer values={props} media={context?.media} preview={preview} />
+      ) : (
+        empty("选择视频", "video")
       );
       break;
     }

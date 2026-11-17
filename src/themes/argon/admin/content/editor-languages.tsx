@@ -2,7 +2,7 @@
 import { AdminLoadingState } from "@/themes/argon/admin/components/loading-state";
 import { UiText } from "@/core/i18n/provider";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useTranslations } from "@/core/content-management/use-translations";
 import { useTranslationCandidates } from "@/core/content-management/use-translation-candidates";
 import type { Locale } from "@/core/i18n/locale";
@@ -108,6 +108,7 @@ export function EditorLanguages({
   onNavigate,
   disabled,
   contentRevision,
+  controls,
 }: {
   id: string | null;
   type: string;
@@ -116,6 +117,7 @@ export function EditorLanguages({
   onNavigate: (href: string) => void;
   disabled: boolean;
   contentRevision?: number;
+  controls?: ReactNode;
 }) {
   const catalog = useLanguageCatalog();
   const [chosen, setChosen] = useState("");
@@ -198,6 +200,7 @@ export function EditorLanguages({
             </Button>
           </>
         )}
+        {controls && <div className={styles.controls}>{controls}</div>}
       </div>
       {id && (
         <div className={styles.reveal} data-open={open} inert={!open}>

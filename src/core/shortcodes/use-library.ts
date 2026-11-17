@@ -12,9 +12,12 @@ import type {
   ShortcodeSource,
 } from "@/core/contracts/settings";
 import { RequestError } from "@/core/http/request";
-import { frontendShortcodes, type CatalogItem } from "./registry";
+import {
+  coreShortcodes,
+  frontendShortcodes,
+  type CatalogItem,
+} from "./registry";
 import { type ShortcodeConfiguration } from "./configuration";
-import { glossaryShortcode } from "./glossary";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
 import { usePluginRuntime } from "@/core/plugins/runtime/context";
@@ -103,10 +106,15 @@ export function useShortcodeLibrary() {
   }, [baseUrl, pending, settings?.revision]);
   return {
     items: [
-      ...items.filter((item) => item.source.name !== glossaryShortcode.name),
+      ...items.filter(
+        (item) =>
+          !coreShortcodes.some(
+            (definition) => definition.name === item.source.name,
+          ),
+      ),
       ...frontendShortcodes().filter(
         (entry) =>
-          entry.id === glossaryShortcode.id ||
+          coreShortcodes.some((definition) => definition.id === entry.id) ||
           (!runtime.loading &&
             !items.some(
               (item) =>

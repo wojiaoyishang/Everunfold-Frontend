@@ -50,6 +50,7 @@ export interface BlockEditorProps {
   initialView?: "visual" | "source";
   onMedia?: (kind: "all" | "image" | "video") => void;
   onShortcode?: () => void;
+  onVideoShortcode?: () => void;
   onUpload?: (files: File[]) => void;
   uploadStatus?: ReactNode;
   uploadEntries?: UploadEntry<MediaItem>[];
@@ -141,6 +142,7 @@ export function SourceBlockEditor({
       inserts={inserts}
       onMedia={props.onMedia}
       onShortcode={props.onShortcode}
+      onVideoShortcode={props.onVideoShortcode}
       onUpload={props.onUpload}
       onFeature={(kind) => {
         let range = input.current?.selection() ?? { start: 0, end: 0 };

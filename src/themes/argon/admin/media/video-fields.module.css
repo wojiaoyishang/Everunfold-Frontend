@@ -1,0 +1,22 @@
+.fields {
+  display: grid;
+  min-width: 0;
+  gap: 14px;
+}
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.toggle > button {
+  flex-shrink: 0;
+}
+.menu {
+  display: grid;
+  gap: 3px;
+  padding: 5px;
+}
+.menu > button {
+  justify-content: start;
+}

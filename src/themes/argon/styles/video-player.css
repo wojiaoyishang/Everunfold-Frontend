@@ -1,0 +1,23 @@
+.ef-video-player,
+.article-content .ef-video-player {
+  box-sizing: border-box;
+  inline-size: 100%;
+  margin: 0 auto;
+}
+.ef-video-player :is(video, iframe),
+.article-content .ef-video-player video {
+  display: block;
+  inline-size: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: var(--radius, 8px);
+  background: #111;
+}
+.ef-video-player iframe {
+  aspect-ratio: 16 / 9;
+  min-block-size: 200px;
+}
+.ef-video-player figcaption {
+  margin-block-start: 8px;
+  text-align: center;
+}

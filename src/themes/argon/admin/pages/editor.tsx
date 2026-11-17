@@ -9,6 +9,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type MouseEvent,
 } from "react";
 import { useRouter } from "next/navigation";
 import type {
@@ -32,7 +33,11 @@ import { useEmbeddedPreviewPublisher } from "@/core/preview/use-embedded-publish
 import { Icon } from "../../components/icon";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
 import { EmbeddedEditorActions } from "../components/embedded-editor-actions";
-import { PreviewAction } from "../components/preview-action";
+import {
+  EditorSecondaryAction,
+  PreviewAction,
+} from "../components/preview-action";
+import { OpenLiveEditorButton } from "../components/editor-canvas-cover";
 import { usePagePreview } from "@/core/pages/use-preview";
 import { isPageUrlFailure, pagesFailure } from "@/core/pages/failure";
 import {
@@ -464,30 +469,33 @@ export function ManagedPageEditor({
     setValue(data.value);
   };
 
-  const submitAction = (apply: boolean, label: string) => (
-    <Button
-      type="submit"
-      form={formId}
-      onClick={(event) => {
+  const submitAction = (apply: boolean, label: string) => {
+    const props = {
+      type: "submit" as const,
+      form: formId,
+      onClick: (event: MouseEvent<HTMLButtonElement>) => {
         if (event.currentTarget.ownerDocument !== document) {
           event.preventDefault();
           void save(apply);
         }
-      }}
-      data-apply={apply || undefined}
-      className={apply ? "admin-button admin-button-primary" : "admin-button"}
-      disabled={
+      },
+      "data-apply": apply || undefined,
+      disabled:
         action.busy ||
         Boolean(optionsError) ||
         (apply
           ? source === "registered" && value.enabled && !available
-          : Boolean(saved) && !dirty)
-      }
-    >
-      <Icon name="save" />
-      <UiText text={label} />
-    </Button>
-  );
+          : Boolean(saved) && !dirty),
+    };
+    return apply || !publish ? (
+      <Button {...props} className="admin-button admin-button-primary">
+        <Icon name="save" />
+        <UiText text={label} />
+      </Button>
+    ) : (
+      <EditorSecondaryAction {...props} label={label} icon="save" />
+    );
+  };
   const saveAction = submitAction(false, "保存草稿");
   const publishAction = publish
     ? submitAction(true, value.enabled ? "保存并应用" : "保存并停用")
@@ -714,14 +722,10 @@ export function ManagedPageEditor({
                     allowScripts={actor.role === "admin"}
                     cover={
                       componentMode ? (
-                        <Button
-                          className="admin-button admin-button-primary"
+                        <OpenLiveEditorButton
                           disabled={disabled}
                           onClick={() => void openLive()}
-                        >
-                          <Icon name="sidebar" />
-                          <UiText text="前往实时预览" />
-                        </Button>
+                        />
                       ) : templateId ? (
                         <RouteLink
                           className="admin-button"

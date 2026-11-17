@@ -2,6 +2,7 @@
 
 import { UiText, useT } from "@/core/i18n/provider";
 import { Select } from "../../components/ui/select";
+import { EditorModeField } from "../components/editor-mode-field";
 import styles from "./pages.module.css";
 
 export type PageLayout = "wide" | "sidebar" | "wide_transparent" | "blank";
@@ -31,26 +32,23 @@ export function PageEditOptions({
       data-compact={compact || undefined}
     >
       {(onMode || lockedMode) && (
-        <label className={styles.editOption}>
-          <UiText text="编辑方式" />
-          <Select
-            name="page-edit-mode"
-            label={t("编辑方式")}
-            panelMinWidth={compact ? 0 : undefined}
-            value={mode}
-            disabled={lockedMode}
-            options={[
-              { value: "components", label: t("组件模式") },
-              {
-                value: "source",
-                label: t(inline ? "源码模式" : "HTML、CSS 和 JavaScript"),
-              },
-            ]}
-            onValueChange={(value) =>
-              onMode?.(value === "source" ? "source" : "components")
-            }
-          />
-        </label>
+        <EditorModeField
+          name="page-edit-mode"
+          className={styles.editOption}
+          value={mode}
+          disabled={lockedMode}
+          compact={compact}
+          modes={[
+            { value: "components", label: "组件模式" },
+            {
+              value: "source",
+              label: inline ? "源码模式" : "HTML、CSS 和 JavaScript",
+            },
+          ]}
+          onChange={(value) =>
+            onMode?.(value === "source" ? "source" : "components")
+          }
+        />
       )}
       <label className={styles.editOption}>
         <UiText text="页面布局" />

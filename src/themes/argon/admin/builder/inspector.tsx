@@ -39,6 +39,7 @@ import { componentCssLimit } from "@/core/rendering/authored-css";
 import { builderIcon, type BuilderRenderContext } from "../../builder/content";
 import styles from "./editor.module.css";
 import inspectorStyles from "./inspector.module.css";
+import { VideoFields, videoDraft } from "../media/video-fields";
 
 type FieldProps = {
   field: BuilderField;
@@ -269,6 +270,7 @@ function NodeProperties({
       return { ...entry, parameters: exposed };
     });
   const fields = definition?.fields ?? [];
+  const video = node.type === "core.video";
   const styleFields = fields.filter(
     (field) =>
       (node.type === "core.banner" && field.key === "image") ||
@@ -445,7 +447,22 @@ function NodeProperties({
                   </div>
                 </PropertySection>
               )}
-              {!definition?.container && !contentFields.length && (
+              {video && (
+                <PropertySection title="视频播放器" defaultOpen>
+                  <VideoFields
+                    value={videoDraft(node.props)}
+                    disabled={disabled}
+                    onMedia={onMedia}
+                    onChange={(patch) =>
+                      changeNode((entry) => ({
+                        ...entry,
+                        props: { ...entry.props, ...patch },
+                      }))
+                    }
+                  />
+                </PropertySection>
+              )}
+              {!video && !definition?.container && !contentFields.length && (
                 <p className={inspectorStyles.empty}>
                   <UiText
                     text={definition ? "暂无内容设置" : "组件当前不可用"}

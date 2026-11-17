@@ -79,6 +79,7 @@ export default function HtmlEditor(props: BlockEditorProps) {
               fonts={fonts.items}
               onMedia={props.onMedia}
               onShortcode={props.onShortcode}
+              onVideoShortcode={props.onVideoShortcode}
               onUpload={props.onUpload}
             />
           )}

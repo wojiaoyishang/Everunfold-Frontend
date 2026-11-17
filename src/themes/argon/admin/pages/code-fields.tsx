@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/primitives";
 import { Select } from "../../components/ui/select";
 import { Switch } from "../../components/ui/switch";
 import { AdminWarning } from "../components/warning";
+import { EditorCanvasCover } from "../components/editor-canvas-cover";
 import styles from "./pages.module.css";
 
 const SourceEditor = dynamic(() => import("../components/source-editor"), {
@@ -63,7 +64,7 @@ export function PageCodeFields({
             )}
           </div>
         </div>
-        {cover && <div className={styles.codeCover}>{cover}</div>}
+        {cover && <EditorCanvasCover overlay>{cover}</EditorCanvasCover>}
       </div>
       {!cover && mode === "javascript" && (
         <div className={styles.sourceOptions}>

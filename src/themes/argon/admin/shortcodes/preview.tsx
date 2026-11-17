@@ -51,7 +51,7 @@ export function ShortcodePreview({
         definitions: previewShortcodeDefinitions(definition, definitions),
         maxDepth,
       },
-      { shortcodePreview: source === undefined },
+      { shortcodePreview: source === undefined, videoPreview: true },
     );
   }, [
     definition,

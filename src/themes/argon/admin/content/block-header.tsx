@@ -21,6 +21,7 @@ export function BlockHeader({
   handle,
   controlsRef,
   formatDisabled,
+  onVideoSettings,
 }: {
   block: DraftBlock;
   index: number;
@@ -31,6 +32,7 @@ export function BlockHeader({
   onDelete: () => void;
   controlsRef: Ref<HTMLDivElement>;
   formatDisabled: boolean;
+  onVideoSettings?: () => void;
   handle?: ComponentProps<typeof Button>;
 }) {
   const label = blockEditors.get(block.type ?? "markdown")?.label ?? block.type;
@@ -46,13 +48,27 @@ export function BlockHeader({
         <Icon name="grip" />
       </Button>
       <span className={styles.format}>
-        <Icon name={block.type === "html" ? "code" : "book"} />
-        {label}
+        <Icon
+          name={
+            onVideoSettings ? "video" : block.type === "html" ? "code" : "book"
+          }
+        />
+        {onVideoSettings ? <UiText text="视频" /> : label}
       </span>
       <span className={styles.number}>
         {String(index + 1).padStart(2, "0")}
       </span>
       <div ref={controlsRef} className={styles.modeControls} />
+      {onVideoSettings && (
+        <Button
+          aria-label="设置视频区块"
+          title="设置视频区块"
+          disabled={disabled}
+          onClick={onVideoSettings}
+        >
+          <Icon name="settings" />
+        </Button>
+      )}
       <ActionPopover
         label={`第 ${index + 1} 块操作`}
         disabled={disabled}

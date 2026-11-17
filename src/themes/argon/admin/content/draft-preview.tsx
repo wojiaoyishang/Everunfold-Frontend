@@ -29,6 +29,7 @@ export function DraftPreview({
         media_urls: media,
       },
       shortcodes,
+      { videoPreview: true },
     );
   }, [fields.body, media, shortcodes, runtime.catalog?.revision]);
   const issue = rendered.diagnostics[0];

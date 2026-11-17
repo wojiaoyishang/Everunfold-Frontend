@@ -13,6 +13,7 @@ import {
 import type { ContentFeatureKind } from "@/core/editor/content-feature-source";
 import { TextColorButton } from "./text-color-button";
 import { ShortcodeButton } from "./shortcode-button";
+import { VideoInsertButton } from "./video-insert-button";
 export interface SourceAction {
   label: string;
   icon: IconName;
@@ -39,6 +40,7 @@ export function SourceToolbar({
   onIndent,
   onMedia,
   onShortcode,
+  onVideoShortcode,
   onUpload,
   onFeature,
 }: {
@@ -53,6 +55,7 @@ export function SourceToolbar({
   onIndent: (direction: -1 | 1) => void;
   onMedia?: (kind: "image" | "all" | "video") => void;
   onShortcode?: () => void;
+  onVideoShortcode?: () => void;
   onUpload?: (files: File[]) => void;
   onFeature: (kind: ContentFeatureKind) => FeatureInsertion;
 }) {
@@ -119,16 +122,27 @@ export function SourceToolbar({
             onClick={onShortcode}
           />
         )}
-        <Button
-          className={styles.tool}
-          title="插入视频"
-          aria-label="插入视频"
-          disabled={disabled}
-          onMouseDown={(event) => event.preventDefault()}
-          onClick={() => onMedia?.("video")}
-        >
-          <Icon name="video" />
-        </Button>
+        {format === "html" && onVideoShortcode ? (
+          <VideoInsertButton
+            className={styles.tool}
+            disabled={disabled}
+            onOrdinary={onMedia && (() => onMedia("video"))}
+            onShortcode={onVideoShortcode}
+          />
+        ) : (
+          onMedia && (
+            <Button
+              className={styles.tool}
+              title="插入视频"
+              aria-label="插入视频"
+              disabled={disabled}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => onMedia?.("video")}
+            >
+              <Icon name="video" />
+            </Button>
+          )
+        )}
         <Button
           className={styles.tool}
           title="插入图片"

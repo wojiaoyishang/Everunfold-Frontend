@@ -132,6 +132,15 @@
   opacity: 1;
   translate: 0 0;
 }
+[data-home-feed] [data-reveal-state] {
+  transition-duration: 220ms, 240ms, 300ms, 250ms, var(--motion-normal);
+}
+[data-home-feed] [data-reveal-state="immediate"] {
+  opacity: 1;
+  translate: none;
+  transition-property: transform, box-shadow, background-color;
+  transition-duration: 300ms, 250ms, var(--motion-normal);
+}
 .archive-month li:focus-within::before {
   background: var(--accent);
   transform: scale(1.35);

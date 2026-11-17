@@ -95,7 +95,7 @@ const definitions = [
 
 export default {
   id,
-  version: "1.0.1",
+  version: "1.1.0",
   title: "更多组件",
   description: "折叠说明、提示框、人物分组、姓名与寄语和视频播放器。",
   author: "Everunfold",

@@ -17,6 +17,16 @@
   width: 16px;
   height: 16px;
 }
+.controls {
+  min-inline-size: 0;
+  margin-inline-start: auto;
+}
+@media (max-width: 640px) {
+  .controls {
+    flex-basis: 100%;
+    margin-inline-start: 0;
+  }
+}
 .reveal {
   display: grid;
   grid-template-rows: 0fr;

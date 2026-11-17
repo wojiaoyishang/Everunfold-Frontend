@@ -109,6 +109,7 @@ export function ShortcodePicker({
       media_urls: media,
     },
     { definitions: library.applied, maxDepth: library.maxDepth },
+    { videoPreview: true },
   );
   return (
     <Modal

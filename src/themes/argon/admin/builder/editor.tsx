@@ -341,6 +341,7 @@ export function LiveEditorSurface({
   const visible = builder
     ? [...definitions.values()].filter(
         (definition) =>
+          definition.type !== "core.more-components.video" &&
           (builder.allowComments || definition.type !== "core.comments") &&
           `${t(definition.label)} ${definition.type}`
             .toLowerCase()

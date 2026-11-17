@@ -37,6 +37,8 @@ import { afterDialogMotion } from "../../hooks/dialog-motion";
 import { CollaborationBar } from "./collaboration-bar";
 import { InlineUploadToasts } from "./inline-upload-toasts";
 import { FrontendPreviewButton } from "./frontend-preview-button";
+import { PreviewAction } from "../components/preview-action";
+import { EditorModeField } from "../components/editor-mode-field";
 import { useSceneShortcuts } from "../../hooks/use-scene-shortcuts";
 import { CodePreferencesProvider } from "../../components/code-preferences";
 import { ScrollHeaderActions } from "../layout/scroll-header-actions";
@@ -277,24 +279,9 @@ export function DraftEditor({
           </Button>
           <div className={styles.headerActions}>
             <ScrollHeaderActions className={styles.previewActions}>
-              {(type.id === "article" || type.id === "shuoshuo") && (
-                <Button
-                  className="admin-button admin-editor-preview-action"
-                  disabled={
-                    editor.loading || editor.busy || uploading || dragging
-                  }
-                  onClick={() =>
-                    requestLeave(
-                      `/admin/content/${type.id}/${id ? `${id}/edit` : "new"}?mode=components`,
-                    )
-                  }
-                >
-                  <Icon name="grid" />
-                  <UiText text="组件模式" />
-                </Button>
-              )}
-              <Button
-                className="admin-button admin-editor-preview-action"
+              <PreviewAction
+                icon={mode === "preview" ? "edit" : "eye"}
+                label={mode === "preview" ? "返回编辑" : "正文预览"}
                 aria-pressed={mode === "preview"}
                 aria-controls="draft-editor-view"
                 disabled={editor.loading || dragging || uploading}
@@ -302,14 +289,7 @@ export function DraftEditor({
                   setSection("body");
                   setMode(mode === "edit" ? "preview" : "edit");
                 }}
-              >
-                <Icon name={mode === "preview" ? "edit" : "eye"} />
-                {mode === "preview" ? (
-                  <UiText text="返回编辑" />
-                ) : (
-                  <UiText text="正文预览" />
-                )}
-              </Button>
+              />
               <FrontendPreviewButton
                 needsSave={editor.dirty || !editor.detail}
                 disabled={Boolean(saveDisabled || editor.uncertain)}
@@ -385,6 +365,20 @@ export function DraftEditor({
             }
             onLanguage={setLanguage}
             disabled={Boolean(editor.busy || leaving || uploading)}
+            controls={
+              !embedded &&
+              (type.id === "article" || type.id === "shuoshuo") && (
+                <EditorModeField
+                  value="blocks"
+                  disabled={Boolean(blocked || uploading || dragging)}
+                  onChange={() =>
+                    requestLeave(
+                      `/admin/content/${type.id}/${id ? `${id}/edit` : "new"}?mode=components`,
+                    )
+                  }
+                />
+              )
+            }
             onNavigate={(href) => {
               if (
                 href ===

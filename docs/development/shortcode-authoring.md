@@ -91,6 +91,17 @@ export default { "example.note.editor": NoteEditor };
 - SDK 的 `shortcodeCall(definition, values, body)` 按定义顺序序列化。缺省参数取定义的默认值或空串。正文按目标区块格式编写，嵌套短代码放在正文中。代码块、行内代码、HTML 属性和注释中的示例保留字面内容。
 - 宿主用当前短代码目录和站点嵌套限制校验源码。缺少结束标记、未知参数、无效参数值或超限会在预览显示诊断。发布保存原始调用，公开阅读按当前注册定义安全渲染。
 
+## 视频播放器
+
+`video` 是前端内建单体短代码。媒体库选择保留 `site://media/UUID`，也可粘贴视频直链、Bilibili 视频页或 YouTube 播放链接。最大宽度缺省时使用内容宽度。设为具体值时，填 320 至 1920 之间的像素整数。
+
+```text
+{{< video source="site://media/646efdd6-2b1a-43f3-a32a-29a79ab60506" max_width="800" autoplay="true" loop="true" >}}
+{{< video source="https://youtu.be/M7lc1UVf-VE" title="视频示例" >}}
+```
+
+`autoplay` 默认关闭，开启后使用静音自动播放。`loop` 适用于直链和 YouTube。直链支持 `poster`、`captions`（WebVTT）和 `language`。编辑器表单显示当前来源支持的选项。
+
 ## 术语弹窗
 
 `glossary` 的正文是读者可触发的区域。弹窗内容可来自 `term` 指定的已发布词条、`text` 指定的纯文本，或一个直接子级 `glossary-popup`。三者填写其中一种，`title` 可给手写说明命名。词条填路径最后一段，编辑器可以按词条标题、路径或别名搜索。

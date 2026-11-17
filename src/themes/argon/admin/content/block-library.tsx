@@ -7,9 +7,27 @@ import { ActionPopover } from "../../components/ui/action-popover";
 import { useDragItem } from "../../components/ui/drag-and-drop";
 import { Icon } from "../../components/icon";
 import { blockEditors } from "./plugins/registry";
-import { useBlockComposer } from "./block-composer";
+import { useBlockComposer, videoBlockPreset } from "./block-composer";
 import styles from "./block-composer.module.css";
 import { EditorInspector } from "../components/editor-inspector";
+import type { IconName } from "../../components/icon";
+
+const libraryChoices = [
+  ...blockEditors.entries.map((plugin) => ({
+    id: plugin.id,
+    label: plugin.label,
+    description: plugin.description,
+    format: plugin.format,
+    icon: (plugin.format === "html" ? "code" : "book") as IconName,
+  })),
+  {
+    id: videoBlockPreset,
+    label: "视频",
+    description: "媒体库、Bilibili 或 YouTube",
+    format: "html" as const,
+    icon: "video" as const,
+  },
+];
 
 export function BlockLibrary({
   compact = false,
@@ -45,7 +63,7 @@ export function BlockLibrary({
         </div>
       )}
       <div className={styles.cards}>
-        {blockEditors.entries.map((plugin) => (
+        {libraryChoices.map((plugin) => (
           <LibraryCard
             key={plugin.id}
             plugin={plugin}
@@ -65,7 +83,7 @@ export function BlockLibrary({
   );
 }
 type LibraryCardProps = {
-  plugin: (typeof blockEditors.entries)[number];
+  plugin: (typeof libraryChoices)[number];
   compact: boolean;
   quiet?: boolean;
   onInsert?: () => void;
@@ -106,19 +124,28 @@ function LibraryChoice({
       }}
       className={styles.libraryCard}
       disabled={host.disabled || host.body.length >= 128}
-      aria-label={`添加 ${plugin.label} 区块`}
+      aria-label={
+        plugin.id === videoBlockPreset
+          ? "添加视频区块"
+          : `添加 ${plugin.label} 区块`
+      }
       data-dragging={drag?.dragging}
       onClick={() => {
-        if (host.insert(plugin.format, before)) onInsert?.();
+        if (plugin.id === videoBlockPreset) {
+          onInsert?.();
+          host.configureVideo(before);
+        } else if (host.insert(plugin.format, before)) onInsert?.();
       }}
       onKeyDown={(event) => {
         if (event.code !== "Enter") drag?.handle.onKeyDown?.(event);
       }}
     >
       <span className={styles.cardIcon}>
-        <Icon name={plugin.format === "html" ? "code" : "book"} />
+        <Icon name={plugin.icon} />
       </span>
-      <strong>{plugin.label}</strong>
+      <strong>
+        <UiText text={plugin.label} />
+      </strong>
       {!quiet && (
         <small>
           <UiText text={plugin.description ?? ""} />

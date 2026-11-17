@@ -11,6 +11,7 @@ import type {
 import { RegisteredBlockEditor } from "../content/plugins/registry";
 import { MediaPickerDialog } from "../media/media-picker-dialog";
 import { ShortcodePicker } from "../shortcodes/picker";
+import { VideoEditorDialog } from "../shortcodes/video-editor";
 
 /** Supplies the media and shortcode pickers to the registered block editor. */
 export function BuilderBlockSourceEditor({
@@ -33,7 +34,7 @@ export function BuilderBlockSourceEditor({
   autoFocus?: boolean;
 }) {
   const [picker, setPicker] = useState<
-    "image" | "video" | "all" | "shortcode" | null
+    "image" | "video" | "all" | "shortcode" | "video-shortcode" | null
   >(null);
   const editor = useRef<CodeEditorHandle>(null);
   const insertion = useRef<CapturedInsertion>(undefined);
@@ -73,8 +74,17 @@ export function BuilderBlockSourceEditor({
         initialView={autoFocus ? "visual" : undefined}
         onMedia={openPicker}
         onShortcode={() => openPicker("shortcode")}
+        onVideoShortcode={() => openPicker("video-shortcode")}
       />
-      {picker === "shortcode" ? (
+      {picker === "video-shortcode" ? (
+        <VideoEditorDialog
+          shortcode
+          media={media}
+          onMedia={onMedia}
+          onConfirm={(source) => insertion.current?.(source)}
+          onClose={closePicker}
+        />
+      ) : picker === "shortcode" ? (
         <ShortcodePicker
           format={format}
           media={media}

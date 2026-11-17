@@ -1,4 +1,4 @@
-.action:global(.admin-button) {
+:global(button.admin-button).action {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -10,11 +10,13 @@
   font-size: 12px;
   line-height: 1.5;
 }
-.action:global(.admin-button) svg {
+:global(button.admin-button).action svg {
   width: 15px;
   height: 15px;
 }
-.action:global(.admin-button):hover:not(:disabled) {
+:global(button.admin-button).action:is(:hover, [aria-pressed="true"]):not(
+    :disabled
+  ) {
   color: var(--admin-accent);
   background: var(--admin-subtle);
 }

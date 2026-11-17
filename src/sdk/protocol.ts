@@ -26,6 +26,7 @@ export const SDK_CLIENT_EXPORTS = [
   "useLanguageCatalog",
   "useRegisteredPageLocale",
   "MediaPickerDialog",
+  "VideoPlayer",
   "HtmlSourceEditor",
   "SettingsForm",
   "FontStyles",

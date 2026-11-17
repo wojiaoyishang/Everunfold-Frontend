@@ -87,6 +87,11 @@ export const coreBuilderComponents: readonly BuilderComponentDefinition[] = [
     ],
   },
   {
+    type: "core.video",
+    label: "视频播放器",
+    group: "media",
+  },
+  {
     type: "core.button",
     label: "按钮",
     fields: links,
