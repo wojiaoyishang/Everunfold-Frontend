@@ -1,4 +1,12 @@
 {
+  "滚轮惯性": "Wheel momentum",
+  "启用滚轮惯性": "Enable wheel momentum",
+  "惯性时长": "Momentum duration",
+  "每格滚动距离": "Distance per notch",
+  "连续滚动加速": "Repeated wheel acceleration",
+  "惯性时长越短，滚动停止越快。访客可在阅读设置中调整。": "Shorter durations stop the scroll sooner. Readers can adjust this in Reading settings.",
+  "减少动态开启时使用浏览器原生滚动。": "Reduced motion uses native browser scrolling.",
+  "恢复站点滚动设置": "Reset to site scroll settings",
   "Argon 主题制作": "Argon theme by",
   "主题重构": "Rebuilt by",
   "页脚 HTML": "Footer HTML",

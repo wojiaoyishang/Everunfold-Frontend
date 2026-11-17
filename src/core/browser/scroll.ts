@@ -1,9 +1,11 @@
 import {
   easeOutExpo,
+  dampedPosition,
   wheelDistance,
   discreteWheel,
   wheelAcceleration,
 } from "./scroll-policy";
+import type { WheelScroll } from "./wheel-scroll-policy";
 import { motionEnabled, subscribeMotion } from "./motion";
 import { waitForAnchorLayout } from "./anchor-readiness";
 
@@ -135,6 +137,7 @@ function nativeScrollTarget(target: EventTarget | null): boolean {
 /** One listener owns wheel interpolation; it never transforms the document/scroller. */
 export function installScrollBehavior(
   navigateAnchor: (url: URL) => boolean,
+  wheel: WheelScroll,
 ): () => void {
   let wheelActive = false;
   let lastWheelAt = -Infinity;
@@ -161,10 +164,12 @@ export function installScrollBehavior(
         document.documentElement.scrollHeight - window.innerHeight,
       );
       const target = Math.max(0, Math.min(wheelTarget ?? position, limit));
-      // A short, time-based tail follows immediately and settles in about 400ms.
-      position +=
-        (target - position) *
-        (1 - Math.exp(-Math.min(64, now - previousTime) / 70));
+      position = dampedPosition(
+        position,
+        target,
+        Math.min(64, now - previousTime),
+        wheel.inertia_ms,
+      );
       previousTime = now;
       const done = Math.abs(position - target) < 0.5;
       window.scrollTo({ top: done ? target : position, behavior: "instant" });
@@ -181,10 +186,13 @@ export function installScrollBehavior(
       event.metaKey ||
       event.shiftKey ||
       Math.abs(event.deltaX) > Math.abs(event.deltaY) ||
+      !wheel.enabled ||
       !motionEnabled() ||
       nativeScrollTarget(event.target) ||
       !discreteWheel(event.deltaY, event.deltaMode)
     ) {
+      lastWheelAt = -Infinity;
+      lastWheelDirection = 0;
       stopScrolling();
       return;
     }
@@ -192,7 +200,8 @@ export function installScrollBehavior(
       -600,
       Math.min(
         600,
-        wheelDistance(event.deltaY, event.deltaMode, window.innerHeight),
+        wheelDistance(event.deltaY, event.deltaMode, window.innerHeight) *
+          (wheel.distance_percent / 100),
       ),
     );
     if (!delta) return;
@@ -202,7 +211,12 @@ export function installScrollBehavior(
     const direction = Math.sign(delta);
     const sameDirection = lastWheelDirection === direction;
     const distance =
-      delta * wheelAcceleration(now - lastWheelAt, sameDirection);
+      delta *
+      wheelAcceleration(
+        now - lastWheelAt,
+        sameDirection,
+        wheel.acceleration_percent,
+      );
     lastWheelAt = now;
     lastWheelDirection = direction;
     const target = (sameDirection ? previous : window.scrollY) + distance;

@@ -21,6 +21,7 @@ import {
   SettingsSection,
 } from "@/themes/argon/admin/settings/shared";
 import { InstalledThemeSection } from "@/themes/argon/admin/settings/installed-theme";
+import { WheelScrollFields } from "@/themes/argon/components/wheel-scroll-fields";
 import { RangeField } from "@/themes/argon/components/ui/range-field";
 import { useAdminAccount } from "@/core/admin/account-context";
 import { can } from "@/core/accounts/permissions";
@@ -99,6 +100,30 @@ export function ThemeSettingsHost(props: ThemeSettingsProps) {
               }}
             />
           </label>
+        </SettingsSection>
+      )}
+      {profile && (
+        <SettingsSection
+          id="settings-wheel-scroll"
+          title="滚轮惯性"
+          description="惯性时长越短，滚动停止越快。访客可在阅读设置中调整。"
+        >
+          <WheelScrollFields
+            value={profile.wheel_scroll}
+            disabled={!writable}
+            onChange={(patch) =>
+              setDraft((current) =>
+                current
+                  ? updateThemeProfile(current, theme, {
+                      wheel_scroll: {
+                        ...themeProfile(current, theme)?.wheel_scroll,
+                        ...patch,
+                      },
+                    })
+                  : current,
+              )
+            }
+          />
         </SettingsSection>
       )}
       {draft ? (

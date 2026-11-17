@@ -1,3 +1,5 @@
+import { defaultWheelScroll } from "./wheel-scroll-policy";
+
 export function wheelDistance(
   delta: number,
   mode: number,
@@ -11,10 +13,11 @@ export function dampedPosition(
   position: number,
   target: number,
   milliseconds: number,
+  inertiaMs = 145,
 ): number {
   return (
     position +
-    (target - position) * (1 - Math.exp(-Math.max(0, milliseconds) / 145))
+    (target - position) * (1 - Math.exp(-Math.max(0, milliseconds) / inertiaMs))
   );
 }
 
@@ -31,6 +34,12 @@ export function discreteWheel(delta: number, mode: number): boolean {
       (Math.abs(delta) % 100 === 0 || Math.abs(delta) % 120 === 0))
   );
 }
-export function wheelAcceleration(gap: number, sameDirection: boolean): number {
-  return sameDirection && gap >= 0 && gap < 160 ? 1 + (1 - gap / 160) * 0.8 : 1;
+export function wheelAcceleration(
+  gap: number,
+  sameDirection: boolean,
+  extraPercent = defaultWheelScroll.acceleration_percent,
+): number {
+  return sameDirection && gap >= 0 && gap < 160
+    ? 1 + (1 - gap / 160) * (extraPercent / 100)
+    : 1;
 }

@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[可配置的滚轮惯性](decisions/0179-configurable-wheel-momentum.md)涵盖主题默认值、前台浏览器偏好与减少动态。
+
 [工作台卡片与统计](decisions/0178-workspace-cards-and-shared-loading.md)及[插件和共享加载指南](development/workspace-cards.md)说明自由布局、鉴权统计、统一动画和排序。
 
 [阅读字体、页脚与媒体选择器](decisions/0177-public-typography-footer-and-media-picker.md)记录浏览器和主题字号偏好、页脚 HTML 与媒体分页置顶。

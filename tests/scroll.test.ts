@@ -4,7 +4,10 @@ import {
   easeOutExpo,
   dampedPosition,
   wheelDistance,
+  wheelAcceleration,
 } from "../src/core/browser/scroll-policy";
+
+import { parseWheelScrollPreference } from "../src/core/browser/wheel-scroll-policy";
 
 test("wheel units preserve direction and fractional high-DPI deltas", () => {
   assert.equal(wheelDistance(-3, 1, 800), -96);
@@ -39,4 +42,25 @@ test("scroll easing reaches its target without overshooting or reversing", () =>
     if (index) assert.ok(value >= positions[index - 1]);
   });
   assert.ok(positions[50] - positions[40] > positions[90] - positions[80]);
+});
+
+test("wheel overrides can be partial and ignore malformed browser data", () => {
+  assert.deepEqual(
+    parseWheelScrollPreference(
+      '{"inertia_ms":150,"distance_percent":999,"enabled":false,"acceleration_percent":0}',
+    ),
+    { inertia_ms: 150, enabled: false, acceleration_percent: 0 },
+  );
+  assert.deepEqual(parseWheelScrollPreference("corrupt"), {});
+  assert.deepEqual(
+    parseWheelScrollPreference('{"distance_percent":103,"enabled":1}'),
+    {},
+  );
+});
+
+test("longer inertia slows settling and acceleration can be disabled", () => {
+  assert.ok(dampedPosition(0, 120, 40, 30) > dampedPosition(0, 120, 40, 150));
+  assert.equal(wheelAcceleration(40, true, 0), 1);
+  assert.equal(wheelAcceleration(40, true, 100), 1.75);
+  assert.equal(wheelAcceleration(40, false, 100), 1);
 });

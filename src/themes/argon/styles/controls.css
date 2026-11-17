@@ -238,6 +238,29 @@ html[data-motion="reduced"] .reading-progress-slot {
 .settings-reset {
   width: 100%;
 }
+.setting-wheel legend {
+  font-weight: 600;
+}
+.setting-wheel-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: calc(14px * var(--public-font-scale, 1));
+}
+.setting-wheel .setting-range {
+  margin-block: 12px;
+}
+.setting-wheel .setting-range .ui-range {
+  margin-top: 7px;
+}
+.setting-wheel .settings-reset {
+  margin-top: 4px;
+}
+.setting-wheel .settings-reset[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: default;
+}
 .setting-playback {
   display: flex;
   gap: 15px;

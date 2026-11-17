@@ -14,6 +14,9 @@ import { setAppearance } from "@/core/browser/appearance";
 import { defaultAppearance } from "@/core/browser/appearance-policy";
 import { HomeFeedSettings } from "./home-feed-settings";
 import { useHomeFeed } from "../hooks/use-home-feed";
+import { setWheelScrollPreference } from "@/core/browser/wheel-scroll-preference";
+import type { WheelScroll } from "@/core/browser/wheel-scroll-policy";
+import { WheelScrollFields } from "./wheel-scroll-fields";
 import { fontScaleLimits } from "@/core/settings/theme-options";
 import {
   setFontScalePreference,
@@ -61,7 +64,13 @@ function applySettings(value: Settings) {
   root.dataset.readingFilter = value.filter;
 }
 
-export function ReadingSettings() {
+export function ReadingSettings({
+  wheelScroll,
+  wheelCustomized,
+}: {
+  wheelScroll: WheelScroll;
+  wheelCustomized: boolean;
+}) {
   const panelId = useId();
   const motion = useMotion();
   const playback = useBackgroundPlayback();
@@ -166,6 +175,32 @@ export function ReadingSettings() {
             <p className="setting-hint">
               <UiText text="控制滚动惯性和界面动画，背景可单独设置" />
             </p>
+          </fieldset>
+          <fieldset className="setting-wheel" data-native-scroll>
+            <legend>
+              <UiText text="滚轮惯性" />
+            </legend>
+            <WheelScrollFields
+              value={wheelScroll}
+              onChange={setWheelScrollPreference}
+              compact
+              reducedMotion={!motion.enabled}
+            />
+            {!motion.enabled && (
+              <p className="setting-hint">
+                <UiText text="减少动态开启时使用浏览器原生滚动。" />
+              </p>
+            )}
+            <Button
+              type="button"
+              className="settings-reset"
+              aria-disabled={!wheelCustomized}
+              onClick={() => {
+                if (wheelCustomized) setWheelScrollPreference(null);
+              }}
+            >
+              <UiText text="恢复站点滚动设置" />
+            </Button>
           </fieldset>
           <div className="setting-playback">
             <div>
@@ -284,6 +319,7 @@ export function ReadingSettings() {
             onClick={() => {
               update(defaults);
               setFontScalePreference(null);
+              setWheelScrollPreference(null);
               motion.setPreference("full");
               playback.reset();
               setAppearance(defaultAppearance);

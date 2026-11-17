@@ -8,6 +8,9 @@ import {
   scrollToPosition,
 } from "@/core/browser/scroll";
 import { navigateToAnchor } from "@/core/browser/scroll-restoration";
+import { useWheelScrollPreference } from "@/core/browser/wheel-scroll-preference";
+import { themeProfile } from "@/core/settings/theme-options";
+import { useRouteState } from "./route-state";
 import { useScrollPosition } from "../hooks/use-scroll-position";
 import { useReadingState } from "./reading-state";
 import { ThemeToggle } from "./controls";
@@ -38,7 +41,21 @@ function ToolSlot({
 export function FloatingTools() {
   const scroll = useScrollPosition();
   const reading = useReadingState();
-  useEffect(() => installScrollBehavior(navigateToAnchor), []);
+  const { site } = useRouteState();
+  const { value, customized } = useWheelScrollPreference(
+    themeProfile(site.settings)?.wheel_scroll,
+  );
+  const { enabled, inertia_ms, distance_percent, acceleration_percent } = value;
+  useEffect(
+    () =>
+      installScrollBehavior(navigateToAnchor, {
+        enabled,
+        inertia_ms,
+        distance_percent,
+        acceleration_percent,
+      }),
+    [enabled, inertia_ms, distance_percent, acceleration_percent],
+  );
   return (
     <div className="floating-tools" role="group" aria-label="阅读工具">
       <ToolSlot
@@ -85,7 +102,7 @@ export function FloatingTools() {
         <ThemeToggle className="floating-button" />
       </ToolSlot>
       <ToolSlot>
-        <ReadingSettings />
+        <ReadingSettings wheelScroll={value} wheelCustomized={customized} />
       </ToolSlot>
     </div>
   );

@@ -4,7 +4,10 @@ import type {
   FeedPreferences,
   PublicSettings,
   ThemePreferences,
+  WheelScrollPreferences,
 } from "@/core/contracts/settings";
+
+import { defaultWheelScroll } from "@/core/browser/wheel-scroll-policy";
 
 export const fallbackThemeId = "argon";
 export const fontScaleLimits = { min: 75, max: 150, default: 100 } as const;
@@ -65,6 +68,7 @@ export type RuntimeThemePreferences = Required<
   article: Required<ArticleDisplayPreferences>;
   code: Required<CodePreferences>;
   feed: Required<FeedPreferences>;
+  wheel_scroll: Required<WheelScrollPreferences>;
   navigation?: ThemePreferences["navigation"];
 };
 const defaults: RuntimeThemePreferences = {
@@ -77,6 +81,7 @@ const defaults: RuntimeThemePreferences = {
   article: articleDefaults,
   code: codeDefaults,
   feed: feedDefaults,
+  wheel_scroll: defaultWheelScroll,
   font_scale_percent: fontScaleLimits.default,
   font_media_id: "",
   font_url: "",
@@ -114,6 +119,7 @@ export function themeProfile(
     article: { ...defaults.article, ...value.article },
     code: { ...defaults.code, ...value.code },
     feed: { ...defaults.feed, ...value.feed },
+    wheel_scroll: { ...defaultWheelScroll, ...value.wheel_scroll },
   };
 }
 
