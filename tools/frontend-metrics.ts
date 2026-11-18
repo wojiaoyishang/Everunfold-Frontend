@@ -9,10 +9,69 @@ import { timingSafeEqual } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { BlockList, isIP } from "node:net";
 
-export const frontendMetricsPath = "/internal/observability/v1/metrics";
+const internalMetricsPath = "/internal/observability/v1/metrics";
+const directMetricsPath = "/metrics";
 
-export function validMetricsToken(token: string | undefined): token is string {
+function validMetricsToken(token: string | undefined): token is string {
   return typeof token === "string" && /^[!-~]{32,256}$/.test(token);
+}
+
+type Environment = Record<string, string | undefined>;
+
+export function frontendMetricsEnabled(env: Environment) {
+  return [
+    env.EVERUNFOLD_METRICS_NODE_TOKEN,
+    env.EVERUNFOLD_FRONTEND_METRICS_TOKEN,
+  ].some(validMetricsToken);
+}
+
+function metricsAccess(
+  token: string | undefined,
+  setting: string,
+  env: Environment,
+  fallback: string[],
+) {
+  if (!validMetricsToken(token)) return;
+  const explicit = env[setting]?.trim();
+  const peers = explicit
+    ? explicit
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean)
+    : fallback;
+  const networks = { ipv4: new BlockList(), ipv6: new BlockList() };
+  for (const entry of peers) {
+    const [address, prefix, extra] = entry.split("/");
+    const version = isIP(address);
+    if (
+      !version ||
+      address.includes("%") ||
+      extra !== undefined ||
+      (prefix !== undefined &&
+        (!/^\d{1,3}$/.test(prefix) ||
+          Number(prefix) > (version === 6 ? 128 : 32) ||
+          (explicit && Number(prefix) === 0)))
+    ) {
+      throw new Error(`${setting} 必须填写有效的受限 IP/CIDR。`);
+    }
+    const family = version === 6 ? "ipv6" : "ipv4";
+    if (prefix === undefined) networks[family].addAddress(address, family);
+    else networks[family].addSubnet(address, Number(prefix), family);
+  }
+  const secret = Buffer.from("Bearer " + token);
+  return (request: IncomingMessage) => {
+    const presented = Buffer.from(request.headers.authorization ?? "");
+    const peer = request.socket.remoteAddress?.replace(/^::ffff:/, "") ?? "";
+    const version = isIP(peer);
+    const family = version === 6 ? "ipv6" : "ipv4";
+    return (
+      request.method === "GET" &&
+      !!version &&
+      networks[family].check(peer, family) &&
+      presented.length === secret.length &&
+      timingSafeEqual(presented, secret)
+    );
+  };
 }
 
 function requestGroup(path: string) {
@@ -24,11 +83,33 @@ function requestGroup(path: string) {
 }
 
 export function frontendMetrics(
-  token: string | undefined,
+  env: Environment,
   peers: string[],
   aggregate?: () => Promise<string>,
 ) {
-  if (!validMetricsToken(token)) return;
+  if (!frontendMetricsEnabled(env)) return;
+  const internal = env.EVERUNFOLD_METRICS_NODE_TOKEN;
+  const direct = env.EVERUNFOLD_FRONTEND_METRICS_TOKEN;
+  if (validMetricsToken(internal) && internal === direct)
+    throw new Error("前端独立指标令牌与内部指标令牌必须不同。");
+  const access = new Map([
+    [
+      internalMetricsPath,
+      metricsAccess(
+        internal,
+        "EVERUNFOLD_METRICS_NODE_ALLOWED_PEERS",
+        env,
+        peers,
+      ),
+    ],
+    [
+      directMetricsPath,
+      metricsAccess(direct, "EVERUNFOLD_FRONTEND_METRICS_ALLOWED_PEERS", env, [
+        "127.0.0.1",
+        "::1",
+      ]),
+    ],
+  ]);
   const registry = new Registry();
   collectDefaultMetrics({ register: registry, prefix: "everunfold_node_" });
   if (aggregate) {
@@ -49,36 +130,23 @@ export function frontendMetrics(
     labelNames: labels,
     registers: [registry],
   });
-  const secret = Buffer.from("Bearer " + token);
-  const allowed = new BlockList();
-  for (const entry of peers) {
-    const [address, prefix] = entry.split("/");
-    const family = isIP(address) === 6 ? "ipv6" : "ipv4";
-    if (prefix === undefined) allowed.addAddress(address, family);
-    else allowed.addSubnet(address, Number(prefix), family);
-  }
   return {
-    async handle(req: IncomingMessage, res: ServerResponse) {
-      const presented = Buffer.from(req.headers.authorization ?? "");
-      const peer = req.socket.remoteAddress?.replace(/^::ffff:/, "") ?? "";
-      const permitted =
-        !!isIP(peer) && allowed.check(peer, isIP(peer) === 6 ? "ipv6" : "ipv4");
+    handle(path: string, req: IncomingMessage, res: ServerResponse) {
+      const authorized = access.get(path);
+      if (!authorized) return false;
       res.setHeader("Cache-Control", "no-store");
-      if (
-        !permitted ||
-        req.method !== "GET" ||
-        presented.length !== secret.length ||
-        !timingSafeEqual(presented, secret)
-      ) {
+      if (!authorized(req)) {
         res.writeHead(403).end();
-        return;
+        return true;
       }
-      try {
-        const body = await (aggregate ? aggregate() : registry.metrics());
-        res.writeHead(200, { "Content-Type": registry.contentType }).end(body);
-      } catch {
-        res.writeHead(503).end();
-      }
+      void (aggregate ? aggregate() : registry.metrics()).then(
+        (body) =>
+          res
+            .writeHead(200, { "Content-Type": registry.contentType })
+            .end(body),
+        () => res.writeHead(503).end(),
+      );
+      return true;
     },
     observe(path: string, response: ServerResponse) {
       if (path === "/health/ready") return;

@@ -199,6 +199,11 @@ refresh_layout
 if [[ "$action" == configure ]]; then
   ensure_networks
   [[ -t 0 && -t 1 ]] || { echo "配置界面需要交互终端。" >&2; exit 1; }
+  network_subnets=""
+  for net in "$network" "${extra_networks[@]}"; do
+    subnets="$(docker network inspect --format '{{range .IPAM.Config}}{{if .Subnet}}{{.Subnet}},{{end}}{{end}}' "$net")"
+    network_subnets+="$net=${subnets//$'\n'/}"$'\n'
+  done
   ui_args=()
   if [[ -n "${EVERUNFOLD_CONNECTION_BASE64:-}" ]]; then
     ui_args+=(-e EVERUNFOLD_CONNECTION_BASE64)
@@ -223,6 +228,7 @@ if [[ "$action" == configure ]]; then
   result=0
   run_temporary yes --interactive --tty "${base[@]}" "${mount_args[@]}" "${ui_args[@]}" \
     -e "TERM=${TERM:-xterm-256color}" -e "EVERUNFOLD_NETWORK_CIDRS=$cidrs" \
+    -e "EVERUNFOLD_SETUP_NETWORK_SUBNETS=$network_subnets" \
     "$setup_image" python "$deploy_dir/configure.py" || result=$?
   cleanup_bridge
   unset EVERUNFOLD_CONNECTION_BASE64

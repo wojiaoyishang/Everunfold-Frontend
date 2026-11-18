@@ -40,6 +40,14 @@ def network_alias(value: str) -> bool:
     return bool(re.fullmatch(r"[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?", value))
 
 
+def setup_network_subnets(name: str) -> str:
+    for line in os.environ.get("EVERUNFOLD_SETUP_NETWORK_SUBNETS", "").splitlines():
+        network, _, subnets = line.partition("=")
+        if network == name and subnets:
+            return subnets
+    raise ValueError(f"无法读取 Docker 网络 {name} 的子网。请先连接该网络并重新打开向导。")
+
+
 def add_container_fields(ctx, add, value):
     prefix = ctx.role.upper()
     attached_networks = (

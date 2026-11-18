@@ -20,6 +20,7 @@ const node = "test-workers";
 const epoch = randomUUID();
 const inbound = randomUUID();
 const outbound = randomUUID();
+const directToken = randomUUID();
 const identity = { node_id: node, source_epoch: epoch };
 const backend = createServer((request, response) => {
   request.resume();
@@ -113,32 +114,33 @@ try {
   await once(probe, "listening");
   const port = (probe.address() as AddressInfo).port;
   await new Promise<void>((resolve) => probe.close(() => resolve()));
-  await writeFile(
-    config,
-    stringify({
-      version: 1,
-      component: "frontend",
-      environment: {
-        FRONTEND_PORT: String(port),
-        FRONTEND_HOST: "127.0.0.1",
-        FRONTEND_WORKERS: "2",
-        EVERUNFOLD_DATA_DIR: data,
-        NODE_IN: inbound,
-        EVERUNFOLD_METRICS_NODE_TOKEN: epoch,
-        NODE_OUT: outbound,
+  const fixture = {
+    version: 1,
+    component: "frontend",
+    environment: {
+      FRONTEND_PORT: String(port),
+      FRONTEND_HOST: "127.0.0.1",
+      FRONTEND_WORKERS: "2",
+      EVERUNFOLD_DATA_DIR: data,
+      NODE_IN: inbound,
+      EVERUNFOLD_METRICS_NODE_TOKEN: epoch,
+      EVERUNFOLD_METRICS_NODE_ALLOWED_PEERS: "127.0.0.1/32",
+      EVERUNFOLD_FRONTEND_METRICS_TOKEN: directToken,
+      EVERUNFOLD_FRONTEND_METRICS_ALLOWED_PEERS: "127.0.0.1/32",
+      NODE_OUT: outbound,
+    },
+    application: {
+      BACKEND_BASE_URL: base,
+      FRONTEND_NODE_ID: node,
+      backend: {
+        allowed_peer_ips: ["127.0.0.1"],
+        fastapi_to_nextjs_token_env: "NODE_IN",
+        nextjs_to_fastapi_token_env: "NODE_OUT",
       },
-      application: {
-        BACKEND_BASE_URL: base,
-        FRONTEND_NODE_ID: node,
-        backend: {
-          allowed_peer_ips: ["127.0.0.1"],
-          fastapi_to_nextjs_token_env: "NODE_IN",
-          nextjs_to_fastapi_token_env: "NODE_OUT",
-        },
-        settings: { source_epoch: epoch },
-      },
-    }),
-  );
+      settings: { source_epoch: epoch },
+    },
+  };
+  await writeFile(config, stringify(fixture));
   const multiple = start();
   await waitFor(
     () => readyServers() === 2 && reports === 1 && policyReads === 2,
@@ -235,17 +237,67 @@ try {
     /everunfold_node_http_requests_total\{group="internal",status="2xx"\}/,
   );
   assert.match(output, /everunfold_node_process_resident_memory_bytes/);
+  const scrapeHeaders = { Authorization: `Bearer ${directToken}` };
+  assert.equal((await request("/metrics")).status, 403);
+  assert.equal(
+    (
+      await request("/metrics", {
+        headers: { Authorization: `Bearer ${epoch}` },
+      })
+    ).status,
+    403,
+  );
+  assert.equal(
+    (await request(metricsPath, { headers: scrapeHeaders })).status,
+    403,
+  );
+  const direct = await request("/metrics", { headers: scrapeHeaders });
+  assert.equal(direct.status, 200);
+  assert.match(
+    await direct.text(),
+    /everunfold_node_process_resident_memory_bytes/,
+  );
   assert.equal(recoveries, 1, "the recovery check is a singleton");
   multiple.child.kill("SIGTERM");
   assert.deepEqual(await multiple.exited, [0, null]);
+  fixture.environment.EVERUNFOLD_METRICS_NODE_ALLOWED_PEERS = "192.0.2.0/24";
+  await writeFile(config, stringify(fixture));
   const single = start("1");
   await waitFor(() => readyServers() === 1 && reports === 2);
   assert.equal((await request("/health/ready")).status, 200);
   assert.equal((await request(internal + "/status", { headers })).status, 200);
+  const denied = await request(metricsPath, {
+    headers: {
+      Authorization: `Bearer ${epoch}`,
+      "X-Forwarded-For": "192.0.2.5",
+    },
+  });
+  assert.equal(denied.status, 403);
+  assert.equal(
+    (await request("/metrics", { headers: scrapeHeaders })).status,
+    200,
+  );
   single.child.kill("SIGTERM");
   assert.deepEqual(await single.exited, [0, null]);
   console.log(
     "Two production web workers share one port, one recovery schedule and one replica store. The same build restarts with one worker.",
+  );
+  backend.closeAllConnections();
+  await new Promise<void>((resolve) => backend.close(() => resolve()));
+  fixture.environment.EVERUNFOLD_METRICS_NODE_TOKEN = "";
+  await writeFile(config, stringify(fixture));
+  const offline = start();
+  await waitFor(() => readyServers() === 2);
+  const offlineMetrics = await request("/metrics", { headers: scrapeHeaders });
+  assert.equal(offlineMetrics.status, 200);
+  assert.match(
+    await offlineMetrics.text(),
+    /everunfold_node_process_resident_memory_bytes/,
+  );
+  offline.child.kill("SIGTERM");
+  assert.deepEqual(await offline.exited, [0, null]);
+  console.log(
+    "The private direct scrape works with two workers and no backend or shared token.",
   );
 } catch (error) {
   if (logs) console.error(logs);

@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[前端节点的独立监控](decisions/0187-independent-frontend-monitoring.md)说明独立采集、来源验证与日志分流。
+
 [内容编辑器的缓存](development/cache-management.md#内容编辑器的缓存)说明文章、说说和页面的缓存操作与节点回执。
 
 [前端插件编译与热发布](decisions/0183-frontend-plugin-deployment-actions.md)说明从源码准备插件包、发布预编译包和沿用运行中前端的流程。

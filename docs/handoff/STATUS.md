@@ -7,7 +7,8 @@
 
 ## 运行指标与结构化日志
 
-- 设置私有 EVERUNFOLD_METRICS_NODE_TOKEN 后，前端按既有内部来源白名单提供只读指标。Node 主进程聚合各 Web worker 的 Prometheus 指标。
+- 启用前端独立指标后，`/metrics` 使用独立令牌与来源网段，后端离线也可直接采集。内部指标保留原路径和令牌，可使用独立来源范围。两条路径共用同一份 Node.js worker 指标。
+- 单端向导分别保存前端独立指标、内部聚合、Loki 查询和 Alloy 写入的来源列表。Docker 模式可将已连接的网络名换算为 CIDR。真实双 worker 验证了后端关闭后的指标采集、令牌隔离及网段校验。
 - 启动及同步日志输出一行 JSON，含可读消息、组件、级别和事件。
 
 ## 前端 Node.js 运行 worker

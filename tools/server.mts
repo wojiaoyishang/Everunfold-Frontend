@@ -6,7 +6,7 @@ import { frontendHandler } from "../src/server/http";
 import { configuredSettingsRuntime } from "../src/server/settings/runtime";
 import { frontendClusterClient } from "./frontend-cluster";
 import { configurationEnvironment } from "../src/core/config/deployment";
-import { frontendMetrics, frontendMetricsPath } from "./frontend-metrics";
+import { frontendMetrics } from "./frontend-metrics";
 import { frontendHTTPAccess } from "../src/server/http-access";
 import { runtimeLog } from "../src/server/runtime-log";
 
@@ -33,7 +33,7 @@ const access = frontendHTTPAccess({
     environment[config.backend.nextjsToFastapiTokenEnv ?? ""] ?? "",
 });
 const monitor = frontendMetrics(
-  environment.EVERUNFOLD_METRICS_NODE_TOKEN,
+  environment,
   config.backend.allowedPeerIps,
   cluster?.metrics,
 );
@@ -61,10 +61,7 @@ const handler = frontendHandler(
 server.on("request", (request, response) => {
   const path = (request.url ?? "/").split("?", 1)[0];
   if (access.observe(request, response, path)) return;
-  if (monitor && path === frontendMetricsPath) {
-    void monitor.handle(request, response);
-    return;
-  }
+  if (monitor?.handle(path, request, response)) return;
   monitor?.observe(path, response);
   void handler(request, response);
 });

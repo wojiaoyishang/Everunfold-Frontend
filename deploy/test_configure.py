@@ -91,6 +91,32 @@ class Fixtures:
 
 
 class ModelTests(Fixtures, unittest.TestCase):
+    def test_frontend_monitoring_saves_dedicated_token_and_independent_ranges(self):
+        model = self.complete()
+        self.edit(model, "frontend_metrics_enabled", "1")
+        self.edit(model, "metrics_node_token", "n" * 43)
+        self.edit(model, "frontend_metrics_peers", "192.0.2.0/24")
+        with patch.dict(os.environ, {"EVERUNFOLD_SETUP_NETWORK_SUBNETS": "monitor=172.20.0.0/16"}):
+            self.edit(model, "frontend_direct_peers", "monitor,fd00::/64")
+            self.edit(model, "loki_query", "monitor")
+        self.edit(model, "loki_push", "")
+        self.assertFalse(model.errors())
+        model.save()
+        env = self.materialize().env
+        self.assertNotEqual(
+            env["EVERUNFOLD_FRONTEND_METRICS_TOKEN"],
+            env["EVERUNFOLD_METRICS_NODE_TOKEN"],
+        )
+        self.assertEqual(env["EVERUNFOLD_METRICS_NODE_ALLOWED_PEERS"], "192.0.2.0/24")
+        self.assertEqual(
+            env["EVERUNFOLD_FRONTEND_METRICS_ALLOWED_PEERS"], "172.20.0.0/16,fd00::/64"
+        )
+        push, query = (
+            (self.root / "var/monitoring/loki-access.conf").read_text().split("location ~", 1)
+        )
+        self.assertNotIn("allow ", push)
+        self.assertIn("allow 172.20.0.0/16;", query)
+
     @unittest.skipIf(BACKEND, "frontend worker setting")
     def test_runtime_workers_save_independently_of_build_workers(self):
         for native in (False, True):
@@ -359,7 +385,8 @@ class ModelTests(Fixtures, unittest.TestCase):
         model = self.complete(native=True)
         self.assertFalse((self.root / "var").exists())
         model.save()
-        self.assertFalse((self.root / "var").exists())
+        self.assertFalse((self.root / "var/instance").exists())
+        self.assertTrue((self.root / "var/monitoring/loki-access.conf").is_file())
         self.assertTrue((self.root / "config.yaml").is_file())
         self.materialize(native=True)
         instance = self.root / "var/instance"

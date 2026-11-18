@@ -25,7 +25,20 @@ from config_validation import (
     valid_port,
 )
 from connection_bundle import decode_bundle, validate_bundle
-from container_fields import add_container_fields
+from container_fields import add_container_fields, setup_network_subnets
+from frontend_monitoring import (
+    add_direct_metrics_fields,
+    direct_metrics_environment,
+    direct_metrics_errors,
+)
+from monitoring_access import (
+    METRICS,
+    NODE_PEERS,
+    add_loki_fields,
+    add_peer_field,
+    loki_environment,
+    loki_proxy_include,
+)
 from node_console_fields import add_node_console_fields
 
 DOCKER = Path(__file__).resolve().parents[1] / "docker"
@@ -230,6 +243,31 @@ def configure(native: bool = False) -> Configuration:
             hint="粘贴该节点的后端连接 Base64 自动填写，可查看或修改。",
         )
     save_console = add_node_console_fields(ctx, add, value)
+    monitor_lookup = None if native else setup_network_subnets
+    add_direct_metrics_fields(add, value, env, monitor_lookup)
+    add(
+        "metrics_node_token",
+        "前端内部指标令牌",
+        env.get(METRICS + "NODE_TOKEN", ""),
+        secret=True,
+        valid=lambda text: not text or bool(re.fullmatch(r"[!-~]{32,256}", text)),
+        hint="和后端监控中配置的前端内部指标令牌一致。留空关闭接口。",
+        group="监控",
+    )
+    add_peer_field(
+        add,
+        "frontend_metrics_peers",
+        "前端内部指标来源 IP/CIDR",
+        env.get(NODE_PEERS, ""),
+        lookup=monitor_lookup,
+        optional=True,
+        active=lambda: bool(value("metrics_node_token")),
+        empty="沿用同步接收器白名单",
+        hint="填写后端采集进程的直连 IP 或网段。留空沿用现有接收器白名单。",
+    )
+    add_loki_fields(add, env, monitor_lookup)
+    acl_file = ctx.root_path.parent / "var/monitoring/loki-access.conf"
+    ctx.files.read(acl_file)
     add(
         "host",
         "前端绑定 IP",
@@ -293,7 +331,7 @@ def configure(native: bool = False) -> Configuration:
     )
 
     def check() -> list[str]:
-        errors = container_errors()
+        errors = container_errors() + direct_metrics_errors(value, value("metrics_node_token"))
         if value("inbound") == value("outbound"):
             errors.append("两个方向的节点令牌必须不同。")
         return errors
@@ -335,6 +373,10 @@ def configure(native: bool = False) -> Configuration:
             "FRONTEND_HOST": value("host"),
             "FRONTEND_PORT": value("port"),
             "FRONTEND_WORKERS": value("workers"),
+            METRICS + "NODE_TOKEN": value("metrics_node_token"),
+            NODE_PEERS: value("frontend_metrics_peers"),
+            **direct_metrics_environment(value),
+            **loki_environment(value),
         }
         save_console(environment)
         for name, key in (
@@ -370,7 +412,11 @@ def configure(native: bool = False) -> Configuration:
         if profile_path and profiles is not None:
             outputs[profile_path] = toml_text(profiles)
         outputs[ctx.compose_path] = update_env(outputs[ctx.compose_path], container_mapping())
-        ctx.write(outputs, connection_profiles=profiles)
+        ctx.write(
+            outputs,
+            connection_profiles=profiles,
+            artifacts={acl_file: loki_proxy_include(environment)},
+        )
 
     notice = ""
     encoded = os.environ.pop("EVERUNFOLD_CONNECTION_BASE64", "")

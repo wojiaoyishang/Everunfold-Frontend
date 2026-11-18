@@ -5,7 +5,7 @@ import { watchInventory } from "./inventory.mts";
 import { configurationEnvironment } from "../../src/core/config/deployment";
 import { readConfigurationFiles } from "../../src/core/config/files";
 import { frontendWorkerCount, superviseFrontend } from "../frontend-cluster";
-import { validMetricsToken } from "../frontend-metrics";
+import { frontendMetricsEnabled } from "../frontend-metrics";
 import { ClusterRegistry } from "@prometheus-io/client";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const project = process.env.EVERUNFOLD_PROJECT_ROOT ?? root;
@@ -33,7 +33,7 @@ if (count > 1) {
   const { configuredReplicaRecovery } =
     await import("../../src/server/settings/runtime");
   const recovery = configuredReplicaRecovery(project);
-  const registry = validMetricsToken(env.EVERUNFOLD_METRICS_NODE_TOKEN)
+  const registry = frontendMetricsEnabled(env)
     ? new ClusterRegistry()
     : undefined;
   superviseFrontend(

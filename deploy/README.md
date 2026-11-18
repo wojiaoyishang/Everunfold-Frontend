@@ -4,6 +4,10 @@
 
 **首次部署需要编译；日常重启直接运行已有产物。** 后端生成双向令牌及来源 UUID，前端导入即可，无需重新生成、抄写或查询数据库。
 
+每个前端可在 setup 的「监控」启用「前端独立 Prometheus 指标」，设置自己的令牌和来源 IP/CIDR。Prometheus 使用该节点的 `/metrics`，后端离线时也能采集。由后端聚合时，使用「前端内部指标令牌」和单独的内部指标来源范围；留空范围时沿用现有接收器来源规则。
+
+同一分组可分别设置 Loki 查询和 Alloy 写入来源，保存生成 `var/monitoring/loki-access.conf`。Docker 模式可填写已连接的网络名来换算当前网段。首次使用独立指标需更新并重新编译前端。采集目标和日志配置见 [Everunfold Deploy 的监控指南](https://github.com/wojiaoyishang/Everunfold-Deploy/tree/main/monitoring)。
+
 前后端统一在**各自项目根目录**运行 `./setup.sh`，选择 Docker 或原生部署；也可使用下方显式参数。配置助手代码在 `deploy/`，`docker/` 只保存镜像及容器相关文件。
 
 **根目录 `config.yaml` 是唯一需要维护的部署配置**。首次保存自动生成，权限为 `0600`，已加入 Git 忽略。配置、密钥及部署参数均从这里读取；兼容 TOML、环境文件和 Compose 参数由助手自动生成。手动修改 YAML 后，下一次 `build`、`start` 或 `check` 会应用修改。不要再修改生成的 `config.runtime.toml`、`.env`、`runtime.env`。两端直接读取所选 YAML；`config.runtime.toml` 仅为兼容派生文件。

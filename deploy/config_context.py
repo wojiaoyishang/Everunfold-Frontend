@@ -193,7 +193,13 @@ class Context:
             if not self.native:
                 (self.data / "npm-cache").mkdir(parents=True, exist_ok=True)
 
-    def write(self, outputs: dict[Path, str], *, connection_profiles: dict | None = None) -> None:
+    def write(
+        self,
+        outputs: dict[Path, str],
+        *,
+        connection_profiles: dict | None = None,
+        artifacts: dict[Path, str] | None = None,
+    ) -> None:
         document = copy.deepcopy(self.document)
         config = tomllib.loads(outputs.get(self.config_path, toml_text(self.config)))
         if self.role == "backend" and self.imported_from_data and config.get("frontend_nodes_file"):
@@ -255,7 +261,7 @@ class Context:
         except FileExistsError:
             raise ValueError("配置正在由其他页面或 setup 保存，请稍后重试。") from None
         try:
-            self.files.write({self.root_path: outputs[self.root_path]})
+            self.files.write({self.root_path: outputs[self.root_path], **(artifacts or {})})
         finally:
             os.close(descriptor)
             lock_path.unlink()
