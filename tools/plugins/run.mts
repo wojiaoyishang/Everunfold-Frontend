@@ -5,17 +5,17 @@ import { watchInventory } from "./inventory.mts";
 import { configurationEnvironment } from "../../src/core/config/deployment";
 import { readConfigurationFiles } from "../../src/core/config/files";
 import { frontendWorkerCount, superviseFrontend } from "../frontend-cluster";
+import { validMetricsToken } from "../frontend-metrics";
+import { ClusterRegistry } from "@prometheus-io/client";
 const root = fileURLToPath(new URL("../../", import.meta.url));
 const project = process.env.EVERUNFOLD_PROJECT_ROOT ?? root;
 const dev = process.argv[2] === "dev";
 if (!dev) process.env.NODE_ENV = "production";
 const output = dev ? path.join(root, "var/cache/plugins") : undefined;
-const count = dev
-  ? 1
-  : frontendWorkerCount(
-      configurationEnvironment(readConfigurationFiles(project).settings)
-        .FRONTEND_WORKERS,
-    );
+const env = dev
+  ? process.env
+  : configurationEnvironment(readConfigurationFiles(project).settings);
+const count = dev ? 1 : frontendWorkerCount(env.FRONTEND_WORKERS);
 let stopCompile = () => {};
 if (dev) {
   const [{ exportThemes }, { watchPlugins }] = await Promise.all([
@@ -33,11 +33,22 @@ if (count > 1) {
   const { configuredReplicaRecovery } =
     await import("../../src/server/settings/runtime");
   const recovery = configuredReplicaRecovery(project);
-  superviseFrontend(root, server, args, count, recovery, (code) => {
-    recovery.stop();
-    stopInventory();
-    process.exitCode = code;
-  });
+  const registry = validMetricsToken(env.EVERUNFOLD_METRICS_NODE_TOKEN)
+    ? new ClusterRegistry()
+    : undefined;
+  superviseFrontend(
+    root,
+    server,
+    args,
+    count,
+    recovery,
+    (code) => {
+      recovery.stop();
+      stopInventory();
+      process.exitCode = code;
+    },
+    registry ? () => registry.clusterMetrics() : undefined,
+  );
 } else {
   const next = spawn(process.execPath, ["--import", "tsx", server, ...args], {
     cwd: root,

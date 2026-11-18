@@ -12,6 +12,8 @@ x-frontend-image: &frontend-image
 
 services:
   frontend:
+    labels:
+      org.everunfold.component: frontend
     <<: *frontend-image
     init: true
     restart: unless-stopped

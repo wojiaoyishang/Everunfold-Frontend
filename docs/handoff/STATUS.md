@@ -1,5 +1,10 @@
 # 前端交接状态
 
+## 运行指标与结构化日志
+
+- 设置私有 EVERUNFOLD_METRICS_NODE_TOKEN 后，前端按既有内部来源白名单提供只读指标。Node 主进程聚合各 Web worker 的 Prometheus 指标。
+- 启动及同步日志输出一行 JSON，含可读消息、组件、级别和事件。
+
 ## 前端 Node.js 运行 worker
 
 - 单端与统一部署可设 `FRONTEND_WORKERS`，默认 1，范围 1–32。使用同一前端产物、监听端口和公开快照；多个 Web 进程通过启动进程共用同步检查和快照写入顺序。内部调用继续校验真实来源 IP 和令牌。

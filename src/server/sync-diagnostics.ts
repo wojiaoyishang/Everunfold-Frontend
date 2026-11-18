@@ -1,4 +1,5 @@
 /** Server diagnostics contain operation metadata, never credentials or payloads. */
+import { runtimeLog } from "./runtime-log";
 const reasons: Record<string, string> = {
   peer_not_allowed:
     "来源 IP 未获允许；核对 setup 中允许内部调用的 Docker 网络及手填来源",
@@ -165,16 +166,13 @@ export function syncFailure(
   code: string,
   error?: unknown,
 ) {
-  console.error(
-    "[Everunfold sync] " +
-      JSON.stringify({
-        time: new Date().toISOString(),
-        ...context,
-        code,
-        reason: reasons[code] ?? "同步失败",
-        ...(error === undefined ? {} : syncErrorDetails(error)),
-      }),
-  );
+  const reason = reasons[code] ?? "同步失败";
+  runtimeLog("error", "sync", reason, {
+    ...context,
+    code,
+    reason,
+    ...(error === undefined ? {} : syncErrorDetails(error)),
+  });
 }
 
 export function syncTarget(url: string): string {

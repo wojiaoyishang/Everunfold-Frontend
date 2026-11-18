@@ -107,6 +107,7 @@ try {
         FRONTEND_WORKERS: "2",
         EVERUNFOLD_DATA_DIR: data,
         NODE_IN: inbound,
+        EVERUNFOLD_METRICS_NODE_TOKEN: epoch,
         NODE_OUT: outbound,
       },
       application: {
@@ -176,6 +177,18 @@ try {
   assert.equal((await apply(2)).status, 200);
   assert.equal((await request("/health/ready")).status, 200);
   assert.equal(reports, 1, "the inventory reporter is a singleton");
+  const metricsPath = "/internal/observability/v1/metrics";
+  assert.equal((await request(metricsPath)).status, 403);
+  const metrics = await request(metricsPath, {
+    headers: { Authorization: `Bearer ${epoch}` },
+  });
+  assert.equal(metrics.status, 200);
+  const output = await metrics.text();
+  assert.match(
+    output,
+    /everunfold_node_http_requests_total\{group="internal",status="2xx"\}/,
+  );
+  assert.match(output, /everunfold_node_process_resident_memory_bytes/);
   assert.equal(recoveries, 1, "the recovery check is a singleton");
   multiple.child.kill("SIGTERM");
   assert.deepEqual(await multiple.exited, [0, null]);

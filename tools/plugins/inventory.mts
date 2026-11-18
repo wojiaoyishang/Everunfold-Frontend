@@ -1,6 +1,7 @@
 import { configurationEnvironment } from "../../src/core/config/deployment";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { runtimeLog } from "../../src/server/runtime-log";
 import { readConfigurationFiles } from "../../src/core/config/files";
 import { readInstalledPlugins } from "../../src/server/plugins/packages";
 import {
@@ -152,14 +153,14 @@ export function watchInventory(root: string, pluginDirectory?: string) {
         if (!(await registration(response, config.frontendNodeId)))
           throw new SyncValidationError(failure);
         if (lastFailure || report !== accepted)
-          console.info(
-            "[Everunfold sync] " +
-              JSON.stringify({
-                time: new Date().toISOString(),
-                ...context,
-                code: "inventory_registered",
-                reason: lastFailure ? "扩展清单上报已恢复" : "扩展清单上报成功",
-              }),
+          runtimeLog(
+            "info",
+            "sync",
+            lastFailure ? "扩展清单上报已恢复" : "扩展清单上报成功",
+            {
+              ...context,
+              code: "inventory_registered",
+            },
           );
         lastFailure = "";
         accepted = report;

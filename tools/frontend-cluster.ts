@@ -1,11 +1,12 @@
 import cluster, { type Worker } from "node:cluster";
 import type { SyncCheck } from "../src/core/contracts/settings";
 import type { ReplicaWrite } from "../src/server/settings/receiver";
+import { runtimeLog } from "../src/server/runtime-log";
 
 type Request =
   | { kind: "visit" | "cleared" | "release" }
-  | { kind: "acquire" | "status"; id: number };
-type Reply = { id: number; status?: SyncCheck };
+  | { kind: "acquire" | "status" | "metrics"; id: number };
+type Reply = { id: number; status?: SyncCheck; metrics?: string };
 type Recovery = {
   start(): void;
   visit(): void;
@@ -27,6 +28,7 @@ export function superviseFrontend(
   count: number,
   recovery: Recovery,
   finish: (code: number) => void,
+  collectMetrics?: () => Promise<string>,
 ) {
   const workers = new Set<Worker>();
   const queue: Array<{ worker: Worker; id: number }> = [];
@@ -91,6 +93,20 @@ export function superviseFrontend(
               () => {},
             );
           break;
+        case "metrics":
+          if (collectMetrics) {
+            const send = (metrics?: string) => {
+              if (worker.isConnected())
+                worker.send(
+                  { id: request.id, metrics } satisfies Reply,
+                  () => {},
+                );
+            };
+            void collectMetrics().then(send, () => send());
+          } else if (worker.isConnected()) {
+            worker.send({ id: request.id } satisfies Reply, () => {});
+          }
+          break;
         case "acquire":
           queue.push({ worker, id: request.id });
           grant();
@@ -107,7 +123,9 @@ export function superviseFrontend(
       workers.delete(worker);
       if (writer === worker) writer = undefined;
       if (!closing) {
-        console.error(
+        runtimeLog(
+          "error",
+          "worker_exit",
           `Everunfold Frontend worker ${worker.process.pid} exited (${signal ?? code})`,
         );
         stop(1);
@@ -136,10 +154,13 @@ export function frontendClusterClient() {
   function send(kind: "visit" | "cleared") {
     if (process.connected) process.send?.({ kind } satisfies Request, () => {});
   }
-  function ask(kind: "acquire" | "status") {
+  function ask(kind: "acquire" | "status" | "metrics") {
     return new Promise<Reply>((resolve, reject) => {
       const id = ++sequence;
+      const deadline =
+        kind === "metrics" ? setTimeout(() => complete(), 5000) : undefined;
       const complete = (reply?: Reply) => {
+        clearTimeout(deadline);
         pending.delete(id);
         if (reply) resolve(reply);
         else reject(new Error("Frontend coordinator disconnected"));
@@ -164,6 +185,12 @@ export function frontendClusterClient() {
   };
   return {
     write,
+    async metrics() {
+      const { metrics } = await ask("metrics");
+      if (metrics === undefined)
+        throw new Error("Frontend metrics are unavailable");
+      return metrics;
+    },
     recovery: {
       visit() {
         const now = Date.now();

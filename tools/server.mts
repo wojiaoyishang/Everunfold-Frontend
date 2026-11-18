@@ -5,6 +5,9 @@ import { readConfigurationFiles } from "../src/core/config/files";
 import { frontendHandler } from "../src/server/http";
 import { configuredSettingsRuntime } from "../src/server/settings/runtime";
 import { frontendClusterClient } from "./frontend-cluster";
+import { configurationEnvironment } from "../src/core/config/deployment";
+import { frontendMetrics, frontendMetricsPath } from "./frontend-metrics";
+import { runtimeLog } from "../src/server/runtime-log";
 
 const { values } = parseArgs({
   options: {
@@ -18,8 +21,16 @@ if (values.hostname !== undefined) process.env.FRONTEND_HOST = values.hostname;
 const root = process.env.EVERUNFOLD_PROJECT_ROOT ?? process.cwd();
 const { settings: config, file } = readConfigurationFiles(root);
 const { host, port } = config.listener;
-const runtime = configuredSettingsRuntime(root, frontendClusterClient());
-console.info("Everunfold Frontend · CONFIG_FILE=" + file.filename);
+const cluster = frontendClusterClient();
+const runtime = configuredSettingsRuntime(root, cluster);
+const monitor = frontendMetrics(
+  configurationEnvironment(config).EVERUNFOLD_METRICS_NODE_TOKEN,
+  config.backend.allowedPeerIps,
+  cluster?.metrics,
+);
+runtimeLog("info", "startup", "前端加载运行配置", {
+  config_file: file.filename,
+});
 const server = createServer({
   maxHeaderSize: 8192,
   requestTimeout: 10000,
@@ -33,20 +44,34 @@ const app = next({
   httpServer: server,
 });
 await app.prepare();
-server.on(
-  "request",
-  frontendHandler(app.getRequestHandler(), runtime.handler, runtime.visit),
+const handler = frontendHandler(
+  app.getRequestHandler(),
+  runtime.handler,
+  runtime.visit,
 );
+server.on("request", (request, response) => {
+  const path = (request.url ?? "/").split("?", 1)[0];
+  if (monitor && path === frontendMetricsPath) {
+    void monitor.handle(request, response);
+    return;
+  }
+  monitor?.observe(path, response);
+  void handler(request, response);
+});
 // Next installs its HMR upgrade handler on this server when handling a web request.
 server.on("error", () => {
-  console.error(
+  runtimeLog(
+    "error",
+    "listen_failed",
     "Everunfold Frontend: 无法监听，请检查绑定地址和端口是否已被占用。",
   );
   process.exit(1);
 });
 server.listen(port, host, () => {
   runtime.start();
-  console.log(
+  runtimeLog(
+    "info",
+    "ready",
     `Everunfold Frontend ready: ${host}:${port} (web + internal sync, pid ${process.pid})`,
   );
 });
