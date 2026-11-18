@@ -115,6 +115,7 @@ test("admin navigation separates primary content, tools, appearance and system s
     "core.settings.site",
     "core.settings.system",
     "core.settings.runtime",
+    "core.settings.real-ip",
     "core.settings.api-keys",
     "core.settings.nodes",
   ]);

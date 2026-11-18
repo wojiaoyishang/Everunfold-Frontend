@@ -1,7 +1,7 @@
 /** Run against a production build: node --import tsx tools/verify-frontend-workers.mts */
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { randomUUID } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import { once } from "node:events";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
@@ -28,6 +28,22 @@ const backend = createServer((request, response) => {
     response.writeHead(403).end();
     return;
   }
+  if (request.url?.endsWith("/real-ip")) {
+    policyReads++;
+    response.writeHead(200, { "Content-Type": "application/json" }).end(
+      JSON.stringify({
+        success: true,
+        code: 200,
+        data: {
+          source: "x-forwarded-for",
+          fallback: "x-real-ip",
+          revision: 2,
+          trusted_proxies: ["127.0.0.1/32", "10.0.0.0/24"],
+        },
+      }),
+    );
+    return;
+  }
   if (inventory) reports++;
   else recoveries++;
   response.writeHead(200, { "Content-Type": "application/json" }).end(
@@ -43,6 +59,7 @@ const backend = createServer((request, response) => {
 });
 let reports = 0;
 let recoveries = 0;
+let policyReads = 0;
 let logs = "";
 let frontend: ReturnType<typeof spawn> | undefined;
 const headers = { Authorization: `Bearer ${inbound}` };
@@ -123,11 +140,40 @@ try {
     }),
   );
   const multiple = start();
-  await waitFor(() => readyServers() === 2 && reports === 1);
+  await waitFor(
+    () => readyServers() === 2 && reports === 1 && policyReads === 2,
+  );
   const origin = `http://127.0.0.1:${port}`;
   const internal = "/internal/cache/v1";
   const request = (route: string, init?: RequestInit) =>
     fetch(origin + route, { ...init, signal: AbortSignal.timeout(5000) });
+  const ipProbe = "/admin/settings/real-ip/diagnostics";
+  assert.equal(
+    (await request(ipProbe, { method: "POST", headers })).status,
+    404,
+  );
+  const expires = Math.floor(Date.now() / 1000) + 60;
+  const signature = createHmac("sha256", inbound)
+    .update(`everunfold/ip-probe/v1:${node}:${expires}`)
+    .digest("hex");
+  const diagnostic = await request(ipProbe, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${expires}.${signature}`,
+      "X-Forwarded-For": "192.0.2.55, 2001:db8::21, 10.0.0.5",
+      "X-Real-IP": "192.0.2.80",
+      "X-Forwarded-Proto": "https",
+    },
+  });
+  assert.equal(diagnostic.status, 200);
+  const observation = await diagnostic.json();
+  assert.equal(observation.client_ip, "2001:db8::21");
+  assert.equal(observation.peer_ip, "127.0.0.1");
+  assert.equal(observation.ip_policy_revision, 2);
+  assert.equal(observation.x_forwarded_proto, "https");
+  await waitFor(() => logs.includes('"client_ip":"2001:db8::21"'));
+  assert.ok(!logs.includes(signature));
+  assert.ok(!logs.includes(inbound) && !logs.includes(outbound));
   const post = (route: string, body: unknown) =>
     request(internal + route, {
       method: "POST",

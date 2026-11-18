@@ -5,6 +5,7 @@ export type AdminPageIcon =
   | "comment"
   | "discussion"
   | "lock"
+  | "shield"
   | "users"
   | "book"
   | "glossary"

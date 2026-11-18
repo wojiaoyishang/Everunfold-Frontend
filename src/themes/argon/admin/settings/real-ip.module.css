@@ -1,0 +1,40 @@
+.diagnostics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1rem;
+}
+
+.report {
+  border: 1px solid var(--admin-border);
+  border-radius: 0.65rem;
+  padding: 1rem;
+}
+
+.report h3 {
+  margin: 0 0 0.85rem;
+  font-size: 0.95rem;
+}
+
+.report dl {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.55rem 0.8rem;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.report dt,
+.report small,
+.empty {
+  color: var(--admin-muted);
+}
+
+.report dd {
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+
+.header {
+  display: contents;
+}

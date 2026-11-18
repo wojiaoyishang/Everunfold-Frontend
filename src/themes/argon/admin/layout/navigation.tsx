@@ -21,6 +21,7 @@ const navigationIcons: Record<AdminPageIcon, IconName> = {
   discussion: "discussion",
   users: "user",
   lock: "lock",
+  shield: "shield",
   font: "type",
   book: "book",
   glossary: "glossary",

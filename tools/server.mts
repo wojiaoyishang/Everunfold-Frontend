@@ -7,6 +7,7 @@ import { configuredSettingsRuntime } from "../src/server/settings/runtime";
 import { frontendClusterClient } from "./frontend-cluster";
 import { configurationEnvironment } from "../src/core/config/deployment";
 import { frontendMetrics, frontendMetricsPath } from "./frontend-metrics";
+import { frontendHTTPAccess } from "../src/server/http-access";
 import { runtimeLog } from "../src/server/runtime-log";
 
 const { values } = parseArgs({
@@ -23,8 +24,16 @@ const { settings: config, file } = readConfigurationFiles(root);
 const { host, port } = config.listener;
 const cluster = frontendClusterClient();
 const runtime = configuredSettingsRuntime(root, cluster);
+const environment = configurationEnvironment(config);
+const access = frontendHTTPAccess({
+  baseUrl: config.backend.baseUrl,
+  nodeId: config.frontendNodeId,
+  inboundToken: environment[config.backend.fastapiToNextjsTokenEnv ?? ""] ?? "",
+  outboundToken:
+    environment[config.backend.nextjsToFastapiTokenEnv ?? ""] ?? "",
+});
 const monitor = frontendMetrics(
-  configurationEnvironment(config).EVERUNFOLD_METRICS_NODE_TOKEN,
+  environment.EVERUNFOLD_METRICS_NODE_TOKEN,
   config.backend.allowedPeerIps,
   cluster?.metrics,
 );
@@ -51,6 +60,7 @@ const handler = frontendHandler(
 );
 server.on("request", (request, response) => {
   const path = (request.url ?? "/").split("?", 1)[0];
+  if (access.observe(request, response, path)) return;
   if (monitor && path === frontendMetricsPath) {
     void monitor.handle(request, response);
     return;
@@ -69,6 +79,7 @@ server.on("error", () => {
 });
 server.listen(port, host, () => {
   runtime.start();
+  access.start();
   runtimeLog(
     "info",
     "ready",
@@ -81,6 +92,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
     if (closing) return;
     closing = true;
     runtime.stop();
+    access.stop();
     const deadline = setTimeout(() => process.exit(1), 30000);
     deadline.unref();
     void Promise.all([

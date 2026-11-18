@@ -117,6 +117,14 @@ export const builtinAdminModule = {
       menu: { group: "core.people", order: 30 },
     },
     {
+      id: "core.settings.real-ip",
+      href: "/admin/settings/real-ip",
+      label: "真实 IP 来源配置",
+      description: "可信代理、来源规则与请求诊断",
+      icon: "shield",
+      menu: { group: "core.settings", order: 55 },
+    },
+    {
       id: "core.settings.api-keys",
       href: "/admin/settings/api-keys",
       label: "应用程序接入",
