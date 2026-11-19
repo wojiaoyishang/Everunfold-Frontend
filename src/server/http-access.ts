@@ -1,8 +1,8 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { BlockList, isIP } from "node:net";
 import type { SettingsContract } from "@/core/contracts/settings";
-import { runtimeLog } from "./runtime-log";
+import { runtimeLogger } from "./runtime-log";
 
 type Policy = Required<SettingsContract["request_ip_policy"]["data"]>;
 type Observation = SettingsContract["request_ip_diagnostic"]["data"]["fastapi"];
@@ -229,19 +229,40 @@ export function frontendHTTPAccess({
       response: ServerResponse,
       pathname: string,
     ) {
+      const started = performance.now();
+      const requestId = randomUUID().replaceAll("-", "");
+      const userAgent =
+        request.headers["user-agent"]
+          ?.slice(0, 512)
+          .replace(/[\x00-\x1f\x7f-\x9f]/g, " ")
+          .trim() || null;
+      // Absolute-form HTTP request targets can contain authority or user info.
+      const url =
+        pathname.startsWith("/") && !pathname.startsWith("//")
+          ? pathname.split("#", 1)[0].slice(0, 2048)
+          : null;
       const observation = requestIPObservation(
         request,
         request.socket.remoteAddress,
         performance.now() < expires ? active : undefined,
       );
-      response.once("finish", () => {
-        runtimeLog(
-          "info",
+      response.once("close", () => {
+        const status = response.headersSent ? response.statusCode : null;
+        const outcome = response.writableFinished ? "completed" : "aborted";
+        runtimeLogger.info(
           "http_access",
-          `${request.method} → ${response.statusCode}`,
+          `${request.method} → ${status ?? outcome}`,
           {
+            request_id: requestId,
+            request_url: url,
+            http_version: request.httpVersion,
+            user_agent: userAgent,
+            node_id: nodeId,
             method: request.method,
-            status: response.statusCode,
+            status,
+            outcome,
+            duration_ms:
+              Math.round((performance.now() - started) * 1000) / 1000,
             ...observation,
           },
         );
