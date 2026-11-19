@@ -198,7 +198,6 @@ class Context:
         outputs: dict[Path, str],
         *,
         connection_profiles: dict | None = None,
-        artifacts: dict[Path, str] | None = None,
     ) -> None:
         document = copy.deepcopy(self.document)
         config = tomllib.loads(outputs.get(self.config_path, toml_text(self.config)))
@@ -220,6 +219,8 @@ class Context:
             docker=env_values(outputs.get(self.compose_path, self.compose_source)),
             assistant=json.loads(outputs.get(self.meta_path, json.dumps(self.meta))),
         )
+        for name in ("EVERUNFOLD_LOKI_QUERY_ALLOWED_PEERS", "EVERUNFOLD_LOKI_PUSH_ALLOWED_PEERS"):
+            document["environment"].pop(name, None)
         if self.role == "frontend":
             for name in (
                 "FRONTEND_RECEIVER_HOST",
@@ -261,7 +262,7 @@ class Context:
         except FileExistsError:
             raise ValueError("配置正在由其他页面或 setup 保存，请稍后重试。") from None
         try:
-            self.files.write({self.root_path: outputs[self.root_path], **(artifacts or {})})
+            self.files.write({self.root_path: outputs[self.root_path]})
         finally:
             os.close(descriptor)
             lock_path.unlink()

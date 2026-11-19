@@ -98,8 +98,6 @@ class ModelTests(Fixtures, unittest.TestCase):
         self.edit(model, "frontend_metrics_peers", "192.0.2.0/24")
         with patch.dict(os.environ, {"EVERUNFOLD_SETUP_NETWORK_SUBNETS": "monitor=172.20.0.0/16"}):
             self.edit(model, "frontend_direct_peers", "monitor,fd00::/64")
-            self.edit(model, "loki_query", "monitor")
-        self.edit(model, "loki_push", "")
         self.assertFalse(model.errors())
         model.save()
         env = self.materialize().env
@@ -111,11 +109,30 @@ class ModelTests(Fixtures, unittest.TestCase):
         self.assertEqual(
             env["EVERUNFOLD_FRONTEND_METRICS_ALLOWED_PEERS"], "172.20.0.0/16,fd00::/64"
         )
-        push, query = (
-            (self.root / "var/monitoring/loki-access.conf").read_text().split("location ~", 1)
-        )
-        self.assertNotIn("allow ", push)
-        self.assertIn("allow 172.20.0.0/16;", query)
+
+    def test_log_format_defaults_to_json_and_removes_legacy_network_settings(self):
+        import yaml
+
+        model = self.complete(native=True)
+        self.assertEqual(model.get("log_format"), "json")
+        model.save()
+        file = self.root / "config.yaml"
+        document = yaml.safe_load(file.read_text())
+        variable = "EVERUNFOLD_LOG_FORMAT"
+        legacy = ("EVERUNFOLD_LOKI_QUERY_ALLOWED_PEERS", "EVERUNFOLD_LOKI_PUSH_ALLOWED_PEERS")
+        self.assertEqual(document["environment"].pop(variable), "json")
+        document["environment"].update(dict.fromkeys(legacy, "192.0.2.5"))
+        file.write_text(yaml.safe_dump(document))
+        model = self.model(native=True)
+        self.assertEqual(model.get("log_format"), "json")
+        with self.assertRaises(ValueError):
+            self.edit(model, "log_format", "xml")
+        self.edit(model, "log_format", "text")
+        model.save()
+        env = self.materialize(native=True).env
+        self.assertEqual(env[variable], "text")
+        self.assertFalse(set(legacy).intersection(env))
+        self.assertEqual(self.model(native=True).get("log_format"), "text")
 
     @unittest.skipIf(BACKEND, "frontend worker setting")
     def test_runtime_workers_save_independently_of_build_workers(self):
@@ -386,7 +403,7 @@ class ModelTests(Fixtures, unittest.TestCase):
         self.assertFalse((self.root / "var").exists())
         model.save()
         self.assertFalse((self.root / "var/instance").exists())
-        self.assertTrue((self.root / "var/monitoring/loki-access.conf").is_file())
+        self.assertFalse((self.root / "var/monitoring").exists())
         self.assertTrue((self.root / "config.yaml").is_file())
         self.materialize(native=True)
         instance = self.root / "var/instance"

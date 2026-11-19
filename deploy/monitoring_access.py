@@ -1,10 +1,9 @@
-"""Validate monitoring source ranges and generate the Loki proxy include."""
+"""Validate monitoring source ranges."""
 
 import re
 from ipaddress import ip_network
 
 METRICS = "EVERUNFOLD_METRICS_"
-LOKI = "EVERUNFOLD_LOKI_"
 LOCAL = "127.0.0.1,::1"
 NODE_PEERS = METRICS + "NODE_ALLOWED_PEERS"
 
@@ -54,55 +53,4 @@ def add_peer_field(add, key, label, initial, *, lookup, hint, optional=False, **
         hint=hint,
         group="监控",
         **options,
-    )
-
-
-def add_loki_fields(add, env, lookup):
-    for action, label in (
-        ("query", "Loki 查询来源 IP/CIDR"),
-        ("push", "Alloy 写入来源 IP/CIDR"),
-    ):
-        add_peer_field(
-            add,
-            "loki_" + action,
-            label,
-            env.get(LOKI + action.upper() + "_ALLOWED_PEERS", LOCAL),
-            lookup=lookup,
-            optional=True,
-            hint="填写 Loki 反代实际看到的来源，逗号分隔。留空拒绝该方向访问。",
-            empty="拒绝该方向访问",
-        )
-
-
-def loki_environment(value):
-    return {
-        LOKI + "QUERY_ALLOWED_PEERS": value("loki_query"),
-        LOKI + "PUSH_ALLOWED_PEERS": value("loki_push"),
-    }
-
-
-def loki_proxy_include(env):
-    def access(action):
-        addresses = networks(env.get(LOKI + action + "_ALLOWED_PEERS", LOCAL), optional=True)
-        return (
-            "    satisfy all;\n"
-            + "".join(f"    allow {address};\n" for address in addresses)
-            + "    deny all;\n"
-        )
-
-    return (
-        "# Include in a dedicated Loki server block. Define upstream everunfold_loki.\n"
-        "location = /loki/api/v1/push {\n"
-        + access("PUSH")
-        + "    limit_except POST { deny all; }\n"
-        "    proxy_pass http://everunfold_loki;\n"
-        "}\n"
-        "location ~ ^/(?:ready|loki/api/v1/(?:query|query_range|labels|series|"
-        "label/[^/]+/values|index/(?:stats|volume|volume_range)|status/buildinfo|"
-        "detected_fields|detected_labels|patterns))$ {\n"
-        + access("QUERY")
-        + "    limit_except GET POST { deny all; }\n"
-        "    proxy_pass http://everunfold_loki;\n"
-        "}\n"
-        "location / { return 404; }\n"
     )

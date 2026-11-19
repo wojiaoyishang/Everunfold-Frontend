@@ -34,10 +34,7 @@ from frontend_monitoring import (
 from monitoring_access import (
     METRICS,
     NODE_PEERS,
-    add_loki_fields,
     add_peer_field,
-    loki_environment,
-    loki_proxy_include,
 )
 from node_console_fields import add_node_console_fields
 
@@ -265,9 +262,14 @@ def configure(native: bool = False) -> Configuration:
         empty="沿用同步接收器白名单",
         hint="填写后端采集进程的直连 IP 或网段。留空沿用现有接收器白名单。",
     )
-    add_loki_fields(add, env, monitor_lookup)
-    acl_file = ctx.root_path.parent / "var/monitoring/loki-access.conf"
-    ctx.files.read(acl_file)
+    add(
+        "log_format",
+        "结构化日志",
+        env.get("EVERUNFOLD_LOG_FORMAT", "json"),
+        choices=(("json", "开启（JSON）"), ("text", "关闭（纯文本）")),
+        group="日志",
+        hint="默认每行输出一个 JSON 对象，便于外部采集。重新启动后生效。",
+    )
     add(
         "host",
         "前端绑定 IP",
@@ -373,10 +375,10 @@ def configure(native: bool = False) -> Configuration:
             "FRONTEND_HOST": value("host"),
             "FRONTEND_PORT": value("port"),
             "FRONTEND_WORKERS": value("workers"),
+            "EVERUNFOLD_LOG_FORMAT": value("log_format"),
             METRICS + "NODE_TOKEN": value("metrics_node_token"),
             NODE_PEERS: value("frontend_metrics_peers"),
             **direct_metrics_environment(value),
-            **loki_environment(value),
         }
         save_console(environment)
         for name, key in (
@@ -415,7 +417,6 @@ def configure(native: bool = False) -> Configuration:
         ctx.write(
             outputs,
             connection_profiles=profiles,
-            artifacts={acl_file: loki_proxy_include(environment)},
         )
 
     notice = ""

@@ -118,6 +118,7 @@ try {
     version: 1,
     component: "frontend",
     environment: {
+      EVERUNFOLD_LOG_FORMAT: "json",
       FRONTEND_PORT: String(port),
       FRONTEND_HOST: "127.0.0.1",
       FRONTEND_WORKERS: "2",
@@ -285,9 +286,15 @@ try {
   backend.closeAllConnections();
   await new Promise<void>((resolve) => backend.close(() => resolve()));
   fixture.environment.EVERUNFOLD_METRICS_NODE_TOKEN = "";
+  fixture.environment.EVERUNFOLD_LOG_FORMAT = "text";
   await writeFile(config, stringify(fixture));
   const offline = start();
   await waitFor(() => readyServers() === 2);
+  assert.equal(
+    [...logs.matchAll(/ info \[nodejs\] ready: Everunfold Frontend ready:/g)]
+      .length,
+    2,
+  );
   const offlineMetrics = await request("/metrics", { headers: scrapeHeaders });
   assert.equal(offlineMetrics.status, 200);
   assert.match(

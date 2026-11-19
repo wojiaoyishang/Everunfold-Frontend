@@ -26,6 +26,10 @@ class Field:
     group: str = "基本设置"
     generate: Callable[[], str] | None = None
     history: list[str] = field(default_factory=list)
+    choices: tuple[tuple[str, str], ...] = ()
+
+    def accepts(self, value: str) -> bool:
+        return self.valid(value) and (not self.choices or value in dict(self.choices))
 
 
 class Configuration:
@@ -71,7 +75,7 @@ class Configuration:
         if any(ord(char) < 32 or ord(char) == 127 for char in value):
             raise ValueError("请输入单行文本。")
         resolved = item.resolve(value)
-        if not item.valid(resolved):
+        if not item.accepts(resolved):
             raise ValueError("格式不正确，请检查后重试。")
         item.value = resolved
         if not item.history or item.history[-1] != value:
@@ -83,5 +87,5 @@ class Configuration:
         return [
             f"{item.label}：尚未正确填写"
             for item in self.fields
-            if item.active() and not item.valid(item.value)
+            if item.active() and not item.accepts(item.value)
         ] + self.check()

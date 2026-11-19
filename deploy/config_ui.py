@@ -21,6 +21,7 @@ from textual.widgets import (
     Header,
     Input,
     Label,
+    OptionList,
     RichLog,
     Static,
 )
@@ -164,31 +165,52 @@ class Editor(ModalScreen[bool]):
         item = self.item
         with Vertical(id="dialog"):
             yield Label(item.label, classes="dialog-title")
-            yield Static(item.hint or "直接编辑当前值，回车应用。", markup=False)
-            yield HistoryInput(item.value, item.history, id="value")
-            yield Static("← → 移动 · ↑ ↓ 历史 · Shift+←/→ 选择 · Ctrl+C 复制", classes="muted")
+            if item.choices:
+                if item.hint:
+                    yield Static(item.hint, markup=False)
+                yield OptionList(*(label for _, label in item.choices), id="choices")
+                yield Static("↑ ↓ 选择 · Enter 应用 · Esc 返回", classes="muted")
+            else:
+                yield Static(item.hint or "直接编辑当前值，回车应用。", markup=False)
+                yield HistoryInput(item.value, item.history, id="value")
+                yield Static("← → 移动 · ↑ ↓ 历史 · Shift+←/→ 选择 · Ctrl+C 复制", classes="muted")
             yield Static("", id="error", markup=False)
             with Horizontal(classes="buttons"):
-                yield Button("应用", id="apply", variant="primary")
-                yield Button("查看 / 复制", id="copy-value")
-                if item.generate:
-                    yield Button("重新生成", id="generate", variant="warning")
-                if item.key == "database":
-                    yield Button("分项填写", id="parts")
+                if not item.choices:
+                    yield Button("应用", id="apply", variant="primary")
+                    yield Button("查看 / 复制", id="copy-value")
+                    if item.generate:
+                        yield Button("重新生成", id="generate", variant="warning")
+                    if item.key == "database":
+                        yield Button("分项填写", id="parts")
                 yield Button("返回", id="cancel")
 
     def on_mount(self) -> None:
+        if self.item.choices:
+            choices = self.query_one(OptionList)
+            choices.highlighted = next(
+                (i for i, (key, _) in enumerate(self.item.choices) if key == self.item.value), 0
+            )
+            choices.focus()
+            return
         entry = self.query_one("#value", Input)
         entry.focus()
         entry.cursor_position = len(entry.value)
 
-    def apply(self) -> None:
+    def apply_value(self, value: str) -> None:
         try:
-            self.config.edit(self.item, self.query_one("#value", Input).value)
+            self.config.edit(self.item, value)
         except ValueError as error:
             self.query_one("#error", Static).update(str(error))
         else:
             self.dismiss(True)
+
+    def apply(self) -> None:
+        self.apply_value(self.query_one("#value", Input).value)
+
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected) -> None:
+        event.stop()
+        self.apply_value(self.item.choices[event.option_index][0])
 
     def on_input_submitted(self) -> None:
         self.apply()
@@ -341,8 +363,8 @@ class SetupApp(App[int]):
         table.add_column("状态", width=6)
         for item in self.config.fields:
             active = item.active()
-            ok = not active or item.valid(item.value)
-            text = item.value or f"（{item.empty}）"
+            ok = not active or item.accepts(item.value)
+            text = dict(item.choices).get(item.value, item.value) or f"（{item.empty}）"
             if item.secret and item.value:
                 text = "••••••••  编辑可查看"
             if not active:

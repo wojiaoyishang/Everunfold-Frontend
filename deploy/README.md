@@ -6,7 +6,9 @@
 
 每个前端可在 setup 的「监控」启用「前端独立 Prometheus 指标」，设置自己的令牌和来源 IP/CIDR。Prometheus 使用该节点的 `/metrics`，后端离线时也能采集。由后端聚合时，使用「前端内部指标令牌」和单独的内部指标来源范围；留空范围时沿用现有接收器来源规则。
 
-同一分组可分别设置 Loki 查询和 Alloy 写入来源，保存生成 `var/monitoring/loki-access.conf`。Docker 模式可填写已连接的网络名来换算当前网段。首次使用独立指标需更新并重新编译前端。采集目标和日志配置见 [Everunfold Deploy 的监控指南](https://github.com/wojiaoyishang/Everunfold-Deploy/tree/main/monitoring)。
+Docker 模式可填写已连接的网络名来换算当前网段。首次使用独立指标需更新并重新编译前端。采集说明见 [Everunfold Deploy 的监控指南](https://github.com/wojiaoyishang/Everunfold-Deploy/tree/main/monitoring)。
+
+setup 的「日志 → 结构化日志」默认开启。Node.js 应用日志每行输出一个 JSON 对象，供外部日志采集器读取。关闭后为可读文本，保存为 `environment.EVERUNFOLD_LOG_FORMAT: text`。已有部署首次使用此选项时先构建新版，之后保存并重启即可切换。
 
 前后端统一在**各自项目根目录**运行 `./setup.sh`，选择 Docker 或原生部署；也可使用下方显式参数。配置助手代码在 `deploy/`，`docker/` 只保存镜像及容器相关文件。
 

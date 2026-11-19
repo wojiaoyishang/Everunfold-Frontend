@@ -15,6 +15,8 @@ const output = dev ? path.join(root, "var/cache/plugins") : undefined;
 const env = dev
   ? process.env
   : configurationEnvironment(readConfigurationFiles(project).settings);
+if (env.EVERUNFOLD_LOG_FORMAT !== undefined)
+  process.env.EVERUNFOLD_LOG_FORMAT = env.EVERUNFOLD_LOG_FORMAT;
 const count = dev ? 1 : frontendWorkerCount(env.FRONTEND_WORKERS);
 let stopCompile = () => {};
 if (dev) {

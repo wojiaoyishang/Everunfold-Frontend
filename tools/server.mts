@@ -21,10 +21,12 @@ if (values.port !== undefined) process.env.FRONTEND_PORT = values.port;
 if (values.hostname !== undefined) process.env.FRONTEND_HOST = values.hostname;
 const root = process.env.EVERUNFOLD_PROJECT_ROOT ?? process.cwd();
 const { settings: config, file } = readConfigurationFiles(root);
+const environment = configurationEnvironment(config);
+if (environment.EVERUNFOLD_LOG_FORMAT !== undefined)
+  process.env.EVERUNFOLD_LOG_FORMAT = environment.EVERUNFOLD_LOG_FORMAT;
 const { host, port } = config.listener;
 const cluster = frontendClusterClient();
 const runtime = configuredSettingsRuntime(root, cluster);
-const environment = configurationEnvironment(config);
 const access = frontendHTTPAccess({
   baseUrl: config.backend.baseUrl,
   nodeId: config.frontendNodeId,
