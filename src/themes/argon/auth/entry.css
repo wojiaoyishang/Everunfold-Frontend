@@ -101,7 +101,7 @@
 }
 .login-panel {
   min-width: 0;
-  padding: 26px 36px 26px;
+  padding: 26px 36px 36px;
 }
 .login-panel-heading {
   margin-bottom: 24px;
@@ -397,7 +397,7 @@ html[data-motion="full"]
     padding: 26px 28px 0;
   }
   .login-panel {
-    padding: 28px 28px 24px;
+    padding: 28px 28px 32px;
   }
   .login-panel-heading {
     margin-bottom: 24px;
@@ -435,7 +435,7 @@ html[data-motion="full"]
     gap: 8px;
   }
   .login-panel {
-    padding: 26px 22px 22px;
+    padding: 26px 22px 28px;
   }
   .login-panel-heading h1 {
     font-size: 26px;
