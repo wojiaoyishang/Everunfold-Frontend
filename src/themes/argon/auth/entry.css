@@ -463,3 +463,37 @@ html[data-motion="reduced"] .login-card {
     outline-offset: 2px;
   }
 }
+
+.management-root .login-submit[data-pending] {
+  justify-content: center;
+  opacity: 1;
+}
+.login-submit-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+html[data-motion="full"] .login-submit-label {
+  animation: login-submit-label-in 170ms var(--motion-ease) both;
+}
+
+.login-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 16px;
+  color: var(--entry-secondary);
+  font-size: 13px;
+}
+
+@keyframes login-submit-label-in {
+  from {
+    opacity: 0.8;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

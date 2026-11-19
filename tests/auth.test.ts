@@ -5,6 +5,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import {
   loginReturnPath,
   loginDestination,
+  loginFlowHref,
   isManagementLink,
   isManagementRoute,
 } from "../src/core/auth/routes";
@@ -82,6 +83,18 @@ test("login defaults by confirmed role and preserves explicit safe return destin
   assert.equal(loginDestination("/admin", false), "/");
   assert.equal(loginDestination("/admin?tab=home", true), "/admin?tab=home");
   assert.equal(loginReturnPath("/login"), "/");
+});
+
+test("password recovery preserves only a safe return destination", () => {
+  assert.equal(
+    loginFlowHref("/login/recover", "/account"),
+    "/login/recover?next=%2Faccount",
+  );
+  assert.equal(
+    loginFlowHref("/login", "https://evil.example/"),
+    "/login?next=%2F",
+  );
+  assert.equal(loginFlowHref("/login/recover", undefined), "/login/recover");
 });
 
 test("comment login returns to the local reader without accepting internal paths", () => {

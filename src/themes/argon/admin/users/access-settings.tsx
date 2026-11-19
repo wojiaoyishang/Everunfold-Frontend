@@ -96,7 +96,7 @@ export function AccessSettingsPage() {
             <SettingsSection
               id="access-password-recovery"
               title="找回密码"
-              description="开启后，用户可通过已验证邮箱自行重置密码。"
+              description="开启后，登录页会显示找回密码入口，用户可通过已验证邮箱自行重置密码。"
             >
               <SettingsToggle
                 label="允许全站找回密码"
@@ -105,6 +105,14 @@ export function AccessSettingsPage() {
                   setDraft({ ...draft, password_recovery_enabled: enabled })
                 }
               />
+              {can(user, "settings:read") && (
+                <RouteLink
+                  href="/admin/notifications/templates"
+                  className="admin-settings-link"
+                >
+                  <UiText text="编辑密码找回邮件模板" />
+                </RouteLink>
+              )}
             </SettingsSection>
             <SettingsSection
               id="access-email"

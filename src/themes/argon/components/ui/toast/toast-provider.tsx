@@ -49,7 +49,7 @@ function ToastViewport({ store }: { store: ToastStore }) {
   if (!entries.length || typeof document === "undefined") return null;
   const surface =
     document.querySelector(
-      "[data-surface='admin'], [data-public-theme], .blog-shell, .auth-root",
+      "[data-surface='admin'], [data-public-theme], .blog-shell, .auth-root, [data-surface='auth']",
     ) ?? document.body;
   let liveSurface: Element | null = null;
   if (isEmbeddedEditor()) {

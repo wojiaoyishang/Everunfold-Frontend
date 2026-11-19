@@ -56,7 +56,7 @@ test("logout invalidation cancels stale checks and clears offline identity recov
   await flush();
   assert.equal(reads, 3);
   stale.resolve(admin);
-  await old;
+  assert.equal(await old, undefined);
   fresh.reject(new RequestError("network"));
   await next;
   assert.ok(states.slice(boundary).every((state) => state.phase !== "ready"));
@@ -121,7 +121,7 @@ test("initial, focus and restore checks share the pending request without aborti
   assert.equal(reads, 1);
   assert.equal(signal?.aborted, false);
   request.resolve(admin);
-  await first;
+  assert.deepEqual(await first, admin);
   assert.deepEqual(
     states.map((state) => state.phase),
     ["checking", "ready"],

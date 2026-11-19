@@ -6,7 +6,7 @@ export function EntryFooter({
   label,
   prompt,
 }: {
-  href: "/login" | "/login/register";
+  href: string;
   label: string;
   prompt?: string;
 }) {

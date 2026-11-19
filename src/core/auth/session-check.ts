@@ -16,7 +16,11 @@ export function createSessionCheck(
   let disposed = false;
   let lastReady: AuthSessionState | null = null;
   let pending:
-    { controller: AbortController; result: Promise<void> } | undefined;
+    | {
+        controller: AbortController;
+        result: Promise<AuthSessionState | undefined>;
+      }
+    | undefined;
 
   function cancel() {
     pending?.controller.abort();
@@ -24,8 +28,8 @@ export function createSessionCheck(
   }
 
   return {
-    check(background = false): Promise<void> {
-      if (disposed) return Promise.resolve();
+    check(background = false): Promise<AuthSessionState | undefined> {
+      if (disposed) return Promise.resolve(undefined);
       if (pending) return pending.result;
       const controller = new AbortController();
       if (!background) publish({ phase: "checking" });
@@ -36,6 +40,7 @@ export function createSessionCheck(
           if (!disposed && !controller.signal.aborted) {
             lastReady = session;
             publish({ phase: "ready", session });
+            return session;
           }
         } catch (error) {
           // Keep an already-open editor available for local recovery on a network outage.

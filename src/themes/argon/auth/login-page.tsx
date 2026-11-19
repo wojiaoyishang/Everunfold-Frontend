@@ -2,9 +2,13 @@
 import { UiText, useT } from "@/core/i18n/provider";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { loginDestination } from "@/core/auth/routes";
+import { loginDestination, loginFlowHref } from "@/core/auth/routes";
 import { useSession } from "@/core/auth/use-session";
-import { authFailureMessage, checkedSession } from "@/core/auth/session";
+import {
+  authFailureMessage,
+  checkedSession,
+  isExpiredSession,
+} from "@/core/auth/session";
 import { RequestError } from "@/core/http/request";
 import {
   completeSecondFactor,
@@ -13,7 +17,8 @@ import {
   readRegistrationOptions,
   readRecoveryOptions,
 } from "@/core/contracts/auth";
-import { Icon } from "../components/icon";
+import { useToastFeedback } from "../components/ui/toast/feedback";
+import { EntrySubmit } from "./entry-submit";
 import { Button, Form, TextField } from "../components/ui/primitives";
 import { FormField } from "../components/ui/form-field";
 import { PasswordField } from "../components/ui/password-field";
@@ -35,13 +40,13 @@ export function LoginPage({
 }) {
   const t = useT();
   const card = useRef<HTMLDivElement>(null);
-  const { state, check, accept, fail } = useSession(baseUrl);
+  const { state, check, accept } = useSession(baseUrl);
   const captcha = useCaptcha(baseUrl, "login");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [secondFactor, setSecondFactor] = useState("");
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
+  const notify = useToastFeedback();
   const [passwordError, setPasswordError] = useState(false);
   const [registrationOpen, setRegistrationOpen] = useState(false);
   const [recoveryOpen, setRecoveryOpen] = useState(false);
@@ -49,15 +54,19 @@ export function LoginPage({
   const passwordField = useRef<HTMLInputElement>(null);
   const secondFactorField = useRef<HTMLInputElement>(null);
   useEffect(() => () => action.current?.abort(), []);
-  useEffect(() => {
-    if (!busy && message && passwordError) passwordField.current?.focus();
-  }, [busy, message, passwordError]);
+  const restorePasswordFocus = useRef(false);
   const entering = state.phase === "ready" && state.session.authenticated;
   const pending = state.phase === "ready" && state.session.mfa_required;
   useEffect(() => {
     if (pending && !busy) secondFactorField.current?.focus();
   }, [busy, pending]);
   const showLogin = state.phase === "ready" && !entering && !pending;
+  useEffect(() => {
+    if (busy || !showLogin || (!passwordError && !restorePasswordFocus.current))
+      return;
+    restorePasswordFocus.current = false;
+    passwordField.current?.focus();
+  }, [busy, showLogin, passwordError]);
   useEffect(() => {
     if (!showLogin) return;
     const controller = new AbortController();
@@ -80,93 +89,145 @@ export function LoginPage({
     state.phase === "ready" && state.session.user?.must_change_password,
   );
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (
-      busy ||
-      !captcha.ready ||
-      state.phase !== "ready" ||
-      state.session.authenticated
-    )
-      return;
+  async function run(work: (signal: AbortSignal) => Promise<void>) {
+    if (action.current) return;
     const controller = new AbortController();
     action.current = controller;
     setBusy(true);
-    setMessage("");
-    setPasswordError(false);
     try {
-      const response = await login(
-        baseUrl,
-        { username: username.trim(), password, captcha: captcha.response },
-        state.session.csrf_token,
-        { signal: controller.signal },
-      );
-      const session = checkedSession(response.data);
-      if (!session.authenticated && !session.mfa_required)
-        throw new RequestError("invalid");
-      setPassword("");
-      accept(session);
-    } catch (error) {
-      if (controller.signal.aborted) return;
-      if (
-        error instanceof RequestError &&
-        [40386, 40387, 40986, 50386, 42986].includes(error.code ?? 0)
-      ) {
-        setMessage(captchaFailure(error));
-        void captcha.refresh();
-        return;
-      }
-      setPassword("");
-      setMessage(authFailureMessage(error, "login"));
-      setPasswordError(error instanceof RequestError && error.status === 401);
-      void captcha.refresh();
-      if (!(
-        error instanceof RequestError &&
-        [401, 422, 429].includes(error.status ?? 0)
-      )) {
-        // A timed-out write may have succeeded. Recheck before another credential exchange.
-        fail(error);
-      }
+      await work(controller.signal);
     } finally {
+      if (action.current === controller) action.current = null;
       if (!controller.signal.aborted) setBusy(false);
     }
   }
 
+  function completeLogin(session: ReturnType<typeof checkedSession>) {
+    setPassword("");
+    setSecondFactor("");
+    notify("登录成功", "success");
+    accept(session);
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (
+      !captcha.ready ||
+      !username.trim() ||
+      !password ||
+      state.phase !== "ready" ||
+      state.session.authenticated ||
+      state.session.mfa_required
+    )
+      return;
+    const csrf = state.session.csrf_token;
+    await run(async (signal) => {
+      setPasswordError(false);
+      try {
+        const response = await login(
+          baseUrl,
+          { username: username.trim(), password, captcha: captcha.response },
+          csrf,
+          { signal },
+        );
+        if (signal.aborted) return;
+        const session = checkedSession(response.data);
+        if (session.authenticated) completeLogin(session);
+        else if (session.mfa_required) accept(session);
+        else throw new RequestError("invalid");
+      } catch (error) {
+        if (signal.aborted) return;
+        if (isExpiredSession(error)) {
+          const session = await check();
+          if (signal.aborted) return;
+          if (session?.authenticated) completeLogin(session);
+          else if (session && !session.mfa_required) {
+            restorePasswordFocus.current = true;
+            notify("登录状态已刷新，已保留输入。请再次登录。", "info");
+            void captcha.refresh();
+          } else if (!session) notify("无法刷新登录状态，请重新检查。");
+          return;
+        }
+        if (
+          error instanceof RequestError &&
+          [40386, 40387, 40986, 50386, 42986].includes(error.code ?? 0)
+        ) {
+          notify(captchaFailure(error));
+          void captcha.refresh();
+          return;
+        }
+        setPasswordError(error instanceof RequestError && error.status === 401);
+        // A timed-out write may have succeeded. Recheck before another credential exchange.
+        if (!(
+          error instanceof RequestError &&
+          [401, 422, 429].includes(error.status ?? 0)
+        )) {
+          const session = await check();
+          if (signal.aborted) return;
+          if (session?.authenticated) {
+            completeLogin(session);
+            return;
+          }
+          if (session?.mfa_required) return;
+        }
+        notify(authFailureMessage(error, "login"));
+        void captcha.refresh();
+      }
+    });
+  }
+
   async function submitSecondFactor(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (busy || state.phase !== "ready" || !state.session.mfa_required) return;
-    const controller = new AbortController();
-    action.current = controller;
-    setBusy(true);
-    setMessage("");
-    try {
-      const response = await completeSecondFactor(
-        baseUrl,
-        { code: secondFactor.trim() },
-        state.session.csrf_token,
-        { signal: controller.signal },
-      );
-      const session = checkedSession(response.data);
-      if (!session.authenticated) throw new RequestError("invalid");
-      setSecondFactor("");
-      accept(session);
-    } catch (error) {
-      if (controller.signal.aborted) return;
-      setMessage(
-        error instanceof RequestError && error.status === 401
-          ? "验证码或恢复码不正确，或验证已过期。"
-          : authFailureMessage(error, "login"),
-      );
-      if (
-        error instanceof RequestError &&
-        (error.status === 401 ||
-          error.status === 403 ||
-          error.status === undefined)
-      )
-        void check(true);
-    } finally {
-      if (!controller.signal.aborted) setBusy(false);
-    }
+    if (
+      !secondFactor.trim() ||
+      state.phase !== "ready" ||
+      !state.session.mfa_required
+    )
+      return;
+    const csrf = state.session.csrf_token;
+    await run(async (signal) => {
+      try {
+        const response = await completeSecondFactor(
+          baseUrl,
+          { code: secondFactor.trim() },
+          csrf,
+          { signal },
+        );
+        if (signal.aborted) return;
+        const session = checkedSession(response.data);
+        if (!session.authenticated) throw new RequestError("invalid");
+        completeLogin(session);
+      } catch (error) {
+        if (signal.aborted) return;
+        if (error instanceof RequestError && error.status === 401) {
+          const session = await check(true);
+          if (signal.aborted) return;
+          if (session?.authenticated) completeLogin(session);
+          else if (session && !session.mfa_required) {
+            setSecondFactor("");
+            restorePasswordFocus.current = true;
+            void captcha.refresh();
+            notify("两步验证已过期，已保留登录信息。请重新登录。", "info");
+          } else notify("验证码或恢复码不正确，或验证已过期。");
+        } else if (isExpiredSession(error)) {
+          const session = await check();
+          if (signal.aborted) return;
+          if (session?.authenticated) completeLogin(session);
+          else if (session) {
+            if (!session.mfa_required) {
+              setSecondFactor("");
+              void captcha.refresh();
+            }
+            notify("登录状态已刷新，已保留输入。请重试。", "info");
+          } else notify("无法刷新登录状态，请重新检查。");
+        } else {
+          const session = await check();
+          if (signal.aborted) return;
+          if (session?.authenticated) completeLogin(session);
+          else notify(authFailureMessage(error, "login"));
+        }
+      }
+    });
   }
 
   return (
@@ -192,11 +253,8 @@ export function LoginPage({
       ) : state.phase !== "ready" ? (
         <SessionFeedback
           error={state.phase === "failed" ? state.error : undefined}
-          failureMessage={message}
-          onRetry={() => {
-            setMessage("");
-            void check();
-          }}
+          backHref={false}
+          onRetry={() => void check()}
         />
       ) : state.session.mfa_required ? (
         <Form
@@ -219,43 +277,35 @@ export function LoginPage({
               onChange={(event) => setSecondFactor(event.target.value)}
               disabled={busy}
               ref={secondFactorField}
-              aria-describedby={message ? "second-factor-error" : undefined}
             />
           </FormField>
-          <div
-            id="second-factor-error"
-            className="login-message"
-            role={message ? "alert" : undefined}
-            aria-live="polite"
-          >
-            {message && <span>{message}</span>}
-          </div>
-          <Button
-            type="submit"
-            className="management-primary login-submit"
-            disabled={busy || !secondFactor.trim()}
-          >
-            <UiText text={busy ? "正在验证…" : "完成登录"} />
-          </Button>
+          <EntrySubmit
+            label="完成登录"
+            busyLabel="正在验证…"
+            busy={busy}
+            disabled={!secondFactor.trim()}
+          />
           <Button
             type="button"
             className="login-back"
             disabled={busy}
-            onClick={async () => {
-              setBusy(true);
-              try {
-                const response = await logout(
-                  baseUrl,
-                  state.session.csrf_token,
-                );
-                accept(checkedSession(response.data));
-                setSecondFactor("");
-                setMessage("");
-              } catch (error) {
-                setMessage(authFailureMessage(error, "logout"));
-              } finally {
-                setBusy(false);
-              }
+            onClick={() => {
+              void run(async (signal) => {
+                try {
+                  const response = await logout(
+                    baseUrl,
+                    state.session.csrf_token,
+                    { signal },
+                  );
+                  if (signal.aborted) return;
+                  accept(checkedSession(response.data));
+                  setSecondFactor("");
+                  void captcha.refresh();
+                } catch (error) {
+                  if (!signal.aborted)
+                    notify(authFailureMessage(error, "logout"));
+                }
+              });
             }}
           >
             <UiText text="返回账号登录" />
@@ -277,7 +327,10 @@ export function LoginPage({
               required
               maxLength={254}
               value={username}
-              onChange={(event) => setUsername(event.target.value)}
+              onChange={(event) => {
+                setUsername(event.target.value);
+                setPasswordError(false);
+              }}
               disabled={busy}
               placeholder={t("输入用户名")}
             />
@@ -289,8 +342,11 @@ export function LoginPage({
             invalid={passwordError}
             action={
               recoveryOpen && (
-                <RouteLink href="/login/recover" className="login-entry-link">
-                  <UiText text="忘记密码" />
+                <RouteLink
+                  href={loginFlowHref("/login/recover", returnTo)}
+                  className="login-entry-link"
+                >
+                  <UiText text="忘记密码？" />
                 </RouteLink>
               )
             }
@@ -302,41 +358,23 @@ export function LoginPage({
               required
               maxLength={1024}
               value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              onChange={(event) => {
+                setPassword(event.target.value);
+                setPasswordError(false);
+              }}
               disabled={busy}
               ref={passwordField}
               placeholder="输入密码"
-              aria-describedby={message ? "login-error" : undefined}
               aria-invalid={passwordError}
             />
           </FormField>
           <CaptchaField control={captcha} appearance="login" disabled={busy} />
-          <div
-            className="login-message"
-            id="login-error"
-            role={message ? "alert" : undefined}
-            aria-live="polite"
-          >
-            {message && (
-              <>
-                <Icon name="close" />
-                <span>{message}</span>
-              </>
-            )}
-          </div>
-          <Button
-            type="submit"
-            className="management-primary login-submit"
-            disabled={busy || !captcha.ready || !username.trim() || !password}
-          >
-            <span aria-live="polite">
-              {busy ? <UiText text="正在登录" /> : <UiText text="登录" />}
-            </span>
-            <Icon
-              name={busy ? "refresh" : "arrow"}
-              className={busy ? "management-spinning" : undefined}
-            />
-          </Button>
+          <EntrySubmit
+            label="登录"
+            busyLabel="正在登录"
+            busy={busy}
+            disabled={!captcha.ready || !username.trim() || !password}
+          />
         </Form>
       )}
       {showLogin && registrationOpen && (

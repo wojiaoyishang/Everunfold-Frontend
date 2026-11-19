@@ -72,3 +72,13 @@ export function loginDestination(
   if (target === undefined) return isAdmin ? "/admin" : "/";
   return target.startsWith("/admin") && !isAdmin ? "/" : target;
 }
+
+export function loginFlowHref(
+  pathname: "/login" | "/login/recover",
+  returnTo: string | undefined,
+): string {
+  const next = loginReturnPath(returnTo);
+  return next
+    ? pathname + "?" + new URLSearchParams({ next }).toString()
+    : pathname;
+}

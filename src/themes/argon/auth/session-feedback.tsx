@@ -8,11 +8,13 @@ export function SessionFeedback({
   failureMessage,
   onRetry,
   checkingText = "正在确认登录状态",
+  backHref = "/login",
 }: {
   error?: unknown;
   failureMessage?: string;
   onRetry: () => void;
   checkingText?: string;
+  backHref?: string | false;
 }) {
   const failed = error !== undefined;
   return (
@@ -34,9 +36,11 @@ export function SessionFeedback({
             <Icon name="refresh" />
             <UiText text="重新检查" />
           </Button>
-          <TextLink href="/login" className="management-text-link">
-            <UiText text="返回登录" />
-          </TextLink>
+          {backHref && (
+            <TextLink href={backHref} className="management-text-link">
+              <UiText text="返回登录" />
+            </TextLink>
+          )}
         </div>
       )}
     </div>

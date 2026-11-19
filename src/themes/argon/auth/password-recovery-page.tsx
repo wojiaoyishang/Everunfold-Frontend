@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { loginFlowHref } from "@/core/auth/routes";
+import { isExpiredSession } from "@/core/auth/session";
 import { useSession } from "@/core/auth/use-session";
 import {
   confirmPasswordRecovery,
@@ -8,12 +10,13 @@ import {
   requestPasswordRecovery,
 } from "@/core/contracts/auth";
 import { RequestError } from "@/core/http/request";
-import { UiText } from "@/core/i18n/provider";
+import { UiText, useT } from "@/core/i18n/provider";
 import { FormField } from "../components/ui/form-field";
 import { PasswordField } from "../components/ui/password-field";
 import { Button, Form, TextField } from "../components/ui/primitives";
-import { Icon } from "../components/icon";
+import { useToastFeedback } from "../components/ui/toast/feedback";
 import { EntryFooter } from "./entry-footer";
+import { EntrySubmit } from "./entry-submit";
 import { ManagementEntry } from "./management-entry";
 import { SessionFeedback } from "./session-feedback";
 
@@ -23,16 +26,27 @@ function failureMessage(error: unknown) {
     if (error.code === 50380) return "找回密码邮件暂不可用。";
     if (error.code === 42280) return "重置码无效或已过期。";
     if (error.status === 429) return "操作过于频繁，请稍后重试。";
-    if (error.code === 40310) return "会话已更新，请重试。";
+    if (error.status === 422) return "请检查重置码和新密码。";
   }
   return "暂时无法完成操作，请稍后重试。";
 }
 
-export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
+export function PasswordRecoveryPage({
+  baseUrl,
+  returnTo,
+}: {
+  baseUrl: string;
+  returnTo: string | undefined;
+}) {
+  const t = useT();
+  const notify = useToastFeedback();
   const { state, check } = useSession(baseUrl);
   const card = useRef<HTMLDivElement>(null);
   const operation = useRef<AbortController | null>(null);
   const codeField = useRef<HTMLInputElement>(null);
+  const retryAt = useRef(0);
+  const [retrySeconds, setRetrySeconds] = useState(0);
+  const coolingDown = retrySeconds > 0;
   const [availability, setAvailability] = useState<
     "loading" | "enabled" | "disabled" | "error"
   >("loading");
@@ -41,10 +55,10 @@ export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
   const [confirmation, setConfirmation] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("");
-  const [requested, setRequested] = useState(false);
+  const [busy, setBusy] = useState<"request" | "reset" | null>(null);
   const [reload, setReload] = useState(0);
+  const backHref = loginFlowHref("/login", returnTo);
+
   useEffect(() => () => operation.current?.abort(), []);
   useEffect(() => {
     const controller = new AbortController();
@@ -59,11 +73,24 @@ export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
     return () => controller.abort();
   }, [baseUrl, reload]);
   useEffect(() => {
-    if (stage === "reset") codeField.current?.focus();
-  }, [stage]);
+    if (stage === "reset" && !busy) codeField.current?.focus();
+  }, [stage, busy]);
+  useEffect(() => {
+    if (!coolingDown) return;
+    const timer = window.setInterval(() => {
+      setRetrySeconds(
+        Math.max(0, Math.ceil((retryAt.current - Date.now()) / 1000)),
+      );
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [coolingDown]);
 
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  function startCooldown(seconds: number) {
+    retryAt.current = Date.now() + seconds * 1000;
+    setRetrySeconds(seconds);
+  }
+
+  async function run(intent: "request" | "reset") {
     if (
       operation.current ||
       state.phase !== "ready" ||
@@ -72,30 +99,33 @@ export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
       availability !== "enabled"
     )
       return;
-    if (stage === "reset" && password !== confirmation) {
-      setMessage("两次输入的密码不一致。");
+    if (intent === "request" && (!identifier.trim() || coolingDown)) return;
+    if (intent === "reset" && password !== confirmation) {
+      notify("两次输入的密码不一致。");
       return;
     }
     const controller = new AbortController();
     operation.current = controller;
-    setBusy(true);
-    setMessage("");
+    setBusy(intent);
     try {
-      if (stage === "request") {
+      const csrf = state.session.csrf_token;
+      if (intent === "request") {
         await requestPasswordRecovery(
           baseUrl,
           { identifier: identifier.trim() },
-          state.session.csrf_token,
+          csrf,
           { signal: controller.signal },
         );
         if (controller.signal.aborted) return;
-        setRequested(true);
+        startCooldown(60);
+        setCode("");
         setStage("reset");
-      } else if (stage === "reset") {
+        notify("若账号已绑定验证邮箱，重置码将发送到该邮箱。", "info");
+      } else {
         await confirmPasswordRecovery(
           baseUrl,
           { code: code.trim(), new_password: password },
-          state.session.csrf_token,
+          csrf,
           { signal: controller.signal },
         );
         if (controller.signal.aborted) return;
@@ -103,18 +133,40 @@ export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
         setPassword("");
         setConfirmation("");
         setStage("done");
+        notify("密码重置成功。", "success");
       }
     } catch (error) {
       if (controller.signal.aborted) return;
-      setMessage(failureMessage(error));
-      if (error instanceof RequestError && error.code === 40380)
-        setAvailability("disabled");
-      if (error instanceof RequestError && error.code === 40310) void check();
+      if (isExpiredSession(error)) {
+        const session = await check();
+        if (controller.signal.aborted) return;
+        if (session && !session.authenticated && !session.mfa_required) {
+          setCode("");
+          startCooldown(0);
+          setStage("request");
+          notify("登录状态已刷新，请重新获取重置码。", "info");
+        } else if (!session) notify("无法刷新登录状态，请重新检查。");
+      } else {
+        if (error instanceof RequestError) {
+          if (error.code === 40380) setAvailability("disabled");
+          if (error.status === 429 && intent === "request") {
+            startCooldown(Math.max(1, error.retryAfterSeconds ?? 60));
+          }
+        }
+        notify(failureMessage(error));
+      }
     } finally {
       operation.current = null;
-      if (!controller.signal.aborted) setBusy(false);
+      if (!controller.signal.aborted) setBusy(null);
     }
   }
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (stage !== "done") void run(stage);
+  }
+
+  const cooldownLabel = t("可在 {seconds} 秒后重发", { seconds: retrySeconds });
 
   return (
     <ManagementEntry
@@ -122,19 +174,18 @@ export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
       panel={{
         title: stage === "reset" ? "重置密码" : "找回密码",
         description:
-          stage === "reset"
-            ? "输入邮件中的重置码并设置新密码。"
-            : "通过已验证的邮箱找回账号密码。",
+          stage === "done"
+            ? "请使用新密码登录。"
+            : stage === "reset"
+              ? "在当前浏览器输入邮件里的重置码，再设置新密码。"
+              : "通过已验证的邮箱找回账号密码。",
       }}
     >
-      {stage === "done" ? (
-        <p role="status">
-          <UiText text="密码已重置，请使用新密码登录。" />
-        </p>
-      ) : state.phase !== "ready" ? (
+      {stage === "done" ? null : state.phase !== "ready" ? (
         <SessionFeedback
           error={state.phase === "failed" ? state.error : undefined}
           onRetry={() => void check()}
+          backHref={false}
         />
       ) : state.session.authenticated || state.session.mfa_required ? (
         <p role="status">
@@ -166,30 +217,32 @@ export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
           )}
         </>
       ) : (
-        <Form className="login-form" onSubmit={submit} aria-busy={busy}>
+        <Form className="login-form" onSubmit={submit} aria-busy={!!busy}>
           {stage === "request" ? (
-            <FormField id="recovery-identifier" label="用户名或邮箱">
+            <FormField
+              id="recovery-identifier"
+              label="用户名或邮箱"
+              icon="user"
+            >
               <TextField
                 id="recovery-identifier"
+                name="username"
                 value={identifier}
                 maxLength={254}
                 autoComplete="username"
                 autoCapitalize="none"
+                spellCheck={false}
                 required
-                disabled={busy}
+                disabled={!!busy}
                 onChange={(event) => setIdentifier(event.target.value)}
               />
             </FormField>
           ) : (
             <>
-              {requested && (
-                <p role="status">
-                  <UiText text="如果账号存在且邮箱已验证，我们会发送重置码。请在当前浏览器中输入邮件里的重置码。" />
-                </p>
-              )}
-              <FormField id="recovery-code" label="重置码">
+              <FormField id="recovery-code" label="重置码" icon="lock">
                 <TextField
                   id="recovery-code"
+                  name="code"
                   ref={codeField}
                   value={code}
                   autoComplete="one-time-code"
@@ -197,79 +250,80 @@ export function PasswordRecoveryPage({ baseUrl }: { baseUrl: string }) {
                   spellCheck={false}
                   maxLength={32}
                   required
-                  disabled={busy}
+                  disabled={!!busy}
                   onChange={(event) => setCode(event.target.value.trim())}
                 />
               </FormField>
-              <FormField id="recovery-password" label="新密码">
+              <FormField id="recovery-password" label="新密码" icon="lock">
                 <PasswordField
                   id="recovery-password"
+                  name="new-password"
                   value={password}
                   autoComplete="new-password"
                   minLength={12}
                   maxLength={1024}
                   required
-                  disabled={busy}
+                  disabled={!!busy}
                   onChange={(event) => setPassword(event.target.value)}
                 />
               </FormField>
-              <FormField id="recovery-confirmation" label="确认新密码">
+              <FormField
+                id="recovery-confirmation"
+                label="确认新密码"
+                icon="lock"
+              >
                 <PasswordField
                   id="recovery-confirmation"
+                  name="confirm-password"
                   value={confirmation}
                   autoComplete="new-password"
                   minLength={12}
                   maxLength={1024}
                   required
-                  disabled={busy}
+                  disabled={!!busy}
                   onChange={(event) => setConfirmation(event.target.value)}
                 />
               </FormField>
             </>
           )}
-          {message && (
-            <p role="alert">
-              <UiText text={message} />
-            </p>
-          )}
-          <Button
-            type="submit"
-            className="management-primary login-submit"
+          <EntrySubmit
+            label={stage === "request" ? "发送重置码" : "重置密码"}
+            busyLabel={busy === "request" ? "正在请求重置码…" : "正在重置密码…"}
+            busy={!!busy}
             disabled={
-              busy ||
-              (stage === "request"
-                ? !identifier.trim()
-                : code.length !== 32 || !password || !confirmation)
+              stage === "request"
+                ? !identifier.trim() || coolingDown
+                : !/^[A-Za-z0-9_-]{32}$/.test(code) ||
+                  password.length < 12 ||
+                  confirmation.length < 12
             }
-          >
-            <span>
+          />
+          <div className="login-recovery-actions">
+            {stage === "reset" && !!identifier.trim() && (
+              <Button
+                className="login-back"
+                disabled={!!busy || coolingDown}
+                onClick={() => void run("request")}
+              >
+                {coolingDown ? cooldownLabel : <UiText text="重新发送重置码" />}
+              </Button>
+            )}
+            {stage === "request" && coolingDown && <span>{cooldownLabel}</span>}
+            <Button
+              className="login-back"
+              disabled={!!busy}
+              onClick={() =>
+                setStage(stage === "request" ? "reset" : "request")
+              }
+            >
               <UiText
-                text={
-                  busy
-                    ? "正在处理…"
-                    : stage === "request"
-                      ? "发送重置码"
-                      : "重置密码"
-                }
+                text={stage === "request" ? "我已收到重置码" : "返回输入账号"}
               />
-            </span>
-            <Icon name="arrow" />
-          </Button>
-          <Button
-            className="login-back"
-            disabled={busy}
-            onClick={() => {
-              setMessage("");
-              setStage(stage === "request" ? "reset" : "request");
-            }}
-          >
-            <UiText
-              text={stage === "request" ? "我已收到重置码" : "重新请求重置码"}
-            />
-          </Button>
+            </Button>
+          </div>
         </Form>
       )}
-      <EntryFooter href="/login" label="返回账号登录" />
+      <EntryFooter href={backHref} label="返回账号登录" />
     </ManagementEntry>
   );
 }

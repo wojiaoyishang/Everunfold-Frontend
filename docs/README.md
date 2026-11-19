@@ -1,5 +1,7 @@
 # Everunfold 文档入口
 
+[登录反馈与密码找回](decisions/0190-login-feedback-and-password-recovery.md)说明过期重试、后台开关和通知模板。
+
 [前端节点的独立监控](decisions/0187-independent-frontend-monitoring.md)说明独立采集、来源验证与日志分流。
 
 [内容编辑器的缓存](development/cache-management.md#内容编辑器的缓存)说明文章、说说和页面的缓存操作与节点回执。

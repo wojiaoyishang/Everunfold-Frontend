@@ -13,6 +13,14 @@ export function checkedSession(
   return session;
 }
 
+export function isExpiredSession(error: unknown): boolean {
+  return (
+    error instanceof RequestError &&
+    error.status === 403 &&
+    error.code === 40310
+  );
+}
+
 export function authFailureMessage(
   error: unknown,
   intent: "login" | "session" | "logout",
