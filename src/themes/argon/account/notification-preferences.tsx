@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
+import { accountFailure } from "@/core/accounts/use-action";
+import { useToastAction } from "../components/ui/toast/feedback";
 import {
   readAccountNotificationPreferences,
   saveAccountNotificationPreferences,
@@ -21,7 +22,7 @@ export function NotificationPreferences({
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
-  const action = useAccountAction();
+  const action = useToastAction();
   useEffect(() => {
     const controller = new AbortController();
     void readAccountNotificationPreferences(baseUrl, {
@@ -67,7 +68,7 @@ export function NotificationPreferences({
                 { signal },
               );
               if (!signal.aborted) setPreferences(data);
-            })
+            }, "通知偏好已保存。")
           }
         />
       ) : error ? (
@@ -86,11 +87,6 @@ export function NotificationPreferences({
       ) : (
         <p role="status">
           <UiText text="正在读取通知偏好…" />
-        </p>
-      )}
-      {action.message && (
-        <p role="status">
-          <UiText text={action.message} />
         </p>
       )}
     </section>

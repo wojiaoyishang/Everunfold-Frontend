@@ -11,9 +11,10 @@ import {
   requestAccountEmailVerification,
 } from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
+import { accountFailure } from "@/core/accounts/use-action";
+import { useToastAction } from "../components/ui/toast/feedback";
 import { captchaFailure, useCaptcha } from "@/core/captcha/use-captcha";
-import { UiText, useT } from "@/core/i18n/provider";
+import { UiText } from "@/core/i18n/provider";
 import { RequestError } from "@/core/http/request";
 import { Button, TextField } from "../components/ui/primitives";
 import { ConfirmDialog } from "../components/ui/confirm-dialog";
@@ -98,10 +99,9 @@ function VerificationDialog({
   onVerified: (profile: AccountProfile) => void;
 }) {
   const { baseUrl, csrfToken } = useAdminRequest();
-  const t = useT();
   const codeId = useId();
-  const request = useAccountAction(requestFailure);
-  const confirm = useAccountAction(confirmFailure);
+  const request = useToastAction(requestFailure, true);
+  const confirm = useToastAction(confirmFailure, true);
   const [destination, setDestination] = useState(changing ? "" : email);
   const [delivery, setDelivery] = useState<EmailVerificationState | null>(null);
   const [code, setCode] = useState("");
@@ -235,7 +235,6 @@ function VerificationDialog({
       busy={busy}
       confirmDisabled={delivery?.status !== "sent" || code.length !== 6}
       submitOnEnter
-      error={confirm.message ? t(confirm.message) : ""}
       returnFocus={trigger}
       onCancel={onClose}
       onConfirm={() =>
@@ -261,7 +260,7 @@ function VerificationDialog({
             }
             throw error;
           }
-        }, "")
+        }, "邮箱验证成功。")
       }
       onConfirmed={onClose}
     >
@@ -274,8 +273,6 @@ function VerificationDialog({
             setDelivery(null);
             setCode("");
             setPollError(false);
-            request.setMessage("");
-            confirm.setMessage("");
           }}
           disabled={busy}
           type="email"
@@ -315,11 +312,6 @@ function VerificationDialog({
             </span>
           )}
         </div>
-        {request.message && (
-          <p role="alert">
-            <UiText text={request.message} />
-          </p>
-        )}
         {delivery && (
           <p role="status">
             <UiText text={statusText[delivery.status]} />

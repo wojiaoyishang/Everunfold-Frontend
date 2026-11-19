@@ -3,7 +3,7 @@ import { useState } from "react";
 import type { AccountProfile, ProfileFields } from "@/core/contracts/accounts";
 import { saveAccountProfile } from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { useAccountAction } from "@/core/accounts/use-action";
+import { useToastAction } from "../components/ui/toast/feedback";
 import {
   UiText,
   useLocale,
@@ -33,7 +33,7 @@ export function AccountProfileEditor({
     profileFields(profile),
   );
   const [pickingAvatar, setPickingAvatar] = useState(false);
-  const action = useAccountAction();
+  const action = useToastAction();
   const t = useT();
   const locale = useLocale();
   const languages = useLanguageCatalog();
@@ -59,7 +59,7 @@ export function AccountProfileEditor({
             )?.ui_locale,
           );
       }
-    });
+    }, "个人资料已保存。");
   return (
     <section className="account-card account-profile-card">
       <aside className="account-profile-identity">
@@ -171,9 +171,6 @@ export function AccountProfileEditor({
             </div>
           </fieldset>
         </Form>
-        <p className="account-message" role="status">
-          <UiText text={action.message} />
-        </p>
       </div>
       {pickingAvatar && (
         <AvatarPicker

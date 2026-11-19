@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { useAccountAction, accountFailure } from "@/core/accounts/use-action";
+import { accountFailure } from "@/core/accounts/use-action";
+import { useToastAction } from "../components/ui/toast/feedback";
 import {
   activateTwoFactor,
   beginTwoFactor,
@@ -30,7 +31,7 @@ function factorFailure(error: unknown) {
 
 export function TwoFactorCard() {
   const { baseUrl, csrfToken } = useAdminRequest();
-  const action = useAccountAction(factorFailure);
+  const action = useToastAction(factorFailure);
   const [state, setState] = useState<TwoFactorState | null>(null);
   const [setup, setSetup] = useState<TwoFactorSetup | null>(null);
   const [codes, setCodes] = useState<string[]>([]);
@@ -77,6 +78,13 @@ export function TwoFactorCard() {
             const disable =
               submitter instanceof HTMLElement &&
               submitter.dataset.action === "disable";
+            const success = state.enabled
+              ? disable
+                ? "两步验证已关闭。"
+                : "两步验证恢复码已重新生成。"
+              : setup
+                ? "两步验证已启用。"
+                : "当前密码验证成功。";
             void action.run(async (signal) => {
               if (state.enabled) {
                 const input = { current_password: password, code: code.trim() };
@@ -137,7 +145,7 @@ export function TwoFactorCard() {
                 setPassword("");
                 setCode("");
               }
-            });
+            }, success);
           }}
         >
           <fieldset className="account-fieldset" disabled={action.busy}>
@@ -209,7 +217,6 @@ export function TwoFactorCard() {
                   onClick={() => {
                     setSetup(null);
                     setCode("");
-                    action.setMessage("");
                   }}
                 >
                   <UiText text="重新开始设置" />
@@ -232,11 +239,6 @@ export function TwoFactorCard() {
           entries={[{ label: "恢复码", value: codes.join("\n") }]}
           onClose={() => setCodes([])}
         />
-      )}
-      {action.message && (
-        <p role="status">
-          <UiText text={action.message} />
-        </p>
       )}
     </section>
   );

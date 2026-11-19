@@ -4,7 +4,8 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/core/auth/use-session";
 import { authFailureMessage } from "@/core/auth/session";
 import { canAccessAdmin } from "@/core/accounts/permissions";
-import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
+import { accountFailure } from "@/core/accounts/use-action";
+import { useToastAction } from "../components/ui/toast/feedback";
 import {
   AdminAccountContext,
   AdminRequestContext,
@@ -100,7 +101,7 @@ function ConfirmedAccount({
   const preferences = useAdminPreferences(
     adminPreferencesKey(baseUrl, user.id),
   );
-  const action = useAccountAction((failure) =>
+  const action = useToastAction((failure) =>
     authFailureMessage(failure, "logout"),
   );
   useEffect(() => {
@@ -170,7 +171,7 @@ function ConfirmedAccount({
                           { signal },
                         );
                         if (!signal.aborted) onSession(response.data);
-                      })
+                      }, "")
                     }
                   />
                 </nav>
@@ -264,11 +265,6 @@ function ConfirmedAccount({
                 ) : (
                   <p role="status">
                     <UiText text="正在读取资料…" />
-                  </p>
-                )}
-                {action.message && (
-                  <p role="status">
-                    <UiText text={action.message} />
                   </p>
                 )}
               </main>

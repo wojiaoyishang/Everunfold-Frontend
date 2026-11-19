@@ -13,7 +13,7 @@ export function accountFailure(error: unknown): string {
     if (error.code === 41365) return "头像文件超过当前上传限制。";
     if (error.code === 42265)
       return "请选择本人图库中的静态 JPG、PNG 或 WebP 图片。";
-    if (error.code === 40963) return "必须保留至少一个有效管理员。";
+    if (error.code === 40963) return "必须保留至少一位已启用的超级管理员。";
     if (error.code === 40361) return "当前密码不正确。";
     if (error.code === 40970 || error.code === 40470)
       return "身份预设已更新或移除，请刷新后重新选择。";

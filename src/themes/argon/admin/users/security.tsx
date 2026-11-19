@@ -6,36 +6,18 @@ import type {
   KeyList,
   KeyState,
 } from "@/core/contracts/accounts";
-import {
-  readUserApiKeys,
-  resetAccountUserPassword,
-  revokeUserApiKey,
-} from "@/core/contracts/accounts";
+import { readUserApiKeys, revokeUserApiKey } from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
 import { UiText, useLocale } from "@/core/i18n/provider";
-import { Button, Form } from "../../components/ui/primitives";
+import { Button } from "../../components/ui/primitives";
 import { ConfirmDialog } from "../../components/ui/confirm-dialog";
-import { AccountField } from "../../account/fields";
 
-export function ManagedUserSecurity({
-  user,
-  onChanged,
-  isSelf,
-}: {
-  user: AccountProfile;
-  onChanged: (user: AccountProfile) => void;
-  isSelf: boolean;
-}) {
+export function ManagedUserSecurity({ user }: { user: AccountProfile }) {
   const { baseUrl, csrfToken } = useAdminRequest(),
     { uiLocale: locale } = useLocale();
-  const action = useAccountAction(),
-    revoke = useAccountAction();
-  const [current, setCurrent] = useState(""),
-    [password, setPassword] = useState(""),
-    [confirmation, setConfirmation] = useState("");
-  const [reset, setReset] = useState(false),
-    [keys, setKeys] = useState<KeyList | null>(null),
+  const revoke = useAccountAction();
+  const [keys, setKeys] = useState<KeyList | null>(null),
     [error, setError] = useState(""),
     [refresh, setRefresh] = useState(0),
     [page, setPage] = useState(1);
@@ -61,67 +43,6 @@ export function ManagedUserSecurity({
   }, [baseUrl, user.id, refresh, page, user.auth_version]);
   return (
     <>
-      {!isSelf && (
-        <section className="account-card">
-          <header>
-            <h2>
-              <UiText text="重置用户密码" />
-            </h2>
-            <p>
-              <UiText text="会退出该用户全部会话并永久撤销已有 Key，下次登录必须修改初始密码。" />
-            </p>
-          </header>
-          <Form
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (password !== confirmation) {
-                action.setMessage("两次输入的密码不一致。");
-                return;
-              }
-              setReset(true);
-            }}
-          >
-            <fieldset className="account-fieldset" disabled={action.busy}>
-              <div className="account-form-grid">
-                <AccountField
-                  label="新的临时密码"
-                  value={password}
-                  onChange={setPassword}
-                  secret
-                  required
-                  minLength={12}
-                  autoComplete="new-password"
-                />
-                <AccountField
-                  label="确认临时密码"
-                  value={confirmation}
-                  onChange={setConfirmation}
-                  secret
-                  required
-                  minLength={12}
-                  autoComplete="new-password"
-                />
-                <AccountField
-                  label="当前管理员密码"
-                  value={current}
-                  onChange={setCurrent}
-                  secret
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
-              <div className="account-actions">
-                <Button className="admin-button" type="submit">
-                  <UiText text="重置密码" />
-                </Button>
-              </div>
-            </fieldset>
-          </Form>
-          <p role="status" className="account-message">
-            <UiText text={action.message} />
-          </p>
-        </section>
-      )}
       <section className="account-card">
         <header className="account-card-heading">
           <div>
@@ -193,39 +114,6 @@ export function ManagedUserSecurity({
           />
         )}
       </section>
-      <ConfirmDialog
-        open={reset}
-        title="重置此用户的密码？"
-        description="所有会话和已有 API Key 将失效。请通过安全方式将临时密码交给用户。"
-        confirmLabel="确认重置"
-        intent="danger"
-        error={action.message}
-        onCancel={() => setReset(false)}
-        onConfirm={() =>
-          action.run(async (signal) => {
-            const input = {
-              expected_revision: user.revision,
-              current_password: current,
-              new_password: password,
-            };
-            const response = await resetAccountUserPassword(
-              baseUrl,
-              user.id,
-              { ...input, operation_id: action.operation(input) },
-              csrfToken,
-              { signal },
-            );
-            if (!signal.aborted) {
-              setCurrent("");
-              setPassword("");
-              setConfirmation("");
-              onChanged(response.data);
-              setRefresh((value) => value + 1);
-            }
-          }, "密码已重置。")
-        }
-        onConfirmed={() => setReset(false)}
-      />
       <ConfirmDialog
         open={!!remove}
         title="永久撤销 API Key？"

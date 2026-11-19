@@ -8,7 +8,8 @@ import {
   revokeApiKey,
 } from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
+import { accountFailure } from "@/core/accounts/use-action";
+import { useToastAction } from "../components/ui/toast/feedback";
 import { UiText, useLocale } from "@/core/i18n/provider";
 import { Button, Form } from "../components/ui/primitives";
 import { Select } from "../components/ui/select";
@@ -48,8 +49,8 @@ export function AccountKeys({
   const [secret, setSecret] = useState<string | null>(null),
     [remove, setRemove] = useState<KeyState | null>(null);
   const [warning, setWarning] = useState("");
-  const action = useAccountAction(),
-    revoke = useAccountAction();
+  const action = useToastAction(),
+    revoke = useToastAction(accountFailure, true);
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
@@ -143,7 +144,7 @@ export function AccountKeys({
                       "生成已确认，但密钥明文无法再次读取；如未保存请撤销后重新生成。",
                     );
                 }
-              });
+              }, "API Key 已创建。");
             }}
           >
             <fieldset className="account-fieldset" disabled={action.busy}>
@@ -257,7 +258,6 @@ export function AccountKeys({
                 className="admin-button"
                 disabled={revoke.busy}
                 onClick={() => {
-                  revoke.setMessage("");
                   setRemove(key);
                 }}
               >
@@ -300,9 +300,6 @@ export function AccountKeys({
             </>
           )}
         </div>
-        <p className="account-message" role="status">
-          <UiText text={action.message} />
-        </p>
         {warning && (
           <p role="alert">
             <UiText text={warning} />
@@ -321,7 +318,6 @@ export function AccountKeys({
         description="对应程序将无法继续使用此密钥。撤销不可恢复，需要重新创建。"
         confirmLabel="撤销密钥"
         intent="danger"
-        error={revoke.message}
         onCancel={() => setRemove(null)}
         onConfirm={() =>
           revoke.run(async (signal) => {

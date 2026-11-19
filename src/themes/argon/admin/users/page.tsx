@@ -14,6 +14,7 @@ import { Avatar } from "../../components/ui/avatar";
 import { AdminPageHeading } from "../components/page-heading";
 import { AccountField } from "../../account/fields";
 import { AvatarPolicyEditor } from "./avatar-policy";
+import { ManagedPasswordReset } from "./password-reset";
 
 export function UsersPage() {
   const actor = useAdminAccount(),
@@ -183,13 +184,35 @@ export function UsersPage() {
               {new Date(user.created_at).toLocaleDateString(locale)}
             </time>
             {actor.role === "admin" || user.role !== "admin" ? (
-              <RouteLink
-                href={`/admin/users/${user.id}`}
-                className="admin-button"
-                showPending
-              >
-                <UiText text="编辑用户" />
-              </RouteLink>
+              <div className="account-user-actions">
+                <RouteLink
+                  href={`/admin/users/${user.id}`}
+                  className="admin-button"
+                  showPending
+                >
+                  <UiText text="编辑用户" />
+                </RouteLink>
+                {user.id !== actor.id && (
+                  <ManagedPasswordReset
+                    user={user}
+                    onChanged={(updated) =>
+                      setResult((current) =>
+                        current?.list
+                          ? {
+                              ...current,
+                              list: {
+                                ...current.list,
+                                items: current.list.items.map((item) =>
+                                  item.id === updated.id ? updated : item,
+                                ),
+                              },
+                            }
+                          : current,
+                      )
+                    }
+                  />
+                )}
+              </div>
             ) : (
               <small>
                 <UiText text="管理员保护" />

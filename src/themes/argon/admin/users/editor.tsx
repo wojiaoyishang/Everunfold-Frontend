@@ -35,6 +35,8 @@ import type { PermissionValues } from "../../account/permissions";
 import { AdminPageHeading } from "../components/page-heading";
 import { UserGrants } from "./grants";
 import { ManagedUserSecurity } from "./security";
+import { ManagedPasswordReset } from "./password-reset";
+import { useToastAction } from "../../components/ui/toast/feedback";
 import { ManagedEmailReview } from "./email-review";
 import { can } from "@/core/accounts/permissions";
 import { UserPresetPicker } from "./preset-picker";
@@ -43,7 +45,7 @@ export function UserEditor({ id }: { id?: string }) {
   const actor = useAdminAccount(),
     { baseUrl, csrfToken } = useAdminRequest(),
     router = useRouter();
-  const action = useAccountAction();
+  const action = useToastAction();
   const presetReload = useAccountAction();
   const [presets, setPresets] = useState<UserPreset[]>([]);
   const [preset, setPreset] = useState<UserPreset | null | undefined>(
@@ -114,72 +116,80 @@ export function UserEditor({ id }: { id?: string }) {
       !!Object.keys(grants).length;
   const forbidden = saved?.role === "admin" && actor.role !== "admin";
   const save = () =>
-    action.run(async (signal) => {
-      if (!id) {
-        const input = {
-          username,
-          display_name: fields.display_name,
-          password,
-          role,
-          grants,
-          ...(preset !== undefined
-            ? {
-                preset: preset
-                  ? { id: preset.id, expected_revision: preset.revision }
-                  : null,
-              }
-            : {}),
-        };
-        const response = await createAccountUser(
-          baseUrl,
-          { ...input, operation_id: action.operation(input) },
-          csrfToken,
-          { signal },
-        );
-        if (!signal.aborted) {
-          setPassword("");
-          router.replace("/admin/users/" + response.data.id);
+    action.run(
+      async (signal) => {
+        if (!id) {
+          const input = {
+            username,
+            display_name: fields.display_name,
+            password,
+            role,
+            grants,
+            ...(preset !== undefined
+              ? {
+                  preset: preset
+                    ? { id: preset.id, expected_revision: preset.revision }
+                    : null,
+                }
+              : {}),
+          };
+          const response = await createAccountUser(
+            baseUrl,
+            { ...input, operation_id: action.operation(input) },
+            csrfToken,
+            { signal },
+          );
+          if (!signal.aborted) {
+            setPassword("");
+            router.replace("/admin/users/" + response.data.id);
+          }
+        } else if (saved) {
+          const input = {
+            expected_revision: saved.revision,
+            value: fields,
+            role,
+            active,
+            grants,
+            ...(preset !== undefined
+              ? {
+                  preset: preset
+                    ? { id: preset.id, expected_revision: preset.revision }
+                    : null,
+                }
+              : {}),
+          };
+          const response = await saveAccountUser(
+            baseUrl,
+            id,
+            { ...input, operation_id: action.operation(input) },
+            csrfToken,
+            { signal },
+          );
+          if (!signal.aborted) {
+            setSaved(response.data);
+            setFields(profileFields(response.data));
+            setGrants(response.data.grants);
+            setPreset(undefined);
+            if (id === actor.id && authorizationChanged)
+              router.replace("/login?next=%2Faccount");
+          }
         }
-      } else if (saved) {
-        const input = {
-          expected_revision: saved.revision,
-          value: fields,
-          role,
-          active,
-          grants,
-          ...(preset !== undefined
-            ? {
-                preset: preset
-                  ? { id: preset.id, expected_revision: preset.revision }
-                  : null,
-              }
-            : {}),
-        };
-        const response = await saveAccountUser(
-          baseUrl,
-          id,
-          { ...input, operation_id: action.operation(input) },
-          csrfToken,
-          { signal },
-        );
-        if (!signal.aborted) {
-          setSaved(response.data);
-          setFields(profileFields(response.data));
-          setGrants(response.data.grants);
-          setPreset(undefined);
-          if (id === actor.id && authorizationChanged)
-            router.replace("/login?next=%2Faccount");
-        }
-      }
-    });
+      },
+      id ? "用户资料已保存。" : "用户已创建。",
+    );
   return (
     <>
       <AdminPageHeading
         title={id ? "编辑用户" : "新建用户"}
         action={
-          <RouteLink href="/admin/users" className="admin-button">
-            <UiText text="返回用户列表" />
-          </RouteLink>
+          <div className="account-heading-actions">
+            {saved && !forbidden && saved.id !== actor.id && (
+              <ManagedPasswordReset user={saved} onChanged={setSaved} />
+            )}
+            <RouteLink href="/admin/users" className="admin-button">
+              <UiText text="返回用户列表" />
+            </RouteLink>
+          </div>
         }
       />
       {error && (
@@ -416,23 +426,12 @@ export function UserEditor({ id }: { id?: string }) {
                 </Button>
               </div>
             </div>
-            {action.message && (
-              <p className="account-message" role="status">
-                <UiText text={action.message} />
-              </p>
-            )}
           </fieldset>
         </Form>
       ) : (
         !error && <AdminLoadingState label="正在读取用户资料…" />
       )}
-      {saved && !forbidden && (
-        <ManagedUserSecurity
-          user={saved}
-          onChanged={setSaved}
-          isSelf={id === actor.id}
-        />
-      )}
+      {saved && !forbidden && <ManagedUserSecurity user={saved} />}
       <UnsavedAccountChanges dirty={dirty} busy={action.busy} />
     </>
   );

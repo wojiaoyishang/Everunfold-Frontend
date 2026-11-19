@@ -8,7 +8,8 @@ import {
   revokeAccountSession,
 } from "@/core/contracts/accounts";
 import { useAdminRequest } from "@/core/admin/account-context";
-import { accountFailure, useAccountAction } from "@/core/accounts/use-action";
+import { accountFailure } from "@/core/accounts/use-action";
+import { useToastAction } from "../components/ui/toast/feedback";
 import { UiText, useLocale } from "@/core/i18n/provider";
 import { Button, Form } from "../components/ui/primitives";
 import { Checkbox } from "../components/ui/checkbox";
@@ -26,8 +27,8 @@ export function AccountSecurity({
 }) {
   const { baseUrl, csrfToken } = useAdminRequest();
   const { uiLocale: locale } = useLocale();
-  const action = useAccountAction(),
-    sessionsAction = useAccountAction();
+  const action = useToastAction(),
+    sessionsAction = useToastAction(accountFailure, true);
   const [current, setCurrent] = useState(""),
     [password, setPassword] = useState(""),
     [confirmation, setConfirmation] = useState("");
@@ -73,7 +74,7 @@ export function AccountSecurity({
           onSubmit={(event) => {
             event.preventDefault();
             if (password !== confirmation) {
-              action.setMessage("两次输入的密码不一致。");
+              action.notify("两次输入的密码不一致。");
               return;
             }
             void action.run(async (signal) => {
@@ -149,9 +150,6 @@ export function AccountSecurity({
             </div>
           </fieldset>
         </Form>
-        <p className="account-message" role="status">
-          <UiText text={action.message} />
-        </p>
       </section>
       <section className="account-card">
         <header className="account-card-heading">
@@ -210,16 +208,12 @@ export function AccountSecurity({
             </Button>
           </div>
         )}
-        <p className="account-message" role="status">
-          <UiText text={sessionsAction.message} />
-        </p>
         <ConfirmDialog
           open={!!remove}
           title="撤销登录会话？"
           description="对应设备需要重新登录，当前会话保留。"
           confirmLabel="撤销会话"
           onCancel={() => setRemove(null)}
-          error={sessionsAction.message}
           onConfirm={() =>
             sessionsAction.run(async (signal) => {
               const input = { session_id: remove! };

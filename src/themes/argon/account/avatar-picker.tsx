@@ -5,7 +5,8 @@ import type { AvatarItem } from "@/core/contracts/accounts";
 import { useAvatarLibrary } from "@/core/accounts/avatar-library";
 import { useAdminRequest } from "@/core/admin/account-context";
 import { removeAccountAvatar } from "@/core/contracts/accounts";
-import { useAccountAction } from "@/core/accounts/use-action";
+import { accountFailure } from "@/core/accounts/use-action";
+import { useToastAction } from "../components/ui/toast/feedback";
 import { UiText, useT } from "@/core/i18n/provider";
 import { formatBytes } from "@/core/media/image-editor";
 import { Modal } from "../components/ui/modal";
@@ -29,7 +30,7 @@ export function AvatarPicker({
   onClose: () => void;
 }) {
   const library = useAvatarLibrary(),
-    action = useAccountAction();
+    action = useToastAction(accountFailure, true);
   const { baseUrl, csrfToken } = useAdminRequest();
   const [closing, setClosing] = useState(false),
     [selection, setSelection] = useState<AvatarItem | null>(null);
@@ -173,7 +174,6 @@ export function AvatarPicker({
                     : undefined
                 }
                 onClick={() => {
-                  action.setMessage("");
                   setRemove(item);
                 }}
               >
@@ -208,7 +208,6 @@ export function AvatarPicker({
         title="从个人头像图库移除？"
         description="已选为当前头像的图片需先更换。移除后不能直接恢复，但可以重新上传。"
         confirmLabel="移除图片"
-        error={action.message}
         onCancel={() => setRemove(null)}
         onConfirm={() =>
           action.run(async (signal) => {

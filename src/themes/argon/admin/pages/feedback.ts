@@ -1,26 +1,11 @@
 "use client";
 
-import { useEffect, useEffectEvent, useId, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useAccountAction } from "@/core/accounts/use-action";
-import { useT } from "@/core/i18n/provider";
 import { pagesFailure } from "@/core/pages/failure";
-import { useToast } from "../../components/ui/toast/toast-provider";
-import type { ToastTone } from "../../components/ui/toast/store";
+import { useToastFeedback as usePageFeedback } from "../../components/ui/toast/feedback";
 
-export function usePageFeedback() {
-  const toast = useToast();
-  const id = useId();
-  const t = useT();
-  return (message: string, tone: ToastTone = "error") =>
-    toast.show({
-      id,
-      title: t(message),
-      tone,
-      placement: "top-center",
-      countdown: true,
-      duration: tone === "error" ? 7500 : 4500,
-    });
-}
+export { usePageFeedback };
 
 export function usePageErrorToast(error: string) {
   const notify = usePageFeedback();

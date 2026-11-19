@@ -905,6 +905,11 @@
   padding: 16px 0;
   border-bottom: 1px solid var(--admin-border);
 }
+.account-user-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .account-user-identity {
   display: flex;
   flex-direction: column;
@@ -969,7 +974,7 @@
   .account-user-date {
     display: none;
   }
-  .account-user-row > .ui-link {
+  .account-user-actions {
     grid-column: 2;
     justify-self: start;
     margin-top: 4px;
