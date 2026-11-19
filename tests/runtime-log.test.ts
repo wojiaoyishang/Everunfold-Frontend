@@ -26,7 +26,7 @@ test("access logs retain request diagnostics without query values", async (t) =>
     outboundToken: "",
   });
   const server = createServer((request, response) => {
-    access.observe(request, response, request.url!.split("?", 1)[0]);
+    access.observe(request, response, request.url!);
     response.end();
   });
   server.listen(0, "127.0.0.1");
@@ -44,6 +44,7 @@ test("access logs retain request diagnostics without query values", async (t) =>
   assert.equal(lines.length, 2);
   const [accessRecord, appRecord] = lines.map((line) => JSON.parse(line));
   assert.equal(accessRecord.request_url, "/health/live");
+  assert.equal(accessRecord.message, "GET /health/live → 200");
   assert.equal(accessRecord.user_agent, "Everunfold-Test/1.0");
   assert.equal(accessRecord.node_id, "log-tests");
   assert.equal(accessRecord.outcome, "completed");

@@ -239,7 +239,7 @@ export function frontendHTTPAccess({
       // Absolute-form HTTP request targets can contain authority or user info.
       const url =
         pathname.startsWith("/") && !pathname.startsWith("//")
-          ? pathname.split("#", 1)[0].slice(0, 2048)
+          ? pathname.split(/[?#]/, 1)[0].slice(0, 2048)
           : null;
       const observation = requestIPObservation(
         request,
@@ -247,25 +247,21 @@ export function frontendHTTPAccess({
         performance.now() < expires ? active : undefined,
       );
       response.once("close", () => {
+        const target = url ? `${request.method} ${url}` : request.method;
         const status = response.headersSent ? response.statusCode : null;
         const outcome = response.writableFinished ? "completed" : "aborted";
-        runtimeLogger.info(
-          "http_access",
-          `${request.method} → ${status ?? outcome}`,
-          {
-            request_id: requestId,
-            request_url: url,
-            http_version: request.httpVersion,
-            user_agent: userAgent,
-            node_id: nodeId,
-            method: request.method,
-            status,
-            outcome,
-            duration_ms:
-              Math.round((performance.now() - started) * 1000) / 1000,
-            ...observation,
-          },
-        );
+        runtimeLogger.info("http_access", `${target} → ${status ?? outcome}`, {
+          request_id: requestId,
+          request_url: url,
+          http_version: request.httpVersion,
+          user_agent: userAgent,
+          node_id: nodeId,
+          method: request.method,
+          status,
+          outcome,
+          duration_ms: Math.round((performance.now() - started) * 1000) / 1000,
+          ...observation,
+        });
       });
       if (pathname !== probePath) return false;
       const approved =
