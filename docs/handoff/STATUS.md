@@ -3,6 +3,7 @@
 
 ## Docker 容器软件源
 
+- 独立前端在首次执行 HTTPS APT 更新前，从所选 Python 基础镜像补齐缺失的 CA 文件。实际解包 Node 22.15.1 Bookworm 镜像复现证书报错，随后验证中科大主源、安全更新源及 `ca-certificates`、`git`、`rsync` 安装成功。
 - 独立前端向导保存官方、清华 TUNA、中科大 USTC 和自定义方案，支持当前构建使用的软件源及基础镜像引用。依赖安装保留锁定版本和哈希。
 - 隔离本地镜像使用 uv 0.9.0 和 npm 10 实测索引、带路径前缀的 Registry 和依赖哈希。Docker 构建参数和配置通过测试，本环境没有 Docker daemon。
 

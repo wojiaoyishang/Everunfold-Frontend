@@ -1,5 +1,7 @@
 ARG EVERUNFOLD_NODE_IMAGE=node:22.15.1-bookworm-slim
+ARG EVERUNFOLD_PYTHON_IMAGE=python:3.12-slim-bookworm
 
+FROM ${EVERUNFOLD_PYTHON_IMAGE} AS debian-ca
 FROM ${EVERUNFOLD_NODE_IMAGE} AS everunfold-frontend-runtime
 
 ARG BUILD_REVISION=unknown
@@ -14,8 +16,13 @@ ENV EVERUNFOLD_IMAGE_REVISION=${BUILD_REVISION}
 
 ARG EVERUNFOLD_APT_MIRROR
 ARG EVERUNFOLD_APT_SECURITY_MIRROR
+# Some slim Node images omit the trust store needed for the first HTTPS APT update.
 RUN --mount=type=bind,source=docker/apt-mirrors.sh,target=/tmp/apt-mirrors.sh \
-    sh /tmp/apt-mirrors.sh && apt-get -o APT::Update::Error-Mode=any update \
+    --mount=type=bind,from=debian-ca,source=/etc/ssl/certs/ca-certificates.crt,target=/tmp/debian-ca.crt \
+    if [ ! -s /etc/ssl/certs/ca-certificates.crt ]; then \
+        install -D -m 0644 /tmp/debian-ca.crt /etc/ssl/certs/ca-certificates.crt; \
+    fi \
+    && sh /tmp/apt-mirrors.sh && apt-get -o APT::Update::Error-Mode=any update \
     && apt-get install -y --no-install-recommends ca-certificates git rsync \
     && rm -rf /var/lib/apt/lists/* \
     && install -d -o node -g node /build /output /plugins /data \

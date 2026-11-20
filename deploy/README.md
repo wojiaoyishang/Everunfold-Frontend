@@ -68,6 +68,8 @@ export CONFIG_FILE=/opt/everunfold/config/frontend/config.yaml
 
 APT 主源和安全更新源用于构建运行镜像，npm Registry 用于编译前端主体和插件。PyPI 索引用于构建配置助手镜像。
 
+Node.js 基础镜像缺少 CA 文件时，构建会先从所选的 Python 基础镜像导入 Debian CA，再访问 HTTPS 软件源。自定义 Python 镜像需包含 `/etc/ssl/certs/ca-certificates.crt`。
+
 清华和中科大方案使用各自的 Debian、Debian Security 和 PyPI 镜像，npm 使用 npmmirror。自定义方案可按项填入 HTTP/HTTPS 源地址。PyPI 地址须指向 Simple API，留空使用该工具的官方源。安装继续按仓库锁文件校验版本与哈希。
 
 可单独填写 Node.js、Python 和 uv 基础镜像引用，例如 `registry.example.com/mirror/python:3.12-slim-bookworm`。使用私有仓库时先用 Docker 登录，并选择与默认镜像同版本、同发行版的副本。
