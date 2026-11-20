@@ -8,6 +8,9 @@ x-frontend-image: &frontend-image
     args:
       BUILD_REVISION: ${EVERUNFOLD_BUILD_REVISION:-unknown}
       BUILD_CREATED: ${EVERUNFOLD_BUILD_CREATED:-unknown}
+      EVERUNFOLD_NODE_IMAGE: ${EVERUNFOLD_NODE_IMAGE:-node:22.15.1-bookworm-slim}
+      EVERUNFOLD_APT_MIRROR: ${EVERUNFOLD_APT_MIRROR:-}
+      EVERUNFOLD_APT_SECURITY_MIRROR: ${EVERUNFOLD_APT_SECURITY_MIRROR:-}
   user: "${EVERUNFOLD_UID:-1000}:${EVERUNFOLD_GID:-1000}"
 
 services:
@@ -51,6 +54,7 @@ services:
     environment:
       FRONTEND_BUILD_WORKERS: "${FRONTEND_BUILD_WORKERS:-2}"
       NODE_OPTIONS: "${FRONTEND_BUILD_NODE_OPTIONS:---max-old-space-size=3072}"
+      EVERUNFOLD_NPM_REGISTRY: "${EVERUNFOLD_NPM_REGISTRY:-}"
     healthcheck:
       disable: true
     volumes:

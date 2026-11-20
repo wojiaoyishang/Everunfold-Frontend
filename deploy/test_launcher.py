@@ -26,6 +26,8 @@ statefile = log.with_suffix(".state")
 state = json.loads(statefile.read_text()) if statefile.exists() else {"next": 0, "containers": {}}
 containers = state["containers"]
 def save(): statefile.write_text(json.dumps(state))
+if args[:2] == ["image", "inspect"] and os.environ.get("DOCKER_TEST_BUILD_ASSISTANT"):
+    raise SystemExit(1)
 def execute(arguments):
     failure = os.environ.get("DOCKER_TEST_FAIL")
     if failure and failure in arguments: return 23
@@ -215,6 +217,54 @@ class LauncherTests(unittest.TestCase):
         )
         calls = [json.loads(line) for line in self.log.read_text().splitlines()]
         return result, calls
+
+    def test_container_mirrors_materialize_and_bootstrap_for_this_config(self):
+        config = self.repo / "config.yaml"
+        document = yaml.safe_load(config.read_text())
+        document["docker"].update(
+            EVERUNFOLD_MIRROR_PROFILE="ustc",
+            EVERUNFOLD_PYTHON_IMAGE="registry.example.test/python:3.12-slim-bookworm",
+            EVERUNFOLD_UV_IMAGE="registry.example.test/uv:0.9.0",
+        )
+        config.write_text(yaml.safe_dump(document))
+
+        for first in (True, False):
+            env = {**self.env, "DOCKER_TEST_BUILD_ASSISTANT": "1"}
+            if first:
+                env["EVERUNFOLD_MIRROR_PROFILE"] = "tuna"
+            result = subprocess.run(
+                [self.repo / "setup.sh", "--docker", "render"],
+                cwd=self.repo, env=env, capture_output=True, text=True,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            calls = [json.loads(line) for line in self.log.read_text().splitlines()]
+            build = [call for call in calls if call[0] == "build"][-1]
+            registry = (
+                "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+                if first else "https://mirrors.ustc.edu.cn/pypi/simple"
+            )
+            self.assertIn("EVERUNFOLD_PYPI_INDEX=" + registry, build)
+            if not first:
+                self.assertIn("EVERUNFOLD_UV_IMAGE=registry.example.test/uv:0.9.0", build)
+
+        from config_files import env_values
+
+        effective = env_values((self.docker / ".env").read_text())
+        self.assertEqual(effective["EVERUNFOLD_PYPI_INDEX"], "https://mirrors.ustc.edu.cn/pypi/simple")
+        if not BACKEND:
+            self.assertEqual(effective["EVERUNFOLD_APT_MIRROR"], "https://mirrors.ustc.edu.cn/debian")
+            self.assertEqual(effective["EVERUNFOLD_NPM_REGISTRY"], "https://registry.npmmirror.com/")
+        self.assertEqual(yaml.safe_load(config.read_text())["docker"], document["docker"])
+
+    def test_plugin_build_rejects_a_legacy_image_when_npm_mirror_is_configured(self):
+        selected = self.repo / "config.yaml"
+        document = yaml.safe_load(selected.read_text())
+        document["docker"]["EVERUNFOLD_MIRROR_PROFILE"] = "tuna"
+        selected.write_text(yaml.safe_dump(document))
+        result, calls = self.run_action("build-plugins")
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("当前镜像未支持 npm 镜像源", result.stderr)
+        self.assertFalse(any(call[0] == "compose" and "builder" in call for call in calls))
 
     def test_custom_config_is_shared_with_runtime_without_a_shadow_copy(self):
         selected = self.root / "private config" / "selected.yaml"

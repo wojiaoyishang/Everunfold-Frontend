@@ -33,7 +33,7 @@ prepare_source() {
   cd "$build_root"
 
   build_log "Installing locked npm dependencies; download cache: $npm_config_cache."
-  npm ci --ignore-scripts --include=dev --no-audit --prefer-offline --loglevel=verbose --timing
+  /usr/local/bin/everunfold-npm-ci
 }
 
 build() {

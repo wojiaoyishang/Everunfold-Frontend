@@ -11,6 +11,7 @@ from uuid import UUID
 
 from config_context import Context
 from config_files import env_values, toml_text, update_env
+from config_mirrors import PROFILE, add_mirror_fields, source_keys
 from config_model import Configuration, Field
 from config_probes import frontend_checks
 from config_validation import (
@@ -152,6 +153,12 @@ def configure(native: bool = False) -> Configuration:
         return source
 
     container_mapping, container_errors, pending_network = add_container_fields(ctx, add, value)
+    mirrors = {
+        **{key: os.environ[key] for key in (PROFILE, *source_keys("frontend")) if key in os.environ},
+        **compose,
+    }
+    mirror_mapping = add_mirror_fields(add, value, mirrors, "frontend", lambda: not native)
+
 
     add(
         "connection_base64",
@@ -413,7 +420,9 @@ def configure(native: bool = False) -> Configuration:
         }
         if profile_path and profiles is not None:
             outputs[profile_path] = toml_text(profiles)
-        outputs[ctx.compose_path] = update_env(outputs[ctx.compose_path], container_mapping())
+        outputs[ctx.compose_path] = update_env(
+            outputs[ctx.compose_path], container_mapping() | mirror_mapping()
+        )
         ctx.write(
             outputs,
             connection_profiles=profiles,

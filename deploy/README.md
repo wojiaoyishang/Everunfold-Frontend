@@ -62,6 +62,28 @@ export CONFIG_FILE=/opt/everunfold/config/frontend/config.yaml
 
 浏览器将在下次插件检查时加载新版，正在使用的编辑器会在重新打开时应用。新插件的启用仍在站点后台设置中完成。`plugin-inbox` 保留输入包，可清理不再打算发布的目录。宿主或插件 SDK 需要升级时，使用完整的构建和启动流程。
 
+## 容器软件源
+
+在 Docker 向导的「容器软件源 → 镜像源方案」选择官方源（默认）、清华 TUNA、中科大 USTC 或自定义。
+
+APT 主源和安全更新源用于构建运行镜像，npm Registry 用于编译前端主体和插件。PyPI 索引用于构建配置助手镜像。
+
+清华和中科大方案使用各自的 Debian、Debian Security 和 PyPI 镜像，npm 使用 npmmirror。自定义方案可按项填入 HTTP/HTTPS 源地址。PyPI 地址须指向 Simple API，留空使用该工具的官方源。安装继续按仓库锁文件校验版本与哈希。
+
+可单独填写 Node.js、Python 和 uv 基础镜像引用，例如 `registry.example.com/mirror/python:3.12-slim-bookworm`。使用私有仓库时先用 Docker 登录，并选择与默认镜像同版本、同发行版的副本。
+
+保存后运行 `./setup.sh --docker build`，再运行 `./setup.sh --docker start` 应用新产物。
+
+单独编译插件也会使用保存的 npm Registry。首次升级此功能时需先完整构建支持镜像源的运行镜像。
+
+第一次打开向导时可用环境变量给配置助手选择下载源，也可提前准备 Python 和 uv 的仓库副本。
+
+```bash
+EVERUNFOLD_MIRROR_PROFILE=tuna ./setup.sh --docker
+```
+
+预设值为 `official`、`tuna`、`ustc`、`custom`。自定义启动索引可用 `EVERUNFOLD_PYPI_INDEX` 指定，基础镜像分别用 `EVERUNFOLD_PYTHON_IMAGE` 和 `EVERUNFOLD_UV_IMAGE` 指定。首次保存并渲染配置后，后续启动自动读取为当前 `CONFIG_FILE` 派生的镜像设置。
+
 ## 一、Docker 从零构建与部署
 
 ### 1. 准备环境和源码

@@ -8,6 +8,7 @@ from pathlib import Path
 
 import yaml
 from config_files import Files, env_values, toml_text, update_env
+from config_mirrors import BOOTSTRAP_KEYS, resolve_sources
 
 
 class ConfigLoader(yaml.SafeLoader):
@@ -155,8 +156,9 @@ class Context:
                 config.setdefault("settings", {})["source_epoch"] = epoch
         for section, key, directory in self.directories():
             config.setdefault(section, {}).setdefault(key, self.runtime_path(directory))
+        sources = resolve_sources(self.compose, self.role) if not self.native else {}
         # Process ports have one source: root environment. Compose names are derived.
-        mapping = dict(self.compose)
+        mapping = self.compose | sources
         mapping["EVERUNFOLD_CONFIG_DIR"] = str(self.root_path.parent)
         mapping["EVERUNFOLD_CONFIG_NAME"] = self.root_path.name
         port_names = (
@@ -185,6 +187,10 @@ class Context:
         if any("\n" in v or "\r" in v for v in self.env.values()):
             raise ValueError("环境变量必须是单行值。")
         outputs[raw_env] = "".join(f"{key}={value}\n" for key, value in self.env.items())
+        if not self.native:
+            mirror_cache = self.root_path.with_name(f".{self.root_path.name}.build-mirrors.env")
+            self.files.read(mirror_cache)
+            outputs[mirror_cache] = "".join(f"{key}={sources[key]}\n" for key in BOOTSTRAP_KEYS)
         self.files.write(outputs)
         for _, _, directory in self.directories():
             (self.data / directory).mkdir(parents=True, exist_ok=True)

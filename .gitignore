@@ -81,3 +81,6 @@ Thumbs.db
 /config.runtime.toml
 /config.runtime.toml.*.bak
 /docker/runtime.env.docker
+
+# Derived standalone Docker assistant mirror settings
+.*.build-mirrors.env

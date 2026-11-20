@@ -54,10 +54,17 @@ command -v docker >/dev/null || { echo "需要 Docker Engine 和 Compose v2。" 
 docker info >/dev/null || { echo "无法连接 Docker daemon。" >&2; exit 1; }
 if [[ "$action" != hot-update-frontend ]]; then docker compose version >/dev/null; fi
 printf '\n\033[1;36mEverunfold · %s · Docker 部署助手\033[0m\n' "$role"
-read -r checksum _ < <(cat "$docker_dir/setup/Dockerfile" "$deploy_dir/assistant/uv.lock" | cksum)
+source "$deploy_dir/bootstrap-mirrors.sh"
+read -r checksum _ < <(
+  {
+    cat "$docker_dir/setup/Dockerfile" "$docker_dir/uv-sync.sh" \
+      "$deploy_dir/assistant/pyproject.toml" "$deploy_dir/assistant/uv.lock"
+    printf '%s\n' "${bootstrap_mirror_args[@]}"
+  } | cksum
+)
 setup_image="everunfold-setup:1-$checksum"
 if ! docker image inspect "$setup_image" >/dev/null 2>&1; then
-  docker build --progress=plain -t "$setup_image" -f "$docker_dir/setup/Dockerfile" "$project_root"
+  docker build --progress=plain "${bootstrap_mirror_args[@]}" -t "$setup_image" -f "$docker_dir/setup/Dockerfile" "$project_root"
 fi
 base=(-e "CONFIG_FILE=$CONFIG_FILE" --user "$(id -u):$(id -g)" -e PYTHONDONTWRITEBYTECODE=1 --workdir "$project_root")
 mount_args=()
@@ -204,7 +211,7 @@ if [[ "$action" == configure ]]; then
     subnets="$(docker network inspect --format '{{range .IPAM.Config}}{{if .Subnet}}{{.Subnet}},{{end}}{{end}}' "$net")"
     network_subnets+="$net=${subnets//$'\n'/}"$'\n'
   done
-  ui_args=()
+  ui_args=("${bootstrap_mirror_env[@]}")
   if [[ -n "${EVERUNFOLD_CONNECTION_BASE64:-}" ]]; then
     ui_args+=(-e EVERUNFOLD_CONNECTION_BASE64)
   fi
@@ -270,6 +277,14 @@ if [[ "$action" == build-plugins || "$action" == hot-update-frontend ]]; then
   }
   ensure_networks
   run_tool render
+  npm_registry=${EVERUNFOLD_NPM_REGISTRY-}
+  if [[ ! -v EVERUNFOLD_NPM_REGISTRY ]]; then
+    npm_registry="$(sed -n 's/^EVERUNFOLD_NPM_REGISTRY="\([^"]*\)"$/\1/p' "$docker_dir/.env")"
+  fi
+  if [[ -n "$npm_registry" ]] &&
+     [[ "$(docker image inspect --format '{{index .Config.Labels "org.everunfold.build.npm-mirror"}}' "$image_name")" != 1 ]]; then
+    echo "当前镜像未支持 npm 镜像源，请先完整构建一次。" >&2; exit 1
+  fi
   staging="$(mktemp -d "$data_dir/.plugin-build.XXXXXXXX")"
   trap 'rm -rf -- "$staging"' EXIT
   FRONTEND_PLUGIN_OUTPUT_DIR="$staging" "${compose[@]}" run --rm --no-build builder build-plugins

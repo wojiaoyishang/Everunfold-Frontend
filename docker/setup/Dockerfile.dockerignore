@@ -6,3 +6,4 @@
 !docker/
 !docker/setup/
 !docker/setup/Dockerfile
+!docker/uv-sync.sh

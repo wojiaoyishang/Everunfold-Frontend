@@ -974,6 +974,7 @@ class PtyTests(Fixtures, unittest.TestCase):
         for filename in DOCKER.glob("*.py"):
             if filename.name != Path(__file__).name:
                 shutil.copy(filename, self.docker / filename.name)
+        shutil.copy(DOCKER / "mirror-presets.env", self.docker)
         master, slave = pty.openpty()
         fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 38, 110, 0, 0))
         original = termios.tcgetattr(slave)

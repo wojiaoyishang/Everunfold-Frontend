@@ -4,3 +4,6 @@
 !docker/entrypoint.sh
 !deploy/
 !deploy/check.mjs
+!deploy/healthcheck.mjs
+!docker/apt-mirrors.sh
+!docker/npm-ci.sh
