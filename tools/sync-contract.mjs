@@ -1,3 +1,4 @@
+import { readPinnedContract } from "./pinned-contract.mjs";
 import { writeArtifact } from "./write-artifact.mjs";
 import { generateSettingsClient } from "./settings-contract-client.mjs";
 import { generateGlossaryClient } from "./glossary-contract-client.mjs";
@@ -45,39 +46,14 @@ if (locked) {
   )
     throw new Error("Invalid contract lock.");
   commit = pin.source_commit;
-  try {
-    source = execFileSync("git", ["show", `${commit}:${relativeSource}`], {
-      cwd: backendRoot,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    });
-  } catch {
-    source = await readFile(
-      path.join(
-        projectRoot,
-        "var/cache/contracts",
-        path.basename(relativeSource),
-      ),
-      "utf8",
-    ).catch(() => null);
-    if (
-      !source ||
-      createHash("sha256")
-        .update(source.replaceAll("\r\n", "\n"))
-        .digest("hex") !== pin.sha256
-    ) {
-      const url = `https://raw.githubusercontent.com/wojiaoyishang/Everunfold-Backend/${commit}/${relativeSource}`;
-      const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
-      if (!response.ok)
-        throw new Error(
-          "Pinned contract unavailable. Set EVERUNFOLD_BACKEND_PATH to a checkout containing the locked commit.",
-        );
-      source = await response.text();
-    }
-  }
-  source = source.replaceAll("\r\n", "\n");
-  if (createHash("sha256").update(source).digest("hex") !== pin.sha256)
-    throw new Error("Pinned contract SHA256 mismatch.");
+  source = await readPinnedContract({
+    backendRoot,
+    relativeSource,
+    pin,
+    output: process.env.EVERUNFOLD_CONTRACT_OUTPUT
+      ? path.resolve(process.env.EVERUNFOLD_CONTRACT_OUTPUT)
+      : path.join(projectRoot, "var/cache/contracts"),
+  });
 } else {
   source = (await readFile(absoluteSource, "utf8")).replaceAll("\r\n", "\n");
   const committed = execFileSync("git", ["show", `HEAD:${relativeSource}`], {

@@ -1,4 +1,5 @@
-import { isIP } from "node:net";
+import { BlockList, isIP } from "node:net";
+import { networkInterfaces } from "node:os";
 
 export class ConfigurationError extends Error {
   constructor(message: string) {
@@ -21,6 +22,7 @@ export interface FrontendConfiguration {
     passwordHash: string | undefined;
     sessionSecretEnv: string;
     trustedTlsProxyIps: string[];
+    allowedPeerIps: string[];
   };
   backend: {
     baseUrl: string;
@@ -116,6 +118,7 @@ function monitorConfig(
   value: unknown,
   publicSiteUrl: string | undefined,
   dockerProxyIps: string | undefined,
+  dockerAllowedPeers: string | undefined,
 ): FrontendConfiguration["nodesMonitor"] {
   const monitor = configObject(value ?? {}, "nodes_monitor");
   configKeys(
@@ -126,6 +129,7 @@ function monitorConfig(
       "password_hash",
       "session_secret_env",
       "trusted_tls_proxy_ips",
+      "allowed_peer_ips",
     ],
     "nodes_monitor",
   );
@@ -176,6 +180,12 @@ function monitorConfig(
     origin: origin?.origin,
     passwordHash: hash,
     trustedTlsProxyIps,
+    allowedPeerIps: [
+      ...new Set([
+        ...peerAddresses(monitor.allowed_peer_ips),
+        ...containerPeers(dockerAllowedPeers),
+      ]),
+    ],
     sessionSecretEnv:
       tokenReference(
         monitor.session_secret_env,
@@ -233,11 +243,45 @@ function containerPeers(value: string | undefined): string[] {
   return peers;
 }
 
+function networkListener(cidrs: string): string {
+  const networks = new BlockList();
+  for (const cidr of cidrs.split(",")) {
+    const [address, prefix] = cidr.split("/");
+    networks.addSubnet(
+      address,
+      Number(prefix),
+      isIP(address) === 6 ? "ipv6" : "ipv4",
+    );
+  }
+  const addresses = Object.values(networkInterfaces()).flatMap(
+    (items) => items ?? [],
+  );
+  const matching = addresses
+    .filter(
+      (item) => !item.internal && (!("scopeid" in item) || item.scopeid === 0),
+    )
+    .filter((item) =>
+      networks.check(item.address, item.family === "IPv6" ? "ipv6" : "ipv4"),
+    );
+  const ipv4 = matching.filter((item) => item.family === "IPv4");
+  const preferred = [
+    ...new Set((ipv4.length ? ipv4 : matching).map((item) => item.address)),
+  ];
+  if (preferred.length !== 1)
+    throw new ConfigurationError(
+      "无法在所选 Docker 网络上确定唯一监听地址，请核对容器网络。",
+    );
+  return preferred[0];
+}
+
 /** One socket for web pages, node diagnostics and authenticated internal sync. */
 export function listenerConfiguration(
   environment: Record<string, string | undefined>,
 ) {
-  const host = environment.FRONTEND_HOST ?? "0.0.0.0";
+  const cidrs = environment.EVERUNFOLD_LISTEN_CIDRS;
+  const host = cidrs
+    ? networkListener(cidrs)
+    : (environment.FRONTEND_HOST ?? "0.0.0.0");
   const rawPort = environment.FRONTEND_PORT ?? "3000";
   if (!isIP(host)) throw new ConfigurationError("FRONTEND_HOST 必须为监听 IP");
   const port = Number(rawPort);
@@ -379,6 +423,7 @@ export function parseConfiguration(
       root.nodes_monitor,
       publicSiteUrl,
       environment.EVERUNFOLD_NODES_TLS_PROXY_IPS,
+      environment.EVERUNFOLD_FRONTEND_NODES_ALLOWED_PEERS,
     ),
     backend: {
       baseUrl:

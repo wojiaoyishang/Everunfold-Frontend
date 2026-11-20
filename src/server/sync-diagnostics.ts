@@ -5,6 +5,7 @@ const reasons: Record<string, string> = {
     "来源 IP 未获允许；核对 setup 中允许内部调用的 Docker 网络及手填来源",
   monitor_proxy_untrusted:
     "节点控制台的直连来源未获信任；核对 setup 中宿主机反代所在网络或手填代理 IP",
+  monitor_peer_not_allowed: "节点控制台的直连来源不在允许列表",
   monitor_https_required: "节点控制台需要反代发送 X-Forwarded-Proto: https",
   token_missing:
     "缺少 Authorization；检查后端到前端的节点令牌及反向代理是否保留请求头",

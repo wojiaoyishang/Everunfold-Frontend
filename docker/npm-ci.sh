@@ -3,6 +3,7 @@ set -euo pipefail
 
 options=(--ignore-scripts --include=dev --no-audit --prefer-offline --loglevel=verbose --timing)
 if [[ -z "${EVERUNFOLD_NPM_REGISTRY:-}" ]]; then
+  printf '[build] npm Registry: %s\n' "$(npm config get registry)"
   exec npm ci "${options[@]}"
 fi
 
@@ -32,4 +33,5 @@ for (const pkg of Object.values(lockfile.packages)) {
 }
 process.stdout.write(JSON.stringify(lockfile));
 JS
+printf '[build] npm Registry: %s\n' "$npm_config_registry"
 npm ci "${options[@]}"

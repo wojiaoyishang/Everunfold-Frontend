@@ -25,22 +25,43 @@ export function withNodeRequestPeer<T>(
   );
 }
 
-export function acceptsNodeConsoleProxy(
+export function acceptsNodeConsolePeer(
   monitor: FrontendConfiguration["nodesMonitor"],
 ): boolean {
+  const peer = peers.getStore();
+  const address = peer?.address ?? "";
+  const version = isIP(address);
+  const family = version === 6 ? "ipv6" : "ipv4";
+  if (monitor.allowedPeerIps.length) {
+    const allowed = new BlockList();
+    for (const rule of monitor.allowedPeerIps) {
+      const [host, prefix] = rule.split("/");
+      const kind = isIP(host) === 6 ? "ipv6" : "ipv4";
+      if (prefix === undefined) allowed.addAddress(host, kind);
+      else allowed.addSubnet(host, Number(prefix), kind);
+    }
+    if (!version || !allowed.check(address, family)) {
+      syncFailure(
+        {
+          direction: "local",
+          operation: "node console source",
+          peer: address,
+          status: 404,
+        },
+        "monitor_peer_not_allowed",
+      );
+      return false;
+    }
+  }
   if (
     !monitor.origin?.startsWith("https:") ||
     !monitor.trustedTlsProxyIps.length
   )
     return true;
-  const peer = peers.getStore();
-  const address = peer?.address ?? "";
-  const version = isIP(address);
   const trusted = new BlockList();
   for (const ip of monitor.trustedTlsProxyIps)
     trusted.addAddress(ip, isIP(ip) === 6 ? "ipv6" : "ipv4");
-  const allowed =
-    version !== 0 && trusted.check(address, version === 6 ? "ipv6" : "ipv4");
+  const allowed = version !== 0 && trusted.check(address, family);
   if (allowed && peer?.forwardedHttps) return true;
   syncFailure(
     {

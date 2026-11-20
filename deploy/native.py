@@ -86,18 +86,18 @@ def main() -> None:
         )
         environment["FRONTEND_BUILD_WORKERS"] = ctx.compose.get("FRONTEND_BUILD_WORKERS", "2")
         environment["npm_config_cache"] = str(ctx.data / "npm-cache")
-        execute(
-            [
-                "npm",
-                "ci",
-                "--ignore-scripts",
-                "--include=dev",
-                "--prefer-offline",
-                "--loglevel=verbose",
-                "--timing",
-            ],
-            cwd,
+        environment.setdefault(
+            "EVERUNFOLD_CONTRACT_CACHE", str(ctx.data / "npm-cache/everunfold-contracts")
         )
+        if ctx.compose.get("EVERUNFOLD_CONTRACT_BASE_URL"):
+            environment.setdefault(
+                "EVERUNFOLD_CONTRACT_BASE_URL", ctx.compose["EVERUNFOLD_CONTRACT_BASE_URL"]
+            )
+        backend_path = ctx.compose.get("EVERUNFOLD_BACKEND_PATH", str(ROOT.with_name("Everunfold-Backend")))
+        environment.setdefault("EVERUNFOLD_BACKEND_PATH", str(Path(backend_path).expanduser().resolve()))
+        if ctx.compose.get("EVERUNFOLD_NPM_REGISTRY"):
+            environment.setdefault("EVERUNFOLD_NPM_REGISTRY", ctx.compose["EVERUNFOLD_NPM_REGISTRY"])
+        execute(["bash", str(ROOT / "docker/npm-ci.sh")], cwd)
 
     def compile_plugins(output: Path, cwd: Path = ROOT) -> None:
         execute(["npm", "run", "plugins:build", "--", "--output", str(output)], cwd)

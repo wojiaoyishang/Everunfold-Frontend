@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { readConfiguration } from "@/core/config/server";
-import { acceptsNodeConsoleProxy } from "@/server/nodes/request-peer";
+import { acceptsNodeConsolePeer } from "@/server/nodes/request-peer";
 import { NodeConsole } from "@/themes/argon/admin/nodes/console";
 import "@/themes/argon/admin/admin.css";
 
@@ -18,7 +18,7 @@ export default async function NodesPage() {
     !nodesMonitor.origin ||
     (await headers()).get("host")?.toLowerCase() !==
       new URL(nodesMonitor.origin).host ||
-    !acceptsNodeConsoleProxy(nodesMonitor)
+    !acceptsNodeConsolePeer(nodesMonitor)
   )
     notFound();
   return <NodeConsole />;

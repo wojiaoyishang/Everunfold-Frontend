@@ -86,6 +86,14 @@ EVERUNFOLD_MIRROR_PROFILE=tuna ./setup.sh --docker
 
 预设值为 `official`、`tuna`、`ustc`、`custom`。自定义启动索引可用 `EVERUNFOLD_PYPI_INDEX` 指定，基础镜像分别用 `EVERUNFOLD_PYTHON_IMAGE` 和 `EVERUNFOLD_UV_IMAGE` 指定。首次保存并渲染配置后，后续启动自动读取为当前 `CONFIG_FILE` 派生的镜像设置。
 
+前端主体和插件构建都从 `docker/.env` 明确读取选定的 npm Registry，安装日志会显示地址。npm 镜像服务处理依赖，后端契约由独立的固定版本来源提供。
+
+### 后端契约来源
+
+独立 Docker 向导会自动查找前端源码旁的 `Everunfold-Backend`，并只读挂载给构建容器。其他位置可在 `config.yaml` 的 `docker` 段设置 `EVERUNFOLD_BACKEND_PATH: "/opt/everunfold/Everunfold-Backend"`。请使用包含锁定提交的检出目录。原生设置也支持同名环境变量。验证过的契约缓存于前端数据目录的 `npm-cache/everunfold-contracts/`。
+
+缺少可验证的本地契约时，构建会使用 GitHub 下载，Raw 地址不可用时尝试 GitHub Contents API。可通过 `docker.EVERUNFOLD_CONTRACT_BASE_URL` 指定自建 HTTPS 镜像的仓库根地址（其下提供 `<提交>/contracts/<文件>`）；也支持同名环境变量。每份文件通过 `contracts.lock.json` 中的 SHA-256 校验才会生成客户端。
+
 ## 一、Docker 从零构建与部署
 
 ### 1. 准备环境和源码
@@ -131,7 +139,7 @@ mkdir -p docker/data
 
 界面先显示全部配置，支持顺序配置、修改选中项、退出。左右键移动输入光标，上下键回显本项会话历史，Ctrl+U 清空；URL 回显，令牌在总览遮盖、编辑时可查看。
 
-“节点控制台”分组可设置**启用开关（1/0）、本机配置密码和会话密钥**。新配置自动生成随机密码，可查看、复制、修改或重新生成；已有哈希时留空保留。入口是前端发布 URL 下的 `/admin/_nodes`，跟随 `PUBLIC_SITE_URL`，不会被旧 `nodes_monitor.origin` 覆盖。**本机配置密码可在后端在线、离线或拒绝连接时使用**，授权查看本机状态、新增和编辑连接。全站状态与后端节点管理仍须后端管理员身份。可为该控制台指定宿主机反代网络或直接来源 IP，Node 会核对真实连接对端。
+“节点控制台”分组可设置**启用开关（1/0）、本机配置密码和会话密钥**。新配置自动生成随机密码，可查看、复制、修改或重新生成；已有哈希时留空保留。入口是前端发布 URL 下的 `/admin/_nodes`，跟随 `PUBLIC_SITE_URL`，不会被旧 `nodes_monitor.origin` 覆盖。**本机配置密码可在后端在线、离线或拒绝连接时使用**，授权查看本机状态、新增和编辑连接。全站状态与后端节点管理仍须后端管理员身份。在“允许访问前端节点控制台的来源 IP/CIDR”中可填写 IP、CIDR 或 Docker 网络名，留空保留默认访问规则。Node 按连接的直接对端校验；通过反代访问时需允许代理的连接来源。HTTPS 代理来源在独立字段填写。
 
 
 ### 容器互通：推荐共享网络和别名
@@ -143,21 +151,23 @@ mkdir -p docker/data
 | 网络别名 | `everunfold-backend` | `everunfold-frontend` |
 | 容器进程绑定 | `0.0.0.0:8001` | `0.0.0.0:3000` |
 | 内部调用地址 | 配对接收器填 `http://everunfold-frontend:3000` | 后端内部连接填 `http://everunfold-backend:8001` |
-| 允许内部调用的 Docker 网络 | `1panel-network` | `1panel-network` |
+| 内部通信允许来源 IP/CIDR | `1panel-network` | `1panel-network` |
 
 容器别名使用**容器内部端口**：宿主映射 `3434 → 8001` 时，这里仍填 `8001`。别名只登记到应用容器的自定义网络，不登记到临时配置或检查容器；默认 `bridge` 没有别名解析。多个前端节点请使用不同别名。
 
 后端配对中的“允许私有网络 HTTP 接收”在 Docker 助手默认开启（已有设置保留），仅允许单段容器别名、RFC1918/ULA 私有 IP 和 `host.docker.internal`；原生默认关闭。通过公网传输继续使用 HTTPS。公开发布 URL、绑定地址和内部连接地址分别配置，浏览器仍使用 HTTPS 发布地址。
 
-在两端“容器设置 → 允许内部调用的 Docker 网络”填写 `1panel-network`，也可用逗号列出多个已连接的网络。后端以这些子网核对前端请求的真实来源，前端接收器以这些子网核对后端同步请求的真实来源。指定网络优先于旧的自动允许开关，手填 IP/CIDR 额外生效，内部接口继续验证节点令牌。留空沿用旧开关：`1` 追加全部已连接网络的范围，`0` 只用手填来源。
+在两端各自的内部通信来源字段中填写 `1panel-network`。来源列表支持混填 IP、CIDR 和多个网络名，以逗号分隔。后端以这些子网核对前端请求的真实来源，前端接收器以这些子网核对后端同步请求的真实来源。内部接口继续验证节点令牌。
 
-如果宿主机 Nginx 经该网桥访问容器，设置“容器设置 → 宿主机反代所在的 Docker 网络”为 `1panel-network`。向导启动时将该网桥的网关 IP 加入节点控制台的可信代理列表，宿主反代须保留公开 Host 并发送 `X-Forwarded-Proto: https`。按启动日志的网关与拒绝日志的 `peer_ip`（前端日志为 `peer`）核对来源。若代理在另一个容器或其他主机，按实际来源填写“HTTPS 反向代理的直接来源 IP”。
+如果宿主机 Nginx 经该网桥访问容器，在各端的“HTTPS 反向代理的直接来源 IP”中填写 `1panel-network`。向导启动时将该网桥的网关 IP 加入节点控制台的可信代理列表，宿主反代须保留公开 Host 并发送 `X-Forwarded-Proto: https`。按启动日志的网关与拒绝日志的 `peer_ip`（前端日志为 `peer`）核对来源。若代理在另一个容器或其他主机，按实际来源填写“HTTPS 反向代理的直接来源 IP”。
 
 网络名称保存在根配置的 `docker` 小节。重建网络后运行 `./setup.sh --docker start`，助手会读取新的 IP 和子网。
 
 另一种方式是在两端开启 **“映射 host.docker.internal”**（默认 `0`）。脚本添加 `--add-host host.docker.internal:host-gateway`，配置工具、启动前检查和运行容器使用相同映射。这是主机名映射，无需新增文件挂载。前端内部地址此时填 `http://host.docker.internal:3434`，使用**宿主映射端口**。后端接收 URL 同理填写前端的宿主映射端口。宿主端口若只绑定 `127.0.0.1`，容器不能通过网关访问，应使用可达的宿主绑定地址，或改用推荐的共享网络别名。
 
-沿用全部网络自动允许且开启宿主网关时，还会允许默认 bridge 的网关 IP，以兼容宿主端口转发来源。使用按名称指定的网络时，额外宿主调用来源可手填。原生模式不自动加入 Docker 网络来源。网络及网关配置修改后，在助手中检测前先保存并重新打开；构建/启动操作会直接使用新设置。
+Docker 模式的宿主映射绑定 IP 可填写网桥网络名，解析为宿主网桥网关。进程监听地址也可填写已连接的网络名，进程使用自己在该网络上的 IP。使用指定网卡监听时，调用方应通过该网络访问容器。需要同时通过多块网卡和宿主端口访问时，可用 `0.0.0.0` 监听并配置来源白名单。原生模式使用 IP/CIDR。
+
+升级后的 setup 自动迁移旧网络配置。网络名保留在根 `config.yaml` 的 `docker` 段。每次执行 `./setup.sh --docker start` 时重新读取当前网络；网络重建后请用此入口重新创建容器并刷新配置。
 
 依据：[Docker 自定义网络 DNS](https://docs.docker.com/engine/network/)、[网络别名](https://docs.docker.com/reference/cli/docker/network/connect/)、[host-gateway](https://docs.docker.com/reference/cli/dockerd/#configure-host-gateway-ip)。
 

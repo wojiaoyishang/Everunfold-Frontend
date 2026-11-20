@@ -33,7 +33,13 @@ def execute(arguments):
     if failure and failure in arguments: return 23
     script = next((i for i, arg in enumerate(arguments) if arg.endswith("/bootstrap.py")), None)
     if script is not None:
-        return subprocess.call([sys.executable, *arguments[script:]])
+        overlay = dict(
+            arg.split("=", 1) for arg in arguments
+            if arg.startswith("EVERUNFOLD_SETUP_DOCKER_NETWORKS=")
+            or arg.startswith("EVERUNFOLD_SETUP_PUBLISH_HOST=")
+            or arg.startswith("EVERUNFOLD_SETUP_BACKEND_PATH=")
+        )
+        return subprocess.call([sys.executable, *arguments[script:]], env={**os.environ, **overlay})
     if "deploy/node_bundle.py" in arguments:
         print("EVERUNFOLD_NODE_CONNECTION_BASE64=" + os.environ.get("DOCKER_TEST_BASE64", ""))
     return 0
@@ -43,6 +49,14 @@ if args[:2] == ["network", "inspect"] and "--format" in args:
     networks = json.loads(os.environ.get("DOCKER_TEST_IPAM", "{}"))
     for name in args[index + 1:]:
         network = networks.get(name, {"subnet": "172.25.0.0/16", "gateway": "172.25.0.1"})
+        if ".Name" in template:
+            ipam = {
+                label: network[key] for label, key in [("Subnet", "subnet"), ("Gateway", "gateway")]
+                if network.get(key)
+            }
+            print(json.dumps({"Name": name, "Driver": network.get("driver", "bridge"),
+                              "IPAM": {"Config": [ipam]}}))
+            continue
         if ".Gateway" in template:
             bridge = network.get("driver", "bridge") == "bridge"
             value = network.get("gateway", "") if bridge else ""
@@ -254,7 +268,29 @@ class LauncherTests(unittest.TestCase):
         if not BACKEND:
             self.assertEqual(effective["EVERUNFOLD_APT_MIRROR"], "https://mirrors.ustc.edu.cn/debian")
             self.assertEqual(effective["EVERUNFOLD_NPM_REGISTRY"], "https://registry.npmmirror.com/")
-        self.assertEqual(yaml.safe_load(config.read_text())["docker"], document["docker"])
+        saved = yaml.safe_load(config.read_text())["docker"]
+        self.assertTrue(all(saved[key] == value for key, value in document["docker"].items()))
+
+    @unittest.skipIf(BACKEND, "frontend contract sources")
+    def test_frontend_build_uses_deployment_env_and_a_sibling_backend_checkout(self):
+        backend = self.repo.with_name("Everunfold-Backend")
+        (backend / "contracts").mkdir(parents=True)
+        config = self.repo / "config.yaml"
+        document = yaml.safe_load(config.read_text())
+        document["docker"]["EVERUNFOLD_MIRROR_PROFILE"] = "tuna"
+        config.write_text(yaml.safe_dump(document))
+
+        result, calls = self.run_action("build")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        builders = [call for call in calls if call[0] == "compose" and "builder" in call]
+        self.assertEqual(len(builders), 2)
+        for call in builders:
+            self.assertEqual(call[call.index("--env-file") + 1], str(self.docker / ".env"))
+        from config_files import env_values
+
+        rendered = env_values((self.docker / ".env").read_text())
+        self.assertEqual(rendered["EVERUNFOLD_NPM_REGISTRY"], "https://registry.npmmirror.com/")
+        self.assertEqual(rendered["EVERUNFOLD_BACKEND_PATH"], str(backend))
 
     def test_plugin_build_rejects_a_legacy_image_when_npm_mirror_is_configured(self):
         selected = self.repo / "config.yaml"
@@ -441,7 +477,6 @@ class LauncherTests(unittest.TestCase):
             EVERUNFOLD_HOST_GATEWAY="1",
         )
         path.write_text(yaml.safe_dump(document))
-        source = path.read_bytes()
         for peer_subnet, proxy_ip in (
             ("172.18.0.0/16", "172.22.0.1"),
             ("172.28.0.0/16", "172.30.0.1"),
@@ -457,10 +492,12 @@ class LauncherTests(unittest.TestCase):
             result, calls = self.run_action("start")
             self.assertEqual(result.returncode, 0, result.stderr)
             runtime = next(call for call in calls if call[0] == "create" and "--name" in call)
-            self.assertIn(f"EVERUNFOLD_INTERNAL_PEER_CIDRS={peer_subnet},", runtime)
-            self.assertIn(f"EVERUNFOLD_NODES_TLS_PROXY_IPS={proxy_ip},", runtime)
-            self.assertIn(f"宿主机反代网络 edge → {proxy_ip}", result.stdout)
-            self.assertEqual(path.read_bytes(), source)
+            self.assertIn(f"EVERUNFOLD_INTERNAL_PEER_CIDRS={peer_subnet}", runtime)
+            self.assertIn(f"EVERUNFOLD_NODES_TLS_PROXY_IPS={proxy_ip}", runtime)
+            saved = yaml.safe_load(path.read_text())["docker"]
+            self.assertEqual(saved["EVERUNFOLD_NETWORK_INPUT_TLS_PEERS"], "edge")
+            self.assertNotIn("EVERUNFOLD_INTERNAL_PEER_NETWORKS", saved)
+            self.assertNotIn("EVERUNFOLD_TLS_PROXY_NETWORK", saved)
 
     def test_unusable_proxy_network_does_not_stop_running_container(self):
         path = self.repo / "config.yaml"
@@ -471,7 +508,7 @@ class LauncherTests(unittest.TestCase):
                 document["docker"]["EVERUNFOLD_TLS_PROXY_NETWORK"] = selected
                 path.write_text(yaml.safe_dump(document))
                 self.env["DOCKER_TEST_IPAM"] = (
-                    '{"1panel-network":{"gateway":"172.18.0.1","driver":"overlay"}}'
+                    '{"1panel-network":{"subnet":"172.18.0.0/16","gateway":"172.18.0.1","driver":"overlay"}}'
                 )
                 result, calls = self.run_action("start", old="matching")
                 self.assertNotEqual(result.returncode, 0)
@@ -572,7 +609,11 @@ class LauncherTests(unittest.TestCase):
         self.assertIn("9201", (self.docker / ".env").read_text())
 
     def test_failure_stops_before_activation_or_initialization(self):
-        before = (self.repo / "config.yaml").read_bytes()
+        config = self.repo / "config.yaml"
+        document = yaml.safe_load(config.read_text())
+        document["docker"]["EVERUNFOLD_NETWORK_INPUT_VERSION"] = "1"
+        config.write_text(yaml.safe_dump(document))
+        before = config.read_bytes()
         result, calls = self.run_action(
             "init-db" if BACKEND else "deploy", "--initialize" if BACKEND else "build-plugins"
         )

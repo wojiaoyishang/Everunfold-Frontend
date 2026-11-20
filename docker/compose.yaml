@@ -56,12 +56,21 @@ services:
       FRONTEND_BUILD_WORKERS: "${FRONTEND_BUILD_WORKERS:-2}"
       NODE_OPTIONS: "${FRONTEND_BUILD_NODE_OPTIONS:---max-old-space-size=3072}"
       EVERUNFOLD_NPM_REGISTRY: "${EVERUNFOLD_NPM_REGISTRY:-}"
+      EVERUNFOLD_BACKEND_PATH: /contracts/backend
+      EVERUNFOLD_CONTRACT_BASE_URL: "${EVERUNFOLD_CONTRACT_BASE_URL:-}"
+      EVERUNFOLD_CONTRACT_CACHE: /build/npm-cache/everunfold-contracts
     healthcheck:
       disable: true
     volumes:
       - type: bind
         source: ${FRONTEND_SOURCE_DIR:-..}
         target: /workspace
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${EVERUNFOLD_BACKEND_PATH:-${FRONTEND_SOURCE_DIR:-..}}
+        target: /contracts/backend
         read_only: true
         bind:
           create_host_path: false

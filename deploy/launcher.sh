@@ -91,17 +91,15 @@ read_paths() {
   local result
   result="$(docker run --rm --network none "${base[@]}" "${mount_args[@]}" "$setup_image" python "$deploy_dir/bootstrap.py" paths)"
   mapfile -t locations <<< "$result"
-  if (( ${#locations[@]} != 23 )); then echo "无法确定容器设置。" >&2; exit 1; fi
+  if (( ${#locations[@]} != 20 )); then echo "无法确定容器设置。" >&2; exit 1; fi
   network=${locations[0]}; data_dir=${locations[1]}; env_parent=${locations[2]}
   output_dir=${locations[3]}; source_dir=${locations[4]}; profile_parent=${locations[5]}
   container_name=${locations[6]}; image_name=${locations[8]}; bind_host=${locations[9]}
   publish_port=${locations[10]}; listen_port=${locations[11]}; env_file=${locations[12]}
   runtime_user=${locations[13]}; artifact_dir=${locations[14]}
   listen_host=${locations[15]}; runtime_config=${locations[16]}
-  network_alias=${locations[17]}; host_gateway=${locations[18]}; allow_network_peers=${locations[19]}
-  internal_peer_networks=${locations[20]#EVERUNFOLD_INTERNAL_PEER_NETWORKS=}
-  tls_proxy_network=${locations[21]#EVERUNFOLD_TLS_PROXY_NETWORK=}
-  frontend_workers=${FRONTEND_WORKERS-${locations[22]#FRONTEND_WORKERS=}}
+  network_alias=${locations[17]}; host_gateway=${locations[18]}
+  frontend_workers=${FRONTEND_WORKERS-${locations[19]#FRONTEND_WORKERS=}}
   host_args=()
   if [[ "$host_gateway" == 1 ]]; then host_args+=(--add-host host.docker.internal:host-gateway); fi
   IFS=',' read -ra extra_networks <<< "${locations[7]}"
@@ -132,41 +130,31 @@ ensure_networks() {
     [[ -n "$net" && "$net" != "$network" ]] || continue
     docker network inspect "$net" >/dev/null 2>&1 || { echo "额外网络不存在：$net。请先创建该网络或修改配置。" >&2; return 1; }
   done
-  cidrs="$(docker network inspect --format '{{range .IPAM.Config}}{{.Subnet}},{{end}}' "$network" "${extra_networks[@]}")"
-  cidrs=${cidrs//$'\n'/}
-  if [[ "$host_gateway" == 1 ]]; then
-    local gateway_ips
-    gateway_ips="$(docker network inspect --format '{{range .IPAM.Config}}{{.Gateway}},{{end}}' bridge)"
-    cidrs+=${gateway_ips//$'\n'/}
-  fi
-  internal_peers=""
-  if [[ "$allow_network_peers" == 1 ]]; then internal_peers=$cidrs; fi
 }
 resolve_network_access() {
-  local net subnets
-  if [[ -n "$internal_peer_networks" ]]; then
-    local -a selected
-    IFS=',' read -ra selected <<< "$internal_peer_networks"
-    internal_peers=
-    for net in "${selected[@]}"; do
-      subnets="$(docker network inspect --format '{{range .IPAM.Config}}{{if .Subnet}}{{.Subnet}},{{end}}{{end}}' "$net")"
-      if [[ -z "$subnets" ]]; then
-        printf '内部调用网络 %s 没有可用的 IP 子网。\n' "$net" >&2
-        return 1
-      fi
-      internal_peers+=$subnets
-    done
-  fi
+  local net resolved key value
+  internal_peers=
   tls_proxy_ips=
-  if [[ -n "$tls_proxy_network" ]]; then
-    tls_proxy_ips="$(docker network inspect --format '{{if eq .Driver "bridge"}}{{range .IPAM.Config}}{{if .Gateway}}{{.Gateway}},{{end}}{{end}}{{end}}' "$tls_proxy_network")"
-    if [[ -z "$tls_proxy_ips" ]]; then
-      printf '宿主机反代网络 %s 必须是有网关 IP 的 Docker 网桥。\n' "$tls_proxy_network" >&2
-      return 1
-    fi
-    printf '宿主机反代网络 %s → %s\n' "$tls_proxy_network" "${tls_proxy_ips%,}"
-  fi
+  resolved_publish_host=
+  local -a selected=("$network")
+  for net in "${extra_networks[@]}"; do
+    if [[ -n "$net" && "$net" != "$network" ]]; then selected+=("$net"); fi
+  done
+  if [[ "$host_gateway" == 1 && "$network" != bridge ]]; then selected+=(bridge); fi
+  network_snapshot="$(docker network inspect --format '{"Name":{{json .Name}},"Driver":{{json .Driver}},"IPAM":{{json .IPAM}}}' "${selected[@]}")"
+  resolved="$(run_tool network-inputs)"
+  network_env=()
+  while IFS='=' read -r key value; do
+    case "$key" in
+      PUBLISH_HOST) bind_host=$value; resolved_publish_host=$value ;;
+      EVERUNFOLD_INTERNAL_PEER_CIDRS) internal_peers=$value ;;
+      EVERUNFOLD_NODES_TLS_PROXY_IPS) tls_proxy_ips=$value ;;
+      EVERUNFOLD_LISTEN_CIDRS|EVERUNFOLD_FRONTEND_NODES_ALLOWED_PEERS|EVERUNFOLD_METRICS_ALLOWED_PEERS|EVERUNFOLD_METRICS_NODE_ALLOWED_PEERS|EVERUNFOLD_FRONTEND_METRICS_ALLOWED_PEERS)
+        network_env+=(-e "$key=$value") ;;
+    esac
+  done <<< "$resolved"
 }
+
 connect_extras() {
   local target=$1 runtime=${2:-no} net
   declare -A connected=(["$network"]=1)
@@ -200,17 +188,20 @@ run_temporary() (
   exit "$status"
 )
 run_tool() {
-  run_temporary no "${base[@]}" "${mount_args[@]}" "$setup_image" python "$deploy_dir/bootstrap.py" "$@"
+  local backend_checkout
+  backend_checkout="$(dirname -- "$source_dir")/Everunfold-Backend"
+  if [[ "$role" != frontend || ! -d "$backend_checkout/contracts" ]]; then backend_checkout=; fi
+  run_temporary no "${base[@]}" "${mount_args[@]}" \
+    -e "EVERUNFOLD_SETUP_DOCKER_NETWORKS=${network_snapshot:-}" \
+    -e "EVERUNFOLD_SETUP_PUBLISH_HOST=${resolved_publish_host:-}" \
+    -e "EVERUNFOLD_SETUP_BACKEND_PATH=$backend_checkout" \
+    "$setup_image" python "$deploy_dir/bootstrap.py" "$@"
 }
 refresh_layout
 if [[ "$action" == configure ]]; then
   ensure_networks
   [[ -t 0 && -t 1 ]] || { echo "配置界面需要交互终端。" >&2; exit 1; }
-  network_subnets=""
-  for net in "$network" "${extra_networks[@]}"; do
-    subnets="$(docker network inspect --format '{{range .IPAM.Config}}{{if .Subnet}}{{.Subnet}},{{end}}{{end}}' "$net")"
-    network_subnets+="$net=${subnets//$'\n'/}"$'\n'
-  done
+  if [[ -f "$CONFIG_FILE" ]]; then run_tool network-migrate; fi
   ui_args=("${bootstrap_mirror_env[@]}")
   if [[ -n "${EVERUNFOLD_CONNECTION_BASE64:-}" ]]; then
     ui_args+=(-e EVERUNFOLD_CONNECTION_BASE64)
@@ -234,8 +225,7 @@ if [[ "$action" == configure ]]; then
             -e "EVERUNFOLD_SETUP_ACTION_DIR=$bridge_dir")
   result=0
   run_temporary yes --interactive --tty "${base[@]}" "${mount_args[@]}" "${ui_args[@]}" \
-    -e "TERM=${TERM:-xterm-256color}" -e "EVERUNFOLD_NETWORK_CIDRS=$cidrs" \
-    -e "EVERUNFOLD_SETUP_NETWORK_SUBNETS=$network_subnets" \
+    -e "TERM=${TERM:-xterm-256color}" \
     "$setup_image" python "$deploy_dir/configure.py" || result=$?
   cleanup_bridge
   unset EVERUNFOLD_CONNECTION_BASE64
@@ -249,7 +239,7 @@ if [[ "$action" == configure ]]; then
   esac
   refresh_layout
 fi
-compose=(docker compose --project-directory "$docker_dir" -f "$docker_dir/compose.yaml")
+compose=(docker compose --project-directory "$docker_dir" --env-file "$docker_dir/.env" -f "$docker_dir/compose.yaml")
 lock_plugins() {
   exec {plugin_lock}>"$data_dir/.plugin-release.lock"
   flock -xn "$plugin_lock" || { echo "另一个 setup 正在更新前端插件，请稍后重试。" >&2; return 1; }
@@ -293,6 +283,7 @@ if [[ "$action" == build-plugins || "$action" == hot-update-frontend ]]; then
 fi
 ensure_networks
 [[ -d "$source_dir" ]] || { echo "代码目录不存在：$source_dir" >&2; exit 1; }
+resolve_network_access
 run_tool render
 if [[ "$action" == render ]]; then echo "根目录配置已保存，挂载目录已准备。"; exit 0; fi
 export EVERUNFOLD_BUILD_REVISION EVERUNFOLD_BUILD_CREATED
@@ -332,6 +323,7 @@ esac
 resolve_network_access
 runtime_args=(--init --user "$runtime_user" --label "org.everunfold.project=$project_root"
               --label "org.everunfold.component=$role"
+              "${network_env[@]}"
               -e "EVERUNFOLD_INTERNAL_PEER_CIDRS=$internal_peers"
               -e "EVERUNFOLD_NODES_TLS_PROXY_IPS=$tls_proxy_ips"
               --mount "type=bind,source=$data_dir,target=/data")
@@ -346,6 +338,14 @@ else
   workspace_dir="$artifact_dir"
   [[ -s "$artifact_dir/.next/BUILD_ID" ]] || { echo "前端产物未构建，请先执行 build。" >&2; exit 1; }
   if [[ "$action" == start ]]; then
+    for option in "${network_env[@]}"; do
+      case "$option" in
+        EVERUNFOLD_LISTEN_CIDRS=*|EVERUNFOLD_FRONTEND_NODES_ALLOWED_PEERS=*)
+          if ! grep -Fq -- "${option%%=*}" "$artifact_dir/src/core/config/schema.ts" 2>/dev/null; then
+            echo "当前前端产物不支持该 Docker 网络来源配置，请先完整构建一次。" >&2; exit 1
+          fi ;;
+      esac
+    done
     [[ "$frontend_workers" =~ ^([1-9]|[12][0-9]|3[0-2])$ ]] || { echo "FRONTEND_WORKERS 必须是 1–32 之间的整数。" >&2; exit 2; }
     if [[ "$frontend_workers" != 1 && ! -f "$artifact_dir/tools/frontend-cluster.ts" ]]; then
       echo "当前前端产物不支持多个运行 worker；请用新版前端源码重新编译。" >&2; exit 1

@@ -5,7 +5,7 @@ import re
 import secrets
 
 from config_context import Context
-from config_validation import ip_address
+from config_validation import ip_address, peer_list
 
 
 def add_node_console_fields(ctx: Context, add, value):
@@ -67,8 +67,19 @@ def add_node_console_fields(ctx: Context, add, value):
         group="节点控制台",
         valid=lambda v: not v or all(ip_address(address.strip()) for address in v.split(",")),
         empty="未手动指定",
-        hint="可填逗号分隔的直连 IP。Docker 宿主机反代也可在容器设置中按网络选择。",
+        hint="可填逗号分隔的直连 IP。Docker 网桥名称会解析为该网桥的网关。",
     )
+
+    if frontend:
+        add(
+            "console_peers",
+            "允许访问前端节点控制台的来源 IP/CIDR",
+            ", ".join(monitor.get("allowed_peer_ips", [])),
+            valid=peer_list,
+            group="节点控制台",
+            empty="沿用现有访问规则",
+            hint="按实际直连来源校验，留空时沿用现有访问规则。",
+        )
 
     def save(environment: dict[str, str]) -> None:
         nonlocal password_hash, saved_password
@@ -84,6 +95,12 @@ def add_node_console_fields(ctx: Context, add, value):
             current["trusted_tls_proxy_ips"] = manual_proxies
         else:
             current.pop("trusted_tls_proxy_ips", None)
+        if frontend:
+            peers = [item.strip() for item in value("console_peers").split(",") if item.strip()]
+            if peers:
+                current["allowed_peer_ips"] = peers
+            else:
+                current.pop("allowed_peer_ips", None)
         environment[secret_key] = value("monitor_secret")
         password = value("monitor_password")
         if password:

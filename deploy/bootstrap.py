@@ -1,16 +1,20 @@
 """Noninteractive setup helpers; output never contains credentials."""
 
 import argparse
+import contextlib
 import ipaddress
+import json
 import os
 import re
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 
 from config_context import Context
 from config_files import update_env
 from config_validation import valid_port
+from network_inputs import entries, migrate_standalone, standalone_addresses
 
 DOCKER = Path(__file__).resolve().parents[1] / "docker"
 ROLE = "backend" if (DOCKER.parent / "app").is_dir() else "frontend"
@@ -33,7 +37,7 @@ def paths() -> None:
         context = Context(DOCKER, ROLE)
         if context.config.get("backend_node_file"):
             profile = context.connection_profile().parent
-    from container_fields import access_networks, network_alias, network_name
+    from container_fields import network_alias, network_name
 
     extra = ",".join(
         n.strip() for n in values.get("EVERUNFOLD_EXTRA_NETWORKS", "").split(",") if n.strip()
@@ -47,15 +51,8 @@ def paths() -> None:
         raise ValueError("容器名称无效。")
     alias = values.get("EVERUNFOLD_NETWORK_ALIAS", "everunfold-" + ROLE)
     gateway = values.get("EVERUNFOLD_HOST_GATEWAY", "0")
-    peers = values.get("EVERUNFOLD_ALLOW_NETWORK_PEERS", "1")
-    if (alias and not network_alias(alias)) or gateway not in {"0", "1"} or peers not in {"0", "1"}:
+    if (alias and not network_alias(alias)) or gateway not in {"0", "1"}:
         raise ValueError("网络别名或网络开关无效。")
-    peer_networks, proxy_network = access_networks(
-        network,
-        extra,
-        values.get("EVERUNFOLD_INTERNAL_PEER_NETWORKS", ""),
-        values.get("EVERUNFOLD_TLS_PROXY_NETWORK", ""),
-    )
     image = values.get(
         prefix + "_IMAGE", "everunfold-" + ROLE + (":python312" if ROLE == "backend" else ":node22")
     )
@@ -101,19 +98,38 @@ def paths() -> None:
         context.root_path,
         alias,
         gateway,
-        peers,
-        "EVERUNFOLD_INTERNAL_PEER_NETWORKS=" + peer_networks,
-        "EVERUNFOLD_TLS_PROXY_NETWORK=" + proxy_network,
         "FRONTEND_WORKERS=" + context.env.get("FRONTEND_WORKERS", "1"),
     )
     if any(
         any(char in str(value) for char in ("\n", "\r", ","))
         for i, value in enumerate(resolved)
-        if i not in {7, 20}
+        if i != 7
     ):
         raise ValueError("挂载路径不能包含逗号或换行。")
     for value in resolved:
         print(value)
+
+
+def network_inputs(*, migrate_only: bool = False) -> None:
+    context = Context(DOCKER, ROLE)
+    if not context.document:
+        return
+    values = context.compose
+    attached = list(dict.fromkeys([values.get("EVERUNFOLD_NETWORK", "bridge"), *entries(values.get("EVERUNFOLD_EXTRA_NETWORKS", ""))]))
+    snapshot = {
+        network["Name"]: network
+        for line in os.environ.get("EVERUNFOLD_SETUP_DOCKER_NETWORKS", "").splitlines()
+        if line and (network := json.loads(line))
+    }
+    updated = migrate_standalone(values, attached)
+    if updated is not None:
+        with contextlib.redirect_stdout(sys.stderr):
+            context.write({context.compose_path: update_env("", updated)})
+    if migrate_only:
+        return
+    resolved = standalone_addresses(updated or values, context.env, snapshot, attached)
+    for key, value in resolved.items():
+        print(f"{key}={value}")
 
 
 def activate(release: str) -> None:
@@ -162,13 +178,18 @@ def activate(release: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("paths", "activate", "render", "stage-plugins"))
+    parser.add_argument(
+        "action",
+        choices=("paths", "activate", "render", "stage-plugins", "network-inputs", "network-migrate"),
+    )
     parser.add_argument("release", nargs="?")
     parser.add_argument("data", nargs="?")
     args = parser.parse_args()
     try:
         if args.action == "paths":
             paths()
+        elif args.action in {"network-inputs", "network-migrate"}:
+            network_inputs(migrate_only=args.action == "network-migrate")
         elif args.action == "render":
             context = Context(DOCKER, ROLE)
             if not context.document:

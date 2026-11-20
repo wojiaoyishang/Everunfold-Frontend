@@ -2,7 +2,7 @@
 
 前后端统一使用项目根目录的 `setup.sh` 与 `config.yaml`。配置助手在 `deploy/`，不需要进入 `docker/` 运行。完整的逐步教程见[部署教程](../deploy/README.md)。
 
-setup 的“节点控制台”分组可设置启用开关、本机配置密码和会话密钥。入口为前端发布 URL 下的 `/admin/_nodes`；后端不可用也可编辑本机连接，全站状态仍验证后端管理员。同步失败查看 `docker logs --follow --tail=100 everunfold-frontend` 中的 `[Everunfold sync]`，含内部目标、HTTP 状态、网络或落盘错误，详见[同步排查](../deploy/README.md#同步失败时看-nodejs-日志)。
+setup 的“节点控制台”分组可设置启用开关、本机配置密码、会话密钥和控制台访问来源。入口为前端发布 URL 下的 `/admin/_nodes`；后端不可用也可编辑本机连接，全站状态仍验证后端管理员。同步失败查看 `docker logs --follow --tail=100 everunfold-frontend` 中的 `[Everunfold sync]`，含内部目标、HTTP 状态、网络或落盘错误，详见[同步排查](../deploy/README.md#同步失败时看-nodejs-日志)。
 
 选中配置项可查看/复制，F4 查看完整执行结果；终端不支持剪贴板时使用“终端复制”。后端导出后自动显示前端导入命令，带空格的路径也可直接复制。
 
@@ -38,7 +38,7 @@ npm 安装默认启用 `--loglevel=verbose --timing`，实时显示详细日志�
 
 向导的「前端 Node.js 运行 worker 数」对应根 `config.yaml` 中的 `environment.FRONTEND_WORKERS`，默认为 `"1"`，支持 1–32。可以用同名环境变量覆盖（直接运行容器时使用 `-e FRONTEND_WORKERS=2`）。它只在启动时读取；已有新版产物时，保存后重新创建运行容器即可，无需编译。早于此功能的产物要先编译一次。所有 worker 共用原端口和公开快照；插件清单上报及同步检查仍各运行一次。
 
-推荐两端加入 `1panel-network`，设置别名 `everunfold-backend`、`everunfold-frontend`，使用容器内部端口 `8001` / `3000` 互访，并在两端的“允许内部调用的 Docker 网络”填写 `1panel-network`。宿主反代通过该网桥访问时，“宿主机反代所在的 Docker 网络”也可填这个名称。也可开启 `host.docker.internal` 映射，此时使用宿主映射端口，例如 `3434`。详见[容器互通教程](../deploy/README.md#容器互通推荐共享网络和别名)。本轮前端更新需重新 `build` 主体与镜像，再 `start`；后端更新后执行 `deploy`。日常重启不编译。
+推荐两端加入 `1panel-network`，设置别名 `everunfold-backend`、`everunfold-frontend`，使用容器内部端口 `8001` / `3000` 互访，并在两端的内部通信来源字段填写 `1panel-network`。宿主反代通过该网桥访问时，“HTTPS 反向代理的直接来源 IP”也可填这个名称。也可开启 `host.docker.internal` 映射，此时使用宿主映射端口，例如 `3434`。详见[容器互通教程](../deploy/README.md#容器互通推荐共享网络和别名)。本轮前端更新需重新 `build` 主体与镜像，再 `start`；后端更新后执行 `deploy`。日常重启不编译。
 
 ## 二、不使用 Docker
 

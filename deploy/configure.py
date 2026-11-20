@@ -26,7 +26,7 @@ from config_validation import (
     valid_port,
 )
 from connection_bundle import decode_bundle, validate_bundle
-from container_fields import add_container_fields, setup_network_subnets
+from container_fields import add_container_fields
 from frontend_monitoring import (
     add_direct_metrics_fields,
     direct_metrics_environment,
@@ -37,6 +37,7 @@ from monitoring_access import (
     NODE_PEERS,
     add_peer_field,
 )
+from network_inputs import ADDRESS_FIELDS, MIGRATED, edit_fields, entries, migrate_standalone
 from node_console_fields import add_node_console_fields
 
 DOCKER = Path(__file__).resolve().parents[1] / "docker"
@@ -231,7 +232,7 @@ def configure(native: bool = False) -> Configuration:
         group="节点",
         hint=(
             "填写接收器实际看到的 Worker 或内部代理来源。"
-            "容器设置可自动追加所选网络 CIDR；仍须对应节点令牌。"
+            "Docker 模式可填网络名；仍须对应节点令牌。"
         ),
     )
     for key, label, name in zip(
@@ -246,9 +247,8 @@ def configure(native: bool = False) -> Configuration:
             group="节点",
             hint="粘贴该节点的后端连接 Base64 自动填写，可查看或修改。",
         )
-    save_console = add_node_console_fields(ctx, add, value)
-    monitor_lookup = None if native else setup_network_subnets
-    add_direct_metrics_fields(add, value, env, monitor_lookup)
+    save_console = add_node_console_fields(ctx, add, lambda key: literal(key))
+    add_direct_metrics_fields(add, value, env)
     add(
         "metrics_node_token",
         "前端内部指标令牌",
@@ -263,7 +263,6 @@ def configure(native: bool = False) -> Configuration:
         "frontend_metrics_peers",
         "前端内部指标来源 IP/CIDR",
         env.get(NODE_PEERS, ""),
-        lookup=monitor_lookup,
         optional=True,
         active=lambda: bool(value("metrics_node_token")),
         empty="沿用同步接收器白名单",
@@ -350,6 +349,14 @@ def configure(native: bool = False) -> Configuration:
             return pending_network()
         return await frontend_checks(value("api"), value("internal"))
 
+    if not native and not ctx.document and compose:
+        attached = [value("network"), *entries(value("extra_networks"))]
+        migrated = migrate_standalone(compose, attached)
+        if migrated:
+            compose.update(migrated)
+    address_fields = {key: kind for key, kind in ADDRESS_FIELDS.items() if key in by_key}
+    literal, address_mapping = edit_fields(by_key, compose, address_fields, lambda: not native)
+
     def save() -> None:
         config["PUBLIC_SITE_URL"] = value("site")
         if profiles is not None:
@@ -362,7 +369,7 @@ def configure(native: bool = False) -> Configuration:
             backend_config["base_url"] = value("internal")
         else:
             backend_config.pop("base_url", None)
-        backend_config["allowed_peer_ips"] = [item.strip() for item in value("peers").split(",")]
+        backend_config["allowed_peer_ips"] = [item.strip() for item in literal("peers").split(",") if item.strip()]
         (
             backend_config["nextjs_to_fastapi_token_env"],
             backend_config["fastapi_to_nextjs_token_env"],
@@ -379,13 +386,13 @@ def configure(native: bool = False) -> Configuration:
         environment = {
             names[0]: value("inbound"),
             names[1]: value("outbound"),
-            "FRONTEND_HOST": value("host"),
+            "FRONTEND_HOST": literal("host") or "0.0.0.0",
             "FRONTEND_PORT": value("port"),
             "FRONTEND_WORKERS": value("workers"),
             "EVERUNFOLD_LOG_FORMAT": value("log_format"),
             METRICS + "NODE_TOKEN": value("metrics_node_token"),
-            NODE_PEERS: value("frontend_metrics_peers"),
-            **direct_metrics_environment(value),
+            NODE_PEERS: literal("frontend_metrics_peers"),
+            **direct_metrics_environment(literal),
         }
         save_console(environment)
         for name, key in (
@@ -395,7 +402,7 @@ def configure(native: bool = False) -> Configuration:
         ):
             if name in env:
                 environment[name] = value(key)
-        host = value("publish_host")
+        host = literal("publish_host") or "127.0.0.1"
         mapping = {
             "FRONTEND_BUILD_WORKERS": value("build_workers"),
             "FRONTEND_BUILD_NODE_OPTIONS": "--max-old-space-size=" + value("memory"),
@@ -421,7 +428,7 @@ def configure(native: bool = False) -> Configuration:
         if profile_path and profiles is not None:
             outputs[profile_path] = toml_text(profiles)
         outputs[ctx.compose_path] = update_env(
-            outputs[ctx.compose_path], container_mapping() | mirror_mapping()
+            outputs[ctx.compose_path], container_mapping() | mirror_mapping() | address_mapping() | ({MIGRATED: "1"} if not native else {})
         )
         ctx.write(
             outputs,

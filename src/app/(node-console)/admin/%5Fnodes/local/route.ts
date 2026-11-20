@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { readConfiguration } from "@/core/config/server";
 import { ConfigurationError } from "@/core/config/schema";
 import { listConnections, saveConnection } from "@/server/nodes/connections";
-import { acceptsNodeConsoleProxy } from "@/server/nodes/request-peer";
+import { acceptsNodeConsolePeer } from "@/server/nodes/request-peer";
 import { browserBackendBaseUrl } from "@/core/config/browser-api";
 import { nodesConsolePath } from "@/core/auth/routes";
 import type { NodeProof, NodeProofRequest } from "@/core/contracts/settings";
@@ -43,7 +43,7 @@ function allowedHost(request: NextRequest, config: Config) {
     origin &&
     request.headers.get("host")?.toLowerCase() === new URL(origin).host &&
     request.nextUrl.protocol === new URL(origin).protocol &&
-    acceptsNodeConsoleProxy(config.nodesMonitor)
+    acceptsNodeConsolePeer(config.nodesMonitor)
   );
 }
 

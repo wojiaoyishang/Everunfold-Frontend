@@ -69,6 +69,33 @@ const request = (body, cookie = "", from = origin) =>
     },
     ...(body ? { body: JSON.stringify(body) } : {}),
   });
+const { acceptsNodeConsolePeer, withNodeRequestPeer } = await import(
+  pathToFileURL(path.resolve("src/server/nodes/request-peer.ts")).href
+).then((module) => module.default ?? module);
+const allowlist = {
+  allowedPeerIps: ["172.28.0.0/16", "2001:db8::1"],
+  trustedTlsProxyIps: [],
+};
+const consoleAllowed = (remoteAddress, config = allowlist) =>
+  withNodeRequestPeer(
+    {
+      socket: { remoteAddress },
+      headers: { "x-forwarded-for": "172.28.0.10" },
+    },
+    () => acceptsNodeConsolePeer(config),
+  );
+assert.equal(consoleAllowed("::ffff:172.28.0.10"), true);
+assert.equal(consoleAllowed("2001:db8::1"), true);
+assert.equal(consoleAllowed("172.29.0.10"), false);
+assert.equal(acceptsNodeConsolePeer(allowlist), false);
+assert.equal(
+  consoleAllowed("172.28.0.10", {
+    ...allowlist,
+    origin: "https://console.example.test",
+    trustedTlsProxyIps: ["172.28.0.10"],
+  }),
+  false,
+);
 const originalFetch = globalThis.fetch;
 const originalOpen = fs.open;
 try {

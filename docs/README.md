@@ -106,6 +106,8 @@
 
 [前端本机节点诊断](development/nodes-monitor.md)说明 `/admin/_nodes`、YAML 本机连接、独立配置密码与 Base64 导入。
 
+[ADR0191](decisions/0191-docker-network-and-contract-inputs.md)记录部署地址的 Docker 网络名解析、前端节点控制台来源校验以及锁定契约的构建方式。
+
 [顶栏标识](decisions/0128-header-branding.md)说明展示模式、默认值和兼容行为。
 
 [侧栏导航与搜索](decisions/0127-sidebar-navigation-and-search.md)说明侧栏文案、菜单继承、搜索和预览。

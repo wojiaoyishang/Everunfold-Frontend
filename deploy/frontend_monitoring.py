@@ -8,7 +8,7 @@ from monitoring_access import LOCAL, add_peer_field
 DIRECT = "EVERUNFOLD_FRONTEND_METRICS_"
 
 
-def add_direct_metrics_fields(add, value, env, lookup):
+def add_direct_metrics_fields(add, value, env):
     add(
         "frontend_metrics_enabled",
         "前端独立 Prometheus 指标（1/0）",
@@ -36,7 +36,6 @@ def add_direct_metrics_fields(add, value, env, lookup):
         "frontend_direct_peers",
         "前端独立指标来源 IP/CIDR",
         env.get(DIRECT + "ALLOWED_PEERS", LOCAL),
-        lookup=lookup,
         active=enabled,
         hint="填写 Prometheus 实际直连前端的来源，逗号分隔。",
     )

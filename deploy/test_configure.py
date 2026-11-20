@@ -107,7 +107,7 @@ class ModelTests(Fixtures, unittest.TestCase):
         )
         self.assertEqual(env["EVERUNFOLD_METRICS_NODE_ALLOWED_PEERS"], "192.0.2.0/24")
         self.assertEqual(
-            env["EVERUNFOLD_FRONTEND_METRICS_ALLOWED_PEERS"], "172.20.0.0/16,fd00::/64"
+            env["EVERUNFOLD_FRONTEND_METRICS_ALLOWED_PEERS"], "fd00::/64"
         )
 
     def test_log_format_defaults_to_json_and_removes_legacy_network_settings(self):
@@ -519,40 +519,27 @@ class ModelTests(Fixtures, unittest.TestCase):
         self.assertEqual(reopened.get("auto_init_empty_db"), "0")
         self.assertEqual(reopened.get("EVERUNFOLD_API_APPLICATION_MASTER_KEY"), master)
 
-    def test_network_subnets_are_runtime_grants_and_manual_lists_stay_editable(self):
-        with patch.dict(os.environ, EVERUNFOLD_NETWORK_CIDRS="172.25.0.0/16,"):
-            model = self.complete()
-        self.assertIn("127.0.0.1", model.get("peers"))
-        self.assertNotIn("172.25.0.0/16", model.get("peers"))
-        self.assertEqual(model.get("network_peers"), "1")
-        self.assertIn(
-            "172.25.0.0/16", next(f.hint for f in model.fields if f.key == "network_peers")
-        )
-        self.edit(model, "peers", "192.0.2.15")
-        model.save()
-        self.assertEqual(self.model().get("peers"), "192.0.2.15")
-
-    def test_explicit_network_rules_can_be_saved_only_for_attached_networks(self):
+    def test_network_names_are_saved_in_the_ip_fields(self):
         model = self.complete()
-        self.edit(model, "internal_peer_networks", "1panel-network")
-        self.edit(model, "tls_proxy_network", "1panel-network")
-        self.assertIn("请将这些网络加入主网络或额外网络：1panel-network", model.errors())
         self.edit(model, "extra_networks", "1panel-network")
-        self.edit(model, "network_peers", "0")
-        self.edit(model, "tls_peers", "192.0.2.12")
-        self.assertEqual(model.errors(), [])
+        self.edit(model, "peers", "192.0.2.15,1panel-network")
+        self.edit(model, "tls_peers", "192.0.2.12,1panel-network")
+        self.edit(model, "publish_host", "1panel-network")
+        self.edit(model, "host", "1panel-network")
+        self.assertFalse(model.errors())
         model.save()
         reopened = self.model()
-        self.assertEqual(reopened.get("internal_peer_networks"), "1panel-network")
-        self.assertEqual(reopened.get("tls_proxy_network"), "1panel-network")
-        self.assertEqual(reopened.get("tls_peers"), "192.0.2.12")
-        self.assertIn("127.0.0.1", reopened.get("peers"))
+        self.assertEqual(reopened.get("peers"), "192.0.2.15,1panel-network")
+        self.assertEqual(reopened.get("tls_peers"), "192.0.2.12,1panel-network")
+        self.assertEqual(reopened.get("publish_host"), "1panel-network")
+        self.assertEqual(reopened.get("host"), "1panel-network")
+        self.assertFalse({"network_peers", "internal_peer_networks", "tls_proxy_network"} &
+                         {field.key for field in reopened.fields})
 
     def test_container_network_options_are_saved_and_validated(self):
         model = self.complete()
         self.edit(model, "network_alias", "everunfold-custom")
         self.edit(model, "host_gateway", "1")
-        self.edit(model, "network_peers", "0")
         with self.assertRaises(ValueError):
             self.edit(model, "network_alias", "--alias=bad")
         with self.assertRaises(ValueError):
@@ -561,7 +548,6 @@ class ModelTests(Fixtures, unittest.TestCase):
         reopened = self.model()
         self.assertEqual(reopened.get("network_alias"), "everunfold-custom")
         self.assertEqual(reopened.get("host_gateway"), "1")
-        self.assertEqual(reopened.get("network_peers"), "0")
 
     def test_custom_mounts_are_applied_after_root_save(self):
         model = self.complete()
